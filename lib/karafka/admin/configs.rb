@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module Karafka
-  module Admin
+  class Admin
     # Namespace for admin operations related to configuration management
     #
     # At the moment Karafka supports configuration management for brokers and topics
@@ -9,11 +9,7 @@ module Karafka
     # You can describe configuration as well as alter it.
     #
     # Altering is done in the incremental way.
-    module Configs
-      extend Helpers::ConfigImporter.new(
-        max_wait_time: %i[admin max_wait_time]
-      )
-
+    class Configs < Admin
       class << self
         # Fetches given resources configurations from Kafka
         #
@@ -97,7 +93,7 @@ module Karafka
         # Yields admin instance, allows to run Acl operations and awaits on the final result
         # Makes sure that admin is closed afterwards.
         def with_admin_wait
-          Admin.with_admin do |admin|
+          with_admin do |admin|
             yield(admin).wait(max_wait_timeout: max_wait_time)
           end
         end

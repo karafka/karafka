@@ -9,7 +9,7 @@ module Karafka
   # @note It always uses the primary defined cluster and does not support multi-cluster work.
   #   Cluster on which operations are performed can be changed via `admin.kafka` config, however
   #   there is no multi-cluster runtime support.
-  module Admin
+  class Admin
     extend Core::Helpers::Time
 
     extend Helpers::ConfigImporter.new(
@@ -34,130 +34,51 @@ module Karafka
     private_constant :LONG_TIME_AGO, :DAY_IN_SECONDS
 
     class << self
-      # Allows us to read messages from the topic
-      #
+      # Delegate topic-related operations to Topics class
+
       # @param name [String, Symbol] topic name
       # @param partition [Integer] partition
       # @param count [Integer] how many messages we want to get at most
-      # @param start_offset [Integer, Time] offset from which we should start. If -1 is provided
-      #   (default) we will start from the latest offset. If time is provided, the appropriate
-      #   offset will be resolved. If negative beyond -1 is provided, we move backwards more.
-      # @param settings [Hash] kafka extra settings (optional)
-      #
-      # @return [Array<Karafka::Messages::Message>] array with messages
+      # @param start_offset [Integer, Time] offset from which we should start
+      # @param settings [Hash] kafka extra settings
+      # @see Topics.read
       def read_topic(name, partition, count, start_offset = -1, settings = {})
-        messages = []
-        tpl = Rdkafka::Consumer::TopicPartitionList.new
-        low_offset, high_offset = nil
-
-        with_consumer(settings) do |consumer|
-          # Convert the time offset (if needed)
-          start_offset = resolve_offset(consumer, name.to_s, partition, start_offset)
-
-          low_offset, high_offset = consumer.query_watermark_offsets(name, partition)
-
-          # Select offset dynamically if -1 or less and move backwards with the negative
-          # offset, allowing to start from N messages back from high-watermark
-          start_offset = high_offset - count - start_offset.abs + 1 if start_offset.negative?
-          start_offset = low_offset if start_offset.negative?
-
-          # Build the requested range - since first element is on the start offset we need to
-          # subtract one from requested count to end up with expected number of elements
-          requested_range = (start_offset..start_offset + (count - 1))
-          # Establish theoretical available range. Note, that this does not handle cases related to
-          # log retention or compaction
-          available_range = (low_offset..(high_offset - 1))
-          # Select only offset that we can select. This will remove all the potential offsets that
-          # are below the low watermark offset
-          possible_range = requested_range.select { |offset| available_range.include?(offset) }
-
-          start_offset = possible_range.first
-          count = possible_range.size
-
-          tpl.add_topic_and_partitions_with_offsets(name, partition => start_offset)
-          consumer.assign(tpl)
-
-          # We should poll as long as we don't have all the messages that we need or as long as
-          # we do not read all the messages from the topic
-          loop do
-            # If we've got as many messages as we've wanted stop
-            break if messages.size >= count
-
-            message = consumer.poll(200)
-
-            next unless message
-
-            # If the message we've got is beyond the requested range, stop
-            break unless possible_range.include?(message.offset)
-
-            messages << message
-          rescue Rdkafka::RdkafkaError => e
-            # End of partition
-            break if e.code == :partition_eof
-
-            raise e
-          end
-        end
-
-        # Use topic from routes if we can match it or create a dummy one
-        # Dummy one is used in case we cannot match the topic with routes. This can happen
-        # when admin API is used to read topics that are not part of the routing
-        topic = ::Karafka::Routing::Router.find_or_initialize_by_name(name)
-
-        messages.map! do |message|
-          Messages::Builders::Message.call(
-            message,
-            topic,
-            Time.now
-          )
-        end
+        Topics.read(name, partition, count, start_offset, settings)
       end
 
-      # Creates Kafka topic with given settings
-      #
       # @param name [String] topic name
       # @param partitions [Integer] number of partitions we expect
       # @param replication_factor [Integer] number of replicas
-      # @param topic_config [Hash] topic config details as described here:
-      #   https://kafka.apache.org/documentation/#topicconfigs
+      # @param topic_config [Hash] topic config details
+      # @see Topics.create
       def create_topic(name, partitions, replication_factor, topic_config = {})
-        with_admin do |admin|
-          handler = admin.create_topic(name, partitions, replication_factor, topic_config)
-
-          with_re_wait(
-            -> { handler.wait(max_wait_timeout: max_wait_time_seconds) },
-            -> { topics_names.include?(name) }
-          )
-        end
+        Topics.create(name, partitions, replication_factor, topic_config)
       end
 
-      # Deleted a given topic
-      #
       # @param name [String] topic name
+      # @see Topics.delete
       def delete_topic(name)
-        with_admin do |admin|
-          handler = admin.delete_topic(name)
-
-          with_re_wait(
-            -> { handler.wait(max_wait_timeout: max_wait_time_seconds) },
-            -> { !topics_names.include?(name) }
-          )
-        end
+        Topics.delete(name)
       end
 
-      # Creates more partitions for a given topic
-      #
       # @param name [String] topic name
       # @param partitions [Integer] total number of partitions we expect to end up with
+      # @see Topics.create_partitions
       def create_partitions(name, partitions)
-        with_admin do |admin|
-          handler = admin.create_partitions(name, partitions)
+        Topics.create_partitions(name, partitions)
+      end
 
-          with_re_wait(
-            -> { handler.wait(max_wait_timeout: max_wait_time_seconds) },
-            -> { topic_info(name).fetch(:partition_count) >= partitions }
-          )
-        end
+      # @param name [String, Symbol] topic name
+      # @param partition [Integer] partition
+      # @see Topics.read_watermark_offsets
+      def read_watermark_offsets(name, partition)
+        Topics.read_watermark_offsets(name, partition)
+      end
+
+      # @param topic_name [String] name of the topic we're interested in
+      # @see Topics.info
+      def topic_info(topic_name)
+        Topics.info(topic_name)
       end
 
       # Moves the offset on a given consumer group and provided topic to the requested location
@@ -369,17 +290,6 @@ module Karafka
         end
       end
 
-      # Fetches the watermark offsets for a given topic partition
-      #
-      # @param name [String, Symbol] topic name
-      # @param partition [Integer] partition
-      # @return [Array<Integer, Integer>] low watermark offset and high watermark offset
-      def read_watermark_offsets(name, partition)
-        with_consumer do |consumer|
-          consumer.query_watermark_offsets(name, partition)
-        end
-      end
-
       # Reads lags and offsets for given topics in the context of consumer groups defined in the
       #   routing
       # @param consumer_groups_with_topics [Hash<String, Array<String>>] hash with consumer groups
@@ -495,24 +405,6 @@ module Karafka
         with_admin(&:metadata)
       end
 
-      # Returns basic topic metadata
-      #
-      # @param topic_name [String] name of the topic we're interested in
-      # @return [Hash] topic metadata info hash
-      # @raise [Rdkafka::RdkafkaError] `unknown_topic_or_part` if requested topic is not found
-      #
-      # @note This query is much more efficient than doing a full `#cluster_info` + topic lookup
-      #   because it does not have to query for all the topics data but just the topic we're
-      #   interested in
-      def topic_info(topic_name)
-        with_admin do |admin|
-          admin
-            .metadata(topic_name)
-            .topics
-            .find { |topic| topic[:topic_name] == topic_name }
-        end
-      end
-
       # Creates consumer instance and yields it. After usage it closes the consumer instance
       # This API can be used in other pieces of code and allows for low-level consumer usage
       #
@@ -596,11 +488,6 @@ module Karafka
         ::Karafka::Core::Instrumentation.oauthbearer_token_refresh_callbacks.delete(id)
       end
 
-      # @return [Array<String>] topics names
-      def topics_names
-        cluster_info.topics.map { |topic| topic.fetch(:topic_name) }
-      end
-
       # There are some cases where rdkafka admin operations finish successfully but without the
       # callback being triggered to materialize the post-promise object. Until this is fixed we
       # can figure out, that operation we wanted to do finished successfully by checking that the
@@ -644,32 +531,6 @@ module Karafka
           .merge!(settings)
           .then { |config| Karafka::Setup::AttributesMap.public_send(type, config) }
           .then { |config| ::Rdkafka::Config.new(config) }
-      end
-
-      # Resolves the offset if offset is in a time format. Otherwise returns the offset without
-      # resolving.
-      # @param consumer [::Rdkafka::Consumer]
-      # @param name [String, Symbol] expected topic name
-      # @param partition [Integer]
-      # @param offset [Integer, Time]
-      # @return [Integer] expected offset
-      def resolve_offset(consumer, name, partition, offset)
-        if offset.is_a?(Time)
-          tpl = ::Rdkafka::Consumer::TopicPartitionList.new
-          tpl.add_topic_and_partitions_with_offsets(
-            name, partition => offset
-          )
-
-          real_offsets = consumer.offsets_for_times(tpl)
-          detected_offset = real_offsets
-                            .to_h
-                            .fetch(name)
-                            .find { |p_data| p_data.partition == partition }
-
-          detected_offset&.offset || raise(Errors::InvalidTimeBasedOffsetError)
-        else
-          offset
-        end
       end
     end
   end

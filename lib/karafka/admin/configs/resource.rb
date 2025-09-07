@@ -1,8 +1,8 @@
 # frozen_string_literal: true
 
 module Karafka
-  module Admin
-    module Configs
+  class Admin
+    class Configs
       # Represents a single resource in the context of configuration management
       class Resource
         # Types of resources that have workable configs.
