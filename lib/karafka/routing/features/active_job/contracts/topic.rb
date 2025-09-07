@@ -14,7 +14,7 @@ module Karafka
                 File.read(
                   File.join(Karafka.gem_root, 'config', 'locales', 'errors.yml')
                 )
-              ).fetch('en').fetch('validations').fetch('topic')
+              ).fetch('en').fetch('validations').fetch('routing').fetch('topic')
             end
 
             virtual do |data, errors|

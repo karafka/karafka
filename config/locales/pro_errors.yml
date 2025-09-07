@@ -1,105 +1,108 @@
 en:
   validations:
-    topic:
-      virtual_partitions.partitioner_respond_to_call: needs to be defined and needs to respond to `#call`
-      virtual_partitions.max_partitions_format: needs to be equal or more than 1
-      virtual_partitions.offset_metadata_strategy_format: needs to be either :exact or :current
-      virtual_partitions.reducer_format: "needs to respond to `#call`"
-      virtual_partitions.distribution_format: "needs to be either :consistent or :balanced"
+    routing:
+      swarm_nodes_not_used: 'At least one of the nodes has no assignments'
 
-      long_running_job.active_format: needs to be either true or false
+      topic:
+        virtual_partitions.partitioner_respond_to_call: needs to be defined and needs to respond to `#call`
+        virtual_partitions.max_partitions_format: needs to be equal or more than 1
+        virtual_partitions.offset_metadata_strategy_format: needs to be either :exact or :current
+        virtual_partitions.reducer_format: "needs to respond to `#call`"
+        virtual_partitions.distribution_format: "needs to be either :consistent or :balanced"
 
-      dead_letter_queue_with_virtual_partitions: when using Dead Letter Queue with Virtual Partitions, at least one retry is required.
-      dead_letter_queue.strategy_format: 'needs to respond to #call'
-      dead_letter_queue.strategy_missing: needs to be present
+        long_running_job.active_format: needs to be either true or false
 
-      throttling.active_format: needs to be either true or false
-      throttling.limit_format: needs to be equal or more than 1
-      throttling.interval_format: needs to be equal or more than 1
+        dead_letter_queue_with_virtual_partitions: when using Dead Letter Queue with Virtual Partitions, at least one retry is required.
+        dead_letter_queue.strategy_format: 'needs to respond to #call'
+        dead_letter_queue.strategy_missing: needs to be present
 
-      filtering.active_missing: needs to be present
-      filtering.factory_format: 'needs to respond to #call'
-      filtering.factories_format: 'needs to contain only factories responding to #call'
-      filtering.active_format: 'needs to be boolean'
+        throttling.active_format: needs to be either true or false
+        throttling.limit_format: needs to be equal or more than 1
+        throttling.interval_format: needs to be equal or more than 1
 
-      expiring.ttl_format: 'needs to be equal or more than 0 and an integer'
-      expiring.active_format: 'needs to be boolean'
+        filtering.active_missing: needs to be present
+        filtering.factory_format: 'needs to respond to #call'
+        filtering.factories_format: 'needs to contain only factories responding to #call'
+        filtering.active_format: 'needs to be boolean'
 
-      delaying.delay_format: 'needs to be equal or more than 0 and an integer'
-      delaying.active_format: 'needs to be boolean'
+        expiring.ttl_format: 'needs to be equal or more than 0 and an integer'
+        expiring.active_format: 'needs to be boolean'
 
-      pause_timeout_format: needs to be an integer bigger than 0
-      pause_max_timeout_format: needs to be an integer bigger than 0
-      pause_with_exponential_backoff_format: needs to be either true or false
-      pause_timeout_max_timeout_vs_pause_max_timeout: pause_timeout must be less or equal to pause_max_timeout
+        delaying.delay_format: 'needs to be equal or more than 0 and an integer'
+        delaying.active_format: 'needs to be boolean'
 
-      patterns.active_format: 'needs to be boolean'
-      patterns.type_format: 'needs to be :matcher, :discovered or :regular'
+        pause_timeout_format: needs to be an integer bigger than 0
+        pause_max_timeout_format: needs to be an integer bigger than 0
+        pause_with_exponential_backoff_format: needs to be either true or false
+        pause_timeout_max_timeout_vs_pause_max_timeout: pause_timeout must be less or equal to pause_max_timeout
 
-      periodic_job.active_missing: needs to be present
-      periodic_job.active_format: 'needs to be boolean'
-      periodic_job.interval_missing: 'needs to be present'
-      periodic_job.interval_format: 'needs to be an integer equal or more than 100'
-      periodic_job.during_pause_format: 'needs to be boolean'
-      periodic_job.during_retry_format: 'needs to be boolean'
-      periodic_job.materialized_format: 'needs to be boolean'
-      periodic_job.materialized_missing: 'needs to be present'
+        patterns.active_format: 'needs to be boolean'
+        patterns.type_format: 'needs to be :matcher, :discovered or :regular'
 
-      inline_insights.active_format: 'needs to be boolean'
-      inline_insights.required_format: 'needs to be boolean'
+        periodic_job.active_missing: needs to be present
+        periodic_job.active_format: 'needs to be boolean'
+        periodic_job.interval_missing: 'needs to be present'
+        periodic_job.interval_format: 'needs to be an integer equal or more than 100'
+        periodic_job.during_pause_format: 'needs to be boolean'
+        periodic_job.during_retry_format: 'needs to be boolean'
+        periodic_job.materialized_format: 'needs to be boolean'
+        periodic_job.materialized_missing: 'needs to be present'
 
-      offset_metadata.active_format: 'needs to be boolean'
-      offset_metadata.cache_format: 'needs to be boolean'
-      offset_metadata.deserializer_missing: needs to be present
-      offset_metadata.deserializer_format: 'needs to respond to #call'
+        inline_insights.active_format: 'needs to be boolean'
+        inline_insights.required_format: 'needs to be boolean'
 
-      subscription_group_details.multiplexing_min_format: 'needs to be an integer equal or more than 1'
-      subscription_group_details.multiplexing_max_format: 'needs to be an integer equal or more than 1'
-      subscription_group_details_multiplexing_min_max_mismatch: 'min needs to be equal or less than max'
-      subscription_group_details_multiplexing_boot_mismatch: 'boot needs to be between min and max'
-      subscription_group_details.multiplexing_boot_format: 'needs to be an integer equal or more than 1'
-      subscription_group_details.multiplexing_boot_not_dynamic: 'needs to be equal to max when not in dynamic mode'
-      subscription_group_details_multiplexing_one_not_enough: 'min and max cannot equal 1'
-      subscription_group_details.multiplexing_scale_delay_format: 'needs to be an integer equal or more than 1000'
+        offset_metadata.active_format: 'needs to be boolean'
+        offset_metadata.cache_format: 'needs to be boolean'
+        offset_metadata.deserializer_missing: needs to be present
+        offset_metadata.deserializer_format: 'needs to respond to #call'
 
-      swarm.active_format: needs to be true
-      swarm.nodes_format: needs to be a range, array of nodes ids or a hash with direct assignments
-      swarm_nodes_with_non_existent_nodes: includes unreachable nodes ids
+        subscription_group_details.multiplexing_min_format: 'needs to be an integer equal or more than 1'
+        subscription_group_details.multiplexing_max_format: 'needs to be an integer equal or more than 1'
+        subscription_group_details_multiplexing_min_max_mismatch: 'min needs to be equal or less than max'
+        subscription_group_details_multiplexing_boot_mismatch: 'boot needs to be between min and max'
+        subscription_group_details.multiplexing_boot_format: 'needs to be an integer equal or more than 1'
+        subscription_group_details.multiplexing_boot_not_dynamic: 'needs to be equal to max when not in dynamic mode'
+        subscription_group_details_multiplexing_one_not_enough: 'min and max cannot equal 1'
+        subscription_group_details.multiplexing_scale_delay_format: 'needs to be an integer equal or more than 1000'
 
-      recurring_tasks.active_format: 'needs to be boolean'
-      scheduled_messages.active_format: 'needs to be boolean'
-      scheduled_messages.active_missing: 'needs to be boolean'
+        swarm.active_format: needs to be true
+        swarm.nodes_format: needs to be a range, array of nodes ids or a hash with direct assignments
+        swarm_nodes_with_non_existent_nodes: includes unreachable nodes ids
 
-      direct_assignments.active_missing: needs to be present
-      direct_assignments.active_format: 'needs to be boolean'
-      direct_assignments.partitions_missing: 'needs to be present'
-      direct_assignments.partitions_format: 'needs to be true, list of partitions or a range of partitions (finite)'
-      direct_assignments_active_but_empty: 'cannot be empty and active at the same time'
-      direct_assignments_swarm_not_complete: 'cannot have partitions that are assigned but not allocated'
-      direct_assignments_swarm_overbooked: 'cannot allocate partitions in swarm that were not assigned'
-      direct_assignments_patterns_active: 'patterns cannot be used with direct assignments'
+        recurring_tasks.active_format: 'needs to be boolean'
+        scheduled_messages.active_format: 'needs to be boolean'
+        scheduled_messages.active_missing: 'needs to be boolean'
 
-      adaptive_iterator.active_missing: needs to be present
-      adaptive_iterator.active_format: 'needs to be boolean'
-      adaptive_iterator.marking_method_format: 'needs to be either #mark_as_consumed or #mark_as_consumed!'
-      adaptive_iterator.clean_after_yielding_format: 'needs to be boolean'
-      adaptive_iterator.safety_margin_format: 'needs to be between 1 and 99'
-      adaptive_iterator_with_virtual_partitions: 'cannot be used with virtual partitions'
-      adaptive_iterator_with_long_running_job: 'cannot be used with long running jobs'
+        direct_assignments.active_missing: needs to be present
+        direct_assignments.active_format: 'needs to be boolean'
+        direct_assignments.partitions_missing: 'needs to be present'
+        direct_assignments.partitions_format: 'needs to be true, list of partitions or a range of partitions (finite)'
+        direct_assignments_active_but_empty: 'cannot be empty and active at the same time'
+        direct_assignments_swarm_not_complete: 'cannot have partitions that are assigned but not allocated'
+        direct_assignments_swarm_overbooked: 'cannot allocate partitions in swarm that were not assigned'
+        direct_assignments_patterns_active: 'patterns cannot be used with direct assignments'
 
-    consumer_group:
-      patterns_format: must be an array with hashes
-      patterns_missing: needs to be present
-      patterns_regexps_not_unique: 'must be unique within consumer group'
+        adaptive_iterator.active_missing: needs to be present
+        adaptive_iterator.active_format: 'needs to be boolean'
+        adaptive_iterator.marking_method_format: 'needs to be either #mark_as_consumed or #mark_as_consumed!'
+        adaptive_iterator.clean_after_yielding_format: 'needs to be boolean'
+        adaptive_iterator.safety_margin_format: 'needs to be between 1 and 99'
+        adaptive_iterator_with_virtual_partitions: 'cannot be used with virtual partitions'
+        adaptive_iterator_with_long_running_job: 'cannot be used with long running jobs'
 
-      direct_assignments_homogenous: 'single consumer group cannot mix regular and direct assignments'
+      consumer_group:
+        patterns_format: must be an array with hashes
+        patterns_missing: needs to be present
+        patterns_regexps_not_unique: 'must be unique within consumer group'
 
-      parallel_segments.partitioner_format: needs to be defined and needs to respond to `#call`
-      parallel_segments.partitioner_respond_to_call: needs to be defined and needs to respond to `#call`
-      parallel_segments.count_format: needs to be equal or more than 1
-      parallel_segments.active_format: needs to be boolean
-      parallel_segments.reducer_format: "needs to respond to `#call`"
-      parallel_segments.merge_key_format: "needs to be a non-empty string"
+        direct_assignments_homogenous: 'single consumer group cannot mix regular and direct assignments'
+
+        parallel_segments.partitioner_format: needs to be defined and needs to respond to `#call`
+        parallel_segments.partitioner_respond_to_call: needs to be defined and needs to respond to `#call`
+        parallel_segments.count_format: needs to be equal or more than 1
+        parallel_segments.active_format: needs to be boolean
+        parallel_segments.reducer_format: "needs to respond to `#call`"
+        parallel_segments.merge_key_format: "needs to be a non-empty string"
 
     pattern:
       regexp_format: must be a regular expression
@@ -138,9 +141,6 @@ en:
       scheduled_messages.deserializers.payload_format: cannot be nil
       scheduled_messages.group_id_format: 'needs to be a string with a Kafka accepted format'
       scheduled_messages.states_postfix_format: 'needs to be a string with a Kafka accepted format'
-
-    routing:
-      swarm_nodes_not_used: 'At least one of the nodes has no assignments'
 
     recurring_tasks:
       id_format: 'can include only alphanumeric characters (a-z, A-Z, 0-9), hyphens (-), and underscores (_)'
