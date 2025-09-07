@@ -80,132 +80,114 @@ RSpec.describe_current do
 
   # More specs in the integrations
   describe '#seek_consumer_group' do
-    subject(:seeking) { described_class.seek_consumer_group(cg_id, map) }
-
     let(:cg_id) { SecureRandom.uuid }
-    let(:topic) { name }
-    let(:partition) { 0 }
-    let(:offset) { 0 }
-    let(:map) { { topic => { partition => offset } } }
+    let(:map) { { 'topic' => { 0 => 10 } } }
 
-    before { described_class.create_topic(topic, 1, 1) }
-
-    context 'when given consumer group does not exist' do
-      it 'expect not to throw error and operate' do
-        expect { seeking }.not_to raise_error
-      end
+    before do
+      allow(Karafka::Admin::ConsumerGroups).to receive(:seek)
     end
 
-    context 'when using the topic level map' do
-      let(:map) { { topic => offset } }
-
-      it 'expect not to throw error and operate' do
-        expect { seeking }.not_to raise_error
-      end
-    end
-
-    context 'when using the topic level map with time reference on empty topic' do
-      let(:offset) { Time.now - 60 }
-      let(:map) { { topic => offset } }
-
-      it 'expect not to throw error and operate' do
-        expect { seeking }.not_to raise_error
-      end
+    it 'delegates to ConsumerGroups.seek' do
+      described_class.seek_consumer_group(cg_id, map)
+      expect(Karafka::Admin::ConsumerGroups).to have_received(:seek).with(cg_id, map)
     end
   end
 
-  # More specs in the integrations
   describe '#copy_consumer_group' do
-    subject(:rename) { described_class.copy_consumer_group(previous_name, new_name, topics) }
-
     let(:previous_name) { rand.to_s }
     let(:new_name) { rand.to_s }
     let(:topics) { [rand.to_s] }
 
-    context 'when old name does not exist' do
-      it 'expect not to raise error because it will not have offsets for old cg' do
-        expect(rename).to be(false)
-      end
+    before do
+      allow(Karafka::Admin::ConsumerGroups).to receive(:copy)
     end
 
-    context 'when old name exists but no topics to migrate are given' do
-      let(:topics) { [] }
-
-      it { expect { rename }.not_to raise_error }
-      it { expect(rename).to be(false) }
-    end
-
-    context 'when requested topics do not exist but CG does' do
-      before do
-        described_class.create_topic(name, 1, 1)
-        described_class.seek_consumer_group(previous_name, name => { 0 => 10 })
-      end
-
-      it { expect { rename }.not_to raise_error }
-      it { expect(rename).to be(false) }
+    it 'delegates to ConsumerGroups.copy' do
+      described_class.copy_consumer_group(previous_name, new_name, topics)
+      expect(Karafka::Admin::ConsumerGroups)
+        .to have_received(:copy).with(previous_name, new_name, topics)
     end
   end
 
-  # More specs in the integrations
   describe '#rename_consumer_group' do
-    subject(:rename) { described_class.rename_consumer_group(previous_name, new_name, topics) }
-
     let(:previous_name) { rand.to_s }
     let(:new_name) { rand.to_s }
     let(:topics) { [rand.to_s] }
 
-    context 'when old name does not exist' do
-      it { expect(rename).to be(false) }
+    before do
+      allow(Karafka::Admin::ConsumerGroups).to receive(:rename)
     end
 
-    context 'when old name exists but no topics to migrate are given' do
-      let(:topics) { [] }
-
-      it { expect { rename }.not_to raise_error }
-    end
-
-    context 'when requested topics do not exist but CG does' do
-      before do
-        described_class.create_topic(name, 1, 1)
-        described_class.seek_consumer_group(previous_name, name => { 0 => 10 })
+    context 'when delete_previous is not specified' do
+      it 'delegates to ConsumerGroups.rename with default delete_previous' do
+        described_class.rename_consumer_group(previous_name, new_name, topics)
+        expect(Karafka::Admin::ConsumerGroups)
+          .to have_received(:rename)
+          .with(previous_name, new_name, topics, delete_previous: true)
       end
+    end
 
-      it { expect { rename }.not_to raise_error }
-      it { expect(rename).to be(false) }
+    context 'when delete_previous is specified' do
+      it 'delegates to ConsumerGroups.rename with specified delete_previous' do
+        described_class.rename_consumer_group(
+          previous_name,
+          new_name,
+          topics,
+          delete_previous: false
+        )
+
+        expect(Karafka::Admin::ConsumerGroups)
+          .to have_received(:rename)
+          .with(previous_name, new_name, topics, delete_previous: false)
+      end
     end
   end
 
   describe '#delete_consumer_group' do
-    subject(:removal) { described_class.delete_consumer_group(cg_id) }
+    let(:cg_id) { SecureRandom.uuid }
 
-    context 'when requested consumer group does not exist' do
-      let(:cg_id) { SecureRandom.uuid }
+    before do
+      allow(Karafka::Admin::ConsumerGroups).to receive(:delete)
+    end
 
-      it do
-        expect { removal }.to raise_error(Rdkafka::RdkafkaError)
+    it 'delegates to ConsumerGroups.delete' do
+      described_class.delete_consumer_group(cg_id)
+      expect(Karafka::Admin::ConsumerGroups).to have_received(:delete).with(cg_id)
+    end
+  end
+
+  describe '#read_lags_with_offsets' do
+    let(:cgs_t) { { 'test_cg' => ['test_topic'] } }
+
+    before do
+      allow(Karafka::Admin::ConsumerGroups).to receive(:read_lags_with_offsets)
+    end
+
+    context 'when active_topics_only is not specified' do
+      it 'delegates to ConsumerGroups.read_lags_with_offsets with default active_topics_only' do
+        described_class.read_lags_with_offsets(cgs_t)
+        expect(Karafka::Admin::ConsumerGroups)
+          .to have_received(:read_lags_with_offsets)
+          .with(cgs_t, active_topics_only: true)
       end
     end
 
-    # The case where given consumer group exists we check in the integrations, because it is
-    # much easier to test with integrations on created consumer group
-  end
-
-  # More coverage of this feature is in integration suite
-  describe '#read_lags_with_offsets' do
-    subject(:results) { Karafka::Admin.read_lags_with_offsets(cgs_t) }
-
-    context 'when we query for a non-existent topic with a non-existing CG' do
-      let(:cgs_t) { { 'doesnotexist' => ['doesnotexisttopic'] } }
-
-      it { expect(results).to eq('doesnotexist' => { 'doesnotexisttopic' => {} }) }
+    context 'when active_topics_only is specified' do
+      it 'delegates to ConsumerGroups.read_lags_with_offsets with specified active_topics_only' do
+        described_class.read_lags_with_offsets(cgs_t, active_topics_only: false)
+        expect(Karafka::Admin::ConsumerGroups)
+          .to have_received(:read_lags_with_offsets)
+          .with(cgs_t, active_topics_only: false)
+      end
     end
 
-    context 'when querying existing topic with a CG that never consumed it' do
-      before { PRODUCERS.regular.produce_sync(topic: name, payload: '1') }
-
-      let(:cgs_t) { { 'doesnotexist' => [name] } }
-
-      it { expect(results).to eq('doesnotexist' => { name => { 0 => { lag: -1, offset: -1 } } }) }
+    context 'when consumer_groups_with_topics is not specified' do
+      it 'delegates to ConsumerGroups.read_lags_with_offsets with empty hash' do
+        described_class.read_lags_with_offsets
+        expect(Karafka::Admin::ConsumerGroups)
+          .to have_received(:read_lags_with_offsets)
+          .with({}, active_topics_only: true)
+      end
     end
   end
 end
