@@ -142,6 +142,20 @@ en:
       deserializers.key_format: 'needs to respond to #call'
       deserializers.headers_format: 'needs to respond to #call'
 
+    admin:
+      replication:
+        missing: needs to be present
+        topic_format: needs to be a non-empty string
+        to_format: needs to be an integer greater than 0
+        brokers_format: needs to be a hash when provided
+        must_be_higher_than_current: target replication factor must be higher than current
+        exceeds_broker_count: target replication factor cannot exceed available broker count
+        missing_partitions: manual assignment missing partitions
+        invalid_partition: partition does not exist in topic
+        wrong_broker_count_for_partition: partition broker count does not match target replication factor
+        duplicate_brokers_for_partition: partition has duplicate brokers
+        invalid_brokers_for_partition: partition references non-existent brokers
+
     consumer_group:
       missing: needs to be present
       topics_names_not_unique: all topic names within a single consumer group must be unique

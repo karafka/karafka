@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require_relative 'admin/consumer_groups'
+require_relative 'admin/replication'
 
 module Karafka
   # Admin actions that we can perform via Karafka on our Kafka cluster
@@ -127,6 +128,53 @@ module Karafka
         ConsumerGroups.read_lags_with_offsets(
           consumer_groups_with_topics,
           active_topics_only: active_topics_only
+        )
+      end
+
+      # Plans a replication factor increase for a topic that can be used with Kafka's
+      # reassignment tools. Since librdkafka does not support increasing replication factor
+      # directly, this method generates the necessary JSON and commands for manual execution.
+      #
+      # @param topic [String] name of the topic to plan replication for
+      # @param replication_factor [Integer] target replication factor (must be higher than current)
+      # @param brokers [Hash<Integer, Array<Integer>>] optional manual broker assignments
+      #   per partition. Keys are partition IDs, values are arrays of broker IDs. If not provided,
+      #   assignments distribution will happen automatically.
+      # @return [Replication] plan object with JSON, commands, and instructions
+      #
+      # @example Plan replication increase with automatic broker distribution
+      #   plan = Karafka::Admin.plan_topic_replication(topic: 'events', replication_factor: 3)
+      #
+      #   # Review the plan
+      #   puts plan.summary
+      #
+      #   # Export JSON for Kafka's reassignment tools
+      #   plan.export_to_file('reassignment.json')
+      #
+      #   # Execute the plan (replace <KAFKA_BROKERS> with actual brokers)
+      #   system(plan.execution_commands[:execute].gsub('<KAFKA_BROKERS>', 'localhost:9092'))
+      #
+      # @example Plan replication with manual broker placement - specify brokers
+      #   plan = Karafka::Admin.plan_topic_replication(
+      #     topic: 'events',
+      #     replication_factor: 3,
+      #     brokers: {
+      #       0 => [1, 2, 4],  # Partition 0 on brokers 1, 2, 4
+      #       1 => [2, 3, 4],  # Partition 1 on brokers 2, 3, 4
+      #       2 => [1, 3, 5]   # Partition 2 on brokers 1, 3, 5
+      #     }
+      #   )
+      #
+      #   # The plan will use your exact broker specifications
+      #   puts plan.partitions_assignment
+      #   # => { 0=>[1, 2, 4], 1=>[2, 3, 4], 2=>[1, 3, 5] }
+      #
+      # @see Replication.plan for more details
+      def plan_topic_replication(topic:, replication_factor:, brokers: nil)
+        Replication.plan(
+          topic: topic,
+          to: replication_factor,
+          brokers: brokers
         )
       end
 
