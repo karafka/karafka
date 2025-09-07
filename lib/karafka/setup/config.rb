@@ -207,7 +207,7 @@ module Karafka
         setting :cli do
           # option contract [Object] cli setup validation contract (in the context of options and
           # topics)
-          setting :contract, default: Contracts::ServerCliOptions.new
+          setting :contract, default: ::Karafka::Contracts::ServerCliOptions.new
         end
 
         setting :routing do

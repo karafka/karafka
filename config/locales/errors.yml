@@ -1,93 +1,94 @@
 en:
   validations:
-    config:
-      license.entity_format: needs to be a string
-      license.token_format: needs to be either false or a string
-      license.expires_on_format: needs to be a valid date
+    setup:
+      config:
+        license.entity_format: needs to be a string
+        license.token_format: needs to be either false or a string
+        license.expires_on_format: needs to be a valid date
 
-      missing: needs to be present
-      client_id_format: 'needs to be a string with a Kafka accepted format'
-      group_id_format: 'needs to be a string with a Kafka accepted format'
-      concurrency_format: needs to be an integer bigger than 0
-      consumer_persistence_format: needs to be either true or false
-      pause_timeout_format: needs to be an integer bigger than 0
-      pause_max_timeout_format: needs to be an integer bigger than 0
-      pause_with_exponential_backoff_format: needs to be either true or false
-      strict_topics_namespacing_format: needs to be either true or false
-      strict_declarative_topics_format: needs to be either true or false
-      shutdown_timeout_format: needs to be an integer bigger than 0
-      max_wait_time_format: needs to be an integer bigger than 0
-      max_wait_time_max_wait_time_vs_swarm_node_report_timeout: >
-        cannot be more than 80% of internal.swarm.node_report_timeout.
-        Decrease max_wait_time or increase node_report_timeout
-      kafka_format: needs to be a filled hash
-      key_must_be_a_symbol: All keys under the kafka settings scope need to be symbols
-      max_timeout_vs_pause_max_timeout: pause_timeout must be less or equal to pause_max_timeout
-      shutdown_timeout_vs_max_wait_time: shutdown_timeout must be more than max_wait_time
-      worker_thread_priority_format: must be between -3 and 3
+        missing: needs to be present
+        client_id_format: 'needs to be a string with a Kafka accepted format'
+        group_id_format: 'needs to be a string with a Kafka accepted format'
+        concurrency_format: needs to be an integer bigger than 0
+        consumer_persistence_format: needs to be either true or false
+        pause_timeout_format: needs to be an integer bigger than 0
+        pause_max_timeout_format: needs to be an integer bigger than 0
+        pause_with_exponential_backoff_format: needs to be either true or false
+        strict_topics_namespacing_format: needs to be either true or false
+        strict_declarative_topics_format: needs to be either true or false
+        shutdown_timeout_format: needs to be an integer bigger than 0
+        max_wait_time_format: needs to be an integer bigger than 0
+        max_wait_time_max_wait_time_vs_swarm_node_report_timeout: >
+          cannot be more than 80% of internal.swarm.node_report_timeout.
+          Decrease max_wait_time or increase node_report_timeout
+        kafka_format: needs to be a filled hash
+        key_must_be_a_symbol: All keys under the kafka settings scope need to be symbols
+        max_timeout_vs_pause_max_timeout: pause_timeout must be less or equal to pause_max_timeout
+        shutdown_timeout_vs_max_wait_time: shutdown_timeout must be more than max_wait_time
+        worker_thread_priority_format: must be between -3 and 3
 
-      oauth.token_provider_listener_format: 'must be false or respond to #on_oauthbearer_token_refresh'
+        oauth.token_provider_listener_format: 'must be false or respond to #on_oauthbearer_token_refresh'
 
-      internal.processing.jobs_builder_format: cannot be nil
-      internal.processing.jobs_queue_class_format: cannot be nil
-      internal.processing.scheduler_class_format: cannot be nil
-      internal.processing.coordinator_class_format: cannot be nil
-      internal.processing.partitioner_class_format: cannot be nil
-      internal.processing.strategy_selector_format: cannot be nil
-      internal.processing.expansions_selector_format: cannot be nil
-      internal.processing.executor_class_format: cannot be nil
-      internal.processing.worker_job_call_wrapper_format: 'needs to be false or respond to #wrap'
-      internal.processing.errors_tracker_class_format: 'needs to be nil or a class'
+        internal.processing.jobs_builder_format: cannot be nil
+        internal.processing.jobs_queue_class_format: cannot be nil
+        internal.processing.scheduler_class_format: cannot be nil
+        internal.processing.coordinator_class_format: cannot be nil
+        internal.processing.partitioner_class_format: cannot be nil
+        internal.processing.strategy_selector_format: cannot be nil
+        internal.processing.expansions_selector_format: cannot be nil
+        internal.processing.executor_class_format: cannot be nil
+        internal.processing.worker_job_call_wrapper_format: 'needs to be false or respond to #wrap'
+        internal.processing.errors_tracker_class_format: 'needs to be nil or a class'
 
-      internal.active_job.dispatcher_format: cannot be nil
-      internal.active_job.job_options_contract_format: cannot be nil
-      internal.active_job.consumer_class_format: cannot be nil
+        internal.active_job.dispatcher_format: cannot be nil
+        internal.active_job.job_options_contract_format: cannot be nil
+        internal.active_job.consumer_class_format: cannot be nil
 
-      internal.status_format: needs to be present
-      internal.process_format: needs to be present
-      internal.tick_interval_format: needs to be an integer bigger or equal to 1000
-      internal.supervision_sleep_format: needs to be an integer bigger than 0
-      internal.forceful_exit_code_format: needs to be an integer bigger or equal to 0
-      internal.forceful_shutdown_wait_format: needs to be an integer bigger or equal to 0
+        internal.status_format: needs to be present
+        internal.process_format: needs to be present
+        internal.tick_interval_format: needs to be an integer bigger or equal to 1000
+        internal.supervision_sleep_format: needs to be an integer bigger than 0
+        internal.forceful_exit_code_format: needs to be an integer bigger or equal to 0
+        internal.forceful_shutdown_wait_format: needs to be an integer bigger or equal to 0
 
-      internal.routing.builder_format: needs to be present
-      internal.routing.subscription_groups_builder_format: needs to be present
+        internal.routing.builder_format: needs to be present
+        internal.routing.subscription_groups_builder_format: needs to be present
 
-      internal.connection.manager_format: needs to be present
-      internal.connection.conductor_format: needs to be present
-      internal.connection.reset_backoff_format: needs to be an integer bigger or equal to 1000
-      internal.connection.proxy.query_watermark_offsets.timeout_format: needs to be an integer bigger than 0
-      internal.connection.proxy.query_watermark_offsets.max_attempts_format: needs to be an integer bigger than 0
-      internal.connection.proxy.query_watermark_offsets.wait_time_format: needs to be an integer bigger than 0
-      internal.connection.proxy.offsets_for_times.timeout_format: needs to be an integer bigger than 0
-      internal.connection.proxy.offsets_for_times.max_attempts_format: needs to be an integer bigger than 0
-      internal.connection.proxy.offsets_for_times.wait_time_format: needs to be an integer bigger than 0
-      internal.connection.proxy.committed.timeout_format: needs to be an integer bigger than 0
-      internal.connection.proxy.committed.max_attempts_format: needs to be an integer bigger than 0
-      internal.connection.proxy.committed.wait_time_format: needs to be an integer bigger than 0
-      internal.connection.proxy.commit.max_attempts_format: needs to be an integer bigger than 0
-      internal.connection.proxy.commit.wait_time_format: needs to be an integer bigger than 0
-      internal.connection.proxy.metadata.timeout_format: needs to be an integer bigger than 0
-      internal.connection.proxy.metadata.max_attempts_format: needs to be an integer bigger than 0
-      internal.connection.proxy.metadata.wait_time_format: needs to be an integer bigger than 0
-      internal.connection.listener_thread_priority_format: must be between -3 and 3
+        internal.connection.manager_format: needs to be present
+        internal.connection.conductor_format: needs to be present
+        internal.connection.reset_backoff_format: needs to be an integer bigger or equal to 1000
+        internal.connection.proxy.query_watermark_offsets.timeout_format: needs to be an integer bigger than 0
+        internal.connection.proxy.query_watermark_offsets.max_attempts_format: needs to be an integer bigger than 0
+        internal.connection.proxy.query_watermark_offsets.wait_time_format: needs to be an integer bigger than 0
+        internal.connection.proxy.offsets_for_times.timeout_format: needs to be an integer bigger than 0
+        internal.connection.proxy.offsets_for_times.max_attempts_format: needs to be an integer bigger than 0
+        internal.connection.proxy.offsets_for_times.wait_time_format: needs to be an integer bigger than 0
+        internal.connection.proxy.committed.timeout_format: needs to be an integer bigger than 0
+        internal.connection.proxy.committed.max_attempts_format: needs to be an integer bigger than 0
+        internal.connection.proxy.committed.wait_time_format: needs to be an integer bigger than 0
+        internal.connection.proxy.commit.max_attempts_format: needs to be an integer bigger than 0
+        internal.connection.proxy.commit.wait_time_format: needs to be an integer bigger than 0
+        internal.connection.proxy.metadata.timeout_format: needs to be an integer bigger than 0
+        internal.connection.proxy.metadata.max_attempts_format: needs to be an integer bigger than 0
+        internal.connection.proxy.metadata.wait_time_format: needs to be an integer bigger than 0
+        internal.connection.listener_thread_priority_format: must be between -3 and 3
 
-      internal.swarm.manager_format: cannot be nil
-      internal.swarm.orphaned_exit_code_format: needs to be an integer bigger or equal to 0
-      internal.swarm.supervision_interval_format: needs to be an integer bigger or equal to 1000
-      internal.swarm.liveness_interval_format: needs to be an integer bigger or equal to 1000
-      internal.swarm.liveness_listener_format: cannot be nil
-      internal.swarm.node_report_timeout_format: needs to be an integer bigger or equal to 1000
-      internal.swarm.node_restart_timeout_format: needs to be an integer bigger or equal to 1000
+        internal.swarm.manager_format: cannot be nil
+        internal.swarm.orphaned_exit_code_format: needs to be an integer bigger or equal to 0
+        internal.swarm.supervision_interval_format: needs to be an integer bigger or equal to 1000
+        internal.swarm.liveness_interval_format: needs to be an integer bigger or equal to 1000
+        internal.swarm.liveness_listener_format: cannot be nil
+        internal.swarm.node_report_timeout_format: needs to be an integer bigger or equal to 1000
+        internal.swarm.node_restart_timeout_format: needs to be an integer bigger or equal to 1000
 
-      admin.kafka_format: needs to be a hash
-      admin.group_id_format: 'needs to be a string with a Kafka accepted format'
-      admin.max_wait_time_format: 'needs to be an integer bigger than 0'
-      admin.retry_backoff_format: 'needs to be an integer bigger than 100'
-      admin.max_retries_duration_format: 'needs to be an integer bigger than 1000'
+        admin.kafka_format: needs to be a hash
+        admin.group_id_format: 'needs to be a string with a Kafka accepted format'
+        admin.max_wait_time_format: 'needs to be an integer bigger than 0'
+        admin.retry_backoff_format: 'needs to be an integer bigger than 100'
+        admin.max_retries_duration_format: 'needs to be an integer bigger than 1000'
 
-      swarm.nodes_format: 'needs to be an integer bigger than 0'
-      swarm.node_format: needs to be false or node instance
+        swarm.nodes_format: 'needs to be an integer bigger than 0'
+        swarm.node_format: needs to be false or node instance
 
     server_cli_options:
       missing: needs to be present
