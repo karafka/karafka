@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module Karafka
-  module Admin
+  class Admin
     # Struct and set of operations for ACLs management that simplifies their usage.
     # It allows to use Ruby symbol based definitions instead of usage of librdkafka types
     # (it allows to use rdkafka numerical types as well out of the box)
@@ -10,11 +10,7 @@ module Karafka
     #
     # This API works based on ability to create a `Karafka:Admin::Acl` object that can be then used
     # using `#create`, `#delete` and `#describe` class API.
-    class Acl
-      extend Helpers::ConfigImporter.new(
-        max_wait_time: %i[admin max_wait_time]
-      )
-
+    class Acl < Admin
       # Types of resources for which we can assign permissions.
       #
       # Resource refers to any entity within the Kafka ecosystem for which access control can be
@@ -167,7 +163,7 @@ module Karafka
         # Yields admin instance, allows to run Acl operations and awaits on the final result
         # Makes sure that admin is closed afterwards.
         def with_admin_wait
-          Admin.with_admin do |admin|
+          with_admin do |admin|
             yield(admin).wait(max_wait_timeout: max_wait_time)
           end
         end
@@ -231,6 +227,7 @@ module Karafka
         @host = host
         @operation = map(operation, OPERATIONS_MAP)
         @permission_type = map(permission_type, PERMISSION_TYPES_MAP)
+        super()
         freeze
       end
 

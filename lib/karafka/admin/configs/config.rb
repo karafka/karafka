@@ -1,8 +1,8 @@
 # frozen_string_literal: true
 
 module Karafka
-  module Admin
-    module Configs
+  class Admin
+    class Configs
       # Represents a single config entry that is related to a resource
       class Config
         attr_reader :name, :value, :synonyms

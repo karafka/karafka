@@ -1,0 +1,206 @@
+# frozen_string_literal: true
+
+module Karafka
+  class Admin
+    # Topic administration operations
+    # Provides methods to manage Kafka topics including creation, deletion, reading, and
+    # introspection
+    class Topics < Admin
+      class << self
+        # Allows us to read messages from the topic
+        #
+        # @param name [String, Symbol] topic name
+        # @param partition [Integer] partition
+        # @param count [Integer] how many messages we want to get at most
+        # @param start_offset [Integer, Time] offset from which we should start. If -1 is provided
+        #   (default) we will start from the latest offset. If time is provided, the appropriate
+        #   offset will be resolved. If negative beyond -1 is provided, we move backwards more.
+        # @param settings [Hash] kafka extra settings (optional)
+        #
+        # @return [Array<Karafka::Messages::Message>] array with messages
+        def read(name, partition, count, start_offset = -1, settings = {})
+          messages = []
+          tpl = Rdkafka::Consumer::TopicPartitionList.new
+          low_offset, high_offset = nil
+
+          with_consumer(settings) do |consumer|
+            # Convert the time offset (if needed)
+            start_offset = resolve_offset(consumer, name.to_s, partition, start_offset)
+
+            low_offset, high_offset = consumer.query_watermark_offsets(name, partition)
+
+            # Select offset dynamically if -1 or less and move backwards with the negative
+            # offset, allowing to start from N messages back from high-watermark
+            start_offset = high_offset - count - start_offset.abs + 1 if start_offset.negative?
+            start_offset = low_offset if start_offset.negative?
+
+            # Build the requested range - since first element is on the start offset we need to
+            # subtract one from requested count to end up with expected number of elements
+            requested_range = (start_offset..start_offset + (count - 1))
+            # Establish theoretical available range. Note, that this does not handle cases related
+            # to log retention or compaction
+            available_range = (low_offset..(high_offset - 1))
+            # Select only offset that we can select. This will remove all the potential offsets
+            # that are below the low watermark offset
+            possible_range = requested_range.select { |offset| available_range.include?(offset) }
+
+            start_offset = possible_range.first
+            count = possible_range.size
+
+            tpl.add_topic_and_partitions_with_offsets(name, partition => start_offset)
+            consumer.assign(tpl)
+
+            # We should poll as long as we don't have all the messages that we need or as long as
+            # we do not read all the messages from the topic
+            loop do
+              # If we've got as many messages as we've wanted stop
+              break if messages.size >= count
+
+              message = consumer.poll(200)
+
+              next unless message
+
+              # If the message we've got is beyond the requested range, stop
+              break unless possible_range.include?(message.offset)
+
+              messages << message
+            rescue Rdkafka::RdkafkaError => e
+              # End of partition
+              break if e.code == :partition_eof
+
+              raise e
+            end
+          end
+
+          # Use topic from routes if we can match it or create a dummy one
+          # Dummy one is used in case we cannot match the topic with routes. This can happen
+          # when admin API is used to read topics that are not part of the routing
+          topic = ::Karafka::Routing::Router.find_or_initialize_by_name(name)
+
+          messages.map! do |message|
+            Messages::Builders::Message.call(
+              message,
+              topic,
+              Time.now
+            )
+          end
+        end
+
+        # Creates Kafka topic with given settings
+        #
+        # @param name [String] topic name
+        # @param partitions [Integer] number of partitions we expect
+        # @param replication_factor [Integer] number of replicas
+        # @param topic_config [Hash] topic config details as described here:
+        #   https://kafka.apache.org/documentation/#topicconfigs
+        #
+        # @return [void]
+        def create(name, partitions, replication_factor, topic_config = {})
+          with_admin do |admin|
+            handler = admin.create_topic(name, partitions, replication_factor, topic_config)
+
+            with_re_wait(
+              -> { handler.wait(max_wait_timeout: max_wait_time_seconds) },
+              -> { names.include?(name) }
+            )
+          end
+        end
+
+        # Deleted a given topic
+        #
+        # @param name [String] topic name
+        #
+        # @return [void]
+        def delete(name)
+          with_admin do |admin|
+            handler = admin.delete_topic(name)
+
+            with_re_wait(
+              -> { handler.wait(max_wait_timeout: max_wait_time_seconds) },
+              -> { !names.include?(name) }
+            )
+          end
+        end
+
+        # Creates more partitions for a given topic
+        #
+        # @param name [String] topic name
+        # @param partitions [Integer] total number of partitions we expect to end up with
+        #
+        # @return [void]
+        def create_partitions(name, partitions)
+          with_admin do |admin|
+            handler = admin.create_partitions(name, partitions)
+
+            with_re_wait(
+              -> { handler.wait(max_wait_timeout: max_wait_time_seconds) },
+              -> { info(name).fetch(:partition_count) >= partitions }
+            )
+          end
+        end
+
+        # Fetches the watermark offsets for a given topic partition
+        #
+        # @param name [String, Symbol] topic name
+        # @param partition [Integer] partition
+        # @return [Array<Integer, Integer>] low watermark offset and high watermark offset
+        def read_watermark_offsets(name, partition)
+          with_consumer do |consumer|
+            consumer.query_watermark_offsets(name, partition)
+          end
+        end
+
+        # Returns basic topic metadata
+        #
+        # @param topic_name [String] name of the topic we're interested in
+        # @return [Hash] topic metadata info hash
+        # @raise [Rdkafka::RdkafkaError] `unknown_topic_or_part` if requested topic is not found
+        #
+        # @note This query is much more efficient than doing a full `#cluster_info` + topic lookup
+        #   because it does not have to query for all the topics data but just the topic we're
+        #   interested in
+        def info(topic_name)
+          with_admin do |admin|
+            admin
+              .metadata(topic_name)
+              .topics
+              .find { |topic| topic[:topic_name] == topic_name }
+          end
+        end
+
+        private
+
+        # @return [Array<String>] topics names
+        def names
+          cluster_info.topics.map { |topic| topic.fetch(:topic_name) }
+        end
+
+        # Resolves the offset if offset is in a time format. Otherwise returns the offset without
+        # resolving.
+        # @param consumer [::Rdkafka::Consumer]
+        # @param name [String, Symbol] expected topic name
+        # @param partition [Integer]
+        # @param offset [Integer, Time]
+        # @return [Integer] expected offset
+        def resolve_offset(consumer, name, partition, offset)
+          if offset.is_a?(Time)
+            tpl = ::Rdkafka::Consumer::TopicPartitionList.new
+            tpl.add_topic_and_partitions_with_offsets(
+              name, partition => offset
+            )
+
+            real_offsets = consumer.offsets_for_times(tpl)
+            detected_offset = real_offsets
+                              .to_h
+                              .fetch(name)
+                              .find { |p_data| p_data.partition == partition }
+
+            detected_offset&.offset || raise(Errors::InvalidTimeBasedOffsetError)
+          else
+            offset
+          end
+        end
+      end
+    end
+  end
+end
