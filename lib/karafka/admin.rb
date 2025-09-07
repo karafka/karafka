@@ -24,17 +24,6 @@ module Karafka
       admin_kafka: %i[admin kafka]
     )
 
-    # 2010-01-01 00:00:00 - way before Kafka was released so no messages should exist prior to
-    # this date
-    # We do not use the explicit -2 librdkafka value here because we resolve this offset without
-    # consuming data
-    LONG_TIME_AGO = Time.at(1_262_300_400)
-
-    # one day in seconds for future time reference
-    DAY_IN_SECONDS = 60 * 60 * 24
-
-    private_constant :LONG_TIME_AGO, :DAY_IN_SECONDS
-
     class << self
       # Delegate topic-related operations to Topics class
 
