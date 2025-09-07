@@ -1,20 +1,17 @@
 # frozen_string_literal: true
 
-# This code is part of Karafka Pro, a commercial component not licensed under LGPL.
-# See LICENSE for details.
-
 module Karafka
-  module Pro
+  class Cli
+    # CLI related contracts
     module Contracts
       # Contract for validating correctness of the server cli command options.
-      # It differs slightly from the OSS one because it is aware of the routing patterns
-      class ServerCliOptions < ::Karafka::Contracts::ServerCliOptions
+      class Server < ::Karafka::Contracts::Base
         configure do |config|
           config.error_messages = YAML.safe_load(
             File.read(
               File.join(Karafka.gem_root, 'config', 'locales', 'errors.yml')
             )
-          ).fetch('en').fetch('validations').fetch('server_cli_options')
+          ).fetch('en').fetch('validations').fetch('cli').fetch('server')
         end
 
         %i[
@@ -78,11 +75,6 @@ module Karafka
                      .flatten
 
             next if (value - topics).empty?
-
-            # If there are any patterns defined, we cannot report on topics inclusions because
-            # topics may be added during boot or runtime. We go with simple assumption:
-            # if there are patterns defined, we do not check the inclusions at all
-            next unless Karafka::App.consumer_groups.map(&:patterns).flatten.empty?
 
             # Found unknown topics
             [[[:"#{action}_topics"], :topics_inclusion]]

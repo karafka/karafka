@@ -110,37 +110,38 @@ en:
       regexp_string_format: 'needs to be a string and start with ^'
       missing: needs to be present
 
-    config:
-      encryption.active_format: 'needs to be either true or false'
-      encryption.public_key_invalid: 'is not a valid public RSA key'
-      encryption.public_key_needs_to_be_public: 'is a private RSA key not a public one'
-      encryption.private_keys_format: 'needs to be a hash of version and private key value'
-      encryption.private_keys_need_to_be_private: 'all keys need to be private'
-      encryption.version_format: must be a non-empty string
-      encryption.public_key_format: 'is not a valid public RSA key'
-      encryption.private_keys_invalid: 'contains an invalid private RSA key string'
-      encryption.fingerprinter_missing: 'needs to be false or respond to #hexdigest method'
-      encryption.fingerprinter_format: 'needs to be false or respond to #hexdigest method'
+    setup:
+      config:
+        encryption.active_format: 'needs to be either true or false'
+        encryption.public_key_invalid: 'is not a valid public RSA key'
+        encryption.public_key_needs_to_be_public: 'is a private RSA key not a public one'
+        encryption.private_keys_format: 'needs to be a hash of version and private key value'
+        encryption.private_keys_need_to_be_private: 'all keys need to be private'
+        encryption.version_format: must be a non-empty string
+        encryption.public_key_format: 'is not a valid public RSA key'
+        encryption.private_keys_invalid: 'contains an invalid private RSA key string'
+        encryption.fingerprinter_missing: 'needs to be false or respond to #hexdigest method'
+        encryption.fingerprinter_format: 'needs to be false or respond to #hexdigest method'
 
-      patterns.ttl_format: needs to be an integer bigger than 0
-      patterns.ttl_missing: needs to be present
+        patterns.ttl_format: needs to be an integer bigger than 0
+        patterns.ttl_missing: needs to be present
 
-      recurring_tasks.consumer_class_format: 'needs to inherit from Karafka::BaseConsumer'
-      recurring_tasks.group_id_format: 'needs to be a string with a Kafka accepted format'
-      recurring_tasks.topics.schedules.name_format: 'needs to be a string with a Kafka accepted format'
-      recurring_tasks.topics.logs.name_format: 'needs to be a string with a Kafka accepted format'
-      recurring_tasks.interval_format: 'needs to be equal or more than 1000 and an integer'
-      recurring_tasks.deserializer_format: 'needs to be configured'
-      recurring_tasks.logging_format: needs to be a boolean
+        recurring_tasks.consumer_class_format: 'needs to inherit from Karafka::BaseConsumer'
+        recurring_tasks.group_id_format: 'needs to be a string with a Kafka accepted format'
+        recurring_tasks.topics.schedules.name_format: 'needs to be a string with a Kafka accepted format'
+        recurring_tasks.topics.logs.name_format: 'needs to be a string with a Kafka accepted format'
+        recurring_tasks.interval_format: 'needs to be equal or more than 1000 and an integer'
+        recurring_tasks.deserializer_format: 'needs to be configured'
+        recurring_tasks.logging_format: needs to be a boolean
 
-      scheduled_messages.consumer_class_format: 'must be a class'
-      scheduled_messages.dispatcher_class_format: 'must be a class'
-      scheduled_messages.flush_batch_size_format: needs to be an integer bigger than 0
-      scheduled_messages.interval_format: needs to be an integer bigger or equal to 1000
-      scheduled_messages.deserializers.headers_format: cannot be nil
-      scheduled_messages.deserializers.payload_format: cannot be nil
-      scheduled_messages.group_id_format: 'needs to be a string with a Kafka accepted format'
-      scheduled_messages.states_postfix_format: 'needs to be a string with a Kafka accepted format'
+        scheduled_messages.consumer_class_format: 'must be a class'
+        scheduled_messages.dispatcher_class_format: 'must be a class'
+        scheduled_messages.flush_batch_size_format: needs to be an integer bigger than 0
+        scheduled_messages.interval_format: needs to be an integer bigger or equal to 1000
+        scheduled_messages.deserializers.headers_format: cannot be nil
+        scheduled_messages.deserializers.payload_format: cannot be nil
+        scheduled_messages.group_id_format: 'needs to be a string with a Kafka accepted format'
+        scheduled_messages.states_postfix_format: 'needs to be a string with a Kafka accepted format'
 
     recurring_tasks:
       id_format: 'can include only alphanumeric characters (a-z, A-Z, 0-9), hyphens (-), and underscores (_)'
