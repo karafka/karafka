@@ -90,12 +90,13 @@ en:
         swarm.nodes_format: 'needs to be an integer bigger than 0'
         swarm.node_format: needs to be false or node instance
 
-    server_cli_options:
-      missing: needs to be present
-      consumer_groups_inclusion: Unknown consumer group name
-      subscription_groups_inclusion: Unknown subscription group name
-      topics_inclusion: Unknown topic name
-      topics_missing: No topics to subscribe to
+    cli:
+      server:
+        missing: needs to be present
+        consumer_groups_inclusion: Unknown consumer group name
+        subscription_groups_inclusion: Unknown subscription group name
+        topics_inclusion: Unknown topic name
+        topics_missing: No topics to subscribe to
 
     routing:
       without_declarative_definition: lacks explicit declarative topics definition

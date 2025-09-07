@@ -87,7 +87,7 @@ module Karafka
         def reconfigure(config)
           icfg = config.internal
 
-          icfg.cli.contract = Contracts::ServerCliOptions.new
+          icfg.cli.contract = Cli::Contracts::Server.new
 
           # Use manager that supports multiplexing
           icfg.connection.manager = Connection::Manager.new

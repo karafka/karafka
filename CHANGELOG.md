@@ -16,6 +16,7 @@
 - [Refactoring] Comprehensive Admin module refactoring: Extract topic operations into Admin::Topics class and consumer group operations into Admin::ConsumerGroups class with proper inheritance hierarchy, cross-class method usage optimization, and constants moved to appropriate locations where they are actually used.
 - [Refactoring] Move routing-related contracts from `Karafka::Contracts::` to `Karafka::Routing::Contracts::` namespace and reorganize error message structure in YAML files under `routing:` scope for better code organization and logical grouping.
 - [Refactoring] Move config-related contracts from `Karafka::Contracts::Config` to `Karafka::Setup::Contracts::Config` namespace and reorganize error message structure in YAML files under `setup:` scope for better code organization and logical grouping.
+- [Refactoring] Move CLI server contracts from `Karafka::Contracts::ServerCliOptions` to `Karafka::Cli::Contracts::Server` namespace and reorganize error message structure in YAML files under `cli:` scope for improved naming consistency and logical grouping.
 - [Fix] Improve same timestamp dispatch in scheduled messages on Ruby 3.2.
 - [Fix] Fix incorrect (6 seconds vs 60 seconds) reset of connections on non-recoverable errors.
 - [Fix] Introduce mutex-safe and thread-safe `#inspect` where needed.
