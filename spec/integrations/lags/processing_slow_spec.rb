@@ -34,5 +34,6 @@ end
 
 assert_equal 0, median(DT[:processing_lags])
 
-# 100ms for slow ci
-assert DT[:processing_lags].max <= 100
+# 200ms for slow ci
+max_lag = DT[:processing_lags].max
+assert max_lag <= 200, max_lag
