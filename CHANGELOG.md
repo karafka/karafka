@@ -22,6 +22,7 @@
 - [Fix] Introduce mutex-safe and thread-safe `#inspect` where needed.
 - [Fix] Fix too loose requirement of Ruby `3.0` when it was `3.1` via transitive dependencies.
 - [Fix] Fix Pro Cleaner Messages compatibility with external libraries that prepend modules to `#each` method (e.g., DataDog tracing).
+- [Fix] SG exclusion in swarm triggers a contract validation error.
 - [Change] Require `karafka-rdkafka` `>=` `0.21.0` to support new features.
 - [Change] Remove no longer needed `cooperative.sticky` rebalance patch.
 - [Change] Normalize how libs and deps are required (no functional change for the end user)
