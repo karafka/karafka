@@ -46,10 +46,16 @@ module Karafka
         # embedded
         # We cannot validate this during the start because config needs to be populated and routes
         # need to be defined.
-        cli_contract.validate!(
-          activity_manager.to_h,
-          scope: %w[cli]
-        )
+        #
+        # We do not validate in swarm because in swarm it is the supervisor that should validate
+        # this. After the supervisor validation some of the internal states like SGs availability
+        # may fail, so double validation may crash
+        if execution_mode != :swarm
+          cli_contract.validate!(
+            activity_manager.to_h,
+            scope: %w[cli]
+          )
+        end
 
         # We clear as we do not want parent handlers in case of working from fork
         process.clear
