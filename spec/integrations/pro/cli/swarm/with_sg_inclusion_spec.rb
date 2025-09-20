@@ -52,15 +52,14 @@ produce_many(DT.topics[2], DT.uuids(5))
 
 thread = Thread.new { Karafka::Cli.start }
 
-consumed = []
-2.times do
-  consumed << READER.gets.strip
-rescue Errno::EIO
-  break
+consumed = Set.new
+while consumed.size < 2
+  begin
+    consumed << READER.gets.strip
+  rescue Errno::EIO
+    break
+  end
 end
-
-# Give it more time to process messages
-sleep(1)
 
 ::Process.kill('QUIT', ::Process.pid)
 thread.join
