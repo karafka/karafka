@@ -22,6 +22,8 @@ module Karafka
         assign
       ].freeze
 
+      private_constant :MODES
+
       # @param mode [Symbol] initial connection mode (defaults to :subscribe)
       # @raise [ArgumentError] when invalid mode is provided
       def initialize(mode = :subscribe)

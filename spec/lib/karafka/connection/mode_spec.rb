@@ -50,7 +50,8 @@ RSpec.describe Karafka::Connection::Mode do
           end
 
           it 'returns false for other modes' do
-            (described_class::MODES - [mode_name]).each do |other_mode|
+            other_modes = %i[subscribe assign] - [mode_name]
+            other_modes.each do |other_mode|
               expect(mode_instance.send("#{other_mode}?")).to be(false)
             end
           end

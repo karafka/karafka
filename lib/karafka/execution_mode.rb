@@ -23,6 +23,8 @@ module Karafka
       swarm
     ].freeze
 
+    private_constant :MODES
+
     # @param mode [Symbol] initial execution mode (defaults to :standalone)
     # @raise [ArgumentError] when invalid mode is provided
     def initialize(mode = :standalone)
