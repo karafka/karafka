@@ -17,7 +17,7 @@
 - [Refactoring] Move routing-related contracts from `Karafka::Contracts::` to `Karafka::Routing::Contracts::` namespace and reorganize error message structure in YAML files under `routing:` scope for better code organization and logical grouping.
 - [Refactoring] Move config-related contracts from `Karafka::Contracts::Config` to `Karafka::Setup::Contracts::Config` namespace and reorganize error message structure in YAML files under `setup:` scope for better code organization and logical grouping.
 - [Refactoring] Move CLI server contracts from `Karafka::Contracts::ServerCliOptions` to `Karafka::Cli::Contracts::Server` namespace and reorganize error message structure in YAML files under `cli:` scope for improved naming consistency and logical grouping.
-- [Refactoring] Replace execution mode symbol-based checks with dedicated `ExecutionMode` class providing cleaner API with query methods (`#swarm?`, `#embedded?`) and state change methods (`#swarm!`, `#embedded!`) for improved type safety and code clarity.
+- [Refactoring] Replace execution mode symbol-based checks with dedicated `ExecutionMode` class providing cleaner API with query methods (`#swarm?`, `#embedded?`) and state change methods (`#swarm!`, `#embedded!`) for improved type safety and code clarity. The class includes backward compatibility support for symbol and string comparisons (`execution_mode == 'standalone'`) to ensure seamless migration.
 - [Fix] Improve same timestamp dispatch in scheduled messages on Ruby 3.2.
 - [Fix] Fix incorrect (6 seconds vs 60 seconds) reset of connections on non-recoverable errors.
 - [Fix] Introduce mutex-safe and thread-safe `#inspect` where needed.

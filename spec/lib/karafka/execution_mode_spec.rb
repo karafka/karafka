@@ -127,4 +127,67 @@ RSpec.describe Karafka::ExecutionMode do
       expect(execution_mode.standalone?).to be(true)
     end
   end
+
+  describe '#==' do
+    context 'when comparing with symbols' do
+      it 'returns true when mode matches' do
+        expect(execution_mode == :standalone).to be(true)
+      end
+
+      it 'returns false when mode does not match' do
+        expect(execution_mode == :embedded).to be(false)
+      end
+    end
+
+    context 'when comparing with strings' do
+      it 'returns true when mode matches' do
+        expect(execution_mode == 'standalone').to be(true)
+      end
+
+      it 'returns false when mode does not match' do
+        expect(execution_mode == 'embedded').to be(false)
+      end
+    end
+
+    context 'when comparing with another ExecutionMode' do
+      let(:other_mode) { described_class.new(:standalone) }
+
+      it 'returns true when modes match' do
+        expect(execution_mode == other_mode).to be(true)
+      end
+
+      it 'returns false when modes do not match' do
+        other_mode.embedded!
+        expect(execution_mode == other_mode).to be(false)
+      end
+    end
+
+    context 'when comparing with other types' do
+      it 'returns false for nil' do
+        expect(execution_mode.nil?).to be(false)
+      end
+
+      it 'returns false for numbers' do
+        expect(execution_mode == 123).to be(false)
+      end
+
+      it 'returns false for arrays' do
+        expect(execution_mode == [:standalone]).to be(false)
+      end
+    end
+
+    context 'when mode is changed' do
+      it 'comparison reflects the new mode' do
+        expect(execution_mode == :standalone).to be(true)
+        expect(execution_mode == 'standalone').to be(true)
+
+        execution_mode.swarm!
+
+        expect(execution_mode == :swarm).to be(true)
+        expect(execution_mode == 'swarm').to be(true)
+        expect(execution_mode == :standalone).to be(false)
+        expect(execution_mode == 'standalone').to be(false)
+      end
+    end
+  end
 end
