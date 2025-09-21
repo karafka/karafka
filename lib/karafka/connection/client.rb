@@ -74,6 +74,8 @@ module Karafka
         @rebalance_manager = RebalanceManager.new(@subscription_group.id, @buffer)
         @rebalance_callback = Instrumentation::Callbacks::Rebalance.new(@subscription_group, id)
 
+        @mode = Mode.new
+
         @interval_runner = Helpers::IntervalRunner.new do
           events_poll
           # events poller returns nil when not running often enough, hence we don't use the
@@ -746,10 +748,10 @@ module Karafka
 
         if subscriptions
           consumer.subscribe(*subscriptions)
-          @mode = :subscribe
+          @mode.subscribe!
         elsif assignments
           consumer.assign(assignments)
-          @mode = :assign
+          @mode.assign!
         end
 
         consumer
@@ -779,7 +781,7 @@ module Karafka
       def unsubscribe?
         return false if @unsubscribing
         return false if @subscription_group.kafka.key?(:'group.instance.id')
-        return false if @mode != :subscribe
+        return false unless @mode.subscribe?
         return false if assignment.empty?
 
         true
