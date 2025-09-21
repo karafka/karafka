@@ -105,7 +105,7 @@ module Karafka
           Karafka::Process.tags.add(:execution_mode, 'mode:swarm')
           Karafka::Process.tags.add(:swarm_nodeid, "node:#{@id}")
 
-          Server.execution_mode = :swarm
+          Server.execution_mode.swarm!
           Server.run
 
           @writer.close

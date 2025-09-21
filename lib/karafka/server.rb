@@ -50,7 +50,7 @@ module Karafka
         # We do not validate in swarm because in swarm it is the supervisor that should validate
         # this. After the supervisor validation some of the internal states like SGs availability
         # may fail, so double validation may crash
-        if execution_mode != :swarm
+        unless execution_mode.swarm?
           cli_contract.validate!(
             activity_manager.to_h,
             scope: %w[cli]
@@ -188,7 +188,7 @@ module Karafka
     # Always start with standalone so there always is a value for the execution mode.
     # This is overwritten quickly during boot, but just in case someone would reach it prior to
     # booting, we want to have the default value.
-    self.execution_mode = :standalone
+    self.execution_mode = ExecutionMode.new(:standalone)
 
     self.id = SecureRandom.hex(6)
   end

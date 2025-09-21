@@ -23,7 +23,7 @@ module Karafka
         server.register_inclusions
         server.register_exclusions
 
-        Karafka::Server.execution_mode = :supervisor
+        Karafka::Server.execution_mode.supervisor!
         Karafka::Swarm::Supervisor.new.run
       end
     end
