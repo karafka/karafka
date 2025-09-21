@@ -28,7 +28,7 @@ module Karafka
         self.mode = mode
       end
 
-      # Define query and setter methods for each mode using metaprogramming
+      # Define query and setter methods for each mode using meta-programming
       # This creates methods like: subscribe?, assign?
       # And bang methods like: subscribe!, assign!
       MODES.each do |mode_name|
