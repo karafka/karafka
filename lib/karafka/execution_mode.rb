@@ -62,11 +62,12 @@ module Karafka
     def mode=(new_mode)
       if MODES.include?(new_mode)
         @mode = new_mode
-
-        return
+      else
+        raise(
+          ArgumentError,
+          "Invalid execution mode: #{new_mode}. Valid modes: #{MODES.join(', ')}"
+        )
       end
-
-      raise ArgumentError, "Invalid execution mode: #{new_mode}. Valid modes: #{MODES.join(', ')}"
     end
   end
 end
