@@ -32,7 +32,7 @@ RSpec.describe_current do
   describe '#create' do
     subject(:creation) do
       ref = described_class.create(acl)
-      sleep(0.2)
+      sleep(0.3)
       ref
     end
 
@@ -74,7 +74,7 @@ RSpec.describe_current do
     subject(:deletion) do
       ref = described_class.delete(acl)
       # This is needed as those operations are async
-      sleep(0.2)
+      sleep(0.3)
       ref
     end
 
@@ -183,7 +183,7 @@ RSpec.describe_current do
       # We wait before describing because in most of the specs we setup some ACLs and their
       # propagation can take a bit of time
       # This improves stability on slow CIs
-      sleep(0.1)
+      sleep(0.3)
       described_class.describe(acl)
     end
 
@@ -267,7 +267,7 @@ RSpec.describe_current do
     subject(:all) do
       # On slow CI first fetch after ACL sync may not be immediately propagated
       # We give it a bit of time to ensure we can sync up most recent full state
-      sleep(0.1)
+      sleep(0.3)
       described_class.all
     end
 
