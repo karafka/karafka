@@ -50,7 +50,8 @@ RSpec.describe Karafka::ExecutionMode do
           end
 
           it 'returns false for other modes' do
-            (described_class::MODES - [mode_name]).each do |other_mode|
+            other_modes = %i[standalone embedded supervisor swarm] - [mode_name]
+            other_modes.each do |other_mode|
               expect(execution_mode.send("#{other_mode}?")).to be(false)
             end
           end
