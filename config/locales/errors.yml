@@ -1,146 +1,102 @@
 en:
   validations:
-    config:
-      license.entity_format: needs to be a string
-      license.token_format: needs to be either false or a string
-      license.expires_on_format: needs to be a valid date
+    setup:
+      config:
+        license.entity_format: needs to be a string
+        license.token_format: needs to be either false or a string
+        license.expires_on_format: needs to be a valid date
 
-      missing: needs to be present
-      client_id_format: 'needs to be a string with a Kafka accepted format'
-      group_id_format: 'needs to be a string with a Kafka accepted format'
-      concurrency_format: needs to be an integer bigger than 0
-      consumer_persistence_format: needs to be either true or false
-      pause_timeout_format: needs to be an integer bigger than 0
-      pause_max_timeout_format: needs to be an integer bigger than 0
-      pause_with_exponential_backoff_format: needs to be either true or false
-      strict_topics_namespacing_format: needs to be either true or false
-      strict_declarative_topics_format: needs to be either true or false
-      shutdown_timeout_format: needs to be an integer bigger than 0
-      max_wait_time_format: needs to be an integer bigger than 0
-      max_wait_time_max_wait_time_vs_swarm_node_report_timeout: >
-        cannot be more than 80% of internal.swarm.node_report_timeout.
-        Decrease max_wait_time or increase node_report_timeout
-      kafka_format: needs to be a filled hash
-      key_must_be_a_symbol: All keys under the kafka settings scope need to be symbols
-      max_timeout_vs_pause_max_timeout: pause_timeout must be less or equal to pause_max_timeout
-      shutdown_timeout_vs_max_wait_time: shutdown_timeout must be more than max_wait_time
-      worker_thread_priority_format: must be between -3 and 3
+        missing: needs to be present
+        client_id_format: 'needs to be a string with a Kafka accepted format'
+        group_id_format: 'needs to be a string with a Kafka accepted format'
+        concurrency_format: needs to be an integer bigger than 0
+        consumer_persistence_format: needs to be either true or false
+        pause_timeout_format: needs to be an integer bigger than 0
+        pause_max_timeout_format: needs to be an integer bigger than 0
+        pause_with_exponential_backoff_format: needs to be either true or false
+        strict_topics_namespacing_format: needs to be either true or false
+        strict_declarative_topics_format: needs to be either true or false
+        shutdown_timeout_format: needs to be an integer bigger than 0
+        max_wait_time_format: needs to be an integer bigger than 0
+        max_wait_time_max_wait_time_vs_swarm_node_report_timeout: >
+          cannot be more than 80% of internal.swarm.node_report_timeout.
+          Decrease max_wait_time or increase node_report_timeout
+        kafka_format: needs to be a filled hash
+        key_must_be_a_symbol: All keys under the kafka settings scope need to be symbols
+        max_timeout_vs_pause_max_timeout: pause_timeout must be less or equal to pause_max_timeout
+        shutdown_timeout_vs_max_wait_time: shutdown_timeout must be more than max_wait_time
+        worker_thread_priority_format: must be between -3 and 3
 
-      oauth.token_provider_listener_format: 'must be false or respond to #on_oauthbearer_token_refresh'
+        oauth.token_provider_listener_format: 'must be false or respond to #on_oauthbearer_token_refresh'
 
-      internal.processing.jobs_builder_format: cannot be nil
-      internal.processing.jobs_queue_class_format: cannot be nil
-      internal.processing.scheduler_class_format: cannot be nil
-      internal.processing.coordinator_class_format: cannot be nil
-      internal.processing.partitioner_class_format: cannot be nil
-      internal.processing.strategy_selector_format: cannot be nil
-      internal.processing.expansions_selector_format: cannot be nil
-      internal.processing.executor_class_format: cannot be nil
-      internal.processing.worker_job_call_wrapper_format: 'needs to be false or respond to #wrap'
-      internal.processing.errors_tracker_class_format: 'needs to be nil or a class'
+        internal.processing.jobs_builder_format: cannot be nil
+        internal.processing.jobs_queue_class_format: cannot be nil
+        internal.processing.scheduler_class_format: cannot be nil
+        internal.processing.coordinator_class_format: cannot be nil
+        internal.processing.partitioner_class_format: cannot be nil
+        internal.processing.strategy_selector_format: cannot be nil
+        internal.processing.expansions_selector_format: cannot be nil
+        internal.processing.executor_class_format: cannot be nil
+        internal.processing.worker_job_call_wrapper_format: 'needs to be false or respond to #wrap'
+        internal.processing.errors_tracker_class_format: 'needs to be nil or a class'
 
-      internal.active_job.dispatcher_format: cannot be nil
-      internal.active_job.job_options_contract_format: cannot be nil
-      internal.active_job.consumer_class_format: cannot be nil
+        internal.active_job.dispatcher_format: cannot be nil
+        internal.active_job.job_options_contract_format: cannot be nil
+        internal.active_job.consumer_class_format: cannot be nil
 
-      internal.status_format: needs to be present
-      internal.process_format: needs to be present
-      internal.tick_interval_format: needs to be an integer bigger or equal to 1000
-      internal.supervision_sleep_format: needs to be an integer bigger than 0
-      internal.forceful_exit_code_format: needs to be an integer bigger or equal to 0
-      internal.forceful_shutdown_wait_format: needs to be an integer bigger or equal to 0
+        internal.status_format: needs to be present
+        internal.process_format: needs to be present
+        internal.tick_interval_format: needs to be an integer bigger or equal to 1000
+        internal.supervision_sleep_format: needs to be an integer bigger than 0
+        internal.forceful_exit_code_format: needs to be an integer bigger or equal to 0
+        internal.forceful_shutdown_wait_format: needs to be an integer bigger or equal to 0
 
-      internal.routing.builder_format: needs to be present
-      internal.routing.subscription_groups_builder_format: needs to be present
+        internal.routing.builder_format: needs to be present
+        internal.routing.subscription_groups_builder_format: needs to be present
 
-      internal.connection.manager_format: needs to be present
-      internal.connection.conductor_format: needs to be present
-      internal.connection.reset_backoff_format: needs to be an integer bigger or equal to 1000
-      internal.connection.proxy.query_watermark_offsets.timeout_format: needs to be an integer bigger than 0
-      internal.connection.proxy.query_watermark_offsets.max_attempts_format: needs to be an integer bigger than 0
-      internal.connection.proxy.query_watermark_offsets.wait_time_format: needs to be an integer bigger than 0
-      internal.connection.proxy.offsets_for_times.timeout_format: needs to be an integer bigger than 0
-      internal.connection.proxy.offsets_for_times.max_attempts_format: needs to be an integer bigger than 0
-      internal.connection.proxy.offsets_for_times.wait_time_format: needs to be an integer bigger than 0
-      internal.connection.proxy.committed.timeout_format: needs to be an integer bigger than 0
-      internal.connection.proxy.committed.max_attempts_format: needs to be an integer bigger than 0
-      internal.connection.proxy.committed.wait_time_format: needs to be an integer bigger than 0
-      internal.connection.proxy.commit.max_attempts_format: needs to be an integer bigger than 0
-      internal.connection.proxy.commit.wait_time_format: needs to be an integer bigger than 0
-      internal.connection.proxy.metadata.timeout_format: needs to be an integer bigger than 0
-      internal.connection.proxy.metadata.max_attempts_format: needs to be an integer bigger than 0
-      internal.connection.proxy.metadata.wait_time_format: needs to be an integer bigger than 0
-      internal.connection.listener_thread_priority_format: must be between -3 and 3
+        internal.connection.manager_format: needs to be present
+        internal.connection.conductor_format: needs to be present
+        internal.connection.reset_backoff_format: needs to be an integer bigger or equal to 1000
+        internal.connection.proxy.query_watermark_offsets.timeout_format: needs to be an integer bigger than 0
+        internal.connection.proxy.query_watermark_offsets.max_attempts_format: needs to be an integer bigger than 0
+        internal.connection.proxy.query_watermark_offsets.wait_time_format: needs to be an integer bigger than 0
+        internal.connection.proxy.offsets_for_times.timeout_format: needs to be an integer bigger than 0
+        internal.connection.proxy.offsets_for_times.max_attempts_format: needs to be an integer bigger than 0
+        internal.connection.proxy.offsets_for_times.wait_time_format: needs to be an integer bigger than 0
+        internal.connection.proxy.committed.timeout_format: needs to be an integer bigger than 0
+        internal.connection.proxy.committed.max_attempts_format: needs to be an integer bigger than 0
+        internal.connection.proxy.committed.wait_time_format: needs to be an integer bigger than 0
+        internal.connection.proxy.commit.max_attempts_format: needs to be an integer bigger than 0
+        internal.connection.proxy.commit.wait_time_format: needs to be an integer bigger than 0
+        internal.connection.proxy.metadata.timeout_format: needs to be an integer bigger than 0
+        internal.connection.proxy.metadata.max_attempts_format: needs to be an integer bigger than 0
+        internal.connection.proxy.metadata.wait_time_format: needs to be an integer bigger than 0
+        internal.connection.listener_thread_priority_format: must be between -3 and 3
 
-      internal.swarm.manager_format: cannot be nil
-      internal.swarm.orphaned_exit_code_format: needs to be an integer bigger or equal to 0
-      internal.swarm.supervision_interval_format: needs to be an integer bigger or equal to 1000
-      internal.swarm.liveness_interval_format: needs to be an integer bigger or equal to 1000
-      internal.swarm.liveness_listener_format: cannot be nil
-      internal.swarm.node_report_timeout_format: needs to be an integer bigger or equal to 1000
-      internal.swarm.node_restart_timeout_format: needs to be an integer bigger or equal to 1000
+        internal.swarm.manager_format: cannot be nil
+        internal.swarm.orphaned_exit_code_format: needs to be an integer bigger or equal to 0
+        internal.swarm.supervision_interval_format: needs to be an integer bigger or equal to 1000
+        internal.swarm.liveness_interval_format: needs to be an integer bigger or equal to 1000
+        internal.swarm.liveness_listener_format: cannot be nil
+        internal.swarm.node_report_timeout_format: needs to be an integer bigger or equal to 1000
+        internal.swarm.node_restart_timeout_format: needs to be an integer bigger or equal to 1000
 
-      admin.kafka_format: needs to be a hash
-      admin.group_id_format: 'needs to be a string with a Kafka accepted format'
-      admin.max_wait_time_format: 'needs to be an integer bigger than 0'
-      admin.retry_backoff_format: 'needs to be an integer bigger than 100'
-      admin.max_retries_duration_format: 'needs to be an integer bigger than 1000'
+        admin.kafka_format: needs to be a hash
+        admin.group_id_format: 'needs to be a string with a Kafka accepted format'
+        admin.max_wait_time_format: 'needs to be an integer bigger than 0'
+        admin.retry_backoff_format: 'needs to be an integer bigger than 100'
+        admin.max_retries_duration_format: 'needs to be an integer bigger than 1000'
 
-      swarm.nodes_format: 'needs to be an integer bigger than 0'
-      swarm.node_format: needs to be false or node instance
+        swarm.nodes_format: 'needs to be an integer bigger than 0'
+        swarm.node_format: needs to be false or node instance
 
-    server_cli_options:
-      missing: needs to be present
-      consumer_groups_inclusion: Unknown consumer group name
-      subscription_groups_inclusion: Unknown subscription group name
-      topics_inclusion: Unknown topic name
-      topics_missing: No topics to subscribe to
-
-    topic:
-      kafka: needs to be a hash with kafka scope settings details
-      kafka_format: needs to be a filled hash
-      missing: needs to be present
-      max_messages_format: 'needs to be an integer bigger than 0'
-      max_wait_time_format: 'needs to be an integer bigger than 0'
-      name_format: 'needs to be a string with a Kafka accepted format'
-      deserializers_format: needs to be present
-      consumer_format: needs to be present
-      id_format: 'needs to be a string with a Kafka accepted format'
-      initial_offset_format: needs to be either earliest or latest
-      subscription_group_details.name_format: must be a non-empty string
-      manual_offset_management.active_format: needs to be either true or false
-      manual_offset_management_must_be_enabled: cannot be disabled for ActiveJob topics
-      inline_insights.active_format: needs to be either true or false
-      consumer_active_job_missing: ActiveJob needs to be available
-
-      dead_letter_queue.max_retries_format: needs to be equal or bigger than 0
-      dead_letter_queue.topic_format: 'needs to be a string with a Kafka accepted format'
-      dead_letter_queue.active_format: needs to be either true or false
-      dead_letter_queue.independent_format: needs to be either true or false
-      dead_letter_queue.transactional_format: needs to be either true or false
-      dead_letter_queue.dispatch_method_format: 'needs to be either #produce_sync or #produce_async'
-      dead_letter_queue.marking_method_format: 'needs to be either #mark_as_consumed or #mark_as_consumed!'
-      dead_letter_queue.mark_after_dispatch_format: 'needs to be true, false or nil'
-
-      active_format: needs to be either true or false
-
-      eofed.active_format: needs to be either true or false
-      eofed.kafka_enable: 'cannot be enabled without enable.partition.eof set to true'
-
-      declaratives.partitions_format: needs to be more or equal to 1
-      declaratives.active_format: needs to be true
-      declaratives.replication_factor_format: needs to be more or equal to 1
-      declaratives.details_format: needs to be a hash with only symbol keys
-
-      inconsistent_namespacing: |
-        needs to follow a consistent namespacing style using either dots (.) or underscores (_), but not both.
-        This ensures proper Kafka metrics reporting and avoids name collisions.
-        To disable this validation, set config.strict_topics_namespacing to false.
-
-      deserializers.active_format: 'needs to be true'
-      deserializers.payload_format: 'needs to respond to #call'
-      deserializers.key_format: 'needs to respond to #call'
-      deserializers.headers_format: 'needs to respond to #call'
+    cli:
+      server:
+        missing: needs to be present
+        consumer_groups_inclusion: Unknown consumer group name
+        subscription_groups_inclusion: Unknown subscription group name
+        topics_inclusion: Unknown topic name
+        topics_missing: No topics to subscribe to
 
     admin:
       replication:
@@ -156,18 +112,64 @@ en:
         duplicate_brokers_for_partition: partition has duplicate brokers
         invalid_brokers_for_partition: partition references non-existent brokers
 
-    consumer_group:
-      missing: needs to be present
-      topics_names_not_unique: all topic names within a single consumer group must be unique
-      topics_many_consumers_same_topic: 'topic within a single consumer group cannot have distinct consumers'
-      id_format: 'needs to be a string with a Kafka accepted format'
-      topics_format: needs to be a non-empty array
-      topics_namespaced_names_not_unique: |
-        all topic names within a single consumer group must be unique considering namespacing styles
-        disable this validation by setting config.strict_topics_namespacing to false
-
     routing:
       without_declarative_definition: lacks explicit declarative topics definition
+
+      topic:
+        kafka: needs to be a hash with kafka scope settings details
+        kafka_format: needs to be a filled hash
+        missing: needs to be present
+        max_messages_format: 'needs to be an integer bigger than 0'
+        max_wait_time_format: 'needs to be an integer bigger than 0'
+        name_format: 'needs to be a string with a Kafka accepted format'
+        deserializers_format: needs to be present
+        consumer_format: needs to be present
+        id_format: 'needs to be a string with a Kafka accepted format'
+        initial_offset_format: needs to be either earliest or latest
+        subscription_group_details.name_format: must be a non-empty string
+        manual_offset_management.active_format: needs to be either true or false
+        manual_offset_management_must_be_enabled: cannot be disabled for ActiveJob topics
+        inline_insights.active_format: needs to be either true or false
+        consumer_active_job_missing: ActiveJob needs to be available
+
+        dead_letter_queue.max_retries_format: needs to be equal or bigger than 0
+        dead_letter_queue.topic_format: 'needs to be a string with a Kafka accepted format'
+        dead_letter_queue.active_format: needs to be either true or false
+        dead_letter_queue.independent_format: needs to be either true or false
+        dead_letter_queue.transactional_format: needs to be either true or false
+        dead_letter_queue.dispatch_method_format: 'needs to be either #produce_sync or #produce_async'
+        dead_letter_queue.marking_method_format: 'needs to be either #mark_as_consumed or #mark_as_consumed!'
+        dead_letter_queue.mark_after_dispatch_format: 'needs to be true, false or nil'
+
+        active_format: needs to be either true or false
+
+        eofed.active_format: needs to be either true or false
+        eofed.kafka_enable: 'cannot be enabled without enable.partition.eof set to true'
+
+        declaratives.partitions_format: needs to be more or equal to 1
+        declaratives.active_format: needs to be true
+        declaratives.replication_factor_format: needs to be more or equal to 1
+        declaratives.details_format: needs to be a hash with only symbol keys
+
+        inconsistent_namespacing: |
+          needs to follow a consistent namespacing style using either dots (.) or underscores (_), but not both.
+          This ensures proper Kafka metrics reporting and avoids name collisions.
+          To disable this validation, set config.strict_topics_namespacing to false.
+
+        deserializers.active_format: 'needs to be true'
+        deserializers.payload_format: 'needs to respond to #call'
+        deserializers.key_format: 'needs to respond to #call'
+        deserializers.headers_format: 'needs to respond to #call'
+
+      consumer_group:
+        missing: needs to be present
+        topics_names_not_unique: all topic names within a single consumer group must be unique
+        topics_many_consumers_same_topic: 'topic within a single consumer group cannot have distinct consumers'
+        id_format: 'needs to be a string with a Kafka accepted format'
+        topics_format: needs to be a non-empty array
+        topics_namespaced_names_not_unique: |
+          all topic names within a single consumer group must be unique considering namespacing styles
+          disable this validation by setting config.strict_topics_namespacing to false
 
     job_options:
       missing: needs to be present

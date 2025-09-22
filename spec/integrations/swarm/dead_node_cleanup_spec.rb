@@ -14,7 +14,7 @@ pids = []
 
 Karafka::App.monitor.subscribe('swarm.manager.after_fork') do |event|
   pids << event[:node].pid
-  DT[:execution_mode] = Karafka::Server.execution_mode
+  DT[:execution_mode] = Karafka::Server.execution_mode.to_sym
 end
 
 READER, WRITER = IO.pipe

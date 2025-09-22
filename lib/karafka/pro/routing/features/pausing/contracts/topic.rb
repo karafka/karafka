@@ -17,7 +17,7 @@ module Karafka
                   File.read(
                     File.join(Karafka.gem_root, 'config', 'locales', 'pro_errors.yml')
                   )
-                ).fetch('en').fetch('validations').fetch('topic')
+                ).fetch('en').fetch('validations').fetch('routing').fetch('topic')
 
                 required(:pause_timeout) { |val| val.is_a?(Integer) && val.positive? }
                 required(:pause_max_timeout) { |val| val.is_a?(Integer) && val.positive? }

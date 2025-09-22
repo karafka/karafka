@@ -14,11 +14,16 @@
 - [Enhancement] Disable Nagle algorithm by default for improved network performance.
 - [Maintenance] Add basic direct DD integration spec via DD gem karafka monitoring feature.
 - [Refactoring] Comprehensive Admin module refactoring: Extract topic operations into Admin::Topics class and consumer group operations into Admin::ConsumerGroups class with proper inheritance hierarchy, cross-class method usage optimization, and constants moved to appropriate locations where they are actually used.
+- [Refactoring] Move routing-related contracts from `Karafka::Contracts::` to `Karafka::Routing::Contracts::` namespace and reorganize error message structure in YAML files under `routing:` scope for better code organization and logical grouping.
+- [Refactoring] Move config-related contracts from `Karafka::Contracts::Config` to `Karafka::Setup::Contracts::Config` namespace and reorganize error message structure in YAML files under `setup:` scope for better code organization and logical grouping.
+- [Refactoring] Move CLI server contracts from `Karafka::Contracts::ServerCliOptions` to `Karafka::Cli::Contracts::Server` namespace and reorganize error message structure in YAML files under `cli:` scope for improved naming consistency and logical grouping.
+- [Refactoring] Replace execution mode symbol-based checks with dedicated `ExecutionMode` class providing cleaner API with query methods (`#swarm?`, `#embedded?`) and state change methods (`#swarm!`, `#embedded!`) for improved type safety and code clarity. The class includes backward compatibility support for symbol and string comparisons (`execution_mode == 'standalone'`) to ensure seamless migration.
 - [Fix] Improve same timestamp dispatch in scheduled messages on Ruby 3.2.
 - [Fix] Fix incorrect (6 seconds vs 60 seconds) reset of connections on non-recoverable errors.
 - [Fix] Introduce mutex-safe and thread-safe `#inspect` where needed.
 - [Fix] Fix too loose requirement of Ruby `3.0` when it was `3.1` via transitive dependencies.
 - [Fix] Fix Pro Cleaner Messages compatibility with external libraries that prepend modules to `#each` method (e.g., DataDog tracing).
+- [Fix] SG exclusion in swarm triggers a contract validation error.
 - [Change] Require `karafka-rdkafka` `>=` `0.21.0` to support new features.
 - [Change] Remove no longer needed `cooperative.sticky` rebalance patch.
 - [Change] Normalize how libs and deps are required (no functional change for the end user)

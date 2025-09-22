@@ -53,23 +53,23 @@ class Consumer < Karafka::BaseConsumer
     DT[4] = per_message_clean_status
 
     # Verify all messages were cleaned using both methods
-    cleaned_count = 0
-    cleaned_flags = []
+    @cleaned_count ||= 0
+    @cleaned_flags ||= []
 
     messages.to_a.each do |message|
       # Check cleaned? flag (more direct)
-      cleaned_flags << message.cleaned?
+      @cleaned_flags << message.cleaned?
 
       # Also verify by attempting to access payload (existing method)
       begin
         message.payload
       rescue Karafka::Pro::Cleaner::Errors::MessageCleanedError
-        cleaned_count += 1
+        @cleaned_count += 1
       end
     end
 
-    DT[2] = cleaned_count
-    DT[3] = cleaned_flags
+    DT[2] = @cleaned_count
+    DT[3] = @cleaned_flags
   end
 end
 
@@ -79,7 +79,7 @@ elements = DT.uuids(5).map { |val| { val: val }.to_json }
 produce_many(DT.topic, elements)
 
 start_karafka_and_wait_until do
-  DT[1]&.size == 5
+  DT[1].size == 5
 end
 
 # Verify external instrumentation was called
