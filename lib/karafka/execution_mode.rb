@@ -57,6 +57,34 @@ module Karafka
       @mode
     end
 
+    # Compares the execution mode with another object.
+    # Supports comparison with symbols, strings, and other ExecutionMode instances
+    # for backward compatibility with existing code.
+    #
+    # @param other [Symbol, String, ExecutionMode] object to compare with
+    # @return [Boolean] true if the modes are equivalent
+    #
+    # @example Compare with symbol
+    #   execution_mode == :standalone #=> true
+    #
+    # @example Compare with string
+    #   execution_mode == 'standalone' #=> true
+    #
+    # @example Compare with another ExecutionMode
+    #   execution_mode == other_mode #=> true/false
+    def ==(other)
+      case other
+      when Symbol
+        @mode == other
+      when String
+        @mode.to_s == other
+      when ExecutionMode
+        @mode == other.to_sym
+      else
+        false
+      end
+    end
+
     private
 
     # @param new_mode [Symbol] the new execution mode to set
