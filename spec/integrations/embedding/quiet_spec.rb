@@ -6,7 +6,7 @@ setup_karafka
 
 class Consumer < Karafka::BaseConsumer
   def consume
-    DT[:execution_mode] = Karafka::Server.execution_mode
+    DT[:execution_mode] = Karafka::Server.execution_mode.to_sym
 
     messages.each do |message|
       DT[message.metadata.partition] << message.raw_payload

@@ -13,7 +13,7 @@ end
 
 class Consumer < Karafka::BaseConsumer
   def consume
-    DT[:execution_mode] = Karafka::Server.execution_mode
+    DT[:execution_mode] = Karafka::Server.execution_mode.to_sym
     DT[0] << true
   end
 end
