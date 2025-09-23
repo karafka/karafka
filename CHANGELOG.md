@@ -1,6 +1,7 @@
 # Karafka Framework Changelog
 
 ## 2.5.1 (Unreleased)
+- **[Breaking]** Remove Ruby 3.1 support according to EOL.
 - **[Feature]** Support Swarm mode on MacOS.
 - [Enhancement] Support past `dispatch_at` times with `jitter: 0` in the OSS Karafka to support ActiveJob continuation.
 - [Enhancement] Use direct topic dispatches when `dispatch_at` is used for past times to bypass Scheduled Messages flow.
@@ -25,6 +26,7 @@
 - [Fix] Fix too loose requirement of Ruby `3.0` when it was `3.1` via transitive dependencies.
 - [Fix] Fix Pro Cleaner Messages compatibility with external libraries that prepend modules to `#each` method (e.g., DataDog tracing).
 - [Fix] SG exclusion in swarm triggers a contract validation error.
+- [Change] Require `waterdrop` `>=` `2.8.8` to support new features.
 - [Change] Require `karafka-rdkafka` `>=` `0.21.0` to support new features.
 - [Change] Remove no longer needed `cooperative.sticky` rebalance patch.
 - [Change] Normalize how libs and deps are required (no functional change for the end user)

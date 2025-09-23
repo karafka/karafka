@@ -170,6 +170,12 @@ module Karafka
           # to dispatch state changes, etc
           Karafka::App.producer.close
 
+          # Closes the default connection pool (if used). If not used, will do nothing
+          # This ensures that if users have configured the default pool, it is closed correctly
+          #
+          # Custom pools need to be closed by users themselves
+          ::WaterDrop::ConnectionPool.shutdown
+
           Karafka::App.terminate!
         end
       end
