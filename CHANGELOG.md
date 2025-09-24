@@ -14,6 +14,7 @@
 - [Enhancement] Inherit from `ActiveJob::QueueAdapters::AbstractAdapter` when possible for ActiveJob base class.
 - [Enhancement] Disable Nagle algorithm by default for improved network performance.
 - [Maintenance] Add basic direct DD integration spec via DD gem karafka monitoring feature.
+- [Maintenance] Add integration specs for WaterDrop connection pool usage from within consumers.
 - [Refactoring] Comprehensive Admin module refactoring: Extract topic operations into Admin::Topics class and consumer group operations into Admin::ConsumerGroups class with proper inheritance hierarchy, cross-class method usage optimization, and constants moved to appropriate locations where they are actually used.
 - [Refactoring] Move routing-related contracts from `Karafka::Contracts::` to `Karafka::Routing::Contracts::` namespace and reorganize error message structure in YAML files under `routing:` scope for better code organization and logical grouping.
 - [Refactoring] Move config-related contracts from `Karafka::Contracts::Config` to `Karafka::Setup::Contracts::Config` namespace and reorganize error message structure in YAML files under `setup:` scope for better code organization and logical grouping.
@@ -26,7 +27,7 @@
 - [Fix] Fix too loose requirement of Ruby `3.0` when it was `3.1` via transitive dependencies.
 - [Fix] Fix Pro Cleaner Messages compatibility with external libraries that prepend modules to `#each` method (e.g., DataDog tracing).
 - [Fix] SG exclusion in swarm triggers a contract validation error.
-- [Change] Require `waterdrop` `>=` `2.8.8` to support new features.
+- [Change] Require `waterdrop` `>=` `2.8.9` to support new features.
 - [Change] Require `karafka-rdkafka` `>=` `0.21.0` to support new features.
 - [Change] Remove no longer needed `cooperative.sticky` rebalance patch.
 - [Change] Normalize how libs and deps are required (no functional change for the end user)
