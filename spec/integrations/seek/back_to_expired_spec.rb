@@ -51,7 +51,6 @@ offset = 0
   break if offset >= 199
 
   offset = Karafka::Admin.read_topic(DT.topic, 0, 1, SEEK_TIME).first.offset
-  p offset
   sleep(5)
 end
 
