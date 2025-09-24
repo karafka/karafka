@@ -44,9 +44,16 @@ offset = 0
 
 # Compacting may not kick in immediately, hence we have to wait for it
 # This can happen slowly especially on CI
-while offset < 199
+30.times do
+  break if offset >= 199
+
   offset = Karafka::Admin.read_topic(DT.topic, 0, 1, SEEK_TIME).first.offset
   sleep(5)
+end
+
+if offset < 199
+  puts offset
+  exit 1
 end
 
 start_karafka_and_wait_until do
