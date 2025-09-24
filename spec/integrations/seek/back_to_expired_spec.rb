@@ -35,9 +35,12 @@ draw_routes do
   end
 end
 
-100.times do
-  produce_many(DT.topic, DT.uuids(1), key: 'test')
-  produce_many(DT.topic, Array.new(1) { nil }, key: 'test')
+100.times do |i|
+  produce_many(DT.topic, DT.uuids(1), key: "test#{i}")
+end
+
+100.times do |i|
+  produce_many(DT.topic, Array.new(1) { nil }, key: "test#{i}")
 end
 
 offset = 0
@@ -48,6 +51,7 @@ offset = 0
   break if offset >= 199
 
   offset = Karafka::Admin.read_topic(DT.topic, 0, 1, SEEK_TIME).first.offset
+  p offset
   sleep(5)
 end
 
