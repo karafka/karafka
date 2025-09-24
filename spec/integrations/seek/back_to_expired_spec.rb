@@ -35,9 +35,9 @@ draw_routes do
   end
 end
 
-10.times do
-  produce_many(DT.topic, DT.uuids(10), key: 'test')
-  produce_many(DT.topic, Array.new(10) { nil }, key: 'test')
+100.times do
+  produce_many(DT.topic, DT.uuids(1), key: 'test')
+  produce_many(DT.topic, Array.new(1) { nil }, key: 'test')
 end
 
 offset = 0
