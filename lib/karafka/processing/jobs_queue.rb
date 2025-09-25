@@ -47,7 +47,7 @@ module Karafka
           # Initializes this semaphore from the mutex, so it is never auto-created
           # Since we always schedule a job before waiting using semaphores, there won't be any
           # concurrency problems
-          @semaphores[group_id] = RUBY_VERSION < '3.2' ? TimedQueue.new : Queue.new
+          @semaphores[group_id] = Queue.new
         end
       end
 
