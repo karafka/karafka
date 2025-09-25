@@ -36,7 +36,7 @@ module Karafka
 
       def initialize
         @mutex = Mutex.new
-        @queue = Processing::TimedQueue.new
+        @queue = Queue.new
       end
 
       # Creates needed number of forks, installs signals and starts supervision
