@@ -185,6 +185,10 @@ jobs:
           chmod -R o-w /opt/hostedtoolcache/Ruby/3*/x64/lib/ruby/gems/3*/gems
           chmod +t /opt/hostedtoolcache/Ruby/3*/x64/lib/ruby/gems/3*/gems
 
+      - name: Force Ruby platform for ffi gem on dev/preview Ruby
+        if: contains(matrix.ruby, 'dev') || contains(matrix.ruby, 'preview') || contains(matrix.ruby, 'rc')
+        run: bundle config set force_ruby_platform ffi
+
       - name: Bundle install
         run: |
           bundle config set without development
