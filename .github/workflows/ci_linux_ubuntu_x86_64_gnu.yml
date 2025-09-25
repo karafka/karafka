@@ -248,6 +248,10 @@ jobs:
           gem update --system
           bundle config set without 'tools benchmarks docs'
 
+      - name: Force Ruby platform for ffi gem on dev/preview Ruby
+        if: contains(matrix.ruby, 'dev') || contains(matrix.ruby, 'preview') || contains(matrix.ruby, 'rc')
+        run: bundle config set force_ruby_platform ffi
+
       - name: Bundle install
         run: |
           bundle config set without development
