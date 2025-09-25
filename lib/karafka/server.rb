@@ -174,7 +174,7 @@ module Karafka
           # This ensures that if users have configured the default pool, it is closed correctly
           #
           # Custom pools need to be closed by users themselves
-          ::WaterDrop::ConnectionPool.shutdown
+          ::WaterDrop::ConnectionPool.close
 
           Karafka::App.terminate!
         end
