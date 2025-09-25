@@ -119,7 +119,6 @@ jobs:
           bundler-cache: true
           bundler: 'latest'
 
-
       - name: Run swarm unit specs
         run: bundle exec rspec spec/lib/karafka/swarm/ --tag mode:fork
 
