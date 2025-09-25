@@ -113,6 +113,10 @@ jobs:
         run: |
           docker compose up -d || (sleep 5 && docker compose up -d)
 
+      - name: Remove Gemfile.lock for Ruby dev/preview versions
+        if: contains(matrix.ruby, 'dev') || contains(matrix.ruby, 'preview') || contains(matrix.ruby, 'rc')
+        run: rm -f Gemfile.lock
+
       - name: Set up Ruby
         uses: ruby/setup-ruby@3fee6763234110473bd57dd4595c5199fce2c510 # v1.258.0
         with:
