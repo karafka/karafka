@@ -13,6 +13,7 @@
 - [Enhancement] Include consumer group, subscription group and other details in error logs for key error locations.
 - [Enhancement] Inherit from `ActiveJob::QueueAdapters::AbstractAdapter` when possible for ActiveJob base class.
 - [Enhancement] Disable Nagle algorithm by default for improved network performance.
+- [Enhancement] Optimize the messages buffer array memory allocation pattern.
 - [Maintenance] Add basic direct DD integration spec via DD gem karafka monitoring feature.
 - [Maintenance] Add integration specs for WaterDrop connection pool usage from within consumers.
 - [Refactoring] Comprehensive Admin module refactoring: Extract topic operations into Admin::Topics class and consumer group operations into Admin::ConsumerGroups class with proper inheritance hierarchy, cross-class method usage optimization, and constants moved to appropriate locations where they are actually used.
