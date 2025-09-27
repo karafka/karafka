@@ -15,7 +15,7 @@ module Karafka
               File.read(
                 File.join(Karafka.gem_root, 'config', 'locales', 'pro_errors.yml')
               )
-            ).fetch('en').fetch('validations').fetch('config')
+            ).fetch('en').fetch('validations').fetch('setup').fetch('config')
           end
 
           nested(:encryption) do

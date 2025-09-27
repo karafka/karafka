@@ -125,10 +125,10 @@ RSpec.describe Karafka::Swarm::Node, mode: :fork do
 
   describe '#start and #cleanup' do
     context 'when we want to start node without stubs' do
-      it 'expect to start it (it will fail as not configured)' do
+      it 'expect to start it' do
         expect { node.start }.not_to raise_error
         sleep(0.5)
-        expect(node.alive?).to be(false)
+        expect(node.alive?).to be(true)
       end
 
       it 'expect to be able to cleanup even if cleanup multiple times' do

@@ -29,7 +29,7 @@ jobs:
           fetch-depth: 0
 
       - name: Set up Ruby
-        uses: ruby/setup-ruby@44511735964dcb71245e7e55f72539531f7bc0eb # v1.257.0
+        uses: ruby/setup-ruby@866b91cc020931c510d42e43e498a7f07d335f60 # v1.259.0
         with:
           ruby-version: 3.4
           bundler-cache: true
@@ -113,8 +113,12 @@ jobs:
         run: |
           docker compose up -d || (sleep 5 && docker compose up -d)
 
+      - name: Remove Gemfile.lock for Ruby dev/preview versions
+        if: contains(matrix.ruby, 'dev') || contains(matrix.ruby, 'preview') || contains(matrix.ruby, 'rc')
+        run: rm -f Gemfile.lock
+
       - name: Set up Ruby
-        uses: ruby/setup-ruby@44511735964dcb71245e7e55f72539531f7bc0eb # v1.257.0
+        uses: ruby/setup-ruby@866b91cc020931c510d42e43e498a7f07d335f60 # v1.259.0
         with:
           ruby-version: ${{matrix.ruby}}
           bundler-cache: true
@@ -165,7 +169,7 @@ jobs:
           docker compose up -d || (sleep 5 && docker compose up -d)
 
       - name: Set up Ruby
-        uses: ruby/setup-ruby@44511735964dcb71245e7e55f72539531f7bc0eb # v1.257.0
+        uses: ruby/setup-ruby@866b91cc020931c510d42e43e498a7f07d335f60 # v1.259.0
         with:
           # Do not use cache here as we run bundle install also later in some of the integration
           # tests and we need to be able to run it without cache
@@ -184,6 +188,10 @@ jobs:
         run: |
           chmod -R o-w /opt/hostedtoolcache/Ruby/3*/x64/lib/ruby/gems/3*/gems
           chmod +t /opt/hostedtoolcache/Ruby/3*/x64/lib/ruby/gems/3*/gems
+
+      - name: Force Ruby platform for ffi gem on dev/preview Ruby
+        if: contains(matrix.ruby, 'dev') || contains(matrix.ruby, 'preview') || contains(matrix.ruby, 'rc')
+        run: bundle config set force_ruby_platform ffi
 
       - name: Bundle install
         run: |
@@ -233,7 +241,7 @@ jobs:
           docker compose up -d || (sleep 5 && docker compose up -d)
 
       - name: Set up Ruby
-        uses: ruby/setup-ruby@44511735964dcb71245e7e55f72539531f7bc0eb # v1.257.0
+        uses: ruby/setup-ruby@866b91cc020931c510d42e43e498a7f07d335f60 # v1.259.0
         with:
           ruby-version: ${{matrix.ruby}}
           bundler: 'latest'
@@ -243,6 +251,10 @@ jobs:
           gem install bundler --no-document
           gem update --system
           bundle config set without 'tools benchmarks docs'
+
+      - name: Force Ruby platform for ffi gem on dev/preview Ruby
+        if: contains(matrix.ruby, 'dev') || contains(matrix.ruby, 'preview') || contains(matrix.ruby, 'rc')
+        run: bundle config set force_ruby_platform ffi
 
       - name: Bundle install
         run: |

@@ -112,13 +112,16 @@ jobs:
             sleep 2
           done
 
+      - name: Remove Gemfile.lock for Ruby dev/preview versions
+        if: contains(matrix.ruby, 'dev') || contains(matrix.ruby, 'preview') || contains(matrix.ruby, 'rc')
+        run: rm -f Gemfile.lock
+
       - name: Set up Ruby
-        uses: ruby/setup-ruby@44511735964dcb71245e7e55f72539531f7bc0eb # v1.257.0
+        uses: ruby/setup-ruby@866b91cc020931c510d42e43e498a7f07d335f60 # v1.259.0
         with:
           ruby-version: ${{ matrix.ruby }}
           bundler-cache: true
           bundler: 'latest'
-
 
       - name: Run swarm unit specs
         run: bundle exec rspec spec/lib/karafka/swarm/ --tag mode:fork

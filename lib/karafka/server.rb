@@ -46,10 +46,16 @@ module Karafka
         # embedded
         # We cannot validate this during the start because config needs to be populated and routes
         # need to be defined.
-        cli_contract.validate!(
-          activity_manager.to_h,
-          scope: %w[cli]
-        )
+        #
+        # We do not validate in swarm because in swarm it is the supervisor that should validate
+        # this. After the supervisor validation some of the internal states like SGs availability
+        # may fail, so double validation may crash
+        unless execution_mode.swarm?
+          cli_contract.validate!(
+            activity_manager.to_h,
+            scope: %w[cli]
+          )
+        end
 
         # We clear as we do not want parent handlers in case of working from fork
         process.clear
@@ -164,6 +170,12 @@ module Karafka
           # to dispatch state changes, etc
           Karafka::App.producer.close
 
+          # Closes the default connection pool (if used). If not used, will do nothing
+          # This ensures that if users have configured the default pool, it is closed correctly
+          #
+          # Custom pools need to be closed by users themselves
+          ::WaterDrop::ConnectionPool.close
+
           Karafka::App.terminate!
         end
       end
@@ -182,7 +194,7 @@ module Karafka
     # Always start with standalone so there always is a value for the execution mode.
     # This is overwritten quickly during boot, but just in case someone would reach it prior to
     # booting, we want to have the default value.
-    self.execution_mode = :standalone
+    self.execution_mode = ExecutionMode.new(:standalone)
 
     self.id = SecureRandom.hex(6)
   end

@@ -10,7 +10,7 @@ module Karafka
       # @param max_interval [Integer] after how many milliseconds of doing nothing should we wake
       #   up the manager despite no state changes
       def initialize(max_interval = 30_000)
-        @lock = RUBY_VERSION < '3.2' ? Processing::TimedQueue.new : Queue.new
+        @lock = Queue.new
         @timeout = max_interval / 1_000.0
       end
 
