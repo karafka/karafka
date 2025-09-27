@@ -24,7 +24,7 @@ class WrappedError < StandardError
   end
 end
 
-class ComplexDqlStrategy
+class ComplexDlqStrategy
   def call(errors_tracker, attempt)
     last_error = errors_tracker.last
 
@@ -67,7 +67,7 @@ draw_routes do
     deserializer ->(message) { message.raw_payload }
     dead_letter_queue(
       topic: DT.topics[1],
-      strategy: ComplexDqlStrategy.new
+      strategy: ComplexDlqStrategy.new
     )
   end
 end
