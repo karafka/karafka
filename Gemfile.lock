@@ -4,7 +4,7 @@ PATH
     karafka (2.5.1.beta1)
       base64 (~> 0.2)
       karafka-core (>= 2.5.6, < 2.6.0)
-      karafka-rdkafka (>= 0.22.0.rc1)
+      karafka-rdkafka (>= 0.22.0)
       waterdrop (>= 2.8.9, < 3.0.0)
       zeitwerk (~> 2.3)
 
