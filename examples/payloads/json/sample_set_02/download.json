@@ -1,0 +1,191 @@
+{
+  "audience_data_versions": {
+    "s1_build_epoch": 1634594595,
+    "s2_build_epoch": 1634093288,
+    "s3_build_epoch": 1634095356
+  },
+  "combination_cache_hits": null,
+  "content_insertion_info": {
+    "ad_rep_account_revenue": {
+      "code": "USD",
+      "scale": "Nano",
+      "value": 0
+    },
+    "ad_rep_account": {
+      "id": "f8a3c7d2-9b41-4e56-a2f3-8d7c1b9e4a6f",
+      "name": "AdOps_Beta"
+    },
+    "advertisement": {
+      "duration": {
+        "scale": "Micro",
+        "value": 29022040
+      },
+      "external_identifier": null,
+      "id": "a9e2f4b7-3c81-4d92-b5e6-7a4f8c2d1e9b",
+      "title": "soda",
+      "type": "TraditionalAd"
+    },
+    "platform_revenue": {
+      "code": "USD",
+      "scale": "Nano",
+      "value": 0
+    },
+    "audience": null,
+    "brand": {
+      "id": "d4c8e1a9-7f62-4b3d-9e85-c2a7f4b9d1e6",
+      "name": "Brand_Beta"
+    },
+    "campaign": {
+      "id": "b7d3a5e8-4c91-4f2b-a6d9-1e8c7f3a5b4d",
+      "title": "Pepsi Max",
+      "frequency_counting_targets": null
+    },
+    "campaign_value": {
+      "code": "USD",
+      "scale": "Nano",
+      "value": 500000
+    },
+    "normalized_campaign_value": {
+      "code": "USD",
+      "scale": "Nano",
+      "value": 500000
+    },
+    "external_payload_id": "c5e9a2f7-8d41-4b36-9e72-a1f4c8b3d7e5",
+    "marker_point": {
+      "id": "e2f7c9a4-1d58-4b63-8e49-f7a3c2d8b1e6",
+      "episode_version_id": "a8c4e7f2-9b31-4d65-b8a9-e3f7c1d4a2b6",
+      "maximum_content_count": 1,
+      "maximum_content_duration": {
+        "scale": "Micro",
+        "value": 120000000
+      },
+      "position_type": "Preroll",
+      "position_sequence": 1
+    },
+    "position_sequence": 1,
+    "series_revenue": {
+      "code": "USD",
+      "scale": "Nano",
+      "value": 0
+    }
+  },
+  "content_insertion_system_type": "ServerSide",
+  "count": 1,
+  "deduplication_keys": null,
+  "distribution_characteristic_id": "c9e3f2a7-4d81-4b56-9e73-a8f2c4d1b7e6",
+  "distribution_identification_method_id": "f7a2c8e4-9b31-4d65-8e49-b3f7a1c2d9e8",
+  "episode": {
+    "created_at": 1698698168000,
+    "capacities": [
+      {
+        "position_type": "Preroll",
+        "count": 1,
+        "duration": 120
+      },
+      {
+        "position_type": "Midroll",
+        "count": 0,
+        "duration": 0
+      },
+      {
+        "position_type": "Postroll",
+        "count": 0,
+        "duration": 0
+      }
+    ],
+    "duration": {
+      "scale": "Micro",
+      "value": 4204747760
+    },
+    "episode_number": null,
+    "id": "d8e2a7f4-9c51-4b36-a8e2-f7c4d1b9a3e6",
+    "title": "Mountain Breeze",
+    "episode_version_id": "a8c4e7f2-9b31-4d65-b8a9-e3f7c1d4a2b6"
+  },
+  "feed": {
+    "id": "b4f9c7e2-8a31-4d56-9e82-a7f3c1d4b8e9",
+    "type": null
+  },
+  "feed_item": {
+    "id": "d8e2a7f4-9c51-4b36-a8e2-f7c4d1b9a3e6"
+  },
+  "id": "e7c2f9a4-8d31-4b65-9e78-a3f4c7d2b1e9",
+  "listened_at": 1747928515000000,
+  "listened_at_ms": 1747928515000,
+  "listener": {
+    "connection_type": "Cellular",
+    "ip_address": "172.58.243.167",
+    "ip_address_encryption_format": "None",
+    "isp": {
+      "as_organization": "WIRELESS-MOBILE",
+      "asn": 8445,
+      "name": "Random Telecom",
+      "organization": "Random Telecom"
+    },
+    "location": {
+      "continent": {
+        "code": "NA",
+        "geoname_id": 6255149,
+        "name": "North America"
+      },
+      "country": {
+        "code": "US",
+        "geoname_id": 6252001
+      },
+      "designated_market_area": {
+        "code": "524",
+        "name": "Atlanta, GA"
+      },
+      "is_in_eu": null,
+      "locality": {
+        "geoname_id": 4180439,
+        "name": "Atlanta"
+      },
+      "region": {
+        "geoname_id": 4197000,
+        "name": "Georgia"
+      },
+      "lat": 33.748997,
+      "lng": -84.387985,
+      "postal_code": "20309"
+    },
+    "rss_browser": null,
+    "time_zone": "America/New_York",
+    "user_agent": {
+      "browser": "Safari",
+      "mobile": true,
+      "operating_system": "iOS",
+      "platform": null,
+      "user_agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 16_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.5 Mobile/15E148 Safari/604.1",
+      "user_agent_hash": "9k742p/X5m"
+    }
+  },
+  "network": null,
+  "playback_group_id": "f9c3e7a2-8d41-4b56-9e73-a8f2c4d1b7e6",
+  "request_duration": 0,
+  "request_headers": {
+    "SERVER_PORT": "80",
+    "SERVER_PROTOCOL": "HTTP/1.1",
+    "REMOTE_ADDR": "172.58.243.167",
+    "ORIGINAL_SCRIPT_NAME": "",
+    "HTTP_VERSION": "HTTP/1.1",
+    "HTTP_HOST": "foo.bar.com",
+    "REQUEST_METHOD": "GET",
+    "HTTP_ACCEPT": "*/*",
+    "SCRIPT_NAME": "",
+    "HTTP_USER_AGENT": "Mozilla/5.0 (iPhone; CPU iPhone OS 16_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.5 Mobile/15E148 Safari/604.1",
+    "REQUEST_PATH": "/paths/d8e2a7f4-9c51-4b36-a8e2-f7c4d1b9a3e6",
+    "HTTP_CONNECTION": "close"
+  },
+  "rejection_status": "NotRejected",
+  "root_network": null,
+  "season": null,
+  "series": {
+    "id": "c8e4a7f2-9b31-4d65-8e49-b3f7a1c2d9e8",
+    "title": "Podcast"
+  },
+  "session_id": "a7f2c9e4-8d31-4b56-9e73-a8f4c2d1b7e6",
+  "statistics_system": "TwentyFourHourWindows",
+  "tracking_id": "b9e3f7a2-4c81-4d56-9e78-a3f4c7d2b1e9",
+  "tracking_id_source": "UniqueClientAttributes"
+}
