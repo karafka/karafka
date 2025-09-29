@@ -1,0 +1,41 @@
+[
+  {
+    "timestamp": 1111111111111,
+    "timestampType": "TYPE",
+    "partition": 0,
+    "offset": 0,
+    "key": "0000000000000000000000000000000000000000000000000000000000000000",
+    "value": {
+      "id": "0000000000000000000000000000000000000000000000000000000000000000",
+      "type": "event_type",
+      "data": {
+        "user_id": 123456789,
+        "user_email": "user@example.com",
+        "org_id": 987654321,
+        "token_id": 111111111,
+        "token_type": "token_type",
+        "request_id": "request-id",
+        "request_host": "api.example.com",
+        "request_path": "/some/path",
+        "remote_ip": "0.0.0.0",
+        "request_graphql": true,
+        "user_agent": "client-library/x.y.z",
+        "request_method": "METHOD",
+        "graphql_data": {
+          "errored": false,
+          "complexity": 0,
+          "depth": 0,
+          "operation_name": null,
+          "operation_type": "operation",
+          "resources": ["resource"]
+        },
+        "response_code": "200",
+        "type": "custom"
+      },
+      "source": "some-source",
+      "version": 1,
+      "timestamp": "1111111111111"
+    },
+    "headers": []
+  }
+]
