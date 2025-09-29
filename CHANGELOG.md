@@ -1,6 +1,6 @@
 # Karafka Framework Changelog
 
-## 2.5.1 (Unreleased)
+## 2.5.1 (2025-09-29)
 - **[Breaking]** Remove Ruby 3.1 support according to EOL.
 - **[Feature]** Support Swarm mode on MacOS.
 - [Enhancement] Support past `dispatch_at` times with `jitter: 0` in the OSS Karafka to support ActiveJob continuation.
