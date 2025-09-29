@@ -1,0 +1,18 @@
+{
+  "connect.name": "production.public.automation_actions.Key",
+  "fields": [
+    {
+      "default": "00000000-0000-0000-0000-000000000000",
+      "name": "id",
+      "type": {
+        "connect.default": "00000000-0000-0000-0000-000000000000",
+        "connect.name": "io.debezium.data.Uuid",
+        "connect.version": 1,
+        "type": "string"
+      }
+    }
+  ],
+  "name": "Key",
+  "namespace": "production.public.automation_actions",
+  "type": "record"
+}
