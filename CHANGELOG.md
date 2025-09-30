@@ -1,5 +1,8 @@
 # Karafka Framework Changelog
 
+## 2.5.2 (Unreleased)
+- [Enhancement] Retry on the KIP-848 `stale_member_epoch` error.
+
 ## 2.5.1 (2025-09-29)
 - **[Breaking]** Remove Ruby 3.1 support according to EOL.
 - **[Feature]** Support Swarm mode on MacOS.

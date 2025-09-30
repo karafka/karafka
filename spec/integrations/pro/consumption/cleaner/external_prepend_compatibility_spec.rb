@@ -46,11 +46,14 @@ class Consumer < Karafka::BaseConsumer
       end
     end
 
-    # Store instrumentation calls for verification
-    DT[0] = DT[:tracker].dup
+    # Store instrumentation calls for verification (append, don't replace)
+    DT[0] ||= []
+    DT[0].concat(DT[:tracker].dup)
+    DT[:tracker].clear
 
-    # Store per-message cleaning verification
-    DT[4] = per_message_clean_status
+    # Store per-message cleaning verification (append across batches)
+    DT[4] ||= []
+    DT[4].concat(per_message_clean_status)
 
     # Verify all messages were cleaned using both methods
     @cleaned_count ||= 0
@@ -68,6 +71,7 @@ class Consumer < Karafka::BaseConsumer
       end
     end
 
+    # Store cumulative counts across all batches
     DT[2] = @cleaned_count
     DT[3] = @cleaned_flags
   end
@@ -99,5 +103,8 @@ assert DT[2] == 5
 assert DT[3] == [true, true, true, true, true]
 
 # Critical: Verify cleaning happened after each message, not after all
-# When processing messages 1,2,3,4 the first message (offset 0) should already be cleaned
-assert DT[4] == [true, true, true, true]
+# Each time we process a message with offset > 0, the first message in that batch should be cleaned
+# With 5 messages (offsets 0-4), we check 4 times (when processing offsets 1,2,3,4)
+# All checks should show first message as cleaned
+assert DT[4].size == 4
+assert(DT[4].all? { |status| status == true })

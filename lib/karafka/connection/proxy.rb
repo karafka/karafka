@@ -21,6 +21,7 @@ module Karafka
         not_coordinator
         not_leader_for_partition
         coordinator_load_in_progress
+        stale_member_epoch
       ].freeze
 
       private_constant :RETRYABLE_DEFAULT_ERRORS
