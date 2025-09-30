@@ -51,7 +51,9 @@ module Karafka
         :fenced, # -144
         :auto_offset_reset, # -140
         # This can happen for many reasons, including issues with static membership being fenced
-        :fatal # -150
+        :fatal, # -150,
+        # This can happen with new rebalance protocol and same group.instance.id in use
+        :unreleased_instance_id # 111
       ].freeze
 
       private_constant :MAX_POLL_RETRIES, :COOP_UNSUBSCRIBE_FACTOR, :EARLY_REPORT_ERRORS
