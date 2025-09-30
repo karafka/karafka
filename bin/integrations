@@ -52,7 +52,8 @@ class Scenario
     'cli/declaratives/delete/existing_with_exit_code_spec.rb' => [2].freeze,
     'cli/declaratives/create/new_with_exit_code_spec.rb' => [2].freeze,
     'cli/declaratives/plan/when_changes_with_detailed_exit_code_spec.rb' => [2].freeze,
-    'cli/declaratives/align/incorrectly_spec.rb' => [1].freeze
+    'cli/declaratives/align/incorrectly_spec.rb' => [1].freeze,
+    'setup/with_kip_848_protocol_incorrect_config_spec.rb' => [1].freeze
   }.freeze
 
   private_constant :MAX_RUN_TIME, :EXIT_CODES
