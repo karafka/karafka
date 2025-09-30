@@ -26,7 +26,7 @@ end
 
 4.times { |i| produce(DT.topic, "test#{i}", partition: i) }
 
-Thread.new do
+thread = Thread.new do
   sleep(0.1) until DT[:c1_partitions].size >= 4
 
   # Start a second consumer that will join and cause rebalancing
@@ -62,3 +62,5 @@ end
 # First consumer should have received messages from all 4 partitions
 # (initially it was the only consumer)
 assert_equal [0, 1, 2, 3], DT[:c1_partitions].to_a.sort
+
+thread.join
