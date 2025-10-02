@@ -113,6 +113,15 @@ module Karafka
         ConsumerGroups.delete(consumer_group_id)
       end
 
+      # Triggers a rebalance for the specified consumer group
+      #
+      # @param consumer_group_id [String] consumer group id to trigger rebalance for
+      # @see ConsumerGroups.trigger_rebalance
+      # @note This API should be used only for development.
+      def trigger_rebalance(consumer_group_id)
+        ConsumerGroups.trigger_rebalance(consumer_group_id)
+      end
+
       # Reads lags and offsets for given topics in the context of consumer groups defined in the
       #   routing
       # @param consumer_groups_with_topics [Hash<String, Array<String>>] hash with consumer groups

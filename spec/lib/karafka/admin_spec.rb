@@ -156,6 +156,20 @@ RSpec.describe_current do
     end
   end
 
+  describe '#trigger_rebalance' do
+    let(:cg_id) { SecureRandom.uuid }
+
+    before do
+      allow(Karafka::Admin::ConsumerGroups).to receive(:trigger_rebalance)
+    end
+
+    it 'delegates to ConsumerGroups.trigger_rebalance' do
+      described_class.trigger_rebalance(cg_id)
+      expect(Karafka::Admin::ConsumerGroups)
+        .to have_received(:trigger_rebalance).with(cg_id)
+    end
+  end
+
   describe '#read_lags_with_offsets' do
     let(:cgs_t) { { 'test_cg' => ['test_topic'] } }
 
