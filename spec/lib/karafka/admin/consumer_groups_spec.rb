@@ -132,4 +132,21 @@ RSpec.describe Karafka::Admin::ConsumerGroups do
       it { expect(results).to eq('doesnotexist' => { name => { 0 => { lag: -1, offset: -1 } } }) }
     end
   end
+
+  describe '#trigger_rebalance' do
+    subject(:trigger) { described_class.trigger_rebalance(consumer_group_id) }
+
+    let(:consumer_group_id) { SecureRandom.uuid }
+
+    context 'when consumer group is not in routing' do
+      it 'expect to raise InvalidConfigurationError with proper message' do
+        expect { trigger }.to raise_error(
+          Karafka::Errors::InvalidConfigurationError,
+          /not found in routing/
+        )
+      end
+    end
+
+    # Successful case is tested in integration specs since it requires proper routing setup
+  end
 end
