@@ -3,23 +3,6 @@
 RSpec.describe_current do
   subject(:manager) { described_class.new }
 
-  # Set a very short pause timeout for tests that check pause expiration
-  before do
-    Karafka::App.setup do |c|
-      c.pause.timeout = 1
-      c.pause.max_timeout = 1
-    end
-  end
-
-  # Reset to defaults after all tests
-  after do
-    Karafka::App.setup do |c|
-      c.pause.max_timeout = 30_000
-      c.pause.timeout = 1_000
-      c.pause.with_exponential_backoff = true
-    end
-  end
-
   let(:topic) { build(:routing_topic) }
   let(:partition) { rand(0..100) }
   let(:fetched_pause) { manager.fetch(topic, partition) }

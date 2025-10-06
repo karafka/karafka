@@ -119,7 +119,7 @@ RSpec.describe_current do
           c.pause.with_exponential_backoff = false
         end
 
-        expect(config.pause.with_exponential_backoff).to eq(false)
+        expect(config.pause.with_exponential_backoff).to be(false)
       end
     end
 
@@ -163,7 +163,7 @@ RSpec.describe_current do
           c.pause.with_exponential_backoff = false
         end
 
-        expect(config.pause_with_exponential_backoff).to eq(false)
+        expect(config.pause_with_exponential_backoff).to be(false)
       end
 
       it 'allows setting pause_with_exponential_backoff via backwards compatible method' do
@@ -171,8 +171,8 @@ RSpec.describe_current do
           c.pause_with_exponential_backoff = false
         end
 
-        expect(config.pause.with_exponential_backoff).to eq(false)
-        expect(config.pause_with_exponential_backoff).to eq(false)
+        expect(config.pause.with_exponential_backoff).to be(false)
+        expect(config.pause_with_exponential_backoff).to be(false)
       end
     end
 

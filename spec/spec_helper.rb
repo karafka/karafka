@@ -95,6 +95,9 @@ RSpec.configure do |config|
     Karafka.monitor.notifications_bus.clear
     Karafka::App.config.internal.routing.activity_manager.clear
     Karafka::Processing::InlineInsights::Tracker.clear
+    Karafka::App.config.pause.timeout = 1
+    Karafka::App.config.pause.max_timeout = 1
+    Karafka::App.config.pause.with_exponential_backoff = false
   end
 
   config.after(:suite) do
