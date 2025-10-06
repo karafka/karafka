@@ -6,9 +6,9 @@
 setup_karafka(allow_errors: %w[consumer.consume.error]) do |config|
   config.kafka[:'transactional.id'] = SecureRandom.uuid
   config.concurrency = 20
-  config.pause_timeout = 100
-  config.pause_max_timeout = 100
-  config.pause_with_exponential_backoff = false
+  config.pause.timeout = 100
+  config.pause.max_timeout = 100
+  config.pause.with_exponential_backoff = false
 end
 
 setup_web do |config|

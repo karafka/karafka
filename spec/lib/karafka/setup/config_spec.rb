@@ -77,10 +77,22 @@ RSpec.describe_current do
   describe 'pause configuration backwards compatibility' do
     subject(:config) { Karafka::App.config }
 
+    # Ensure clean state before each test
+    before do
+      Karafka::App.setup do |c|
+        # Reset max_timeout first to ensure timeout <= max_timeout constraint is never violated
+        c.pause.max_timeout = 30_000
+        c.pause.timeout = 1_000
+        c.pause.with_exponential_backoff = true
+      end
+    end
+
+    # Clean up after each test as well
     after do
       Karafka::App.setup do |c|
-        c.pause.timeout = 1_000
+        # Reset max_timeout first to ensure timeout <= max_timeout constraint is never violated
         c.pause.max_timeout = 30_000
+        c.pause.timeout = 1_000
         c.pause.with_exponential_backoff = true
       end
     end

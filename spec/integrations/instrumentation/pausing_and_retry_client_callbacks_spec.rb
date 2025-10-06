@@ -3,8 +3,8 @@
 # We should be able to get client level instrumentation on pausing and resuming
 
 setup_karafka do |config|
-  config.pause_timeout = 50
-  config.pause_max_timeout = 50
+  config.pause.timeout = 50
+  config.pause.max_timeout = 50
 end
 
 class Consumer < Karafka::BaseConsumer

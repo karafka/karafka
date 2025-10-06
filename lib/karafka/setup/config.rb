@@ -350,27 +350,46 @@ module Karafka
       # Backwards compatibility: Add old flat API methods to the config instance
       # These delegate to the new nested pause config
       # @deprecated Will be removed in Karafka 2.6
+      #
+      # Prior to the introduction of nested pause configuration, pause-related settings were
+      # accessed directly on the config object (e.g., `config.pause_timeout`). With the nested
+      # structure introduced, these settings moved to `config.pause.timeout`, etc.
+      #
+      # This instance_eval block adds delegation methods to maintain backwards compatibility,
+      # allowing existing code using the old flat API to continue working without modification.
       config.instance_eval do
+        # @return [Integer] delegated timeout value from pause.timeout
+        # @deprecated Use config.pause.timeout instead
         def pause_timeout
           pause.timeout
         end
 
+        # @param value [Integer] timeout value to set
+        # @deprecated Use config.pause.timeout= instead
         def pause_timeout=(value)
           pause.timeout = value
         end
 
+        # @return [Integer] delegated max_timeout value from pause.max_timeout
+        # @deprecated Use config.pause.max_timeout instead
         def pause_max_timeout
           pause.max_timeout
         end
 
+        # @param value [Integer] max timeout value to set
+        # @deprecated Use config.pause.max_timeout= instead
         def pause_max_timeout=(value)
           pause.max_timeout = value
         end
 
+        # @return [Boolean] delegated exponential backoff flag from pause.with_exponential_backoff
+        # @deprecated Use config.pause.with_exponential_backoff instead
         def pause_with_exponential_backoff
           pause.with_exponential_backoff
         end
 
+        # @param value [Boolean] exponential backoff flag to set
+        # @deprecated Use config.pause.with_exponential_backoff= instead
         def pause_with_exponential_backoff=(value)
           pause.with_exponential_backoff = value
         end

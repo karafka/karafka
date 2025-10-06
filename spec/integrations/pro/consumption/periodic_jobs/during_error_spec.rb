@@ -6,8 +6,8 @@
 # By default ticking should not happen if we are in a recovery flow
 
 setup_karafka(allow_errors: true) do |config|
-  config.pause_timeout = 1_000
-  config.pause_max_timeout = 1_500
+  config.pause.timeout = 1_000
+  config.pause.max_timeout = 1_500
   config.max_wait_time = 100
 end
 

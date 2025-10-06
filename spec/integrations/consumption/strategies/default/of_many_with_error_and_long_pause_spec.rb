@@ -4,8 +4,8 @@
 
 setup_karafka(allow_errors: true) do |config|
   # 60 seconds, long enough for it to not restart upon us finishing
-  config.pause_timeout = 60 * 1_000
-  config.pause_max_timeout = 60 * 1_000
+  config.pause.timeout = 60 * 1_000
+  config.pause.max_timeout = 60 * 1_000
   config.max_messages = 1
 end
 

@@ -6,9 +6,9 @@
 # When customizing the error pausing strategy, each topic should obey its own limitations
 
 setup_karafka(allow_errors: %w[consumer.consume.error]) do |config|
-  config.pause_timeout = 1_000
-  config.pause_max_timeout = 10_000
-  config.pause_with_exponential_backoff = false
+  config.pause.timeout = 1_000
+  config.pause.max_timeout = 10_000
+  config.pause.with_exponential_backoff = false
   config.max_wait_time = 100
 end
 

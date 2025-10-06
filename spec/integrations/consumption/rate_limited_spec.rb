@@ -7,8 +7,8 @@
 
 setup_karafka do |config|
   # Throttle for a second
-  config.pause_timeout = 1_000
-  config.pause_max_timeout = 1_000
+  config.pause.timeout = 1_000
+  config.pause.max_timeout = 1_000
   config.max_wait_time = 500
   config.max_messages = 1
   config.concurrency = 1
