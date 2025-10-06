@@ -1,0 +1,263 @@
+{
+  "connect.name": "production.public.automation_actions.Envelope",
+  "connect.version": 1,
+  "fields": [
+    {
+      "default": null,
+      "name": "before",
+      "type": [
+        "null",
+        {
+          "connect.name": "production.public.automation_actions.Value",
+          "fields": [
+            {
+              "default": "00000000-0000-0000-0000-000000000000",
+              "name": "id",
+              "type": {
+                "connect.default": "00000000-0000-0000-0000-000000000000",
+                "connect.name": "io.debezium.data.Uuid",
+                "connect.version": 1,
+                "type": "string"
+              }
+            },
+            {
+              "name": "automation_id",
+              "type": "int"
+            },
+            {
+              "default": null,
+              "name": "card_id",
+              "type": [
+                "null",
+                "int"
+              ]
+            },
+            {
+              "name": "organization_id",
+              "type": "int"
+            },
+            {
+              "default": null,
+              "name": "user_id",
+              "type": [
+                "null",
+                "int"
+              ]
+            },
+            {
+              "name": "action_name",
+              "type": "string"
+            },
+            {
+              "default": null,
+              "name": "finished_at",
+              "type": [
+                "null",
+                {
+                  "connect.name": "io.debezium.time.MicroTimestamp",
+                  "connect.version": 1,
+                  "type": "long"
+                }
+              ]
+            },
+            {
+              "default": 0,
+              "name": "status",
+              "type": [
+                {
+                  "connect.default": 0,
+                  "type": "int"
+                },
+                "null"
+              ]
+            },
+            {
+              "default": null,
+              "name": "deleted_at",
+              "type": [
+                "null",
+                {
+                  "connect.name": "io.debezium.time.MicroTimestamp",
+                  "connect.version": 1,
+                  "type": "long"
+                }
+              ]
+            },
+            {
+              "name": "created_at",
+              "type": {
+                "connect.name": "io.debezium.time.MicroTimestamp",
+                "connect.version": 1,
+                "type": "long"
+              }
+            },
+            {
+              "name": "updated_at",
+              "type": {
+                "connect.name": "io.debezium.time.MicroTimestamp",
+                "connect.version": 1,
+                "type": "long"
+              }
+            },
+            {
+              "default": null,
+              "name": "response",
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            {
+              "default": null,
+              "name": "executed",
+              "type": [
+                "null",
+                "boolean"
+              ]
+            }
+          ],
+          "name": "Value",
+          "type": "record"
+        }
+      ]
+    },
+    {
+      "default": null,
+      "name": "after",
+      "type": [
+        "null",
+        "Value"
+      ]
+    },
+    {
+      "name": "source",
+      "type": {
+        "connect.name": "io.debezium.connector.v2.postgresql.Source",
+        "fields": [
+          {
+            "name": "version",
+            "type": "string"
+          },
+          {
+            "name": "connector",
+            "type": "string"
+          },
+          {
+            "name": "name",
+            "type": "string"
+          },
+          {
+            "name": "ts_ms",
+            "type": "long"
+          },
+          {
+            "default": "false",
+            "name": "snapshot",
+            "type": [
+              {
+                "connect.default": "false",
+                "connect.name": "io.debezium.data.Enum",
+                "connect.parameters": {
+                  "allowed": "true,last,false,incremental"
+                },
+                "connect.version": 1,
+                "type": "string"
+              },
+              "null"
+            ]
+          },
+          {
+            "name": "db",
+            "type": "string"
+          },
+          {
+            "default": null,
+            "name": "sequence",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          {
+            "name": "schema",
+            "type": "string"
+          },
+          {
+            "name": "table",
+            "type": "string"
+          },
+          {
+            "default": null,
+            "name": "txId",
+            "type": [
+              "null",
+              "long"
+            ]
+          },
+          {
+            "default": null,
+            "name": "lsn",
+            "type": [
+              "null",
+              "long"
+            ]
+          },
+          {
+            "default": null,
+            "name": "xmin",
+            "type": [
+              "null",
+              "long"
+            ]
+          }
+        ],
+        "name": "Source",
+        "namespace": "io.debezium.connector.v2.postgresql",
+        "type": "record"
+      }
+    },
+    {
+      "name": "op",
+      "type": "string"
+    },
+    {
+      "default": null,
+      "name": "ts_ms",
+      "type": [
+        "null",
+        "long"
+      ]
+    },
+    {
+      "default": null,
+      "name": "transaction",
+      "type": [
+        "null",
+        {
+          "connect.name": "event.block",
+          "connect.version": 1,
+          "fields": [
+            {
+              "name": "id",
+              "type": "string"
+            },
+            {
+              "name": "total_order",
+              "type": "long"
+            },
+            {
+              "name": "data_collection_order",
+              "type": "long"
+            }
+          ],
+          "name": "block",
+          "namespace": "event",
+          "type": "record"
+        }
+      ]
+    }
+  ],
+  "name": "Envelope",
+  "namespace": "production.public.automation_actions",
+  "type": "record"
+}

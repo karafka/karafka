@@ -234,6 +234,76 @@ module Karafka
           end
         end
 
+        # Triggers a rebalance for the specified consumer group by briefly joining and leaving
+        #
+        # @param consumer_group_id [String] consumer group id to trigger rebalance for
+        #
+        # @return [void]
+        #
+        # @raise [Karafka::Errors::InvalidConfigurationError] when consumer group is not found in
+        #   routing or has no topics
+        #
+        # @note This method creates a temporary "fake" consumer that joins the consumer group,
+        #   triggering a rebalance when it joins and another when it leaves. This should only be
+        #   used for operational/testing purposes as it causes two rebalances.
+        #
+        # @note The consumer group does not need to be running for this to work, but if it is,
+        #   it will experience rebalances.
+        #
+        # @note The behavior follows the configured rebalance protocol. For cooperative sticky
+        #   rebalancing or KIP-848 based protocols, there may be no immediate reaction to the
+        #   rebalance trigger as these protocols allow incremental partition reassignments without
+        #   stopping all consumers.
+        #
+        # @note Topics are always detected from the routing configuration. The consumer settings
+        #   (kafka config) are taken from the first topic in the consumer group to ensure
+        #   consistency with the actual consumer configuration.
+        #
+        # @example Trigger rebalance for a consumer group
+        #   Karafka::Admin::ConsumerGroups.trigger_rebalance('my-group')
+        def trigger_rebalance(consumer_group_id)
+          consumer_group = Karafka::App.routes.find { |cg| cg.id == consumer_group_id }
+
+          unless consumer_group
+            raise(
+              Errors::InvalidConfigurationError,
+              "Consumer group '#{consumer_group_id}' not found in routing"
+            )
+          end
+
+          topics = consumer_group.topics.map(&:name)
+
+          if topics.empty?
+            raise(
+              Errors::InvalidConfigurationError,
+              "Consumer group '#{consumer_group_id}' has no topics"
+            )
+          end
+
+          # Get the first topic to extract kafka settings
+          first_topic = consumer_group.topics.first
+
+          # Build consumer settings using the consumer group's kafka config from first topic
+          # This ensures we use the same settings as the actual consumers
+          # Following the same pattern as in Karafka::Connection::Client#build_kafka
+          consumer_settings = Setup::AttributesMap.consumer(first_topic.kafka.dup)
+          consumer_settings[:'group.id'] = consumer_group.id
+          consumer_settings[:'enable.auto.offset.store'] = false
+          consumer_settings[:'auto.offset.reset'] ||= first_topic.initial_offset
+
+          with_consumer(consumer_settings) do |consumer|
+            # Subscribe to the topics - this triggers the first rebalance
+            consumer.subscribe(*topics)
+
+            # Wait briefly (100ms) to allow the rebalance to initiate
+            # The actual rebalance happens asynchronously, so we just need to give it a moment
+            sleep(0.1)
+
+            # Unsubscribe - this will trigger the second rebalance when the consumer closes
+            # The ensure block in with_consumer will handle the unsubscribe and close
+          end
+        end
+
         # Reads lags and offsets for given topics in the context of consumer groups defined in the
         #   routing
         #

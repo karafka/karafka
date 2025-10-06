@@ -1,6 +1,10 @@
 # Karafka Framework Changelog
 
-## 2.5.1 (Unreleased)
+## 2.5.2 (Unreleased)
+- [Enhancement] Retry on the KIP-848 `stale_member_epoch` error.
+- [Enhancement] Provide `Karafka::Admin.trigger_rebalance` API to programmatically trigger consumer group rebalances for operational purposes.
+
+## 2.5.1 (2025-09-29)
 - **[Breaking]** Remove Ruby 3.1 support according to EOL.
 - **[Feature]** Support Swarm mode on MacOS.
 - [Enhancement] Support past `dispatch_at` times with `jitter: 0` in the OSS Karafka to support ActiveJob continuation.
@@ -13,6 +17,7 @@
 - [Enhancement] Include consumer group, subscription group and other details in error logs for key error locations.
 - [Enhancement] Inherit from `ActiveJob::QueueAdapters::AbstractAdapter` when possible for ActiveJob base class.
 - [Enhancement] Disable Nagle algorithm by default for improved network performance.
+- [Enhancement] Optimize the messages buffer array memory allocation pattern.
 - [Maintenance] Add basic direct DD integration spec via DD gem karafka monitoring feature.
 - [Maintenance] Add integration specs for WaterDrop connection pool usage from within consumers.
 - [Refactoring] Comprehensive Admin module refactoring: Extract topic operations into Admin::Topics class and consumer group operations into Admin::ConsumerGroups class with proper inheritance hierarchy, cross-class method usage optimization, and constants moved to appropriate locations where they are actually used.
@@ -28,7 +33,7 @@
 - [Fix] Fix Pro Cleaner Messages compatibility with external libraries that prepend modules to `#each` method (e.g., DataDog tracing).
 - [Fix] SG exclusion in swarm triggers a contract validation error.
 - [Change] Require `waterdrop` `>=` `2.8.10` to support new features.
-- [Change] Require `karafka-rdkafka` `>=` `0.21.0` to support new features.
+- [Change] Require `karafka-rdkafka` `>=` `0.22.0` to support new features and require SSL-bug free version.
 - [Change] Remove no longer needed `cooperative.sticky` rebalance patch.
 - [Change] Normalize how libs and deps are required (no functional change for the end user)
 - [Change] Remove Ruby `3.1` specs according to the EOL schedule.

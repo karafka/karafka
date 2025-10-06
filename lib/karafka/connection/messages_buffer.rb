@@ -38,7 +38,6 @@ module Karafka
       # @param raw_messages_buffer [RawMessagesBuffer] buffer with raw messages
       def remap(raw_messages_buffer)
         clear
-
         # Since it happens "right after" we've received the messages, it is close enough it time
         # to be used as the moment we received messages.
         received_at = Time.now
@@ -46,12 +45,11 @@ module Karafka
 
         raw_messages_buffer.each do |topic, partition, messages, eof|
           @size += messages.size
-
           ktopic = @subscription_group.topics.find(topic)
 
-          built_messages = messages.map do |message|
+          built_messages = Array.new(messages.size) do |index|
             Messages::Builders::Message.call(
-              message,
+              messages[index],
               ktopic,
               received_at
             )
