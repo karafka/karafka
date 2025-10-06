@@ -73,4 +73,113 @@ RSpec.describe_current do
       expect(defaults).to eq(expected_defaults)
     end
   end
+
+  describe 'pause configuration backwards compatibility' do
+    subject(:config) { Karafka::App.config }
+
+    after do
+      Karafka::App.setup do |c|
+        c.pause.timeout = 1_000
+        c.pause.max_timeout = 30_000
+        c.pause.with_exponential_backoff = true
+      end
+    end
+
+    context 'when using new nested API' do
+      it 'allows setting pause.timeout' do
+        Karafka::App.setup do |c|
+          c.pause.timeout = 2_000
+        end
+
+        expect(config.pause.timeout).to eq(2_000)
+      end
+
+      it 'allows setting pause.max_timeout' do
+        Karafka::App.setup do |c|
+          c.pause.max_timeout = 5_000
+        end
+
+        expect(config.pause.max_timeout).to eq(5_000)
+      end
+
+      it 'allows setting pause.with_exponential_backoff' do
+        Karafka::App.setup do |c|
+          c.pause.with_exponential_backoff = false
+        end
+
+        expect(config.pause.with_exponential_backoff).to eq(false)
+      end
+    end
+
+    context 'when using old flat API via config instance' do
+      it 'allows reading pause_timeout via backwards compatible method' do
+        Karafka::App.setup do |c|
+          c.pause.timeout = 3_000
+        end
+
+        expect(config.pause_timeout).to eq(3_000)
+      end
+
+      it 'allows setting pause_timeout via backwards compatible method' do
+        Karafka::App.setup do |c|
+          c.pause_timeout = 4_000
+        end
+
+        expect(config.pause.timeout).to eq(4_000)
+        expect(config.pause_timeout).to eq(4_000)
+      end
+
+      it 'allows reading pause_max_timeout via backwards compatible method' do
+        Karafka::App.setup do |c|
+          c.pause.max_timeout = 7_000
+        end
+
+        expect(config.pause_max_timeout).to eq(7_000)
+      end
+
+      it 'allows setting pause_max_timeout via backwards compatible method' do
+        Karafka::App.setup do |c|
+          c.pause_max_timeout = 8_000
+        end
+
+        expect(config.pause.max_timeout).to eq(8_000)
+        expect(config.pause_max_timeout).to eq(8_000)
+      end
+
+      it 'allows reading pause_with_exponential_backoff via backwards compatible method' do
+        Karafka::App.setup do |c|
+          c.pause.with_exponential_backoff = false
+        end
+
+        expect(config.pause_with_exponential_backoff).to eq(false)
+      end
+
+      it 'allows setting pause_with_exponential_backoff via backwards compatible method' do
+        Karafka::App.setup do |c|
+          c.pause_with_exponential_backoff = false
+        end
+
+        expect(config.pause.with_exponential_backoff).to eq(false)
+        expect(config.pause_with_exponential_backoff).to eq(false)
+      end
+    end
+
+    context 'when mixing old and new APIs' do
+      it 'reflects changes from old API setter in new API getter' do
+        Karafka::App.setup do |c|
+          c.pause_timeout = 5_000
+        end
+
+        expect(config.pause.timeout).to eq(5_000)
+      end
+
+      it 'reflects changes from new API setter in old API getter' do
+        Karafka::App.setup do |c|
+          c.pause.timeout = 6_000
+        end
+
+        expect(config.pause_timeout).to eq(6_000)
+      end
+    end
+  end
 end

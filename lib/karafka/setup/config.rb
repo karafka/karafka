@@ -52,12 +52,16 @@ module Karafka
       setting :shutdown_timeout, default: 60_000
       # option [Integer] number of threads in which we want to do parallel processing
       setting :concurrency, default: 5
-      # option [Integer] how long should we wait upon processing error (milliseconds)
-      setting :pause_timeout, default: 1_000
-      # option [Integer] what is the max timeout in case of an exponential backoff (milliseconds)
-      setting :pause_max_timeout, default: 30_000
-      # option [Boolean] should we use exponential backoff
-      setting :pause_with_exponential_backoff, default: true
+      # Namespace for pause-related settings
+      setting :pause do
+        # option [Integer] how long should we wait upon processing error (milliseconds)
+        setting :timeout, default: 1_000
+        # option [Integer] what is the max timeout in case of an exponential backoff (milliseconds)
+        setting :max_timeout, default: 30_000
+        # option [Boolean] should we use exponential backoff
+        setting :with_exponential_backoff, default: true
+      end
+
       # option [::WaterDrop::Producer, nil]
       # Unless configured, will be created once Karafka is configured based on user Karafka setup
       setting :producer, default: nil
@@ -342,6 +346,35 @@ module Karafka
       # This will load all the defaults that can be later overwritten.
       # Thanks to that we have an initial state out of the box.
       configure
+
+      # Backwards compatibility: Add old flat API methods to the config instance
+      # These delegate to the new nested pause config
+      # @deprecated Will be removed in Karafka 2.6
+      config.instance_eval do
+        def pause_timeout
+          pause.timeout
+        end
+
+        def pause_timeout=(value)
+          pause.timeout = value
+        end
+
+        def pause_max_timeout
+          pause.max_timeout
+        end
+
+        def pause_max_timeout=(value)
+          pause.max_timeout = value
+        end
+
+        def pause_with_exponential_backoff
+          pause.with_exponential_backoff
+        end
+
+        def pause_with_exponential_backoff=(value)
+          pause.with_exponential_backoff = value
+        end
+      end
 
       class << self
         # Configuring method

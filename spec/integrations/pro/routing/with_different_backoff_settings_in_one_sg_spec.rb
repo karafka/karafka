@@ -4,16 +4,17 @@
 # See LICENSE for details.
 
 # Karafka should not build separate SGs when altering pause settings per topic in a SG/CG
-# We also should be able to use any of the pause declaration styles.
 
 setup_karafka
 
 draw_routes(create_topics: false) do
   topic 'topic1' do
     consumer Class.new
-    pause_timeout 100
-    pause_max_timeout 1_000
-    pause_with_exponential_backoff true
+    pause(
+      timeout: 100,
+      max_timeout: 1_000,
+      with_exponential_backoff: true
+    )
   end
 
   topic 'topic2' do

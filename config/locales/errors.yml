@@ -11,9 +11,11 @@ en:
         group_id_format: 'needs to be a string with a Kafka accepted format'
         concurrency_format: needs to be an integer bigger than 0
         consumer_persistence_format: needs to be either true or false
-        pause_timeout_format: needs to be an integer bigger than 0
-        pause_max_timeout_format: needs to be an integer bigger than 0
-        pause_with_exponential_backoff_format: needs to be either true or false
+
+        pause.timeout_format: needs to be an integer bigger than 0
+        pause.max_timeout_format: needs to be an integer bigger than 0
+        pause.with_exponential_backoff_format: needs to be either true or false
+
         strict_topics_namespacing_format: needs to be either true or false
         strict_declarative_topics_format: needs to be either true or false
         shutdown_timeout_format: needs to be an integer bigger than 0
@@ -23,7 +25,7 @@ en:
           Decrease max_wait_time or increase node_report_timeout
         kafka_format: needs to be a filled hash
         key_must_be_a_symbol: All keys under the kafka settings scope need to be symbols
-        max_timeout_vs_pause_max_timeout: pause_timeout must be less or equal to pause_max_timeout
+        pause.timeout_max_timeout_vs_pause_max_timeout: pause.timeout must be less or equal to pause.max_timeout
         shutdown_timeout_vs_max_wait_time: shutdown_timeout must be more than max_wait_time
         worker_thread_priority_format: must be between -3 and 3
 
