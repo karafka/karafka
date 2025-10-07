@@ -3,8 +3,6 @@
 # This spec verifies that the client.events_poll event is emitted when assignment loss is
 # detected, and that the AssignmentsTracker properly clears assignments in response.
 
-require_relative '../../integrations_helper'
-
 setup_karafka(allow_errors: true) do |config|
   config.kafka[:'max.poll.interval.ms'] = 10_000
   config.kafka[:'session.timeout.ms'] = 10_000
@@ -21,13 +19,11 @@ end
 
 class Consumer < Karafka::BaseConsumer
   def consume
-    return if DT.key?(:done)
-
     # Store initial assignment state
     DT[:initial_assignments] = Karafka::App.assignments.dup
 
-    # Simulate processing that exceeds max.poll.interval.ms
-    sleep(15)
+    # Simulate processing that exceeds max.poll.interval.ms beyond another events poll
+    sleep(20)
 
     # Store final assignment state after sleep
     DT[:final_assignments] = Karafka::App.assignments.dup
@@ -51,16 +47,17 @@ assert(
 
 # Verify the events contain proper metadata
 first_event = DT[:events_poll_events].first
-assert first_event[:client_id], 'Event should include client_id'
-assert first_event[:subscription_group_id], 'Event should include subscription_group_id'
+
+assert !first_event[:client_id].nil?
+assert !first_event[:subscription_group_id].nil?
 
 # Verify assignments were present initially
 initial_topic = DT[:initial_assignments].keys.first
-assert initial_topic, 'Should have initial topic assignment'
-assert DT[:initial_assignments][initial_topic].any?, 'Should have initial partition assignments'
+assert !initial_topic.nil?, 'Should have initial topic assignment'
+assert !DT[:initial_assignments][initial_topic].empty?
 
 # Verify assignments were cleared after exceeding max.poll.interval.ms
-assert DT[:final_assignments].empty?, 'Assignments should be cleared after assignment loss'
+assert DT[:final_assignments].empty?
 
 # Verify timing - events_poll should have been called multiple times during the 15s sleep
 event_count = DT[:events_poll_events].size
