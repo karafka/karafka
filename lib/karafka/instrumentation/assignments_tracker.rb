@@ -79,6 +79,23 @@ module Karafka
         end
       end
 
+      # Handles events_poll notification to detect assignment loss
+      # This is called regularly (every tick_interval) so we check if assignment was lost
+      #
+      # @param event [Karafka::Core::Monitoring::Event]
+      # @note We can run the `#assignment_lost?` on each events poll because they happen once every
+      #   5 seconds during processing plus prior to each messages poll. It takes
+      #   0.6 microseconds per call.
+      def on_client_events_poll(event)
+        client = event[:caller]
+
+        # Only clear assignments if they were actually lost
+        return unless client.assignment_lost?
+
+        # Cleaning happens the same way as with the consumer reset
+        on_client_reset(event)
+      end
+
       # Removes partitions from the current assignments hash
       #
       # @param event [Karafka::Core::Monitoring::Event]

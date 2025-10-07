@@ -72,6 +72,79 @@ RSpec.describe_current do
     it { expect(tracker.current.values.first).to eq([2]) }
   end
 
+  describe '#on_client_events_poll' do
+    let(:client) { instance_double(Karafka::Connection::Client, assignment_lost?: false) }
+    let(:events_poll_event) do
+      {
+        caller: client,
+        subscription_group: subscription_group1
+      }
+    end
+
+    context 'when assignment was not lost' do
+      before do
+        tracker.on_rebalance_partitions_assigned(assign_event)
+        tracker.on_client_events_poll(events_poll_event)
+      end
+
+      it 'expect not to clear any assignments' do
+        expect(tracker.current[topic1]).to eq([0, 1, 2])
+      end
+    end
+
+    context 'when assignment was lost' do
+      before do
+        allow(client).to receive(:assignment_lost?).and_return(true)
+        tracker.on_rebalance_partitions_assigned(assign_event)
+      end
+
+      context 'with single subscription group' do
+        before { tracker.on_client_events_poll(events_poll_event) }
+
+        it 'expect to clear assignments for the subscription group' do
+          expect(tracker.current).to eq({})
+        end
+      end
+
+      context 'with multiple subscription groups' do
+        let(:client2) { instance_double(Karafka::Connection::Client, assignment_lost?: false) }
+        let(:events_poll_event2) do
+          {
+            caller: client2,
+            subscription_group: subscription_group2
+          }
+        end
+
+        before do
+          # Assign to both subscription groups
+          assign_event2 = assign_event.dup
+          assign_event2[:subscription_group] = subscription_group2
+          tracker.on_rebalance_partitions_assigned(assign_event2)
+
+          # Only subscription_group1 loses assignment
+          tracker.on_client_events_poll(events_poll_event)
+        end
+
+        it 'expect to only clear assignments for the affected subscription group' do
+          expect(tracker.current.key?(topic1)).to be(false)
+          expect(tracker.current.key?(topic2)).to be(true)
+          expect(tracker.current[topic2]).to eq([0, 1, 2])
+        end
+      end
+    end
+
+    context 'when called multiple times with no assignment loss' do
+      before do
+        tracker.on_rebalance_partitions_assigned(assign_event)
+      end
+
+      it 'expect to be safe to call repeatedly without side effects' do
+        10.times { tracker.on_client_events_poll(events_poll_event) }
+        expect(tracker.current[topic1]).to eq([0, 1, 2])
+      end
+    end
+  end
+
   describe '#inspect' do
     let(:subscription_group) { build(:routing_subscription_group) }
     let(:topic) { subscription_group.topics.first }
