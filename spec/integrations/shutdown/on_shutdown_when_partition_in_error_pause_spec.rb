@@ -4,8 +4,8 @@
 # `#shutdown` method still should be invoked
 
 setup_karafka(allow_errors: true) do |config|
-  config.pause_timeout = 60 * 1_000
-  config.pause_max_timeout = 60 * 1_000
+  config.pause.timeout = 60 * 1_000
+  config.pause.max_timeout = 60 * 1_000
 end
 
 class Consumer < Karafka::BaseConsumer

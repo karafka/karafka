@@ -8,9 +8,12 @@ RSpec.describe_current do
 
   let(:config) do
     {
-      pause_timeout: 100,
-      pause_max_timeout: 200,
-      pause_with_exponential_backoff: false
+      pausing: {
+        active: true,
+        timeout: 100,
+        max_timeout: 200,
+        with_exponential_backoff: false
+      }
     }
   end
 
@@ -18,40 +21,46 @@ RSpec.describe_current do
     it { expect(check).to be_success }
   end
 
-  context 'when pause_timeout is not int' do
-    before { config[:pause_timeout] = 1.2 }
+  context 'when pausing.active is not boolean' do
+    before { config[:pausing][:active] = 'true' }
 
     it { expect(check).not_to be_success }
   end
 
-  context 'when pause_timeout is less than 0' do
-    before { config[:pause_timeout] = -1 }
+  context 'when pausing.timeout is not int' do
+    before { config[:pausing][:timeout] = 1.2 }
 
     it { expect(check).not_to be_success }
   end
 
-  context 'when pause_max_timeout is not int' do
-    before { config[:pause_max_timeout] = 1.2 }
+  context 'when pausing.timeout is less than or equal to 0' do
+    before { config[:pausing][:timeout] = 0 }
 
     it { expect(check).not_to be_success }
   end
 
-  context 'when pause_max_timeout is less than 0' do
-    before { config[:pause_max_timeout] = -1 }
+  context 'when pausing.max_timeout is not int' do
+    before { config[:pausing][:max_timeout] = 1.2 }
 
     it { expect(check).not_to be_success }
   end
 
-  context 'when pause_with_exponential_backoff is not boolean' do
-    before { config[:pause_with_exponential_backoff] = -1 }
+  context 'when pausing.max_timeout is less than or equal to 0' do
+    before { config[:pausing][:max_timeout] = -1 }
 
     it { expect(check).not_to be_success }
   end
 
-  context 'when max is less than pause' do
+  context 'when pausing.with_exponential_backoff is not boolean' do
+    before { config[:pausing][:with_exponential_backoff] = -1 }
+
+    it { expect(check).not_to be_success }
+  end
+
+  context 'when pausing.max_timeout is less than pausing.timeout' do
     before do
-      config[:pause_timeout] = 10
-      config[:pause_max_timeout] = 1
+      config[:pausing][:timeout] = 10
+      config[:pausing][:max_timeout] = 1
     end
 
     it { expect(check).not_to be_success }

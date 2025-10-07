@@ -31,10 +31,11 @@ en:
         delaying.delay_format: 'needs to be equal or more than 0 and an integer'
         delaying.active_format: 'needs to be boolean'
 
-        pause_timeout_format: needs to be an integer bigger than 0
-        pause_max_timeout_format: needs to be an integer bigger than 0
-        pause_with_exponential_backoff_format: needs to be either true or false
-        pause_timeout_max_timeout_vs_pause_max_timeout: pause_timeout must be less or equal to pause_max_timeout
+        pausing.active_format: 'needs to be boolean'
+        pausing.timeout_format: needs to be an integer bigger than 0
+        pausing.max_timeout_format: needs to be an integer bigger than 0
+        pausing.with_exponential_backoff_format: needs to be either true or false
+        pausing.timeout_max_timeout_vs_pause_max_timeout: timeout must be less or equal to max_timeout
 
         patterns.active_format: 'needs to be boolean'
         patterns.type_format: 'needs to be :matcher, :discovered or :regular'

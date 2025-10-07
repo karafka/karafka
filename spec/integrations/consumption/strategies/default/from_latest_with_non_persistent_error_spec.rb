@@ -7,9 +7,9 @@
 setup_karafka(allow_errors: true) do |config|
   config.concurrency = 1
   # We sleep more to check if when sleeping other topic messages are processed
-  config.pause_timeout = 1_000
-  config.pause_max_timeout = 1_000
-  config.pause_with_exponential_backoff = false
+  config.pause.timeout = 1_000
+  config.pause.max_timeout = 1_000
+  config.pause.with_exponential_backoff = false
   config.initial_offset = 'latest'
 end
 

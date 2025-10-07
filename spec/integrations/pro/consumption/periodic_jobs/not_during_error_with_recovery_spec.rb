@@ -6,8 +6,8 @@
 # Ticking should work before and after the recovery but not during in the default setup.
 
 setup_karafka(allow_errors: true) do |config|
-  config.pause_timeout = 1_000
-  config.pause_max_timeout = 1_500
+  config.pause.timeout = 1_000
+  config.pause.max_timeout = 1_500
   config.max_wait_time = 100
   config.max_messages = 1
 end

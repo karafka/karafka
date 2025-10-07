@@ -6,9 +6,9 @@
 setup_karafka(allow_errors: true) do |config|
   config.max_wait_time = 100
   config.max_messages = 1
-  config.pause_with_exponential_backoff = true
-  config.pause_max_timeout = 5_000
-  config.pause_timeout = 200
+  config.pause.with_exponential_backoff = true
+  config.pause.max_timeout = 5_000
+  config.pause.timeout = 200
 end
 
 class Consumer < Karafka::BaseConsumer
