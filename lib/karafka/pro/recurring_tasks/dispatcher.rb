@@ -9,8 +9,7 @@ module Karafka
       # Dispatches appropriate recurring tasks related messages to expected topics
       class Dispatcher
         extend Helpers::ConfigImporter.new(
-          recurring_tasks_producer: %i[recurring_tasks producer],
-          recurring_tasks_topics: %i[recurring_tasks topics]
+          topics: %i[recurring_tasks topics]
         )
 
         class << self
@@ -49,13 +48,10 @@ module Karafka
           private
 
           # @return [::WaterDrop::Producer] web ui producer
+          # @note We do not fetch it via the ConfigImporter not to cache it so we can re-use it
+          #   if needed
           def producer
-            recurring_tasks_producer
-          end
-
-          # @return [String] consumers commands topic
-          def topics
-            recurring_tasks_topics
+            ::Karafka::App.config.recurring_tasks.producer
           end
 
           # @return [Serializer]
