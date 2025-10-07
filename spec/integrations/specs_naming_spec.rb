@@ -15,11 +15,18 @@ ALLOWED_NAMES = %w[
   config.ru
 ].freeze
 
+# Special cases where multi-file setup was needed
+SPECIAL_SPECS = %w[
+  routing/consumer_group_reopening_pristine/consumers
+  routing/consumer_group_reopening_pristine
+].freeze
+
 not_prefixed = []
 
 specs_location = File.join(Karafka.gem_root, 'spec', 'integrations', '**/**')
 
 Dir[specs_location].each do |path|
+  next if SPECIAL_SPECS.any? { |spec| path.include?(spec) }
   next unless File.file?(path)
   next if path.end_with?('_spec.rb')
 
