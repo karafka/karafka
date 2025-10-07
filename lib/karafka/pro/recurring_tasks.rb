@@ -7,6 +7,10 @@ module Karafka
   module Pro
     # Recurring tasks functionality
     module RecurringTasks
+      extend Helpers::ConfigImporter.new(
+        recurring_tasks_logging: %i[recurring_tasks logging]
+      )
+
       class << self
         # @return [Schedule, nil] current defined schedule or nil if not defined
         def schedule
@@ -75,7 +79,7 @@ module Karafka
           RecurringTasks.schedule
 
           # User can disable logging of executions, in which case we don't track them
-          return unless Karafka::App.config.recurring_tasks.logging
+          return unless recurring_tasks_logging
 
           Karafka.monitor.subscribe(Listener.new)
         end

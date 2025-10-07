@@ -13,6 +13,10 @@ module Karafka
           # Extension allowing us to select correct subscriptions and assignments based on the
           # expanded routing setup
           module SubscriptionGroup
+            include Helpers::ConfigImporter.new(
+              swarm_node: %i[swarm node]
+            )
+
             # @return [false, Array<String>] false if we do not have any subscriptions or array
             #   with all the subscriptions for given subscription group
             def subscriptions
@@ -44,21 +48,19 @@ module Karafka
             # @param topic [Karafka::Routing::Topic]
             # @return [Array<String, Hash>]
             def build_assignments(topic)
-              node = Karafka::App.config.swarm.node
-
               standard_setup = [
                 topic.subscription_name,
                 topic.direct_assignments.partitions
               ]
 
-              return standard_setup unless node
+              return standard_setup unless swarm_node
               # Unless user explicitly assigned particular partitions to particular nodes, we just
               # go with full regular assignments
               return standard_setup unless topic.swarm.nodes.is_a?(Hash)
 
               [
                 topic.subscription_name,
-                topic.swarm.nodes.fetch(node.id).map { |partition| [partition, true] }.to_h
+                topic.swarm.nodes.fetch(swarm_node.id).map { |partition| [partition, true] }.to_h
               ]
             end
           end

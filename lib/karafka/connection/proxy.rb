@@ -10,6 +10,10 @@ module Karafka
     # do still want to be able to alter some functionalities. This wrapper helps us do it when
     # it would be needed
     class Proxy < SimpleDelegator
+      include Helpers::ConfigImporter.new(
+        proxy_config: %i[internal connection proxy]
+      )
+
       # Errors on which we want to retry
       # Includes temporary errors related to node not being (or not yet being) coordinator or a
       # leader to a given set of partitions. Usually goes away after a retry
@@ -37,7 +41,6 @@ module Karafka
         # wrap an already wrapped object with another proxy level. Simplifies passing consumers
         # and makes it safe to wrap without type checking
         @wrapped = obj.is_a?(self.class) ? obj.wrapped : obj
-        @config = ::Karafka::App.config.internal.connection.proxy
       end
 
       # Proxies the `#query_watermark_offsets` with extra recovery from timeout problems.
@@ -48,7 +51,7 @@ module Karafka
       # @param partition [Integer] partition number
       # @return [Array<Integer, Integer>] watermark offsets
       def query_watermark_offsets(topic, partition)
-        l_config = @config.query_watermark_offsets
+        l_config = proxy_config.query_watermark_offsets
 
         # For newly created topics or in cases where we're trying to get them but there is no
         # leader, this can fail. It happens more often for new topics under KRaft, however we
@@ -68,7 +71,7 @@ module Karafka
       # @param tpl [Rdkafka::Consumer::TopicPartitionList] tpl to get time offsets
       # @return [Rdkafka::Consumer::TopicPartitionList] tpl with time offsets
       def offsets_for_times(tpl)
-        l_config = @config.offsets_for_times
+        l_config = proxy_config.offsets_for_times
 
         with_broker_errors_retry(
           # required to be in seconds, not ms
@@ -85,7 +88,7 @@ module Karafka
       #   assignment tpl usage
       # @return [Rdkafka::Consumer::TopicPartitionList] tpl with committed offsets and metadata
       def committed(tpl = nil)
-        c_config = @config.committed
+        c_config = proxy_config.committed
 
         with_broker_errors_retry(
           # required to be in seconds, not ms
@@ -122,7 +125,7 @@ module Karafka
       #   even when no stored, because with sync commit, it refreshes the ownership state of the
       #   consumer in a sync way.
       def commit_offsets(tpl = nil, async: true)
-        c_config = @config.commit
+        c_config = proxy_config.commit
 
         with_broker_errors_retry(
           wait_time: c_config.wait_time / 1_000.to_f,
@@ -154,7 +157,7 @@ module Karafka
       #   we want to get the lag on the defined CG
       # @return [Hash<String, Hash>] hash with topics and their partitions lags
       def lag(tpl)
-        l_config = @config.committed
+        l_config = proxy_config.committed
 
         with_broker_errors_retry(
           # required to be in seconds, not ms
@@ -169,7 +172,7 @@ module Karafka
       #   get info on all topics
       # @return [Rdkafka::Metadata] rdkafka metadata object with the requested details
       def metadata(topic_name = nil)
-        m_config = @config.metadata
+        m_config = proxy_config.metadata
 
         with_broker_errors_retry(
           # required to be in seconds, not ms

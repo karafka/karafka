@@ -11,11 +11,14 @@ module Karafka
     # or other places but would only slow things down if would run with each tick.
     class IntervalRunner
       include Karafka::Core::Helpers::Time
+      include Helpers::ConfigImporter.new(
+        tick_interval: %i[internal tick_interval]
+      )
 
       # @param interval [Integer] interval in ms for running the provided code. Defaults to the
       #   `internal.tick_interval` value
       # @param block [Proc] block of code we want to run once in a while
-      def initialize(interval: ::Karafka::App.config.internal.tick_interval, &block)
+      def initialize(interval: tick_interval, &block)
         @block = block
         @interval = interval
         @last_called_at = monotonic_now - @interval
