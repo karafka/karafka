@@ -8,6 +8,10 @@ module Karafka
     module RecurringTasks
       # Dispatches appropriate recurring tasks related messages to expected topics
       class Dispatcher
+        extend Helpers::ConfigImporter.new(
+          topics: %i[recurring_tasks topics]
+        )
+
         class << self
           # Snapshots to Kafka current schedule state
           def schedule
@@ -44,13 +48,10 @@ module Karafka
           private
 
           # @return [::WaterDrop::Producer] web ui producer
+          # @note We do not fetch it via the ConfigImporter not to cache it so we can re-use it
+          #   if needed
           def producer
             ::Karafka::App.config.recurring_tasks.producer
-          end
-
-          # @return [String] consumers commands topic
-          def topics
-            ::Karafka::App.config.recurring_tasks.topics
           end
 
           # @return [Serializer]

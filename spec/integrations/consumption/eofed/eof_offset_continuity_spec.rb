@@ -28,6 +28,9 @@ class Consumer < Karafka::BaseConsumer
       DT[:consumed] << message.offset
       DT[:payloads] << message.raw_payload
     end
+
+    # Run eofed in case it was not without messages
+    eofed if eofed?
   end
 
   def eofed
