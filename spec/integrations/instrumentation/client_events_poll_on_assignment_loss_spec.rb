@@ -44,7 +44,10 @@ start_karafka_and_wait_until do
 end
 
 # Verify client.events_poll events were emitted during processing
-assert DT[:events_poll_events].size > 1, "Expected multiple events_poll events, got #{DT[:events_poll_events].size}"
+assert(
+  DT[:events_poll_events].size > 1,
+  "Expected multiple events_poll events, got #{DT[:events_poll_events].size}"
+)
 
 # Verify the events contain proper metadata
 first_event = DT[:events_poll_events].first
