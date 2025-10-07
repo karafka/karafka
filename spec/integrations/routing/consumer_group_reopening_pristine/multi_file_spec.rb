@@ -77,10 +77,7 @@ topic3 = consumer_group.topics.to_a.find { |t| t.name == DT.topics[3] }
 raise 'topic0 should have UsersConsumer' unless topic0.consumer == UsersConsumer
 raise 'topic1 should have UsersConsumer' unless topic1.consumer == UsersConsumer
 raise 'topic2 should have OrdersConsumer' unless topic2.consumer == OrdersConsumer
-
-unless topic3.consumer == OrdersConsumer
-  raise 'topic3 should have OrdersConsumer'
-end
+raise 'topic3 should have OrdersConsumer' unless topic3.consumer == OrdersConsumer
 
 # Verify all topics have correct initial_offset
 [topic0, topic1, topic2, topic3].each do |topic|
