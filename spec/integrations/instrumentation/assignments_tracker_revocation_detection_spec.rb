@@ -3,6 +3,8 @@
 # This spec demonstrates using Fiber storage to pass context (topic, partition)
 # to helper classes without explicit arguments, enabling them to check assignment status.
 
+require_relative '../../integrations_helper'
+
 setup_karafka(allow_errors: true) do |config|
   config.kafka[:'max.poll.interval.ms'] = 10_000
   config.kafka[:'session.timeout.ms'] = 10_000
@@ -32,9 +34,9 @@ class ExpensiveComputation
       topic = Fiber.current.storage[:karafka_context][:topic]
       partition = Fiber.current.storage[:karafka_context][:partition]
 
-      assignments = Karafka::App.assignments[topic]
+      assignments = Karafka::App.assignments[topic] || []
 
-      assignments.include?(partition)
+      !assignments.include?(partition)
     end
   end
 end

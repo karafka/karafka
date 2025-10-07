@@ -409,6 +409,14 @@ module Karafka
       #   2ms when no callbacks are triggered.
       def events_poll(timeout = 0)
         kafka.events_poll(timeout)
+
+        # Emit event for monitoring - happens once per tick_interval (default 5s)
+        # Listeners can check assignment_lost?, track polling health, etc.
+        Karafka.monitor.instrument(
+          'client.events_poll',
+          caller: self,
+          subscription_group: @subscription_group
+        )
       end
 
       # Returns pointer to the consumer group metadata. It is used only in the context of
