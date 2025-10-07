@@ -5,14 +5,38 @@
 # topics in the same consumer group.
 #
 # Directory structure:
-# - routes/users_routes.rb  - defines 'users.*' topics in 'main_app' group
-# - routes/orders_routes.rb - reopens 'main_app' group with 'orders.*' topics
+# - routes/users_routes.rb  - defines topics in a shared consumer group
+# - routes/orders_routes.rb - reopens the same consumer group with more topics
 # - consumers/              - consumer implementations
 #
-# Expected behavior: All topics should accumulate in the same 'main_app'
-# consumer group, allowing for modular routing configuration.
+# Expected behavior: All topics should accumulate in the same consumer group,
+# allowing for modular routing configuration.
 
 require 'karafka'
+require 'singleton'
+require 'securerandom'
+
+# Load DataCollector for DT support
+class DataCollector
+  include Singleton
+
+  attr_reader :topics, :consumer_groups
+
+  def self.topics
+    instance.topics
+  end
+
+  def self.consumer_groups
+    instance.consumer_groups
+  end
+
+  def initialize
+    @topics = Array.new(100) { "it-#{SecureRandom.hex(8)}" }
+    @consumer_groups = @topics
+  end
+end
+
+DT = DataCollector
 
 # Load consumer classes
 current_dir = __dir__
@@ -32,12 +56,12 @@ require File.join(current_dir, 'routes', 'users_routes')
 require File.join(current_dir, 'routes', 'orders_routes')
 
 # Verify that consumer group reopening worked correctly
-consumer_group = Karafka::App.routes.find { |cg| cg.name == 'main_app' }
+consumer_group = Karafka::App.routes.find { |cg| cg.name == DT.consumer_groups[0] }
 
-raise 'Consumer group "main_app" should exist' if consumer_group.nil?
+raise 'Consumer group should exist' if consumer_group.nil?
 
 # Should have all 4 topics from both route files
-expected_topics = %w[orders.completed orders.placed users.created users.updated]
+expected_topics = [DT.topics[0], DT.topics[1], DT.topics[2], DT.topics[3]].sort
 actual_topics = consumer_group.topics.map(&:name).sort
 
 unless actual_topics == expected_topics
@@ -45,24 +69,24 @@ unless actual_topics == expected_topics
 end
 
 # Verify consumers are correctly assigned
-users_created = consumer_group.topics.to_a.find { |t| t.name == 'users.created' }
-users_updated = consumer_group.topics.to_a.find { |t| t.name == 'users.updated' }
-orders_placed = consumer_group.topics.to_a.find { |t| t.name == 'orders.placed' }
-orders_completed = consumer_group.topics.to_a.find { |t| t.name == 'orders.completed' }
+topic0 = consumer_group.topics.to_a.find { |t| t.name == DT.topics[0] }
+topic1 = consumer_group.topics.to_a.find { |t| t.name == DT.topics[1] }
+topic2 = consumer_group.topics.to_a.find { |t| t.name == DT.topics[2] }
+topic3 = consumer_group.topics.to_a.find { |t| t.name == DT.topics[3] }
 
-raise 'users.created should have UsersConsumer' unless users_created.consumer == UsersConsumer
-raise 'users.updated should have UsersConsumer' unless users_updated.consumer == UsersConsumer
-raise 'orders.placed should have OrdersConsumer' unless orders_placed.consumer == OrdersConsumer
+raise 'topic0 should have UsersConsumer' unless topic0.consumer == UsersConsumer
+raise 'topic1 should have UsersConsumer' unless topic1.consumer == UsersConsumer
+raise 'topic2 should have OrdersConsumer' unless topic2.consumer == OrdersConsumer
 
-unless orders_completed.consumer == OrdersConsumer
-  raise 'orders.completed should have OrdersConsumer'
+unless topic3.consumer == OrdersConsumer
+  raise 'topic3 should have OrdersConsumer'
 end
 
 # Verify all topics have correct initial_offset
-[users_created, users_updated, orders_placed, orders_completed].each do |topic|
-  unless topic.initial_offset == 'earliest'
-    raise(
-      "#{topic.name} should have initial_offset 'earliest', got #{topic.initial_offset.inspect}"
-    )
-  end
+[topic0, topic1, topic2, topic3].each do |topic|
+  next if topic.initial_offset == 'earliest'
+
+  raise(
+    "#{topic.name} should have initial_offset 'earliest', got #{topic.initial_offset.inspect}"
+  )
 end
