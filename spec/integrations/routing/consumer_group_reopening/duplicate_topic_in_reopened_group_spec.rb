@@ -9,10 +9,10 @@ setup_karafka
 Consumer1 = Class.new(Karafka::BaseConsumer)
 Consumer2 = Class.new(Karafka::BaseConsumer)
 
-# First draw - define consumer group with topic1
+# First draw - define consumer group with a topic
 draw_routes(create_topics: false) do
-  consumer_group 'test_group' do
-    topic 'topic1' do
+  consumer_group DT.consumer_groups[0] do
+    topic DT.topics[0] do
       consumer Consumer1
       initial_offset 'earliest'
     end
@@ -22,10 +22,10 @@ end
 # Verify first draw
 group = Karafka::App.routes.first
 assert_equal 1, group.topics.size
-topic1_first = group.topics.to_a.first
-assert_equal 'topic1', topic1_first.name
-assert_equal Consumer1, topic1_first.consumer
-assert_equal 'earliest', topic1_first.initial_offset
+topic_first = group.topics.to_a.first
+assert_equal DT.topics[0], topic_first.name
+assert_equal Consumer1, topic_first.consumer
+assert_equal 'earliest', topic_first.initial_offset
 
 # Second draw - try to define the same topic again with different settings
 # This should raise an error because duplicate topic names are not allowed
@@ -34,8 +34,8 @@ error_message = nil
 
 begin
   draw_routes(create_topics: false) do
-    consumer_group 'test_group' do
-      topic 'topic1' do
+    consumer_group DT.consumer_groups[0] do
+      topic DT.topics[0] do
         consumer Consumer2
         initial_offset 'latest'
       end
@@ -65,4 +65,4 @@ assert_equal 2, group.topics.size, expected_message
 
 # Both topics exist but the configuration is invalid
 topics = group.topics.to_a
-raise 'Should have topic1 topics' unless topics.any? { |t| t.name == 'topic1' }
+raise 'Should have duplicate topics' unless topics.any? { |t| t.name == DT.topics[0] }

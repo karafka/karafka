@@ -16,27 +16,29 @@ require 'karafka'
 require 'singleton'
 require 'securerandom'
 
-# Load DataCollector for DT support
-class DataCollector
-  include Singleton
+# Load DataCollector for DT support unless already defined
+unless defined?(DT)
+  class DataCollector
+    include Singleton
 
-  attr_reader :topics, :consumer_groups
+    attr_reader :topics, :consumer_groups
 
-  def self.topics
-    instance.topics
+    def self.topics
+      instance.topics
+    end
+
+    def self.consumer_groups
+      instance.consumer_groups
+    end
+
+    def initialize
+      @topics = Array.new(100) { "it-#{SecureRandom.hex(8)}" }
+      @consumer_groups = @topics
+    end
   end
 
-  def self.consumer_groups
-    instance.consumer_groups
-  end
-
-  def initialize
-    @topics = Array.new(100) { "it-#{SecureRandom.hex(8)}" }
-    @consumer_groups = @topics
-  end
+  DT = DataCollector
 end
-
-DT = DataCollector
 
 # Load consumer classes
 current_dir = __dir__
