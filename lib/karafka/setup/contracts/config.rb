@@ -33,9 +33,13 @@ module Karafka
         required(:client_id) { |val| val.is_a?(String) && TOPIC_REGEXP.match?(val) }
         required(:concurrency) { |val| val.is_a?(Integer) && val.positive? }
         required(:consumer_persistence) { |val| [true, false].include?(val) }
-        required(:pause_timeout) { |val| val.is_a?(Integer) && val.positive? }
-        required(:pause_max_timeout) { |val| val.is_a?(Integer) && val.positive? }
-        required(:pause_with_exponential_backoff) { |val| [true, false].include?(val) }
+
+        nested(:pause) do
+          required(:timeout) { |val| val.is_a?(Integer) && val.positive? }
+          required(:max_timeout) { |val| val.is_a?(Integer) && val.positive? }
+          required(:with_exponential_backoff) { |val| [true, false].include?(val) }
+        end
+
         required(:strict_topics_namespacing) { |val| [true, false].include?(val) }
         required(:shutdown_timeout) { |val| val.is_a?(Integer) && val.positive? }
         required(:max_wait_time) { |val| val.is_a?(Integer) && val.positive? }
@@ -171,12 +175,12 @@ module Karafka
         virtual do |data, errors|
           next unless errors.empty?
 
-          pause_timeout = data.fetch(:pause_timeout)
-          pause_max_timeout = data.fetch(:pause_max_timeout)
+          pause_timeout = data.fetch(:pause).fetch(:timeout)
+          pause_max_timeout = data.fetch(:pause).fetch(:max_timeout)
 
           next if pause_timeout <= pause_max_timeout
 
-          [[%i[pause_timeout], :max_timeout_vs_pause_max_timeout]]
+          [[%i[pause timeout], :max_timeout_vs_pause_max_timeout]]
         end
 
         virtual do |data, errors|

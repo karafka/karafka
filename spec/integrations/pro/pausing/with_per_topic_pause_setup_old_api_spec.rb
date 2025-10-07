@@ -3,12 +3,14 @@
 # This code is part of Karafka Pro, a commercial component not licensed under LGPL.
 # See LICENSE for details.
 
-# When customizing the error pausing strategy, each topic should obey its own limitations
+# When customizing the error pausing strategy using old API (setters),
+# each topic should obey its own limitations
+# This is a backwards compatibility test
 
 setup_karafka(allow_errors: %w[consumer.consume.error]) do |config|
-  config.pause.timeout = 1_000
-  config.pause.max_timeout = 10_000
-  config.pause.with_exponential_backoff = false
+  config.pause_timeout = 1_000
+  config.pause_max_timeout = 10_000
+  config.pause_with_exponential_backoff = false
   config.max_wait_time = 100
 end
 
@@ -27,20 +29,16 @@ draw_routes do
 
   topic DT.topics[1] do
     consumer Consumer
-    pause(
-      timeout: 100,
-      max_timeout: 2_000,
-      with_exponential_backoff: true
-    )
+    pause_timeout 100
+    pause_max_timeout 2_000
+    pause_with_exponential_backoff true
   end
 
   topic DT.topics[2] do
     consumer Consumer
-    pause(
-      timeout: 5_000,
-      max_timeout: 5_000,
-      with_exponential_backoff: false
-    )
+    pause_timeout 5_000
+    pause_max_timeout 5_000
+    pause_with_exponential_backoff false
   end
 end
 
@@ -96,3 +94,18 @@ DT[DT.topics[2]].each do |time|
 
   previous = time
 end
+
+config = Karafka::App.config
+
+# Verify backwards compatibility: old API and new API should return the same values
+assert_equal 1_000, config.pause_timeout
+assert_equal 1_000, config.pause.timeout
+assert_equal config.pause_timeout, config.pause.timeout
+
+assert_equal 10_000, config.pause_max_timeout
+assert_equal 10_000, config.pause.max_timeout
+assert_equal config.pause_max_timeout, config.pause.max_timeout
+
+assert_equal false, config.pause_with_exponential_backoff
+assert_equal false, config.pause.with_exponential_backoff
+assert_equal config.pause_with_exponential_backoff, config.pause.with_exponential_backoff

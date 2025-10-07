@@ -7,8 +7,8 @@ setup_karafka do |config|
   config.max_messages = 1
   # We assign a really big value as we want to make sure this value is not used with this spec
   # since we override this
-  config.pause_timeout = 1_000_000
-  config.pause_max_timeout = 1_000_000
+  config.pause.timeout = 1_000_000
+  config.pause.max_timeout = 1_000_000
 end
 
 class Consumer < Karafka::BaseConsumer

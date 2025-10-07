@@ -5,8 +5,8 @@
 # so the consumer can back off if needed
 
 setup_karafka(allow_errors: true) do |config|
-  config.pause_with_exponential_backoff = true
-  config.pause_max_timeout = 5_000
+  config.pause.with_exponential_backoff = true
+  config.pause.max_timeout = 5_000
 end
 
 NoPoolObjectAvailableError = Class.new(StandardError)

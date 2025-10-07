@@ -9,9 +9,11 @@ RSpec.describe_current do
       group_id: 'name',
       shutdown_timeout: 2_000,
       consumer_persistence: true,
-      pause_max_timeout: 1_000,
-      pause_timeout: 1_000,
-      pause_with_exponential_backoff: false,
+      pause: {
+        timeout: 1_000,
+        max_timeout: 1_000,
+        with_exponential_backoff: false
+      },
       max_wait_time: 1_000,
       strict_topics_namespacing: false,
       strict_declarative_topics: false,
@@ -497,44 +499,44 @@ RSpec.describe_current do
     end
   end
 
-  context 'when we validate pause_max_timeout' do
-    context 'when pause_max_timeout is nil' do
-      before { config[:pause_max_timeout] = nil }
+  context 'when we validate pause.max_timeout' do
+    context 'when pause.max_timeout is nil' do
+      before { config[:pause][:max_timeout] = nil }
 
       it { expect(contract.call(config)).not_to be_success }
     end
 
-    context 'when pause_max_timeout is not an int' do
-      before { config[:pause_max_timeout] = 2.1 }
+    context 'when pause.max_timeout is not an int' do
+      before { config[:pause][:max_timeout] = 2.1 }
 
       it { expect(contract.call(config)).not_to be_success }
     end
 
-    context 'when pause_max_timeout is less then 1' do
-      before { config[:pause_max_timeout] = -2 }
+    context 'when pause.max_timeout is less then 1' do
+      before { config[:pause][:max_timeout] = -2 }
 
       it { expect(contract.call(config)).not_to be_success }
     end
   end
 
-  context 'when we validate pause_with_exponential_backoff' do
-    context 'when pause_with_exponential_backoff is nil' do
-      before { config[:pause_with_exponential_backoff] = nil }
+  context 'when we validate pause.with_exponential_backoff' do
+    context 'when pause.with_exponential_backoff is nil' do
+      before { config[:pause][:with_exponential_backoff] = nil }
 
       it { expect(contract.call(config)).not_to be_success }
     end
 
-    context 'when pause_with_exponential_backoff is not a bool' do
-      before { config[:pause_with_exponential_backoff] = 2.1 }
+    context 'when pause.with_exponential_backoff is not a bool' do
+      before { config[:pause][:with_exponential_backoff] = 2.1 }
 
       it { expect(contract.call(config)).not_to be_success }
     end
 
-    context 'when pause_timeout is more than pause_max_timeout' do
+    context 'when pause.timeout is more than pause.max_timeout' do
       before do
-        config[:pause_timeout] = 2
-        config[:pause_max_timeout] = 1
-        config[:pause_with_exponential_backoff] = true
+        config[:pause][:timeout] = 2
+        config[:pause][:max_timeout] = 1
+        config[:pause][:with_exponential_backoff] = true
       end
 
       it { expect(contract.call(config)).not_to be_success }
