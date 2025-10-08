@@ -1,8 +1,5 @@
 # frozen_string_literal: true
 
-require_relative 'admin/consumer_groups'
-require_relative 'admin/replication'
-
 module Karafka
   # Admin actions that we can perform via Karafka on our Kafka cluster
   #
