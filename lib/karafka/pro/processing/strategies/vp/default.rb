@@ -136,8 +136,8 @@ module Karafka
             # non-blocking.
             #
             # @param block [Proc] block we want to run in a mutex to prevent race-conditions
-            def synchronize(&block)
-              coordinator.shared_mutex.synchronize(&block)
+            def synchronize(&)
+              coordinator.shared_mutex.synchronize(&)
             end
 
             private

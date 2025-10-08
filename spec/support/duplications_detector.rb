@@ -88,7 +88,7 @@ class DuplicationsDetector
   private
 
   # @param args [Array] anything the spec context assertion accepts
-  def assert_equal(*args)
-    @spec_context.send(:assert_equal, *args)
+  def assert_equal(*)
+    @spec_context.send(:assert_equal, *)
   end
 end

@@ -17,11 +17,11 @@ module Karafka
         # @param lock_id [Object] key we want to use if we want to set multiple locks on the same
         #   subscription group
         # @param kwargs [Object] Any keyword arguments accepted by the jobs queue lock.
-        def pause(subscription_group, lock_id = nil, **kwargs)
+        def pause(subscription_group, lock_id = nil, **)
           jobs_queue.lock_async(
             subscription_group.id,
             lock_id,
-            **kwargs
+            **
           )
         end
 

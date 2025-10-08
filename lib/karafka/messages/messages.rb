@@ -18,8 +18,8 @@ module Karafka
 
       # @param block [Proc] block we want to execute per each message
       # @note Invocation of this method will not cause loading and deserializing of messages.
-      def each(&block)
-        @messages_array.each(&block)
+      def each(&)
+        @messages_array.each(&)
       end
 
       # Runs deserialization of all the messages and returns them

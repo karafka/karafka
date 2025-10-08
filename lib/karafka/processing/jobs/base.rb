@@ -32,8 +32,8 @@ module Karafka
         # @param block [Proc] whole user related processing flow
         # @note We inject the action name so user can decide whether to run custom logic on a
         #   given action or not.
-        def wrap(&block)
-          executor.wrap(self.class.action, &block)
+        def wrap(&)
+          executor.wrap(self.class.action, &)
         end
 
         # When redefined can run any code prior to the job being scheduled

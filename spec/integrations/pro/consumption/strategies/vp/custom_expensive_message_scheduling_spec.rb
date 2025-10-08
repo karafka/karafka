@@ -119,7 +119,7 @@ class ExpensiveMessageConsumer < Karafka::BaseConsumer
         DT[:expensive_end] << Time.now.to_f
       else
         # Normal messages process quickly (50-200ms)
-        sleep(0.05 + rand * 0.15)
+        sleep(0.05 + (rand * 0.15))
       end
 
       end_time = Time.now.to_f

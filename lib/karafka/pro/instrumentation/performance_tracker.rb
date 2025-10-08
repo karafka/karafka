@@ -50,7 +50,7 @@ module Karafka
           partition = messages.metadata.partition
 
           samples = @processing_times[topic][partition]
-          samples << event[:time] / messages.size
+          samples << (event[:time] / messages.size)
 
           return unless samples.size > SAMPLES_COUNT
 
@@ -66,8 +66,8 @@ module Karafka
         def percentile(percentile, values)
           values_sorted = values.sort
 
-          floor = (percentile * (values_sorted.length - 1) + 1).floor - 1
-          mod = (percentile * (values_sorted.length - 1) + 1).modulo(1)
+          floor = ((percentile * (values_sorted.length - 1)) + 1).floor - 1
+          mod = ((percentile * (values_sorted.length - 1)) + 1).modulo(1)
 
           values_sorted[floor] + (mod * (values_sorted[floor + 1] - values_sorted[floor]))
         end

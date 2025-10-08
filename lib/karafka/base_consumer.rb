@@ -82,8 +82,8 @@ module Karafka
     #
     # @param action [Symbol]
     # @param block [Proc]
-    def on_wrap(action, &block)
-      handle_wrap(action, &block)
+    def on_wrap(action, &)
+      handle_wrap(action, &)
     rescue StandardError => e
       monitor.instrument(
         'error.occurred',

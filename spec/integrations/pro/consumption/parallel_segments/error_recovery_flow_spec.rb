@@ -142,7 +142,7 @@ Karafka::App.producer.produce_many_sync(first_batch)
 
 start_karafka_and_wait_until do
   # Wait until error triggered or some processing has happened
-  unless @produced_second_batch && DT[:error_triggered].any? || DT[:processed].size >= 10
+  unless (@produced_second_batch && DT[:error_triggered].any?) || DT[:processed].size >= 10
     sleep(2) # Give time for error to be processed
 
     # Send second batch after error or some processing

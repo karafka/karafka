@@ -19,16 +19,16 @@ module Karafka
       # Yields each topic
       #
       # @param [Proc] block we want to yield with on each topic
-      def each(&block)
-        @accumulator.each(&block)
+      def each(&)
+        @accumulator.each(&)
       end
 
       # Allows us to remove elements from the topics
       #
       # Block to decide what to delete
       # @param block [Proc]
-      def delete_if(&block)
-        @accumulator.delete_if(&block)
+      def delete_if(&)
+        @accumulator.delete_if(&)
       end
 
       # Finds topic by its name

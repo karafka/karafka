@@ -5,7 +5,7 @@ RSpec.describe_current do
 
   describe '#initialize' do
     context 'when we dont have any ENVs that we can use' do
-      before { allow(ENV).to receive(:[]).and_return(nil) }
+      before { allow(ENV).to receive(:fetch).and_return(nil) }
 
       it 'expect to use default' do
         expect(karafka_env).to eq 'development'

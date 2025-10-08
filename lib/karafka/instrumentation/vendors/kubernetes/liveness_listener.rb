@@ -167,8 +167,8 @@ module Karafka
 
           # Wraps the logic with a mutex
           # @param block [Proc] code we want to run in mutex
-          def synchronize(&block)
-            @mutex.synchronize(&block)
+          def synchronize(&)
+            @mutex.synchronize(&)
           end
 
           # @return [Integer] object id of the current thread

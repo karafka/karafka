@@ -20,8 +20,8 @@ draw_routes do
   end
 end
 
-def read_lags_with_offsets(*args)
-  Karafka::Admin.read_lags_with_offsets(*args)
+def read_lags_with_offsets(*)
+  Karafka::Admin.read_lags_with_offsets(*)
 end
 
 CG1 = Karafka::App.config.group_id

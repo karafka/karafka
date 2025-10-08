@@ -54,7 +54,7 @@ DT[0].each do |row|
     next
   end
 
-  distances << row.last - previous.last
+  distances << (row.last - previous.last)
 
   previous = row
 end

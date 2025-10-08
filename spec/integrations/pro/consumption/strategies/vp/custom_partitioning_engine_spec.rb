@@ -17,9 +17,9 @@ REGULAR_TOPIC = DT.topics[1]
 become_pro!
 
 class CustomPartitioner < Karafka::Pro::Processing::Partitioner
-  def call(topic_name, messages, coordinator, &block)
+  def call(topic_name, messages, coordinator, &)
     if topic_name == SPECIAL_TOPIC
-      balanced_strategy(messages, &block)
+      balanced_strategy(messages, &)
     else
       super
     end

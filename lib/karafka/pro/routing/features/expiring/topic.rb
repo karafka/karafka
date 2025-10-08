@@ -37,8 +37,8 @@ module Karafka
             # Just an alias for nice API
             #
             # @param args [Array] Anything `#expiring` accepts
-            def expire_in(*args)
-              expiring(*args)
+            def expire_in(*)
+              expiring(*)
             end
 
             # @return [Boolean] is a given job expiring

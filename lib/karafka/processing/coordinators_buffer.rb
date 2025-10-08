@@ -39,8 +39,8 @@ module Karafka
       # @param block we want to run for resumed topic partitions
       # @yieldparam [String] topic name
       # @yieldparam [Integer] partition number
-      def resume(&block)
-        @pauses_manager.resume(&block)
+      def resume(&)
+        @pauses_manager.resume(&)
       end
 
       # @param topic_name [String] topic name

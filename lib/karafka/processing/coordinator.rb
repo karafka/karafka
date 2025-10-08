@@ -207,11 +207,11 @@ module Karafka
       #   Otherwise user indirectly could cause deadlocks or prolonged locks by running his logic.
       #   This can and should however be used for multi-thread strategy applications and other
       #   internal operations locks.
-      def synchronize(&block)
+      def synchronize(&)
         if @mutex.owned?
           yield
         else
-          @mutex.synchronize(&block)
+          @mutex.synchronize(&)
         end
       end
     end

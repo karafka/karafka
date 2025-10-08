@@ -255,7 +255,7 @@ RSpec.describe_current do
 
     context 'when reading from far in the past' do
       let(:count) { 10 }
-      let(:offset) { Time.now - 60 * 5 }
+      let(:offset) { Time.now - (60 * 5) }
 
       before do
         described_class.create(name, 1, 1)
@@ -271,7 +271,7 @@ RSpec.describe_current do
 
     context 'when reading from far in the past on a higher partition' do
       let(:count) { 10 }
-      let(:offset) { Time.now - 60 * 5 }
+      let(:offset) { Time.now - (60 * 5) }
       let(:partition) { 5 }
 
       before do
@@ -289,7 +289,7 @@ RSpec.describe_current do
 
     context 'when reading from far in the past and trying to read more than present' do
       let(:count) { 1_000 }
-      let(:offset) { Time.now - 60 * 5 }
+      let(:offset) { Time.now - (60 * 5) }
 
       before do
         described_class.create(name, 1, 1)

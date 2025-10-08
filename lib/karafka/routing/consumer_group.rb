@@ -42,12 +42,12 @@ module Karafka
       # @param name [String, Symbol] name of topic to which we want to subscribe
       # @param block [Proc] block that we want to evaluate in the topic context
       # @return [Karafka::Routing::Topic] newly built topic instance
-      def topic=(name, &block)
+      def topic=(name, &)
         topic = Topic.new(name, self)
         @topics << Proxy.new(
           topic,
           builder.defaults,
-          &block
+          &
         ).target
         built_topic = @topics.last
         # We overwrite it conditionally in case it was not set by the user inline in the topic
@@ -60,12 +60,12 @@ module Karafka
       # topic definition
       # @param name [String, Symbol] name of the current subscription group
       # @param block [Proc] block that may include topics definitions
-      def subscription_group=(name = SubscriptionGroup.id, &block)
+      def subscription_group=(name = SubscriptionGroup.id, &)
         # We cast it here, so the routing supports symbol based but that's anyhow later on
         # validated as a string
         @current_subscription_group_details = { name: name.to_s }
 
-        Proxy.new(self, &block)
+        Proxy.new(self, &)
 
         # We need to reset the current subscription group after it is used, so it won't leak
         # outside to other topics that would be defined without a defined subscription group

@@ -36,7 +36,7 @@ draw_routes do
   end
 end
 
-DT[:created_at] = (Time.now - 24 * 60 * 60).to_i
+DT[:created_at] = (Time.now - (24 * 60 * 60)).to_i
 
 # We patch it so we can simulate end of day
 module Karafka

@@ -37,8 +37,8 @@ module Karafka
             # Just an alias for nice API
             #
             # @param args [Array] Anything `#delaying` accepts
-            def delay_by(*args)
-              delaying(*args)
+            def delay_by(*)
+              delaying(*)
             end
 
             # @return [Boolean] is a given job delaying

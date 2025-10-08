@@ -27,14 +27,14 @@ module Karafka
           # @note This method calls super() to ensure compatibility with other libraries that
           #   may have prepended modules to modify #each behavior. This preserves the method
           #   chain and allows instrumentation libraries to function correctly.
-          def each(clean: false, &block)
+          def each(clean: false, &)
             if clean
               super() do |message|
                 yield(message)
                 message.clean!
               end
             else
-              super(&block)
+              super(&)
             end
           end
         end

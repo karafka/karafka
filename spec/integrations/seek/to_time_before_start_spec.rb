@@ -12,7 +12,7 @@ class Consumer < Karafka::BaseConsumer
         DT[message.metadata.partition] << message.raw_payload
       end
     else
-      seek(Time.now - 60 * 5)
+      seek(Time.now - (60 * 5))
       @after_seek = true
     end
   end

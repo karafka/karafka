@@ -8,10 +8,10 @@ module ClassBuilder
     # Creates an empty class without any predefined methods
     # @param block [Proc, nil] block that should be evaluated (if given)
     # @return [Class] created anonymous class
-    def build(&block)
+    def build(&)
       klass = Class.new
 
-      klass.class_eval(&block) if block_given?
+      klass.class_eval(&) if block_given?
       klass
     end
 
@@ -19,8 +19,8 @@ module ClassBuilder
     # @param klass [Class] any class from which we want to inherit in our anonymous class
     # @param block [Proc] a block of code that should be evaluated in a new anonymous class body
     # @return [Class] new anonymous class
-    def inherit(klass, &block)
-      Class.new(klass, &block)
+    def inherit(klass, &)
+      Class.new(klass, &)
     end
   end
 end

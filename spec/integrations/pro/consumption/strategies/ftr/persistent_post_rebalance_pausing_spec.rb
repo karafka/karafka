@@ -42,7 +42,7 @@ class Consumer < Karafka::BaseConsumer
   end
 
   def persistent_pause(offset, pause_ms)
-    DbPause.pause(offset, Time.now + pause_ms / 1_000)
+    DbPause.pause(offset, Time.now + (pause_ms / 1_000))
     pause(offset, pause_ms)
   end
 end

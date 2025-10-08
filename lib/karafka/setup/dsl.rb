@@ -8,8 +8,8 @@ module Karafka
     module Dsl
       # Sets up the whole configuration
       # @param [Block] block configuration block
-      def setup(&block)
-        Setup::Config.setup(&block)
+      def setup(&)
+        Setup::Config.setup(&)
       end
 
       # @return [Karafka::Config] config instance

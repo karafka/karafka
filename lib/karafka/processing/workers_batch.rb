@@ -17,8 +17,8 @@ module Karafka
 
       # Iterates over available workers and yields each worker
       # @param block [Proc] block we want to run
-      def each(&block)
-        @batch.each(&block)
+      def each(&)
+        @batch.each(&)
       end
 
       # @return [Integer] number of workers in the batch

@@ -30,7 +30,7 @@ Karafka::App.monitor.subscribe('statistics.emitted') do |_event|
 end
 
 Karafka::App.monitor.subscribe('connection.listener.fetch_loop.received') do |event|
-  DT[:polls] << ((Time.now.to_f - event[:time] / 1_000)..Time.now.to_f)
+  DT[:polls] << ((Time.now.to_f - (event[:time] / 1_000))..Time.now.to_f)
 end
 
 start_karafka_and_wait_until do

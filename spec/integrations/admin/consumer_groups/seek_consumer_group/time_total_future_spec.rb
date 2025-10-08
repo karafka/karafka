@@ -26,7 +26,7 @@ end
 
 Karafka::Admin.seek_consumer_group(
   DT.consumer_group,
-  { DT.topic => { 0 => Time.now + 60 * 60 } }
+  { DT.topic => { 0 => Time.now + (60 * 60) } }
 )
 
 assert_equal 10, fetch_next_offset

@@ -84,8 +84,8 @@ module Karafka
       # Runs the wrap/around execution context appropriate for a given action
       # @param action [Symbol] action execution wrapped with our block
       # @param block [Proc] execution context
-      def wrap(action, &block)
-        consumer.on_wrap(action, &block)
+      def wrap(action, &)
+        consumer.on_wrap(action, &)
       end
 
       # Runs consumer data processing against given batch and handles failures and errors.
