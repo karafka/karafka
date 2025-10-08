@@ -36,7 +36,6 @@ module Karafka
       end
 
       # Resumes processing of partitions for which pause time has ended.
-      # @param block we want to run for resumed topic partitions
       # @yieldparam [String] topic name
       # @yieldparam [Integer] partition number
       def resume(&)

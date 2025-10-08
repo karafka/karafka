@@ -397,7 +397,6 @@ module Karafka
 
       class << self
         # Configuring method
-        # @param block [Proc] block we want to execute with the config instance
         def setup(&)
           # Will prepare and verify license if present
           Licenser.prepare_and_verify(config.license)

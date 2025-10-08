@@ -18,7 +18,6 @@ module Karafka
             setup(&block) if block
           end
 
-          # @param block [Proc] configuration block
           # @note We define this alias to be consistent with `Karafka#setup`
           def setup(&)
             configure(&)

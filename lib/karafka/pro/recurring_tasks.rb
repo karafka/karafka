@@ -20,7 +20,6 @@ module Karafka
         # Simplified API for schedules definitions and validates the tasks data
         #
         # @param version [String]
-        # @param block [Proc]
         #
         # @example
         #   Karafka::Pro::RecurringTasks.define('1.0.1') do

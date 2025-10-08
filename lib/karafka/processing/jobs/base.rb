@@ -29,7 +29,6 @@ module Karafka
         end
 
         # Runs the wrap/around job hook within which the rest of the flow happens
-        # @param block [Proc] whole user related processing flow
         # @note We inject the action name so user can decide whether to run custom logic on a
         #   given action or not.
         def wrap(&)

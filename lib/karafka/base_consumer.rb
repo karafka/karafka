@@ -82,7 +82,6 @@ module Karafka
     # @private
     #
     # @param action [Symbol]
-    # @param block [Proc]
     def on_wrap(action, &)
       handle_wrap(action, &)
     rescue StandardError => e

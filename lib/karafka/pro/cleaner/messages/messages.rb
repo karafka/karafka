@@ -17,7 +17,6 @@ module Karafka
         module Messages
           # @param clean [Boolean] do we want to clean each message after we're done working with
           #   it.
-          # @param block [Proc] block we want to execute per each message
           #
           # @note Cleaning messages after we're done with each of them and did not fail does not
           #   affect any other functionalities. The only thing that is crucial is to make sure,

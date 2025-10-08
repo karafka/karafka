@@ -81,7 +81,6 @@ module Karafka
       private :array_clear
 
       # Clear routes and draw them again with the given block. Helpful for testing purposes.
-      # @param block [Proc] block we will evaluate within the builder context
       def redraw(&)
         @mutex.synchronize do
           @draws.clear
@@ -124,7 +123,6 @@ module Karafka
 
       # Builds and saves given consumer group
       # @param group_id [String, Symbol] name for consumer group
-      # @param block [Proc] proc that should be executed in the proxy context
       def consumer_group(group_id, &)
         consumer_group = find { |cg| cg.name == group_id.to_s }
 

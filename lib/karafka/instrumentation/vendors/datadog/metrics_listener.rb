@@ -70,7 +70,6 @@ module Karafka
             setup(&block) if block
           end
 
-          # @param block [Proc] configuration block
           # @note We define this alias to be consistent with `WaterDrop#setup`
           def setup(&)
             configure(&)
@@ -199,7 +198,6 @@ module Karafka
 
           # Selects the histogram mode configured and uses it to report to DD client
           # @param key [String] non-namespaced key
-          # @param args [Array] extra arguments to pass to the client
           def histogram(key, *)
             case distribution_mode
             when :histogram

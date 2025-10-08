@@ -25,7 +25,6 @@ module Karafka
       end
 
       # Iterates over available listeners and yields each listener
-      # @param block [Proc] block we want to run
       def each(&)
         @batch.each(&)
       end

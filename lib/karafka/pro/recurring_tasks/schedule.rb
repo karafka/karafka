@@ -32,7 +32,6 @@ module Karafka
         end
 
         # Iterates over tasks yielding them one after another
-        # @param block [Proc] block that will be executed with each task
         def each(&)
           @tasks.each_value(&)
         end
@@ -45,7 +44,6 @@ module Karafka
 
         # Allows us to have a nice DSL for defining schedules
         # @param args [Array] attributes accepted by the task initializer
-        # @param block [Proc] block to execute
         def schedule(**args, &)
           self << Task.new(**args, &)
         end

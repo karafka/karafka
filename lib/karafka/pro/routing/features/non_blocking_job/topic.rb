@@ -10,7 +10,7 @@ module Karafka
         class NonBlockingJob < Base
           # Non-Blocking Jobs topic API extensions
           module Topic
-            # @param args [Array] anything accepted by the `#long_running_job` API
+            # Non blocking setting method
             def non_blocking_job(*)
               long_running_job(*)
             end

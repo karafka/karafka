@@ -27,7 +27,6 @@ module Karafka
               @filtering
             end
 
-            # @param args [Array] Anything `#filter` accepts
             # @return [Filtering::Config] alias to match the naming API for features
             def filtering(*)
               filter(*)

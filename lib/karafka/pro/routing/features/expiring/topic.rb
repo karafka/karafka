@@ -35,8 +35,6 @@ module Karafka
             end
 
             # Just an alias for nice API
-            #
-            # @param args [Array] Anything `#expiring` accepts
             def expire_in(*)
               expiring(*)
             end

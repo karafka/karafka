@@ -166,7 +166,6 @@ module Karafka
           end
 
           # Wraps the logic with a mutex
-          # @param block [Proc] code we want to run in mutex
           def synchronize(&)
             @mutex.synchronize(&)
           end

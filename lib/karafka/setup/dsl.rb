@@ -7,7 +7,6 @@ module Karafka
     # from the Karafka::Setup::Config
     module Dsl
       # Sets up the whole configuration
-      # @param [Block] block configuration block
       def setup(&)
         Setup::Config.setup(&)
       end

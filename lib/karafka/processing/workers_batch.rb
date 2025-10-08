@@ -16,7 +16,6 @@ module Karafka
       end
 
       # Iterates over available workers and yields each worker
-      # @param block [Proc] block we want to run
       def each(&)
         @batch.each(&)
       end

@@ -79,7 +79,6 @@ module Karafka
           end
 
           # Iterates over errors
-          # @param block [Proc] code we want to run on each error
           def each(&)
             @errors.each(&)
           end
