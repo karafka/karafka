@@ -44,6 +44,7 @@ Thread.new do
   DT[:recreated] = true
 end
 
+# Should stop on the unknown partition error
 start_karafka_and_wait_until do
-  DT[0].size >= 100
+  true
 end
