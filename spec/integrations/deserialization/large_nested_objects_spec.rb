@@ -163,12 +163,12 @@ end
 
 # Verify all messages were processed
 assert_equal large_nested_messages.size, DT[:consumed].size,
-             'Should process all large nested object messages'
+  'Should process all large nested object messages'
 
 # Verify JSON parsing succeeded for all messages
 valid_json_messages = DT[:consumed].select { |msg| msg[:status] == 'valid_json' }
 assert_equal large_nested_messages.size, valid_json_messages.size,
-             'Should successfully parse all large nested JSON objects'
+  'Should successfully parse all large nested JSON objects'
 
 # Verify nesting depths were calculated
 depth_measurements = DT[:consumed].select { |msg| msg[:nesting_depth] }
@@ -191,8 +191,7 @@ large_messages = DT[:consumed].select { |msg| msg[:size] >= 10_000 }
 assert large_messages.size >= 2, 'Should handle messages with substantial size'
 
 # The key success criteria: all large nested objects processed without errors
-assert_equal large_nested_messages.size, DT[:consumed].size,
-             'Should handle all large nested objects without crashing'
+assert_equal large_nested_messages.size, DT[:consumed].size
 
 # Verify no stack overflow or parsing errors occurred
 error_messages = DT[:consumed].reject { |msg| msg[:status] == 'valid_json' }

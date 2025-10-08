@@ -114,18 +114,26 @@ start_karafka_and_wait_until do
 end
 
 # Verify messages were consumed from the special character topic
-assert_equal test_messages.size, DT[:consumed].size,
-             'Should consume messages from topic with special characters'
+assert_equal(
+  test_messages.size, DT[:consumed].size,
+  'Should consume messages from topic with special characters'
+)
 
 # Verify all messages came from the correct topic
 consumed_topics = DT[:consumed].map { |msg| msg[:topic] }.uniq
-assert_equal [test_topic], consumed_topics,
-             'All messages should come from the special character topic'
+assert_equal(
+  [test_topic],
+  consumed_topics,
+  'All messages should come from the special character topic'
+)
 
 # Verify consumer class was correctly assigned
 consumer_classes = DT[:consumed].map { |msg| msg[:consumer_class] }.uniq
-assert_equal ['SpecialCharacterConsumer'], consumer_classes,
-             'Should use correct consumer class for special character topic'
+assert_equal(
+  ['SpecialCharacterConsumer'],
+  consumer_classes,
+  'Should use correct consumer class for special character topic'
+)
 
 # Verify payloads were preserved correctly
 consumed_payloads = DT[:consumed].map { |msg| msg[:payload] }

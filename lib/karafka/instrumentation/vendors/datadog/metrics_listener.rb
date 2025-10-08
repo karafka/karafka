@@ -14,8 +14,9 @@ module Karafka
           include ::Karafka::Core::Configurable
           extend Forwardable
 
-          def_delegators :config, :client, :rd_kafka_metrics, :namespace,
-                         :default_tags, :distribution_mode
+          def_delegators(
+            :config, :client, :rd_kafka_metrics, :namespace, :default_tags, :distribution_mode
+          )
 
           # Value object for storing a single rdkafka metric publishing details
           RdKafkaMetric = Struct.new(:type, :scope, :name, :key_location)

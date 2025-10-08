@@ -84,8 +84,10 @@ start_karafka_and_wait_until do
 end
 
 # Verify all messages were processed despite encoding issues
-assert_equal encoding_test_messages.size, DT[:consumed].size,
-             'Should process all messages despite encoding issues'
+assert_equal(
+  encoding_test_messages.size, DT[:consumed].size,
+  'Should process all messages despite encoding issues'
+)
 
 # Verify different encodings were handled
 encodings = DT[:consumed].map { |msg| msg[:encoding] }.uniq

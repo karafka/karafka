@@ -112,8 +112,10 @@ start_karafka_and_wait_until do
 end
 
 # Verify all messages were consumed
-assert_equal mixed_messages.size, DT[:consumed].size,
-             'Should consume all mixed format messages'
+assert_equal(
+  mixed_messages.size, DT[:consumed].size,
+  'Should consume all mixed format messages'
+)
 
 # Verify different formats were detected
 formats_detected = DT[:consumed].map { |msg| msg[:parsed_as] }.uniq

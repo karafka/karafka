@@ -156,8 +156,10 @@ thread_groups = DT[:consumed].group_by { |entry| entry[:thread_id] }
 thread_groups.each do |thread_id, entries|
   # Within each thread, counter values should be monotonically increasing
   counter_values = entries.map { |entry| entry[:counter_after] }
-  assert counter_values.each_cons(2).all? { |a, b| a <= b },
-         "Counter values should be non-decreasing within thread #{thread_id}"
+  assert(
+    counter_values.each_cons(2).all? { |a, b| a <= b },
+    "Counter values should be non-decreasing within thread #{thread_id}"
+  )
 end
 
 # The key success criteria: concurrent shared state access handled safely

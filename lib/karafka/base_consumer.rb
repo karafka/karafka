@@ -14,8 +14,9 @@ module Karafka
 
     def_delegators :@coordinator, :topic, :partition, :eofed?, :seek_offset, :seek_offset=
 
-    def_delegators :producer, :produce_async, :produce_sync, :produce_many_async,
-                   :produce_many_sync
+    def_delegators(
+      :producer, :produce_async, :produce_sync, :produce_many_async, :produce_many_sync
+    )
 
     def_delegators :messages, :each
 
