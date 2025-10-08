@@ -41,7 +41,7 @@ end
 require 'net/http'
 require 'karafka/instrumentation/vendors/kubernetes/liveness_listener'
 
-listener = ::Karafka::Instrumentation::Vendors::Kubernetes::LivenessListener.new(
+listener = Karafka::Instrumentation::Vendors::Kubernetes::LivenessListener.new(
   hostname: '127.0.0.1',
   port: 9013,
   polling_ttl: 1_000

@@ -14,5 +14,5 @@ setup_karafka do |config|
   config.encryption.private_keys = PRIVATE_KEYS
 end
 
-parser = ::Karafka::Messages::Parser
+parser = Karafka::Messages::Parser
 assert Karafka::App.config.internal.messages.parser.is_a?(parser)

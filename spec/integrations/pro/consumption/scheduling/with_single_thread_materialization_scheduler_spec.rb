@@ -8,7 +8,7 @@
 
 become_pro!
 
-class OneThreadScheduler < ::Karafka::Pro::Processing::Schedulers::Base
+class OneThreadScheduler < Karafka::Pro::Processing::Schedulers::Base
   def initialize(queue)
     super
     @jobs_buffer = []

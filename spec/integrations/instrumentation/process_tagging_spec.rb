@@ -4,6 +4,6 @@
 
 setup_karafka
 
-::Karafka::Process.tags.add(:commit_hash, '#4f0450221')
+Karafka::Process.tags.add(:commit_hash, '#4f0450221')
 
-assert_equal ::Karafka::Process.tags.to_a, %w[#4f0450221]
+assert_equal Karafka::Process.tags.to_a, %w[#4f0450221]

@@ -3,7 +3,7 @@
 RSpec.describe_current do
   subject(:proxy) { described_class.new(consumer) }
 
-  let(:consumer) { ::Rdkafka::Config.new(subscription_group.kafka).consumer }
+  let(:consumer) { Rdkafka::Config.new(subscription_group.kafka).consumer }
   let(:subscription_group) { build(:routing_subscription_group) }
   let(:wrapped_object) { consumer }
   let(:all_down_error) { Rdkafka::RdkafkaError.new(-187) }

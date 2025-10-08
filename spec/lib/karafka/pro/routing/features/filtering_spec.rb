@@ -4,5 +4,5 @@
 # See LICENSE for details.
 
 RSpec.describe_current do
-  it { expect(described_class).to be < ::Karafka::Routing::Features::Base }
+  it { expect(described_class).to be < Karafka::Routing::Features::Base }
 end

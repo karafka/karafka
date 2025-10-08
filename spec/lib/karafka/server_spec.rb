@@ -21,7 +21,7 @@ RSpec.describe_current do
 
     jobs_queue = Karafka::Processing::JobsQueue.new
 
-    described_class.listeners = ::Karafka::Connection::ListenersBatch.new(jobs_queue)
+    described_class.listeners = Karafka::Connection::ListenersBatch.new(jobs_queue)
     described_class.workers = []
   end
 

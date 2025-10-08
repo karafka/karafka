@@ -14,7 +14,7 @@ RSpec.describe Karafka::Instrumentation::Logger do
     allow(delegate_scope).to receive(:to)
   end
 
-  specify { expect(described_class).to be < ::Logger }
+  specify { expect(described_class).to be < Logger }
 
   describe '#new' do
     let(:karafka_test_root) { Pathname(Dir::Tmpname.create('karafka') { |_| }) }
@@ -26,7 +26,7 @@ RSpec.describe Karafka::Instrumentation::Logger do
     after { FileUtils.rm_rf(karafka_test_root) }
 
     it 'expect to be of a proper level' do
-      expect(logger.level).to eq ::Logger::ERROR
+      expect(logger.level).to eq Logger::ERROR
     end
 
     context 'when the dir does not exist' do

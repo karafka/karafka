@@ -5,7 +5,7 @@ RSpec.describe_current do
 
   let(:job1) { job_n.call }
   let(:job2) { job_n.call }
-  let(:internal_queue) { ::Queue.new }
+  let(:internal_queue) { Queue.new }
   let(:job_n) do
     -> { OpenStruct.new(group_id: 2, id: SecureRandom.uuid, call: true, non_blocking?: false) }
   end

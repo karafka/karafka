@@ -3,7 +3,7 @@
 RSpec.describe_current do
   subject(:job_class) do
     Class.new do
-      extend ::Karafka::ActiveJob::JobExtensions
+      extend Karafka::ActiveJob::JobExtensions
     end
   end
 

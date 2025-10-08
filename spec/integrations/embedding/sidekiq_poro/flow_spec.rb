@@ -38,24 +38,24 @@ class TestConsumer < Karafka::BaseConsumer
   end
 end
 
-::Karafka::App.setup do |config|
+Karafka::App.setup do |config|
   config.kafka = { 'bootstrap.servers': '127.0.0.1:9092' }
   config.client_id = SecureRandom.hex(6)
 end
 
-::Karafka::App.routes.draw do
+Karafka::App.routes.draw do
   topic TOPIC do
     consumer TestConsumer
   end
 end
 
-::Karafka.producer.produce_sync(topic: TOPIC, payload: '')
+Karafka.producer.produce_sync(topic: TOPIC, payload: '')
 
-::Karafka::Embedded.start
+Karafka::Embedded.start
 TestWorker.perform_async
 
 Sidekiq::Worker.drain_all
 
 sleep(0.1) until Accu.fetch.size >= 2
 
-::Karafka::Embedded.stop
+Karafka::Embedded.stop

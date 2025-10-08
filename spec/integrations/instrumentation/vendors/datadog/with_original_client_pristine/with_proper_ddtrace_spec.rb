@@ -16,14 +16,14 @@ setup_karafka
 
 require 'karafka/instrumentation/vendors/datadog/logger_listener'
 
-trace_listener = ::Karafka::Instrumentation::Vendors::Datadog::LoggerListener.new do |config|
+trace_listener = Karafka::Instrumentation::Vendors::Datadog::LoggerListener.new do |config|
   config.client = Datadog::Tracing
 end
 
 Karafka.monitor.subscribe(trace_listener)
 
 require 'karafka/instrumentation/vendors/datadog/metrics_listener'
-listener = ::Karafka::Instrumentation::Vendors::Datadog::MetricsListener.new do |config|
+listener = Karafka::Instrumentation::Vendors::Datadog::MetricsListener.new do |config|
   config.client = Datadog::Statsd.new('localhost', 8125)
   # Publish host as a tag alongside the rest of tags
   config.default_tags = ["host:#{Socket.gethostname}"]

@@ -52,7 +52,7 @@ while consumed.size < 2
   end
 end
 
-::Process.kill('QUIT', ::Process.pid)
+Process.kill('QUIT', Process.pid)
 thread.join
 
 # Should consume from topics[0] and topics[2], but not topics[1] (which was excluded)

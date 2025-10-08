@@ -16,7 +16,7 @@ assert_equal(
   ActiveJob::QueueAdapters::KarafkaAdapter.superclass
 )
 
-ActiveJob::Base.extend ::Karafka::ActiveJob::JobExtensions
+ActiveJob::Base.extend Karafka::ActiveJob::JobExtensions
 ActiveJob::Base.queue_adapter = :karafka
 
 class ExampleApp < Rails::Application

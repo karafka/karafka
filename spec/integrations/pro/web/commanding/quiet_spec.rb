@@ -31,7 +31,7 @@ Thread.new do
   sleep(0.1) until DT.key?(:is)
 
   Karafka::Web::Pro::Commanding::Dispatcher.request(
-    'consumers.quiet', ::Karafka::Web.config.tracking.consumers.sampler.process_id
+    'consumers.quiet', Karafka::Web.config.tracking.consumers.sampler.process_id
   )
 end
 

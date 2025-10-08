@@ -16,7 +16,7 @@ class Consumer < Karafka::BaseConsumer
   end
 end
 
-listener = ::Karafka::Instrumentation::Vendors::Kubernetes::LivenessListener.new(
+listener = Karafka::Instrumentation::Vendors::Kubernetes::LivenessListener.new(
   hostname: '127.0.0.1',
   port: 9000,
   consuming_ttl: 2_000

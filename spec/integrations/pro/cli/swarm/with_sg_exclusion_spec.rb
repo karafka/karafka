@@ -43,6 +43,6 @@ thread = Thread.new { Karafka::Cli.start }
 
 READER.gets
 
-::Process.kill('QUIT', ::Process.pid)
+Process.kill('QUIT', Process.pid)
 
 thread.join

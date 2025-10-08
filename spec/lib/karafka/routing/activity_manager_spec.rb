@@ -5,7 +5,7 @@ RSpec.describe_current do
 
   describe '#include and #active?' do
     context 'when trying to include something of an invalid type' do
-      let(:expected_error) { ::Karafka::Errors::UnsupportedCaseError }
+      let(:expected_error) { Karafka::Errors::UnsupportedCaseError }
 
       it { expect { manager.include('na', 1) }.to raise_error(expected_error) }
     end
@@ -24,7 +24,7 @@ RSpec.describe_current do
 
   describe '#exclude and #active?' do
     context 'when trying to exclude something of an invalid type' do
-      let(:expected_error) { ::Karafka::Errors::UnsupportedCaseError }
+      let(:expected_error) { Karafka::Errors::UnsupportedCaseError }
 
       it { expect { manager.exclude('na', 1) }.to raise_error(expected_error) }
     end

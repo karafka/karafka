@@ -30,8 +30,8 @@ end
 
 setup_karafka
 
-Karafka::App.config.producer = ::WaterDrop::Producer.new do |p_config|
-  p_config.kafka = ::Karafka::Setup::AttributesMap.producer(Karafka::App.config.kafka.dup)
+Karafka::App.config.producer = WaterDrop::Producer.new do |p_config|
+  p_config.kafka = Karafka::Setup::AttributesMap.producer(Karafka::App.config.kafka.dup)
   p_config.monitor = WaterdropTracingMonitor.new
 end
 

@@ -4,7 +4,7 @@ FactoryBot.define do
   factory :swarm_node, class: 'Karafka::Swarm::Node' do
     transient do
       id { 0 }
-      parent_pid { ::Process.pid }
+      parent_pid { Process.pid }
     end
 
     skip_create

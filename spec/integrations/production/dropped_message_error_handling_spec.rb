@@ -13,7 +13,7 @@ dropped_messages = []
 message_payloads = {}
 
 # Create a producer pointing to an invalid Kafka port
-producer = ::WaterDrop::Producer.new do |config|
+producer = WaterDrop::Producer.new do |config|
   config.deliver = true
   config.kafka = {
     'bootstrap.servers': 'localhost:9999',

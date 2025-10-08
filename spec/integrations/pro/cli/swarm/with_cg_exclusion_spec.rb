@@ -56,7 +56,7 @@ while consumed.size < 2
   end
 end
 
-::Process.kill('QUIT', ::Process.pid)
+Process.kill('QUIT', Process.pid)
 thread.join
 
 # Should consume from consumer_groups[0] and consumer_groups[2],

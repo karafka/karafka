@@ -9,7 +9,7 @@
 
 become_pro!
 
-class FairScheduler < ::Karafka::Pro::Processing::Schedulers::Base
+class FairScheduler < Karafka::Pro::Processing::Schedulers::Base
   def initialize(queue)
     super
     @buffer = []

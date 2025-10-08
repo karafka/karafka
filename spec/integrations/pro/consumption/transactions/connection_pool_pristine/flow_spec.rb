@@ -26,7 +26,7 @@ DP = -> { produce_many(DT.topic, DT.uuids(50)) }
 DT[:accu] = {}
 
 PRODUCERS = ConnectionPool.new(size: 5, timeout: 5) do
-  me = ::WaterDrop::Producer.new do |producer_config|
+  me = WaterDrop::Producer.new do |producer_config|
     producer_config.kafka = Karafka::Setup::AttributesMap.producer(Karafka::App.config.kafka.dup)
     producer_config.logger = Karafka::App.config.logger
     producer_config.kafka[:'transactional.id'] = SecureRandom.uuid

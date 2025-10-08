@@ -12,8 +12,8 @@ RSpec.describe_current do
   let(:subscription_group_id) { SecureRandom.hex(6) }
   let(:consumer_group_id) { SecureRandom.hex(6) }
   let(:client_name) { SecureRandom.hex(6) }
-  let(:monitor) { ::Karafka.monitor }
-  let(:error) { ::Rdkafka::RdkafkaError.new(1, []) }
+  let(:monitor) { Karafka.monitor }
+  let(:error) { Rdkafka::RdkafkaError.new(1, []) }
 
   describe '#call' do
     let(:changed) { [] }

@@ -31,6 +31,6 @@ module Karafka
   end
 end
 
-::Rdkafka::Opaque.include(
+Rdkafka::Opaque.include(
   Karafka::Patches::Rdkafka::Opaque
 )

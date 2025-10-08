@@ -15,5 +15,5 @@ setup_karafka do |config|
 end
 
 # It is expected to use correct encryption aware parser
-parser = ::Karafka::Pro::Encryption::Messages::Parser
+parser = Karafka::Pro::Encryption::Messages::Parser
 assert Karafka::App.config.internal.messages.parser.is_a?(parser)

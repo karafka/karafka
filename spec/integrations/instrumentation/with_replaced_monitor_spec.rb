@@ -5,7 +5,7 @@
 
 DT[:tags] = Set.new
 
-class WrappedMonitor < ::Karafka::Instrumentation::Monitor
+class WrappedMonitor < Karafka::Instrumentation::Monitor
   # Events we want to handle differently
   TRACEABLE_EVENTS = %w[
     consumer.consumed

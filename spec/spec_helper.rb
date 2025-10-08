@@ -114,7 +114,7 @@ require 'karafka/pro/loader'
 Karafka::Pro::Loader.require_all if ENV['SPECS_TYPE'] == 'pro'
 
 # We extend this manually since it's done by a Railtie that we do not run here
-ActiveJob::Base.extend ::Karafka::ActiveJob::JobExtensions
+ActiveJob::Base.extend Karafka::ActiveJob::JobExtensions
 
 # Test setup for the framework
 module Karafka
@@ -136,8 +136,8 @@ RSpec.extend RSpecLocator.new(__FILE__)
 # other one that is transactional for transactional specs
 PRODUCERS = OpenStruct.new(
   regular: Karafka.producer,
-  transactional: ::WaterDrop::Producer.new do |p_config|
-    p_config.kafka = ::Karafka::Setup::AttributesMap.producer(Karafka::App.config.kafka.dup)
+  transactional: WaterDrop::Producer.new do |p_config|
+    p_config.kafka = Karafka::Setup::AttributesMap.producer(Karafka::App.config.kafka.dup)
     p_config.kafka[:'transactional.id'] = SecureRandom.uuid
     p_config.logger = Karafka::App.config.logger
   end

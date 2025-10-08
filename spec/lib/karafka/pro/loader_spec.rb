@@ -25,8 +25,8 @@ RSpec.describe_current do
 
     context 'when we run pre_setup_all loader' do
       before do
-        allow(::Karafka::Pro::Routing::Features::VirtualPartitions).to receive(:activate)
-        allow(::Karafka::Pro::Routing::Features::LongRunningJob).to receive(:activate)
+        allow(Karafka::Pro::Routing::Features::VirtualPartitions).to receive(:activate)
+        allow(Karafka::Pro::Routing::Features::LongRunningJob).to receive(:activate)
 
         loader.pre_setup_all(Karafka::App.config)
       end

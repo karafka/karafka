@@ -19,8 +19,8 @@ def setup_karafka
     config.pause_timeout = 1
     config.pause_max_timeout = 1
     config.pause_with_exponential_backoff = false
-    config.logger = ::Logger.new($stdout)
-    config.logger.level = ::Logger::ERROR
+    config.logger = Logger.new($stdout)
+    config.logger.level = Logger::ERROR
 
     # Allows to overwrite any option we're interested in
     yield(config) if block_given?

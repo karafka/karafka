@@ -43,7 +43,7 @@ RSpec.describe Karafka::Swarm::Node, mode: :fork do
   end
 
   describe '#orphaned?' do
-    subject(:node) { described_class.new(0, ::Process.ppid) }
+    subject(:node) { described_class.new(0, Process.ppid) }
 
     it { expect(node.orphaned?).to be(false) }
   end

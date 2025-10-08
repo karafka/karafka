@@ -89,7 +89,7 @@ RSpec.describe_current do
   describe '#on_worker_process' do
     subject(:trigger) { listener.on_worker_process(event) }
 
-    let(:job) { ::Karafka::Processing::Jobs::Shutdown.new(executor) }
+    let(:job) { Karafka::Processing::Jobs::Shutdown.new(executor) }
     let(:executor) { build(:processing_executor) }
     let(:payload) { { job: job } }
 
@@ -99,7 +99,7 @@ RSpec.describe_current do
   describe '#on_worker_processed' do
     subject(:trigger) { listener.on_worker_processed(event) }
 
-    let(:job) { ::Karafka::Processing::Jobs::Shutdown.new(executor) }
+    let(:job) { Karafka::Processing::Jobs::Shutdown.new(executor) }
     let(:executor) { build(:processing_executor) }
     let(:payload) { { job: job, time: 2 } }
 
@@ -382,7 +382,7 @@ RSpec.describe_current do
 
     let(:node) { build(:swarm_node) }
     let(:payload) { { node: node } }
-    let(:message) { "Swarm node #{::Process.pid} forked from #{::Process.ppid}" }
+    let(:message) { "Swarm node #{Process.pid} forked from #{Process.ppid}" }
 
     it 'expect logger to log on error' do
       expect(Karafka.logger).to have_received(:info).with(message).at_least(:once)

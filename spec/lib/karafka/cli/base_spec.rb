@@ -13,7 +13,7 @@ RSpec.describe_current do
     end
 
     describe '#load' do
-      it { expect { base_cli_class.load }.to raise_error(::Karafka::Errors::MissingBootFileError) }
+      it { expect { base_cli_class.load }.to raise_error(Karafka::Errors::MissingBootFileError) }
     end
   end
 
