@@ -25,9 +25,8 @@ module Karafka
       end
 
       # Iterates over available listeners and yields each listener
-      # @param block [Proc] block we want to run
-      def each(&block)
-        @batch.each(&block)
+      def each(&)
+        @batch.each(&)
       end
 
       # @return [Array<Listener>] active listeners

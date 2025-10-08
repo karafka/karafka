@@ -42,8 +42,8 @@ draw_routes do
   end
 end
 
-def read_lags_with_offsets(*args)
-  Karafka::Admin.read_lags_with_offsets(*args)
+def read_lags_with_offsets(*)
+  Karafka::Admin.read_lags_with_offsets(*)
 end
 
 produce_many(DT.topics[0], DT.uuids(10))

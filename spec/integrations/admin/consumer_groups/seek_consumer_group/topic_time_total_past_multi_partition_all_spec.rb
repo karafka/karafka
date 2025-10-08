@@ -38,7 +38,7 @@ end
 Karafka::Admin.seek_consumer_group(
   DT.consumer_group,
   {
-    DT.topic => Time.now - 60 * 60
+    DT.topic => Time.now - (60 * 60)
   }
 )
 

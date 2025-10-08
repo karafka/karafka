@@ -59,8 +59,10 @@ start_karafka_and_wait_until do
 end
 
 # Verify all messages were consumed despite serialization edge cases
-assert_equal edge_case_messages.size, DT[:consumed].size,
-             "Should consume all #{edge_case_messages.size} edge case messages"
+assert_equal(
+  edge_case_messages.size, DT[:consumed].size,
+  "Should consume all #{edge_case_messages.size} edge case messages"
+)
 
 # Verify each type of edge case was handled
 empty_msg = DT[:consumed].find { |msg| msg[:size] == 0 }

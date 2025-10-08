@@ -83,20 +83,36 @@ assert_equal 1, DT[:consumed_b].size, 'Consumer B should receive 1 message'
 assert_equal 1, DT[:consumed_c].size, 'Consumer C should receive 1 message'
 
 # Verify each consumer received the correct topic's message
-assert_equal DT.topic, DT[:consumed_a].first[:topic],
-             'Consumer A should receive message from primary topic'
-assert_equal "#{DT.topic}_secondary", DT[:consumed_b].first[:topic],
-             'Consumer B should receive message from secondary topic'
-assert_equal "#{DT.topic}_tertiary", DT[:consumed_c].first[:topic],
-             'Consumer C should receive message from tertiary topic'
+assert_equal(
+  DT.topic, DT[:consumed_a].first[:topic],
+  'Consumer A should receive message from primary topic'
+)
+
+assert_equal(
+  "#{DT.topic}_secondary", DT[:consumed_b].first[:topic],
+  'Consumer B should receive message from secondary topic'
+)
+
+assert_equal(
+  "#{DT.topic}_tertiary", DT[:consumed_c].first[:topic],
+  'Consumer C should receive message from tertiary topic'
+)
 
 # Verify correct consumer class assignment
-assert_equal 'PatternConsumerA', DT[:consumed_a].first[:consumer_class],
-             'Should use PatternConsumerA for primary topic'
-assert_equal 'PatternConsumerB', DT[:consumed_b].first[:consumer_class],
-             'Should use PatternConsumerB for secondary topic'
-assert_equal 'PatternConsumerC', DT[:consumed_c].first[:consumer_class],
-             'Should use PatternConsumerC for tertiary topic'
+assert_equal(
+  'PatternConsumerA', DT[:consumed_a].first[:consumer_class],
+  'Should use PatternConsumerA for primary topic'
+)
+
+assert_equal(
+  'PatternConsumerB', DT[:consumed_b].first[:consumer_class],
+  'Should use PatternConsumerB for secondary topic'
+)
+
+assert_equal(
+  'PatternConsumerC', DT[:consumed_c].first[:consumer_class],
+  'Should use PatternConsumerC for tertiary topic'
+)
 
 # Test that attempting to assign same topic to multiple consumers fails
 Karafka::App.routes.clear

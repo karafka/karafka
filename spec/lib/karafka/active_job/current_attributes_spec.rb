@@ -21,12 +21,12 @@ RSpec.describe_current do
 
     let(:job_class) do
       Class.new(ActiveJob::Base) do
-        extend ::Karafka::ActiveJob::JobExtensions
+        extend Karafka::ActiveJob::JobExtensions
       end
     end
 
     describe '#dispatch' do
-      before { allow(::Karafka.producer).to receive(:produce_async) }
+      before { allow(Karafka.producer).to receive(:produce_async) }
 
       let(:job) { job_class.new }
 
@@ -35,14 +35,14 @@ RSpec.describe_current do
           dispatcher.dispatch(job)
         end
 
-        expect(::Karafka.producer).to have_received(:produce_async).with(
+        expect(Karafka.producer).to have_received(:produce_async).with(
           hash_including(topic: job.queue_name)
         )
       end
     end
 
     describe '#dispatch_many' do
-      before { allow(::Karafka.producer).to receive(:produce_many_async) }
+      before { allow(Karafka.producer).to receive(:produce_many_async) }
 
       let(:jobs) { [job_class.new, job_class.new] }
       let(:jobs_messages) do
@@ -58,7 +58,7 @@ RSpec.describe_current do
           dispatcher.dispatch_many(jobs)
         end
 
-        expect(::Karafka.producer).to have_received(:produce_many_async).with(jobs_messages)
+        expect(Karafka.producer).to have_received(:produce_many_async).with(jobs_messages)
       end
     end
   end

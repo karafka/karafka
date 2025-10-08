@@ -30,7 +30,7 @@ end
 
 # We need a new producer just to create a message to this topic to check the start offset
 # as after valid consumption there will be only one message
-producer = ::WaterDrop::Producer.new do |producer_config|
+producer = WaterDrop::Producer.new do |producer_config|
   producer_config.kafka = Karafka::Setup::AttributesMap.producer(Karafka::App.config.kafka)
 end
 

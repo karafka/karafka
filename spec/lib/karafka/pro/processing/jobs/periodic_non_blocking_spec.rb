@@ -11,5 +11,5 @@ RSpec.describe_current do
   specify { expect(described_class.action).to eq(:tick) }
 
   it { expect(job.non_blocking?).to be(true) }
-  it { expect(described_class).to be < ::Karafka::Pro::Processing::Jobs::Periodic }
+  it { expect(described_class).to be < Karafka::Pro::Processing::Jobs::Periodic }
 end

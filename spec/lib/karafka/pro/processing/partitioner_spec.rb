@@ -14,9 +14,9 @@ RSpec.describe_current do
   let(:topic) { subscription_group.topics.first }
   let(:messages) { Array.new(100) { build(:messages_message) } }
 
-  before { ::Karafka::App.config.concurrency = concurrency }
+  before { Karafka::App.config.concurrency = concurrency }
 
-  after { ::Karafka::App.config.concurrency = 1 }
+  after { Karafka::App.config.concurrency = 1 }
 
   context 'when we do not use virtual partitions' do
     it 'expect to yield with 0 and input messages' do

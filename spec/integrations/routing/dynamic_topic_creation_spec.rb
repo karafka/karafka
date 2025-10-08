@@ -46,8 +46,7 @@ Karafka::App.routes.each do |consumer_group|
 end
 
 topics_to_create.each do |expected_topic|
-  assert created_topics.include?(expected_topic),
-         "Should create route for dynamic topic: #{expected_topic}"
+  assert created_topics.include?(expected_topic)
 end
 
 # Test producing to dynamically created topics
@@ -70,18 +69,15 @@ end
 consumed_topics = DT[:consumed].map { |msg| msg[:topic] }.uniq.sort
 expected_topics = topics_to_create.sort
 
-assert_equal expected_topics, consumed_topics,
-             'Should consume from all dynamically created topics'
+assert_equal expected_topics, consumed_topics
 
 # Verify correct number of messages
-assert_equal test_data.size, DT[:consumed].size,
-             'Should consume correct number of messages from dynamic topics'
+assert_equal test_data.size, DT[:consumed].size
 
 # Verify each topic got exactly one message
 topics_to_create.each do |topic|
   topic_messages = DT[:consumed].select { |msg| msg[:topic] == topic }
-  assert_equal 1, topic_messages.size,
-               "Should consume exactly one message from #{topic}"
+  assert_equal 1, topic_messages.size
 end
 
 # Test routing configuration modification at runtime
@@ -113,12 +109,10 @@ end
 new_topics_count = new_topics.size
 
 # Should have different topics now
-assert_equal additional_topics.size, new_topics_count,
-             'Should have new topic configuration after rebuild'
+assert_equal additional_topics.size, new_topics_count
 
 additional_topics.each do |expected_topic|
-  assert new_topics.include?(expected_topic),
-         "Should include new runtime topic: #{expected_topic}"
+  assert new_topics.include?(expected_topic)
 end
 
 # Test conditional topic creation based on configuration

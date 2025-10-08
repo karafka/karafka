@@ -39,8 +39,8 @@ require 'singleton'
 require 'securerandom'
 require 'stringio'
 require 'tmpdir'
-require_relative './support/data_collector'
-require_relative './support/duplications_detector'
+require_relative 'support/data_collector'
+require_relative 'support/duplications_detector'
 
 Thread.abort_on_exception = true
 
@@ -86,7 +86,7 @@ def setup_karafka(
     yield(config) if block_given?
 
     # Configure producer once everything else has been configured
-    config.producer = ::WaterDrop::Producer.new do |producer_config|
+    config.producer = WaterDrop::Producer.new do |producer_config|
       producer_config.kafka = Karafka::Setup::AttributesMap.producer(config.kafka.dup)
       producer_config.logger = config.logger
       # We need to wait a lot sometimes because we create a lot of new topics and this can take
@@ -120,7 +120,7 @@ def setup_karafka(
   end
 
   # We turn on also WaterDrop instrumentation the same way and for the same reasons as above
-  listener = ::WaterDrop::Instrumentation::LoggerListener.new(Karafka.logger)
+  listener = WaterDrop::Instrumentation::LoggerListener.new(Karafka.logger)
 
   Karafka.producer.monitor.subscribe(listener)
 
@@ -219,7 +219,7 @@ def become_pro!
   Karafka.const_set('License', mod) unless Karafka.const_defined?('License')
   require 'karafka/pro/loader'
   Karafka::Pro::Loader.require_all
-  require_relative './support/vp_stabilizer'
+  require_relative 'support/vp_stabilizer'
 end
 
 # Configures ActiveJob stuff in a similar way as the Railtie does for full Rails setup
@@ -228,7 +228,7 @@ def setup_active_job
   require 'active_job/karafka'
 
   # This is done in Railtie but here we use only ActiveJob, not Rails
-  ActiveJob::Base.extend ::Karafka::ActiveJob::JobExtensions
+  ActiveJob::Base.extend Karafka::ActiveJob::JobExtensions
   ActiveJob::Base.queue_adapter = :karafka
 end
 

@@ -28,7 +28,7 @@ produce(DT.topic, '1')
 
 Thread.new do
   sleep(0.1) while DT[:in].empty?
-  Process.kill('TSTP', ::Process.pid)
+  Process.kill('TSTP', Process.pid)
 end
 
 start_karafka_and_wait_until do

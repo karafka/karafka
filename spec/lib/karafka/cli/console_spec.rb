@@ -37,7 +37,7 @@ RSpec.describe_current do
       end
 
       before do
-        allow(::Karafka).to receive(:rails?).and_return(true)
+        allow(Karafka).to receive(:rails?).and_return(true)
         allow(info).to receive(:call)
         allow(console_cli).to receive(:exec)
       end

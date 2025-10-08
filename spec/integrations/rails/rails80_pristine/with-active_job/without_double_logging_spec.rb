@@ -19,7 +19,7 @@ $stderr = strio
 
 require 'active_support'
 
-class CustomFormatter < ::Logger::Formatter
+class CustomFormatter < Logger::Formatter
   def call(severity, timestamp, _, input)
     msg = input.is_a?(String) ? input : input.inspect
 

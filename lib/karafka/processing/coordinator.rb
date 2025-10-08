@@ -198,8 +198,6 @@ module Karafka
 
       # Allows to run synchronized (locked) code that can operate only from a given thread
       #
-      # @param block [Proc] code we want to run in the synchronized mode
-      #
       # @note We check if mutex is not owned already by the current thread so we won't end up with
       #   a deadlock in case user runs coordinated code from inside of his own lock
       #
@@ -207,11 +205,11 @@ module Karafka
       #   Otherwise user indirectly could cause deadlocks or prolonged locks by running his logic.
       #   This can and should however be used for multi-thread strategy applications and other
       #   internal operations locks.
-      def synchronize(&block)
+      def synchronize(&)
         if @mutex.owned?
           yield
         else
-          @mutex.synchronize(&block)
+          @mutex.synchronize(&)
         end
       end
     end

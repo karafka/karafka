@@ -116,14 +116,14 @@ thread_groups.each do |thread_id, entries|
     )
 
     assert entry[:instance_var].include?("thread_#{thread_id}"),
-           'Instance variable should contain correct thread ID'
+      'Instance variable should contain correct thread ID'
   end
 end
 
 # Verify timing consistency - processing times should be reasonable
 processing_times = DT[:consumed].map { |entry| entry[:processing_time] }
 assert processing_times.all? { |time| time > 0 && time < 0.1 },
-       'Processing times should be reasonable (between 0 and 0.1 seconds)'
+  'Processing times should be reasonable (between 0 and 0.1 seconds)'
 
 # Verify thread independence - different threads should have different data
 if thread_groups.size > 1
@@ -134,8 +134,11 @@ if thread_groups.size > 1
   # No thread should have data from another thread
   thread_data_sets.combination(2).each do |set1, set2|
     intersection = set1 & set2
-    assert intersection.empty?,
-           'Different threads should not share instance variable data'
+
+    assert(
+      intersection.empty?,
+      'Different threads should not share instance variable data'
+    )
   end
 end
 

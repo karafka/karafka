@@ -39,7 +39,7 @@ end
 
 10.times do
   Thread.new do
-    consumer = ::Rdkafka::Config.new(CONFIG).consumer
+    consumer = Rdkafka::Config.new(CONFIG).consumer
     DT[:consumers] << consumer
     consumer.subscribe(DT.topics[0])
 
@@ -54,7 +54,7 @@ end
 Thread.new do
   15.times do
     Thread.new do
-      consumer = ::Rdkafka::Config.new(CONFIG).consumer
+      consumer = Rdkafka::Config.new(CONFIG).consumer
       DT[:consumers] << consumer
       consumer.subscribe(DT.topics[1])
 

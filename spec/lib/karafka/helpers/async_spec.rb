@@ -4,7 +4,7 @@ RSpec.describe_current do
   describe '#async_call' do
     subject(:async_executor) do
       Class.new do
-        include ::Karafka::Helpers::Async
+        include Karafka::Helpers::Async
 
         attr_reader :thread_id
 

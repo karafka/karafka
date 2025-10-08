@@ -14,7 +14,7 @@ spec_dir = File.expand_path(__dir__)
 # @return [Array<String, Integer>]
 def cmd(dir, cmd)
   stdout, stderr, status = Open3.capture3(
-    "cd #{dir} && KARAFKA_GEM_DIR=#{ENV['KARAFKA_GEM_DIR']} #{cmd}"
+    "cd #{dir} && KARAFKA_GEM_DIR=#{ENV.fetch('KARAFKA_GEM_DIR', nil)} #{cmd}"
   )
   ["#{stdout}\n#{stderr}", status.exitstatus]
 end

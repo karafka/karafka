@@ -24,17 +24,15 @@ module Karafka
 
       class << self
         # Runs the `Proxy.call`
-        # @param kwargs [Hash] things requested by the proxy
         # @return [Hash] message wrapped with the scheduled message envelope
-        def schedule(**kwargs)
-          Proxy.schedule(**kwargs)
+        def schedule(**)
+          Proxy.schedule(**)
         end
 
         # Generates a tombstone message to cancel given dispatch (if not yet happened)
-        # @param kwargs [Hash] things requested by the proxy
         # @return [Hash] tombstone cancelling message
-        def cancel(**kwargs)
-          Proxy.cancel(**kwargs)
+        def cancel(**)
+          Proxy.cancel(**)
         end
 
         # Below are private APIs

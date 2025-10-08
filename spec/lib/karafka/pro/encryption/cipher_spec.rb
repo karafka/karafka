@@ -7,7 +7,7 @@ RSpec.describe_current do
   subject(:cipher) { described_class.new }
 
   before do
-    allow(::Karafka::App.config.encryption).to receive_messages(
+    allow(Karafka::App.config.encryption).to receive_messages(
       public_key: fixture_file('rsa/public_key_1.pem'),
       private_keys: { '1' => fixture_file('rsa/private_key_1.pem') }
     )
@@ -23,7 +23,7 @@ RSpec.describe_current do
     end
 
     context 'when trying to use non-existing key' do
-      let(:expected_error) { ::Karafka::Pro::Encryption::Errors::PrivateKeyNotFoundError }
+      let(:expected_error) { Karafka::Pro::Encryption::Errors::PrivateKeyNotFoundError }
 
       it 'expect to raise error' do
         expect { cipher.decrypt('2', content) }.to raise_error(expected_error)

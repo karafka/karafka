@@ -36,7 +36,7 @@ draw_routes(Consumer)
 Karafka.monitor.subscribe 'error.occurred' do |event|
   next unless event[:error].is_a?(Test::Error)
 
-  ::Test.clean!
+  Test.clean!
 end
 
 class Cleaner

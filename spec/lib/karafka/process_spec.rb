@@ -78,8 +78,8 @@ RSpec.describe_current do
     let(:callback) { double }
 
     before do
-      process.instance_variable_set(:'@callbacks', signal => [callback])
-      allow(::Signal).to receive(:trap).with(signal).and_yield
+      process.instance_variable_set(:@callbacks, signal => [callback])
+      allow(Signal).to receive(:trap).with(signal).and_yield
     end
 
     it 'traps signals, log it and run callbacks if defined' do

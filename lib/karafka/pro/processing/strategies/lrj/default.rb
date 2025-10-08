@@ -78,10 +78,8 @@ module Karafka
             # Allows for LRJ to synchronize its work. It may be needed because LRJ can run
             # lifecycle events like revocation while the LRJ work is running and there may be a
             # need for a critical section.
-            #
-            # @param block [Proc] block we want to run in a mutex to prevent race-conditions
-            def synchronize(&block)
-              coordinator.shared_mutex.synchronize(&block)
+            def synchronize(&)
+              coordinator.shared_mutex.synchronize(&)
             end
           end
         end

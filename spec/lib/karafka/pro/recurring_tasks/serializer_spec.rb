@@ -54,7 +54,7 @@ RSpec.describe_current do
     let(:task_id) { 'task_1' }
     let(:schedule) { Karafka::Pro::RecurringTasks::Schedule.new(version: '1.0.0') }
 
-    before { allow(::Karafka::Pro::RecurringTasks).to receive(:schedule).and_return(schedule) }
+    before { allow(Karafka::Pro::RecurringTasks).to receive(:schedule).and_return(schedule) }
 
     it 'serializes and compresses the command data' do
       compressed_data = serializer.command(command_name, task_id)
@@ -72,7 +72,7 @@ RSpec.describe_current do
   describe '#log' do
     let(:schedule) { Karafka::Pro::RecurringTasks::Schedule.new(version: '1.0.0') }
 
-    before { allow(::Karafka::Pro::RecurringTasks).to receive(:schedule).and_return(schedule) }
+    before { allow(Karafka::Pro::RecurringTasks).to receive(:schedule).and_return(schedule) }
 
     it 'serializes and compresses the log event data' do
       compressed_data = serializer.log(event)

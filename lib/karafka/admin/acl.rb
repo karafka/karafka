@@ -98,8 +98,10 @@ module Karafka
         PERMISSION_TYPES_MAP
       ].freeze
 
-      private_constant :RESOURCE_TYPES_MAP, :RESOURCE_PATTERNS_TYPE_MAP, :OPERATIONS_MAP,
-                       :PERMISSION_TYPES_MAP, :ALL_MAPS
+      private_constant(
+        :RESOURCE_TYPES_MAP, :RESOURCE_PATTERNS_TYPE_MAP, :OPERATIONS_MAP, :PERMISSION_TYPES_MAP,
+        :ALL_MAPS
+      )
 
       # Class level APIs that operate on Acl instances and/or return Acl instances.
       # @note For the sake of consistency all methods from this API return array of Acls
@@ -187,8 +189,10 @@ module Karafka
         end
       end
 
-      attr_reader :resource_type, :resource_name, :resource_pattern_type, :principal, :host,
-                  :operation, :permission_type
+      attr_reader(
+        :resource_type, :resource_name, :resource_pattern_type, :principal, :host, :operation,
+        :permission_type
+      )
 
       # Initializes a new Acl instance with specified attributes.
       #

@@ -10,5 +10,5 @@ RSpec.describe_current do
   it { expect(config.version).to eq('1') }
   it { expect(config.public_key).to eq('') }
   it { expect(config.private_keys).to eq({}) }
-  it { expect(config.cipher).to be_a(::Karafka::Pro::Encryption::Cipher) }
+  it { expect(config.cipher).to be_a(Karafka::Pro::Encryption::Cipher) }
 end

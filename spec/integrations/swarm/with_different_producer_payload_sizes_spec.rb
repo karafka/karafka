@@ -7,8 +7,8 @@
 setup_karafka
 
 # We do it that way because `#setup_karafka` overwrites the producer
-PRODUCER = ::WaterDrop::Producer.new do |p_config|
-  p_config.kafka = ::Karafka::Setup::AttributesMap.producer(Karafka::App.config.kafka.dup)
+PRODUCER = WaterDrop::Producer.new do |p_config|
+  p_config.kafka = Karafka::Setup::AttributesMap.producer(Karafka::App.config.kafka.dup)
   p_config.logger = Karafka::App.config.logger
   p_config.max_payload_size = 10_999
 end

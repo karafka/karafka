@@ -7,7 +7,7 @@
 
 become_pro!
 
-class Scheduler < ::Karafka::Pro::Processing::Schedulers::Base
+class Scheduler < Karafka::Pro::Processing::Schedulers::Base
   def schedule_consumption(jobs_array)
     jobs_array.each do |job|
       # This API is only available in the consume jobs so idle jobs would crash

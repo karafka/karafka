@@ -43,7 +43,7 @@ g2 = error_events.values.last.map { |event| event.payload[:error] }
 
 # Each error published, should be published only once
 # If this would not be true, all would go everywhere
-assert (g1 & g2).empty?
+assert !g1.intersect?(g2)
 
 assert_equal 'error.occurred', error_events.values.first.first.id
 assert_equal 'librdkafka.error', error_events.values.first.first[:type]

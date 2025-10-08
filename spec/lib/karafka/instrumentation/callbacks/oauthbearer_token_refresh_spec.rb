@@ -10,7 +10,7 @@ RSpec.describe_current do
   before do
     previous_monitor
     allow(monitor).to receive(:instrument)
-    ::Karafka::App.config.monitor = monitor
+    Karafka::App.config.monitor = monitor
   end
 
   after { Karafka::App.config.monitor = previous_monitor }

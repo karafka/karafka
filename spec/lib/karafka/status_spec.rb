@@ -5,7 +5,7 @@ RSpec.describe_current do
 
   let(:status) { :initializing }
 
-  before { status_manager.instance_variable_set(:'@status', status) }
+  before { status_manager.instance_variable_set(:@status, status) }
 
   context 'when we start with a default state' do
     it { expect(status_manager.initialized?).to be(false) }
@@ -76,7 +76,7 @@ RSpec.describe_current do
   describe 'stopping?' do
     context 'when status is not set to stopping' do
       before do
-        status_manager.instance_variable_set(:'@status', rand)
+        status_manager.instance_variable_set(:@status, rand)
       end
 
       it { expect(status_manager.initialized?).to be(false) }
@@ -90,7 +90,7 @@ RSpec.describe_current do
 
     context 'when status is set to stopping' do
       before do
-        status_manager.instance_variable_set(:'@status', :stopping)
+        status_manager.instance_variable_set(:@status, :stopping)
       end
 
       it { expect(status_manager.initialized?).to be(false) }

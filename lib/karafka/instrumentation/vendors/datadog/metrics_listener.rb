@@ -14,8 +14,9 @@ module Karafka
           include ::Karafka::Core::Configurable
           extend Forwardable
 
-          def_delegators :config, :client, :rd_kafka_metrics, :namespace,
-                         :default_tags, :distribution_mode
+          def_delegators(
+            :config, :client, :rd_kafka_metrics, :namespace, :default_tags, :distribution_mode
+          )
 
           # Value object for storing a single rdkafka metric publishing details
           RdKafkaMetric = Struct.new(:type, :scope, :name, :key_location)
@@ -69,10 +70,9 @@ module Karafka
             setup(&block) if block
           end
 
-          # @param block [Proc] configuration block
           # @note We define this alias to be consistent with `WaterDrop#setup`
-          def setup(&block)
-            configure(&block)
+          def setup(&)
+            configure(&)
           end
 
           # Hooks up to Karafka instrumentation for emitted statistics
@@ -198,18 +198,17 @@ module Karafka
 
           # Selects the histogram mode configured and uses it to report to DD client
           # @param key [String] non-namespaced key
-          # @param args [Array] extra arguments to pass to the client
-          def histogram(key, *args)
+          def histogram(key, *)
             case distribution_mode
             when :histogram
               client.histogram(
                 namespaced_metric(key),
-                *args
+                *
               )
             when :distribution
               client.distribution(
                 namespaced_metric(key),
-                *args
+                *
               )
             else
               raise(

@@ -79,9 +79,8 @@ module Karafka
           end
 
           # Iterates over errors
-          # @param block [Proc] code we want to run on each error
-          def each(&block)
-            @errors.each(&block)
+          def each(&)
+            @errors.each(&)
           end
 
           # @return [Array<StandardError>] array with all the errors that occurred

@@ -4,7 +4,7 @@
 # See LICENSE for details.
 
 RSpec.describe_current do
-  subject(:topics) { ::Karafka::Routing::Topics.new([]) }
+  subject(:topics) { Karafka::Routing::Topics.new([]) }
 
   let(:topic) { build(:routing_topic) }
 

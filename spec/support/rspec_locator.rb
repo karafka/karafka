@@ -3,7 +3,7 @@
 require 'karafka/core/helpers/rspec_locator'
 
 # We need a slightly special locator because of Pro
-class RSpecLocator < ::Karafka::Core::Helpers::RSpecLocator
+class RSpecLocator < Karafka::Core::Helpers::RSpecLocator
   # Builds needed API
   # @param rspec [Module] RSpec main module
   def extended(rspec)

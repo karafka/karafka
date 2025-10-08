@@ -14,7 +14,7 @@ Karafka::App.config.producer = WaterDrop::Producer.new do |config|
   }
 end
 
-SUPER_PRODUCER = ::WaterDrop::Producer.new do |producer_config|
+SUPER_PRODUCER = WaterDrop::Producer.new do |producer_config|
   producer_config.kafka = Karafka::Setup::AttributesMap.producer(Karafka::App.config.kafka.dup)
 end
 

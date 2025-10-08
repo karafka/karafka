@@ -36,7 +36,7 @@ module Karafka
 
             # Build the requested range - since first element is on the start offset we need to
             # subtract one from requested count to end up with expected number of elements
-            requested_range = (start_offset..start_offset + (count - 1))
+            requested_range = (start_offset..(start_offset + (count - 1)))
             # Establish theoretical available range. Note, that this does not handle cases related
             # to log retention or compaction
             available_range = (low_offset..(high_offset - 1))

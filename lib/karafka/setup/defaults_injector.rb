@@ -47,8 +47,9 @@ module Karafka
         'socket.nagle.disable': true
       }.freeze
 
-      private_constant :CONSUMER_KAFKA_DEFAULTS, :CONSUMER_KAFKA_DEV_DEFAULTS,
-                       :PRODUCER_KAFKA_DEV_DEFAULTS
+      private_constant(
+        :CONSUMER_KAFKA_DEFAULTS, :CONSUMER_KAFKA_DEV_DEFAULTS, :PRODUCER_KAFKA_DEV_DEFAULTS
+      )
 
       class << self
         # Propagates the kafka setting defaults unless they are already present for consumer config

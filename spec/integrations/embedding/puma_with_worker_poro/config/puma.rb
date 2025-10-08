@@ -17,23 +17,23 @@ class ShutdownConsumer < Karafka::BaseConsumer
   end
 end
 
-::Karafka::App.setup do |config|
+Karafka::App.setup do |config|
   config.kafka = { 'bootstrap.servers': '127.0.0.1:9092' }
   config.client_id = SecureRandom.hex(6)
 end
 
-::Karafka::App.routes.draw do
+Karafka::App.routes.draw do
   topic TOPIC do
     consumer ShutdownConsumer
   end
 end
 
 on_worker_boot do
-  ::Karafka.producer.produce_sync(topic: TOPIC, payload: 'bye bye')
+  Karafka.producer.produce_sync(topic: TOPIC, payload: 'bye bye')
 
-  ::Karafka::Embedded.start
+  Karafka::Embedded.start
 end
 
 on_worker_shutdown do
-  ::Karafka::Embedded.stop
+  Karafka::Embedded.stop
 end

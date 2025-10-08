@@ -17,7 +17,6 @@ module Karafka
         module Messages
           # @param clean [Boolean] do we want to clean each message after we're done working with
           #   it.
-          # @param block [Proc] block we want to execute per each message
           #
           # @note Cleaning messages after we're done with each of them and did not fail does not
           #   affect any other functionalities. The only thing that is crucial is to make sure,
@@ -27,14 +26,14 @@ module Karafka
           # @note This method calls super() to ensure compatibility with other libraries that
           #   may have prepended modules to modify #each behavior. This preserves the method
           #   chain and allows instrumentation libraries to function correctly.
-          def each(clean: false, &block)
+          def each(clean: false, &)
             if clean
               super() do |message|
                 yield(message)
                 message.clean!
               end
             else
-              super(&block)
+              super(&)
             end
           end
         end

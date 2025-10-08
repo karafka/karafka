@@ -397,8 +397,7 @@ module Karafka
 
       class << self
         # Configuring method
-        # @param block [Proc] block we want to execute with the config instance
-        def setup(&block)
+        def setup(&)
           # Will prepare and verify license if present
           Licenser.prepare_and_verify(config.license)
 
@@ -410,7 +409,7 @@ module Karafka
           # of the pro defaults with custom components
           Pro::Loader.pre_setup_all(config) if Karafka.pro?
 
-          configure(&block)
+          configure(&)
 
           Contracts::Config.new.validate!(
             config.to_h,

@@ -10,7 +10,7 @@ RSpec.describe_current do
       before { buffer }
 
       it 'expect to be newer then moment ago' do
-        now = ::Process.clock_gettime(::Process::CLOCK_MONOTONIC) * 1_000
+        now = Process.clock_gettime(Process::CLOCK_MONOTONIC) * 1_000
         expect(buffer.last_polled_at).to be < now
         buffer.polled
         expect(buffer.last_polled_at).to be > now
