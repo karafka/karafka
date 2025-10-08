@@ -141,4 +141,4 @@ post_rebalance_messages = DT
                           .with_index { |_, index| index > after }
                           .select { |message| message.is_a?(Array) }
 
-assert (DT[:process1] & post_rebalance_messages).empty?
+assert !DT[:process1].intersect?(post_rebalance_messages)

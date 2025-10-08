@@ -39,8 +39,8 @@ require 'singleton'
 require 'securerandom'
 require 'stringio'
 require 'tmpdir'
-require_relative './support/data_collector'
-require_relative './support/duplications_detector'
+require_relative 'support/data_collector'
+require_relative 'support/duplications_detector'
 
 Thread.abort_on_exception = true
 
@@ -219,7 +219,7 @@ def become_pro!
   Karafka.const_set('License', mod) unless Karafka.const_defined?('License')
   require 'karafka/pro/loader'
   Karafka::Pro::Loader.require_all
-  require_relative './support/vp_stabilizer'
+  require_relative 'support/vp_stabilizer'
 end
 
 # Configures ActiveJob stuff in a similar way as the Railtie does for full Rails setup

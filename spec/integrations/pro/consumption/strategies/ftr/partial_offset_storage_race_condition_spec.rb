@@ -58,7 +58,7 @@ class CursorRaceFilter < Karafka::Pro::Processing::Filters::Base
       DT[:original_batch1] = messages.map(&:offset)
 
       # Remove messages 4-6 from the first batch
-      to_remove = messages.select { |m| m.offset >= 4 && m.offset <= 6 }
+      to_remove = messages.select { |m| m.offset.between?(4, 6) }
 
       if to_remove.any?
         # Set cursor to last removed message

@@ -46,7 +46,7 @@ start_karafka_and_wait_until do
 end
 
 if DT[:errors].empty?
-  assert (DT[0] & elements).empty?
+  assert !DT[0].intersect?(elements)
 else
   assert DT[:errors].first.payload[:error].is_a?(OpenSSL::PKey::PKeyError)
 end

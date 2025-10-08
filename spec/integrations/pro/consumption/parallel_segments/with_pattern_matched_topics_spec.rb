@@ -68,10 +68,8 @@ start_karafka_and_wait_until do
     topic1 = "#{pattern_base}-first-topic"
 
     # Create and send messages to first topic
-    messages1 = []
-
-    topic1_group0_keys.each do |key|
-      messages1 << { topic: topic1, key: key, payload: "topic1-#{key}" }
+    messages1 = topic1_group0_keys.map do |key|
+      { topic: topic1, key: key, payload: "topic1-#{key}" }
     end
 
     topic1_group1_keys.each do |key|
@@ -93,10 +91,8 @@ start_karafka_and_wait_until do
     topic2 = "#{pattern_base}-second-topic"
 
     # Create and send messages to second topic
-    messages2 = []
-
-    topic2_group0_keys.each do |key|
-      messages2 << { topic: topic2, key: key, payload: "topic2-#{key}" }
+    messages2 = topic2_group0_keys.map do |key|
+      { topic: topic2, key: key, payload: "topic2-#{key}" }
     end
 
     topic2_group1_keys.each do |key|

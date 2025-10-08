@@ -56,7 +56,7 @@ module Karafka
                 max = max(data)
                 boot = boot(data)
 
-                next if boot >= min && boot <= max
+                next if boot.between?(min, max)
 
                 [[%w[subscription_group_details], :multiplexing_boot_mismatch]]
               end

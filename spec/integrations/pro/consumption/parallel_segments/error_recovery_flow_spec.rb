@@ -111,11 +111,9 @@ segment2_keys.first(5).each do |key|
 end
 
 # Second batch: Messages to verify recovery
-second_batch = []
-
 # Add more messages for all segments including the previously errored key
-segment0_keys.first(5).each do |key|
-  second_batch << {
+second_batch = segment0_keys.first(5).map do |key|
+  {
     topic: DT.topic,
     key: key,
     payload: "second-batch-#{key}"

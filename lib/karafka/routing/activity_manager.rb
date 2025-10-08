@@ -58,8 +58,8 @@ module Karafka
       # @return [Hash] accumulated data in a hash for validations
       def to_h
         (
-          SUPPORTED_TYPES.map { |type| ["include_#{type}".to_sym, @included[type]] } +
-          SUPPORTED_TYPES.map { |type| ["exclude_#{type}".to_sym, @excluded[type]] }
+          SUPPORTED_TYPES.map { |type| [:"include_#{type}", @included[type]] } +
+          SUPPORTED_TYPES.map { |type| [:"exclude_#{type}", @excluded[type]] }
         ).to_h
       end
 

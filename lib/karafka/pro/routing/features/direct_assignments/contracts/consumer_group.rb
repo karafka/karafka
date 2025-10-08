@@ -21,10 +21,8 @@ module Karafka
                 virtual do |data, errors|
                   next unless errors.empty?
 
-                  active = []
-
-                  data[:topics].each do |topic|
-                    active << topic[:direct_assignments][:active]
+                  active = data[:topics].map do |topic|
+                    topic[:direct_assignments][:active]
                   end
 
                   # If none active we use standard subscriptions

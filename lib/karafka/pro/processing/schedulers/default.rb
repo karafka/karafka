@@ -29,10 +29,8 @@ module Karafka
           def on_schedule_consumption(jobs_array)
             perf_tracker = Instrumentation::PerformanceTracker.instance
 
-            ordered = []
-
-            jobs_array.each do |job|
-              ordered << [
+            ordered = jobs_array.map do |job|
+              [
                 job,
                 processing_cost(perf_tracker, job)
               ]
