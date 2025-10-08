@@ -97,7 +97,7 @@ module Karafka
       def summary
         broker_count = @cluster_info[:brokers].size
         change = @target_replication_factor - @current_replication_factor
-        broker_nodes = @cluster_info[:brokers].map { |b| b[:node_id] }.join(', ')
+        broker_nodes = @cluster_info[:brokers].map { |broker_info| broker_info[:node_id] }.join(', ')
 
         <<~SUMMARY
           Replication Increase Plan for Topic: #{@topic}
@@ -137,8 +137,8 @@ module Karafka
         #   puts plan.reassignment_json
         #
         #   # Check which brokers will get new replicas
-        #   plan.partitions_assignment.each do |partition, brokers|
-        #     puts "Partition #{partition}: #{brokers.join(', ')}"
+        #   plan.partitions_assignment.each do |partition_id, broker_ids|
+        #     puts "Partition #{partition_id}: #{broker_ids.join(', ')}"
         #   end
         #
         #   # Save and execute
@@ -164,7 +164,8 @@ module Karafka
         # @note Manual placement overrides automatic distribution entirely
         def plan(topic:, to:, brokers: nil)
           topic_info = fetch_topic_info(topic)
-          current_rf = topic_info[:partitions].first[:replicas].size
+          first_partition = topic_info[:partitions].first
+          current_rf = first_partition[:replica_count] || first_partition[:replicas]&.size
           cluster_info = fetch_cluster_info
 
           # Use contract for validation
@@ -228,7 +229,8 @@ module Karafka
         # @note Consider impact on cluster resources during rebalancing
         def rebalance(topic:)
           topic_info = fetch_topic_info(topic)
-          current_rf = topic_info[:partitions].first[:replicas].size
+          first_partition = topic_info[:partitions].first
+          current_rf = first_partition[:replica_count] || first_partition[:replicas]&.size
           cluster_info = fetch_cluster_info
 
           partitions_assignment = generate_partitions_assignment(
@@ -261,9 +263,14 @@ module Karafka
         def fetch_cluster_info
           cluster_metadata = cluster_info
           {
-            brokers: cluster_metadata.brokers.map { |broker| 
-              { node_id: broker.node_id, host: "#{broker.host}:#{broker.port}" }
-            }
+            brokers: cluster_metadata.brokers.map do |broker|
+              # Handle both hash and object formats from metadata
+              if broker.is_a?(Hash)
+                { node_id: broker[:node_id], host: "#{broker[:host]}:#{broker[:port]}" }
+              else
+                { node_id: broker.node_id, host: "#{broker.host}:#{broker.port}" }
+              end
+            end
           }
         end
 
@@ -277,12 +284,19 @@ module Karafka
         # @return [Hash<Integer, Array<Integer>>] partition assignments (partition_id => broker_ids)
         def generate_partitions_assignment(topic_info:, target_replication_factor:, cluster_info:, rebalance_only: false)
           partitions = topic_info[:partitions]
-          brokers = cluster_info[:brokers].map { |b| b[:node_id] }.sort
+          brokers = cluster_info[:brokers].map { |broker_info| broker_info[:node_id] }.sort
           assignments = {}
 
           partitions.each do |partition_info|
             partition_id = partition_info[:partition_id]
-            current_replicas = partition_info[:replicas].map(&:node_id).sort
+
+            # Handle both :replicas (array of objects) and :replica_brokers (array of IDs)
+            replicas = partition_info[:replicas] || partition_info[:replica_brokers] || []
+            current_replicas = if replicas.first&.respond_to?(:node_id)
+                                 replicas.map(&:node_id).sort
+                               else
+                                 replicas.sort
+                               end
 
             if rebalance_only
               # For rebalancing, redistribute current replicas optimally
@@ -327,8 +341,8 @@ module Karafka
           start_index = partition_id % available_brokers.size
           selected = []
 
-          replica_count.times do |i|
-            broker_index = (start_index + i) % available_brokers.size
+          replica_count.times do |replica_index|
+            broker_index = (start_index + replica_index) % available_brokers.size
             selected << available_brokers[broker_index]
           end
 
@@ -346,8 +360,8 @@ module Karafka
           start_index = partition_id % available_brokers.size
           selected = []
 
-          needed_count.times do |i|
-            broker_index = (start_index + i) % available_brokers.size
+          needed_count.times do |additional_replica_index|
+            broker_index = (start_index + additional_replica_index) % available_brokers.size
             selected << available_brokers[broker_index]
           end
 
@@ -361,11 +375,11 @@ module Karafka
       # Creates Kafka-compatible reassignment plan with version and partitions data
       # @return [void]
       def generate_reassignment_json
-        partitions_data = @partitions_assignment.map do |partition, replicas|
+        partitions_data = @partitions_assignment.map do |partition_id, replica_broker_ids|
           {
             topic: @topic,
-            partition: partition,
-            replicas: replicas
+            partition: partition_id,
+            replicas: replica_broker_ids
           }
         end
 
