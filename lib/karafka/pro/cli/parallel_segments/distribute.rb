@@ -92,8 +92,8 @@ module Karafka
 
                   raise(
                     ::Karafka::Errors::CommandValidationError,
-                    "Parallel segment #{red(cg_name)} already has offset #{red(offset)}" \
-                    " set for #{red("#{topic_name}##{partition_id}")}"
+                    "Parallel segment #{red(cg_name)} already has offset #{red(offset)} " \
+                    "set for #{red("#{topic_name}##{partition_id}")}"
                   )
                 end
               end

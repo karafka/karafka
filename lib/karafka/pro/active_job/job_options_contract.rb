@@ -10,10 +10,8 @@ module Karafka
       # class that works with Pro features.
       class JobOptionsContract < Contracts::Base
         configure do |config|
-          config.error_messages = YAML.safe_load(
-            File.read(
-              File.join(Karafka.gem_root, 'config', 'locales', 'errors.yml')
-            )
+          config.error_messages = YAML.safe_load_file(
+            File.join(Karafka.gem_root, 'config', 'locales', 'errors.yml')
           ).fetch('en').fetch('validations').fetch('job_options')
         end
 

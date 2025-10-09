@@ -1,7 +1,5 @@
 # frozen_string_literal: true
 
-# frozen_string_literal: true
-
 module Karafka
   module Routing
     # Abstraction layer on top of groups of topics

@@ -15,7 +15,7 @@ RSpec.describe_current do
     Module.new do
       def each(clean: false, &_block)
         @instrumentation_calls ||= []
-        super(clean: clean) do |message|
+        super do |message|
           @instrumentation_calls << "before_#{message.object_id}"
           yield(message)
           @instrumentation_calls << "after_#{message.object_id}"

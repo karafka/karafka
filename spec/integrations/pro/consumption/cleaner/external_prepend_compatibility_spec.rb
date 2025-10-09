@@ -13,7 +13,7 @@ setup_karafka
 # Simulate external library instrumentation (like DataDog)
 module ExternalInstrumentation
   def each(clean: false, &_block)
-    super(clean: clean) do |message|
+    super do |message|
       DT[:tracker] << "start_#{message.offset}"
       yield(message)
       DT[:tracker] << "end_#{message.offset}"

@@ -12,10 +12,8 @@ module Karafka
             # Contract to validate configuration of the filtering feature
             class ConsumerGroup < Karafka::Contracts::Base
               configure do |config|
-                config.error_messages = YAML.safe_load(
-                  File.read(
-                    File.join(Karafka.gem_root, 'config', 'locales', 'pro_errors.yml')
-                  )
+                config.error_messages = YAML.safe_load_file(
+                  File.join(Karafka.gem_root, 'config', 'locales', 'pro_errors.yml')
                 ).fetch('en').fetch('validations').fetch('routing').fetch('consumer_group')
 
                 required(:patterns) { |val| val.is_a?(Array) && val.all? { |el| el.is_a?(Hash) } }

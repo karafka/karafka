@@ -21,7 +21,7 @@ module Karafka
 
         # Creates new manager instance
         def initialize
-          super()
+          super
           @mutex = Mutex.new
           @changes = Hash.new do |h, k|
             h[k] = {
