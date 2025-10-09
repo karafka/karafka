@@ -111,7 +111,7 @@ error_messages = DT[:consumed].select { |msg| msg[:error_message] }
 assert error_messages.size >= 5, 'Should capture error details for malformed JSON'
 
 # Verify specific error types were caught
-error_types = DT[:consumed].map { |msg| msg[:error_type] }.compact.uniq
+error_types = DT[:consumed].filter_map { |msg| msg[:error_type] }.uniq
 assert error_types.include?('JSON::ParserError'), 'Should catch JSON parsing errors'
 
 # The key success criteria: all malformed JSON handled without consumer crashes

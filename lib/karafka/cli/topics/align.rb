@@ -95,7 +95,7 @@ module Karafka
               names = config.synonyms.map(&:name) << config.name
 
               # We move forward only if given topic config is for altering
-              next if !desired_configs.keys.intersect?(names)
+              next unless desired_configs.keys.intersect?(names)
 
               desired_config = nil
 

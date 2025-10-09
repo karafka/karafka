@@ -15,7 +15,7 @@ end
 class Consumer < Karafka::BaseConsumer
   def consume
     each do |message|
-      sleep((message.offset % 3))
+      sleep(message.offset % 3)
       DT[:offsets] << message.offset
     end
   end

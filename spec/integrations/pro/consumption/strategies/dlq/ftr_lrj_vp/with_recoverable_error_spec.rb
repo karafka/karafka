@@ -58,4 +58,4 @@ start_karafka_and_wait_until do
 end
 
 assert DT[:dlqed].empty?
-assert((DT[0].count { |offset| offset == 7 }) >= 2)
+assert(DT[0].count { |offset| offset == 7 } >= 2)

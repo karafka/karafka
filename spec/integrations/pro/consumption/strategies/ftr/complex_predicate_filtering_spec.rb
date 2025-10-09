@@ -136,8 +136,8 @@ end
 assert_equal valid_message_count, DT[:processed_data].size
 
 # Verify specific filtering behaviors
-processed_user_ids = DT[:processed_data].map { |data| data['user_id'] }.compact
-invalid_user_ids = processed_user_ids.reject { |id| id.match?(/^user_\d+$/) }
+processed_user_ids = DT[:processed_data].filter_map { |data| data['user_id'] }
+invalid_user_ids = processed_user_ids.grep_v(/^user_\d+$/)
 assert_equal [], invalid_user_ids
 
 # Verify no sensitive data was processed

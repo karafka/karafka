@@ -32,6 +32,6 @@ start_karafka_and_wait_until do
   DT[:offsets].count >= 10
 end
 
-assert_equal true, DT[:errors].count == 1
+assert_equal true, DT[:errors].count.one?
 assert_equal true, DT[:errors].first.instance_of?(SuperStandardError)
 assert_equal DT[:offsets], (0..9).to_a

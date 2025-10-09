@@ -66,11 +66,7 @@ start_karafka_and_wait_until do
     (
       DT[0].uniq.size >= 3 ||
         DT[1].uniq.size >= 3
-    ) && (
-      DT[0].uniq.size >= 2 && DT[1].uniq.size >= 2
-    ) && (
-      DT.key?(:done) && sleep(1)
-    )
+    ) && DT[0].uniq.size >= 2 && DT[1].uniq.size >= 2 && DT.key?(:done) && sleep(1)
 end
 
 taken_partition = DT[:jumped].first

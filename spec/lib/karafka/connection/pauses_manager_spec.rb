@@ -35,7 +35,7 @@ RSpec.describe_current do
       end
 
       it 'expect to resume it' do
-        manager.resume {}
+        manager.resume { nil }
         expect(fetched_pause.paused?).to be(false)
         expect(fetched_pause.expired?).to be(true)
       end

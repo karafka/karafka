@@ -75,7 +75,7 @@ RSpec.describe Karafka::Instrumentation::Logger do
       before { FileUtils.mkdir_p(File.dirname(log_path), mode: 0o700) }
 
       context 'when file is writable' do
-        before { FileUtils.install('/dev/null', log_path, mode: 0o700) }
+        before { FileUtils.install(File::NULL, log_path, mode: 0o700) }
 
         specify do
           described_class.new
@@ -84,7 +84,7 @@ RSpec.describe Karafka::Instrumentation::Logger do
       end
 
       context 'when file is not writable' do
-        before { FileUtils.install('/dev/null', log_path, mode: 0o400) }
+        before { FileUtils.install(File::NULL, log_path, mode: 0o400) }
 
         specify do
           described_class.new

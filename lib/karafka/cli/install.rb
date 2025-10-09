@@ -54,7 +54,7 @@ module Karafka
           template = File.read(Karafka.core_root.join("templates/#{source}"))
           render = ::ERB.new(template, trim_mode: '-').result(binding)
 
-          File.open(pathed_target, 'w') { |file| file.write(render) }
+          File.write(pathed_target, render)
 
           puts "#{green('Created')} #{target}"
         end
