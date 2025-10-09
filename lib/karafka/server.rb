@@ -64,7 +64,7 @@ module Karafka
         process.on_sigterm { stop }
         process.on_sigtstp { quiet }
         # Needed for instrumentation
-        process.on_sigttin {}
+        process.on_sigttin { nil }
         process.supervise
 
         # This will only run when not in a swarm mode. In swarm mode the server runs post-fork, so

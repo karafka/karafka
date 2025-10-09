@@ -14,7 +14,7 @@ module Karafka
       class << self
         # @return [Schedule, nil] current defined schedule or nil if not defined
         def schedule
-          @schedule || define('0.0.0') {}
+          @schedule || define('0.0.0') { nil }
         end
 
         # Simplified API for schedules definitions and validates the tasks data

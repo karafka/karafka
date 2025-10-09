@@ -327,19 +327,19 @@ module Karafka
           # We first fetch all the topics with partitions count that exist in the cluster so we
           # do not query for topics that do not exist and so we can get partitions count for all
           # the topics we may need. The non-existent and not consumed will be filled at the end
-          existing_topics = cluster_info.topics.map do |topic|
+          existing_topics = cluster_info.topics.to_h do |topic|
             [topic[:topic_name], topic[:partition_count]]
-          end.to_h.freeze
+          end.freeze
 
           # If no expected CGs, we use all from routing that have active topics
           if consumer_groups_with_topics.empty?
-            consumer_groups_with_topics = Karafka::App.routes.map do |cg|
+            consumer_groups_with_topics = Karafka::App.routes.to_h do |cg|
               cg_topics = cg.topics.select do |cg_topic|
                 active_topics_only ? cg_topic.active? : true
               end
 
               [cg.id, cg_topics.map(&:name)]
-            end.to_h
+            end
           end
 
           # We make a copy because we will remove once with non-existing topics

@@ -39,7 +39,7 @@ RSpec.describe_current do
 
     context 'when no callbacks registered' do
       it 'expect not to bind to anything' do
-        process.on_any_active {}
+        process.on_any_active { nil }
         process.supervise
         expect(process).not_to have_received(:trap_signal)
       end
@@ -47,11 +47,11 @@ RSpec.describe_current do
 
     context 'when callbacks were registered' do
       before do
-        process.on_sigint {}
+        process.on_sigint { nil }
       end
 
       it 'expect to bind' do
-        process.on_any_active {}
+        process.on_any_active { nil }
         process.supervise
         expect(process).to have_received(:trap_signal).once
       end

@@ -176,7 +176,12 @@ RSpec.describe_current do
     end
 
     context 'when given partition exists and is not the only one' do
-      let(:message2) { OpenStruct.new(topic: message1.topic, partition: 1) }
+      let(:message2) do
+        build(
+          :messages_message,
+          metadata: build(:messages_metadata, topic: message1.topic, partition: 1)
+        )
+      end
 
       before { buffer << message2 }
 

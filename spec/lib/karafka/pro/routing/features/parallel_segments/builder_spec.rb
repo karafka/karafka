@@ -38,7 +38,7 @@ RSpec.describe_current do
 
       it 'uses the existing consumer group' do
         stub_const('Karafka::Routing::ConsumerGroup', consumer_group_class_spy)
-        builder.consumer_group('test-group') {}
+        builder.consumer_group('test-group') { nil }
         expect(consumer_group_class_spy).not_to have_received(:new)
       end
     end

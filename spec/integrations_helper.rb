@@ -11,8 +11,8 @@ unless ENV.key?('PRISTINE_MODE')
 
   Warning.process do |warning|
     next unless warning.include?(Dir.pwd)
-    # Allow OpenStruct usage only in specs
-    next if warning.include?('OpenStruct use') && warning.include?('_spec')
+    # Filter out warnings we don't care about in specs
+    next if warning.include?('_spec')
     # We redefine whole bunch of stuff to simulate various scenarios
     next if warning.include?('previous definition of')
     next if warning.include?('method redefined')
@@ -455,8 +455,9 @@ end
 # @param details [Hash] other details
 def produce(topic, payload, details = {})
   Karafka::App.producer.produce_sync(
-    **details, topic: topic,
-      payload: payload
+    **details,
+    topic: topic,
+    payload: payload
   )
 end
 

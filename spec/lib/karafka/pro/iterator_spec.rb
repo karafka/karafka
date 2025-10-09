@@ -12,7 +12,7 @@ RSpec.describe_current do
   before { Karafka::Admin.create_topic(topic, 2, 1) }
 
   it 'expect to start and stop iterator' do
-    iterator.each {}
+    iterator.each { nil }
   end
 
   context 'when there is some data in the topic' do

@@ -114,7 +114,7 @@ RSpec.describe Karafka::Swarm::Node, mode: :fork do
 
     context 'when node process is dead' do
       let(:fork_pid) do
-        pid = fork {}
+        pid = fork { nil }
         sleep(0.5)
         pid
       end

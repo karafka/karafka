@@ -132,14 +132,15 @@ RSpec.extend RSpecLocator.new(__FILE__)
 
 # Alias for two producers that we need in specs. Regular one that is not transactional and the
 # other one that is transactional for transactional specs
-PRODUCERS = OpenStruct.new(
+Producers = Struct.new(:regular, :transactional, keyword_init: true)
+PRODUCERS = Producers.new(
   regular: Karafka.producer,
   transactional: WaterDrop::Producer.new do |p_config|
     p_config.kafka = Karafka::Setup::AttributesMap.producer(Karafka::App.config.kafka.dup)
     p_config.kafka[:'transactional.id'] = SecureRandom.uuid
     p_config.logger = Karafka::App.config.logger
   end
-)
+).freeze
 
 # We by default use the default listeners for specs to check how they work and that
 # they don't not break anything

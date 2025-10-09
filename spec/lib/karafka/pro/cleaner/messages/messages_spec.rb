@@ -30,7 +30,7 @@ RSpec.describe_current do
 
   describe '#each' do
     context 'when not with clean' do
-      before { messages.each {} }
+      before { messages.each { nil } }
 
       it 'expect not to have all messages cleaned' do
         expect(message1.cleaned?).to be(false)
@@ -39,7 +39,7 @@ RSpec.describe_current do
     end
 
     context 'when with clean' do
-      before { messages.each(clean: true) {} }
+      before { messages.each(clean: true) { nil } }
 
       it 'expect to have all messages cleaned' do
         expect(message1.cleaned?).to be(true)

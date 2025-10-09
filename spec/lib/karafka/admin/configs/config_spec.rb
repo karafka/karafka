@@ -115,23 +115,29 @@ RSpec.describe_current do
   end
 
   describe '.from_rd_kafka' do
+    let(:synonym_config) do
+      instance_double(
+        Rdkafka::Admin::ConfigBindingResult,
+        name: 'test_synonym',
+        value: 'synonym_value',
+        read_only: 1,
+        default: 1,
+        sensitive: 1,
+        synonym: 1,
+        synonyms: []
+      )
+    end
+
     let(:rd_kafka_config) do
-      OpenStruct.new(
+      instance_double(
+        Rdkafka::Admin::ConfigBindingResult,
         name: name,
         value: value,
         read_only: 1,
         default: 1,
         sensitive: 1,
         synonym: 1,
-        synonyms: [OpenStruct.new(
-          name: 'test_synonym',
-          value: 'synonym_value',
-          read_only: 1,
-          default: 1,
-          sensitive: 1,
-          synonym: 1,
-          synonyms: []
-        )]
+        synonyms: [synonym_config]
       )
     end
 

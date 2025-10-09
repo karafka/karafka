@@ -10,9 +10,9 @@ module Karafka
         def call
           any_repartitioned = false
 
-          existing_partitions = existing_topics.map do |topic|
+          existing_partitions = existing_topics.to_h do |topic|
             [topic.fetch(:topic_name), topic.fetch(:partition_count)]
-          end.to_h
+          end
 
           declaratives_routing_topics.each do |topic|
             name = topic.name
