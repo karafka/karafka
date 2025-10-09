@@ -15,7 +15,7 @@ RSpec.describe_current do
 
   before do
     allow(Karafka::App.config).to receive(:concurrency).and_return(5)
-    queue.instance_variable_set('@queue', internal_queue)
+    queue.instance_variable_set(:@queue, internal_queue)
     queue.register(job1.group_id)
     queue.register(job2.group_id)
   end

@@ -22,7 +22,7 @@ FactoryBot.define do
 
       reader.close
 
-      instance.instance_variable_set('@writer', writer)
+      instance.instance_variable_set(:@writer, writer)
       instance
     end
   end
@@ -33,8 +33,8 @@ FactoryBot.define do
 
       instance = new(id, parent_pid)
 
-      instance.instance_variable_set('@writer', writer)
-      instance.instance_variable_set('@reader', reader)
+      instance.instance_variable_set(:@writer, writer)
+      instance.instance_variable_set(:@reader, reader)
       instance
     end
   end

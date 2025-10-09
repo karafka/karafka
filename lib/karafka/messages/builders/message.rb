@@ -28,7 +28,7 @@ module Karafka
 
             # And nullify it in the kafka message. This can save a lot of memory when used with
             # the Pro Cleaner API
-            kafka_message.instance_variable_set('@payload', nil)
+            kafka_message.instance_variable_set(:@payload, nil)
 
             # Karafka messages cannot be frozen because of the lazy deserialization feature
             message = Karafka::Messages::Message.new(payload, metadata)

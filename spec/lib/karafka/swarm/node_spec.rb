@@ -30,13 +30,13 @@ RSpec.describe Karafka::Swarm::Node, mode: :fork do
     end
 
     context 'when pipe for writing is closed' do
-      before { node.instance_variable_get('@writer').close }
+      before { node.instance_variable_get(:@writer).close }
 
       it { expect(node.healthy).to be(false) }
     end
 
     context 'when pipe for reading is closed' do
-      before { node.instance_variable_get('@reader').close }
+      before { node.instance_variable_get(:@reader).close }
 
       it { expect(node.status).to eq(-1) }
     end
@@ -79,7 +79,7 @@ RSpec.describe Karafka::Swarm::Node, mode: :fork do
     let(:signal_string) { 'TERM' }
 
     before do
-      node.instance_variable_set('@pid', Process.pid)
+      node.instance_variable_set(:@pid, Process.pid)
       allow(Process).to receive(:kill)
     end
 

@@ -216,7 +216,7 @@ def become_pro!
     end
   end
 
-  Karafka.const_set('License', mod) unless Karafka.const_defined?('License')
+  Karafka.const_set(:License, mod) unless Karafka.const_defined?('License')
   require 'karafka/pro/loader'
   Karafka::Pro::Loader.require_all
   require_relative 'support/vp_stabilizer'
