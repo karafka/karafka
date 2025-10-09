@@ -28,9 +28,9 @@ ARGV[1] = 'repartition'
 
 Karafka::Cli.start
 
-cluster_topics = Karafka::Admin.cluster_info.topics.map do |topic|
+cluster_topics = Karafka::Admin.cluster_info.topics.to_h do |topic|
   [topic.fetch(:topic_name), topic.fetch(:partition_count)]
-end.to_h
+end
 
 # Increase
 assert_equal 5, cluster_topics.fetch(DT.topic)

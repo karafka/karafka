@@ -109,7 +109,7 @@ RSpec.describe_current do
       tracker.empty?
       tracker.last
       tracker.all
-      tracker.each { |_| }
+      tracker.each { |_| nil }
 
       expect(tracker.trace_id).to eq(trace_id_before)
     end

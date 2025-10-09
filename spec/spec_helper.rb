@@ -8,6 +8,8 @@ require 'warning'
 
 Warning.process do |warning|
   next unless warning.include?(Dir.pwd)
+  # Allow OpenStruct usage only in specs
+  next if warning.include?('OpenStruct use') && warning.include?('/spec/')
   next if warning.include?('vendor/')
   next if warning.include?('rspec_locator.rb')
   next if warning.include?('fixture_file')
@@ -24,6 +26,7 @@ $LOAD_PATH.unshift(File.join(File.dirname(__FILE__), '..', 'lib'))
   active_support
   singleton
   factory_bot
+  ostruct
   simplecov
   tempfile
   zlib

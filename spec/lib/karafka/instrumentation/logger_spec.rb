@@ -17,7 +17,7 @@ RSpec.describe Karafka::Instrumentation::Logger do
   specify { expect(described_class).to be < Logger }
 
   describe '#new' do
-    let(:karafka_test_root) { Pathname(Dir::Tmpname.create('karafka') { |_| }) }
+    let(:karafka_test_root) { Pathname(Dir::Tmpname.create('karafka') { |_| nil }) }
     let(:log_path) { karafka_test_root.join("log/#{Karafka.env}.log") }
     let(:file_matcher) { having_attributes(closed?: false, path: log_path.to_path, class: File) }
 

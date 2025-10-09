@@ -77,7 +77,7 @@ RSpec.describe_current do
     end
 
     context 'when executed already once' do
-      before { coordinator.on_enqueued {} }
+      before { coordinator.on_enqueued { nil } }
 
       it 'expect not to run again' do
         expect { |block| coordinator.on_enqueued(&block) }.not_to yield_control
@@ -94,7 +94,7 @@ RSpec.describe_current do
     end
 
     context 'when executed already once' do
-      before { coordinator.on_started {} }
+      before { coordinator.on_started { nil } }
 
       it 'expect not to run again' do
         expect { |block| coordinator.on_started(&block) }.not_to yield_control
@@ -111,7 +111,7 @@ RSpec.describe_current do
     end
 
     context 'when executed already once' do
-      before { coordinator.on_finished {} }
+      before { coordinator.on_finished { nil } }
 
       it 'expect not to run again' do
         expect { |block| coordinator.on_finished(&block) }.not_to yield_control

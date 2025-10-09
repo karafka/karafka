@@ -67,8 +67,7 @@ module Karafka
             consumer_groups = [segment_origin, segments.map(&:name)].flatten
 
             consumer_groups_with_topics = consumer_groups
-                                          .map { |name| [name, topics_names] }
-                                          .to_h
+                                          .to_h { |name| [name, topics_names] }
 
             lags_with_offsets = Karafka::Admin.read_lags_with_offsets(
               consumer_groups_with_topics

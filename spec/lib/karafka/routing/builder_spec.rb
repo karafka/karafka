@@ -263,7 +263,7 @@ RSpec.describe_current do
             topic(:topic_name1) { consumer Class.new(Karafka::BaseConsumer) }
           end
 
-          consumer_group(:group_name2) {}
+          consumer_group(:group_name2) { nil }
         end
       end
 
