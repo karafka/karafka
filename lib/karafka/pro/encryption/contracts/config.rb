@@ -24,8 +24,8 @@ module Karafka
 
             required(:private_keys) do |val|
               val.is_a?(Hash) &&
-                val.keys.all? { |key| key.is_a?(String) } &&
-                val.values.all? { |key| key.is_a?(String) }
+                val.keys.all?(String) &&
+                val.values.all?(String)
             end
           end
 

@@ -28,7 +28,7 @@ start_karafka_and_wait_until do
   DT[:events].size >= 10
 end
 
-assert(DT[:events].all? { |detail| detail.is_a?(Consumer) })
+assert(DT[:events].all?(Consumer))
 
 # shutdown enqueue should happen after all work is done
 assert DT[:consumes].last < DT[:shutdown].last

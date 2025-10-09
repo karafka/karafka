@@ -16,7 +16,7 @@ module Karafka
                   File.join(Karafka.gem_root, 'config', 'locales', 'pro_errors.yml')
                 ).fetch('en').fetch('validations').fetch('routing').fetch('consumer_group')
 
-                required(:patterns) { |val| val.is_a?(Array) && val.all? { |el| el.is_a?(Hash) } }
+                required(:patterns) { |val| val.is_a?(Array) && val.all?(Hash) }
 
                 virtual do |data, errors|
                   next unless errors.empty?

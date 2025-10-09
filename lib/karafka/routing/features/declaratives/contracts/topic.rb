@@ -20,7 +20,7 @@ module Karafka
               required(:replication_factor) { |val| val.is_a?(Integer) && val.positive? }
               required(:details) do |val|
                 val.is_a?(Hash) &&
-                  val.keys.all? { |key| key.is_a?(Symbol) }
+                  val.keys.all?(Symbol)
               end
             end
           end

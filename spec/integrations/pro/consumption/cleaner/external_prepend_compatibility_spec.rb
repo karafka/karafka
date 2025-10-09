@@ -107,4 +107,4 @@ assert DT[3] == [true, true, true, true, true]
 # With 5 messages (offsets 0-4), we check 4 times (when processing offsets 1,2,3,4)
 # All checks should show first message as cleaned
 assert DT[4].size == 4
-assert(DT[4].all? { |status| status == true })
+assert(DT[4].all?(true))

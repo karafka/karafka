@@ -23,15 +23,15 @@ module Karafka
 
                 required(:nodes) do |val|
                   next true if val.is_a?(Range)
-                  next true if val.is_a?(Array) && val.all? { |id| id.is_a?(Integer) }
+                  next true if val.is_a?(Array) && val.all?(Integer)
                   next false unless val.is_a?(Hash)
-                  next false unless val.keys.all? { |id| id.is_a?(Integer) }
+                  next false unless val.keys.all?(Integer)
 
                   values = val.values
 
                   next false unless values.all? { |ps| ps.is_a?(Array) || ps.is_a?(Range) }
-                  next true if values.flatten.all? { |part| part.is_a?(Integer) }
-                  next true if values.flatten.all? { |part| part.is_a?(Range) }
+                  next true if values.flatten.all?(Integer)
+                  next true if values.flatten.all?(Range)
 
                   false
                 end

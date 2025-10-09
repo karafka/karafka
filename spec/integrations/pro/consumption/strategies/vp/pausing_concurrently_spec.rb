@@ -75,5 +75,5 @@ DT[0]
   .group_by(&:itself)
   .values
   .map(&:size)
-  .all? { |size| size == 1 }
+  .all?(1)
   .then { |no_duplicates| assert no_duplicates }

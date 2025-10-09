@@ -37,7 +37,7 @@ module Karafka
             topics_consumers[topic[:name]] << topic[:consumer]
           end
 
-          next if topics_consumers.values.map(&:size).all? { |count| count == 1 }
+          next if topics_consumers.values.map(&:size).all?(1)
 
           [[%i[topics], :many_consumers_same_topic]]
         end

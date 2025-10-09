@@ -38,7 +38,7 @@ error = DT[:errors].first
 exit unless error
 
 assert(
-  %i[unknown_partition unknown_topic_or_part].any? { |code| error.code == code }
+  %i[unknown_partition unknown_topic_or_part].any?(error.code)
 )
 
 DT[:thread].join

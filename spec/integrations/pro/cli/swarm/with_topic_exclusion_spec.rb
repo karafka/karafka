@@ -61,16 +61,16 @@ t1 = DT.topics[1]
 t2 = DT.topics[2]
 
 assert(
-  consumed.any? { |c| c == t0 },
+  consumed.any?(t0),
   "Expected to consume from #{t0} but didn't"
 )
 
 assert(
-  consumed.any? { |c| c == t2 },
+  consumed.any?(t2),
   "Expected to consume from #{t2} but didn't"
 )
 
 assert(
-  consumed.none? { |c| c == t1 },
+  consumed.none?(t1),
   "Should NOT have consumed from excluded topic #{t1}"
 )
