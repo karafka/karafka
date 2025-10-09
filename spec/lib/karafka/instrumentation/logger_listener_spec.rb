@@ -692,8 +692,8 @@ RSpec.describe_current do
       let(:payload) do
         {
           tpl: {
-            'topic1' => [OpenStruct.new(partition: 0), OpenStruct.new(partition: 1)],
-            'topic2' => [OpenStruct.new(partition: 0)]
+            'topic1' => [double(partition: 0), double(partition: 1)],
+            'topic2' => [double(partition: 0)]
           },
           consumer_group_id: group_id,
           client_id: client_id
@@ -737,8 +737,8 @@ RSpec.describe_current do
       let(:payload) do
         {
           tpl: {
-            'topic1' => [OpenStruct.new(partition: 0), OpenStruct.new(partition: 1)],
-            'topic2' => [OpenStruct.new(partition: 0)]
+            'topic1' => [double(partition: 0), double(partition: 1)],
+            'topic2' => [double(partition: 0)]
           },
           consumer_group_id: group_id,
           client_id: client_id
