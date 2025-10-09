@@ -35,5 +35,5 @@ start_karafka_and_wait_until do
   DT.key?(:stats) && DT.key?(:stats_exist)
 end
 
-assert(DT[:stats].all? { |val| val == -1 })
-assert(DT[:stats_exist].all? { |val| val == -1 })
+assert(DT[:stats].all?(-1))
+assert(DT[:stats_exist].all?(-1))

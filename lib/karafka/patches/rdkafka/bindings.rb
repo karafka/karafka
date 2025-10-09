@@ -99,7 +99,7 @@ Rdkafka::Bindings.send(
 )
 
 Rdkafka::Bindings.const_set(
-  'RebalanceCallback',
+  :RebalanceCallback,
   Karafka::Patches::Rdkafka::Bindings::RebalanceCallback
 )
 

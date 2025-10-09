@@ -44,7 +44,7 @@ assert DT[0].count { |val| val == '1' } >= 5
 
 # First 20 messages should be consumed only once
 elements[0..19].each do |payload|
-  assert_equal 1, (DT[0].count { |val| val == payload })
+  assert_equal 1, DT[0].count { |val| val == payload }
 end
 
 # All other messages should be consumed at least 5 times

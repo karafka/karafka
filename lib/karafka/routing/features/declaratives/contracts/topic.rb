@@ -9,10 +9,8 @@ module Karafka
           # Basic validation of the Kafka expected config details
           class Topic < Karafka::Contracts::Base
             configure do |config|
-              config.error_messages = YAML.safe_load(
-                File.read(
-                  File.join(Karafka.gem_root, 'config', 'locales', 'errors.yml')
-                )
+              config.error_messages = YAML.safe_load_file(
+                File.join(Karafka.gem_root, 'config', 'locales', 'errors.yml')
               ).fetch('en').fetch('validations').fetch('routing').fetch('topic')
             end
 
@@ -22,7 +20,7 @@ module Karafka
               required(:replication_factor) { |val| val.is_a?(Integer) && val.positive? }
               required(:details) do |val|
                 val.is_a?(Hash) &&
-                  val.keys.all? { |key| key.is_a?(Symbol) }
+                  val.keys.all?(Symbol)
               end
             end
           end

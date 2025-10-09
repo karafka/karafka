@@ -11,10 +11,8 @@ module Karafka
         # Makes sure, all the expected config is defined as it should be
         class Config < ::Karafka::Contracts::Base
           configure do |config|
-            config.error_messages = YAML.safe_load(
-              File.read(
-                File.join(Karafka.gem_root, 'config', 'locales', 'pro_errors.yml')
-              )
+            config.error_messages = YAML.safe_load_file(
+              File.join(Karafka.gem_root, 'config', 'locales', 'pro_errors.yml')
             ).fetch('en').fetch('validations').fetch('setup').fetch('config')
           end
 
@@ -26,8 +24,8 @@ module Karafka
 
             required(:private_keys) do |val|
               val.is_a?(Hash) &&
-                val.keys.all? { |key| key.is_a?(String) } &&
-                val.values.all? { |key| key.is_a?(String) }
+                val.keys.all?(String) &&
+                val.values.all?(String)
             end
           end
 

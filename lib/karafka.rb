@@ -101,7 +101,7 @@ module Karafka
     #   always mean user wants to have it required. User may want to run Karafka without Rails
     #   even when having both in the same Gemfile.
     def rails?
-      return @rails if instance_variable_defined?('@rails')
+      return @rails if instance_variable_defined?(:@rails)
 
       @rails = Object.const_defined?('Rails::Railtie')
 

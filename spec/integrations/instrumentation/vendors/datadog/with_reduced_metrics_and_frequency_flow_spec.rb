@@ -33,7 +33,7 @@ class OptimizedDatadogListener < Karafka::Instrumentation::Vendors::Datadog::Met
     @statistics_counter += 1
     return unless (@statistics_counter % @report_every_n_stats).zero?
 
-    super(event)
+    super
   end
 end
 

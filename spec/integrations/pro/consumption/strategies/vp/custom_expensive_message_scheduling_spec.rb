@@ -215,7 +215,7 @@ assert expensive_scheduled_first, 'Expensive job should be among the first sched
 # 3. Verify expensive VP was prioritized
 # The expensive VP should be scheduled early, though exact position may vary due to timing
 vp_start_order = DT[:vp_start_times].sort_by { |_, time| time }.map(&:first)
-expensive_vp_positions = DT[:expensive_vps].uniq.map { |vp| vp_start_order.index(vp) }.compact
+expensive_vp_positions = DT[:expensive_vps].uniq.filter_map { |vp| vp_start_order.index(vp) }
 
 # Due to timing variations, we check if it's in the first 10 (out of 15 VPs)
 assert(

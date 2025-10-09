@@ -55,7 +55,7 @@ class DelayThrottler < Karafka::Pro::Processing::Filters::Base
 
   def timeout
     timeout = (@min_delay * 1_000) - ((float_now - @cursor.timestamp.to_f) * 1_000)
-    timeout <= 0 ? 0 : timeout
+    [timeout, 0].max
   end
 end
 

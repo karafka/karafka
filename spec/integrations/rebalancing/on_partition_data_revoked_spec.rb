@@ -75,7 +75,7 @@ re_assigned = DT[:post].to_a.sort
 # After rebalance we should not get all partitions back as now there are two consumers
 assert_not_equal [0, 1, 2], re_assigned
 # It may get either one or two partitions back
-assert re_assigned.size == 1 || re_assigned.size == 2
+assert [1, 2].include?(re_assigned.size)
 
 other.join
 consumer.close

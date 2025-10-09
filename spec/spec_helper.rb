@@ -67,9 +67,7 @@ end
 # Require total coverage after running both regular and pro
 SimpleCov.minimum_coverage(93.6) if SPECS_TYPE == 'pro'
 
-Dir["#{File.dirname(__FILE__)}/support/**/*.rb"]
-  .sort
-  .each { |f| require f }
+Dir["#{File.dirname(__FILE__)}/support/**/*.rb"].each { |f| require f }
 
 RSpec.configure do |config|
   config.include FactoryBot::Syntax::Methods

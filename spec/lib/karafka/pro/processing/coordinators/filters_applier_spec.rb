@@ -255,7 +255,7 @@ RSpec.describe_current do
     end
 
     before do
-      applier.instance_variable_get('@filters').each do |filter|
+      applier.instance_variable_get(:@filters).each do |filter|
         allow(filter).to receive(:action).and_return(:skip)
       end
 

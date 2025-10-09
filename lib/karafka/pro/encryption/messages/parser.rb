@@ -25,7 +25,7 @@ module Karafka
             encryption = headers['encryption']
             fingerprint = headers['encryption_fingerprint']
 
-            return super(message) unless active && encryption
+            return super unless active && encryption
 
             # Decrypt raw payload so it can be handled by the default parser logic
             decrypted_payload = cipher.decrypt(
@@ -35,11 +35,11 @@ module Karafka
 
             message.raw_payload = decrypted_payload
 
-            return super(message) unless fingerprint && fingerprinter
+            return super unless fingerprint && fingerprinter
 
             message_fingerprint = fingerprinter.hexdigest(decrypted_payload)
 
-            return super(message) if message_fingerprint == fingerprint
+            return super if message_fingerprint == fingerprint
 
             raise(Errors::FingerprintVerificationError, message.to_s)
           end

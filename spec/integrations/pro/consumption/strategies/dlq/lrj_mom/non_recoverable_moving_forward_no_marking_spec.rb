@@ -24,7 +24,7 @@ end
 class Consumer < Karafka::BaseConsumer
   def consume
     messages.each do |message|
-      if message.offset == 1 || message.offset == 25
+      if [1, 25].include?(message.offset)
         DT[:firsts] << messages.first.offset
 
         raise StandardError
@@ -58,7 +58,7 @@ assert !DT[0].include?(25)
 
 # Failing messages that are not first in batch should cause some reprocessing
 duplicates.each do |duplicate|
-  next if duplicate + 1 == 1 || duplicate + 1 == 25
+  next if [1, 25].include?(duplicate + 1)
 
   assert DT[0].count { |nr| nr == (duplicate + 1) } > 1
 end

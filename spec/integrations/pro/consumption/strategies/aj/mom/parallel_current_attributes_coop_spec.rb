@@ -34,7 +34,7 @@ class Job < ActiveJob::Base
   queue_as DT.topic
 
   def perform(value)
-    sleep((rand / 100))
+    sleep(rand / 100)
     DT[0] << [value, CurrentA.a, CurrentB.b]
   end
 end

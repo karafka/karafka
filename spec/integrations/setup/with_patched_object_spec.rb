@@ -14,5 +14,6 @@ end
 # https://github.com/karafka/karafka-core/issues/1
 
 # This will crash
-setup_karafka do |config|
+setup_karafka do |_config|
+  nil
 end

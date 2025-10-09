@@ -11,7 +11,7 @@ mod = Module.new do
   end
 end
 
-Karafka.const_set('License', mod)
+Karafka.const_set(:License, mod)
 require 'karafka/pro/loader'
 
 Karafka::Pro::Loader.require_all

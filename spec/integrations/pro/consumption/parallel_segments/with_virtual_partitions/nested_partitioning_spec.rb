@@ -160,7 +160,7 @@ vp_key_batch_distribution.each do |segment_id, vp_distribution|
 
     assert(
       batch_ids.size < message_count,
-      "VP key #{vp_key} in segment #{segment_id} was distributed across too many batches: "\
+      "VP key #{vp_key} in segment #{segment_id} was distributed across too many batches: " \
       "#{batch_ids.size} batches for #{message_count} messages"
     )
   end

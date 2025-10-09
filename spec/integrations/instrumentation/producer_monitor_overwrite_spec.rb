@@ -19,7 +19,7 @@ class WaterdropTracingMonitor < WaterDrop::Instrumentation::Monitor
     @service_name = service_name
   end
 
-  def instrument(event_id, event = EMPTY_HASH, &block)
+  def instrument(event_id, event = EMPTY_HASH, &)
     return super unless INTERCEPTED_KARAFKA_EVENTS.include?(event_id)
 
     DT[:intercepted] = true

@@ -37,7 +37,7 @@ end
 setup_karafka
 
 # This will simulate removing whole schedule
-Karafka::Pro::RecurringTasks.define('1.0.0') {}
+Karafka::Pro::RecurringTasks.define('1.0.0') { nil }
 
 start_karafka_and_wait_until do
   unless @dispatched

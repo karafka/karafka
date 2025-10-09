@@ -7,10 +7,8 @@ module Karafka
       # Contract for single full route (consumer group + topics) validation.
       class ConsumerGroup < Karafka::Contracts::Base
         configure do |config|
-          config.error_messages = YAML.safe_load(
-            File.read(
-              File.join(Karafka.gem_root, 'config', 'locales', 'errors.yml')
-            )
+          config.error_messages = YAML.safe_load_file(
+            File.join(Karafka.gem_root, 'config', 'locales', 'errors.yml')
           ).fetch('en').fetch('validations').fetch('routing').fetch('consumer_group')
         end
 
@@ -39,7 +37,7 @@ module Karafka
             topics_consumers[topic[:name]] << topic[:consumer]
           end
 
-          next if topics_consumers.values.map(&:size).all? { |count| count == 1 }
+          next if topics_consumers.values.map(&:size).all?(1)
 
           [[%i[topics], :many_consumers_same_topic]]
         end

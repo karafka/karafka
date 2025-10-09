@@ -25,7 +25,7 @@ class Consumer < Karafka::BaseConsumer
     mark_as_consumed(messages.first)
 
     messages.each do |message|
-      raise StandardError if message.offset == 1 || message.offset == 25
+      raise StandardError if [1, 25].include?(message.offset)
 
       DT[0] << message.offset
     end
