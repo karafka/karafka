@@ -178,7 +178,7 @@ module Karafka
             break
           end
 
-          (kb_rss / 1_024.to_i).round
+          (kb_rss / 1_024).round
         rescue Errno::ENOENT, Errno::EACCES
           # /proc file doesn't exist or no permission to read it
           0
