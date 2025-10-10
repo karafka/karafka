@@ -88,9 +88,9 @@ start_karafka_and_wait_until do
 end
 
 # Analyze processing patterns for each error type
-validation_attempts = DT[:processing_attempts].slice('validation')
-business_attempts = DT[:processing_attempts].slice('business')
-unknown_attempts = DT[:processing_attempts].slice('unknown')
+validation_attempts = DT[:processing_attempts].select { |type, _| type == 'validation' }
+business_attempts = DT[:processing_attempts].select { |type, _| type == 'business' }
+unknown_attempts = DT[:processing_attempts].select { |type, _| type == 'unknown' }
 
 # Validation errors should be skipped immediately (only 1 attempt)
 assert_equal [1], validation_attempts.map(&:last).uniq
