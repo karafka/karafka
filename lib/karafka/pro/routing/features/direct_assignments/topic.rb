@@ -43,12 +43,12 @@ module Karafka
 
                 Config.new(
                   active: true,
-                  partitions: partitions_or_all.map { |partition| [partition, true] }.to_h
+                  partitions: partitions_or_all.to_h { |partition| [partition, true] }
                 )
               else
                 Config.new(
                   active: !partitions_or_all.empty?,
-                  partitions: partitions_or_all.map { |partition| [partition, true] }.to_h
+                  partitions: partitions_or_all.to_h { |partition| [partition, true] }
                 )
               end
             end

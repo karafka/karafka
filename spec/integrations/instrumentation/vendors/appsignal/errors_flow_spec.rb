@@ -23,11 +23,11 @@ end
 appsignal_consumer_dummy = Vendors::Appsignal::DummyClient.new
 appsignal_producer_dummy = Vendors::Appsignal::DummyClient.new
 
-consumer_listener = ::Karafka::Instrumentation::Vendors::Appsignal::ErrorsListener.new do |config|
+consumer_listener = Karafka::Instrumentation::Vendors::Appsignal::ErrorsListener.new do |config|
   config.client = appsignal_consumer_dummy
 end
 
-producer_listener = ::Karafka::Instrumentation::Vendors::Appsignal::ErrorsListener.new do |config|
+producer_listener = Karafka::Instrumentation::Vendors::Appsignal::ErrorsListener.new do |config|
   config.client = appsignal_producer_dummy
 end
 

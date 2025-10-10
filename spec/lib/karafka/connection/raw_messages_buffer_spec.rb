@@ -10,7 +10,7 @@ RSpec.describe_current do
       before { buffer }
 
       it 'expect to be newer then moment ago' do
-        now = ::Process.clock_gettime(::Process::CLOCK_MONOTONIC) * 1_000
+        now = Process.clock_gettime(Process::CLOCK_MONOTONIC) * 1_000
         expect(buffer.last_polled_at).to be < now
         buffer.polled
         expect(buffer.last_polled_at).to be > now
@@ -176,7 +176,12 @@ RSpec.describe_current do
     end
 
     context 'when given partition exists and is not the only one' do
-      let(:message2) { OpenStruct.new(topic: message1.topic, partition: 1) }
+      let(:message2) do
+        build(
+          :messages_message,
+          metadata: build(:messages_metadata, topic: message1.topic, partition: 1)
+        )
+      end
 
       before { buffer << message2 }
 

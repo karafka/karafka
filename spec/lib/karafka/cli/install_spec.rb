@@ -23,8 +23,8 @@ RSpec.describe_current do
           .and_return('')
 
         allow(File)
-          .to receive(:open)
-          .with(Karafka.root.join(target), 'w')
+          .to receive(:write)
+          .with(Karafka.root.join(target), anything)
       end
     end
 

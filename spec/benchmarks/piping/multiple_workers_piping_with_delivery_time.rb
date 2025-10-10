@@ -19,7 +19,7 @@ PARTITIONS_COUNT = 5
 # Topic where we want to pipe the data
 TARGET_TOPIC = DT.topic
 
-::Karafka::Admin.create_topic(TARGET_TOPIC, PARTITIONS_COUNT, 1)
+Karafka::Admin.create_topic(TARGET_TOPIC, PARTITIONS_COUNT, 1)
 
 class Consumer < Karafka::BaseConsumer
   def consume

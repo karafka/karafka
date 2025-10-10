@@ -4,7 +4,7 @@
 
 setup_karafka(allow_errors: %w[consumer.consume.error])
 
-SUPER_PRODUCER = ::WaterDrop::Producer.new do |producer_config|
+SUPER_PRODUCER = WaterDrop::Producer.new do |producer_config|
   producer_config.kafka = Karafka::Setup::AttributesMap.producer(Karafka::App.config.kafka.dup)
 end
 

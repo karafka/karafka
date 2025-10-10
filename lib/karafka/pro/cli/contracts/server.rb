@@ -12,10 +12,8 @@ module Karafka
         # It differs slightly from the OSS one because it is aware of the routing patterns
         class Server < ::Karafka::Cli::Contracts::Server
           configure do |config|
-            config.error_messages = YAML.safe_load(
-              File.read(
-                File.join(Karafka.gem_root, 'config', 'locales', 'errors.yml')
-              )
+            config.error_messages = YAML.safe_load_file(
+              File.join(Karafka.gem_root, 'config', 'locales', 'errors.yml')
             ).fetch('en').fetch('validations').fetch('cli').fetch('server')
           end
 

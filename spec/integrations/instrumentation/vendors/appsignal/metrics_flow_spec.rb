@@ -24,7 +24,7 @@ end
 
 appsignal_dummy = Vendors::Appsignal::DummyClient.new
 
-listener = ::Karafka::Instrumentation::Vendors::Appsignal::MetricsListener.new do |config|
+listener = Karafka::Instrumentation::Vendors::Appsignal::MetricsListener.new do |config|
   config.client = appsignal_dummy
 end
 

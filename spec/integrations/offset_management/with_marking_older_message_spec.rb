@@ -30,7 +30,7 @@ class Consumer < Karafka::BaseConsumer
 
     # We force a rebalance by reaching the max poll interval
     DT[:first_one] << true
-    DT[:expected_next] << messages.last.offset + 1
+    DT[:expected_next] << (messages.last.offset + 1)
 
     sleep(15)
   end

@@ -14,8 +14,9 @@ module Karafka
 
     def_delegators :@coordinator, :topic, :partition, :eofed?, :seek_offset, :seek_offset=
 
-    def_delegators :producer, :produce_async, :produce_sync, :produce_many_async,
-                   :produce_many_sync
+    def_delegators(
+      :producer, :produce_async, :produce_sync, :produce_many_async, :produce_many_sync
+    )
 
     def_delegators :messages, :each
 
@@ -81,9 +82,8 @@ module Karafka
     # @private
     #
     # @param action [Symbol]
-    # @param block [Proc]
-    def on_wrap(action, &block)
-      handle_wrap(action, &block)
+    def on_wrap(action, &)
+      handle_wrap(action, &)
     rescue StandardError => e
       monitor.instrument(
         'error.occurred',

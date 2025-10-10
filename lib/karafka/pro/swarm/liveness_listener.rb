@@ -171,14 +171,14 @@ module Karafka
         def rss_mb_linux
           kb_rss = 0
 
-          IO.readlines("/proc/#{node.pid}/status").each do |line|
+          File.readlines("/proc/#{node.pid}/status").each do |line|
             next unless line.start_with?('VmRSS:')
 
             kb_rss = line.split[1].to_i
             break
           end
 
-          (kb_rss / 1_024.to_i).round
+          (kb_rss / 1_024).round
         rescue Errno::ENOENT, Errno::EACCES
           # /proc file doesn't exist or no permission to read it
           0

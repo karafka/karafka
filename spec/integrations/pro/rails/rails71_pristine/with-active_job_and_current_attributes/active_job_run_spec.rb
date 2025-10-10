@@ -14,7 +14,7 @@ require 'tempfile'
 require 'active_job'
 require 'active_job/karafka'
 
-ActiveJob::Base.extend ::Karafka::ActiveJob::JobExtensions
+ActiveJob::Base.extend Karafka::ActiveJob::JobExtensions
 ActiveJob::Base.queue_adapter = :karafka
 
 require 'karafka/active_job/current_attributes'
@@ -33,7 +33,7 @@ mod = Module.new do
   end
 end
 
-Karafka.const_set('License', mod)
+Karafka.const_set(:License, mod)
 require 'karafka/pro/loader'
 
 Karafka::Pro::Loader.require_all

@@ -10,7 +10,7 @@ RSpec.describe_current do
     # @see `::Karafka::Core::Helpers::Time` for more details
     normalized = RUBY_VERSION >= '3.2' ? times.map { |time| time * 1_000 } : times
 
-    allow(::Process).to receive(:clock_gettime).and_return(*normalized)
+    allow(Process).to receive(:clock_gettime).and_return(*normalized)
   end
 
   context 'when we still have time after 2 ms and it is first attempt' do

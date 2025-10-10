@@ -19,7 +19,7 @@ class Consumer < Karafka::BaseConsumer
       mark_as_consumed(message)
       stop = Time.now
 
-      $times << stop - start
+      $times << (stop - start)
     end
 
     return if @count < MAX_MESSAGES

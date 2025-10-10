@@ -16,7 +16,7 @@ current_dir = File.expand_path(__dir__)
 def cmd(dir, cmd)
   stdout, stderr, status = Open3.capture3(
     "cd #{dir} && \
-    KARAFKA_GEM_DIR=#{ENV['KARAFKA_GEM_DIR']} \
+    KARAFKA_GEM_DIR=#{ENV.fetch('KARAFKA_GEM_DIR', nil)} \
     KARAFKA_BOOT_FILE=config_wow/my_boot.rb \
     #{cmd}"
   )

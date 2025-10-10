@@ -19,7 +19,7 @@ RSpec.describe_current do
       it 'expect to mark as active and use given partitions' do
         topic.direct_assignments(*partitions)
         expect(topic.direct_assignments.active).to be(true)
-        expect(topic.direct_assignments.partitions).to eq(partitions.map { |p| [p, true] }.to_h)
+        expect(topic.direct_assignments.partitions).to eq(partitions.to_h { |p| [p, true] })
       end
     end
 
@@ -37,7 +37,7 @@ RSpec.describe_current do
       it 'expect to mark as active and use given partitions' do
         topic.direct_assignments(partitions)
         expect(topic.direct_assignments.active).to be(true)
-        expect(topic.direct_assignments.partitions).to eq(partitions.map { |p| [p, true] }.to_h)
+        expect(topic.direct_assignments.partitions).to eq(partitions.to_h { |p| [p, true] })
       end
     end
   end

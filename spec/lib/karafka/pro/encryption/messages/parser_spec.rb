@@ -18,7 +18,7 @@ RSpec.describe_current do
   end
 
   context 'when encryption is active' do
-    before { allow(::Karafka::App.config.encryption).to receive(:active).and_return(true) }
+    before { allow(Karafka::App.config.encryption).to receive(:active).and_return(true) }
 
     context 'when encryption is active but message without encryption' do
       it 'expect to run deserializer without anything else' do
@@ -30,11 +30,11 @@ RSpec.describe_current do
       let(:headers) { { 'encryption' => '1' } }
 
       let(:raw_payload) do
-        ::Karafka::App.config.encryption.cipher.encrypt({ 'test' => 1 }.to_json)
+        Karafka::App.config.encryption.cipher.encrypt({ 'test' => 1 }.to_json)
       end
 
       before do
-        allow(::Karafka::App.config.encryption).to receive_messages(
+        allow(Karafka::App.config.encryption).to receive_messages(
           public_key: fixture_file('rsa/public_key_1.pem'),
           private_keys: { '1' => fixture_file('rsa/private_key_1.pem') }
         )
@@ -58,11 +58,11 @@ RSpec.describe_current do
       let(:headers) { { 'encryption' => '1', 'encryption_fingerprint' => rand.to_s } }
 
       let(:raw_payload) do
-        ::Karafka::App.config.encryption.cipher.encrypt({ 'test' => 1 }.to_json)
+        Karafka::App.config.encryption.cipher.encrypt({ 'test' => 1 }.to_json)
       end
 
       before do
-        allow(::Karafka::App.config.encryption).to receive_messages(
+        allow(Karafka::App.config.encryption).to receive_messages(
           public_key: fixture_file('rsa/public_key_1.pem'),
           private_keys: { '1' => fixture_file('rsa/private_key_1.pem') }
         )
@@ -77,11 +77,11 @@ RSpec.describe_current do
       let(:headers) { { 'encryption' => '1' } }
 
       let(:raw_payload) do
-        ::Karafka::App.config.encryption.cipher.encrypt({ 'test' => 1 }.to_json)
+        Karafka::App.config.encryption.cipher.encrypt({ 'test' => 1 }.to_json)
       end
 
       before do
-        allow(::Karafka::App.config.encryption).to receive_messages(
+        allow(Karafka::App.config.encryption).to receive_messages(
           public_key: fixture_file('rsa/public_key_1.pem'),
           fingerprinter: Digest::SHA256,
           private_keys: { '1' => fixture_file('rsa/private_key_1.pem') }
@@ -97,7 +97,7 @@ RSpec.describe_current do
       let(:headers) { { 'encryption' => '1', 'encryption_fingerprint' => rand.to_s } }
 
       let(:raw_payload) do
-        ::Karafka::App.config.encryption.cipher.encrypt({ 'test' => 1 }.to_json)
+        Karafka::App.config.encryption.cipher.encrypt({ 'test' => 1 }.to_json)
       end
 
       let(:expected_error) do
@@ -105,7 +105,7 @@ RSpec.describe_current do
       end
 
       before do
-        allow(::Karafka::App.config.encryption).to receive_messages(
+        allow(Karafka::App.config.encryption).to receive_messages(
           public_key: fixture_file('rsa/public_key_1.pem'),
           fingerprinter: Digest::MD5,
           private_keys: { '1' => fixture_file('rsa/private_key_1.pem') }
@@ -126,7 +126,7 @@ RSpec.describe_current do
       end
 
       let(:raw_payload) do
-        ::Karafka::App.config.encryption.cipher.encrypt({ 'test' => 1 }.to_json)
+        Karafka::App.config.encryption.cipher.encrypt({ 'test' => 1 }.to_json)
       end
 
       let(:expected_error) do
@@ -134,7 +134,7 @@ RSpec.describe_current do
       end
 
       before do
-        allow(::Karafka::App.config.encryption).to receive_messages(
+        allow(Karafka::App.config.encryption).to receive_messages(
           public_key: fixture_file('rsa/public_key_1.pem'),
           fingerprinter: Digest::MD5,
           private_keys: { '1' => fixture_file('rsa/private_key_1.pem') }

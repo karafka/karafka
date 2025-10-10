@@ -27,5 +27,5 @@ assert_equal 10, DT[0].size
 
 DT[0].each do |element|
   assert_equal element[0], element[1].fetch('value')
-  assert(element[1].keys.all? { |key| key.is_a?(String) })
+  assert(element[1].keys.all?(String))
 end

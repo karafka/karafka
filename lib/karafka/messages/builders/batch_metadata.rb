@@ -51,7 +51,7 @@ module Karafka
             return now unless last_message
 
             timestamp = last_message.timestamp
-            timestamp > now ? now : timestamp
+            [timestamp, now].min
           end
         end
       end

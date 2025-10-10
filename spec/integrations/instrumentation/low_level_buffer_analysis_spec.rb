@@ -4,7 +4,7 @@
 # the data received from rdkafka
 
 Karafka::App.monitor.subscribe('connection.listener.fetch_loop.received') do |event|
-  event[:messages_buffer].each do |topic_name, partition, messages|
+  event[:messages_buffer].each do |_topic_name, _partition, messages|
     assert_equal [1], messages.group_by(&:offset).transform_values(&:size).values.uniq
   end
 end

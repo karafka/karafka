@@ -30,20 +30,20 @@ RSpec.describe Karafka::Swarm::Node, mode: :fork do
     end
 
     context 'when pipe for writing is closed' do
-      before { node.instance_variable_get('@writer').close }
+      before { node.instance_variable_get(:@writer).close }
 
       it { expect(node.healthy).to be(false) }
     end
 
     context 'when pipe for reading is closed' do
-      before { node.instance_variable_get('@reader').close }
+      before { node.instance_variable_get(:@reader).close }
 
       it { expect(node.status).to eq(-1) }
     end
   end
 
   describe '#orphaned?' do
-    subject(:node) { described_class.new(0, ::Process.ppid) }
+    subject(:node) { described_class.new(0, Process.ppid) }
 
     it { expect(node.orphaned?).to be(false) }
   end
@@ -79,7 +79,7 @@ RSpec.describe Karafka::Swarm::Node, mode: :fork do
     let(:signal_string) { 'TERM' }
 
     before do
-      node.instance_variable_set('@pid', Process.pid)
+      node.instance_variable_set(:@pid, Process.pid)
       allow(Process).to receive(:kill)
     end
 
@@ -114,7 +114,7 @@ RSpec.describe Karafka::Swarm::Node, mode: :fork do
 
     context 'when node process is dead' do
       let(:fork_pid) do
-        pid = fork {}
+        pid = fork { nil }
         sleep(0.5)
         pid
       end

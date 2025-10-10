@@ -12,7 +12,7 @@ RSpec.describe_current do
   end
 
   context 'when not supported' do
-    before { allow(::Process).to receive(:respond_to?).with(:fork).and_return(false) }
+    before { allow(Process).to receive(:respond_to?).with(:fork).and_return(false) }
 
     it 'expect to raise that unsupported' do
       expect { swarm.ensure_supported! }.to raise_error(Karafka::Errors::UnsupportedOptionError)

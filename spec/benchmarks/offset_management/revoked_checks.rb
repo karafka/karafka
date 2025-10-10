@@ -16,7 +16,7 @@ class Consumer < Karafka::BaseConsumer
       revoked?
       stop = Time.now
 
-      $times << stop - start
+      $times << (stop - start)
     end
 
     return if @count < MAX_MESSAGES

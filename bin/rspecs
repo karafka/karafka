@@ -2,6 +2,10 @@
 
 set -e
 
+# We remove old coverage because under heavy development and parallel spec execution, the
+# rspec results formatter tends to crash
+rm -rf ./coverage
+
 # Run only regular non-forking specs first
 SPECS_TYPE=regular bundle exec rspec \
   --tag ~type:pro \

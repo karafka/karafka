@@ -67,7 +67,7 @@ module Karafka
         process.on_sigtstp { quiet }
         process.on_sigttin { signal('TTIN') }
         # Needed to be registered as we want to unlock on child changes
-        process.on_sigchld {}
+        process.on_sigchld { nil }
         process.on_any_active { unlock }
         process.supervise
 

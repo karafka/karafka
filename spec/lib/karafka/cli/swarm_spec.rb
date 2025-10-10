@@ -31,7 +31,7 @@ RSpec.describe_current do
     end
 
     context 'when forking is not supported' do
-      before { allow(::Karafka::Swarm).to receive(:supported?).and_return(false) }
+      before { allow(Karafka::Swarm).to receive(:supported?).and_return(false) }
 
       it 'expect to raise not supported error' do
         expect { swarm_cli.call }.to raise_error(Karafka::Errors::UnsupportedOptionError)

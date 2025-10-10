@@ -267,8 +267,10 @@ assert reads.size >= 15, 'Should have logged read operations'
 # Verify write-read coherence
 write_read_coherence = DT[:write_read_coherence] || []
 assert write_read_coherence.size >= 5, 'Should have coherent write-read operations'
-assert write_read_coherence.all? { |entry| entry[:coherent] },
-       'All write-read operations should be coherent'
+assert(
+  write_read_coherence.all? { |entry| entry[:coherent] },
+  'All write-read operations should be coherent'
+)
 
 # Verify cross-thread visibility (if multiple threads were used)
 unique_threads = DT[:consumed].map { |entry| entry[:thread_id] }.uniq
@@ -278,8 +280,10 @@ if unique_threads.size > 1
   # Test bulk visibility occurred
   bulk_visibility = DT[:bulk_visibility] || []
   if bulk_visibility.any?
-    assert bulk_visibility.all? { |entry| entry[:other_thread_count] > 0 },
-           'Bulk readers should see data from other threads'
+    assert(
+      bulk_visibility.all? { |entry| entry[:other_thread_count] > 0 },
+      'Bulk readers should see data from other threads'
+    )
   end
 end
 

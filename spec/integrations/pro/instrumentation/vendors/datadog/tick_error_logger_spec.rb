@@ -40,7 +40,7 @@ end
 
 client = Vendors::Datadog::LoggerDummyClient.new
 
-listener = ::Karafka::Instrumentation::Vendors::Datadog::LoggerListener.new do |config|
+listener = Karafka::Instrumentation::Vendors::Datadog::LoggerListener.new do |config|
   config.client = client
   config.service_name = 'myservice-karafka'
 end
@@ -63,8 +63,8 @@ end
 
 assert client.buffer.include?(['karafka.consumer', 'myservice-karafka']), client.buffer
 assert client.buffer.include?('Consumer#tick'), client.buffer
-assert client.errors.any? { |error| error.is_a?(StandardError) }, client.errors
-assert client.errors.all? { |error| error.is_a?(StandardError) }, client.errors
+assert client.errors.any?(StandardError), client.errors
+assert client.errors.all?(StandardError), client.errors
 
 $stdout = proper_stdout
 $stderr = proper_stderr

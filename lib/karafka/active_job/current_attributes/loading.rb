@@ -8,7 +8,7 @@ module Karafka
       module Loading
         # @param job_message [Karafka::Messages::Message] message with active job
         def with_deserialized_job(job_message)
-          super(job_message) do |job|
+          super do |job|
             resetable = []
 
             _cattr_klasses.each do |key, cattr_klass_str|

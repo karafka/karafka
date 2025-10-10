@@ -61,7 +61,7 @@ while consumed.size < 2
   end
 end
 
-::Process.kill('QUIT', ::Process.pid)
+Process.kill('QUIT', Process.pid)
 thread.join
 
 # Should only consume from SG_NAMES[0] and SG_NAMES[2], not SG_NAMES[1]

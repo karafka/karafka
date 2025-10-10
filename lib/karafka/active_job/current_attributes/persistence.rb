@@ -10,7 +10,7 @@ module Karafka
         #
         # @param job [ActiveJob::Base] job
         def serialize_job(job)
-          json = super(job)
+          json = super
 
           _cattr_klasses.each do |key, cattr_klass_str|
             next if json.key?(key)

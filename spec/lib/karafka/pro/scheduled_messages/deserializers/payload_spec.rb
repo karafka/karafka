@@ -25,7 +25,7 @@ RSpec.describe_current do
     end
 
     it 'returns a hash with symbolized keys' do
-      expect(parsing.keys.all? { |key| key.is_a?(Symbol) }).to be(true)
+      expect(parsing.keys.all?(Symbol)).to be(true)
     end
 
     it 'returns a hash with expected values' do

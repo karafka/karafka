@@ -5,13 +5,13 @@
 
 DT[:tags] = Set.new
 
-class WrappedMonitor < ::Karafka::Instrumentation::Monitor
+class WrappedMonitor < Karafka::Instrumentation::Monitor
   # Events we want to handle differently
   TRACEABLE_EVENTS = %w[
     consumer.consumed
   ].freeze
 
-  def instrument(event_id, payload = EMPTY_HASH, &block)
+  def instrument(event_id, payload = EMPTY_HASH, &)
     # Always run super, so the default instrumentation pipeline works
     return super unless TRACEABLE_EVENTS.include?(event_id)
 

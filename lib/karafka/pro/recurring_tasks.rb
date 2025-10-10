@@ -14,13 +14,12 @@ module Karafka
       class << self
         # @return [Schedule, nil] current defined schedule or nil if not defined
         def schedule
-          @schedule || define('0.0.0') {}
+          @schedule || define('0.0.0') { nil }
         end
 
         # Simplified API for schedules definitions and validates the tasks data
         #
         # @param version [String]
-        # @param block [Proc]
         #
         # @example
         #   Karafka::Pro::RecurringTasks.define('1.0.1') do
@@ -28,9 +27,9 @@ module Karafka
         #       MailingJob.perform_async
         #     end
         #   end
-        def define(version = '1.0.0', &block)
+        def define(version = '1.0.0', &)
           @schedule = Schedule.new(version: version)
-          @schedule.instance_exec(&block)
+          @schedule.instance_exec(&)
 
           @schedule.each do |task|
             Contracts::Task.new.validate!(

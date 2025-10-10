@@ -27,7 +27,7 @@ RSpec.describe_current do
     after { valid_configure.call }
 
     context 'when configuration has errors' do
-      let(:error_class) { ::Karafka::Errors::InvalidConfigurationError }
+      let(:error_class) { Karafka::Errors::InvalidConfigurationError }
       let(:error_message) do
         { 'config.client_id': 'needs to be a string with a Kafka accepted format' }.to_s
       end

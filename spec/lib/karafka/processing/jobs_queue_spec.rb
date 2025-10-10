@@ -5,14 +5,14 @@ RSpec.describe_current do
 
   let(:job1) { job_n.call }
   let(:job2) { job_n.call }
-  let(:internal_queue) { ::Queue.new }
+  let(:internal_queue) { Queue.new }
   let(:job_n) do
     -> { OpenStruct.new(group_id: 2, id: SecureRandom.uuid, call: true, non_blocking?: false) }
   end
 
   before do
     allow(Karafka::App.config).to receive(:concurrency).and_return(5)
-    queue.instance_variable_set('@queue', internal_queue)
+    queue.instance_variable_set(:@queue, internal_queue)
     queue.register(job1.group_id)
     queue.register(job2.group_id)
   end

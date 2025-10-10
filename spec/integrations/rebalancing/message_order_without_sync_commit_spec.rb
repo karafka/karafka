@@ -125,7 +125,7 @@ duplicate_counts = messages_from_contested_batch
                    .values
                    .map { |group| group.uniq.size }
 
-assert(duplicate_counts.all? { |size| size == 2 })
+assert(duplicate_counts.all?(2))
 
 # Second consumer should have started from the first offset in a contested batch
 messages_processed_by_second_consumer = DT[:second_consumer].select do |_, partition, _|

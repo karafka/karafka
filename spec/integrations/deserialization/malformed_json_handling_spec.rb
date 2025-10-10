@@ -94,8 +94,7 @@ start_karafka_and_wait_until do
 end
 
 # Verify all messages were processed despite malformed JSON
-assert_equal malformed_messages.size, DT[:consumed].size,
-             'Should process all messages including malformed JSON'
+assert_equal malformed_messages.size, DT[:consumed].size
 
 # Count different status types
 valid_messages = DT[:consumed].select { |msg| msg[:status] == 'valid_json' }
@@ -112,14 +111,11 @@ error_messages = DT[:consumed].select { |msg| msg[:error_message] }
 assert error_messages.size >= 5, 'Should capture error details for malformed JSON'
 
 # Verify specific error types were caught
-error_types = DT[:consumed].map { |msg| msg[:error_type] }.compact.uniq
+error_types = DT[:consumed].filter_map { |msg| msg[:error_type] }.uniq
 assert error_types.include?('JSON::ParserError'), 'Should catch JSON parsing errors'
 
 # The key success criteria: all malformed JSON handled without consumer crashes
-assert_equal(
-  malformed_messages.size, DT[:consumed].size,
-  'Should handle all malformed JSON without crashing'
-)
+assert_equal malformed_messages.size, DT[:consumed].size
 
 # Verify raw payloads are always preserved
 assert(

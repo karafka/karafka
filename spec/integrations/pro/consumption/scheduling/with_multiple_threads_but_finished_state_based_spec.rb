@@ -11,7 +11,7 @@
 
 become_pro!
 
-class WorkBasedScheduler < ::Karafka::Pro::Processing::Schedulers::Base
+class WorkBasedScheduler < Karafka::Pro::Processing::Schedulers::Base
   def initialize(queue)
     super
     @jobs_buffer = []

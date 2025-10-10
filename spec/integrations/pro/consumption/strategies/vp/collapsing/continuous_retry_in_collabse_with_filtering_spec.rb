@@ -55,5 +55,5 @@ start_karafka_and_wait_until do
   DT[:errors].size >= 5
 end
 
-assert_equal([10], (DT[0].sort.uniq & DT[1].sort.uniq))
+assert_equal([10], DT[0].sort.uniq & DT[1].sort.uniq)
 assert (DT[0] + DT[1]).count(10) >= 5

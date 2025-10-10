@@ -34,8 +34,7 @@ module Karafka
               topics
                 .select(&:active?)
                 .select { |topic| topic.direct_assignments.active? }
-                .map { |topic| build_assignments(topic) }
-                .to_h
+                .to_h { |topic| build_assignments(topic) }
                 .tap { |topics| return false if topics.empty? }
                 .then { |topics| Iterator::Expander.new.call(topics) }
                 .then { |topics| Iterator::TplBuilder.new(consumer, topics).call }
@@ -60,7 +59,7 @@ module Karafka
 
               [
                 topic.subscription_name,
-                topic.swarm.nodes.fetch(swarm_node.id).map { |partition| [partition, true] }.to_h
+                topic.swarm.nodes.fetch(swarm_node.id).to_h { |partition| [partition, true] }
               ]
             end
           end

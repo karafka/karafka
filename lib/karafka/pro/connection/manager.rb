@@ -21,7 +21,7 @@ module Karafka
 
         # Creates new manager instance
         def initialize
-          super()
+          super
           @mutex = Mutex.new
           @changes = Hash.new do |h, k|
             h[k] = {
@@ -69,7 +69,7 @@ module Karafka
           times = []
           # stateage is in microseconds
           # We monitor broker changes to make sure we do not introduce extra friction
-          times << statistics['brokers'].values.map { |stats| stats['stateage'] }.min / 1_000
+          times << (statistics['brokers'].values.map { |stats| stats['stateage'] }.min / 1_000)
           times << statistics['cgrp']['rebalance_age']
           times << statistics['cgrp']['stateage']
 

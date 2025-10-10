@@ -68,7 +68,7 @@ module Karafka
 
           # However when it is unavailable, we still want to be able to run help command
           # and install command as they don't require configured app itself to run
-          return if %w[-h install].any? { |cmd| cmd == ARGV[0] }
+          return if %w[-h install].any?(ARGV[0])
 
           # All other commands except help and install do require an existing boot file if it was
           # declared

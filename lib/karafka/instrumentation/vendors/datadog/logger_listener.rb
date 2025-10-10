@@ -38,10 +38,9 @@ module Karafka
             @job_types_cache = {}
           end
 
-          # @param block [Proc] configuration block
           # @note We define this alias to be consistent with `WaterDrop#setup`
-          def setup(&block)
-            configure(&block)
+          def setup(&)
+            configure(&)
           end
 
           # Prints info about the fact that a given job has started

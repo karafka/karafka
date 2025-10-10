@@ -25,7 +25,7 @@ draw_routes(create_topics: false) do
     .cluster_info
     .topics
     .map { |topic| topic[:topic_name] }
-    .select { |name| name =~ /#{MATCH}/ }
+    .grep(/#{MATCH}/)
     .each do |name|
       topic name do
         consumer Consumer

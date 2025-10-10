@@ -43,9 +43,9 @@ module Karafka
       )
         @topics_with_partitions = Expander.new.call(topics)
 
-        @routing_topics = @topics_with_partitions.map do |name, _|
+        @routing_topics = @topics_with_partitions.to_h do |name, _|
           [name, ::Karafka::Routing::Router.find_or_initialize_by_name(name)]
-        end.to_h
+        end
 
         @total_partitions = @topics_with_partitions.map(&:last).sum(&:count)
 

@@ -242,7 +242,7 @@ rapid_ops.each do |op|
   )
 
   assert(
-    op[:iteration] >= 0 && op[:iteration] <= 2,
+    op[:iteration].between?(0, 2),
     'Rapid metadata iteration should be in valid range'
   )
 end

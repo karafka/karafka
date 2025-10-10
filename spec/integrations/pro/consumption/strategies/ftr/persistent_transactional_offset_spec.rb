@@ -25,7 +25,7 @@ class DbOffsets
     end
 
     def mark_as_consumed(message)
-      DT[:offsets] << message.offset + 1
+      DT[:offsets] << (message.offset + 1)
     end
 
     def fetch

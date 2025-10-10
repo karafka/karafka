@@ -36,12 +36,12 @@ draw_routes do
 end
 
 # Simulate using old version by changing version just for production
-::Karafka::App.config.encryption.version = '1'
+Karafka::App.config.encryption.version = '1'
 
 elements = DT.uuids(10)
 produce_many(DT.topic, elements)
 
-::Karafka::App.config.encryption.version = '2'
+Karafka::App.config.encryption.version = '2'
 
 start_karafka_and_wait_until do
   DT[0].size >= 10

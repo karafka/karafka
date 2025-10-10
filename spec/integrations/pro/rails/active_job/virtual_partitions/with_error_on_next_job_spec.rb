@@ -44,6 +44,6 @@ start_karafka_and_wait_until do
   DT[0].uniq.sort.size >= 100
 end
 
-assert_equal 1, (DT[0].count { |nr| nr == 94 })
-assert_equal 2, (DT[0].count { |nr| nr == 95 })
+assert_equal(1, DT[0].count { |nr| nr == 94 })
+assert_equal(2, DT[0].count { |nr| nr == 95 })
 assert_equal DT[0].uniq.sort, (0..99).to_a

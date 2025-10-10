@@ -101,7 +101,7 @@ module Karafka
     #   always mean user wants to have it required. User may want to run Karafka without Rails
     #   even when having both in the same Gemfile.
     def rails?
-      return @rails if instance_variable_defined?('@rails')
+      return @rails if instance_variable_defined?(:@rails)
 
       @rails = Object.const_defined?('Rails::Railtie')
 
@@ -177,7 +177,7 @@ loader.eager_load
 
 # This will load features but since Pro are not loaded automatically, they will not be visible
 # nor included here
-::Karafka::Routing::Features::Base.load_all
+Karafka::Routing::Features::Base.load_all
 
 # We need to detect and require (not setup) Pro components during the gem load, because we need
 # to make pro components available in case anyone wants to use them as a base to their own

@@ -21,8 +21,7 @@ module Karafka
       super('')
 
       LOOKUP_ENV_KEYS
-        .map { |key| ENV[key] }
-        .compact
+        .filter_map { |key| ENV.fetch(key, nil) }
         .first
         .then { |env| env || DEFAULT_ENV }
         .then { |env| replace(env) }

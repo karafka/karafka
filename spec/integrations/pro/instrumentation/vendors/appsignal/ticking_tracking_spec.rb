@@ -29,11 +29,11 @@ end
 
 appsignal_dummy = Vendors::Appsignal::DummyClient.new
 
-metrics_listener = ::Karafka::Instrumentation::Vendors::Appsignal::MetricsListener.new do |config|
+metrics_listener = Karafka::Instrumentation::Vendors::Appsignal::MetricsListener.new do |config|
   config.client = appsignal_dummy
 end
 
-errors_listener = ::Karafka::Instrumentation::Vendors::Appsignal::ErrorsListener.new do |config|
+errors_listener = Karafka::Instrumentation::Vendors::Appsignal::ErrorsListener.new do |config|
   config.client = appsignal_dummy
 end
 

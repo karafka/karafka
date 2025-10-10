@@ -62,7 +62,7 @@ module Karafka
 
           # If we've got just array with topics, we need to convert that into a representation
           # that we can expand with offsets
-          topics = topics.map { |name| [name, false] }.to_h if topics.is_a?(Array)
+          topics = topics.to_h { |name| [name, false] } if topics.is_a?(Array)
           # We remap by creating new hash, just in case the hash came as the argument for this
           # expanded. We do not want to modify user provided hash
           topics.transform_keys(&:to_s)

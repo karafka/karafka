@@ -200,8 +200,8 @@ revocation_detected = !DT[:revoked_called].empty? || !DT[:revoked_events].empty?
 # The logs show revocation happening, so this should pass with either method
 assert(
   revocation_detected,
-  'Revocation was not detected during the test.' \
-  " Revoked called: #{DT[:revoked_called].inspect}, Revoked events: #{DT[:revoked_events].inspect}"
+  'Revocation was not detected during the test. ' \
+  "Revoked called: #{DT[:revoked_called].inspect}, Revoked events: #{DT[:revoked_events].inspect}"
 )
 
 # 5. Check that each segment processed some messages

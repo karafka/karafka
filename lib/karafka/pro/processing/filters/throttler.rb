@@ -67,7 +67,7 @@ module Karafka
           #   so we are no longer throttled and so we can process at least one message
           def timeout
             timeout = @interval - (monotonic_now - @time)
-            timeout <= 0 ? 0 : timeout
+            [timeout, 0].max
           end
         end
       end

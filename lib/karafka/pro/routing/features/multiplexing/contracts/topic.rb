@@ -17,10 +17,8 @@ module Karafka
             # multiplexing attributes are optional since multiplexing may not be enabled
             class Topic < Karafka::Contracts::Base
               configure do |config|
-                config.error_messages = YAML.safe_load(
-                  File.read(
-                    File.join(Karafka.gem_root, 'config', 'locales', 'pro_errors.yml')
-                  )
+                config.error_messages = YAML.safe_load_file(
+                  File.join(Karafka.gem_root, 'config', 'locales', 'pro_errors.yml')
                 ).fetch('en').fetch('validations').fetch('routing').fetch('topic')
               end
 
@@ -56,7 +54,7 @@ module Karafka
                 max = max(data)
                 boot = boot(data)
 
-                next if boot >= min && boot <= max
+                next if boot.between?(min, max)
 
                 [[%w[subscription_group_details], :multiplexing_boot_mismatch]]
               end

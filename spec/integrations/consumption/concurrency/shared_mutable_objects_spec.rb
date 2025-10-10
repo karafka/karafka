@@ -196,8 +196,10 @@ assert_equal(
 
   # All expected items should be present (order may vary due to concurrency)
   expected_items.each do |item|
-    assert actual_items.include?(item),
-           "List #{i} should contain #{item}"
+    assert(
+      actual_items.include?(item),
+      "List #{i} should contain #{item}"
+    )
   end
 
   # Verify mixed operations created additional data

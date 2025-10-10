@@ -123,8 +123,8 @@ module Karafka
                 inconclusive = true
 
                 puts(
-                  "  Inconclusive offsets for #{red(topic_name)}##{red(partition_id)}:" \
-                  " #{parallel_offsets.to_a.join(', ')}"
+                  "  Inconclusive offsets for #{red(topic_name)}##{red(partition_id)}: " \
+                  "#{parallel_offsets.to_a.join(', ')}"
                 )
               end
             end

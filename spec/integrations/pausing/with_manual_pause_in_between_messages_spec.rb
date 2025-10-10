@@ -45,7 +45,7 @@ DT[:times].each do |timestamp|
   end
 
   pause = (timestamp - previous)
-  assert pause >= 1 && pause <= 5
+  assert pause.between?(1, 5)
 
   previous = timestamp
 end

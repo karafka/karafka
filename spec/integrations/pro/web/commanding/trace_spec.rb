@@ -23,12 +23,12 @@ Thread.new do
   sleep(0.1) until DT.key?(:is)
 
   Karafka::Web::Pro::Commanding::Dispatcher.request(
-    'consumers.trace', ::Karafka::Web.config.tracking.consumers.sampler.process_id
+    'consumers.trace', Karafka::Web.config.tracking.consumers.sampler.process_id
   )
 
   loop do
     result = Karafka::Admin.read_topic(
-      ::Karafka::Web.config.topics.consumers.commands.name,
+      Karafka::Web.config.topics.consumers.commands.name,
       0,
       1
     ).first

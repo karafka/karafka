@@ -32,7 +32,7 @@ end
 
 # @note We use external messages producer here, as the one from Karafka will be closed upon first
 # process shutdown.
-PRODUCER = ::WaterDrop::Producer.new do |producer_config|
+PRODUCER = WaterDrop::Producer.new do |producer_config|
   producer_config.kafka = Karafka::Setup::AttributesMap.producer(Karafka::App.config.kafka.dup)
   producer_config.logger = Karafka::App.config.logger
   producer_config.max_wait_timeout = 120_000
@@ -138,4 +138,4 @@ post_rebalance_messages = DT
                           .with_index { |_, index| index > after }
                           .select { |message| message.is_a?(Array) }
 
-assert (DT[:process1] & post_rebalance_messages).empty?
+assert !DT[:process1].intersect?(post_rebalance_messages)

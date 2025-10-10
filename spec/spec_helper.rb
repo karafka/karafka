@@ -67,9 +67,7 @@ end
 # Require total coverage after running both regular and pro
 SimpleCov.minimum_coverage(93.6) if SPECS_TYPE == 'pro'
 
-Dir["#{File.dirname(__FILE__)}/support/**/*.rb"]
-  .sort
-  .each { |f| require f }
+Dir["#{File.dirname(__FILE__)}/support/**/*.rb"].each { |f| require f }
 
 RSpec.configure do |config|
   config.include FactoryBot::Syntax::Methods
@@ -114,7 +112,7 @@ require 'karafka/pro/loader'
 Karafka::Pro::Loader.require_all if ENV['SPECS_TYPE'] == 'pro'
 
 # We extend this manually since it's done by a Railtie that we do not run here
-ActiveJob::Base.extend ::Karafka::ActiveJob::JobExtensions
+ActiveJob::Base.extend Karafka::ActiveJob::JobExtensions
 
 # Test setup for the framework
 module Karafka
@@ -134,14 +132,15 @@ RSpec.extend RSpecLocator.new(__FILE__)
 
 # Alias for two producers that we need in specs. Regular one that is not transactional and the
 # other one that is transactional for transactional specs
-PRODUCERS = OpenStruct.new(
+Producers = Struct.new(:regular, :transactional, keyword_init: true)
+PRODUCERS = Producers.new(
   regular: Karafka.producer,
-  transactional: ::WaterDrop::Producer.new do |p_config|
-    p_config.kafka = ::Karafka::Setup::AttributesMap.producer(Karafka::App.config.kafka.dup)
+  transactional: WaterDrop::Producer.new do |p_config|
+    p_config.kafka = Karafka::Setup::AttributesMap.producer(Karafka::App.config.kafka.dup)
     p_config.kafka[:'transactional.id'] = SecureRandom.uuid
     p_config.logger = Karafka::App.config.logger
   end
-)
+).freeze
 
 # We by default use the default listeners for specs to check how they work and that
 # they don't not break anything

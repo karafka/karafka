@@ -15,7 +15,7 @@ module Karafka
         notifications_bus = ::Karafka::Instrumentation::Notifications.new,
         namespace = nil
       )
-        super(notifications_bus, namespace)
+        super
       end
     end
   end

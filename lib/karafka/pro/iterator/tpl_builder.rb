@@ -56,7 +56,7 @@ module Karafka
             next unless partitions.is_a?(Array) || partitions.is_a?(Range)
 
             # When no offsets defined, we just start from zero
-            @mapped_topics[name] = partitions.map { |partition| [partition, 0] }.to_h
+            @mapped_topics[name] = partitions.to_h { |partition| [partition, 0] }
           end
         end
 

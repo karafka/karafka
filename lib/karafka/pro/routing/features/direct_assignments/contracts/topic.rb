@@ -13,10 +13,8 @@ module Karafka
             # Contract to validate configuration of the direct assignments topic feature
             class Topic < Karafka::Contracts::Base
               configure do |config|
-                config.error_messages = YAML.safe_load(
-                  File.read(
-                    File.join(Karafka.gem_root, 'config', 'locales', 'pro_errors.yml')
-                  )
+                config.error_messages = YAML.safe_load_file(
+                  File.join(Karafka.gem_root, 'config', 'locales', 'pro_errors.yml')
                 ).fetch('en').fetch('validations').fetch('routing').fetch('topic')
               end
 
@@ -26,8 +24,8 @@ module Karafka
                 required(:partitions) do |val|
                   next true if val == true
                   next false unless val.is_a?(Hash)
-                  next false unless val.keys.all? { |part| part.is_a?(Integer) }
-                  next false unless val.values.all? { |flag| flag == true }
+                  next false unless val.keys.all?(Integer)
+                  next false unless val.values.all?(true)
 
                   true
                 end
@@ -67,7 +65,7 @@ module Karafka
                 direct_partitions = direct_assignments[:partitions].keys
                 swarm_partitions = nodes.values.flatten
 
-                next unless swarm_partitions.all? { |partition| partition.is_a?(Integer) }
+                next unless swarm_partitions.all?(Integer)
                 next if direct_partitions.sort == swarm_partitions.sort
 
                 # If we assigned more partitions than we distributed in swarm

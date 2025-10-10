@@ -14,10 +14,10 @@ RSpec.describe Karafka::Instrumentation::Logger do
     allow(delegate_scope).to receive(:to)
   end
 
-  specify { expect(described_class).to be < ::Logger }
+  specify { expect(described_class).to be < Logger }
 
   describe '#new' do
-    let(:karafka_test_root) { Pathname(Dir::Tmpname.create('karafka') { |_| }) }
+    let(:karafka_test_root) { Pathname(Dir::Tmpname.create('karafka') { |_| nil }) }
     let(:log_path) { karafka_test_root.join("log/#{Karafka.env}.log") }
     let(:file_matcher) { having_attributes(closed?: false, path: log_path.to_path, class: File) }
 
@@ -26,7 +26,7 @@ RSpec.describe Karafka::Instrumentation::Logger do
     after { FileUtils.rm_rf(karafka_test_root) }
 
     it 'expect to be of a proper level' do
-      expect(logger.level).to eq ::Logger::ERROR
+      expect(logger.level).to eq Logger::ERROR
     end
 
     context 'when the dir does not exist' do
@@ -75,7 +75,7 @@ RSpec.describe Karafka::Instrumentation::Logger do
       before { FileUtils.mkdir_p(File.dirname(log_path), mode: 0o700) }
 
       context 'when file is writable' do
-        before { FileUtils.install('/dev/null', log_path, mode: 0o700) }
+        before { FileUtils.install(File::NULL, log_path, mode: 0o700) }
 
         specify do
           described_class.new
@@ -84,7 +84,7 @@ RSpec.describe Karafka::Instrumentation::Logger do
       end
 
       context 'when file is not writable' do
-        before { FileUtils.install('/dev/null', log_path, mode: 0o400) }
+        before { FileUtils.install(File::NULL, log_path, mode: 0o400) }
 
         specify do
           described_class.new

@@ -15,7 +15,7 @@ RSpec.describe_current do
     Module.new do
       def each(clean: false, &_block)
         @instrumentation_calls ||= []
-        super(clean: clean) do |message|
+        super do |message|
           @instrumentation_calls << "before_#{message.object_id}"
           yield(message)
           @instrumentation_calls << "after_#{message.object_id}"
@@ -30,7 +30,7 @@ RSpec.describe_current do
 
   describe '#each' do
     context 'when not with clean' do
-      before { messages.each {} }
+      before { messages.each { nil } }
 
       it 'expect not to have all messages cleaned' do
         expect(message1.cleaned?).to be(false)
@@ -39,7 +39,7 @@ RSpec.describe_current do
     end
 
     context 'when with clean' do
-      before { messages.each(clean: true) {} }
+      before { messages.each(clean: true) { nil } }
 
       it 'expect to have all messages cleaned' do
         expect(message1.cleaned?).to be(true)

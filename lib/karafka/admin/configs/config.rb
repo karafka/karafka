@@ -71,10 +71,12 @@ module Karafka
         def synonym? = @synonym.positive?
 
         # @return [Hash] hash that we can use to operate with rdkafka
-        def to_native_hash = {
-          name: name,
-          value: value
-        }.freeze
+        def to_native_hash
+          {
+            name: name,
+            value: value
+          }.freeze
+        end
       end
     end
   end

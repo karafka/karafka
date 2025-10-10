@@ -4,7 +4,7 @@ FactoryBot.define do
   factory :swarm_node, class: 'Karafka::Swarm::Node' do
     transient do
       id { 0 }
-      parent_pid { ::Process.pid }
+      parent_pid { Process.pid }
     end
 
     skip_create
@@ -22,7 +22,7 @@ FactoryBot.define do
 
       reader.close
 
-      instance.instance_variable_set('@writer', writer)
+      instance.instance_variable_set(:@writer, writer)
       instance
     end
   end
@@ -33,8 +33,8 @@ FactoryBot.define do
 
       instance = new(id, parent_pid)
 
-      instance.instance_variable_set('@writer', writer)
-      instance.instance_variable_set('@reader', reader)
+      instance.instance_variable_set(:@writer, writer)
+      instance.instance_variable_set(:@reader, reader)
       instance
     end
   end

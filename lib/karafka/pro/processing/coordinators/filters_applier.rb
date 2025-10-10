@@ -68,7 +68,7 @@ module Karafka
           # @return [Integer] minimum timeout we need to pause. This is the minimum for all the
           #   filters to satisfy all of them.
           def timeout
-            applied.map(&:timeout).compact.min || 0
+            applied.filter_map(&:timeout).min || 0
           end
 
           # The first message we do need to get next time we poll. We use the minimum not to jump
@@ -78,7 +78,7 @@ module Karafka
           def cursor
             return nil unless active?
 
-            applied.map(&:cursor).compact.min_by(&:offset)
+            applied.filter_map(&:cursor).min_by(&:offset)
           end
 
           # @return [Boolean] did any of the filters requested offset storage during filter
@@ -106,7 +106,7 @@ module Karafka
           def marking_cursor
             return nil unless active?
 
-            applied.map(&:marking_cursor).compact.min_by(&:offset)
+            applied.filter_map(&:marking_cursor).min_by(&:offset)
           end
 
           private

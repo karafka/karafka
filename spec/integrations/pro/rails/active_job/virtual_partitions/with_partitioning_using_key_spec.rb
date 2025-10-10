@@ -30,7 +30,7 @@ class Job < ActiveJob::Base
   )
 
   def perform(value1)
-    sleep(0.001 + rand(5) / 1_000.0)
+    sleep(0.001 + (rand(5) / 1_000.0))
     DT[0] << value1
   end
 end

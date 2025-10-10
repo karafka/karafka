@@ -23,7 +23,7 @@ RSpec.describe_current do
 
   describe '#subscribe' do
     context 'when we have a block based listener' do
-      let(:subscription) { Karafka.monitor.subscribe(event_name) {} }
+      let(:subscription) { Karafka.monitor.subscribe(event_name) { nil } }
       let(:exception) { Karafka::Core::Monitoring::Notifications::EventNotRegistered }
 
       context 'when we try to subscribe to an unsupported event' do

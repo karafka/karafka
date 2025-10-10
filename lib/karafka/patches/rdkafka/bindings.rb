@@ -93,29 +93,29 @@ end
 
 # We need to replace the original callback with ours.
 # At the moment there is no API in rdkafka-ruby to do so
-::Rdkafka::Bindings.send(
+Rdkafka::Bindings.send(
   :remove_const,
   'RebalanceCallback'
 )
 
-::Rdkafka::Bindings.const_set(
-  'RebalanceCallback',
+Rdkafka::Bindings.const_set(
+  :RebalanceCallback,
   Karafka::Patches::Rdkafka::Bindings::RebalanceCallback
 )
 
-::Rdkafka::Bindings.attach_function(
+Rdkafka::Bindings.attach_function(
   :rd_kafka_rebalance_protocol,
   %i[pointer],
   :string
 )
 
-::Rdkafka::Bindings.attach_function(
+Rdkafka::Bindings.attach_function(
   :rd_kafka_incremental_assign,
   %i[pointer pointer],
   :string
 )
 
-::Rdkafka::Bindings.attach_function(
+Rdkafka::Bindings.attach_function(
   :rd_kafka_incremental_unassign,
   %i[pointer pointer],
   :string

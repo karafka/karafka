@@ -162,7 +162,7 @@ vp_key_counts_by_segment.each do |segment, counts|
     max_expected = (expected_per_key + tolerance).ceil
 
     assert(
-      count >= min_expected && count <= max_expected,
+      count.between?(min_expected, max_expected),
       "VP key #{vp_key} in segment #{segment} has #{count} messages"
     )
   end

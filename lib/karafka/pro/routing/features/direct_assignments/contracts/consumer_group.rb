@@ -12,19 +12,15 @@ module Karafka
             # Contract to validate configuration of the direct assignments feature
             class ConsumerGroup < Karafka::Contracts::Base
               configure do |config|
-                config.error_messages = YAML.safe_load(
-                  File.read(
-                    File.join(Karafka.gem_root, 'config', 'locales', 'pro_errors.yml')
-                  )
+                config.error_messages = YAML.safe_load_file(
+                  File.join(Karafka.gem_root, 'config', 'locales', 'pro_errors.yml')
                 ).fetch('en').fetch('validations').fetch('routing').fetch('consumer_group')
 
                 virtual do |data, errors|
                   next unless errors.empty?
 
-                  active = []
-
-                  data[:topics].each do |topic|
-                    active << topic[:direct_assignments][:active]
+                  active = data[:topics].map do |topic|
+                    topic[:direct_assignments][:active]
                   end
 
                   # If none active we use standard subscriptions

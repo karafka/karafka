@@ -24,10 +24,10 @@ setup_karafka
 require 'karafka/instrumentation/vendors/appsignal/errors_listener'
 require 'karafka/instrumentation/vendors/appsignal/metrics_listener'
 
-appsignal_metrics_listener = ::Karafka::Instrumentation::Vendors::Appsignal::MetricsListener.new
+appsignal_metrics_listener = Karafka::Instrumentation::Vendors::Appsignal::MetricsListener.new
 Karafka.monitor.subscribe(appsignal_metrics_listener)
 
-appsignal_errors_listener = ::Karafka::Instrumentation::Vendors::Appsignal::ErrorsListener.new
+appsignal_errors_listener = Karafka::Instrumentation::Vendors::Appsignal::ErrorsListener.new
 Karafka.monitor.subscribe(appsignal_errors_listener)
 Karafka.producer.monitor.subscribe(appsignal_errors_listener)
 

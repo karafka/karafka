@@ -141,8 +141,8 @@ by_batch.each do |segment_id, batches|
       assert_equal(
         expected_segment,
         segment_id,
-        "Batch #{batch_id}:" \
-        " Key #{record[:key]} processed by #{segment_id} but should #{expected_segment}"
+        "Batch #{batch_id}: " \
+        "Key #{record[:key]} processed by #{segment_id} but should #{expected_segment}"
       )
     end
   end

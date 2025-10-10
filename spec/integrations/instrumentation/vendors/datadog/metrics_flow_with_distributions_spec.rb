@@ -26,7 +26,7 @@ end
 
 statsd_dummy = Vendors::Datadog::StatsdDummyClient.new
 
-listener = ::Karafka::Instrumentation::Vendors::Datadog::MetricsListener.new do |config|
+listener = Karafka::Instrumentation::Vendors::Datadog::MetricsListener.new do |config|
   config.client = statsd_dummy
   # Publish host as a tag alongside the rest of tags
   config.default_tags = ["host:#{Socket.gethostname}"]

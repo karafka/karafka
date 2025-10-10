@@ -41,7 +41,7 @@ Karafka.monitor.subscribe('statistics.emitted') do |event|
 
   # Track memory and timing metrics
   stats = event[:statistics]
-  DT[:memory_usage] << stats['msg_cnt'] || 0
+  (DT[:memory_usage] << stats['msg_cnt']) || 0
   DT[:stats_received] << 1
 end
 

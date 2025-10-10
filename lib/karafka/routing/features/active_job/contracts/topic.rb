@@ -10,10 +10,8 @@ module Karafka
           # in order to be able to use active job routing
           class Topic < Karafka::Contracts::Base
             configure do |config|
-              config.error_messages = YAML.safe_load(
-                File.read(
-                  File.join(Karafka.gem_root, 'config', 'locales', 'errors.yml')
-                )
+              config.error_messages = YAML.safe_load_file(
+                File.join(Karafka.gem_root, 'config', 'locales', 'errors.yml')
               ).fetch('en').fetch('validations').fetch('routing').fetch('topic')
             end
 

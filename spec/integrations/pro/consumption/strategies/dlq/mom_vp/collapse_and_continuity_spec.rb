@@ -159,5 +159,5 @@ assert uncollapsed.none?(&:last)
 assert uncollapsed.map { |row| row[1] }.uniq.size >= 2
 
 # None of those processed later in parallel should be in the previous sets
-assert (uncollapsed.map(&:first) & collapsed.map(&:first)).empty?
-assert (uncollapsed.map(&:first) & pre_collapse.map(&:first)).empty?
+assert !uncollapsed.map(&:first).intersect?(collapsed.map(&:first))
+assert !uncollapsed.map(&:first).intersect?(pre_collapse.map(&:first))

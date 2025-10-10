@@ -11,10 +11,8 @@ module Karafka
         # Ensures that task details are as expected
         class Task < ::Karafka::Contracts::Base
           configure do |config|
-            config.error_messages = YAML.safe_load(
-              File.read(
-                File.join(Karafka.gem_root, 'config', 'locales', 'pro_errors.yml')
-              )
+            config.error_messages = YAML.safe_load_file(
+              File.join(Karafka.gem_root, 'config', 'locales', 'pro_errors.yml')
             ).fetch('en').fetch('validations').fetch('recurring_tasks')
           end
 
