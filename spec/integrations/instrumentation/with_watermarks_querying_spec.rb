@@ -5,12 +5,6 @@
 
 setup_karafka
 
-class Consumer < Karafka::BaseConsumer
-  def consume
-    # Nothing to do, we're just testing Admin API
-  end
-end
-
 # Create three topics with different partition counts
 topic1 = "#{DT.topic}-1"
 topic2 = "#{DT.topic}-2"
@@ -18,32 +12,34 @@ topic3 = "#{DT.topic}-3"
 
 draw_routes do
   topic topic1 do
-    consumer Consumer
+    active(false)
     config(partitions: 2)
   end
 
   topic topic2 do
-    consumer Consumer
+    active(false)
     config(partitions: 3)
   end
 
   topic topic3 do
-    consumer Consumer
+    active(false)
     config(partitions: 1)
   end
 end
 
 # Produce messages to some partitions but not all
+# topic1: partition 0 has data, partition 1 has data
 produce(topic1, '1', partition: 0)
 produce(topic1, '2', partition: 0)
 produce(topic1, '3', partition: 1)
 
+# topic2: partition 0 has data, partition 1 has data, partition 2 is empty
 produce(topic2, '1', partition: 0)
 produce(topic2, '2', partition: 1)
 produce(topic2, '3', partition: 1)
 produce(topic2, '4', partition: 1)
-# topic2 partition 2 has no messages
 
+# topic3: partition 0 has data
 produce(topic3, '1', partition: 0)
 produce(topic3, '2', partition: 0)
 produce(topic3, '3', partition: 0)
@@ -74,3 +70,11 @@ assert_equal [topic1, topic2, topic3].sort, result.keys.sort
 assert_equal [0, 1], result[topic1].keys.sort
 assert_equal [0, 1, 2], result[topic2].keys.sort
 assert_equal [0], result[topic3].keys.sort
+
+# Test single partition query with empty partition
+empty_partition_result = Karafka::Admin.read_watermark_offsets(topic2, 2)
+assert_equal [0, 0], empty_partition_result
+
+# Test single partition query with data
+non_empty_partition_result = Karafka::Admin.read_watermark_offsets(topic2, 1)
+assert_equal [0, 3], non_empty_partition_result
