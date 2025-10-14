@@ -142,19 +142,11 @@ module Karafka
         # Fetches the watermark offsets for a given topic partition or multiple topics and
         # partitions
         #
-        # @overload read_watermark_offsets(name, partition)
-        #   Fetches watermark offsets for a single topic partition
-        #   @param name [String, Symbol] topic name
-        #   @param partition [Integer] partition
-        #   @return [Array<Integer, Integer>] low watermark offset and high watermark offset
+        # @param name_or_hash [String, Symbol, Hash] topic name or hash with topics and partitions
+        # @param partition [Integer, nil] partition number (required when first param is topic name)
         #
-        # @overload read_watermark_offsets(topics_with_partitions)
-        #   Fetches watermark offsets for multiple topics and partitions using a single consumer
-        #   @param topics_with_partitions [Hash] Hash with list of topics and partitions to query
-        #     in the format `{ 'topic1' => [0, 1, 2], 'topic2' => [0, 1] }`
-        #   @return [Hash<String, Hash<Integer, Array<Integer, Integer>>>] nested hash where first
-        #     level keys are topic names, second level keys are partition numbers, and values are
-        #     arrays with low watermark offset and high watermark offset
+        # @return [Array<Integer, Integer>, Hash] when querying single partition returns array with
+        #   low and high watermark offsets, when querying multiple returns nested hash
         #
         # @example Query single partition
         #   Karafka::Admin::Topics.read_watermark_offsets('events', 0)
