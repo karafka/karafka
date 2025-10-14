@@ -174,14 +174,21 @@ module Karafka
         #   #   }
         #   # }
         def read_watermark_offsets(name_or_hash, partition = nil)
-          # Single topic partition query
-          if partition
-            result = read_watermark_offsets_bulk({ name_or_hash => [partition] })
-            return result.dig(name_or_hash, partition)
+          # Normalize input to hash format
+          topics_with_partitions = partition ? { name_or_hash => [partition] } : name_or_hash
+
+          result = Hash.new { |h, k| h[k] = {} }
+
+          with_consumer do |consumer|
+            topics_with_partitions.each do |topic, partitions|
+              partitions.each do |partition_id|
+                result[topic][partition_id] = consumer.query_watermark_offsets(topic, partition_id)
+              end
+            end
           end
 
-          # Multiple topics and partitions query
-          read_watermark_offsets_bulk(name_or_hash)
+          # Return single array for single partition query, hash for multiple
+          partition ? result.dig(name_or_hash, partition) : result
         end
 
         # Returns basic topic metadata
@@ -203,24 +210,6 @@ module Karafka
         end
 
         private
-
-        # Internal method that performs the actual bulk query
-        #
-        # @param topics_with_partitions [Hash] Hash with list of topics and partitions to query
-        # @return [Hash<String, Hash<Integer, Array<Integer, Integer>>>] nested hash with results
-        def read_watermark_offsets_bulk(topics_with_partitions)
-          result = Hash.new { |h, k| h[k] = {} }
-
-          with_consumer do |consumer|
-            topics_with_partitions.each do |topic, partitions|
-              partitions.each do |partition|
-                result[topic][partition] = consumer.query_watermark_offsets(topic, partition)
-              end
-            end
-          end
-
-          result
-        end
 
         # @return [Array<String>] topics names
         def names
