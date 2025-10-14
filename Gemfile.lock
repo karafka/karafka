@@ -52,7 +52,7 @@ GEM
     ffi (1.17.2-x86_64-darwin)
     ffi (1.17.2-x86_64-linux-gnu)
     ffi (1.17.2-x86_64-linux-musl)
-    fugit (1.12.0)
+    fugit (1.12.1)
       et-orbi (~> 1.4)
       raabro (~> 1.4)
     globalid (1.2.1)
@@ -107,7 +107,7 @@ GEM
     minitest (5.25.5)
     ostruct (0.6.3)
     raabro (1.4.0)
-    rack (3.2.2)
+    rack (3.2.3)
     rake (13.3.0)
     roda (3.95.0)
       rack
