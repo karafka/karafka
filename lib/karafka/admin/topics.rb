@@ -139,15 +139,49 @@ module Karafka
           end
         end
 
-        # Fetches the watermark offsets for a given topic partition
+        # Fetches the watermark offsets for a given topic partition or multiple topics and
+        # partitions
         #
-        # @param name [String, Symbol] topic name
-        # @param partition [Integer] partition
-        # @return [Array<Integer, Integer>] low watermark offset and high watermark offset
-        def read_watermark_offsets(name, partition)
-          with_consumer do |consumer|
-            consumer.query_watermark_offsets(name, partition)
+        # @overload read_watermark_offsets(name, partition)
+        #   Fetches watermark offsets for a single topic partition
+        #   @param name [String, Symbol] topic name
+        #   @param partition [Integer] partition
+        #   @return [Array<Integer, Integer>] low watermark offset and high watermark offset
+        #
+        # @overload read_watermark_offsets(topics_with_partitions)
+        #   Fetches watermark offsets for multiple topics and partitions using a single consumer
+        #   @param topics_with_partitions [Hash] Hash with list of topics and partitions to query
+        #     in the format `{ 'topic1' => [0, 1, 2], 'topic2' => [0, 1] }`
+        #   @return [Hash<String, Hash<Integer, Array<Integer, Integer>>>] nested hash where first
+        #     level keys are topic names, second level keys are partition numbers, and values are
+        #     arrays with low watermark offset and high watermark offset
+        #
+        # @example Query single partition
+        #   Karafka::Admin::Topics.read_watermark_offsets('events', 0)
+        #   # => [0, 100]
+        #
+        # @example Query specific partitions across multiple topics
+        #   Karafka::Admin::Topics.read_watermark_offsets(
+        #     { 'events' => [0, 1], 'logs' => [0] }
+        #   )
+        #   # => {
+        #   #   'events' => {
+        #   #     0 => [0, 100],
+        #   #     1 => [0, 150]
+        #   #   },
+        #   #   'logs' => {
+        #   #     0 => [0, 50]
+        #   #   }
+        #   # }
+        def read_watermark_offsets(name_or_hash, partition = nil)
+          # Single topic partition query
+          if partition
+            result = read_watermark_offsets_bulk({ name_or_hash => [partition] })
+            return result.dig(name_or_hash, partition)
           end
+
+          # Multiple topics and partitions query
+          read_watermark_offsets_bulk(name_or_hash)
         end
 
         # Returns basic topic metadata
@@ -169,6 +203,24 @@ module Karafka
         end
 
         private
+
+        # Internal method that performs the actual bulk query
+        #
+        # @param topics_with_partitions [Hash] Hash with list of topics and partitions to query
+        # @return [Hash<String, Hash<Integer, Array<Integer, Integer>>>] nested hash with results
+        def read_watermark_offsets_bulk(topics_with_partitions)
+          result = Hash.new { |h, k| h[k] = {} }
+
+          with_consumer do |consumer|
+            topics_with_partitions.each do |topic, partitions|
+              partitions.each do |partition|
+                result[topic][partition] = consumer.query_watermark_offsets(topic, partition)
+              end
+            end
+          end
+
+          result
+        end
 
         # @return [Array<String>] topics names
         def names
