@@ -447,4 +447,92 @@ RSpec.describe_current do
       it { expect(offsets.last).to eq(10) }
     end
   end
+
+  describe '#read_watermark_offsets with hash argument' do
+    subject(:offsets) { described_class.read_watermark_offsets(topics_with_partitions) }
+
+    let(:name2) { "it-#{SecureRandom.uuid}" }
+
+    context 'when querying single topic with single partition' do
+      let(:topics_with_partitions) { { name => [0] } }
+
+      before { described_class.create(name, 1, 1) }
+
+      it 'expect to return correct structure' do
+        expect(offsets).to eq({ name => { 0 => [0, 0] } })
+      end
+    end
+
+    context 'when querying single topic with multiple partitions' do
+      let(:topics_with_partitions) { { name => [0, 1, 2] } }
+
+      before do
+        described_class.create(name, 3, 1)
+        PRODUCERS.regular.produce_sync(topic: name, payload: 'test', partition: 1)
+      end
+
+      it 'expect to return correct structure for all partitions' do
+        result = offsets
+        expect(result[name][0]).to eq([0, 0])
+        expect(result[name][1]).to eq([0, 1])
+        expect(result[name][2]).to eq([0, 0])
+      end
+    end
+
+    context 'when querying multiple topics with multiple partitions' do
+      let(:topics_with_partitions) { { name => [0, 1], name2 => [0] } }
+
+      before do
+        described_class.create(name, 2, 1)
+        described_class.create(name2, 1, 1)
+
+        messages1 = Array.new(5) { |i| { topic: name, payload: i.to_s, partition: 0 } }
+        messages2 = Array.new(3) { |i| { topic: name, payload: i.to_s, partition: 1 } }
+        messages3 = Array.new(10) { |i| { topic: name2, payload: i.to_s } }
+
+        PRODUCERS.regular.produce_many_sync(messages1)
+        PRODUCERS.regular.produce_many_sync(messages2)
+        PRODUCERS.regular.produce_many_sync(messages3)
+      end
+
+      it 'expect to return correct structure for all topics and partitions' do
+        result = offsets
+        expect(result[name][0]).to eq([0, 5])
+        expect(result[name][1]).to eq([0, 3])
+        expect(result[name2][0]).to eq([0, 10])
+      end
+    end
+
+    context 'when querying non-existing topic' do
+      let(:topics_with_partitions) { { 'non-existing' => [0] } }
+
+      it { expect { offsets }.to raise_error(Rdkafka::RdkafkaError) }
+    end
+
+    context 'when querying non-existing partition' do
+      let(:topics_with_partitions) { { name => [999] } }
+
+      before { described_class.create(name, 1, 1) }
+
+      it { expect { offsets }.to raise_error(Rdkafka::RdkafkaError) }
+    end
+
+    context 'when querying empty topics' do
+      let(:topics_with_partitions) { { name => [0, 1], name2 => [0, 1, 2] } }
+
+      before do
+        described_class.create(name, 2, 1)
+        described_class.create(name2, 3, 1)
+      end
+
+      it 'expect to return correct structure with zero offsets' do
+        result = offsets
+        expect(result[name][0]).to eq([0, 0])
+        expect(result[name][1]).to eq([0, 0])
+        expect(result[name2][0]).to eq([0, 0])
+        expect(result[name2][1]).to eq([0, 0])
+        expect(result[name2][2]).to eq([0, 0])
+      end
+    end
+  end
 end
