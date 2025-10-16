@@ -53,10 +53,13 @@ DT = DataCollector
 # Test setup for the framework
 # @param allow_errors [true, false, Array<String>] Should we allow any errors (true), none (false)
 #   or a given types (array with types)
+# @param pro [Boolean] is it a pro spec
+# @param log_messages [Boolean] should we log payloads in WaterDrop for the default producer
 def setup_karafka(
   allow_errors: false,
   # automatically load pro for all the pro specs unless stated otherwise
-  pro: caller_locations(1..1).first.path.include?('integrations/pro/')
+  pro: caller_locations(1..1).first.path.include?('integrations/pro/'),
+  log_messages: true
 )
   # If the spec  is in pro, run in pro mode
   become_pro! if pro
@@ -120,7 +123,10 @@ def setup_karafka(
   end
 
   # We turn on also WaterDrop instrumentation the same way and for the same reasons as above
-  listener = WaterDrop::Instrumentation::LoggerListener.new(Karafka.logger)
+  listener = WaterDrop::Instrumentation::LoggerListener.new(
+    Karafka.logger,
+    log_messages: log_messages
+  )
 
   Karafka.producer.monitor.subscribe(listener)
 
