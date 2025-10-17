@@ -3,7 +3,7 @@
 # When moving back to expired it should seek to -1 which is latest (upcoming)
 # This is expected as all expired mean there is nothing except high watermark (-1/latest)
 
-setup_karafka
+setup_karafka(log_messages: false)
 
 Karafka::App.monitor.subscribe('consumer.consuming.seek') do |event|
   DT[:seeks] << event[:message].offset
@@ -27,7 +27,7 @@ draw_routes do
       'cleanup.policy': 'compact',
       'min.cleanable.dirty.ratio': 0.00001,
       'segment.ms': 500,
-      'segment.bytes': 2800,
+      'segment.bytes': 1_048_576,
       'delete.retention.ms': 500,
       'min.compaction.lag.ms': 500,
       'retention.ms': 500
@@ -36,7 +36,7 @@ draw_routes do
 end
 
 100.times do |i|
-  produce_many(DT.topic, DT.uuids(1), key: "test#{i}")
+  produce_many(DT.topic, ['a' * 1_024 * 512], key: "test#{i}")
 end
 
 100.times do |i|
