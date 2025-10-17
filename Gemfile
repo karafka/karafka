@@ -2,8 +2,6 @@
 
 source 'https://rubygems.org'
 
-plugin 'diffend'
-
 gemspec
 
 # Karafka gem does not require activejob, karafka-web or fugit to work

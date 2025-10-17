@@ -69,12 +69,24 @@ RSpec.describe_current do
 
   describe '#read_watermark_offsets' do
     let(:partition) { 0 }
+    let(:topics_with_partitions) { { name => [0, 1] } }
 
-    it 'delegates to Admin::Topics.read_watermark_offsets' do
-      allow(Karafka::Admin::Topics).to receive(:read_watermark_offsets)
-      described_class.read_watermark_offsets(name, partition)
-      expect(Karafka::Admin::Topics)
-        .to have_received(:read_watermark_offsets).with(name, partition)
+    context 'when called with topic and partition' do
+      it 'delegates to Admin::Topics.read_watermark_offsets' do
+        allow(Karafka::Admin::Topics).to receive(:read_watermark_offsets)
+        described_class.read_watermark_offsets(name, partition)
+        expect(Karafka::Admin::Topics)
+          .to have_received(:read_watermark_offsets).with(name, partition)
+      end
+    end
+
+    context 'when called with topics hash' do
+      it 'delegates to Admin::Topics.read_watermark_offsets' do
+        allow(Karafka::Admin::Topics).to receive(:read_watermark_offsets)
+        described_class.read_watermark_offsets(topics_with_partitions)
+        expect(Karafka::Admin::Topics)
+          .to have_received(:read_watermark_offsets).with(topics_with_partitions, nil)
+      end
     end
   end
 

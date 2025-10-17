@@ -139,15 +139,48 @@ module Karafka
           end
         end
 
-        # Fetches the watermark offsets for a given topic partition
+        # Fetches the watermark offsets for a given topic partition or multiple topics and
+        # partitions
         #
-        # @param name [String, Symbol] topic name
-        # @param partition [Integer] partition
-        # @return [Array<Integer, Integer>] low watermark offset and high watermark offset
-        def read_watermark_offsets(name, partition)
+        # @param name_or_hash [String, Symbol, Hash] topic name or hash with topics and partitions
+        # @param partition [Integer, nil] partition number (required when first param is topic name)
+        #
+        # @return [Array<Integer, Integer>, Hash] when querying single partition returns array with
+        #   low and high watermark offsets, when querying multiple returns nested hash
+        #
+        # @example Query single partition
+        #   Karafka::Admin::Topics.read_watermark_offsets('events', 0)
+        #   # => [0, 100]
+        #
+        # @example Query specific partitions across multiple topics
+        #   Karafka::Admin::Topics.read_watermark_offsets(
+        #     { 'events' => [0, 1], 'logs' => [0] }
+        #   )
+        #   # => {
+        #   #   'events' => {
+        #   #     0 => [0, 100],
+        #   #     1 => [0, 150]
+        #   #   },
+        #   #   'logs' => {
+        #   #     0 => [0, 50]
+        #   #   }
+        #   # }
+        def read_watermark_offsets(name_or_hash, partition = nil)
+          # Normalize input to hash format
+          topics_with_partitions = partition ? { name_or_hash => [partition] } : name_or_hash
+
+          result = Hash.new { |h, k| h[k] = {} }
+
           with_consumer do |consumer|
-            consumer.query_watermark_offsets(name, partition)
+            topics_with_partitions.each do |topic, partitions|
+              partitions.each do |partition_id|
+                result[topic][partition_id] = consumer.query_watermark_offsets(topic, partition_id)
+              end
+            end
           end
+
+          # Return single array for single partition query, hash for multiple
+          partition ? result.dig(name_or_hash, partition) : result
         end
 
         # Returns basic topic metadata

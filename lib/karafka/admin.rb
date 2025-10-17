@@ -57,11 +57,11 @@ module Karafka
         Topics.create_partitions(name, partitions)
       end
 
-      # @param name [String, Symbol] topic name
-      # @param partition [Integer] partition
+      # @param name_or_hash [String, Symbol, Hash] topic name or hash with topics and partitions
+      # @param partition [Integer, nil] partition (nil when using hash format)
       # @see Topics.read_watermark_offsets
-      def read_watermark_offsets(name, partition)
-        Topics.read_watermark_offsets(name, partition)
+      def read_watermark_offsets(name_or_hash, partition = nil)
+        Topics.read_watermark_offsets(name_or_hash, partition)
       end
 
       # @param topic_name [String] name of the topic we're interested in
