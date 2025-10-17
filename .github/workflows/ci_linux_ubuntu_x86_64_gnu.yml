@@ -18,28 +18,6 @@ env:
   BUNDLE_JOBS: 4
 
 jobs:
-  diffend:
-    runs-on: ubuntu-latest
-    timeout-minutes: 5
-    strategy:
-      fail-fast: false
-    steps:
-      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
-        with:
-          fetch-depth: 0
-
-      - name: Set up Ruby
-        uses: ruby/setup-ruby@6797dcbb9a1889fd411d07e8aba7eded53fb8b48 # v1.264.0
-        with:
-          ruby-version: 3.4.7
-          bundler-cache: true
-
-      - name: Install Diffend plugin
-        run: bundle plugin install diffend
-
-      - name: Bundle Secure
-        run: bundle secure
-
   karafka-checksum:
     runs-on: ubuntu-latest
     timeout-minutes: 5
@@ -87,7 +65,6 @@ jobs:
   specs:
     timeout-minutes: 15
     runs-on: ubuntu-latest
-    needs: diffend
     env:
       BUNDLE_FORCE_RUBY_PLATFORM: ${{ matrix.force_ruby_platform }}
     strategy:
@@ -142,7 +119,6 @@ jobs:
   integrations_oss:
     timeout-minutes: 30
     runs-on: ubuntu-latest
-    needs: diffend
     env:
       BUNDLE_FORCE_RUBY_PLATFORM: ${{ matrix.force_ruby_platform }}
     strategy:
@@ -214,7 +190,6 @@ jobs:
   integrations_pro:
     timeout-minutes: 45
     runs-on: ubuntu-latest
-    needs: diffend
     env:
       BUNDLE_FORCE_RUBY_PLATFORM: ${{ matrix.force_ruby_platform }}
     strategy:
@@ -288,7 +263,6 @@ jobs:
     runs-on: ubuntu-latest
     if: always()
     needs:
-      - diffend
       - karafka-checksum
       - coditsu
       - specs

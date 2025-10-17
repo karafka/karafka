@@ -229,7 +229,10 @@ RSpec.describe_current do
         described_class.new(**config)
       end
 
-      before { described_class.create(acl1) }
+      before do
+        described_class.create(acl1)
+        sleep(0.3)
+      end
 
       it { expect(describing.size).to eq(1) }
       it { expect(describing.first.resource_type).to eq(:transactional_id) }
@@ -255,6 +258,7 @@ RSpec.describe_current do
       before do
         described_class.create(acl1)
         described_class.create(acl2)
+        sleep(0.3)
       end
 
       it { expect(describing.size).to eq(2) }
