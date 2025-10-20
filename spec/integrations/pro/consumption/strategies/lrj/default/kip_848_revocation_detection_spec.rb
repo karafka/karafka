@@ -7,12 +7,8 @@
 # during long-running consumption with the new protocol, the consumer is properly
 # notified via both #revoked and #revoked? methods
 
-setup_karafka do |config|
-  # Use the new consumer protocol (KIP-848)
-  config.kafka[:'group.protocol'] = 'consumer'
-  # Remove settings that are not compatible with KIP-848
-  config.kafka.delete(:'partition.assignment.strategy')
-  config.kafka.delete(:'heartbeat.interval.ms')
+setup_karafka(consumer_group_protocol: true) do |config|
+  # Remove session timeout and configure max poll interval
   config.kafka.delete(:'session.timeout.ms')
   config.kafka[:'max.poll.interval.ms'] = 10_000
 end
