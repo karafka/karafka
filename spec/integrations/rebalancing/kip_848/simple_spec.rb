@@ -2,13 +2,7 @@
 
 # Test that KIP-848 consumer group protocol works with basic consumption
 
-setup_karafka do |config|
-  # Use the new consumer protocol (KIP-848)
-  config.kafka[:'group.protocol'] = 'consumer'
-  # Remove settings that are not compatible with the new protocol
-  config.kafka.delete(:'partition.assignment.strategy')
-  config.kafka.delete(:'heartbeat.interval.ms')
-end
+setup_karafka(consumer_group_protocol: true)
 
 class Consumer < Karafka::BaseConsumer
   def consume

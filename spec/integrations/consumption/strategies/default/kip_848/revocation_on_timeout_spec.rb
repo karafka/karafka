@@ -4,14 +4,9 @@
 # max.poll.interval.ms is exceeded, the consumer is properly kicked out
 # and revoked callbacks are triggered
 
-setup_karafka(allow_errors: true) do |config|
-  # Use the new consumer protocol (KIP-848)
-  config.kafka[:'group.protocol'] = 'consumer'
-  # Remove settings that are not compatible with KIP-848
-  config.kafka.delete(:'partition.assignment.strategy')
-  config.kafka.delete(:'heartbeat.interval.ms')
+setup_karafka(allow_errors: true, consumer_group_protocol: true) do |config|
+  # Remove session timeout and set very short max poll interval for faster testing
   config.kafka.delete(:'session.timeout.ms')
-  # Very short max poll interval for faster testing
   config.kafka[:'max.poll.interval.ms'] = 5_000
   config.max_messages = 1
 end

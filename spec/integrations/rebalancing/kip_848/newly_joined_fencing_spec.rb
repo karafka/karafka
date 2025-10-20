@@ -7,11 +7,11 @@
 
 GROUP_INSTANCE_ID = SecureRandom.uuid
 
-setup_karafka(allow_errors: %w[connection.client.poll.error]) do |config|
-  config.kafka[:'group.protocol'] = 'consumer'
+setup_karafka(
+  allow_errors: %w[connection.client.poll.error],
+  consumer_group_protocol: true
+) do |config|
   config.kafka[:'group.instance.id'] = GROUP_INSTANCE_ID
-  config.kafka.delete(:'partition.assignment.strategy')
-  config.kafka.delete(:'heartbeat.interval.ms')
 end
 
 Karafka.monitor.subscribe('error.occurred') do |event|
