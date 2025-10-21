@@ -43,7 +43,7 @@ module Karafka
           [[%w[to], :exceeds_broker_count]]
         end
 
-        # Validate manual broker assignments when provided
+        # Validate all partitions are specified in manual broker assignment
         virtual do |data, errors|
           next unless errors.empty?
 
@@ -52,48 +52,97 @@ module Karafka
           next unless data.key?(:topic_info)
 
           topic_info = data.fetch(:topic_info)
-          target_rf = data.fetch(:to)
-          cluster_info = data.fetch(:cluster_info, {})
-
           partition_ids = topic_info.fetch(:partitions, []).map { |p| p[:partition_id] }
+
+          missing_partitions = partition_ids - brokers.keys
+          next unless missing_partitions.any?
+
+          [[%w[brokers], :missing_partitions]]
+        end
+
+        # Validate that manual broker assignments reference valid partitions
+        virtual do |data, errors|
+          next unless errors.empty?
+
+          brokers = data[:brokers]
+          next if brokers.nil?
+          next unless data.key?(:topic_info)
+
+          topic_info = data.fetch(:topic_info)
+          partition_ids = topic_info.fetch(:partitions, []).map { |p| p[:partition_id] }
+
+          error_found = nil
+          brokers.each_key do |partition_id|
+            unless partition_ids.include?(partition_id)
+              error_found = [[%w[brokers], :invalid_partition]]
+              break
+            end
+          end
+
+          error_found
+        end
+
+        # Validate broker count matches target replication factor for each partition
+        virtual do |data, errors|
+          next unless errors.empty?
+
+          brokers = data[:brokers]
+          next if brokers.nil?
+          next unless data.key?(:topic_info)
+
+          target_rf = data.fetch(:to)
+
+          error_found = nil
+          brokers.each_value do |broker_ids|
+            if broker_ids.size != target_rf
+              error_found = [[%w[brokers], :wrong_broker_count_for_partition]]
+              break
+            end
+          end
+
+          error_found
+        end
+
+        # Validate no duplicate brokers assigned to the same partition
+        virtual do |data, errors|
+          next unless errors.empty?
+
+          brokers = data[:brokers]
+          next if brokers.nil?
+          next unless data.key?(:topic_info)
+
+          error_found = nil
+          brokers.each_value do |broker_ids|
+            if broker_ids.size != broker_ids.uniq.size
+              error_found = [[%w[brokers], :duplicate_brokers_for_partition]]
+              break
+            end
+          end
+
+          error_found
+        end
+
+        # Validate all referenced brokers exist in the cluster
+        virtual do |data, errors|
+          next unless errors.empty?
+
+          brokers = data[:brokers]
+          next if brokers.nil?
+          next unless data.key?(:topic_info)
+
+          cluster_info = data.fetch(:cluster_info, {})
           all_broker_ids = cluster_info.fetch(:brokers, []).map { |b| b[:node_id] }
 
-          # Check all partitions are specified
-          missing_partitions = partition_ids - brokers.keys
-          if missing_partitions.any?
-            [[%w[brokers], :missing_partitions]]
-          else
-            # Check each partition assignment
-            error_found = nil
-            brokers.each do |partition_id, broker_ids|
-              # Verify partition exists
-              unless partition_ids.include?(partition_id)
-                error_found = [[%w[brokers], :invalid_partition]]
-                break
-              end
-
-              # Check broker count matches target RF
-              if broker_ids.size != target_rf
-                error_found = [[%w[brokers], :wrong_broker_count_for_partition]]
-                break
-              end
-
-              # Check for duplicate brokers
-              if broker_ids.size != broker_ids.uniq.size
-                error_found = [[%w[brokers], :duplicate_brokers_for_partition]]
-                break
-              end
-
-              # Check all brokers exist
-              invalid_brokers = broker_ids - all_broker_ids
-              if invalid_brokers.any?
-                error_found = [[%w[brokers], :invalid_brokers_for_partition]]
-                break
-              end
+          error_found = nil
+          brokers.each_value do |broker_ids|
+            invalid_brokers = broker_ids - all_broker_ids
+            if invalid_brokers.any?
+              error_found = [[%w[brokers], :invalid_brokers_for_partition]]
+              break
             end
-
-            error_found
           end
+
+          error_found
         end
       end
     end
