@@ -233,11 +233,9 @@ RSpec.describe Karafka::Admin::Replication do
       expect(plan.partitions_assignment.values.all? { |replicas| replicas.size == 2 }).to be(true)
     end
   end
-end
 
-RSpec.describe Karafka::Admin::Replication do
-  let(:topic_name) { 'test-topic' }
-  let(:cluster_info) do
+  # Instance method tests
+  let(:cluster_info_for_instance) do
     {
       brokers: [
         { node_id: 1, host: 'broker1:9092' },
@@ -248,13 +246,13 @@ RSpec.describe Karafka::Admin::Replication do
   end
   let(:partitions_assignment) { { 0 => [1, 2, 3], 1 => [2, 3, 1] } }
 
-  let(:plan) do
+  let(:plan_instance) do
     described_class.new(
       topic: topic_name,
       current_replication_factor: 2,
       target_replication_factor: 3,
       partitions_assignment: partitions_assignment,
-      cluster_info: cluster_info
+      cluster_info: cluster_info_for_instance
     )
   end
 
@@ -264,7 +262,7 @@ RSpec.describe Karafka::Admin::Replication do
     after { temp_file.unlink }
 
     it 'exports JSON to specified file' do
-      file_path = plan.export_to_file(temp_file.path)
+      file_path = plan_instance.export_to_file(temp_file.path)
 
       expect(file_path).to eq(temp_file.path)
       expect(File.exist?(temp_file.path)).to be(true)
@@ -278,7 +276,7 @@ RSpec.describe Karafka::Admin::Replication do
 
   describe '#summary' do
     it 'provides comprehensive plan summary' do
-      summary = plan.summary
+      summary = plan_instance.summary
 
       expect(summary).to include('test-topic')
       expect(summary).to include('Current replication factor: 2')
@@ -291,7 +289,7 @@ RSpec.describe Karafka::Admin::Replication do
 
   describe '#reassignment_json' do
     it 'generates valid Kafka reassignment JSON format' do
-      json_data = JSON.parse(plan.reassignment_json)
+      json_data = JSON.parse(plan_instance.reassignment_json)
 
       expect(json_data).to include('version' => 1, 'partitions' => anything)
       expect(json_data['partitions']).to be_an(Array)
@@ -306,7 +304,7 @@ RSpec.describe Karafka::Admin::Replication do
 
   describe '#execution_commands' do
     it 'provides all necessary Kafka commands' do
-      commands = plan.execution_commands
+      commands = plan_instance.execution_commands
 
       expect(commands).to include(:generate, :execute, :verify)
 
