@@ -37,7 +37,8 @@ RSpec.describe Karafka::Admin::Replication do
 
   describe '.plan' do
     before do
-      allow(described_class).to receive(:fetch_topic_info).with(topic_name).and_return(mock_topic_info)
+      allow(described_class).to receive(:fetch_topic_info)
+        .with(topic_name).and_return(mock_topic_info)
       allow(described_class).to receive(:cluster_info).and_return(mock_cluster_info)
     end
 
@@ -165,7 +166,7 @@ RSpec.describe Karafka::Admin::Replication do
       context 'when manual assignment has wrong broker count' do
         let(:wrong_count_brokers) do
           {
-            0 => [1, 2],  # Only 2 brokers instead of 3
+            0 => [1, 2], # Only 2 brokers instead of 3
             1 => [2, 3, 4]
           }
         end
@@ -309,7 +310,7 @@ RSpec.describe Karafka::Admin::Replication do
 
       expect(commands).to include(:generate, :execute, :verify)
 
-      commands.values.each do |command|
+      commands.each_value do |command|
         expect(command).to include('kafka-reassign-partitions.sh')
         expect(command).to include('--bootstrap-server')
         expect(command).to include('--reassignment-json-file')
@@ -339,7 +340,7 @@ RSpec.describe Karafka::Admin do
         .and_return(double(:plan))
 
       described_class.plan_topic_replication(
-        topic: topic_name, 
+        topic: topic_name,
         replication_factor: 3,
         brokers: manual_brokers
       )

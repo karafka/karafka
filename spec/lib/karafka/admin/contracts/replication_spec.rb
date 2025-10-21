@@ -142,7 +142,8 @@ RSpec.describe Karafka::Admin::Contracts::Replication do
     end
 
     context 'when broker count does not match target replication factor' do
-      let(:invalid_brokers) { { 0 => [1, 2], 1 => [2, 3, 4] } } # Partition 0 has 2 brokers, should be 3
+      # Partition 0 has 2 brokers, should be 3
+      let(:invalid_brokers) { { 0 => [1, 2], 1 => [2, 3, 4] } }
 
       it { expect(contract.call(config_with_validation_data)).not_to be_success }
 

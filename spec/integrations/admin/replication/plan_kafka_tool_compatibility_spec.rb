@@ -8,6 +8,16 @@
 require 'tempfile'
 require 'securerandom'
 
+# Skip this spec if Docker is not available or kafka container is not running
+# This allows the spec to run on platforms without Docker (e.g., macOS in some CI environments)
+docker_available = system('docker --version > /dev/null 2>&1')
+kafka_container_running = docker_available && system('docker exec kafka true > /dev/null 2>&1')
+
+unless docker_available && kafka_container_running
+  puts 'Skipping Kafka tool compatibility spec: Docker or kafka container not available'
+  exit 0
+end
+
 setup_karafka
 
 class ReplicationKafkaToolConsumer < Karafka::BaseConsumer

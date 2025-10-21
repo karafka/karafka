@@ -16,9 +16,9 @@ module Karafka
     # ## Prerequisites
     #
     # 1. **Sufficient Disk Space**: Ensure target brokers have enough space for new replicas
-    # 2. **Network Capacity**: Verify network can handle the additional replication traffic
+    # 2. **Network Capacity**: Verify network can handle additional replication traffic
     # 3. **Broker Count**: Cannot exceed the number of available brokers
-    # 4. **Java Tools**: Kafka's reassignment tools (kafka-reassign-partitions.sh) must be available
+    # 4. **Java Tools**: Kafka's reassignment tools must be available
     #
     # ## Best Practices
     #
@@ -73,6 +73,8 @@ module Karafka
         partitions_assignment:,
         cluster_info:
       )
+        super()
+
         @topic = topic
         @current_replication_factor = current_replication_factor
         @target_replication_factor = target_replication_factor
@@ -97,7 +99,9 @@ module Karafka
       def summary
         broker_count = @cluster_info[:brokers].size
         change = @target_replication_factor - @current_replication_factor
-        broker_nodes = @cluster_info[:brokers].map { |broker_info| broker_info[:node_id] }.join(', ')
+        broker_nodes = @cluster_info[:brokers].map do |broker_info|
+          broker_info[:node_id]
+        end.join(', ')
 
         <<~SUMMARY
           Replication Increase Plan for Topic: #{@topic}
@@ -181,15 +185,11 @@ module Karafka
 
           Contracts::Replication.new.validate!(validation_data)
 
-          partitions_assignment = if brokers
-                                    brokers
-                                  else
-                                    generate_partitions_assignment(
-                                      topic_info: topic_info,
-                                      target_replication_factor: to,
-                                      cluster_info: cluster_info
-                                    )
-                                  end
+          partitions_assignment = brokers || generate_partitions_assignment(
+            topic_info: topic_info,
+            target_replication_factor: to,
+            cluster_info: cluster_info
+          )
 
           new(
             topic: topic,
@@ -274,15 +274,19 @@ module Karafka
           }
         end
 
-
         # Generates partition-to-broker assignments for replication changes
         # Handles both replication factor increases and rebalancing scenarios
         # @param topic_info [Hash] topic metadata with partition information
         # @param target_replication_factor [Integer] desired replication factor
-        # @param cluster_info [Hash] cluster metadata with broker information  
-        # @param rebalance_only [Boolean] true for rebalancing, false for replication increase
-        # @return [Hash<Integer, Array<Integer>>] partition assignments (partition_id => broker_ids)
-        def generate_partitions_assignment(topic_info:, target_replication_factor:, cluster_info:, rebalance_only: false)
+        # @param cluster_info [Hash] cluster metadata with broker information
+        # @param rebalance_only [Boolean] true for rebalancing, false for increase
+        # @return [Hash<Integer, Array<Integer>>] assignments (partition_id => broker_ids)
+        def generate_partitions_assignment(
+          topic_info:,
+          target_replication_factor:,
+          cluster_info:,
+          rebalance_only: false
+        )
           partitions = topic_info[:partitions]
           brokers = cluster_info[:brokers].map { |broker_info| broker_info[:node_id] }.sort
           assignments = {}
@@ -292,7 +296,7 @@ module Karafka
 
             # Handle both :replicas (array of objects) and :replica_brokers (array of IDs)
             replicas = partition_info[:replicas] || partition_info[:replica_brokers] || []
-            current_replicas = if replicas.first&.respond_to?(:node_id)
+            current_replicas = if replicas.first.respond_to?(:node_id)
                                  replicas.map(&:node_id).sort
                                else
                                  replicas.sort
@@ -327,13 +331,18 @@ module Karafka
         end
 
         # Selects brokers for a partition using round-robin distribution
-        # Distributes replicas evenly across available brokers starting from partition-specific offset
+        # Distributes replicas evenly across available brokers
         # @param partition_id [Integer] partition identifier for offset calculation
         # @param brokers [Array<Integer>] available broker node IDs
         # @param replica_count [Integer] number of replicas needed
         # @param avoid_brokers [Array<Integer>] broker IDs to exclude from selection
         # @return [Array<Integer>] sorted array of selected broker node IDs
-        def select_brokers_for_partition(partition_id:, brokers:, replica_count:, avoid_brokers: [])
+        def select_brokers_for_partition(
+          partition_id:,
+          brokers:,
+          replica_count:,
+          avoid_brokers: []
+        )
           available_brokers = brokers - avoid_brokers
 
           # Simple round-robin selection starting from a different offset per partition
@@ -405,19 +414,22 @@ module Karafka
       # Builds the kafka-reassign-partitions.sh command for generating reassignment plan
       # @return [String] command template with placeholder for broker addresses
       def build_generate_command
-        "kafka-reassign-partitions.sh --bootstrap-server <KAFKA_BROKERS> --reassignment-json-file reassignment.json --generate"
+        'kafka-reassign-partitions.sh --bootstrap-server <KAFKA_BROKERS> ' \
+          '--reassignment-json-file reassignment.json --generate'
       end
 
       # Builds the kafka-reassign-partitions.sh command for executing reassignment
       # @return [String] command template with placeholder for broker addresses
       def build_execute_command
-        "kafka-reassign-partitions.sh --bootstrap-server <KAFKA_BROKERS> --reassignment-json-file reassignment.json --execute"
+        'kafka-reassign-partitions.sh --bootstrap-server <KAFKA_BROKERS> ' \
+          '--reassignment-json-file reassignment.json --execute'
       end
 
       # Builds the kafka-reassign-partitions.sh command for verifying reassignment progress
       # @return [String] command template with placeholder for broker addresses
       def build_verify_command
-        "kafka-reassign-partitions.sh --bootstrap-server <KAFKA_BROKERS> --reassignment-json-file reassignment.json --verify"
+        'kafka-reassign-partitions.sh --bootstrap-server <KAFKA_BROKERS> ' \
+          '--reassignment-json-file reassignment.json --verify'
       end
 
       # Generates detailed step-by-step instructions for executing the reassignment
@@ -429,16 +441,16 @@ module Karafka
           "2. Validate the plan (optional): #{@execution_commands[:generate]}",
           "3. Execute the reassignment: #{@execution_commands[:execute]}",
           "4. Monitor progress: #{@execution_commands[:verify]}",
-          "5. Verify completion by checking topic metadata",
-          "",
-          "IMPORTANT NOTES:",
-          "- Replace <KAFKA_BROKERS> with your actual Kafka broker addresses",
-          "- The reassignment process may take time depending on data size",
-          "- Monitor disk space and network I/O during reassignment",
-          "- Consider running during low-traffic periods",
-          "- For large topics, consider throttling replica transfer rate",
-          "- Ensure sufficient disk space on target brokers before starting",
-          "- Keep monitoring until all replicas are in-sync (ISR)"
+          '5. Verify completion by checking topic metadata',
+          '',
+          'IMPORTANT NOTES:',
+          '- Replace <KAFKA_BROKERS> with your actual Kafka broker addresses',
+          '- The reassignment process may take time depending on data size',
+          '- Monitor disk space and network I/O during reassignment',
+          '- Consider running during low-traffic periods',
+          '- For large topics, consider throttling replica transfer rate',
+          '- Ensure sufficient disk space on target brokers before starting',
+          '- Keep monitoring until all replicas are in-sync (ISR)'
         ]
       end
     end
