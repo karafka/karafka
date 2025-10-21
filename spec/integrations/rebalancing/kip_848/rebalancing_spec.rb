@@ -3,11 +3,7 @@
 # Test rebalancing with KIP-848 by verifying partition assignment changes
 # when a second consumer joins the group
 
-setup_karafka do |config|
-  config.kafka[:'group.protocol'] = 'consumer'
-  config.kafka.delete(:'partition.assignment.strategy')
-  config.kafka.delete(:'heartbeat.interval.ms')
-end
+setup_karafka(consumer_group_protocol: true)
 
 DT[:c1_partitions] = Set.new
 

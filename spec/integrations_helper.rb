@@ -55,11 +55,13 @@ DT = DataCollector
 #   or a given types (array with types)
 # @param pro [Boolean] is it a pro spec
 # @param log_messages [Boolean] should we log payloads in WaterDrop for the default producer
+# @param consumer_group_protocol [Boolean] use KIP-848 consumer group protocol
 def setup_karafka(
   allow_errors: false,
   # automatically load pro for all the pro specs unless stated otherwise
   pro: caller_locations(1..1).first.path.include?('integrations/pro/'),
-  log_messages: true
+  log_messages: true,
+  consumer_group_protocol: false
 )
   # If the spec  is in pro, run in pro mode
   become_pro! if pro
@@ -87,6 +89,13 @@ def setup_karafka(
 
     # Allows to overwrite any option we're interested in
     yield(config) if block_given?
+
+    # Apply KIP-848 consumer group protocol configuration if requested
+    if consumer_group_protocol
+      config.kafka[:'group.protocol'] = 'consumer'
+      config.kafka.delete(:'partition.assignment.strategy')
+      config.kafka.delete(:'heartbeat.interval.ms')
+    end
 
     # Configure producer once everything else has been configured
     config.producer = WaterDrop::Producer.new do |producer_config|
