@@ -67,7 +67,7 @@ module ActiveJob
 
       # @return [Boolean] should we stop the job. Used by the ActiveJob continuation feature
       def stopping?
-        Karafka::App.done?
+        ::Karafka::App.done?
       end
     end
   end

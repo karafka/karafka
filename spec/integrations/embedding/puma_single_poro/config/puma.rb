@@ -26,13 +26,13 @@ Karafka::App.routes.draw do
   end
 end
 
-@config.options[:events].on_booted do
+on_booted do
   Karafka::Embedded.start
   sleep(1)
   Process.kill('TERM', PID)
 end
 
 # There is no `on_worker_shutdown` equivalent for single mode
-@config.options[:events].on_stopped do
+on_stopped do
   Karafka::Embedded.stop
 end
