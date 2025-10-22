@@ -103,6 +103,11 @@ RSpec.describe_current do
     Karafka::CurrentAttrTest.send("#{attr}=", value)
     yield
   ensure
-    Karafka::CurrentAttrTest.reset_all
+    # Rails 8.1 renamed reset_all to clear_all, support both for backward compatibility
+    if Karafka::CurrentAttrTest.respond_to?(:clear_all)
+      Karafka::CurrentAttrTest.clear_all
+    else
+      Karafka::CurrentAttrTest.reset_all
+    end
   end
 end

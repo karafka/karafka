@@ -49,6 +49,7 @@ if Karafka.rails?
         rails71plus = Rails.gem_version >= Gem::Version.new('7.1.0')
 
         # Rails 7.1 replaced the broadcast module with a broadcast logger
+        # While 7.1 is EOL, we keep this for users who may still use it without official support
         if rails71plus
           Rails.logger.broadcast_to(stdout_logger)
         else
