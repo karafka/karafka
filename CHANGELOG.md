@@ -1,15 +1,17 @@
 # Karafka Framework Changelog
 
 ## 2.5.2 (Unreleased)
+- **[EOL]** Remove Rails 7.1 support according to EOL while not blocking Rails 7.1 usage.
 - [Enhancement] Retry on the KIP-848 `stale_member_epoch` error.
 - [Enhancement] Provide `Karafka::Admin.trigger_rebalance` API to programmatically trigger consumer group rebalances for operational purposes.
 - [Enhancement] Provide `Karafka::Admin.plan_topic_replication` API to generate partition reassignment plans for increasing topic replication factors with automatic broker distribution or manual placement, compatible with `kafka-reassign-partitions.sh` tool.
 - [Enhancement] Nest pause configuration under `config.pause.*` namespace (`config.pause.timeout`, `config.pause.max_timeout`, `config.pause.with_exponential_backoff`) while maintaining backwards compatibility with the old flat API (`config.pause_timeout`, etc.) via delegation methods that will be removed in Karafka 2.6.
 - [Enhancement] Detect and track involuntary assignment loss during long-running processing that exceeds `max.poll.interval.ms` via `client.events_poll` event and automatically update `Karafka::App.assignments` to reflect reality.
 - [Enhancement] Extend `Karafka::Admin.read_watermark_offsets` to accept either a single topic with partition or a hash of multiple topics with partitions, using a single consumer instance for improved efficiency when querying multiple partitions.
+- [Fix] Fix ActiveJob Continuation invalid class reference bug.
 
 ## 2.5.1 (2025-09-29)
-- **[Breaking]** Remove Ruby 3.1 support according to EOL.
+- **[EOL]** Remove Ruby 3.1 support according to EOL.
 - **[Feature]** Support Swarm mode on MacOS.
 - [Enhancement] Support past `dispatch_at` times with `jitter: 0` in the OSS Karafka to support ActiveJob continuation.
 - [Enhancement] Use direct topic dispatches when `dispatch_at` is used for past times to bypass Scheduled Messages flow.
@@ -40,7 +42,7 @@
 - [Change] Require `karafka-rdkafka` `>=` `0.22.0` to support new features and require SSL-bug free version.
 - [Change] Remove no longer needed `cooperative.sticky` rebalance patch.
 - [Change] Normalize how libs and deps are required (no functional change for the end user)
-- [Change] Remove Ruby `3.1` specs according to the EOL schedule.
+- **[EOL]** Remove Ruby `3.1` specs according to the EOL schedule.
 
 ## 2.5.0 (2025-06-15)
 - **[Breaking]** Change how consistency of DLQ dispatches works in Pro (`partition_key` vs. direct partition id mapping).
@@ -96,7 +98,7 @@
 - [Maintenance] Lower the `Karafka::Admin` `poll_timeout` to 50 ms to improve responsiveness of admin operations.
 - [Maintenance] Require `karafka-rdkafka` `>=` `0.19.5` due to usage of `#rd_kafka_global_init`, KIP-82, new producer caching engine and improvements to the `partition_key` assignments.
 - [Maintenance] Add Deimos routing patch into integration suite not to break it in the future.
-- [Maintenance] Remove Rails `7.0` specs due to upcoming EOL.
+- **[EOL]** Remove Rails `7.0` specs due to upcoming EOL.
 - [Fix] Fix Recurring Tasks and Scheduled Messages not working with Swarm (using closed producer).
 - [Fix] Fix a case where `unknown_topic_or_part` error could leak out of the consumer on consumer shutdown.
 - [Fix] Fix missing `virtual_partitions.partitioner.error` custom error logging in the `LoggerListener`.
@@ -262,7 +264,7 @@
 
 This release contains **BREAKING** changes. Make sure to read and apply upgrade notes.
 
-- **[Breaking]** Drop Ruby `2.7` support.
+- **[EOL]** Drop Ruby `2.7` support.
 - **[Breaking]** Drop the concept of consumer group mapping.
 - **[Breaking]** `karafka topics migrate` will now perform declarative topics configuration alignment.
 - **[Breaking]** Replace `deserializer` config with `#deserializers` in routing to support key and lazy header deserializers.
