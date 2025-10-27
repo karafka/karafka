@@ -4,6 +4,10 @@ module Karafka
   module ActiveJob
     # Dispatcher that sends the ActiveJob job to a proper topic based on the queue name
     class Dispatcher
+      include Helpers::ConfigImporter.new(
+        deserializer: %i[internal active_job deserializer]
+      )
+
       # Defaults for dispatching
       # The can be updated by using `#karafka_options` on the job
       DEFAULTS = {
@@ -18,7 +22,7 @@ module Karafka
         ::Karafka.producer.public_send(
           fetch_option(job, :dispatch_method, DEFAULTS),
           topic: job.queue_name,
-          payload: ::ActiveSupport::JSON.encode(serialize_job(job))
+          payload: deserializer.serialize(job)
         )
       end
 
@@ -34,7 +38,7 @@ module Karafka
 
           dispatches[d_method] << {
             topic: job.queue_name,
-            payload: ::ActiveSupport::JSON.encode(serialize_job(job))
+            payload: deserializer.serialize(job)
           }
         end
 
@@ -91,12 +95,6 @@ module Karafka
           .class
           .karafka_options
           .fetch(key, defaults.fetch(key))
-      end
-
-      # @param job [ActiveJob::Base] job
-      # @return [Hash] json representation of the job
-      def serialize_job(job)
-        job.serialize
       end
     end
   end

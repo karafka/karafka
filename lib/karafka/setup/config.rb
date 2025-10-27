@@ -340,6 +340,12 @@ module Karafka
           setting :job_options_contract, default: ActiveJob::JobOptionsContract.new
           # option consumer [Class] consumer class that should be used to consume ActiveJob data
           setting :consumer_class, default: ActiveJob::Consumer
+          # option deserializer [Karafka::ActiveJob::Deserializer] deserializer for ActiveJob jobs
+          #   Despite the name, handles both serialization (outgoing) and deserialization
+          #   (incoming). Can be replaced with a custom implementation for formats like Avro,
+          #   Protobuf, etc. This is a global setting because Rails serializes jobs before
+          #   Karafka receives them, so we need a consistent approach across all ActiveJob topics.
+          setting :deserializer, default: ::Karafka::ActiveJob::Deserializer.new
         end
       end
 
