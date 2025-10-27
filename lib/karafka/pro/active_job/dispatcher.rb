@@ -47,7 +47,7 @@ module Karafka
             fetch_option(job, :dispatch_method, DEFAULTS),
             dispatch_details(job).merge!(
               topic: job.queue_name,
-              payload: deserializer.serialize(job)
+              payload: serialize_job(job)
             )
           )
         end
@@ -68,7 +68,7 @@ module Karafka
 
             dispatches[d_method][producer] << dispatch_details(job).merge!(
               topic: job.queue_name,
-              payload: deserializer.serialize(job)
+              payload: serialize_job(job)
             )
           end
 
@@ -94,7 +94,7 @@ module Karafka
 
           target_message = dispatch_details(job).merge!(
             topic: job.queue_name,
-            payload: deserializer.serialize(job)
+            payload: serialize_job(job)
           )
 
           proxy_message = Pro::ScheduledMessages.schedule(

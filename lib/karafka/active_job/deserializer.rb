@@ -41,7 +41,9 @@ module Karafka
     class Deserializer
       # Serializes an ActiveJob job into a string payload for Kafka
       #
-      # @param job [ActiveJob::Base] job to serialize
+      # @param job [ActiveJob::Base, #serialize] job to serialize. The job must respond to
+      #   #serialize which returns a Hash of job attributes. When CurrentAttributes are used,
+      #   this may be a JobWrapper instance instead of the original ActiveJob::Base.
       # @return [String] serialized job payload
       def serialize(job)
         ::ActiveSupport::JSON.encode(job.serialize)
