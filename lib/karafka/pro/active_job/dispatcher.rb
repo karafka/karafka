@@ -11,6 +11,10 @@ module Karafka
       # and that allows to inject additional options into the producer, effectively allowing for a
       # much better and more granular control over the dispatch and consumption process.
       class Dispatcher < ::Karafka::ActiveJob::Dispatcher
+        include Helpers::ConfigImporter.new(
+          deserializer: %i[internal active_job deserializer]
+        )
+
         # Defaults for dispatching
         # They can be updated by using `#karafka_options` on the job
         DEFAULTS = {
@@ -43,7 +47,7 @@ module Karafka
             fetch_option(job, :dispatch_method, DEFAULTS),
             dispatch_details(job).merge!(
               topic: job.queue_name,
-              payload: ::ActiveSupport::JSON.encode(serialize_job(job))
+              payload: serialize_job(job)
             )
           )
         end
@@ -64,7 +68,7 @@ module Karafka
 
             dispatches[d_method][producer] << dispatch_details(job).merge!(
               topic: job.queue_name,
-              payload: ::ActiveSupport::JSON.encode(serialize_job(job))
+              payload: serialize_job(job)
             )
           end
 
@@ -90,7 +94,7 @@ module Karafka
 
           target_message = dispatch_details(job).merge!(
             topic: job.queue_name,
-            payload: ::ActiveSupport::JSON.encode(serialize_job(job))
+            payload: serialize_job(job)
           )
 
           proxy_message = Pro::ScheduledMessages.schedule(

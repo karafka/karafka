@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require 'active_support/current_attributes'
+require_relative 'current_attributes/job_wrapper'
 require_relative 'current_attributes/loading'
 require_relative 'current_attributes/persistence'
 

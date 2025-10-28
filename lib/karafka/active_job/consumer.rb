@@ -6,6 +6,10 @@ module Karafka
     # This is the consumer for ActiveJob that eats the messages enqueued with it one after another.
     # It marks the offset after each message, so we make sure, none of the jobs is executed twice
     class Consumer < ::Karafka::BaseConsumer
+      include Helpers::ConfigImporter.new(
+        deserializer: %i[internal active_job deserializer]
+      )
+
       # Executes the ActiveJob logic
       # @note ActiveJob does not support batches, so we just run one message after another
       def consume
@@ -42,7 +46,7 @@ module Karafka
         # We technically speaking could set this as deserializer and reference it from the
         # message instead of using the `#raw_payload`. This is not done on purpose to simplify
         # the ActiveJob setup here
-        yield ::ActiveSupport::JSON.decode(job_message.raw_payload)
+        yield deserializer.deserialize(job_message)
       end
     end
   end

@@ -4,23 +4,35 @@ module Karafka
   module ActiveJob
     module CurrentAttributes
       # Module adding the current attributes persistence into the ActiveJob jobs
+      # This module wraps the Dispatcher#serialize_job to inject current attributes
       module Persistence
-        # Alters the job serialization to inject the current attributes into the json before we
-        # send it to Kafka
+        # Wraps the Dispatcher#serialize_job to inject current attributes before serialization
+        # This allows us to modify the job before it's serialized without modifying ActiveJob::Base
         #
-        # @param job [ActiveJob::Base] job
+        # @param job [ActiveJob::Base] the original job to serialize
+        # @return [String] serialized job payload with current attributes injected
+        #
+        # @note This method creates a JobWrapper internally and passes it to the parent's
+        #   serialize_job method. The wrapper is transparent to the deserializer.
         def serialize_job(job)
-          json = super
+          # Get the job hash
+          job_hash = job.serialize
 
+          # Inject current attributes
           _cattr_klasses.each do |key, cattr_klass_str|
-            next if json.key?(key)
+            next if job_hash.key?(key)
 
             attrs = cattr_klass_str.constantize.attributes
 
-            json[key] = attrs unless attrs.empty?
+            job_hash[key] = attrs unless attrs.empty?
           end
 
-          json
+          # Wrap the modified hash in a simple object that implements #serialize
+          # This avoids modifying the original job instance
+          wrapper = JobWrapper.new(job_hash)
+
+          # Pass the wrapper to the deserializer
+          super(wrapper)
         end
       end
     end
