@@ -1,6 +1,6 @@
 # Karafka Framework Changelog
 
-## 2.5.2 (Unreleased)
+## 2.5.2 (2025-10-31)
 - **[EOL]** Remove Rails 7.1 support according to EOL while not blocking Rails 7.1 usage.
 - [Enhancement] Retry on the KIP-848 `stale_member_epoch` error.
 - [Enhancement] Provide `Karafka::Admin.trigger_rebalance` API to programmatically trigger consumer group rebalances for operational purposes.
