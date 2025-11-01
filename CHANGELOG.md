@@ -1,5 +1,9 @@
 # Karafka Framework Changelog
 
+## 2.5.3 (Unreleased)
+- [Change] Require `waterdrop` `>=` `2.8.13` to support new features.
+- [Change] Require `karafka-rdkafka` `>=` `0.23.0` to support new rebalance protocol.
+
 ## 2.5.2 (2025-10-31)
 - **[EOL]** Remove Rails 7.1 support according to EOL while not blocking Rails 7.1 usage.
 - [Enhancement] Retry on the KIP-848 `stale_member_epoch` error.
