@@ -23,7 +23,7 @@ Gem::Specification.new do |spec|
 
   spec.add_dependency 'base64', '~> 0.2'
   spec.add_dependency 'karafka-core', '>= 2.5.6', '< 2.6.0'
-  spec.add_dependency 'karafka-rdkafka', '>= 0.22.0'
+  spec.add_dependency 'karafka-rdkafka', '>= 0.23.0.beta2'
   spec.add_dependency 'waterdrop', '>= 2.8.9', '< 3.0.0'
   spec.add_dependency 'zeitwerk', '~> 2.3'
 
