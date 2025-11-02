@@ -417,7 +417,9 @@ module Karafka
 
           # Wrap config in a proxy that intercepts producer block configuration
           proxy = ConfigProxy.new(config)
-          configure { yield(proxy) }
+          # We need to check for the block presence here because user can just run setup without
+          # any block given
+          configure { yield(proxy) if block_given? }
 
           Contracts::Config.new.validate!(
             config.to_h,
