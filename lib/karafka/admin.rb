@@ -158,7 +158,7 @@ module Karafka
         bind_oauth(bind_id, consumer)
 
         consumer.start
-        proxy = ::Karafka::Connection::Proxy.new(consumer)
+        proxy = Karafka::Connection::Proxy.new(consumer)
         yield(proxy)
       ensure
         # Always unsubscribe consumer just to be sure, that no metadata requests are running
@@ -188,7 +188,7 @@ module Karafka
         bind_oauth(bind_id, admin)
 
         admin.start
-        proxy = ::Karafka::Connection::Proxy.new(admin)
+        proxy = Karafka::Connection::Proxy.new(admin)
         yield(proxy)
       ensure
         admin&.close
@@ -211,7 +211,7 @@ module Karafka
       # @param instance [Rdkafka::Consumer, Rdkafka::Admin] rdkafka instance to be used to set
       #   appropriate oauth token when needed
       def bind_oauth(id, instance)
-        ::Karafka::Core::Instrumentation.oauthbearer_token_refresh_callbacks.add(
+        Karafka::Core::Instrumentation.oauthbearer_token_refresh_callbacks.add(
           id,
           Instrumentation::Callbacks::OauthbearerTokenRefresh.new(
             instance
@@ -224,7 +224,7 @@ module Karafka
       # @param id [String, Symbol] unique (for the lifetime of instance) id that we use for
       #   callback referencing
       def unbind_oauth(id)
-        ::Karafka::Core::Instrumentation.oauthbearer_token_refresh_callbacks.delete(id)
+        Karafka::Core::Instrumentation.oauthbearer_token_refresh_callbacks.delete(id)
       end
 
       # There are some cases where rdkafka admin operations finish successfully but without the
@@ -269,7 +269,7 @@ module Karafka
           # consumer group or do something similar
           .merge!(settings)
           .then { |config| Karafka::Setup::AttributesMap.public_send(type, config) }
-          .then { |config| ::Rdkafka::Config.new(config) }
+          .then { |config| Rdkafka::Config.new(config) }
       end
     end
   end

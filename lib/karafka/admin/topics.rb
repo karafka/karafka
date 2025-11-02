@@ -36,7 +36,7 @@ module Karafka
 
             # Build the requested range - since first element is on the start offset we need to
             # subtract one from requested count to end up with expected number of elements
-            requested_range = (start_offset..(start_offset + (count - 1)))
+            requested_range = (start_offset..(start_offset + count - 1))
             # Establish theoretical available range. Note, that this does not handle cases related
             # to log retention or compaction
             available_range = (low_offset..(high_offset - 1))
@@ -75,7 +75,7 @@ module Karafka
           # Use topic from routes if we can match it or create a dummy one
           # Dummy one is used in case we cannot match the topic with routes. This can happen
           # when admin API is used to read topics that are not part of the routing
-          topic = ::Karafka::Routing::Router.find_or_initialize_by_name(name)
+          topic = Karafka::Routing::Router.find_or_initialize_by_name(name)
 
           messages.map! do |message|
             Messages::Builders::Message.call(
@@ -217,7 +217,7 @@ module Karafka
         # @return [Integer] expected offset
         def resolve_offset(consumer, name, partition, offset)
           if offset.is_a?(Time)
-            tpl = ::Rdkafka::Consumer::TopicPartitionList.new
+            tpl = Rdkafka::Consumer::TopicPartitionList.new
             tpl.add_topic_and_partitions_with_offsets(
               name, partition => offset
             )

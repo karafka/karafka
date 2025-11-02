@@ -5,7 +5,7 @@ module Karafka
   module ActiveJob
     # This is the consumer for ActiveJob that eats the messages enqueued with it one after another.
     # It marks the offset after each message, so we make sure, none of the jobs is executed twice
-    class Consumer < ::Karafka::BaseConsumer
+    class Consumer < Karafka::BaseConsumer
       include Helpers::ConfigImporter.new(
         deserializer: %i[internal active_job deserializer]
       )

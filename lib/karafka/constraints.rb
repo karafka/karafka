@@ -42,7 +42,7 @@ module Karafka
       # @param string [String]
       # @return [::Gem::Version]
       def version(string)
-        ::Gem::Version.new(string)
+        Gem::Version.new(string)
       end
     end
   end

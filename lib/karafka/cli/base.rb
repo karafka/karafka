@@ -72,7 +72,7 @@ module Karafka
 
           # All other commands except help and install do require an existing boot file if it was
           # declared
-          raise ::Karafka::Errors::MissingBootFileError, ::Karafka.boot_file
+          raise Karafka::Errors::MissingBootFileError, Karafka.boot_file
         end
 
         # Allows to set options for Thor cli

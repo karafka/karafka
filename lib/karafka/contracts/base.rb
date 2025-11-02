@@ -3,7 +3,7 @@
 module Karafka
   module Contracts
     # Base contract for all Karafka contracts
-    class Base < ::Karafka::Core::Contractable::Contract
+    class Base < Karafka::Core::Contractable::Contract
       # @param data [Hash] data for validation
       # @param scope [Array<String>] nested scope if in use
       # @return [Boolean] true if all good

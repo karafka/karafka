@@ -19,7 +19,7 @@ module Karafka
 
       # @param job [ActiveJob::Base] job
       def dispatch(job)
-        ::Karafka.producer.public_send(
+        Karafka.producer.public_send(
           fetch_option(job, :dispatch_method, DEFAULTS),
           topic: job.queue_name,
           payload: serialize_job(job)
@@ -43,7 +43,7 @@ module Karafka
         end
 
         dispatches.each do |type, messages|
-          ::Karafka.producer.public_send(
+          Karafka.producer.public_send(
             type,
             messages
           )

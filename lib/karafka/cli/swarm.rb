@@ -13,7 +13,7 @@ module Karafka
 
       # Starts the swarm
       def call
-        ::Karafka::Swarm.ensure_supported!
+        Karafka::Swarm.ensure_supported!
 
         # Print our banner and info in the dev mode
         print_marketing_info if Karafka::App.env.development?

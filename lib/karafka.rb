@@ -34,7 +34,7 @@ module Karafka
       env.replace(environment.to_s)
     end
 
-    # @return [Logger] logger that we want to use. Will use ::Karafka::Logger by default
+    # @return [Logger] logger that we want to use. Will use Karafka::Logger by default
     def logger
       @logger ||= App.config.logger
     end
@@ -148,7 +148,7 @@ module Karafka
     #
     # This method refreshes the things that might have been altered by the configuration
     def refresh!
-      config = ::Karafka::App.config
+      config = Karafka::App.config
 
       @logger = config.logger
       @producer = config.producer
