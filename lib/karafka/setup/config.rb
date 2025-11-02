@@ -415,14 +415,16 @@ module Karafka
           # of the pro defaults with custom components
           Pro::Loader.pre_setup_all(config) if Karafka.pro?
 
-          configure(&)
+          # Wrap config in a proxy that intercepts producer block configuration
+          proxy = ConfigProxy.new(config)
+          configure { yield(proxy) }
 
           Contracts::Config.new.validate!(
             config.to_h,
             scope: %w[config]
           )
 
-          configure_components
+          configure_components(proxy.producer_initialization_block)
 
           # Refreshes the references that are cached that might have been changed by the config
           ::Karafka.refresh!
@@ -443,8 +445,10 @@ module Karafka
         private
 
         # Sets up all the components that are based on the user configuration
+        # @param producer_init_block [Proc] block for customizing producer config (defaults to
+        #   empty proc from ConfigProxy)
         # @note At the moment it is only WaterDrop
-        def configure_components
+        def configure_components(producer_init_block)
           oauth_listener = config.oauth.token_provider_listener
           # We need to subscribe the oauth listener here because we want it to be ready before
           # any consumer/admin runs
@@ -463,6 +467,11 @@ module Karafka
             producer_config.oauth.token_provider_listener = oauth_listener
             producer_config.logger = config.logger
           end
+
+          # Execute user's producer configuration block
+          # This happens after the default producer setup, allowing users to customize settings
+          # If no block was provided during setup, this will be an empty proc that does nothing
+          producer_init_block.call(config.producer.config)
         end
       end
     end

@@ -194,4 +194,110 @@ RSpec.describe_current do
       end
     end
   end
+
+  describe 'producer configuration block' do
+    subject(:config) { Karafka::App.config }
+
+    after do
+      # Reset to clean state
+      Karafka::App.setup do |c|
+        c.kafka = { 'bootstrap.servers': '127.0.0.1:9092' }
+      end
+    end
+
+    context 'when producer block is provided' do
+      it 'executes the block with producer config after setup' do
+        received_config = nil
+
+        Karafka::App.setup do |c|
+          c.producer do |producer_config|
+            received_config = producer_config
+          end
+        end
+
+        # Block should have been called with WaterDrop config
+        expect(received_config).not_to be_nil
+        expect(received_config).to respond_to(:kafka)
+        expect(received_config).to respond_to(:logger)
+      end
+
+      it 'allows customizing producer kafka settings' do
+        Karafka::App.setup do |c|
+          c.producer do |producer_config|
+            producer_config.kafka['compression.type'] = 'snappy'
+            producer_config.kafka['linger.ms'] = 10
+          end
+        end
+
+        # Verify the settings were applied
+        expect(config.producer.config.kafka['compression.type']).to eq('snappy')
+        expect(config.producer.config.kafka['linger.ms']).to eq(10)
+      end
+
+      it 'allows adding middleware to producer' do
+        test_middleware = Class.new do
+          def call(message)
+            message
+          end
+        end
+
+        Karafka::App.setup do |c|
+          c.producer do |producer_config|
+            producer_config.middleware.append(test_middleware.new)
+          end
+        end
+
+        # Verify middleware works by running a test message through it
+        # We use the producer's internal middleware to transform a message
+        result = config.producer.middleware.run({ topic: 'test' })
+        expect(result).to be_a(Hash)
+      end
+    end
+
+    context 'when producer block is not provided' do
+      it 'creates default producer without errors' do
+        Karafka::App.setup do |c|
+          c.kafka = { 'bootstrap.servers': '127.0.0.1:9092' }
+        end
+
+        expect(config.producer).not_to be_nil
+      end
+    end
+
+    context 'when custom producer is set via assignment' do
+      it 'preserves custom producer assignment' do
+        custom_producer = WaterDrop::Producer.new do |c|
+          c.kafka = { 'bootstrap.servers': 'custom.server:9092' }
+        end
+
+        Karafka::App.setup do |c|
+          c.producer = custom_producer
+        end
+
+        # Custom producer should be used
+        expect(config.producer).to eq(custom_producer)
+      end
+    end
+
+    context 'when both custom producer and configuration block are used' do
+      it 'applies block to custom producer' do
+        custom_producer = WaterDrop::Producer.new do |c|
+          c.kafka = { 'bootstrap.servers': 'custom.server:9092' }
+        end
+
+        Karafka::App.setup do |c|
+          c.producer = custom_producer
+
+          c.producer do |producer_config|
+            producer_config.kafka['custom.setting'] = 'value'
+          end
+        end
+
+        # Custom producer should still be used
+        expect(config.producer).to eq(custom_producer)
+        # Block should have been applied to the custom producer
+        expect(config.producer.config.kafka['custom.setting']).to eq('value')
+      end
+    end
+  end
 end
