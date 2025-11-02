@@ -5,7 +5,7 @@ module Karafka
   # Base consumer from which all Karafka consumers should inherit
   class BaseConsumer
     # Allow for consumer instance tagging for instrumentation
-    include ::Karafka::Core::Taggable
+    include Karafka::Core::Taggable
     include Helpers::ConfigImporter.new(
       monitor: %i[monitor]
     )

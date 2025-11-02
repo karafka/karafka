@@ -28,7 +28,7 @@ module Karafka
       def call
         Info.new.call
 
-        command = ::Karafka.rails? ? self.class.rails_console : self.class.console
+        command = Karafka.rails? ? self.class.rails_console : self.class.console
 
         exec "KARAFKA_CONSOLE=true #{command}"
       end

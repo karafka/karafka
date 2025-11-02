@@ -10,7 +10,7 @@ module Karafka
       )
 
       # Types of things we can include / exclude from the routing via the CLI options
-      SUPPORTED_TYPES = ::Karafka::Routing::ActivityManager::SUPPORTED_TYPES
+      SUPPORTED_TYPES = Karafka::Routing::ActivityManager::SUPPORTED_TYPES
 
       private_constant :SUPPORTED_TYPES
 

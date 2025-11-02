@@ -20,7 +20,7 @@ module Karafka
         #
         # @param base [Class] class we're including this module in
         def included(base)
-          base.extend ::Forwardable
+          base.extend Forwardable
 
           base.def_delegators :@thread, :join, :terminate, :name
         end

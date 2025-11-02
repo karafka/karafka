@@ -43,7 +43,7 @@ module Karafka
         @buffer = buffer
 
         # Connects itself to the instrumentation pipeline so rebalances can be tracked
-        ::Karafka.monitor.subscribe(self)
+        Karafka.monitor.subscribe(self)
       end
 
       # Resets the rebalance manager state
