@@ -12,6 +12,10 @@ RSpec.describe_current do
       test_obj = double('test')
       expect { proxy.producer_initialization_block.call(test_obj) }.not_to raise_error
     end
+
+    it 'wraps the config object using SimpleDelegator' do
+      expect(proxy).to be_a(SimpleDelegator)
+    end
   end
 
   describe '#producer' do
@@ -36,7 +40,7 @@ RSpec.describe_current do
     end
   end
 
-  describe '#method_missing' do
+  describe 'delegation' do
     it 'delegates method calls to config' do
       allow(config).to receive(:some_method).with('arg1', 'arg2').and_return('result')
 
@@ -53,17 +57,15 @@ RSpec.describe_current do
 
       expect(yielded_value).to eq('value')
     end
-  end
 
-  describe '#respond_to_missing?' do
-    it 'returns true if config responds to the method' do
-      allow(config).to receive(:respond_to?).and_return(true)
+    it 'responds to methods that config responds to' do
+      allow(config).to receive(:respond_to?).with(:some_method, false).and_return(true)
 
       expect(proxy.respond_to?(:some_method)).to be true
     end
 
-    it 'returns false if config does not respond to the method' do
-      allow(config).to receive(:respond_to?).and_return(false)
+    it 'does not respond to methods that config does not respond to' do
+      allow(config).to receive(:respond_to?).with(:unknown_method, false).and_return(false)
 
       expect(proxy.respond_to?(:unknown_method)).to be false
     end

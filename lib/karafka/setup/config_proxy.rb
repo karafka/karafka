@@ -71,10 +71,11 @@ module Karafka
     #
     # ## Implementation Details
     #
-    # The proxy is a simple wrapper object that:
-    # 1. Implements specific interceptor methods (currently just `producer`)
-    # 2. Delegates everything else to the wrapped config via `method_missing`
-    # 3. Stores deferred configuration in instance variables
+    # The proxy uses Ruby's SimpleDelegator pattern:
+    # 1. Inherits from SimpleDelegator for automatic delegation
+    # 2. Implements specific interceptor methods (currently just `producer`)
+    # 3. Delegates everything else to the wrapped config automatically
+    # 4. Stores deferred configuration in instance variables
     #
     # ## Lifecycle
     #
@@ -95,11 +96,6 @@ module Karafka
     #   ↓
     # proxy = nil                      # Proxy discarded
     # ```
-    #
-    # ## Thread Safety
-    #
-    # The proxy is created once per setup call and is not shared between threads. Each setup
-    # invocation gets its own proxy instance.
     #
     # ## Example Usage
     #
@@ -122,13 +118,16 @@ module Karafka
     #
     # @see Karafka::Setup::Config.setup
     # @see Karafka::Setup::Config.configure_components
-    class ConfigProxy
-      # @return [Proc] the stored producer initialization block (defaults to empty proc)
+    class ConfigProxy < SimpleDelegator
+      # @return [Proc] the stored producer initialization block (defaults to empty lambda)
       attr_reader :producer_initialization_block
 
       # Creates a new configuration proxy wrapping the actual config object.
       #
-      # The producer initialization block defaults to an empty proc, eliminating the need for
+      # Uses SimpleDelegator to automatically delegate all method calls to the wrapped config
+      # except for specifically intercepted methods like {#producer}.
+      #
+      # The producer initialization block defaults to an empty lambda, eliminating the need for
       # nil checks when executing the block in {#configure_components}.
       #
       # @param config [Karafka::Setup::Config::Node] the actual config object to wrap
@@ -136,7 +135,7 @@ module Karafka
       # @example
       #   proxy = ConfigProxy.new(Karafka::App.config)
       def initialize(config)
-        @config = config
+        super(config)
         @producer_initialization_block = ->(_) {}
       end
 
@@ -201,50 +200,9 @@ module Karafka
           # Store the configuration block for later execution
           @producer_initialization_block = block
         else
-          # Direct assignment - delegate to real config
-          @config.producer = instance
+          # Direct assignment - delegate to real config via __getobj__
+          __getobj__.producer = instance
         end
-      end
-
-      # Delegates all other method calls to the wrapped config object.
-      #
-      # This is the core delegation mechanism. Any method not explicitly defined on the proxy
-      # is forwarded to the real config object. This makes the proxy transparent for all
-      # standard configuration access.
-      #
-      # ## Ruby 2.7+ Argument Forwarding
-      #
-      # Uses `...` syntax to forward all arguments, keyword arguments, and blocks efficiently
-      # without explicitly naming them. This is more performant and maintainable than the
-      # older `*args, **kwargs, &block` pattern.
-      #
-      # @param method [Symbol] the method name
-      # @return [Object] whatever the delegated method returns
-      #
-      # @example
-      #   proxy.kafka = { ... }           # Delegates to config.kafka=
-      #   proxy.client_id = 'app'         # Delegates to config.client_id=
-      #   value = proxy.max_wait_time     # Delegates to config.max_wait_time
-      def method_missing(method, ...)
-        @config.public_send(method, ...)
-      end
-
-      # Responds to methods that the wrapped config responds to.
-      #
-      # This makes the proxy appear to have all the same methods as the config object,
-      # which is important for introspection and compatibility with code that checks
-      # `respond_to?` before calling methods.
-      #
-      # @param method [Symbol] the method name
-      # @param include_private [Boolean] whether to include private methods
-      # @return [Boolean] true if the config responds to the method
-      #
-      # @example
-      #   proxy.respond_to?(:kafka)          # => true
-      #   proxy.respond_to?(:producer)       # => true (defined on proxy)
-      #   proxy.respond_to?(:unknown)        # => false
-      def respond_to_missing?(method, include_private = false)
-        @config.respond_to?(method, include_private)
       end
     end
   end
