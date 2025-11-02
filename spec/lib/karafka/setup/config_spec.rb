@@ -224,14 +224,14 @@ RSpec.describe_current do
       it 'allows customizing producer kafka settings' do
         Karafka::App.setup do |c|
           c.producer do |producer_config|
-            producer_config.kafka['compression.type'] = 'snappy'
-            producer_config.kafka['linger.ms'] = 10
+            producer_config.kafka[:'compression.type'] = 'snappy'
+            producer_config.kafka[:'linger.ms'] = 10
           end
         end
 
         # Verify the settings were applied
-        expect(config.producer.config.kafka['compression.type']).to eq('snappy')
-        expect(config.producer.config.kafka['linger.ms']).to eq(10)
+        expect(config.producer.config.kafka[:'compression.type']).to eq('snappy')
+        expect(config.producer.config.kafka[:'linger.ms']).to eq(10)
       end
 
       it 'allows adding middleware to producer' do
@@ -289,14 +289,14 @@ RSpec.describe_current do
           c.producer = custom_producer
 
           c.producer do |producer_config|
-            producer_config.kafka['custom.setting'] = 'value'
+            producer_config.kafka[:'compression.type'] = 'gzip'
           end
         end
 
         # Custom producer should still be used
         expect(config.producer).to eq(custom_producer)
         # Block should have been applied to the custom producer
-        expect(config.producer.config.kafka['custom.setting']).to eq('value')
+        expect(config.producer.config.kafka[:'compression.type']).to eq('gzip')
       end
     end
   end
