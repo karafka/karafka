@@ -51,7 +51,7 @@ module Karafka
             Collapse.new(options).call
             Distribute.new(options).call
           else
-            raise ::ArgumentError, "Invalid topics action: #{action}"
+            raise ArgumentError, "Invalid topics action: #{action}"
           end
         end
       end

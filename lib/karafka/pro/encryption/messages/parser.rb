@@ -11,7 +11,7 @@ module Karafka
         # @note There may be a case where someone decides not to encrypt data and we start getting
         #   unencrypted payloads. That is why we always rely on message headers for encryption
         #   indication.
-        class Parser < ::Karafka::Messages::Parser
+        class Parser < Karafka::Messages::Parser
           include Helpers::ConfigImporter.new(
             cipher: %i[encryption cipher],
             active: %i[encryption active],

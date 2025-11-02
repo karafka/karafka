@@ -7,7 +7,7 @@ module Karafka
   module Pro
     module Processing
       # Pro jobs builder that supports lrj
-      class JobsBuilder < ::Karafka::Processing::JobsBuilder
+      class JobsBuilder < Karafka::Processing::JobsBuilder
         # @param executor [Karafka::Pro::Processing::Executor]
         def idle(executor)
           Karafka::Processing::Jobs::Idle.new(executor)

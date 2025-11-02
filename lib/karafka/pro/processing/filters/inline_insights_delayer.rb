@@ -41,7 +41,7 @@ module Karafka
             # This can happen when we chain filters
             return unless @cursor
 
-            insights = ::Karafka::Processing::InlineInsights::Tracker.find(
+            insights = Karafka::Processing::InlineInsights::Tracker.find(
               @topic,
               @partition
             )

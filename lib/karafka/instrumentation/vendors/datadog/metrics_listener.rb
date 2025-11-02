@@ -11,7 +11,7 @@ module Karafka
         #
         # @note You need to setup the `dogstatsd-ruby` client and assign it
         class MetricsListener
-          include ::Karafka::Core::Configurable
+          include Karafka::Core::Configurable
           extend Forwardable
 
           def_delegators(
@@ -212,7 +212,7 @@ module Karafka
               )
             else
               raise(
-                ::ArgumentError,
+                ArgumentError,
                 'distribution_mode setting value must be either :histogram or :distribution'
               )
             end

@@ -120,7 +120,7 @@ module Karafka
         # Loads the Pro features of Karafka
         # @note Object space lookup is not the fastest but we do it once during boot, so it's ok
         def load_topic_features
-          ::Karafka::Pro::Routing::Features::Base.load_all
+          Karafka::Pro::Routing::Features::Base.load_all
         end
       end
     end

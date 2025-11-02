@@ -22,7 +22,7 @@ module Karafka
         # @param consumer [::Rdkafka::Consumer] consumer instance needed to talk with Kafka
         # @param expanded_topics [Hash] hash with expanded and normalized topics data
         def initialize(consumer, expanded_topics)
-          @consumer = ::Karafka::Connection::Proxy.new(consumer)
+          @consumer = Karafka::Connection::Proxy.new(consumer)
           @expanded_topics = expanded_topics
           @mapped_topics = Hash.new { |h, k| h[k] = {} }
         end

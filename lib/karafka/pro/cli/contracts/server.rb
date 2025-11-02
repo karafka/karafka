@@ -10,7 +10,7 @@ module Karafka
       module Contracts
         # Contract for validating correctness of the server cli command options.
         # It differs slightly from the OSS one because it is aware of the routing patterns
-        class Server < ::Karafka::Cli::Contracts::Server
+        class Server < Karafka::Cli::Contracts::Server
           configure do |config|
             config.error_messages = YAML.safe_load_file(
               File.join(Karafka.gem_root, 'config', 'locales', 'errors.yml')

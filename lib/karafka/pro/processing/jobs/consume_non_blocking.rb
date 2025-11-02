@@ -17,7 +17,7 @@ module Karafka
         #
         # @note It needs to be working with a proper consumer that will handle the partition
         #   management. This layer of the framework knows nothing about Kafka messages consumption.
-        class ConsumeNonBlocking < ::Karafka::Processing::Jobs::Consume
+        class ConsumeNonBlocking < Karafka::Processing::Jobs::Consume
           self.action = :consume
 
           # Makes this job non-blocking from the start

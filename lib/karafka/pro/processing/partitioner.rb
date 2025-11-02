@@ -7,7 +7,7 @@ module Karafka
   module Pro
     module Processing
       # Pro partitioner that can distribute work based on the virtual partitioner settings
-      class Partitioner < ::Karafka::Processing::Partitioner
+      class Partitioner < Karafka::Processing::Partitioner
         # @param topic [String] topic name
         # @param messages [Array<Karafka::Messages::Message>] karafka messages
         # @param coordinator [Karafka::Pro::Processing::Coordinator] processing coordinator that

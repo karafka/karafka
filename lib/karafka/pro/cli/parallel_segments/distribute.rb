@@ -91,7 +91,7 @@ module Karafka
                   next unless offset.to_i.positive?
 
                   raise(
-                    ::Karafka::Errors::CommandValidationError,
+                    Karafka::Errors::CommandValidationError,
                     "Parallel segment #{red(cg_name)} already has offset #{red(offset)} " \
                     "set for #{red("#{topic_name}##{partition_id}")}"
                   )

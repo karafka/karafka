@@ -9,7 +9,7 @@ module Karafka
         # A karafka's logger listener for Datadog
         # It depends on the 'ddtrace' gem
         class LoggerListener
-          include ::Karafka::Core::Configurable
+          include Karafka::Core::Configurable
           extend Forwardable
 
           def_delegators :config, :client, :service_name

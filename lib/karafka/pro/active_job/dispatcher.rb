@@ -10,7 +10,7 @@ module Karafka
       # Pro dispatcher that sends the ActiveJob job to a proper topic based on the queue name
       # and that allows to inject additional options into the producer, effectively allowing for a
       # much better and more granular control over the dispatch and consumption process.
-      class Dispatcher < ::Karafka::ActiveJob::Dispatcher
+      class Dispatcher < Karafka::ActiveJob::Dispatcher
         include Helpers::ConfigImporter.new(
           deserializer: %i[internal active_job deserializer]
         )
@@ -31,7 +31,7 @@ module Karafka
           # Allows for setting a callable producer since at the moment of defining the class,
           # variants may not be available
           #
-          # We do not initialize it with `-> { ::Karafka.producer }` so we do not have to call it
+          # We do not initialize it with `-> { Karafka.producer }` so we do not have to call it
           #   each time for the defaults to preserve CPU cycles.
           #
           # We also do **not** cache the execution of this producer lambda because we want to
@@ -122,7 +122,7 @@ module Karafka
         def producer(job)
           dynamic_producer = fetch_option(job, :producer, DEFAULTS)
 
-          dynamic_producer ? dynamic_producer.call(job) : ::Karafka.producer
+          dynamic_producer ? dynamic_producer.call(job) : Karafka.producer
         end
 
         # @param job [ActiveJob::Base] job instance
