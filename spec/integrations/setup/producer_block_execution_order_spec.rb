@@ -24,6 +24,5 @@ assert_equal 'test', producer.config.kafka[:'bootstrap.servers']
 # Producer config should NOT leak back to Karafka
 assert_equal nil, Karafka::App.config.kafka[:'max.in.flight.requests.per.connection']
 
-
 # Producer should be properly created
 assert producer.is_a?(WaterDrop::Producer)

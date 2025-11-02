@@ -447,7 +447,8 @@ module Karafka
         private
 
         # Sets up all the components that are based on the user configuration
-        # @param config_proxy [ConfigProxy] the configuration proxy containing deferred setup blocks
+        # @param config_proxy [ConfigProxy] the configuration proxy containing deferred setup
+        #   blocks
         # @note At the moment it is only WaterDrop
         def configure_components(config_proxy)
           oauth_listener = config.oauth.token_provider_listener

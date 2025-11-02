@@ -135,7 +135,7 @@ module Karafka
       # @example
       #   proxy = ConfigProxy.new(Karafka::App.config)
       def initialize(config)
-        super(config)
+        super
         @producer_initialization_block = ->(_) {}
       end
 
