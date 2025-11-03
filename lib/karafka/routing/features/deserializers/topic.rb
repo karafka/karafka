@@ -22,9 +22,9 @@ module Karafka
           # @param key [Object] deserializer for the message key
           # @param headers [Object] deserializer for the message headers
           def deserializers(
-            payload: ::Karafka::Deserializers::Payload.new,
-            key: ::Karafka::Deserializers::Key.new,
-            headers: ::Karafka::Deserializers::Headers.new
+            payload: Karafka::Deserializers::Payload.new,
+            key: Karafka::Deserializers::Key.new,
+            headers: Karafka::Deserializers::Headers.new
           )
             @deserializers ||= Config.new(
               active: true,

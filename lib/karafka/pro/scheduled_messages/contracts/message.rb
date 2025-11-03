@@ -11,7 +11,7 @@ module Karafka
         #
         # Our envelope always needs to comply with this format, otherwise we won't have enough
         # details to be able to dispatch the message
-        class Message < ::Karafka::Contracts::Base
+        class Message < Karafka::Contracts::Base
           configure do |config|
             config.error_messages = YAML.safe_load_file(
               File.join(Karafka.gem_root, 'config', 'locales', 'pro_errors.yml')

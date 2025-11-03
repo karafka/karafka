@@ -31,7 +31,7 @@ module Karafka
         # @param block [Proc] code to execute.
         def initialize(id:, cron:, previous_time: 0, enabled: true, &block)
           @id = id
-          @cron = ::Fugit::Cron.do_parse(cron)
+          @cron = Fugit::Cron.do_parse(cron)
           @previous_time = previous_time
           @start_time = Time.now
           @executable = block

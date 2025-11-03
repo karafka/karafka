@@ -92,7 +92,7 @@ module Karafka
           # consumer class is defined with a name. It won't support code reload for anonymous
           # consumer classes, but this is an edge case
           begin
-            ::Object.const_get(@consumer.to_s)
+            Object.const_get(@consumer.to_s)
           rescue NameError
             # It will only fail if the in case of anonymous classes
             @consumer

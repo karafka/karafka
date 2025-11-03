@@ -16,7 +16,7 @@ module Karafka
         # @param message [::Karafka::Messages::Message]
         # @return [Hash] deserialized data
         def call(message)
-          ::JSON.parse(
+          JSON.parse(
             Zlib::Inflate.inflate(message.raw_payload),
             symbolize_names: true
           )

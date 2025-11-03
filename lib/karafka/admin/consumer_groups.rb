@@ -80,15 +80,13 @@ module Karafka
               case casted_position
               # Earliest is not always 0. When compacting/deleting it can be much later, that's why
               # we fetch the oldest possible offset
-              when 'earliest'
+              # false is treated the same as 'earliest'
+              when 'earliest', false
                 LONG_TIME_AGO
               # Latest will always be the high-watermark offset and we can get it just by getting
               # a future position
               when 'latest'
                 Time.now + DAY_IN_SECONDS
-              # Same as `'earliest'`
-              when false
-                LONG_TIME_AGO
               # Regular offset case
               else
                 position

@@ -5,7 +5,7 @@ module Karafka
   # @note There might be only one process - this class is a singleton
   class Process
     # Allow for process tagging for instrumentation
-    extend ::Karafka::Core::Taggable
+    extend Karafka::Core::Taggable
 
     # Signal types that we handle
     HANDLED_SIGNALS = %i[
@@ -84,7 +84,7 @@ module Karafka
     # trap context s some things may not work there as expected, that is why we spawn a separate
     # thread to handle the signals process
     def trap_signal(signal)
-      previous_handler = ::Signal.trap(signal) do
+      previous_handler = Signal.trap(signal) do
         Thread.new do
           notice_signal(signal)
 

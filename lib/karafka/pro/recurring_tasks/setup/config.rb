@@ -10,7 +10,7 @@ module Karafka
       module Setup
         # Config for recurring tasks
         class Config
-          extend ::Karafka::Core::Configurable
+          extend Karafka::Core::Configurable
 
           setting(:consumer_class, default: Consumer)
           setting(:deserializer, default: Deserializer.new)
@@ -27,7 +27,7 @@ module Karafka
           # a separate instance in case of heavy usage of the  transactional producer, etc.
           setting(
             :producer,
-            constructor: -> { ::Karafka.producer },
+            constructor: -> { Karafka.producer },
             lazy: true
           )
 

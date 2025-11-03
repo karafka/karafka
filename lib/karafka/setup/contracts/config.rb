@@ -18,7 +18,7 @@ module Karafka
         end
 
         # Topics regexp constant reference for easier usage
-        TOPIC_REGEXP = ::Karafka::Contracts::TOPIC_REGEXP
+        TOPIC_REGEXP = Karafka::Contracts::TOPIC_REGEXP
 
         private_constant :TOPIC_REGEXP
 

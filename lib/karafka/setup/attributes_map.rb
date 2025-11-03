@@ -369,7 +369,7 @@ module Karafka
 
           attributes = { consumer: Set.new, producer: Set.new }
 
-          ::URI.parse(SOURCE).open.readlines.each do |line|
+          URI.parse(SOURCE).open.readlines.each do |line|
             next unless line.include?('|')
 
             attribute, attribute_type = line.split('|').map(&:strip)

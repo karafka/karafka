@@ -73,7 +73,7 @@ module Karafka
           old_producer_config = old_producer.config
 
           # Supervisor producer is closed, hence we need a new one here
-          config.producer = ::WaterDrop::Producer.new do |p_config|
+          config.producer = WaterDrop::Producer.new do |p_config|
             p_config.kafka = Setup::AttributesMap.producer(kafka.dup)
             p_config.logger = config.logger
 

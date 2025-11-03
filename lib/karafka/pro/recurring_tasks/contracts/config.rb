@@ -9,7 +9,7 @@ module Karafka
       # Recurring Tasks related contracts
       module Contracts
         # Makes sure, all the expected config is defined as it should be
-        class Config < ::Karafka::Contracts::Base
+        class Config < Karafka::Contracts::Base
           configure do |config|
             config.error_messages = YAML.safe_load_file(
               File.join(Karafka.gem_root, 'config', 'locales', 'pro_errors.yml')
@@ -17,7 +17,7 @@ module Karafka
           end
 
           nested(:recurring_tasks) do
-            required(:consumer_class) { |val| val < ::Karafka::BaseConsumer }
+            required(:consumer_class) { |val| val < Karafka::BaseConsumer }
             required(:deserializer) { |val| !val.nil? }
             required(:logging) { |val| [true, false].include?(val) }
             # Do not allow to run more often than every 5 seconds

@@ -14,7 +14,7 @@ module Karafka
       #
       # It contains slightly better revocation warranties than the regular blocking consumer as
       # it can stop processing batch of jobs in the middle after the revocation.
-      class Consumer < ::Karafka::ActiveJob::Consumer
+      class Consumer < Karafka::ActiveJob::Consumer
         # Runs ActiveJob jobs processing and handles lrj if needed
         def consume
           messages.each(clean: true) do |message|
@@ -25,7 +25,7 @@ module Karafka
             # We cannot early stop when running virtual partitions because the intermediate state
             # would force us not to commit the offsets. This would cause extensive
             # double-processing
-            break if Karafka::App.stopping? && !topic.virtual_partitions?
+            break if ::Karafka::App.stopping? && !topic.virtual_partitions?
 
             consume_job(message)
 

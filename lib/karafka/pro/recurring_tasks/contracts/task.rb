@@ -9,7 +9,7 @@ module Karafka
       # Recurring Tasks related contracts
       module Contracts
         # Ensures that task details are as expected
-        class Task < ::Karafka::Contracts::Base
+        class Task < Karafka::Contracts::Base
           configure do |config|
             config.error_messages = YAML.safe_load_file(
               File.join(Karafka.gem_root, 'config', 'locales', 'pro_errors.yml')

@@ -51,7 +51,7 @@ module Karafka
           # @note We do not fetch it via the ConfigImporter not to cache it so we can re-use it
           #   if needed
           def producer
-            ::Karafka::App.config.recurring_tasks.producer
+            Karafka::App.config.recurring_tasks.producer
           end
 
           # @return [Serializer]

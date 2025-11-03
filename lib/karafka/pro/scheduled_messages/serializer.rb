@@ -9,7 +9,7 @@ module Karafka
       # Serializers used to build payloads (if applicable) for dispatch
       # @note We only deal with states payload. Other payloads are not ours but end users.
       class Serializer
-        include ::Karafka::Core::Helpers::Time
+        include Karafka::Core::Helpers::Time
 
         # @param tracker [Tracker] tracker based on which we build the state
         # @return [String] compressed payload with the state details

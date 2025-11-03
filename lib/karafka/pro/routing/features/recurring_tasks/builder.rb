@@ -108,7 +108,7 @@ module Karafka
               require 'fugit'
             rescue LoadError
               raise(
-                ::Karafka::Errors::DependencyConstraintsError,
+                Karafka::Errors::DependencyConstraintsError,
                 <<~ERROR_MSG
                   Failed to require fugit gem.
                   Add it to your Gemfile, as it is required for the recurring tasks to work.
