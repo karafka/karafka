@@ -21,7 +21,7 @@ module Karafka
       module Proxy
         # General WaterDrop message contract. Before we envelop a message, we need to be certain
         # it is correct, hence we use this contract.
-        MSG_CONTRACT = ::WaterDrop::Contracts::Message.new(
+        MSG_CONTRACT = WaterDrop::Contracts::Message.new(
           # Payload size is a subject to the target producer dispatch validation, so we set it
           # to 100MB basically to ignore it here.
           max_payload_size: 104_857_600

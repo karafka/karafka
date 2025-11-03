@@ -44,7 +44,7 @@ module Karafka
                 during_retry = false if during_retry.nil?
 
                 # If no interval, use default
-                interval ||= ::Karafka::App.config.internal.tick_interval
+                interval ||= Karafka::App.config.internal.tick_interval
 
                 Config.new(
                   active: active,

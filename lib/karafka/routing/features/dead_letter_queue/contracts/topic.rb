@@ -39,7 +39,7 @@ module Karafka
               next unless dead_letter_queue[:active]
 
               topic = dead_letter_queue[:topic]
-              topic_regexp = ::Karafka::Contracts::TOPIC_REGEXP
+              topic_regexp = Karafka::Contracts::TOPIC_REGEXP
 
               # When topic is set to false, it means we just want to skip dispatch on DLQ
               next if topic == false

@@ -3,15 +3,15 @@
 module Karafka
   module Instrumentation
     # Default logger for Event Delegator
-    # @note It uses ::Logger features - providing basic logging
-    class Logger < ::Logger
+    # @note It uses Logger features - providing basic logging
+    class Logger < Logger
       # Map containing information about log level for given environment
       ENV_MAP = {
-        'production' => ::Logger::ERROR,
-        'test' => ::Logger::ERROR,
-        'development' => ::Logger::INFO,
-        'debug' => ::Logger::DEBUG,
-        'default' => ::Logger::INFO
+        'production' => Logger::ERROR,
+        'test' => Logger::ERROR,
+        'development' => Logger::INFO,
+        'debug' => Logger::DEBUG,
+        'default' => Logger::INFO
       }.freeze
 
       private_constant :ENV_MAP

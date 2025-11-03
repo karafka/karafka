@@ -19,7 +19,7 @@ module Karafka
               factor = topics_array.first.subscription_group_details.fetch(:multiplexing_max, 1)
 
               Array.new(factor) do |i|
-                ::Karafka::Routing::Topics.new(
+                Karafka::Routing::Topics.new(
                   i.zero? ? topics_array : topics_array.map(&:dup)
                 )
               end

@@ -14,7 +14,7 @@ module Karafka
       # @note ActiveJob does not support batches, so we just run one message after another
       def consume
         messages.each do |message|
-          break if Karafka::App.stopping?
+          break if ::Karafka::App.stopping?
 
           consume_job(message)
 

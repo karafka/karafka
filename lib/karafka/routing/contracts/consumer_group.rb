@@ -44,14 +44,15 @@ module Karafka
 
         virtual do |data, errors|
           next unless errors.empty?
-          next unless ::Karafka::App.config.strict_topics_namespacing
+          next unless Karafka::App.config.strict_topics_namespacing
 
           names = data.fetch(:topics).map { |topic| topic[:name] }
           names_hash = names.each_with_object({}) { |n, h| h[n] = true }
           error_occured = false
+          namespace_chars = ['.', '_'].freeze
           names.each do |n|
             # Skip topic names that are not namespaced
-            next unless n.chars.find { |c| ['.', '_'].include?(c) }
+            next unless n.chars.find { |c| namespace_chars.include?(c) }
 
             if n.chars.include?('.')
               # Check underscore styled topic
