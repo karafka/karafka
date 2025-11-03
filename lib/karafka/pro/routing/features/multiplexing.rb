@@ -17,7 +17,7 @@ module Karafka
             # @param _config [Karafka::Core::Configurable::Node] app config node
             def pre_setup(_config)
               # Make sure we use proper unique validator for topics definitions
-              ::Karafka::Routing::Contracts::ConsumerGroup.singleton_class.prepend(
+              Karafka::Routing::Contracts::ConsumerGroup.singleton_class.prepend(
                 Patches::Contracts::ConsumerGroup
               )
             end
@@ -26,11 +26,11 @@ module Karafka
             #
             # @param _config [Karafka::Core::Configurable::Node] app config
             def post_setup(_config)
-              ::Karafka::App.monitor.subscribe('app.running') do
+              Karafka::App.monitor.subscribe('app.running') do
                 # Do not install the manager and listener to control multiplexing unless there is
                 # multiplexing enabled and it is dynamic.
                 # We only need to control multiplexing when it is in a dynamic state
-                next unless ::Karafka::App
+                next unless Karafka::App
                             .subscription_groups
                             .values
                             .flat_map(&:itself)
@@ -38,8 +38,8 @@ module Karafka
 
                 # Subscribe for events and possibility to manage via the Pro connection manager
                 # that supports multiplexing
-                ::Karafka.monitor.subscribe(
-                  ::Karafka::Pro::Connection::Multiplexing::Listener.new
+                Karafka.monitor.subscribe(
+                  Karafka::Pro::Connection::Multiplexing::Listener.new
                 )
               end
             end

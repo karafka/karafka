@@ -14,13 +14,13 @@ module Karafka
             #
             # @param _config [Karafka::Core::Configurable::Node] app config
             def post_setup(_config)
-              ::Karafka::App.monitor.subscribe('app.running') do
+              Karafka::App.monitor.subscribe('app.running') do
                 # Initialize the tracker prior to becoming multi-threaded
-                ::Karafka::Processing::InlineInsights::Tracker.instance
+                Karafka::Processing::InlineInsights::Tracker.instance
 
                 # Subscribe to the statistics reports and collect them
-                ::Karafka.monitor.subscribe(
-                  ::Karafka::Pro::Processing::OffsetMetadata::Listener.new
+                Karafka.monitor.subscribe(
+                  Karafka::Pro::Processing::OffsetMetadata::Listener.new
                 )
               end
             end

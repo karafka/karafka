@@ -131,7 +131,7 @@ module Karafka
 
         # @return [Karafka::Pro::RecurringTasks::Schedule] current in-memory schedule
         def schedule
-          ::Karafka::Pro::RecurringTasks.schedule
+          Karafka::Pro::RecurringTasks.schedule
         end
 
         # Dispatches the current schedule state to Kafka
