@@ -8,7 +8,7 @@ module Karafka
     module Processing
       # Pro coordinator that provides extra orchestration methods useful for parallel processing
       # within the same partition
-      class Coordinator < ::Karafka::Processing::Coordinator
+      class Coordinator < Karafka::Processing::Coordinator
         extend Forwardable
         include Helpers::ConfigImporter.new(
           errors_tracker_class: %i[internal processing errors_tracker_class]

@@ -10,7 +10,7 @@ module Karafka
       module Setup
         # Config for encryption
         class Config
-          extend ::Karafka::Core::Configurable
+          extend Karafka::Core::Configurable
 
           # Should this feature be in use
           setting(:active, default: false)

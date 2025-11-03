@@ -18,7 +18,7 @@ module Karafka
           @subscription_group_id = subscription_group_id
           @consumer_group_id = consumer_group_id
           @client_name = client_name
-          @statistics_decorator = ::Karafka::Core::Monitoring::StatisticsDecorator.new
+          @statistics_decorator = Karafka::Core::Monitoring::StatisticsDecorator.new
         end
 
         # Emits decorated statistics to the monitor

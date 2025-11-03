@@ -9,7 +9,7 @@ module Karafka
       # Encryption related contracts
       module Contracts
         # Makes sure, all the expected config is defined as it should be
-        class Config < ::Karafka::Contracts::Base
+        class Config < Karafka::Contracts::Base
           configure do |config|
             config.error_messages = YAML.safe_load_file(
               File.join(Karafka.gem_root, 'config', 'locales', 'pro_errors.yml')

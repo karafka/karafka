@@ -8,7 +8,7 @@ module Karafka
     # Pro contracts that aim to replace or complement the general framework contracts
     module Contracts
       # Base for all the Pro contracts
-      class Base < ::Karafka::Contracts::Base
+      class Base < Karafka::Contracts::Base
       end
     end
   end

@@ -132,7 +132,7 @@ module Karafka
             return unless inconclusive
 
             raise(
-              ::Karafka::Errors::CommandValidationError,
+              Karafka::Errors::CommandValidationError,
               "Parallel segments for #{red(segment_origin)} have #{red('inconclusive')} offsets"
             )
           end

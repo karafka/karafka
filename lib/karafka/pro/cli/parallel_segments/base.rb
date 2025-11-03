@@ -28,7 +28,7 @@ module Karafka
           def applicable_groups
             requested_groups = options[:groups].dup || []
 
-            workable_groups = ::Karafka::App
+            workable_groups = Karafka::App
                               .routes
                               .select(&:parallel_segments?)
                               .group_by(&:segment_origin)
@@ -46,7 +46,7 @@ module Karafka
                 applicable_groups[requested_group] = workable_group
               else
                 raise(
-                  ::Karafka::Errors::ConsumerGroupNotFoundError,
+                  Karafka::Errors::ConsumerGroupNotFoundError,
                   "Consumer group #{requested_group} was not found"
                 )
               end

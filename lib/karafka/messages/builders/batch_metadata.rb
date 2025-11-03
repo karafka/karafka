@@ -46,7 +46,7 @@ module Karafka
           # @note Message can be from the future in case consumer machine and Kafka cluster drift
           #   apart and the machine is behind the cluster.
           def local_created_at(last_message)
-            now = ::Time.now
+            now = Time.now
 
             return now unless last_message
 

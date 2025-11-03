@@ -25,7 +25,7 @@ module Karafka
 
             # Time on message is in seconds with ms precision, so we need to convert the ttl that
             # is in ms to this format
-            border = ::Time.now.utc - (@delay / 1_000.0)
+            border = Time.now.utc - (@delay / 1_000.0)
 
             messages.delete_if do |message|
               too_young = message.timestamp > border

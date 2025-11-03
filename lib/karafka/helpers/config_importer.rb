@@ -20,7 +20,7 @@ module Karafka
         @attributes.each do |name, path|
           model.class_eval <<~RUBY, __FILE__, __LINE__ + 1
             def #{name}
-              @#{name} ||= ::Karafka::App.config.#{path.join('.')}
+              @#{name} ||= Karafka::App.config.#{path.join('.')}
             end
           RUBY
         end
@@ -33,7 +33,7 @@ module Karafka
         @attributes.each do |name, path|
           model.class_eval <<~RUBY, __FILE__, __LINE__ + 1
             def self.#{name}
-              @#{name} ||= ::Karafka::App.config.#{path.join('.')}
+              @#{name} ||= Karafka::App.config.#{path.join('.')}
             end
           RUBY
         end

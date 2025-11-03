@@ -15,7 +15,7 @@ module Karafka
         # It can be useful when having long lasting jobs that would exceed `max.poll.interval`
         # in scenarios where there are more jobs than threads, without this being async we
         # would potentially stop polling
-        class RevokedNonBlocking < ::Karafka::Processing::Jobs::Revoked
+        class RevokedNonBlocking < Karafka::Processing::Jobs::Revoked
           self.action = :revoked
 
           # Makes this job non-blocking from the start

@@ -10,7 +10,7 @@ module Karafka
         # Base Kubernetes Listener providing basic HTTP server capabilities to respond with health
         # statuses
         class BaseListener
-          include ::Karafka::Core::Helpers::Time
+          include Karafka::Core::Helpers::Time
 
           # All good with Karafka
           OK_CODE = '200 OK'
