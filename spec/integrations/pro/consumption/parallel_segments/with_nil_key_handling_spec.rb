@@ -89,7 +89,7 @@ start_karafka_and_wait_until do
   DT[:key_assignments].count { |key, _| key == 'nil_key' } >= 30
 end
 
-nil_key_assignments = DT[:key_assignments].slice('nil_key')
+nil_key_assignments = DT[:key_assignments].select { |key, _| key == 'nil_key' }
 nil_key_segments = nil_key_assignments.map { |_, segment| segment }.uniq
 
 assert_equal(
