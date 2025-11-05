@@ -60,7 +60,7 @@ class BaseThrottler < Karafka::Pro::Processing::Filters::Base
   end
 
   def timeout
-    self.class.to_s.chars.last.to_i * 1_000
+    self.class.to_s[-1].to_i * 1_000
   end
 end
 

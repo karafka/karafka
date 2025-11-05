@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+TASK_IDS = %w[a b c].freeze
 
 # This code is part of Karafka Pro, a commercial component not licensed under LGPL.
 # See LICENSE for details.
@@ -59,7 +60,7 @@ DT[:messages].each_with_index do |payload, i|
   task = payload[:task]
 
   # Assertions for the task
-  assert_equal task[:id], %w[a b c][i]
+  assert_equal task[:id], TASK_IDS[i]
   assert task[:time_taken].is_a?(Float)
   assert_equal task[:result], 'success'
 end

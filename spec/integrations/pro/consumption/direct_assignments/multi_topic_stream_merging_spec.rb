@@ -158,13 +158,15 @@ draw_routes do
   end
 end
 
+RANDOM_BOOL = [true, false].freeze
+
 Thread.new do
   loop do
     user_id = SecureRandom.uuid
     user_event = { id: user_id, time: Time.now.to_f }.to_json
     action_event = { user_id: user_id, val: rand, time: Time.now.to_f }.to_json
 
-    if [true, false].sample
+    if RANDOM_BOOL.sample
       produce(DT.topics[0], user_event)
       sleep(rand / 10)
       produce(DT.topics[1], action_event)

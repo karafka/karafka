@@ -125,7 +125,7 @@ assert_equal(
 )
 
 # Verify shared counter integrity
-expected_total_increment = (1..20).map { |i| (i % 10) + 1 }.sum
+expected_total_increment = (1..20).sum { |i| (i % 10) + 1 }
 actual_final_counter = DT[:consumed].last[:counter_after]
 assert_equal(
   expected_total_increment, actual_final_counter,

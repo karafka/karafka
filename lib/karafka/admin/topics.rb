@@ -143,7 +143,8 @@ module Karafka
         # partitions
         #
         # @param name_or_hash [String, Symbol, Hash] topic name or hash with topics and partitions
-        # @param partition [Integer, nil] partition number (required when first param is topic name)
+        # @param partition [Integer, nil] partition number
+        #   (required when first param is topic name)
         #
         # @return [Array<Integer, Integer>, Hash] when querying single partition returns array with
         #   low and high watermark offsets, when querying multiple returns nested hash

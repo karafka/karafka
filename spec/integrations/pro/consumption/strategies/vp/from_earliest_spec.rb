@@ -31,7 +31,7 @@ end
 produce_many(DT.topic, DT.uuids(100))
 
 start_karafka_and_wait_until do
-  DT.data.values.map(&:size).sum >= 100
+  DT.data.values.sum(&:size) >= 100
 end
 
 # Since Ruby hash function is slightly nondeterministic, not all the threads may always be used

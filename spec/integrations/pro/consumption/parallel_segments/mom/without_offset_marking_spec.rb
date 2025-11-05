@@ -139,9 +139,11 @@ end
 
 # 6. Verify segment-filtered messages were NOT marked as consumed
 filtered_messages = {}
+ALL_SEGMENTS = [0, 1, 2].freeze
+
 segment_messages.each do |segment_id, _messages|
   # For each segment, track which messages went to other segments (were filtered)
-  other_segments = [0, 1, 2] - [segment_id]
+  other_segments = ALL_SEGMENTS - [segment_id]
 
   other_segments.each do |other_segment_id|
     filtered_messages[segment_id] ||= []

@@ -30,6 +30,8 @@ start_karafka_and_wait_until do
   DT[:errors].size >= 1
 end
 
+EXPECTED_ERROR_CODES = %i[unknown_partition unknown_topic_or_part].freeze
+
 DT[:errors].each do |error|
-  assert %i[unknown_partition unknown_topic_or_part].include?(error.code)
+  assert EXPECTED_ERROR_CODES.include?(error.code)
 end
