@@ -184,7 +184,7 @@ module Karafka
           # We assign producer only when not available already. It may already be available if
           # user redefined the `#producer` method for example. This can be useful for example when
           # having a multi-cluster setup and using a totally custom producer
-          consumer.producer ||= ::Karafka::App.producer
+          consumer.producer ||= Karafka::App.producer
           # Since we have some message-less flows (idle, etc), we initialize consumer with empty
           # messages set. In production we have persistent consumers, so this is not a performance
           # overhead as this will happen only once per consumer lifetime

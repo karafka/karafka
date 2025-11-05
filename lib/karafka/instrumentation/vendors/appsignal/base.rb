@@ -9,7 +9,7 @@ module Karafka
       module Appsignal
         # Base for all the instrumentation listeners
         class Base
-          include ::Karafka::Core::Configurable
+          include Karafka::Core::Configurable
           extend Forwardable
 
           # @param block [Proc] configuration block

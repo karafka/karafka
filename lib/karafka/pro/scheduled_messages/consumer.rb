@@ -7,7 +7,7 @@ module Karafka
   module Pro
     module ScheduledMessages
       # Consumer that coordinates scheduling of messages when the time comes
-      class Consumer < ::Karafka::BaseConsumer
+      class Consumer < Karafka::BaseConsumer
         include Helpers::ConfigImporter.new(
           dispatcher_class: %i[scheduled_messages dispatcher_class]
         )

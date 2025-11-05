@@ -35,7 +35,7 @@ module Karafka
 
         # @return [::OpenSSL::PKey::RSA] rsa public key
         def public_pem
-          @public_pem ||= ::OpenSSL::PKey::RSA.new(encryption.public_key)
+          @public_pem ||= OpenSSL::PKey::RSA.new(encryption.public_key)
         end
 
         # @param version [String] version for which we want to get the rsa key
@@ -46,7 +46,7 @@ module Karafka
           key_string = encryption.private_keys[version]
           key_string || raise(Errors::PrivateKeyNotFoundError, version)
 
-          @private_pems[version] = ::OpenSSL::PKey::RSA.new(key_string)
+          @private_pems[version] = OpenSSL::PKey::RSA.new(key_string)
         end
       end
     end

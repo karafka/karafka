@@ -11,7 +11,7 @@ module Karafka
       #   - we only run schedules that are of same or newer version
       #   - we always mark as consumed in such a way, that the first message received after
       #     assignment (if any) is a state
-      class Consumer < ::Karafka::BaseConsumer
+      class Consumer < Karafka::BaseConsumer
         # @param args [Array] all arguments accepted by the consumer
         def initialize(*args)
           super
@@ -54,7 +54,7 @@ module Karafka
               # that collectively have a different outcome
               @executor.call
             else
-              raise ::Karafka::Errors::UnsupportedCaseError, type
+              raise Karafka::Errors::UnsupportedCaseError, type
             end
           end
 

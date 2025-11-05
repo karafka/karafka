@@ -122,6 +122,7 @@ module Karafka
         sasl.oauthbearer.config
         sasl.oauthbearer.extensions
         sasl.oauthbearer.grant.type
+        sasl.oauthbearer.metadata.authentication.type
         sasl.oauthbearer.method
         sasl.oauthbearer.scope
         sasl.oauthbearer.token.endpoint.url
@@ -279,6 +280,7 @@ module Karafka
         sasl.oauthbearer.config
         sasl.oauthbearer.extensions
         sasl.oauthbearer.grant.type
+        sasl.oauthbearer.metadata.authentication.type
         sasl.oauthbearer.method
         sasl.oauthbearer.scope
         sasl.oauthbearer.token.endpoint.url
@@ -367,7 +369,7 @@ module Karafka
 
           attributes = { consumer: Set.new, producer: Set.new }
 
-          ::URI.parse(SOURCE).open.readlines.each do |line|
+          URI.parse(SOURCE).open.readlines.each do |line|
             next unless line.include?('|')
 
             attribute, attribute_type = line.split('|').map(&:strip)

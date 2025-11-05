@@ -10,7 +10,7 @@ module Karafka
       module Setup
         # Config for recurring tasks
         class Config
-          extend ::Karafka::Core::Configurable
+          extend Karafka::Core::Configurable
 
           setting(:consumer_class, default: Consumer)
           setting(:group_id, default: 'karafka_scheduled_messages')
@@ -27,7 +27,7 @@ module Karafka
           # Producer to use. By default uses default Karafka producer.
           setting(
             :producer,
-            constructor: -> { ::Karafka.producer },
+            constructor: -> { Karafka.producer },
             lazy: true
           )
 

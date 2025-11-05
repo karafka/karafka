@@ -8,7 +8,7 @@ module Karafka
   module TimeTrackers
     # Base class for all the time-trackers.
     class Base
-      include ::Karafka::Core::Helpers::Time
+      include Karafka::Core::Helpers::Time
     end
   end
 end

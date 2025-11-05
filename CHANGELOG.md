@@ -1,6 +1,11 @@
 # Karafka Framework Changelog
 
-## 2.5.2 (Unreleased)
+## 2.5.3 (Unreleased)
+- [Enhancement] Add `producer` block API to setup for simplified WaterDrop producer configuration without manual producer instance creation, using a transparent ConfigProxy during setup to avoid polluting the permanent config API.
+- [Change] Require `waterdrop` `>=` `2.8.13` to support new features.
+- [Change] Require `karafka-rdkafka` `>=` `0.23.0` to support new rebalance protocol.
+
+## 2.5.2 (2025-10-31)
 - **[EOL]** Remove Rails 7.1 support according to EOL while not blocking Rails 7.1 usage.
 - [Enhancement] Retry on the KIP-848 `stale_member_epoch` error.
 - [Enhancement] Provide `Karafka::Admin.trigger_rebalance` API to programmatically trigger consumer group rebalances for operational purposes.
@@ -8,6 +13,7 @@
 - [Enhancement] Nest pause configuration under `config.pause.*` namespace (`config.pause.timeout`, `config.pause.max_timeout`, `config.pause.with_exponential_backoff`) while maintaining backwards compatibility with the old flat API (`config.pause_timeout`, etc.) via delegation methods that will be removed in Karafka 2.6.
 - [Enhancement] Detect and track involuntary assignment loss during long-running processing that exceeds `max.poll.interval.ms` via `client.events_poll` event and automatically update `Karafka::App.assignments` to reflect reality.
 - [Enhancement] Extend `Karafka::Admin.read_watermark_offsets` to accept either a single topic with partition or a hash of multiple topics with partitions, using a single consumer instance for improved efficiency when querying multiple partitions.
+- [Enhancement] Add configurable `Karafka::ActiveJob::Deserializer` to support custom serialization formats (Avro, Protobuf, etc.) for ActiveJob payloads.
 - [Fix] Fix ActiveJob Continuation invalid class reference bug.
 
 ## 2.5.1 (2025-09-29)

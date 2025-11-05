@@ -5,6 +5,12 @@ module Karafka
     module Features
       class ActiveJob < Base
         # Topic extensions to be able to check if given topic is ActiveJob topic
+        #
+        # @note ActiveJob topics do not have per-topic deserializer configuration. The deserializer
+        #   is configured globally via `config.internal.active_job.deserializer` because Rails
+        #   serializes jobs before dispatching them, requiring a consistent serialization format
+        #   across all ActiveJob topics. If you need custom serialization (e.g., Avro, Protobuf),
+        #   configure it once at the application level rather than per-topic.
         module Topic
           # This method calls the parent class initializer and then sets up the
           # extra instance variable to nil. The explicit initialization

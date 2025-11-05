@@ -9,7 +9,7 @@ module Karafka
       module Features
         class Patterns < Base
           # Representation of groups of topics
-          class Patterns < ::Karafka::Routing::Topics
+          class Patterns < Karafka::Routing::Topics
             # Finds first pattern matching given topic name
             #
             # @param topic_name [String] topic name that may match a pattern

@@ -46,7 +46,7 @@ module Karafka
         def command(command_name, task_id)
           data = {
             schema_version: SCHEMA_VERSION,
-            schedule_version: ::Karafka::Pro::RecurringTasks.schedule.version,
+            schedule_version: Karafka::Pro::RecurringTasks.schedule.version,
             dispatched_at: Time.now.to_f,
             type: 'command',
             command: {
@@ -69,7 +69,7 @@ module Karafka
 
           data = {
             schema_version: SCHEMA_VERSION,
-            schedule_version: ::Karafka::Pro::RecurringTasks.schedule.version,
+            schedule_version: Karafka::Pro::RecurringTasks.schedule.version,
             dispatched_at: Time.now.to_f,
             type: 'log',
             task: {

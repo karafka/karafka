@@ -1,20 +1,20 @@
 PATH
   remote: .
   specs:
-    karafka (2.5.2)
+    karafka (2.5.3)
       base64 (~> 0.2)
       karafka-core (>= 2.5.6, < 2.6.0)
-      karafka-rdkafka (>= 0.22.0)
-      waterdrop (>= 2.8.9, < 3.0.0)
+      karafka-rdkafka (>= 0.23.0)
+      waterdrop (>= 2.8.13, < 3.0.0)
       zeitwerk (~> 2.3)
 
 GEM
   remote: https://rubygems.org/
   specs:
-    activejob (8.1.0)
-      activesupport (= 8.1.0)
+    activejob (8.1.1)
+      activesupport (= 8.1.1)
       globalid (>= 0.3.6)
-    activesupport (8.1.0)
+    activesupport (8.1.1)
       base64
       bigdecimal
       concurrent-ruby (~> 1.0, >= 1.3.1)
@@ -62,32 +62,32 @@ GEM
     karafka-core (2.5.7)
       karafka-rdkafka (>= 0.20.0)
       logger (>= 1.6.0)
-    karafka-rdkafka (0.22.2)
-      ffi (~> 1.15)
+    karafka-rdkafka (0.23.0)
+      ffi (~> 1.17.1)
       json (> 2.0)
       logger
       mini_portile2 (~> 2.6)
       rake (> 12)
-    karafka-rdkafka (0.22.2-aarch64-linux-gnu)
-      ffi (~> 1.15)
+    karafka-rdkafka (0.23.0-aarch64-linux-gnu)
+      ffi (~> 1.17.1)
       json (> 2.0)
       logger
       mini_portile2 (~> 2.6)
       rake (> 12)
-    karafka-rdkafka (0.22.2-arm64-darwin)
-      ffi (~> 1.15)
+    karafka-rdkafka (0.23.0-arm64-darwin)
+      ffi (~> 1.17.1)
       json (> 2.0)
       logger
       mini_portile2 (~> 2.6)
       rake (> 12)
-    karafka-rdkafka (0.22.2-x86_64-linux-gnu)
-      ffi (~> 1.15)
+    karafka-rdkafka (0.23.0-x86_64-linux-gnu)
+      ffi (~> 1.17.1)
       json (> 2.0)
       logger
       mini_portile2 (~> 2.6)
       rake (> 12)
-    karafka-rdkafka (0.22.2-x86_64-linux-musl)
-      ffi (~> 1.15)
+    karafka-rdkafka (0.23.0-x86_64-linux-musl)
+      ffi (~> 1.17.1)
       json (> 2.0)
       logger
       mini_portile2 (~> 2.6)
@@ -95,9 +95,9 @@ GEM
     karafka-testing (2.5.4)
       karafka (>= 2.5.0, < 2.6.0)
       waterdrop (>= 2.8.0)
-    karafka-web (0.11.3)
+    karafka-web (0.11.4)
       erubi (~> 1.4)
-      karafka (>= 2.5.0, < 2.6.0)
+      karafka (>= 2.5.2, < 2.6.0)
       karafka-core (>= 2.5.0, < 2.6.0)
       roda (~> 3.68, >= 3.69)
       tilt (~> 2.0)
@@ -107,7 +107,7 @@ GEM
     ostruct (0.6.3)
     raabro (1.4.0)
     rack (3.2.3)
-    rake (13.3.0)
+    rake (13.3.1)
     roda (3.97.0)
       rack
     rspec (3.13.2)
@@ -136,7 +136,7 @@ GEM
       concurrent-ruby (~> 1.0)
     uri (1.0.4)
     warning (1.5.0)
-    waterdrop (2.8.12)
+    waterdrop (2.8.13)
       karafka-core (>= 2.4.9, < 3.0.0)
       karafka-rdkafka (>= 0.20.0)
       zeitwerk (~> 2.3)

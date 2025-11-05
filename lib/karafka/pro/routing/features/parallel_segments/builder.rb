@@ -23,7 +23,7 @@ module Karafka
                 # We build a temp consumer group and a target to check if it has parallel segments
                 # enabled and if so, we do not add it to the routing but instead we build the
                 # appropriate number of parallel segment groups
-                temp_consumer_group = ::Karafka::Routing::ConsumerGroup.new(group_id.to_s)
+                temp_consumer_group = Karafka::Routing::ConsumerGroup.new(group_id.to_s)
                 temp_target = Karafka::Routing::Proxy.new(temp_consumer_group, &block).target
                 config = temp_target.parallel_segments
 

@@ -10,7 +10,7 @@ module Karafka
       module Strategies
         # Base strategy for Pro
         module Base
-          include ::Karafka::Processing::Strategies::Base
+          include Karafka::Processing::Strategies::Base
         end
       end
     end

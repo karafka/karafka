@@ -14,7 +14,7 @@ module Karafka
         # Nothing. Just standard, automatic flow
         module Default
           include Base
-          include ::Karafka::Processing::Strategies::Default
+          include Karafka::Processing::Strategies::Default
 
           # Apply strategy for a non-feature based flow
           FEATURES = %i[].freeze
@@ -263,7 +263,7 @@ module Karafka
           # the post-user code execution marking with transactional producer to result in a
           # boolean state of marking for further framework flow. This is a normalization to make it
           # behave the same way as it would behave with a non-transactional one
-          rescue ::Rdkafka::RdkafkaError, Errors::AssignmentLostError
+          rescue Rdkafka::RdkafkaError, Errors::AssignmentLostError
             false
           ensure
             @_transaction_internal = false

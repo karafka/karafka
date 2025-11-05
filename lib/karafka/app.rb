@@ -102,8 +102,8 @@ module Karafka
       #
       # @param contexts [String] librdkafka low level debug contexts for granular debugging
       def debug!(contexts = 'all')
-        logger.level = ::Logger::DEBUG
-        producer.config.logger.level = ::Logger::DEBUG
+        logger.level = Logger::DEBUG
+        producer.config.logger.level = Logger::DEBUG
 
         config.kafka[:debug] = contexts
         producer.config.kafka[:debug] = contexts

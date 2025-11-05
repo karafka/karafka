@@ -52,7 +52,7 @@ module Karafka
           FileUtils.mkdir_p File.dirname(pathed_target)
 
           template = File.read(Karafka.core_root.join("templates/#{source}"))
-          render = ::ERB.new(template, trim_mode: '-').result(binding)
+          render = ERB.new(template, trim_mode: '-').result(binding)
 
           File.write(pathed_target, render)
 

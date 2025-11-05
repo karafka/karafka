@@ -30,7 +30,7 @@ module Karafka
             @group_counter ||= 0
             @group_counter += 1
 
-            ::Digest::SHA256.hexdigest(
+            Digest::SHA256.hexdigest(
               @group_counter.to_s
             )[0..11]
           end

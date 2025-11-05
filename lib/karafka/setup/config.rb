@@ -340,6 +340,12 @@ module Karafka
           setting :job_options_contract, default: ActiveJob::JobOptionsContract.new
           # option consumer [Class] consumer class that should be used to consume ActiveJob data
           setting :consumer_class, default: ActiveJob::Consumer
+          # option deserializer [Karafka::ActiveJob::Deserializer] deserializer for ActiveJob jobs
+          #   Despite the name, handles both serialization (outgoing) and deserialization
+          #   (incoming). Can be replaced with a custom implementation for formats like Avro,
+          #   Protobuf, etc. This is a global setting because Rails serializes jobs before
+          #   Karafka receives them, so we need a consistent approach across all ActiveJob topics.
+          setting :deserializer, default: ::Karafka::ActiveJob::Deserializer.new
         end
       end
 
@@ -409,14 +415,18 @@ module Karafka
           # of the pro defaults with custom components
           Pro::Loader.pre_setup_all(config) if Karafka.pro?
 
-          configure(&)
+          # Wrap config in a proxy that intercepts producer block configuration
+          proxy = ConfigProxy.new(config)
+          # We need to check for the block presence here because user can just run setup without
+          # any block given
+          configure { yield(proxy) if block_given? }
 
           Contracts::Config.new.validate!(
             config.to_h,
             scope: %w[config]
           )
 
-          configure_components
+          configure_components(proxy)
 
           # Refreshes the references that are cached that might have been changed by the config
           ::Karafka.refresh!
@@ -437,8 +447,10 @@ module Karafka
         private
 
         # Sets up all the components that are based on the user configuration
+        # @param config_proxy [ConfigProxy] the configuration proxy containing deferred setup
+        #   blocks
         # @note At the moment it is only WaterDrop
-        def configure_components
+        def configure_components(config_proxy)
           oauth_listener = config.oauth.token_provider_listener
           # We need to subscribe the oauth listener here because we want it to be ready before
           # any consumer/admin runs
@@ -457,6 +469,11 @@ module Karafka
             producer_config.oauth.token_provider_listener = oauth_listener
             producer_config.logger = config.logger
           end
+
+          # Execute user's producer configuration block
+          # This happens after the default producer setup, allowing users to customize settings
+          # If no block was provided during setup, this will be an empty lambda that does nothing
+          config_proxy.producer_initialization_block.call(config.producer.config)
         end
       end
     end

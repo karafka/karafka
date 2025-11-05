@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require 'active_support/current_attributes'
+require_relative 'current_attributes/job_wrapper'
 require_relative 'current_attributes/loading'
 require_relative 'current_attributes/persistence'
 
@@ -22,8 +23,8 @@ module Karafka
           .each { |expandable| expandable.class_attribute :_cattr_klasses, default: {} }
 
         # Do not double inject in case of running persist multiple times
-        Dispatcher.prepend(Persistence) unless Dispatcher.ancestors.include?(Persistence)
-        Consumer.prepend(Loading) unless Consumer.ancestors.include?(Loading)
+        Dispatcher.prepend(Persistence) unless Dispatcher <= Persistence
+        Consumer.prepend(Loading) unless Consumer <= Loading
 
         klasses.map(&:to_s).each do |stringified_klass|
           # Prevent registering same klass multiple times
