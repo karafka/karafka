@@ -20,6 +20,8 @@ iterator = Karafka::Pro::Iterator.new(
   { DT.topic => { 0 => -100 } }
 )
 
-data = iterator.map(&:offset)
+data = []
+
+iterator.each { |message| data << message.offset }
 
 assert_equal [0, 1], data
