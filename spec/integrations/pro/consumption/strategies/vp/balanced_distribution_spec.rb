@@ -71,7 +71,7 @@ end
 end
 
 start_karafka_and_wait_until do
-  DT.data.values.map(&:size).sum >= 11
+  DT.data.values.sum(&:size) >= 11
 end
 
 # Verify that messages with the same key were processed together
@@ -85,12 +85,14 @@ end
 
 values = DT.data.sort_by { |object_id, _| object_id }.to_h.values
 
+EXPECTED_SIZES = [5, 3].freeze
+
 values.map(&:size).each do |size|
-  assert [5, 3].include?(size), size
+  assert EXPECTED_SIZES.include?(size), size
 end
 
 # Verify that we used all available workers
 assert_equal 3, DT.data.size
 
 # Verify that all messages were processed
-assert_equal 11, DT.data.values.map(&:size).sum
+assert_equal 11, DT.data.values.sum(&:size)

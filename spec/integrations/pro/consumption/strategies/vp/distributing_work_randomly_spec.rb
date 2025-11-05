@@ -49,7 +49,7 @@ start_karafka_and_wait_until do
   produce(DT.topic, '1', key: %w[a b c d].sample)
   produce(DT.topic, '1', key: %w[a b c d].sample)
 
-  DT.data.values.map(&:count).sum >= 1_000
+  DT.data.values.sum(&:count) >= 1_000
 end
 
 # Two partitions, 5 jobs per each

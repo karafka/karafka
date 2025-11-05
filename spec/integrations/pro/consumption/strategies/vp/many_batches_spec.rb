@@ -29,7 +29,7 @@ draw_routes do
 end
 
 start_karafka_and_wait_until do
-  if DT.data.values.map(&:size).sum < 1000
+  if DT.data.values.sum(&:size) < 1000
     produce_many(DT.topic, DT.uuids(100))
     sleep(1)
     false

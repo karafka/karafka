@@ -10,7 +10,7 @@ module Karafka
       # Print available commands
       def call
         # Find the longest command for alignment purposes
-        max_command_length = self.class.commands.map(&:name).map(&:size).max
+        max_command_length = self.class.commands.map { |command| command.name.size }.max
 
         puts 'Karafka commands:'
 

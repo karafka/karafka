@@ -43,7 +43,7 @@ end
 
 start_karafka_and_wait_until do
   # We subtract 3 as 3 values are from the offsets
-  (DT.data.values.map(&:size).sum - 3) >= 200
+  (DT.data.values.sum(&:size) - 3) >= 200
 end
 
 # No data for failing partition

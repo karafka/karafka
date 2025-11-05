@@ -139,7 +139,7 @@ module Karafka
           [attribute, public_send(attribute)]
         end
 
-        Hash[map].merge!(
+        map.to_h.merge!(
           id: id,
           name: name,
           active: active?,
