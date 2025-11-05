@@ -39,7 +39,7 @@ start_karafka_and_wait_until do
     @produced = true
   end
 
-  DT.data.values.map(&:size).sum >= 100
+  DT.data.values.sum(&:size) >= 100
 end
 
 # Since Ruby hash function is slightly nondeterministic, not all the threads may always be used

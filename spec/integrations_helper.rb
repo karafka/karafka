@@ -310,7 +310,7 @@ end
 
 # @return [Array<Karafka::Routing::Topic>] all topics (declaratives and non-declaratives)
 def fetch_routes_topics
-  Karafka::App.routes.map(&:topics).map(&:to_a).flatten
+  Karafka::App.routes.map { |route| route.topics.to_a }.flatten
 end
 
 # @return [Hash] hash with names of topics and configs as values or false for topics for which

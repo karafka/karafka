@@ -100,9 +100,11 @@ draw_routes do
   end
 end
 
+RANDOM_BOOL = [true, false].freeze
+
 Thread.new do
   loop do
-    if [true, false].sample
+    if RANDOM_BOOL.sample
       produce(DT.topics[0], DT.uuids(1).first)
       sleep(rand / 10)
       produce(DT.topics[1], DT.uuids(1).first)

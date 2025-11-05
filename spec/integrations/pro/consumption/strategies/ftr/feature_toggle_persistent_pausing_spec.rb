@@ -49,7 +49,7 @@ class FeatureTogglePauseFilter < Karafka::Pro::Processing::Filters::Base
     @cursor = nil
     @paused = false
 
-    # No reason to pause anything when ther are no messages to consume in the first place
+    # No reason to pause anything when there are no messages to consume in the first place
     return if messages.empty?
 
     flag_name = "pause_topic_#{@topic.name}"
@@ -99,7 +99,7 @@ Thread.new { Karafka::Server.run }
 
 sleep(10)
 
-assert DT[:messages].size == 0
+assert DT[:messages].empty?
 
 FeatureToggle.disable("pause_topic_#{DT.topic}")
 

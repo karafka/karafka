@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+FAILING_OFFSETS = [1, 25].freeze
 
 # This code is part of Karafka Pro, a commercial component not licensed under LGPL.
 # See LICENSE for details.
@@ -25,7 +26,7 @@ class Consumer < Karafka::BaseConsumer
     mark_as_consumed(messages.first)
 
     messages.each do |message|
-      raise StandardError if [1, 25].include?(message.offset)
+      raise StandardError if FAILING_OFFSETS.include?(message.offset)
 
       DT[0] << message.offset
     end

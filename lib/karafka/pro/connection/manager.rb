@@ -184,8 +184,7 @@ module Karafka
                                     .assignments
                                     .select { |_, partitions| partitions.size > 1 }
                                     .keys
-                                    .map(&:subscription_group)
-                                    .map(&:name)
+                                    .map { |sg| sg.subscription_group.name }
                                     .uniq
 
           # Select connections for scaling up

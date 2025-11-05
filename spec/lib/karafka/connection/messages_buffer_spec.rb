@@ -28,9 +28,7 @@ RSpec.describe_current do
         buffer.remap(raw_messages_buffer)
 
         messages = []
-
         buffer.each { |*args| messages << args }
-
         messages
       end
 
@@ -71,9 +69,7 @@ RSpec.describe_current do
         buffer.remap(raw_messages_buffer)
 
         messages = []
-
         buffer.each { |*args| messages << args }
-
         messages
       end
 

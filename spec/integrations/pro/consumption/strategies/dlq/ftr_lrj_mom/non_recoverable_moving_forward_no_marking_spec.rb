@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+FAILING_OFFSETS = [1, 25].freeze
 
 # This code is part of Karafka Pro, a commercial component not licensed under LGPL.
 # See LICENSE for details.
@@ -24,7 +25,7 @@ end
 class Consumer < Karafka::BaseConsumer
   def consume
     messages.each do |message|
-      if [1, 25].include?(message.offset)
+      if FAILING_OFFSETS.include?(message.offset)
         DT[:firsts] << messages.first.offset
 
         raise StandardError
@@ -59,7 +60,7 @@ assert !DT[0].include?(25)
 
 # Failing messages that are not first in batch should cause some reprocessing
 duplicates.each do |duplicate|
-  next if [1, 25].include?(duplicate + 1)
+  next if FAILING_OFFSETS.include?(duplicate + 1)
 
   assert DT[0].count { |nr| nr == (duplicate + 1) } > 1
 end

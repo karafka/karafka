@@ -47,9 +47,11 @@ other = Thread.new do
   consumer.close
 end
 
+SAMPLE_PARTITIONS = [0, 1].freeze
+
 Thread.new do
   loop do
-    produce(DT.topic, '1', partition: [0, 1].sample)
+    produce(DT.topic, '1', partition: SAMPLE_PARTITIONS.sample)
     sleep(0.1)
   rescue WaterDrop::Errors::ProducerClosedError
     break
