@@ -3,6 +3,9 @@
 # This code is part of Karafka Pro, a commercial component not licensed under LGPL.
 # See LICENSE for details.
 
+# Karafka should correctly handle transactional producers from a ConnectionPool with
+# multiplexing, ensuring transactional integrity across concurrent consumers
+
 Bundler.require(:default)
 
 mod = Module.new do
