@@ -1,5 +1,8 @@
 # frozen_string_literal: true
 
+# Karafka should integrate with Datadog native tracing and enable distributed tracing for
+# message consumption
+
 require 'karafka'
 require 'datadog/auto_instrument'
 

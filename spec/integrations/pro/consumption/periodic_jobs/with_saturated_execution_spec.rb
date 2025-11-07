@@ -3,6 +3,9 @@
 # This code is part of Karafka Pro, a commercial component not licensed under LGPL.
 # See LICENSE for details.
 
+# When consume takes longer than the periodic interval, tick should still execute after
+# consume finishes and should not be skipped
+
 setup_karafka do |config|
   config.max_messages = 1
 end

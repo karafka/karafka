@@ -1,5 +1,8 @@
 # frozen_string_literal: true
 
+# AssignmentsTracker should remain stable and not crash when inspected concurrently from
+# multiple consumer groups during message processing
+
 setup_karafka
 
 class Consumer < Karafka::BaseConsumer
