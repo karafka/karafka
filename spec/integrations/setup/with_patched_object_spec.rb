@@ -1,5 +1,8 @@
 # frozen_string_literal: true
 
+# Karafka setup should not crash even when Object class has been patched with logger methods
+# that raise errors
+
 class Object
   def self.logger
     raise

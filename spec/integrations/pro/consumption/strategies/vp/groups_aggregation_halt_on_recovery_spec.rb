@@ -3,6 +3,10 @@
 # This code is part of Karafka Pro, a commercial component not licensed under LGPL.
 # See LICENSE for details.
 
+# When using virtual partitions with errors during consumption, the virtual offset manager
+# should limit group accumulation and halt further grouping during recovery to prevent
+# memory issues
+
 setup_karafka(allow_errors: %w[consumer.consume.error]) do |config|
   config.concurrency = 2
   config.max_messages = 100

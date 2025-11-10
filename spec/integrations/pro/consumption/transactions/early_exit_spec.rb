@@ -3,6 +3,9 @@
 # This code is part of Karafka Pro, a commercial component not licensed under LGPL.
 # See LICENSE for details.
 
+# When attempting to exit a transaction block early using break, Karafka should raise
+# EarlyTransactionExitNotAllowedError to prevent incomplete transactions
+
 setup_karafka do |config|
   config.kafka[:'transactional.id'] = SecureRandom.uuid
 end
