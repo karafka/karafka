@@ -97,7 +97,7 @@ module Karafka
       # If we've issued a stop to this process and it does not want to stop in the period, kills it
       #
       # @param statuses [Hash] hash with statuses transitions with times
-      # @param [Swarm::Node] node we're checking
+      # @param node [Swarm::Node] node we're checking
       # @return [Boolean] should it be the last action taken on this node in this run
       def terminate_if_hanging(statuses, node)
         return false unless statuses.key?(:stop)
@@ -118,7 +118,7 @@ module Karafka
       # reported it is not healthy.
       #
       # @param statuses [Hash] hash with statuses transitions with times
-      # @param [Swarm::Node] node we're checking
+      # @param node [Swarm::Node] node we're checking
       # @return [Boolean] should it be the last action taken on this node in this run
       def stop_if_not_healthy(statuses, node)
         status = node.status
@@ -146,7 +146,7 @@ module Karafka
       # If node stopped responding, starts the stopping procedure.
       #
       # @param statuses [Hash] hash with statuses transitions with times
-      # @param [Swarm::Node] node we're checking
+      # @param node [Swarm::Node] node we're checking
       # @return [Boolean] should it be the last action taken on this node in this run
       def stop_if_not_responding(statuses, node)
         # Do nothing if already stopping
@@ -171,7 +171,7 @@ module Karafka
       # Cleans up a dead process and remembers time of death for restart after a period.
       #
       # @param statuses [Hash] hash with statuses transitions with times
-      # @param [Swarm::Node] node we're checking
+      # @param node [Swarm::Node] node we're checking
       # @return [Boolean] should it be the last action taken on this node in this run
       def cleanup_one(statuses, node)
         return false if statuses.key?(:dead_since)
@@ -188,7 +188,7 @@ module Karafka
       # killed for some external reason.
       #
       # @param statuses [Hash] hash with statuses transitions with times
-      # @param [Swarm::Node] node we're checking
+      # @param node [Swarm::Node] node we're checking
       # @return [Boolean] should it be the last action taken on this node in this run
       def restart_after_timeout(statuses, node)
         return false unless over?(statuses[:dead_since], node_restart_timeout)
@@ -200,7 +200,7 @@ module Karafka
 
       # Starts a new node (or restarts dead)
       #
-      # @param [Swarm::Node] node we're starting
+      # @param node [Swarm::Node] node we're starting
       def start_one(node)
         instr_args = { caller: self, node: node }
 

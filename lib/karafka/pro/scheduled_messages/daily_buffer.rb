@@ -69,8 +69,8 @@ module Karafka
           selected.each { |_, message| yield(message) }
         end
 
-        # Removes given key from the accumulator
-        # @param key [String] key to remove
+        # Removes the schedule entry identified by the given key from the daily buffer
+        # @param key [String]
         def delete(key)
           @accu.delete(key)
         end

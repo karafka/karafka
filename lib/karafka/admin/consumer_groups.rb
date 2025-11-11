@@ -305,14 +305,14 @@ module Karafka
         # Reads lags and offsets for given topics in the context of consumer groups defined in the
         #   routing
         #
-        # @param consumer_groups_with_topics [Hash<String, Array<String>>] hash with consumer
+        # @param consumer_groups_with_topics [Hash{String => Array<String>}] hash with consumer
         #   groups names with array of topics to query per consumer group inside
         # @param active_topics_only [Boolean] if set to false, when we use routing topics, will
         #   select also topics that are marked as inactive in routing
         #
-        # @return [Hash<String, Hash<Integer, <Hash<Integer>>>>] hash where the top level keys are
-        #   the consumer groups and values are hashes with topics and inside partitions with lags
-        #   and offsets
+        # @return [Hash{String => Hash{Integer => Hash{Integer => Object}}}] hash where the top
+        #   level keys are the consumer groups and values are hashes with topics and inside
+        #   partitions with lags and offsets
         #
         # @note For topics that do not exist, topic details will be set to an empty hash
         #

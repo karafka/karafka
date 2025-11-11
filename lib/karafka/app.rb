@@ -52,7 +52,7 @@ module Karafka
 
       # Returns current assignments of this process. Both topics and partitions
       #
-      # @return [Hash<Karafka::Routing::Topic, Array<Integer>>]
+      # @return [Hash{Karafka::Routing::Topic => Array<Integer>}]
       def assignments
         Instrumentation::AssignmentsTracker.instance.current
       end

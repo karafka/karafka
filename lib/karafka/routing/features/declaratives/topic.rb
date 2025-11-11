@@ -16,9 +16,11 @@ module Karafka
           end
 
           # @param active [Boolean] is the topic structure management feature active
-          # @param partitions [Integer]
-          # @param replication_factor [Integer]
+          # @param partitions [Integer] number of partitions for the topic
+          # @param replication_factor [Integer] replication factor for the topic
           # @param details [Hash] extra configuration for the topic
+          # @option details [String] :retention.ms retention time in milliseconds
+          # @option details [String] :compression.type compression type (none, gzip, snappy, lz4, zstd)
           # @return [Config] defined structure
           def config(active: true, partitions: 1, replication_factor: 1, **details)
             @declaratives ||= Config.new(

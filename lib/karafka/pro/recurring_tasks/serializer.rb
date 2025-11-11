@@ -11,7 +11,8 @@ module Karafka
         # Current recurring tasks related schema structure
         SCHEMA_VERSION = '1.0'
 
-        # @param schedule [Karafka::Pro::RecurringTasks::Schedule] schedule to serialize
+        # Serializes and compresses the schedule with all its tasks and their execution state
+        # @param schedule [Karafka::Pro::RecurringTasks::Schedule]
         # @return [String] serialized and compressed current schedule data with its tasks and their
         #   current state.
         def schedule(schedule)
@@ -92,9 +93,9 @@ module Karafka
           hash.to_json
         end
 
-        # Compresses the provided data
+        # Compresses the provided data using Zlib deflate algorithm
         #
-        # @param data [String] data to compress
+        # @param data [String]
         # @return [String] compressed data
         def compress(data)
           Zlib::Deflate.deflate(data)

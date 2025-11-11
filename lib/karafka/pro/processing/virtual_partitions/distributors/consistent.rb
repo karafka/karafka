@@ -11,8 +11,10 @@ module Karafka
           # Consistent distributor that ensures messages with the same partition key
           # are always processed in the same virtual partition
           class Consistent < Base
-            # @param messages [Array<Karafka::Messages::Message>] messages to distribute
-            # @return [Hash<Integer, Array<Karafka::Messages::Message>>] hash with group ids as
+            # Distributes messages ensuring consistent routing where messages with the same
+            # partition key always go to the same virtual partition
+            # @param messages [Array<Karafka::Messages::Message>]
+            # @return [Hash{Integer => Array<Karafka::Messages::Message>}] hash with group ids as
             #   keys and message groups as values
             def call(messages)
               messages
