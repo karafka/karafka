@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+# Karafka should be able to produce and consume messages compressed with snappy codec
+
 setup_karafka do |config|
   config.kafka[:'compression.codec'] = 'snappy'
 end

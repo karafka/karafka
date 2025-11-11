@@ -3,6 +3,9 @@
 # This code is part of Karafka Pro, a commercial component not licensed under LGPL.
 # See LICENSE for details.
 
+# Karafka Web should handle high-concurrency DLQ message dispatching without deadlocking,
+# ensuring tracking data is properly synchronized across many partitions
+
 setup_karafka(allow_errors: %w[consumer.consume.error]) do |config|
   config.kafka[:'transactional.id'] = SecureRandom.uuid
   config.concurrency = 20
