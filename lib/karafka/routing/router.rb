@@ -8,7 +8,7 @@ module Karafka
     #  structure so all the routes are being stored in a single level array
     module Router
       # Finds first reference of a given topic based on provided lookup attribute
-      # @param lookup [Hash<Symbol, String>] hash with attribute - value key pairs
+      # @param lookup [Hash{Symbol => String}] hash with attribute - value key pairs
       # @return [Karafka::Routing::Topic, nil] proper route details or nil if not found
       def find_by(lookup)
         App.consumer_groups.each do |consumer_group|

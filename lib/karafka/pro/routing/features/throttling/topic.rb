@@ -46,7 +46,9 @@ module Karafka
 
             # Just an alias for nice API
             #
-            # @param args [Array] Anything `#throttling` accepts
+            # @param args [Hash] Anything `#throttling` accepts
+            # @option args [Integer] :limit max messages to process in a time interval
+            # @option args [Integer] :interval time interval for processing in milliseconds
             def throttle(**args)
               throttling(**args)
             end

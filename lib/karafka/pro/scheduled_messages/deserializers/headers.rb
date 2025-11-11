@@ -16,7 +16,7 @@ module Karafka
 
           private_constant :WORKABLE_TYPES
 
-          # @param metadata [Karafka::aMessages::Metadata]
+          # @param metadata [Karafka::Messages::Metadata]
           # @return [Hash] headers
           def call(metadata)
             raw_headers = metadata.raw_headers

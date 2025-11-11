@@ -22,6 +22,9 @@ module Karafka
             # @param strategy [#call, nil] Strategy we want to use or nil if a default strategy
             # (same as in OSS) should be applied
             # @param args [Hash] Pro DLQ arguments
+            # @option args [String, nil] :topic name of the dead letter queue topic
+            # @option args [Integer] :max_retries maximum number of retries before dispatching to DLQ
+            # @option args [Boolean] :independent whether DLQ runs independently
             def dead_letter_queue(strategy: nil, **args)
               return @dead_letter_queue if @dead_letter_queue
 
