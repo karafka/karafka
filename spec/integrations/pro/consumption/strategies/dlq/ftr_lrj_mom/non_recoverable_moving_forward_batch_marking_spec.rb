@@ -1,11 +1,12 @@
 # frozen_string_literal: true
-FAILING_OFFSETS = [1, 25].freeze
 
 # This code is part of Karafka Pro, a commercial component not licensed under LGPL.
 # See LICENSE for details.
 
 # Upon non-recoverable errors, Karafka should move forward retrying from last one that was
 # committed with duplicates in between comitted and crashed
+
+FAILING_OFFSETS = [1, 25].freeze
 
 class Listener
   def on_error_occurred(event)
