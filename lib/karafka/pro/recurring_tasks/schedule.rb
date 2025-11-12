@@ -13,7 +13,7 @@ module Karafka
         # @return [String]
         attr_reader :version
 
-        # @return [Hash<String, Task>]
+        # @return [Hash{String => Task}]
         attr_reader :tasks
 
         # @param version [String] schedule version. In case of usage of versioning it is used to
@@ -43,7 +43,10 @@ module Karafka
         end
 
         # Allows us to have a nice DSL for defining schedules
-        # @param args [Array] attributes accepted by the task initializer
+        # @param args [Hash] attributes accepted by the task initializer
+        # @option args [String] :id unique task identifier
+        # @option args [String] :cron cron expression for task scheduling
+        # @option args [Proc] :previous_time optional lambda returning previous execution time
         def schedule(**args, &)
           self << Task.new(**args, &)
         end

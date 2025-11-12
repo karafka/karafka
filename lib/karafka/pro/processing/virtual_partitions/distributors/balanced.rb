@@ -11,8 +11,10 @@ module Karafka
           # Balanced distributor that groups messages by partition key
           # and processes larger groups first while maintaining message order within groups
           class Balanced < Base
-            # @param messages [Array<Karafka::Messages::Message>] messages to distribute
-            # @return [Hash<Integer, Array<Karafka::Messages::Message>>] hash with group ids as
+            # Distributes messages to virtual partitions ensuring balanced load across workers
+            # by grouping messages by partition key and assigning larger groups first
+            # @param messages [Array<Karafka::Messages::Message>]
+            # @return [Hash{Integer => Array<Karafka::Messages::Message>}] hash with group ids as
             #   keys and message groups as values
             def call(messages)
               # Group messages by partition key

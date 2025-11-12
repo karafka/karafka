@@ -79,7 +79,7 @@ module Karafka
     private
 
     # Traps a single signal and performs callbacks (if any) or just ignores this signal
-    # @param [Symbol] signal type that we want to catch
+    # @param signal [Symbol] signal type that we want to catch
     # @note Since we do a lot of threading and queuing, we don't want to handle signals from the
     # trap context s some things may not work there as expected, that is why we spawn a separate
     # thread to handle the signals process
@@ -96,7 +96,7 @@ module Karafka
     end
 
     # Informs monitoring about trapped signal
-    # @param [Symbol] signal type that we received
+    # @param signal [Symbol] signal type that we received
     def notice_signal(signal)
       Karafka.monitor.instrument('process.notice_signal', caller: self, signal: signal)
     end

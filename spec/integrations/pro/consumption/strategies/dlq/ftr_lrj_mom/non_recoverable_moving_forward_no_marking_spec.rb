@@ -1,5 +1,4 @@
 # frozen_string_literal: true
-FAILING_OFFSETS = [1, 25].freeze
 
 # This code is part of Karafka Pro, a commercial component not licensed under LGPL.
 # See LICENSE for details.
@@ -7,6 +6,8 @@ FAILING_OFFSETS = [1, 25].freeze
 # Upon non-recoverable errors, Karafka should move forward skipping given message even if no
 # marking happens. When operating on batches and no marking happens, we skip first message from
 # the batch on which the error happened.
+
+FAILING_OFFSETS = [1, 25].freeze
 
 class Listener
   def on_error_occurred(event)

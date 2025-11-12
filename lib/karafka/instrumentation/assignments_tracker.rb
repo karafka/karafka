@@ -21,7 +21,7 @@ module Karafka
 
       # Returns all the active/current assignments of this given process
       #
-      # @return [Hash<Karafka::Routing::Topic, Array<Integer>>]
+      # @return [Hash{Karafka::Routing::Topic => Array<Integer>}]
       #
       # @note Keep in mind, that those assignments can change any time, especially when working
       #   with multiple consumer groups or subscription groups.

@@ -12,6 +12,7 @@ module Karafka
           include Helpers::Colorize
 
           # @param options [Hash] cli flags options
+          # @option options [Array<String>] :groups consumer group names to work with
           def initialize(options)
             @options = options
           end
@@ -23,7 +24,7 @@ module Karafka
 
           # Returns consumer groups for parallel segments with which we should be working
           #
-          # @return [Hash<String, Array<Karafka::Routing::ConsumerGroup>>] hash with all parallel
+          # @return [Hash{String => Array<Karafka::Routing::ConsumerGroup>}] hash with all parallel
           #   consumer groups as values and names of segments origin consumer group as the key.
           def applicable_groups
             requested_groups = options[:groups].dup || []

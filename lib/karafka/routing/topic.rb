@@ -29,7 +29,7 @@ module Karafka
 
       private_constant :INHERITABLE_ATTRIBUTES
 
-      # @param [String, Symbol] name of a topic on which we want to listen
+      # @param name [String, Symbol] name of a topic on which we want to listen
       # @param consumer_group [Karafka::Routing::ConsumerGroup] owning consumer group of this topic
       def initialize(name, consumer_group)
         @name = name.to_s
