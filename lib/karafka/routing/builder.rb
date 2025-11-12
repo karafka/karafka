@@ -139,8 +139,8 @@ module Karafka
       # @param subscription_group_name [String, Symbol] subscription group id. When not provided,
       #   a random uuid will be used
       # @param args [Hash] any extra arguments accepted by the subscription group builder
-      # @option args [String] :kafka optional kafka scope settings
       # @param block [Proc] further topics definitions
+      # @option args [String] :kafka optional kafka scope settings
       def subscription_group(
         subscription_group_name = SubscriptionGroup.id,
         **args,
