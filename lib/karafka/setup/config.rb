@@ -12,7 +12,7 @@ module Karafka
     #   enough and will still keep the code simple
     # @see Karafka::Setup::Configurators::Base for more details about configurators api
     class Config
-      extend ::Karafka::Core::Configurable
+      extend Karafka::Core::Configurable
 
       # Available settings
 
@@ -33,9 +33,9 @@ module Karafka
       #   Used only for logging.
       setting :client_id, default: 'karafka'
       # option logger [Instance] logger that we want to use
-      setting :logger, default: ::Karafka::Instrumentation::Logger.new
+      setting :logger, default: Karafka::Instrumentation::Logger.new
       # option monitor [Instance] monitor that we will to use (defaults to Karafka::Monitor)
-      setting :monitor, default: ::Karafka::Instrumentation::Monitor.new
+      setting :monitor, default: Karafka::Instrumentation::Monitor.new
       # option [Boolean] should we reload consumers with each incoming batch thus effectively
       # supporting code reload (if someone reloads code) or should we keep the persistence
       setting :consumer_persistence, default: true
@@ -211,7 +211,7 @@ module Karafka
         setting :cli do
           # option contract [Object] cli setup validation contract (in the context of options and
           # topics)
-          setting :contract, default: ::Karafka::Cli::Contracts::Server.new
+          setting :contract, default: Karafka::Cli::Contracts::Server.new
         end
 
         setting :routing do
@@ -345,7 +345,7 @@ module Karafka
           #   (incoming). Can be replaced with a custom implementation for formats like Avro,
           #   Protobuf, etc. This is a global setting because Rails serializes jobs before
           #   Karafka receives them, so we need a consistent approach across all ActiveJob topics.
-          setting :deserializer, default: ::Karafka::ActiveJob::Deserializer.new
+          setting :deserializer, default: Karafka::ActiveJob::Deserializer.new
         end
       end
 
@@ -429,7 +429,7 @@ module Karafka
           configure_components(proxy)
 
           # Refreshes the references that are cached that might have been changed by the config
-          ::Karafka.refresh!
+          Karafka.refresh!
 
           # Post-setup configure all routing features that would need this
           Routing::Features::Base.post_setup_all(config)
@@ -456,7 +456,7 @@ module Karafka
           # any consumer/admin runs
           Karafka::App.monitor.subscribe(oauth_listener) if oauth_listener
 
-          config.producer ||= ::WaterDrop::Producer.new do |producer_config|
+          config.producer ||= WaterDrop::Producer.new do |producer_config|
             # In some cases WaterDrop updates the config and we don't want our consumer config to
             # be polluted by those updates, that's why we copy
             producer_kafka = AttributesMap.producer(config.kafka.dup)
