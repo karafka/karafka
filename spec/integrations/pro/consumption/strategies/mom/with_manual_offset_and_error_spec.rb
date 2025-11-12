@@ -46,7 +46,7 @@ Thread.new do
 end
 
 start_karafka_and_wait_until do
-  DT[:offsets].size >= 10
+  DT[:offsets].size >= 17
 end
 
 split = DT[:split].first
