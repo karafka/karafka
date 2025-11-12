@@ -8,7 +8,7 @@ module Karafka
     # It is threadsafe and provides some security measures so we won't end up operating on a
     # closed consumer instance as it causes Ruby VM process to crash.
     class Client
-      include ::Karafka::Core::Helpers::Time
+      include Karafka::Core::Helpers::Time
       include Helpers::ConfigImporter.new(
         logger: %i[logger],
         tick_interval: %i[internal tick_interval],
@@ -489,7 +489,7 @@ module Karafka
         # If the seek message offset is in a time format, we need to find the closest "real"
         # offset matching before we seek
         if message.offset.is_a?(Time)
-          tpl = ::Rdkafka::Consumer::TopicPartitionList.new
+          tpl = Rdkafka::Consumer::TopicPartitionList.new
           tpl.add_topic_and_partitions_with_offsets(
             message.topic,
             message.partition => message.offset
@@ -546,9 +546,9 @@ module Karafka
         sg_id = @subscription_group.id
 
         # Remove callbacks runners that were registered
-        ::Karafka::Core::Instrumentation.statistics_callbacks.delete(sg_id)
-        ::Karafka::Core::Instrumentation.error_callbacks.delete(sg_id)
-        ::Karafka::Core::Instrumentation.oauthbearer_token_refresh_callbacks.delete(sg_id)
+        Karafka::Core::Instrumentation.statistics_callbacks.delete(sg_id)
+        Karafka::Core::Instrumentation.error_callbacks.delete(sg_id)
+        Karafka::Core::Instrumentation.oauthbearer_token_refresh_callbacks.delete(sg_id)
 
         kafka.close
         @kafka = nil
@@ -564,7 +564,7 @@ module Karafka
       #   ignored. We do however want to instrument on it
       def unsubscribe
         kafka.unsubscribe
-      rescue ::Rdkafka::RdkafkaError => e
+      rescue Rdkafka::RdkafkaError => e
         Karafka.monitor.instrument(
           'error.occurred',
           caller: self,
@@ -593,8 +593,8 @@ module Karafka
       #   established. It may be `-1` in case we lost the assignment or we did not yet fetch data
       #   for this topic partition
       def topic_partition_position(topic, partition)
-        rd_partition = ::Rdkafka::Consumer::Partition.new(partition, nil, 0)
-        tpl = ::Rdkafka::Consumer::TopicPartitionList.new(topic => [rd_partition])
+        rd_partition = Rdkafka::Consumer::Partition.new(partition, nil, 0)
+        tpl = Rdkafka::Consumer::TopicPartitionList.new(topic => [rd_partition])
 
         kafka.position(tpl).to_h.fetch(topic).first.offset || -1
       end
@@ -645,7 +645,7 @@ module Karafka
         # If we did not exceed total time allocated, it means that we finished because of the
         # tick interval time limitations and not because time run out without any data
         time_poll.exceeded? ? nil : :tick_time
-      rescue ::Rdkafka::RdkafkaError => e
+      rescue Rdkafka::RdkafkaError => e
         early_report = false
 
         retryable = time_poll.attempts <= MAX_POLL_RETRIES && time_poll.retryable?
@@ -704,7 +704,7 @@ module Karafka
       # Builds a new rdkafka consumer instance based on the subscription group configuration
       # @return [Rdkafka::Consumer]
       def build_consumer
-        ::Rdkafka::Config.logger = logger
+        Rdkafka::Config.logger = logger
 
         # We need to refresh the setup of this subscription group in case we started running in a
         # swarm. The initial configuration for validation comes from the parent node, but it needs
@@ -712,7 +712,7 @@ module Karafka
         # group instance id.
         @subscription_group.refresh
 
-        config = ::Rdkafka::Config.new(@subscription_group.kafka)
+        config = Rdkafka::Config.new(@subscription_group.kafka)
         config.consumer_rebalance_listener = @rebalance_callback
         # We want to manage the events queue independently from the messages queue. Thanks to that
         # we can ensure, that we get statistics and errors often enough even when not polling
@@ -724,7 +724,7 @@ module Karafka
         @name = consumer.name
 
         # Register statistics runner for this particular type of callbacks
-        ::Karafka::Core::Instrumentation.statistics_callbacks.add(
+        Karafka::Core::Instrumentation.statistics_callbacks.add(
           @subscription_group.id,
           Instrumentation::Callbacks::Statistics.new(
             @subscription_group.id,
@@ -734,7 +734,7 @@ module Karafka
         )
 
         # Register error tracking callback
-        ::Karafka::Core::Instrumentation.error_callbacks.add(
+        Karafka::Core::Instrumentation.error_callbacks.add(
           @subscription_group.id,
           Instrumentation::Callbacks::Error.new(
             @subscription_group.id,
@@ -743,7 +743,7 @@ module Karafka
           )
         )
 
-        ::Karafka::Core::Instrumentation.oauthbearer_token_refresh_callbacks.add(
+        Karafka::Core::Instrumentation.oauthbearer_token_refresh_callbacks.add(
           @subscription_group.id,
           Instrumentation::Callbacks::OauthbearerTokenRefresh.new(
             consumer
