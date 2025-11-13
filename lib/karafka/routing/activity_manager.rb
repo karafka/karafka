@@ -12,6 +12,7 @@ module Karafka
         topics
       ].freeze
 
+      # Initializes the activity manager with empty inclusion and exclusion lists
       def initialize
         @included = Hash.new { |h, k| h[k] = [] }
         @excluded = Hash.new { |h, k| h[k] = [] }

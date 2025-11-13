@@ -34,6 +34,7 @@ module Karafka
 
       private_constant :SHUTDOWN_GRACE_PERIOD
 
+      # Initializes the swarm supervisor
       def initialize
         @mutex = Mutex.new
         @queue = Queue.new

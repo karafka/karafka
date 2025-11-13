@@ -27,6 +27,7 @@ module Karafka
 
         private_constant :STATES
 
+        # Initializes the state as fresh
         def initialize
           @state = 'fresh'
         end

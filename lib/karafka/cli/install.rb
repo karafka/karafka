@@ -24,6 +24,7 @@ module Karafka
         'example_consumer.rb.erb' => 'app/consumers/example_consumer.rb'
       }.freeze
 
+      # Initializes the install command
       def initialize
         super
 

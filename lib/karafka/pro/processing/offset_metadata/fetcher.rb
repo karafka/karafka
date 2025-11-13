@@ -28,6 +28,7 @@ module Karafka
             def_delegators :instance, :register, :clear, :find
           end
 
+          # Initializes the fetcher with empty caches
           def initialize
             @mutexes = {}
             @clients = {}

@@ -20,6 +20,7 @@ module Karafka
 
           include Karafka::Core::Helpers::Time
 
+          # Initializes the filter as not yet applied
           def initialize
             @applied = false
             @cursor = nil

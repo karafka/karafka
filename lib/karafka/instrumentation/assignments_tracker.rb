@@ -14,6 +14,7 @@ module Karafka
     class AssignmentsTracker
       include Singleton
 
+      # Initializes the assignments tracker with empty assignments
       def initialize
         @mutex = Mutex.new
         @assignments = Hash.new { |hash, key| hash[key] = [] }

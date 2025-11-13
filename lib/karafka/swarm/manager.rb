@@ -29,6 +29,7 @@ module Karafka
       # @return [Array<Node>] All nodes that manager manages
       attr_reader :nodes
 
+      # Initializes the swarm manager with empty nodes
       def initialize
         @nodes = []
         @statuses = Hash.new { |h, k| h[k] = {} }

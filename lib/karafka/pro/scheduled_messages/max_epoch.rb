@@ -23,6 +23,7 @@ module Karafka
         # @return [Integer] max epoch recorded
         attr_reader :to_i
 
+        # Initializes max epoch tracker with -1 as starting value
         def initialize
           @max = -1
           @to_i = @max
