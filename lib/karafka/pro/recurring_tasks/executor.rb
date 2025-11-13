@@ -17,6 +17,7 @@ module Karafka
           trigger
         ].freeze
 
+        # Initializes the executor in replaying mode
         def initialize
           @replaying = true
           @incompatible = false

@@ -13,6 +13,7 @@ module Karafka
         dead_letter_queue
       ].freeze
 
+      # Initializes the strategy selector and preloads all strategies
       def initialize
         # We load them once for performance reasons not to do too many lookups
         @strategies = find_all

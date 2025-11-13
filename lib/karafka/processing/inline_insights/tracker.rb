@@ -51,6 +51,7 @@ module Karafka
           def_delegators :instance, :find, :add, :exists?, :clear
         end
 
+        # Initializes the tracker with empty accumulator
         def initialize
           @accu = {}
           @mutex = Mutex.new

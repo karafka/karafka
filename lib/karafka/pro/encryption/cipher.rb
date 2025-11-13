@@ -12,6 +12,7 @@ module Karafka
           encryption: %i[encryption]
         )
 
+        # Initializes the cipher with empty private keys cache
         def initialize
           @private_pems = {}
         end

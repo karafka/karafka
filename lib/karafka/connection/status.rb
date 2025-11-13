@@ -46,6 +46,7 @@ module Karafka
         RUBY
       end
 
+      # Initializes the connection status and sets it to pending
       def initialize
         @mutex = Mutex.new
         pending!

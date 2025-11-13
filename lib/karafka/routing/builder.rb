@@ -23,6 +23,7 @@ module Karafka
 
       private_constant :EMPTY_DEFAULTS
 
+      # Initializes the routing builder with empty routes
       def initialize
         @mutex = Mutex.new
         @draws = []
