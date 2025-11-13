@@ -37,7 +37,7 @@ module Karafka
       COOP_UNSUBSCRIBE_FACTOR = 0.5
 
       # Errors upon which we early report that something is off without retrying prior to the
-      # report
+      # report. Aside from those we ALWAYS early report on any fatal error.
       EARLY_REPORT_ERRORS = [
         :inconsistent_group_protocol, # 23
         :max_poll_exceeded, # -147
@@ -48,10 +48,7 @@ module Karafka
         :cluster_authorization_failed, # 31
         :illegal_generation,
         # this will not recover as fencing is permanent
-        :fenced, # -144
         :auto_offset_reset, # -140
-        # This can happen for many reasons, including issues with static membership being fenced
-        :fatal, # -150,
         # This can happen with new rebalance protocol and same group.instance.id in use
         :unreleased_instance_id # 111
       ].freeze
@@ -655,6 +652,7 @@ module Karafka
         # Those are mainly network issues and exceeding the max poll interval
         # We want to report early on max poll interval exceeding because it may mean that the
         # underlying processing is taking too much time and it is not LRJ
+
         case e.code
         when *EARLY_REPORT_ERRORS
           early_report = true
@@ -677,6 +675,9 @@ module Karafka
         when :partition_eof
           return e.details
         end
+
+        # Any fatal error should always cause early report
+        early_report = true if e.fatal?
 
         if early_report || !retryable
           Karafka.monitor.instrument(

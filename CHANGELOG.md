@@ -1,6 +1,7 @@
 # Karafka Framework Changelog
 
 ## 2.5.3 (Unreleased)
+- [Enhancement] Dynamically support `librdkafka` fatal errors with correct reported details.
 - [Enhancement] Add `producer` block API to setup for simplified WaterDrop producer configuration without manual producer instance creation, using a transparent ConfigProxy during setup to avoid polluting the permanent config API.
 - [Change] Require `waterdrop` `>=` `2.8.13` to support new features.
 - [Change] Require `karafka-rdkafka` `>=` `0.23.0` to support new rebalance protocol.
