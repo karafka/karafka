@@ -14,6 +14,7 @@ module Karafka
       # up to 1.5 second, thus it is acceptable. Please ping me if you encounter performance
       # issues with this naive implementation so it can be improved.
       class DailyBuffer
+        # Initializes the daily buffer with empty accumulator
         def initialize
           @accu = {}
         end

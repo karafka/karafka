@@ -8,6 +8,7 @@ module Karafka
     # In the OSS version it starts listeners as they are without any connection management or
     # resources utilization supervision and shuts them down or quiets  when time has come
     class Manager
+      # Initializes the connection manager
       def initialize
         @once_executions = Set.new
       end

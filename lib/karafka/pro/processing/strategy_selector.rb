@@ -23,6 +23,7 @@ module Karafka
           filtering
         ].freeze
 
+        # Initializes the strategy selector and preloads all strategies
         def initialize
           # Preload the strategies
           # We load them once for performance reasons not to do too many lookups

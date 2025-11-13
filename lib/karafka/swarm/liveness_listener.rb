@@ -13,6 +13,7 @@ module Karafka
         orphaned_exit_code: %i[internal swarm orphaned_exit_code]
       )
 
+      # Initializes the liveness listener
       def initialize
         @last_checked_at = 0
         @mutex = Mutex.new

@@ -18,6 +18,7 @@ module Karafka
         # @return [Integer] utc timestamp when this day starts. Equal to 00:00:00
         attr_reader :starts_at
 
+        # Initializes a day representation for the current UTC day
         def initialize
           @created_at = Time.now.to_i
 

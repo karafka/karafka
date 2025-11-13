@@ -24,6 +24,7 @@ module Karafka
 
       private_constant :DISTRIBUTION_KEYS
 
+      # Initializes the subscription groups builder
       def initialize
         @position = -1
       end
