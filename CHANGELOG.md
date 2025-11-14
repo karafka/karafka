@@ -1,10 +1,10 @@
 # Karafka Framework Changelog
 
-## 2.5.3 (Unreleased)
+## 2.5.3 (2025-11-14)
 - [Enhancement] Dynamically support `librdkafka` fatal errors with correct reported details.
 - [Enhancement] Add `producer` block API to setup for simplified WaterDrop producer configuration without manual producer instance creation, using a transparent ConfigProxy during setup to avoid polluting the permanent config API.
-- [Change] Require `waterdrop` `>=` `2.8.13` to support new features.
-- [Change] Require `karafka-rdkafka` `>=` `0.23.0` to support new rebalance protocol.
+- [Change] Require `waterdrop` `>=` `2.8.14` to support new features.
+- [Change] Require `karafka-rdkafka` `>=` `0.23.1` to support new rebalance protocol.
 
 ## 2.5.2 (2025-10-31)
 - **[EOL]** Remove Rails 7.1 support according to EOL while not blocking Rails 7.1 usage.
