@@ -42,7 +42,7 @@ File.open('karafka.rb', 'a') do |file|
   file.puts <<~LISTENER
     require 'karafka/instrumentation/vendors/kubernetes/liveness_listener'
 
-    listener = ::Karafka::Instrumentation::Vendors::Kubernetes::LivenessListener.new(port: 9007)
+    listener = ::Karafka::Instrumentation::Vendors::Kubernetes::LivenessListener.new(port: 9014)
 
     Karafka.monitor.subscribe(listener)
   LISTENER
@@ -64,7 +64,7 @@ not_available = false
 
 begin
   req = Net::HTTP::Get.new('/')
-  client = Net::HTTP.new('127.0.0.1', 9007)
+  client = Net::HTTP.new('127.0.0.1', 9014)
   client.request(req)
 rescue Errno::ECONNREFUSED
   not_available = true
