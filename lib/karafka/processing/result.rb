@@ -8,6 +8,7 @@ module Karafka
     class Result
       attr_reader :cause
 
+      # Initializes the result as successful with no cause
       def initialize
         @success = true
         @cause = false

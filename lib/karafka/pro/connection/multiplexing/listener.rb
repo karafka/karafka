@@ -12,6 +12,7 @@ module Karafka
         # Listener used to connect listeners manager to the lifecycle events that are significant
         # to its operations
         class Listener
+          # Initializes the multiplexing listener with the connection manager
           def initialize
             @manager = App.config.internal.connection.manager
           end

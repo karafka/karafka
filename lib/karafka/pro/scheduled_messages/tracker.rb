@@ -18,6 +18,7 @@ module Karafka
         # @return [Integer] time epoch when this tracker was started
         attr_reader :started_at
 
+        # Initializes the tracker with empty statistics
         def initialize
           @daily = Hash.new { |h, k| h[k] = 0 }
           @started_at = Time.now.to_i

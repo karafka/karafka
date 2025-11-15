@@ -66,10 +66,13 @@ module Karafka
 
         virtual do |data, errors|
           next unless errors.empty?
-          next unless ::Karafka::App.config.strict_topics_namespacing
+          next unless Karafka::App.config.strict_topics_namespacing
 
           value = data.fetch(:name)
-          namespacing_chars_count = value.chars.find_all { |c| ['.', '_'].include?(c) }.uniq.size
+          namespace_chars = ['.', '_'].freeze
+          namespacing_chars_count = value.chars.find_all do |c|
+            namespace_chars.include?(c)
+          end.uniq.size
 
           next if namespacing_chars_count <= 1
 

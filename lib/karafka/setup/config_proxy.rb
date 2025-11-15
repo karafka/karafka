@@ -193,7 +193,7 @@ module Karafka
       #   end
       #
       # @example Direct producer assignment
-      #   custom_producer = WaterDrop::Producer.new { |c| c.kafka = { ... } }
+      #   custom_producer = WaterDrop::Producer.new { |c| c.kafka = { 'bootstrap.servers' => 'localhost:9092' } }
       #   config.producer = custom_producer
       def producer(instance = nil, &block)
         if block

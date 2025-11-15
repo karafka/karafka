@@ -18,6 +18,7 @@ module Karafka
           @executor = Executor.new
         end
 
+        # Consumes messages and manages recurring tasks execution
         def consume
           # There is nothing we can do if we operate on a newer schedule. In such cases we should
           # just wait and re-raise error hoping someone will notice or that this will be

@@ -14,6 +14,7 @@ module Karafka
     class AssignmentsTracker
       include Singleton
 
+      # Initializes the assignments tracker with empty assignments
       def initialize
         @mutex = Mutex.new
         @assignments = Hash.new { |hash, key| hash[key] = [] }
@@ -21,7 +22,7 @@ module Karafka
 
       # Returns all the active/current assignments of this given process
       #
-      # @return [Hash<Karafka::Routing::Topic, Array<Integer>>]
+      # @return [Hash{Karafka::Routing::Topic => Array<Integer>}]
       #
       # @note Keep in mind, that those assignments can change any time, especially when working
       #   with multiple consumer groups or subscription groups.

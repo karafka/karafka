@@ -155,7 +155,7 @@ module Karafka
 
       # @param tpl [Rdkafka::Consumer::TopicPartitionList] list of topics and partitions for which
       #   we want to get the lag on the defined CG
-      # @return [Hash<String, Hash>] hash with topics and their partitions lags
+      # @return [Hash{String => Hash}] hash with topics and their partitions lags
       def lag(tpl)
         l_config = proxy_config.committed
 

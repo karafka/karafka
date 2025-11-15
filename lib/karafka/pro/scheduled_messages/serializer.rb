@@ -32,9 +32,9 @@ module Karafka
           hash.to_json
         end
 
-        # Compresses the provided data
+        # Compresses the provided data using Zlib deflate algorithm
         #
-        # @param data [String] data to compress
+        # @param data [String]
         # @return [String] compressed data
         def compress(data)
           Zlib::Deflate.deflate(data)

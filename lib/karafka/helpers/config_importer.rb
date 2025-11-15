@@ -5,7 +5,7 @@ module Karafka
     # Module allowing for configuration injections. By default injects whole app config
     # Allows for granular config injection
     class ConfigImporter < Module
-      # @param attributes [Hash<Symbol, Array<Symbol>>] map defining what we want to inject.
+      # @param attributes [Hash{Symbol => Array<Symbol>}] map defining what we want to inject.
       #   The key is the name under which attribute will be visible and the value is the full
       #   path to the attribute
       def initialize(attributes = { config: %i[itself] })

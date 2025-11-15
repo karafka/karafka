@@ -14,7 +14,7 @@ module Karafka
             # Binds our routing validation contract prior to warmup in the supervisor, so we can
             # run it when all the context should be there (config + full routing)
             #
-            # @param config [Karafka::Core::Configurable::Node] app config
+            # @param config [Karafka::Core::Configurable::Node]
             def post_setup(config)
               config.monitor.subscribe('app.before_warmup') do
                 Contracts::Routing.new.validate!(

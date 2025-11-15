@@ -26,19 +26,6 @@ module Karafka
         #
         # @note Please use `Kubernetes::SwarmLivenessListener` when operating in the swarm mode
         class LivenessListener < BaseListener
-          # When any of those occurs, it means something went wrong in a way that cannot be
-          # recovered. In such cases we should report that the consumer process is not healthy.
-          # - `fenced` - This instance has been fenced by a newer instance and will not do any
-          #   processing at all never. Fencing most of the time means the instance.group.id has
-          #   been reused without properly terminating the previous consumer process first
-          # - `fatal` - any fatal error that halts the processing forever
-          UNRECOVERABLE_RDKAFKA_ERRORS = [
-            :fenced, # -144
-            :fatal # -150
-          ].freeze
-
-          private_constant :UNRECOVERABLE_RDKAFKA_ERRORS
-
           # @param hostname [String, nil] hostname or nil to bind on all
           # @param port [Integer] TCP port on which we want to run our HTTP status server
           # @param consuming_ttl [Integer] time in ms after which we consider consumption hanging.
@@ -113,8 +100,9 @@ module Karafka
 
             # We are only interested in the rdkafka errors
             return unless error.is_a?(Rdkafka::RdkafkaError)
-            # We mark as unrecoverable only on certain errors that will not be fixed by retrying
-            return unless UNRECOVERABLE_RDKAFKA_ERRORS.include?(error.code)
+            # When any of those occurs, it means something went wrong in a way that cannot be
+            # recovered. In such cases we should report that the consumer process is not healthy.
+            return unless error.fatal?
 
             @unrecoverable = error.code
           end

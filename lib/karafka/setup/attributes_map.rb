@@ -359,7 +359,7 @@ module Karafka
         end
 
         # @private
-        # @return [Hash<Symbol, Array<Symbol>>] hash with consumer and producer attributes list
+        # @return [Hash{Symbol => Array<Symbol>}] hash with consumer and producer attributes list
         #   that is sorted.
         # @note This method should not be used directly. It is only used to generate appropriate
         #   options list in case it would change

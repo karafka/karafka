@@ -10,8 +10,8 @@ module Karafka
           monitor: %i[monitor]
         )
 
-        # @param subscription_group_id [String] id of the current subscription group instance
-        # @param consumer_group_id [String] id of the current consumer group
+        # @param subscription_group_id [String]
+        # @param consumer_group_id [String]
         # @param client_name [String] rdkafka client name
         def initialize(subscription_group_id, consumer_group_id, client_name)
           @subscription_group_id = subscription_group_id

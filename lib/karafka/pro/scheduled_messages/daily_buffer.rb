@@ -14,6 +14,7 @@ module Karafka
       # up to 1.5 second, thus it is acceptable. Please ping me if you encounter performance
       # issues with this naive implementation so it can be improved.
       class DailyBuffer
+        # Initializes the daily buffer with empty accumulator
         def initialize
           @accu = {}
         end
@@ -69,8 +70,8 @@ module Karafka
           selected.each { |_, message| yield(message) }
         end
 
-        # Removes given key from the accumulator
-        # @param key [String] key to remove
+        # Removes the schedule entry identified by the given key from the daily buffer
+        # @param key [String]
         def delete(key)
           @accu.delete(key)
         end

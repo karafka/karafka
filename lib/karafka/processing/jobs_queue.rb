@@ -99,7 +99,7 @@ module Karafka
       # Marks a given job from a given group as completed. When there are no more jobs from a given
       # group to be executed, we won't wait.
       #
-      # @param [Jobs::Base] job that was completed
+      # @param job [Jobs::Base] job that was completed
       def complete(job)
         @mutex.synchronize do
           # We finish one job and if there is another, we pick it up
