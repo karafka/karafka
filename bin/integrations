@@ -56,7 +56,17 @@ class Scenario
     'setup/with_kip_848_protocol_incorrect_config_spec.rb' => [1].freeze
   }.freeze
 
-  private_constant :MAX_RUN_TIME, :EXIT_CODES
+  # Those specs fail as of now because of dependency on gems that do not support Ruby 4.0
+  # This should be revisited once in a while
+  RUBY_4_INCOMPATIBLE_SPECS = [
+    'instrumentation/vendors/datadog_native_pristine/consume_with_tracing_spec.rb',
+    'web/end_to_end_install_flow_pristine/install_with_rails_spec.rb',
+    'installation/with_rails7_pristine/install_spec.rb',
+    'web/incompatible_version_pristine_0.7/console_with_rails_spec.rb',
+    'instrumentation/vendors/datadog/with_original_client_pristine/with_proper_ddtrace_spec.rb'
+  ].freeze
+
+  private_constant :MAX_RUN_TIME, :EXIT_CODES, :RUBY_4_INCOMPATIBLE_SPECS
 
   attr_reader :index
 
@@ -259,6 +269,13 @@ specs.delete_if do |spec|
   next true if RUBY_VERSION < '3.2' && spec.include?('rails8')
 
   false
+end
+
+# Remove specs that don't work on Ruby 4.0.0 due to gem compatibility issues
+if RUBY_VERSION.split('.').first.to_i >= 4
+  specs.delete_if do |spec|
+    RUBY_4_INCOMPATIBLE_SPECS.any? { |incompatible| spec.end_with?(incompatible) }
+  end
 end
 
 # Randomize order
