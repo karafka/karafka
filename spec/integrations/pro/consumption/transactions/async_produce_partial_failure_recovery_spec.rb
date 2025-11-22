@@ -41,7 +41,7 @@ class Consumer < Karafka::BaseConsumer
     first_offset = messages.first.offset
 
     # Only fail on first time we see offset 0, and only on second message
-    should_fail = (first_offset == 0 && DT[:first_offset_attempts] == 0)
+    should_fail = first_offset == 0 && DT[:first_offset_attempts] == 0
     DT[:first_offset_attempts] += 1 if first_offset == 0
 
     handlers = []
@@ -96,13 +96,13 @@ class Consumer < Karafka::BaseConsumer
         }
 
         # If transaction completed, all handlers MUST be delivered
-        if result.error
-          DT[:unexpected_failures] << {
-            attempt: handler_info[:attempt],
-            offset: handler_info[:offset],
-            error: result.error
-          }
-        end
+        next unless result.error
+
+        DT[:unexpected_failures] << {
+          attempt: handler_info[:attempt],
+          offset: handler_info[:offset],
+          error: result.error
+        }
       end
     rescue StandardError => e
       DT[:failed_attempts] << attempt_id
@@ -142,7 +142,7 @@ end
 
 # Produce 15 messages to the topic
 # Kafka may deliver these in any batch size combination
-test_messages = 15.times.map { |i| "msg#{i}_#{DT.uuid}" }
+test_messages = Array.new(15) { |i| "msg#{i}_#{DT.uuid}" }
 
 produce_many(DT.topics[0], test_messages)
 
