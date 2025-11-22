@@ -252,15 +252,6 @@ ARGV.each do |filter|
   end
 end
 
-# Remove Rails 7.2 specs from Ruby < 3.1 because it requires 3.1
-# Remove Rails 8.0 specs from Ruby < 3.2 because it requires 3.2
-specs.delete_if do |spec|
-  next true if RUBY_VERSION < '3.1' && spec.include?('rails72')
-  next true if RUBY_VERSION < '3.2' && spec.include?('rails8')
-
-  false
-end
-
 # Remove specs that don't work on Ruby 4.0.0 due to gem compatibility issues
 if RUBY_VERSION.split('.').first.to_i >= 4
   # Those specs fail as of now because of dependency on gems that do not support Ruby 4.0
