@@ -40,7 +40,7 @@ class Consumer < Karafka::BaseConsumer
     # Track which offsets we're processing
     first_offset = messages.first.offset
 
-    # Only fail on first time we see offset 0, and only on second message
+    # Only fail on the first time we see offset 0, and only when processing the message at offset 1
     should_fail = first_offset == 0 && DT[:first_offset_attempts] == 0
     DT[:first_offset_attempts] += 1 if first_offset == 0
 
@@ -95,7 +95,7 @@ class Consumer < Karafka::BaseConsumer
           payload: handler_info[:payload]
         }
 
-        # If transaction completed, all handlers MUST be delivered
+        # If transaction completed, all handlers must have been delivered successfully
         next unless result.error
 
         DT[:unexpected_failures] << {
