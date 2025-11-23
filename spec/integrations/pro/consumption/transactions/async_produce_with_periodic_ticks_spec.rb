@@ -24,7 +24,7 @@ class Consumer < Karafka::BaseConsumer
       messages.each do |message|
         producer.produce_async(
           topic: DT.topics[1],
-          payload: "consume_#{message.payload}"
+          payload: "consume_#{message.raw_payload}"
         )
       end
 
@@ -49,10 +49,10 @@ end
 class ValidationConsumer < Karafka::BaseConsumer
   def consume
     messages.each do |msg|
-      if msg.payload.start_with?('consume_')
-        DT[:consume_messages] << msg.payload
-      elsif msg.payload.start_with?('tick_')
-        DT[:tick_messages] << msg.payload
+      if msg.raw_payload.start_with?('consume_')
+        DT[:consume_messages] << msg.raw_payload
+      elsif msg.raw_payload.start_with?('tick_')
+        DT[:tick_messages] << msg.raw_payload
       end
     end
   end
