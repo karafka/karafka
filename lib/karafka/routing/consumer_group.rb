@@ -31,6 +31,9 @@ module Karafka
         # Initialize the subscription group so there's always a value for it, since even if not
         # defined directly, a subscription group will be created
         @current_subscription_group_details = { name: SubscriptionGroup.id }
+        # Track the base position for subscription groups to ensure stable positions when
+        # rebuilding. This is critical for static group membership in swarm mode
+        @subscription_groups_base_position = nil
       end
 
       # @return [Boolean] true if this consumer group should be active in our current process
@@ -42,6 +45,10 @@ module Karafka
       # @param name [String, Symbol] name of topic to which we want to subscribe
       # @return [Karafka::Routing::Topic] newly built topic instance
       def topic=(name, &)
+        # Clear memoized subscription groups since adding a topic requires rebuilding them
+        # This is critical for consumer group reopening across multiple draw calls
+        @subscription_groups = nil
+
         topic = Topic.new(name, self)
         @topics << Proxy.new(
           topic,
@@ -73,7 +80,18 @@ module Karafka
       # @return [Array<Routing::SubscriptionGroup>] all the subscription groups build based on
       #   the consumer group topics
       def subscription_groups
-        @subscription_groups ||= subscription_groups_builder.call(topics)
+        @subscription_groups ||= begin
+          result = subscription_groups_builder.call(
+            topics,
+            base_position: @subscription_groups_base_position
+          )
+
+          # Store the base position from the first subscription group for future rebuilds.
+          # This ensures stable positions for static group membership.
+          @subscription_groups_base_position ||= result.first&.position
+
+          result
+        end
       end
 
       # Hashed version of consumer group that can be used for validation purposes

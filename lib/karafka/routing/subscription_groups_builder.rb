@@ -31,16 +31,28 @@ module Karafka
 
       # @param topics [Karafka::Routing::Topics] all the topics based on which we want to build
       #   subscription groups
+      # @param base_position [Integer, nil] optional starting position for subscription groups.
+      #   When provided, positions will start from this value instead of continuing from the
+      #   global counter. This is used when rebuilding subscription groups to maintain stable
+      #   positions for static group membership.
       # @return [Array<SubscriptionGroup>] all subscription groups we need in separate threads
-      def call(topics)
+      def call(topics, base_position: nil)
+        # If base_position is provided, use it for stable rebuilding (consumer group reopening).
+        # Otherwise continue from global counter for new subscription groups.
+        # We subtract 1 because position is incremented before use
+        use_base = !base_position.nil?
+        position = use_base ? base_position - 1 : @position
+
         topics
           .map { |topic| [checksum(topic), topic] }
           .group_by(&:first)
           .values
           .map { |value| value.map(&:last) }
           .flat_map { |value| expand(value) }
-          .map { |grouped_topics| SubscriptionGroup.new(@position += 1, grouped_topics) }
+          .map { |grouped_topics| SubscriptionGroup.new(position += 1, grouped_topics) }
           .tap do |subscription_groups|
+            # Update global counter only when not using base_position
+            @position = position unless use_base
             subscription_groups.each do |subscription_group|
               subscription_group.topics.each do |topic|
                 topic.subscription_group = subscription_group

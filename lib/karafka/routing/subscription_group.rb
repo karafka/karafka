@@ -14,7 +14,7 @@ module Karafka
         node: %i[swarm node]
       )
 
-      attr_reader :id, :name, :topics, :kafka, :consumer_group
+      attr_reader :id, :name, :topics, :kafka, :consumer_group, :position
 
       # Lock for generating new ids safely
       ID_MUTEX = Mutex.new
