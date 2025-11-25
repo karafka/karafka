@@ -1,5 +1,8 @@
 # Karafka Framework Changelog
 
+## 2.5.4 (Unreleased)
+- [Fix] Multiple route draws don't seem to work.
+
 ## 2.5.3 (2025-11-14)
 - [Enhancement] Dynamically support `librdkafka` fatal errors with correct reported details.
 - [Enhancement] Add `producer` block API to setup for simplified WaterDrop producer configuration without manual producer instance creation, using a transparent ConfigProxy during setup to avoid polluting the permanent config API.
