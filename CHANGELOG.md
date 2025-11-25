@@ -1,6 +1,6 @@
 # Karafka Framework Changelog
 
-## 2.5.3 (Unreleased)
+## 2.5.4 (Unreleased)
 - [Fix] Multiple route draws don't seem to work.
 
 ## 2.5.3 (2025-11-14)

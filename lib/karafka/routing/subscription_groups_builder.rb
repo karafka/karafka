@@ -39,7 +39,8 @@ module Karafka
       def call(topics, base_position: nil)
         # If base_position is provided, use it for stable rebuilding (consumer group reopening).
         # Otherwise continue from global counter for new subscription groups.
-        # We subtract 1 because position is incremented before use
+        # We subtract 1 from base_position because position is incremented in the map block below.
+        # This ensures the first subscription group gets the correct base_position value.
         use_base = !base_position.nil?
         position = use_base ? base_position - 1 : @position
 
