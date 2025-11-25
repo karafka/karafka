@@ -52,8 +52,10 @@ module Karafka
           .flat_map { |value| expand(value) }
           .map { |grouped_topics| SubscriptionGroup.new(position += 1, grouped_topics) }
           .tap do |subscription_groups|
-            # Update global counter only when not using base_position
-            @position = position unless use_base
+            # Always ensure global counter is at least as high as the highest position used.
+            # This prevents position collisions when new consumer groups are created after
+            # existing ones are rebuilt with base_position.
+            @position = position if position > @position
             subscription_groups.each do |subscription_group|
               subscription_group.topics.each do |topic|
                 topic.subscription_group = subscription_group
