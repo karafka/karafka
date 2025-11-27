@@ -38,6 +38,8 @@ end
 require 'singleton'
 require 'securerandom'
 require 'stringio'
+require 'tempfile'
+require 'timeout'
 require 'tmpdir'
 require_relative 'support/data_collector'
 require_relative 'support/duplications_detector'

@@ -2,10 +2,6 @@
 
 # Karafka should rebalance replicas across brokers without changing replication factor
 
-require 'tempfile'
-require 'securerandom'
-require 'timeout'
-
 docker_available = system('docker --version > /dev/null 2>&1')
 kafka_container_running = docker_available && system('docker exec kafka1 true > /dev/null 2>&1')
 
