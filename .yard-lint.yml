@@ -17,7 +17,7 @@ AllValidators:
     - 'test/**/*'
 
   # Exit code behavior (error, warning, convention, never)
-  FailOnSeverity: error
+  FailOnSeverity: convention
 
   # Minimum documentation coverage percentage (0-100)
   # Fails if coverage is below this threshold

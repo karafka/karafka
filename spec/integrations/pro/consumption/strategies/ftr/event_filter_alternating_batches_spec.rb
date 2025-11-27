@@ -114,7 +114,8 @@ end
 produce_many(DT.topic, elements)
 
 start_karafka_and_wait_until do
-  DT[:filtered].size >= 50 && DT[:processed].size >= 50
+  # Wait for all 10 batches to be processed (5 filtered + 5 processable)
+  DT[:all_filtered_batches].size >= 5 && DT[:processable_batches].size >= 5
 end
 
 # Verify exactly half were filtered (batches 0, 2, 4, 6, 8)

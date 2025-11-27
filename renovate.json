@@ -3,6 +3,7 @@
   "extends": [
     "config:recommended"
   ],
+  "minimumReleaseAge": "7 days",
   "ignorePaths": [
     "spec/integrations"
   ],
@@ -10,12 +11,5 @@
     "enabled": true,
     "pinDigests": true
   },
-  "packageRules": [
-    {
-      "matchManagers": [
-        "github-actions"
-      ],
-      "minimumReleaseAge": "7 days"
-    }
-  ]
+  "packageRules": []
 }

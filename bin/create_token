@@ -1,7 +1,6 @@
 #!/usr/bin/env ruby
 
 require 'openssl'
-require 'base64'
 require 'json'
 require 'date'
 
@@ -19,4 +18,4 @@ private_key = OpenSSL::PKey::RSA.new(File.read(PRIVATE_KEY_LOCATION))
 
 bin_key = private_key.private_encrypt(pro_token_data.to_json)
 
-puts Base64.encode64(bin_key)
+puts [bin_key].pack("m") # encode to base64
