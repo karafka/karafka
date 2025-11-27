@@ -46,7 +46,7 @@ module Karafka
 
         # We gsub and strip in case someone copy-pasted it as a multi line string
         formatted_token = license_config.token.strip.delete("\n").delete(' ')
-        decoded_token = Base64.decode64(formatted_token)
+        decoded_token = formatted_token.unpack1("m") # decode from base64
 
         begin
           data = public_key.public_decrypt(decoded_token)
