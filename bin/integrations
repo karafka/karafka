@@ -90,6 +90,7 @@ class Scenario
 
     return :poro if scenario_dir.include?('_poro')
     return :pristine if scenario_dir.include?('_pristine')
+    return :sequential if scenario_dir.include?('_sequential')
 
     :regular
   end
