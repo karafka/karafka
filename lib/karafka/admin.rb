@@ -143,7 +143,7 @@ module Karafka
       #
       # @param topic [String] name of the topic to plan replication for
       # @param replication_factor [Integer] target replication factor (must be higher than current)
-      # @param brokers [Hash<Integer, Array<Integer>>] optional manual broker assignments
+      # @param brokers [Hash{Integer => Array<Integer>}] optional manual broker assignments
       #   per partition. Keys are partition IDs, values are arrays of broker IDs. If not provided,
       #   assignments distribution will happen automatically.
       # @return [Replication] plan object with JSON, commands, and instructions

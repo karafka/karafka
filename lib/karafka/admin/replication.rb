@@ -124,7 +124,7 @@ module Karafka
         #
         # @param topic [String] name of the topic
         # @param to [Integer] target replication factor (must be higher than current)
-        # @param brokers [Hash<Integer, Array<Integer>>] optional manual broker assignments
+        # @param brokers [Hash{Integer => Array<Integer>}] optional manual broker assignments
         #   per partition. Keys are partition IDs, values are arrays of broker IDs. If not provided
         #   automatic distribution (usually fine) will be used
         # @return [Replication] plan object containing JSON, commands, and instructions
@@ -280,7 +280,7 @@ module Karafka
         # @param target_replication_factor [Integer] desired replication factor
         # @param cluster_info [Hash] cluster metadata with broker information
         # @param rebalance_only [Boolean] true for rebalancing, false for increase
-        # @return [Hash<Integer, Array<Integer>>] assignments (partition_id => broker_ids)
+        # @return [Hash{Integer => Array<Integer>}] assignments (partition_id => broker_ids)
         def generate_partitions_assignment(
           topic_info:,
           target_replication_factor:,

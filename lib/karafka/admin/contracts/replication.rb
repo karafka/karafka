@@ -2,6 +2,7 @@
 
 module Karafka
   class Admin
+    # Contracts namespace for Admin validation logic
     module Contracts
       # Contract for replication plan parameters
       class Replication < Karafka::Contracts::Base
