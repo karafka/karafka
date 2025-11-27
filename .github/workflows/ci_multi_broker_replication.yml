@@ -22,7 +22,7 @@ on:
     paths:
       - 'lib/karafka/admin/replication.rb'
       - 'lib/karafka/admin/contracts/replication.rb'
-      - 'spec/integrations/admin/replication_multi_broker/**'
+      - 'spec/integrations/admin/replication_multi_broker_pristine/**'
       - 'docker-compose.multi-broker.yml'
 
   schedule:
@@ -95,7 +95,7 @@ jobs:
       - name: Run multi-broker replication integration tests
         env:
           KARAFKA_PRO_LICENSE_TOKEN: ${{ secrets.KARAFKA_PRO_LICENSE_TOKEN }}
-        run: bin/integrations '/replication_multi_broker'
+        run: bin/integrations '/replication_multi_broker_pristine'
 
       - name: Show Kafka logs on failure
         if: failure()
