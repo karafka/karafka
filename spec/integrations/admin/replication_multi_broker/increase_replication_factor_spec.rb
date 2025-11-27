@@ -133,6 +133,8 @@ temp_file = Tempfile.new(['rf_increase', '.json'])
 
 begin
   plan.export_to_file(temp_file.path)
+  # Make file world-readable for Docker container access
+  File.chmod(0o644, temp_file.path)
 
   # Copy to kafka1 container
   container_path = "/tmp/karafka_rf_increase_#{SecureRandom.hex(4)}.json"
@@ -142,6 +144,9 @@ begin
     puts "Failed to copy file to container: #{copy_result}"
     exit 1
   end
+
+  # Ensure file is readable inside container
+  `docker exec kafka1 chmod 644 #{container_path} 2>/dev/null`
 
   # Execute kafka-reassign-partitions.sh
   # Use internal listener (kafka1:29092) for inter-broker communication

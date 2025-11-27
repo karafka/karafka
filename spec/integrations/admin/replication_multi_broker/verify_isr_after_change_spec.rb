@@ -79,8 +79,12 @@ temp_file = Tempfile.new(['isr_test', '.json'])
 
 begin
   plan.export_to_file(temp_file.path)
+  # Make file world-readable for Docker container access
+  File.chmod(0o644, temp_file.path)
   container_path = "/tmp/karafka_isr_#{SecureRandom.hex(4)}.json"
   `docker cp #{temp_file.path} kafka1:#{container_path} 2>&1`
+  # Ensure file is readable inside container
+  `docker exec kafka1 chmod 644 #{container_path} 2>/dev/null`
 
   # Execute
   execute_cmd = <<~CMD
