@@ -265,8 +265,12 @@ module Karafka
           {
             brokers: cluster_metadata.brokers.map do |broker|
               # Handle both hash and object formats from metadata
+              # rdkafka returns hashes with broker_id, broker_name, broker_port
               if broker.is_a?(Hash)
-                { node_id: broker[:node_id], host: "#{broker[:host]}:#{broker[:port]}" }
+                node_id = broker[:broker_id] || broker[:node_id]
+                host = broker[:broker_name] || broker[:host]
+                port = broker[:broker_port] || broker[:port]
+                { node_id: node_id, host: "#{host}:#{port}" }
               else
                 { node_id: broker.node_id, host: "#{broker.host}:#{broker.port}" }
               end

@@ -1,0 +1,128 @@
+name: CI Multi-Broker Replication Tests
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+on:
+  workflow_dispatch:
+    inputs:
+      ruby_version:
+        description: 'Ruby version to test'
+        required: false
+        default: '3.4'
+        type: choice
+        options:
+          - '3.4'
+          - '3.3'
+          - '3.2'
+
+  pull_request:
+    branches: [master]
+    paths:
+      - 'lib/karafka/admin/replication.rb'
+      - 'lib/karafka/admin/contracts/replication.rb'
+      - 'spec/integrations/admin/replication_multi_broker/**'
+      - 'docker-compose.multi-broker.yml'
+
+  schedule:
+    - cron: '0 3 * * *' # Daily at 3 AM UTC (after main CI at 1 AM)
+
+permissions:
+  contents: read
+
+env:
+  BUNDLE_RETRY: 6
+  BUNDLE_JOBS: 4
+  KAFKA_BOOTSTRAP_SERVERS: '127.0.0.1:9092,127.0.0.1:9093,127.0.0.1:9094'
+
+jobs:
+  multi-broker-replication:
+    timeout-minutes: 30
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        ruby:
+          - ${{ github.event.inputs.ruby_version || '3.4' }}
+    steps:
+      - uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6.0.0
+
+      - name: Install package dependencies
+        run: "[ -e $APT_DEPS ] || sudo apt-get install -y --no-install-recommends $APT_DEPS"
+
+      - name: Start Multi-Broker Kafka cluster
+        run: |
+          docker compose -f docker-compose.multi-broker.yml up -d || \
+            (sleep 5 && docker compose -f docker-compose.multi-broker.yml up -d)
+
+          echo "Waiting for Kafka brokers to initialize..."
+          sleep 30
+
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@8aeb6ff8030dd539317f8e1769a044873b56ea71 # v1.268.0
+        with:
+          ruby-version: ${{ matrix.ruby }}
+          bundler-cache: true
+          bundler: 'latest'
+
+      - name: Install latest Bundler
+        run: |
+          gem install bundler --no-document
+          gem update --system
+          bundle config set without 'tools benchmarks docs'
+
+      - name: Bundle install
+        run: |
+          bundle config set without development
+          bundle install --jobs 4 --retry 3
+
+      - name: Wait for Multi-Broker Kafka cluster
+        run: |
+          bundle exec bin/wait_for_kafka_multi_broker
+
+      - name: Verify cluster has 3 brokers
+        run: |
+          bundle exec ruby -e "
+            require 'karafka'
+            Karafka::App.setup { |c| c.kafka[:'bootstrap.servers'] = ENV['KAFKA_BOOTSTRAP_SERVERS'] }
+            info = Karafka::Admin.cluster_info
+            broker_count = info.brokers.size
+            puts \"Cluster has #{broker_count} brokers\"
+            exit 1 unless broker_count >= 3
+          "
+
+      - name: Run multi-broker replication integration tests
+        env:
+          KARAFKA_PRO_LICENSE_TOKEN: ${{ secrets.KARAFKA_PRO_LICENSE_TOKEN }}
+        run: bin/integrations '/replication_multi_broker'
+
+      - name: Show Kafka logs on failure
+        if: failure()
+        run: |
+          echo "=== Kafka1 Logs ==="
+          docker logs kafka1 --tail 100
+          echo ""
+          echo "=== Kafka2 Logs ==="
+          docker logs kafka2 --tail 100
+          echo ""
+          echo "=== Kafka3 Logs ==="
+          docker logs kafka3 --tail 100
+
+      - name: Stop Kafka cluster
+        if: always()
+        run: docker compose -f docker-compose.multi-broker.yml down -v
+
+  ci-success-multi-broker:
+    name: CI Multi-Broker Replication Success
+    runs-on: ubuntu-latest
+    if: always()
+    needs:
+      - multi-broker-replication
+    steps:
+      - name: Check all jobs passed
+        if: |
+          contains(needs.*.result, 'failure') ||
+          contains(needs.*.result, 'cancelled')
+        run: exit 1
+      - run: echo "All Multi-Broker Replication CI checks passed!"
