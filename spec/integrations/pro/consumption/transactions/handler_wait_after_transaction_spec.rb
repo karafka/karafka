@@ -3,7 +3,7 @@
 # This code is part of Karafka Pro, a commercial component not licensed under LGPL.
 # See LICENSE for details.
 
-# This test verifies the behavior when explicitly waiting on handlers after a transaction completes.
+# This test verifies the behavior when explicitly waiting on handlers after a transaction finished.
 # Once the transaction block exits without error, the transaction is committed and handlers should
 # indicate success, even if checked afterwards.
 #
