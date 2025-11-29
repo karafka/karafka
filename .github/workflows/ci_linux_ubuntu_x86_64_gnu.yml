@@ -196,7 +196,7 @@ jobs:
           bundle exec bin/wait_for_kafka
 
       - name: Run OSS integration tests
-        run: bin/integrations --exclude '/pro'
+        run: bin/integrations --exclude '/pro' --exclude '/multi_broker'
 
       - name: Check Kafka logs for unexpected warnings
         run: bin/verify_kafka_warnings

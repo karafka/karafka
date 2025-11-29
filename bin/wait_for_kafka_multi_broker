@@ -1,0 +1,38 @@
+#!/usr/bin/env ruby
+
+# Waits for multi-broker Kafka cluster to be ready
+# Ensures all 3 brokers are available before running tests
+# Usage: bundle exec bin/wait_for_kafka_multi_broker
+
+require 'karafka'
+
+brokers = ENV.fetch('KAFKA_BOOTSTRAP_SERVERS', '127.0.0.1:9092,127.0.0.1:9093,127.0.0.1:9094')
+expected_count = ENV.fetch('EXPECTED_BROKERS', '3').to_i
+
+Karafka::App.setup do |config|
+  config.kafka[:'bootstrap.servers'] = brokers
+end
+
+puts "Waiting for #{expected_count} brokers at #{brokers}..."
+
+60.times do
+  begin
+    cluster_info = Karafka::Admin.cluster_info
+    broker_count = cluster_info.brokers.size
+
+    if broker_count >= expected_count
+      puts "Multi-broker cluster ready with #{broker_count} brokers"
+      exit 0
+    end
+
+    puts "Found #{broker_count}/#{expected_count} brokers, waiting..."
+  rescue Rdkafka::RdkafkaError => e
+    puts "Kafka not available: #{e.message}, retrying..."
+  end
+
+  sleep(2)
+end
+
+puts 'Multi-broker Kafka cluster not available!'
+
+exit 1
