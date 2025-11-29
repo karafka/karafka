@@ -35,7 +35,7 @@ class Consumer < Karafka::BaseConsumer
 
       # Check if messages in current batch get cleaned as we process them
       # Only check within the current batch, not across batches
-      messages.to_a.each_with_index do |batch_message, idx|
+      messages.to_a.each_with_index do |batch_message, _idx|
         # If we've already processed this message in this batch, it should be cleaned
         if DT[1].include?(batch_message.offset) && batch_message.offset != message.offset
           DT[4] ||= []
