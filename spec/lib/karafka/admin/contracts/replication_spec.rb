@@ -156,7 +156,8 @@ RSpec.describe Karafka::Admin::Contracts::Replication do
     end
 
     context 'when partition has duplicate brokers' do
-      let(:invalid_brokers) { { 0 => [1, 2, 2], 1 => [2, 3, 4] } } # Partition 0 has duplicate broker 2
+      # Partition 0 has duplicate broker 2
+      let(:invalid_brokers) { { 0 => [1, 2, 2], 1 => [2, 3, 4] } }
 
       it { expect(contract.call(config_with_validation_data)).not_to be_success }
 

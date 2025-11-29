@@ -72,7 +72,6 @@ begin
     json_format_valid,
     "Kafka should accept JSON format. Output: #{kafka_output}"
   )
-
 ensure
   temp_file.close
   temp_file.unlink

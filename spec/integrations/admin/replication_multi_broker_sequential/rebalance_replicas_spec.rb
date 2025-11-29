@@ -91,4 +91,8 @@ messages_after = Karafka::Admin.read_topic(test_topic, 0, 100, 0).map(&:raw_payl
 
 test_messages.each { |msg| assert messages_after.include?(msg) }
 
-Karafka::Admin.delete_topic(test_topic) rescue nil
+begin
+  Karafka::Admin.delete_topic(test_topic)
+rescue StandardError
+  nil
+end

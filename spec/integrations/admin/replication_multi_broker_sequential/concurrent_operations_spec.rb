@@ -25,11 +25,9 @@ test_topics = topic_count.times.map { "it-concurrent-#{SecureRandom.uuid}" }
 target_rf = 3
 
 test_topics.each do |topic|
-  begin
-    Karafka::Admin.create_topic(topic, 1, 1)
-  rescue Rdkafka::RdkafkaError => e
-    raise unless e.code == :topic_already_exists
-  end
+  Karafka::Admin.create_topic(topic, 1, 1)
+rescue Rdkafka::RdkafkaError => e
+  raise unless e.code == :topic_already_exists
 end
 
 sleep(2)
@@ -107,6 +105,10 @@ test_topics.each do |topic|
   messages_after = partition_messages.map(&:raw_payload)
 
   messages_per_topic[topic].each { |msg| assert messages_after.include?(msg) }
-end
 
-test_topics.each { |topic| Karafka::Admin.delete_topic(topic) rescue nil }
+  begin
+    Karafka::Admin.delete_topic(topic)
+  rescue StandardError
+    nil
+  end
+end

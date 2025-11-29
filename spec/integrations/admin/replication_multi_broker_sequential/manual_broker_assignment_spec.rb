@@ -96,6 +96,10 @@ final_replica_count = final_partition[:replica_count] || final_partition[:replic
 assert_equal target_brokers.size, final_replica_count
 
 messages = Karafka::Admin.read_topic(test_topic, 0, 100, 0)
-assert messages.any? { |m| m.raw_payload == test_msg }
+assert(messages.any? { |m| m.raw_payload == test_msg })
 
-Karafka::Admin.delete_topic(test_topic) rescue nil
+begin
+  Karafka::Admin.delete_topic(test_topic)
+rescue StandardError
+  nil
+end

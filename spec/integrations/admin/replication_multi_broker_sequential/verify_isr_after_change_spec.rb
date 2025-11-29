@@ -73,12 +73,13 @@ sleep(5)
 final_topic_info = Karafka::Admin::Topics.info(test_topic)
 
 final_topic_info[:partitions].each do |partition|
-  partition_id = partition[:partition_id]
-
   replica_count = partition[:replica_count] || partition[:replicas]&.size
   assert_equal target_rf, replica_count
 
-  isr = partition[:in_sync_replicas] || partition[:in_sync_replica_brokers] || partition[:isr] || []
+  isr = partition[:in_sync_replicas] ||
+        partition[:in_sync_replica_brokers] ||
+        partition[:isr] ||
+        []
   isr_list = if isr.is_a?(Array) && isr.first.respond_to?(:node_id)
                isr.map(&:node_id)
              elsif isr.is_a?(Array)
@@ -100,6 +101,10 @@ produce(test_topic, test_msg, partition: 0)
 sleep(1)
 
 messages = Karafka::Admin.read_topic(test_topic, 0, 100, 0)
-assert messages.any? { |m| m.raw_payload == test_msg }
+assert(messages.any? { |m| m.raw_payload == test_msg })
 
-Karafka::Admin.delete_topic(test_topic) rescue nil
+begin
+  Karafka::Admin.delete_topic(test_topic)
+rescue StandardError
+  nil
+end

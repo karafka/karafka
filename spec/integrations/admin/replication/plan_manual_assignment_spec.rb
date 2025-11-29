@@ -77,7 +77,7 @@ if broker_ids.size >= 3
       topic: test_topic,
       replication_factor: 3,
       brokers: {
-        0 => [broker_ids[0], broker_ids[1]],  # Only 2 brokers, need 3
+        0 => [broker_ids[0], broker_ids[1]], # Only 2 brokers, need 3
         1 => [broker_ids[1], broker_ids[2], broker_ids[0]]
       }
     )
@@ -103,7 +103,7 @@ if broker_ids.size >= 3
       topic: test_topic,
       replication_factor: 3,
       brokers: {
-        0 => [broker_ids[0], broker_ids[0], broker_ids[1]],  # Duplicate broker
+        0 => [broker_ids[0], broker_ids[0], broker_ids[1]], # Duplicate broker
         1 => [broker_ids[1], broker_ids[2], broker_ids[0]]
       }
     )

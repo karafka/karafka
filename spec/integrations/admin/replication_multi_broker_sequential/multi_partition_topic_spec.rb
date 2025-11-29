@@ -114,4 +114,8 @@ partition_count.times do |partition|
   messages_by_partition[partition].each { |msg| assert partition_payloads.include?(msg) }
 end
 
-Karafka::Admin.delete_topic(test_topic) rescue nil
+begin
+  Karafka::Admin.delete_topic(test_topic)
+rescue StandardError
+  nil
+end

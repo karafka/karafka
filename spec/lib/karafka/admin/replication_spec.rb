@@ -8,15 +8,15 @@ RSpec.describe Karafka::Admin::Replication do
         {
           partition_id: 0,
           replicas: [
-            double(:replica, node_id: 1),
-            double(:replica, node_id: 2)
+            OpenStruct.new(node_id: 1),
+            OpenStruct.new(node_id: 2)
           ]
         },
         {
           partition_id: 1,
           replicas: [
-            double(:replica, node_id: 2),
-            double(:replica, node_id: 3)
+            OpenStruct.new(node_id: 2),
+            OpenStruct.new(node_id: 3)
           ]
         }
       ]
@@ -24,14 +24,35 @@ RSpec.describe Karafka::Admin::Replication do
   end
 
   let(:mock_cluster_info) do
-    double(
-      :cluster_metadata,
+    OpenStruct.new(
       brokers: [
-        double(:broker, node_id: 1, host: 'broker1', port: 9092),
-        double(:broker, node_id: 2, host: 'broker2', port: 9092),
-        double(:broker, node_id: 3, host: 'broker3', port: 9092),
-        double(:broker, node_id: 4, host: 'broker4', port: 9092)
+        OpenStruct.new(node_id: 1, host: 'broker1', port: 9092),
+        OpenStruct.new(node_id: 2, host: 'broker2', port: 9092),
+        OpenStruct.new(node_id: 3, host: 'broker3', port: 9092),
+        OpenStruct.new(node_id: 4, host: 'broker4', port: 9092)
       ]
+    )
+  end
+
+  let(:cluster_info_for_instance) do
+    {
+      brokers: [
+        { node_id: 1, host: 'broker1:9092' },
+        { node_id: 2, host: 'broker2:9092' },
+        { node_id: 3, host: 'broker3:9092' }
+      ]
+    }
+  end
+
+  let(:partitions_assignment) { { 0 => [1, 2, 3], 1 => [2, 3, 1] } }
+
+  let(:plan_instance) do
+    described_class.new(
+      topic: topic_name,
+      current_replication_factor: 2,
+      target_replication_factor: 3,
+      partitions_assignment: partitions_assignment,
+      cluster_info: cluster_info_for_instance
     )
   end
 
@@ -46,7 +67,7 @@ RSpec.describe Karafka::Admin::Replication do
       let(:plan) { described_class.plan(topic: topic_name, to: 3) }
 
       it 'returns a Replication object' do
-        expect(plan).to be_a(Karafka::Admin::Replication)
+        expect(plan).to be_a(described_class)
       end
 
       it 'correctly identifies current and target replication factors' do
@@ -146,7 +167,7 @@ RSpec.describe Karafka::Admin::Replication do
       end
 
       it 'returns a valid Replication object' do
-        expect(plan).to be_a(Karafka::Admin::Replication)
+        expect(plan).to be_a(described_class)
         expect(plan.target_replication_factor).to eq(3)
       end
 
@@ -221,7 +242,8 @@ RSpec.describe Karafka::Admin::Replication do
 
   describe '.rebalance' do
     before do
-      allow(described_class).to receive(:fetch_topic_info).with(topic_name).and_return(mock_topic_info)
+      allow(described_class).to receive(:fetch_topic_info)
+        .with(topic_name).and_return(mock_topic_info)
       allow(described_class).to receive(:cluster_info).and_return(mock_cluster_info)
     end
 
@@ -232,28 +254,6 @@ RSpec.describe Karafka::Admin::Replication do
       expect(plan.target_replication_factor).to eq(2)
       expect(plan.partitions_assignment.values.all? { |replicas| replicas.size == 2 }).to be(true)
     end
-  end
-
-  # Instance method tests
-  let(:cluster_info_for_instance) do
-    {
-      brokers: [
-        { node_id: 1, host: 'broker1:9092' },
-        { node_id: 2, host: 'broker2:9092' },
-        { node_id: 3, host: 'broker3:9092' }
-      ]
-    }
-  end
-  let(:partitions_assignment) { { 0 => [1, 2, 3], 1 => [2, 3, 1] } }
-
-  let(:plan_instance) do
-    described_class.new(
-      topic: topic_name,
-      current_replication_factor: 2,
-      target_replication_factor: 3,
-      partitions_assignment: partitions_assignment,
-      cluster_info: cluster_info_for_instance
-    )
   end
 
   describe '#export_to_file' do
@@ -315,33 +315,29 @@ RSpec.describe Karafka::Admin::Replication do
       end
     end
   end
-end
 
-# Integration test for Admin API
-RSpec.describe Karafka::Admin do
-  describe '.plan_topic_replication' do
-    let(:topic_name) { 'test-topic' }
-
+  describe 'Karafka::Admin.plan_topic_replication' do
     it 'delegates to Replication correctly' do
-      expect(Karafka::Admin::Replication).to receive(:plan)
-        .with(topic: topic_name, to: 3, brokers: nil)
-        .and_return(double(:plan))
+      allow(described_class).to receive(:plan).and_return(OpenStruct.new)
 
-      described_class.plan_topic_replication(topic: topic_name, replication_factor: 3)
+      Karafka::Admin.plan_topic_replication(topic: topic_name, replication_factor: 3)
+
+      expect(described_class).to have_received(:plan)
+        .with(topic: topic_name, to: 3, brokers: nil)
     end
 
     it 'passes manual broker assignments when provided' do
       manual_brokers = { 0 => [1, 2, 3] }
+      allow(described_class).to receive(:plan).and_return(OpenStruct.new)
 
-      expect(Karafka::Admin::Replication).to receive(:plan)
-        .with(topic: topic_name, to: 3, brokers: manual_brokers)
-        .and_return(double(:plan))
-
-      described_class.plan_topic_replication(
+      Karafka::Admin.plan_topic_replication(
         topic: topic_name,
         replication_factor: 3,
         brokers: manual_brokers
       )
+
+      expect(described_class).to have_received(:plan)
+        .with(topic: topic_name, to: 3, brokers: manual_brokers)
     end
   end
 end

@@ -5,9 +5,7 @@
 docker_available = system('docker --version > /dev/null 2>&1')
 kafka_container_running = docker_available && system('docker exec kafka1 true > /dev/null 2>&1')
 
-unless docker_available && kafka_container_running
-  exit 0
-end
+exit 0 unless docker_available && kafka_container_running
 
 setup_karafka
 
@@ -52,7 +50,7 @@ assert_equal test_topic, plan.topic
 assert_equal initial_rf, plan.current_replication_factor
 assert_equal target_rf, plan.target_replication_factor
 
-plan.partitions_assignment.each do |partition_id, broker_ids|
+plan.partitions_assignment.each do |_partition_id, broker_ids|
   assert_equal target_rf, broker_ids.size
   assert_equal broker_ids.uniq.size, broker_ids.size
 end
@@ -113,6 +111,10 @@ produce(test_topic, new_message)
 sleep(1)
 
 post_messages = Karafka::Admin.read_topic(test_topic, 0, 100, 0)
-assert post_messages.any? { |m| m.raw_payload == new_message }
+assert(post_messages.any? { |m| m.raw_payload == new_message })
 
-Karafka::Admin.delete_topic(test_topic) rescue nil
+begin
+  Karafka::Admin.delete_topic(test_topic)
+rescue StandardError
+  nil
+end
