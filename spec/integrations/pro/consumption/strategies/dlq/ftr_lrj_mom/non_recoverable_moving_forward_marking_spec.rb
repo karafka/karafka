@@ -1,11 +1,12 @@
 # frozen_string_literal: true
-FAILING_OFFSETS = [1, 25].freeze
 
 # This code is part of Karafka Pro, a commercial component not licensed under LGPL.
 # See LICENSE for details.
 
 # When using DLQ with FTR, LRJ, and MOM together, non-recoverable errors should skip failed
 # messages and move forward, ensuring no duplicates when manual offset management is used
+
+FAILING_OFFSETS = [1, 25].freeze
 
 class Listener
   def on_error_occurred(_)

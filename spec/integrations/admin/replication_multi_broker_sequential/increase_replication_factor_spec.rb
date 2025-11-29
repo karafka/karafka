@@ -31,7 +31,7 @@ rescue Rdkafka::RdkafkaError => e
   raise unless e.code == :topic_already_exists
 end
 
-test_messages = 10.times.map { |i| "message-#{i}-#{SecureRandom.hex(8)}" }
+test_messages = Array.new(10) { |i| "message-#{i}-#{SecureRandom.hex(8)}" }
 test_messages.each { |msg| produce(test_topic, msg) }
 sleep(1)
 

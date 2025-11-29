@@ -21,7 +21,7 @@ broker_count = cluster_info.brokers.size
 exit 0 unless broker_count >= 3
 
 topic_count = 3
-test_topics = topic_count.times.map { "it-concurrent-#{SecureRandom.uuid}" }
+test_topics = Array.new(topic_count) { "it-concurrent-#{SecureRandom.uuid}" }
 target_rf = 3
 
 test_topics.each do |topic|
@@ -34,7 +34,7 @@ sleep(2)
 
 messages_per_topic = {}
 test_topics.each do |topic|
-  messages = 5.times.map { |i| "msg-#{topic}-#{i}-#{SecureRandom.hex(8)}" }
+  messages = Array.new(5) { |i| "msg-#{topic}-#{i}-#{SecureRandom.hex(8)}" }
   messages_per_topic[topic] = messages
   messages.each { |msg| produce(topic, msg) }
 end
