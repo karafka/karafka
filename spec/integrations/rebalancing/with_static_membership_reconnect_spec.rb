@@ -4,8 +4,6 @@
 # the assigned work. It should not be reassigned to a different process.
 # Karafka should maintain all the ordering and should not have duplicated.
 
-require 'securerandom'
-
 setup_karafka do |config|
   config.initial_offset = 'latest'
   config.kafka[:'group.instance.id'] = SecureRandom.hex(6)

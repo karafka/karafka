@@ -1,11 +1,12 @@
 # frozen_string_literal: true
-TASK_IDS = %w[a b c].freeze
 
 # This code is part of Karafka Pro, a commercial component not licensed under LGPL.
 # See LICENSE for details.
 
 # When tasks are triggered, by default it should publish events to the logs topic
 # This spec will hang if logs are not published
+
+TASK_IDS = %w[a b c].freeze
 
 setup_karafka
 

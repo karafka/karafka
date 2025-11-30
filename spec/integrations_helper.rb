@@ -38,6 +38,8 @@ end
 require 'singleton'
 require 'securerandom'
 require 'stringio'
+require 'tempfile'
+require 'timeout'
 require 'tmpdir'
 require_relative 'support/data_collector'
 require_relative 'support/duplications_detector'
@@ -68,7 +70,7 @@ def setup_karafka(
 
   Karafka::App.setup do |config|
     config.kafka = {
-      'bootstrap.servers': '127.0.0.1:9092',
+      'bootstrap.servers': ENV.fetch('KAFKA_BOOTSTRAP_SERVERS', '127.0.0.1:9092'),
       'statistics.interval.ms': 100,
       # We need to send this often as in specs we do time sensitive things and we may be kicked
       # out of the consumer group if it is not delivered fast enough
@@ -251,7 +253,7 @@ end
 # @param options [Hash] rdkafka consumer options if we need to overwrite defaults
 def setup_rdkafka_consumer(options = {})
   config = {
-    'bootstrap.servers': '127.0.0.1:9092',
+    'bootstrap.servers': ENV.fetch('KAFKA_BOOTSTRAP_SERVERS', '127.0.0.1:9092'),
     'group.id': Karafka::App.consumer_groups.first.id,
     'auto.offset.reset': 'earliest',
     'enable.auto.offset.store': 'false',

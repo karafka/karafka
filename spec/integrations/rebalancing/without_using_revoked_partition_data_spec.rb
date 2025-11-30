@@ -10,8 +10,6 @@
 
 # We simulate lost partition by starting a second consumer that will trigger a rebalance.
 
-require 'securerandom'
-
 RUN = SecureRandom.hex(6).split('-').first
 
 setup_karafka do |config|
