@@ -92,6 +92,28 @@ module Karafka
       # @see https://github.com/edenhill/librdkafka/blob/master/CONFIGURATION.md
       setting :kafka, default: {}
 
+      # Deserializing settings namespace
+      setting :deserializing do
+        # Parallel deserializing settings for Ractor-based batch deserialization
+        setting :parallel do
+          # option [Boolean] whether parallel deserializing is enabled globally
+          setting :active, default: false
+          # option [Integer] number of Ractor workers in the pool
+          setting :pool_size, default: 4
+          # option [Integer] minimum number of messages to use parallel deserialization
+          # Batches smaller than this will use linear deserialization
+          setting :batch_threshold, default: 100
+          # option [Integer] minimum total bytes of all payloads combined to use parallel
+          # deserialization. This helps avoid overhead for small batches.
+          # Default 50KB - parallel deserialization is most effective with larger payloads
+          setting :total_payload_threshold, default: 50 * 1024
+          # option [Integer] number of messages per batch sent to each worker
+          # Larger = less dispatch overhead, smaller = better load balancing
+          # Sweet spot is typically 25-100 depending on message size
+          setting :batch_size, default: 50
+        end
+      end
+
       # Public configuration for swarm operations
       setting :swarm do
         # option [Integer] how many processes do we want to run in a swarm mode

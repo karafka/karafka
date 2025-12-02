@@ -110,9 +110,14 @@ module Karafka
           commit_offsets(async: false)
         end
 
-        # Increment number of attempts
+        # Increment number of attempts and optionally retrieve pre-deserialized messages
         def handle_before_consume
           coordinator.pause_tracker.increment
+
+          # If parallel deserialization was dispatched, retrieve and inject results now
+          # For Immediate (parallel not used), retrieve returns nil and Injector is a no-op
+          results = messages.metadata.deserialization.retrieve
+          Deserializing::Parallel::Injector.call(messages.to_a, results)
         end
 
         # Runs the wrapping to execute appropriate action wrapped with the wrapper method code

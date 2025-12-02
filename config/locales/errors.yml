@@ -92,6 +92,12 @@ en:
         swarm.nodes_format: 'needs to be an integer bigger than 0'
         swarm.node_format: needs to be false or node instance
 
+        deserializing.parallel.active_format: needs to be either true or false
+        deserializing.parallel.pool_size_format: needs to be an integer bigger than 0
+        deserializing.parallel.batch_threshold_format: needs to be an integer bigger than 0
+        deserializing.parallel.total_payload_threshold_format: needs to be an integer bigger or equal to 0
+        deserializing.parallel.batch_size_format: needs to be an integer bigger than 0
+
     cli:
       server:
         missing: needs to be present
@@ -124,7 +130,7 @@ en:
         max_messages_format: 'needs to be an integer bigger than 0'
         max_wait_time_format: 'needs to be an integer bigger than 0'
         name_format: 'needs to be a string with a Kafka accepted format'
-        deserializers_format: needs to be present
+        deserializing_format: needs to be present
         consumer_format: needs to be present
         id_format: 'needs to be a string with a Kafka accepted format'
         initial_offset_format: needs to be either earliest or latest
@@ -158,10 +164,11 @@ en:
           This ensures proper Kafka metrics reporting and avoids name collisions.
           To disable this validation, set config.strict_topics_namespacing to false.
 
-        deserializers.active_format: 'needs to be true'
-        deserializers.payload_format: 'needs to respond to #call'
-        deserializers.key_format: 'needs to respond to #call'
-        deserializers.headers_format: 'needs to respond to #call'
+        deserializing.active_format: 'needs to be true'
+        deserializing.payload_format: 'needs to respond to #call'
+        deserializing.key_format: 'needs to respond to #call'
+        deserializing.headers_format: 'needs to respond to #call'
+        deserializing.parallel_format: 'needs to be either true or false'
 
       consumer_group:
         missing: needs to be present

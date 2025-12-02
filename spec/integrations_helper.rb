@@ -21,6 +21,8 @@ unless ENV.key?('PRISTINE_MODE')
     next if warning.include?('multi_delegator.rb')
     # We redefine it on purpose
     next if warning.include?('fixture_file')
+    # Ractor experimental warning is expected when using parallel deserialization
+    next if warning.include?('Ractor is experimental')
 
     raise "Warning in your code: #{warning}"
   end

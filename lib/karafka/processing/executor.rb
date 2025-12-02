@@ -73,6 +73,26 @@ module Karafka
           Time.now
         )
 
+        return consumer.on_before_schedule_consume unless topic.deserializing.parallel?
+        return consumer.on_before_schedule_consume unless consumer.messages.none?(&:deserialized?)
+
+        # Early dispatch to Ractor pool if parallel deserialization enabled
+        # This allows Ractors to work while the job waits in the queue
+        #
+        # IMPORTANT: This runs AFTER filtering (coordinator.start filters before this is called)
+        # so we only dispatch non-filtered messages.
+        #
+        # IMPORTANT: If ANY message is already deserialized (e.g., user accessed payload
+        # in filtering API), skip early dispatch and fall back to normal flow.
+        # This prevents double-deserialization and respects user's filter logic.
+        # Dispatch returns Future (if thresholds met) or Immediate (if not)
+        # Either way, calling .retrieve in worker thread will do the right thing
+        consumer.messages.metadata.deserialization =
+          Deserializing::Parallel::Pool.instance.dispatch_async(
+            consumer.messages,
+            topic.deserializing.payload
+          )
+
         consumer.on_before_schedule_consume
       end
 
