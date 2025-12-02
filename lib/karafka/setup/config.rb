@@ -98,8 +98,8 @@ module Karafka
         setting :parallel do
           # option [Boolean] whether parallel deserializing is enabled globally
           setting :active, default: false
-          # option [Integer] number of Ractor workers in the pool
-          setting :pool_size, default: 4
+          # option [Integer] number of Ractor workers for parallel deserialization
+          setting :concurrency, default: 4
           # option [Integer] minimum number of messages to use parallel deserialization
           # Batches smaller than this will use linear deserialization
           setting :batch_threshold, default: 100

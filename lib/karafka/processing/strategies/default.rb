@@ -117,7 +117,7 @@ module Karafka
           # If parallel deserialization was dispatched, retrieve and inject results now
           # For Immediate (parallel not used), retrieve returns nil and Injector is a no-op
           results = messages.metadata.deserialization.retrieve
-          Deserializing::Parallel::Injector.call(messages.to_a, results)
+          Deserializing::Parallel::Injector.call(messages, results)
         end
 
         # Runs the wrapping to execute appropriate action wrapped with the wrapper method code

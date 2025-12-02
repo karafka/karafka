@@ -11,7 +11,7 @@ module Karafka
           # Messages that failed during parallel deserialization are skipped (left untouched)
           # so lazy deserialization will retry them during consumption
           #
-          # @param messages [Array<Karafka::Messages::Message>] messages to inject into
+          # @param messages [Enumerable<Karafka::Messages::Message>] messages to inject into
           # @param results [Array] deserialized results in same order as messages
           def call(messages, results)
             return if results.nil?

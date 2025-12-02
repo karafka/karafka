@@ -33,7 +33,7 @@ RSpec.describe_current do
       deserializing: {
         parallel: {
           active: false,
-          pool_size: 4,
+          concurrency: 4,
           batch_threshold: 100,
           total_payload_threshold: 50 * 1024,
           batch_size: 50
@@ -908,20 +908,20 @@ RSpec.describe_current do
       it { expect(contract.call(config)).not_to be_success }
     end
 
-    context 'when pool_size is not an integer' do
-      before { parallel_config[:pool_size] = 'invalid' }
+    context 'when concurrency is not an integer' do
+      before { parallel_config[:concurrency] = 'invalid' }
 
       it { expect(contract.call(config)).not_to be_success }
     end
 
-    context 'when pool_size is zero' do
-      before { parallel_config[:pool_size] = 0 }
+    context 'when concurrency is zero' do
+      before { parallel_config[:concurrency] = 0 }
 
       it { expect(contract.call(config)).not_to be_success }
     end
 
-    context 'when pool_size is negative' do
-      before { parallel_config[:pool_size] = -1 }
+    context 'when concurrency is negative' do
+      before { parallel_config[:concurrency] = -1 }
 
       it { expect(contract.call(config)).not_to be_success }
     end

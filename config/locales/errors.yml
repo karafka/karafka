@@ -93,7 +93,7 @@ en:
         swarm.node_format: needs to be false or node instance
 
         deserializing.parallel.active_format: needs to be either true or false
-        deserializing.parallel.pool_size_format: needs to be an integer bigger than 0
+        deserializing.parallel.concurrency_format: needs to be an integer bigger than 0
         deserializing.parallel.batch_threshold_format: needs to be an integer bigger than 0
         deserializing.parallel.total_payload_threshold_format: needs to be an integer bigger or equal to 0
         deserializing.parallel.batch_size_format: needs to be an integer bigger than 0

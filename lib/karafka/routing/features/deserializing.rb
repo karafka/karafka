@@ -15,15 +15,15 @@ module Karafka
           def post_setup(_config)
             return unless Karafka::App.config.deserializing.parallel.active
 
-            if RUBY_VERSION < '4.0' || !defined?(Ractor)
+            if RUBY_VERSION < '4.0'
               raise(
                 Karafka::Errors::UnsupportedOptionError,
                 'Parallel deserializing requires Ruby 4.0+ with stable Ractor support'
               )
             end
 
-            pool_size = Karafka::App.config.deserializing.parallel.pool_size
-            Karafka::Deserializing::Parallel::Pool.instance.start(pool_size)
+            concurrency = Karafka::App.config.deserializing.parallel.concurrency
+            Karafka::Deserializing::Parallel::Pool.instance.start(concurrency)
           end
         end
       end

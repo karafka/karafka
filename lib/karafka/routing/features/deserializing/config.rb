@@ -17,8 +17,11 @@ module Karafka
 
           # @return [Boolean] is parallel deserialization enabled for this topic
           # @note Returns false if global parallel config is disabled, even if topic has it enabled
+          # @note Result is cached since config values don't change after setup
           def parallel?
-            parallel && Karafka::App.config.deserializing.parallel.active
+            return @parallel_cached unless @parallel_cached.nil?
+
+            @parallel_cached = parallel && Karafka::App.config.deserializing.parallel.active
           end
         end
       end

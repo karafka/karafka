@@ -35,15 +35,17 @@ module Karafka
           @ready_port = nil
           @dispatch_mutex = nil
           @ready_queue = []
+          @config = nil
         end
 
         # Starts the pool with the specified number of workers
-        # @param pool_size [Integer] number of Ractor workers to create
-        def start(pool_size)
+        # @param concurrency [Integer] number of Ractor workers to create
+        def start(concurrency)
           @mutex.synchronize do
             return if @started
 
-            @size = pool_size
+            @size = concurrency
+            @config = Karafka::App.config.deserializing.parallel
             @ready_port = Ractor::Port.new
             @dispatch_mutex = Mutex.new
             create_workers
@@ -57,6 +59,18 @@ module Karafka
           @started
         end
 
+        # Resets the pool state
+        # This is used in the test suite
+        def reset!
+          @workers = []
+          @size = 0
+          @started = false
+          @ready_port = nil
+          @dispatch_mutex = nil
+          @ready_queue = []
+          @config = nil
+        end
+
         # Dispatches messages for async deserialization, returns Future for later retrieval
         # Non-blocking: dispatches work and returns immediately
         # Used for early dispatch in listener thread before job is scheduled
@@ -68,17 +82,15 @@ module Karafka
           return Immediate.instance if messages.empty?
           return Immediate.instance unless @started
 
-          config = Karafka::App.config.deserializing.parallel
-
           # Check thresholds - if not met, return Immediate (lazy deserialization will handle it)
-          return Immediate.instance if messages.size < config.batch_threshold
+          return Immediate.instance if messages.size < @config.batch_threshold
 
           total_size = messages.sum { |m| m.raw_payload&.bytesize || 0 }
-          return Immediate.instance if total_size < config.total_payload_threshold
+          return Immediate.instance if total_size < @config.total_payload_threshold
 
           # Dispatch to Ractor pool
           payloads = messages.map(&:raw_payload)
-          batches = payloads.each_slice(config.batch_size).to_a
+          batches = payloads.each_slice(@config.batch_size).to_a
           result_port = Ractor::Port.new
 
           batches.each_with_index do |batch, idx|

@@ -1,6 +1,9 @@
 # frozen_string_literal: true
 
 RSpec.describe_current do
+  before do
+    skip 'Requires Ruby 4.0+ with Ractor::Port' unless RUBY_VERSION >= '4.0' && defined?(Ractor::Port)
+  end
   subject(:future) { described_class.new(result_port, batch_count) }
 
   let(:result_port) { instance_double(Ractor::Port) }
