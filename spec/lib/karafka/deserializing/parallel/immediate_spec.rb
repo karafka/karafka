@@ -11,12 +11,6 @@ RSpec.describe_current do
     end
   end
 
-  describe '#retrieved?' do
-    it 'returns true' do
-      expect(immediate.retrieved?).to be(true)
-    end
-  end
-
   describe '#retrieve' do
     it 'does nothing and returns nil' do
       expect(immediate.retrieve).to be_nil
@@ -24,12 +18,6 @@ RSpec.describe_current do
 
     it 'can be called multiple times safely' do
       expect { 3.times { immediate.retrieve } }.not_to raise_error
-    end
-  end
-
-  describe '#batch_count' do
-    it 'returns 0' do
-      expect(immediate.batch_count).to eq(0)
     end
   end
 end

@@ -15,20 +15,10 @@ module Karafka
           INSTANCE
         end
 
-        # @return [Boolean] always true since there's nothing to retrieve
-        def retrieved?
-          true
-        end
-
         # @return [nil] always nil since no parallel deserialization happened
         # Lazy deserialization will handle it when payload is accessed
         def retrieve
           nil
-        end
-
-        # @return [Integer] always 0 since no batches were dispatched
-        def batch_count
-          0
         end
       end
     end

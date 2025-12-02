@@ -12,20 +12,6 @@ RSpec.describe_current do
   let(:result_port) { instance_double(Ractor::Port) }
   let(:batch_count) { 2 }
 
-  describe '#initialize' do
-    it 'starts with retrieved? false' do
-      expect(future.retrieved?).to be(false)
-    end
-  end
-
-  describe '#retrieved?' do
-    context 'when results have not been retrieved' do
-      it 'returns false' do
-        expect(future.retrieved?).to be(false)
-      end
-    end
-  end
-
   describe '#retrieve' do
     context 'when results are available' do
       before do
@@ -45,12 +31,6 @@ RSpec.describe_current do
         results = future.retrieve
 
         expect(results).to eq(%w[result1 result2 result3])
-      end
-
-      it 'marks future as retrieved' do
-        future.retrieve
-
-        expect(future.retrieved?).to be(true)
       end
     end
 
