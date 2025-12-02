@@ -142,7 +142,12 @@ module Karafka
         def create_worker(worker_id, ready_port)
           error_marker = DESERIALIZATION_ERROR
 
-          Ractor.new(worker_id, ready_port, error_marker, name: "pd_worker_#{worker_id}") do |wid, ready_p, err_marker|
+          Ractor.new(
+            worker_id,
+            ready_port,
+            error_marker,
+            name: "pd_worker_#{worker_id}"
+          ) do |wid, ready_p, err_marker|
             my_port = Ractor::Port.new
 
             loop do

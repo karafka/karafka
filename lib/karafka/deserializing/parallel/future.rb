@@ -25,6 +25,11 @@ module Karafka
           @retrieved
         end
 
+        # @return [Integer] number of batches dispatched
+        def batch_count
+          @batch_count
+        end
+
         # Retrieves results from Ractor pool, blocking if necessary until all batches complete.
         # Safe to call multiple times - returns cached results if already retrieved.
         #

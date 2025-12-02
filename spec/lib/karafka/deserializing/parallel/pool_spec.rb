@@ -15,6 +15,18 @@ RSpec.describe_current do
     end
   end
 
+  describe '#reset!' do
+    it 'resets size to 0' do
+      pool.reset!
+      expect(pool.size).to eq(0)
+    end
+
+    it 'resets started? to false' do
+      pool.reset!
+      expect(pool.started?).to be(false)
+    end
+  end
+
   describe '#started?' do
     context 'when pool is not started' do
       it 'returns false' do

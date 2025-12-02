@@ -15,8 +15,18 @@ RSpec.describe_current do
     )
   end
 
-  describe '.call' do
-    context 'when we can deserialize given raw_payload' do
+  describe '#initialize' do
+    it 'inherits from Base' do
+      expect(described_class.superclass).to eq(Karafka::Deserializing::Deserializers::Base)
+    end
+
+    it 'is frozen for Ractor shareability' do
+      expect(deserializer).to be_frozen
+    end
+  end
+
+  describe '#call' do
+    context 'when deserializing valid JSON raw_payload' do
       let(:content_source) { { rand.to_s => rand.to_s } }
       let(:raw_payload) { content_source.to_json }
 
