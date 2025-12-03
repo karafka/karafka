@@ -81,7 +81,7 @@ module Karafka
             # @return [Array<Karafka::Messages::Message, Boolean>] message we may want to skip and
             #   information if this message was from marked offset or figured out via mom flow
             def find_skippable_message
-              skippable_message = messages.find do |msg|
+              skippable_message = messages._to_a.find do |msg|
                 coordinator.marked? && msg.offset == seek_offset
               end
 
