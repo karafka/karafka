@@ -43,7 +43,7 @@ RSpec.describe_current do
     end
 
     it 'expect to bypass any patched each method' do
-      # Track #each calls via a prepended module
+      # Track #each calls via a prepended module on a subclass to avoid polluting the main class
       each_calls = []
 
       tracking_module = Module.new do
@@ -53,17 +53,22 @@ RSpec.describe_current do
         end
       end
 
-      # Temporarily prepend the tracking module
-      Karafka::Messages::Messages.prepend(tracking_module)
+      # Create a subclass with the tracking module to avoid affecting other tests
+      patched_messages_class = Class.new(Karafka::Messages::Messages) do
+        prepend tracking_module
+      end
+
+      # Create an instance of the patched class
+      patched_messages = patched_messages_class.new(messages_array, topic.deserializers)
 
       # Using _to_a.each should NOT trigger the patched each
       each_calls.clear
-      messages._to_a.each { |_m| } # rubocop:disable Lint/EmptyBlock
+      patched_messages._to_a.each { |_m| } # rubocop:disable Lint/EmptyBlock
       expect(each_calls).to be_empty
 
       # Using regular each SHOULD trigger the patched each
       each_calls.clear
-      messages.each { |_m| } # rubocop:disable Lint/EmptyBlock
+      patched_messages.each { |_m| } # rubocop:disable Lint/EmptyBlock
       expect(each_calls).not_to be_empty
     end
   end
