@@ -26,20 +26,20 @@ RSpec.describe_current do
     end
   end
 
-  describe '#_to_a' do
+  describe '#raw' do
     it 'expect to return the underlying messages array directly' do
-      expect(messages._to_a).to eq(messages_array)
+      expect(messages.raw).to eq(messages_array)
     end
 
     it 'expect to return the same array instance each time' do
-      ar1 = messages._to_a
-      ar2 = messages._to_a
+      ar1 = messages.raw
+      ar2 = messages.raw
 
       expect(ar1).to be(ar2)
     end
 
     it 'expect not to deserialize messages' do
-      expect(messages._to_a.first.deserialized?).to be(false)
+      expect(messages.raw.first.deserialized?).to be(false)
     end
 
     it 'expect to bypass any patched each method' do
@@ -61,9 +61,9 @@ RSpec.describe_current do
       # Create an instance of the patched class
       patched_messages = patched_messages_class.new(messages_array, topic.deserializers)
 
-      # Using _to_a.each should NOT trigger the patched each
+      # Using raw.each should NOT trigger the patched each
       each_calls.clear
-      patched_messages._to_a.each { |_m| } # rubocop:disable Lint/EmptyBlock
+      patched_messages.raw.each { |_m| } # rubocop:disable Lint/EmptyBlock
       expect(each_calls).to be_empty
 
       # Using regular each SHOULD trigger the patched each
