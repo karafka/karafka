@@ -6,7 +6,7 @@
 # This spec verifies that VP strategy works correctly when external libraries monkey-patch
 # the Messages#each method (e.g., for tracing/instrumentation purposes).
 #
-# The VP strategy internally uses messages._to_a.map(&:offset) which bypasses the patched each
+# The VP strategy internally uses messages.raw.map(&:offset) which bypasses the patched each
 # method by accessing the underlying array directly.
 #
 # @see https://github.com/karafka/karafka/issues/2939
@@ -70,7 +70,7 @@ assert vp_strategy_calls.empty?, <<~MSG
   #{vp_strategy_calls.map { |c| "  - #{c[:caller]} at #{c[:path]}" }.join("\n")}
 
   This causes issues with external instrumentation libraries creating unwanted spans.
-  Fix: Use messages._to_a.map(&:offset) instead of messages.map(&:offset)
+  Fix: Use messages.raw.map(&:offset) instead of messages.map(&:offset)
 MSG
 
 # Verify that #each WAS called from user code

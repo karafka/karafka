@@ -3,7 +3,7 @@
 # This spec verifies that DLQ strategy works correctly when external libraries monkey-patch
 # the Messages#each method (e.g., for tracing/instrumentation purposes).
 #
-# The DLQ strategy internally uses messages._to_a.find to locate skippable messages,
+# The DLQ strategy internally uses messages.raw.find to locate skippable messages,
 # which bypasses the patched each method by accessing the underlying array directly.
 #
 # @see https://github.com/karafka/karafka/issues/2939
@@ -78,7 +78,7 @@ assert dlq_strategy_calls.empty?, <<~MSG
   #{dlq_strategy_calls.map { |c| "  - #{c[:caller]} at #{c[:path]}" }.join("\n")}
 
   This causes issues with external instrumentation libraries creating unwanted spans.
-  Fix: Use messages._to_a.find instead of messages.find
+  Fix: Use messages.raw.find instead of messages.find
 MSG
 
 # Verify that #each WAS called from user code

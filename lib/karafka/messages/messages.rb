@@ -77,7 +77,7 @@ module Karafka
       # infrastructure iterates over messages for housekeeping tasks (offset tracking,
       # deserialization, etc.) - creating empty/unwanted spans.
       #
-      # By using `_to_a.map` or `_to_a.each` instead of `map` or `each` directly, internal code
+      # By using `raw.map` or `raw.each` instead of `map` or `each` directly, internal code
       # bypasses the patched `#each` method since it operates on the raw Array, not this class.
       #
       # ## Usage
@@ -89,12 +89,10 @@ module Karafka
       # @return [Array<Karafka::Messages::Message>] the underlying messages array (not a copy)
       #
       # @note This returns the actual internal array, not a copy. Do not modify it.
-      # @note The underscore prefix indicates this is for internal use only.
-      #
       # @see https://github.com/karafka/karafka/issues/2939
       #
       # @private
-      def _to_a
+      def raw
         @messages_array
       end
 

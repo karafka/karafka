@@ -156,7 +156,7 @@ module Karafka
               return if collapsed?
 
               coordinator.virtual_offset_manager.register(
-                messages._to_a.map(&:offset)
+                messages.raw.map(&:offset)
               )
             end
           end

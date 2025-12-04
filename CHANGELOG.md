@@ -2,7 +2,7 @@
 
 ## 2.5.4 (Unreleased)
 - [Fix] Multiple route draws don't seem to work.
-- [Fix] Fix internal code compatibility with external libraries that prepend modules to `Messages#each` method (e.g., DataDog tracing) by introducing `Messages#_to_a` for internal iteration that bypasses patched enumerable methods.
+- [Fix] Fix internal code compatibility with external libraries that prepend modules to `Messages#each` method (e.g., DataDog tracing) by introducing `Messages#raw` for internal iteration that bypasses patched enumerable methods.
 - [Maintenance] Removed `base64` dependency.
 
 ## 2.5.3 (2025-11-14)
