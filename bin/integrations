@@ -253,6 +253,17 @@ ARGV.each do |filter|
   end
 end
 
+# Remove specs that require Ruby 4.0+ (Ractor::Port) when running on older Ruby
+if RUBY_VERSION.split('.').first.to_i < 4
+  RUBY_4_REQUIRED_SPECS = [
+    'deserialization/parallel/'
+  ].freeze
+
+  specs.delete_if do |spec|
+    RUBY_4_REQUIRED_SPECS.any? { |required| spec.include?(required) }
+  end
+end
+
 # Remove specs that don't work on Ruby 4.0.0 due to gem compatibility issues
 if RUBY_VERSION.split('.').first.to_i >= 4
   # Those specs fail as of now because of dependency on gems that do not support Ruby 4.0
