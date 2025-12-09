@@ -6,6 +6,7 @@
 - [Fix] Multiple route draws don't seem to work.
 - [Fix] Fix internal code compatibility with external libraries that prepend modules to `Messages#each` method (e.g., DataDog tracing) by introducing `Messages#raw` for internal iteration that bypasses patched enumerable methods.
 - [Maintenance] Removed `base64` dependency.
+- [Maintenance] Add `ErrorTypesChecker` spec support module to programmatically verify listener error type coverage against source code definitions.
 
 ## 2.5.3 (2025-11-14)
 - [Enhancement] Dynamically support `librdkafka` fatal errors with correct reported details.

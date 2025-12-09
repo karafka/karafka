@@ -756,4 +756,15 @@ RSpec.describe_current do
       end
     end
   end
+
+  describe 'error types coverage' do
+    subject(:trigger) { nil }
+
+    it 'handles all error types defined in the source code' do
+      coverage = ErrorTypesChecker.check_logging_listener_coverage(described_class)
+
+      expect(coverage[:missing]).to be_empty,
+        "Logger listener is missing handlers for: #{coverage[:missing].join(', ')}"
+    end
+  end
 end
