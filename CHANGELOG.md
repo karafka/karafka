@@ -1,6 +1,8 @@
 # Karafka Framework Changelog
 
 ## 2.5.4 (Unreleased)
+- [Enhancement] Align Datadog logger listener error handling with the main logger listener by adding missing error types and replacing `UnsupportedCaseError` with generic error logging to support dynamic errors reporting.
+- [Enhancement] Align Appsignal metrics listener `USER_CONSUMER_ERROR_TYPES` with all consumer error types for complete error tracking.
 - [Fix] Multiple route draws don't seem to work.
 - [Fix] Fix internal code compatibility with external libraries that prepend modules to `Messages#each` method (e.g., DataDog tracing) by introducing `Messages#raw` for internal iteration that bypasses patched enumerable methods.
 - [Maintenance] Removed `base64` dependency.
