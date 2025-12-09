@@ -17,6 +17,17 @@ module ErrorTypesChecker
     recurring_tasks.task.execute.error
   ].freeze
 
+  # Dynamic rebalance callback names that generate error types
+  REBALANCE_CALLBACK_NAMES = %w[
+    partitions_revoke
+    partitions_assign
+    partitions_revoked
+    partitions_assigned
+  ].freeze
+
+  # Pattern to detect dynamic rebalance error type generation in source
+  REBALANCE_ERROR_PATTERN = 'callbacks.rebalance.#{name}.error'
+
   class << self
     # Extracts all error types from the Karafka lib source code (excluding pro directory)
     #
@@ -44,15 +55,10 @@ module ErrorTypesChecker
 
         # Match dynamic error type definitions like: type: "callbacks.rebalance.#{name}.error"
         # These generate multiple error types based on the rebalance callback names
-        if content.include?('callbacks.rebalance.#{name}.error')
-          %w[
-            partitions_revoke
-            partitions_assign
-            partitions_revoked
-            partitions_assigned
-          ].each do |name|
-            error_types << "callbacks.rebalance.#{name}.error"
-          end
+        next unless content.include?(REBALANCE_ERROR_PATTERN)
+
+        REBALANCE_CALLBACK_NAMES.each do |name|
+          error_types << "callbacks.rebalance.#{name}.error"
         end
       end
 
@@ -118,9 +124,12 @@ module ErrorTypesChecker
     # Checks if a metrics listener's consumer error types constant covers all consumer errors
     #
     # @param listener_class [Class] the listener class to check
-    # @param constant_name [Symbol] name of the constant (default: :USER_CONSUMER_ERROR_TYPES)
+    # @param constant_name [Symbol] name of the constant
     # @return [Hash] with :missing and :extra keys showing discrepancies
-    def check_consumer_error_types_coverage(listener_class, constant_name = :USER_CONSUMER_ERROR_TYPES)
+    def check_consumer_error_types_coverage(
+      listener_class,
+      constant_name = :USER_CONSUMER_ERROR_TYPES
+    )
       source_consumer_types = consumer_error_types
       constant_types = extract_constant_error_types(listener_class, constant_name)
 
