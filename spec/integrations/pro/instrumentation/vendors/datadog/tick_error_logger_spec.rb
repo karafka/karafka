@@ -70,4 +70,4 @@ $stdout = proper_stdout
 $stderr = proper_stderr
 
 assert strio.string.include?('Consume job for Consumer on')
-assert strio.string.include?('Consumer tick failed due to an error')
+assert strio.string.include?('Consumer on tick failed due to an error')
