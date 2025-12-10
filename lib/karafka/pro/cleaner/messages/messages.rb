@@ -13,7 +13,7 @@ module Karafka
         # This module is prepended to Karafka::Messages::Messages to add cleaning functionality.
         # The implementation calls super() to maintain compatibility with other libraries that
         # also prepend modules to modify the #each method (e.g., DataDog tracing).
-        # See: https://github.com/DataDog/dd-trace-rb/issues/4867
+        # @see https://github.com/DataDog/dd-trace-rb/issues/4867
         module Messages
           # @param clean [Boolean] do we want to clean each message after we're done working with
           #   it.
