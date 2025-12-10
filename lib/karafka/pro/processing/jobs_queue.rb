@@ -101,10 +101,8 @@ module Karafka
         end
 
         # Allows for explicit unlocking of locked queue of a group
-        #
         # @param group_id [String] id of the group we want to unlock
         # @param lock_id [Object] unique id we want to use to identify our lock
-        #
         def unlock_async(group_id, lock_id)
           @mutex.synchronize do
             if @locks[group_id].delete(lock_id)
