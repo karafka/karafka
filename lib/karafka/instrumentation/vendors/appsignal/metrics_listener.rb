@@ -44,11 +44,15 @@ module Karafka
 
           # Types of errors originating from user code in the consumer flow
           USER_CONSUMER_ERROR_TYPES = %w[
+            consumer.initialized.error
+            consumer.wrap.error
             consumer.consume.error
             consumer.revoked.error
+            consumer.idle.error
             consumer.shutdown.error
             consumer.tick.error
             consumer.eofed.error
+            consumer.after_consume.error
           ].freeze
 
           private_constant :USER_CONSUMER_ERROR_TYPES
