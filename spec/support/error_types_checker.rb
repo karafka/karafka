@@ -29,20 +29,16 @@ module ErrorTypesChecker
   REBALANCE_ERROR_PATTERN = 'callbacks.rebalance.#{name}.error'
 
   class << self
-    # Extracts all error types from the Karafka lib source code (excluding pro directory)
+    # Extracts all error types from the Karafka lib source code
     #
-    # @param include_pro [Boolean] whether to include pro directory in scan
     # @return [Array<String>] sorted list of unique error types found in source code
     # @note This scans for patterns like `type: 'something.error'` in the lib directory
-    def extract_error_types_from_source(include_pro: false)
+    def extract_error_types_from_source
       lib_path = File.expand_path('../../lib', __dir__)
       error_types = Set.new
 
       # Scan all Ruby files in lib directory
       Dir.glob(File.join(lib_path, '**', '*.rb')).each do |file|
-        # Skip pro directory unless explicitly included
-        next if !include_pro && file.include?('/pro/')
-
         content = File.read(file)
 
         # Match static error type definitions: type: 'something.error' or type: "something.error"
@@ -106,10 +102,9 @@ module ErrorTypesChecker
     # Checks if a listener handles all source-defined error types (for logging listeners)
     #
     # @param listener_class [Class] the listener class to check
-    # @param include_pro [Boolean] whether to include pro directory error types
     # @return [Hash] with :missing and :extra keys showing discrepancies
-    def check_logging_listener_coverage(listener_class, include_pro: false)
-      source_types = extract_error_types_from_source(include_pro: include_pro)
+    def check_logging_listener_coverage(listener_class)
+      source_types = extract_error_types_from_source
       handled_types = extract_handled_error_types(listener_class)
 
       # Remove optional error types that are handled via the generic else clause
