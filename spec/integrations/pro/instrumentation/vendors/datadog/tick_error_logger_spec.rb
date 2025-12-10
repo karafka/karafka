@@ -71,3 +71,5 @@ $stderr = proper_stderr
 
 assert strio.string.include?('Consume job for Consumer on')
 assert strio.string.include?('Consumer on tick failed due to an error')
+# Verify DD listener handled the error type without raising UnsupportedCaseError
+assert !strio.string.include?('UnsupportedCaseError'), strio.string

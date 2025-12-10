@@ -104,8 +104,6 @@ module Karafka
               error "Consumer on shutdown failed due to an error: #{error}"
             when 'consumer.tick.error'
               error "Consumer on tick failed due to an error: #{error}"
-            when 'consumer.eofed.error'
-              error "Consumer on eofed failed due to an error: #{error}"
             when 'consumer.after_consume.error'
               error "Consumer on after_consume failed due to an error: #{error}"
             when 'worker.process.error'
