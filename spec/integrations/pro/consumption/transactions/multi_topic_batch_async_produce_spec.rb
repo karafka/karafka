@@ -21,7 +21,6 @@ setup_karafka do |config|
   config.max_messages = 20
 end
 
-
 DT[:done] = false
 DT[:processed] = []
 DT[:analytics] = []
