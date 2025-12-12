@@ -52,7 +52,7 @@ class Consumer < Karafka::BaseConsumer
       }
     end
 
-    DT[:done] = true
+    DT[:done] = true if DT[:handler_results].size >= 5
   end
 end
 

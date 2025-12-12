@@ -66,7 +66,7 @@ class Consumer < Karafka::BaseConsumer
       mark_as_consumed(messages.last)
     end
 
-    DT[:done] = true
+    DT[:done] = true if DT[:processed].size >= 20
   end
 end
 

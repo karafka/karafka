@@ -70,7 +70,7 @@ class Consumer < Karafka::BaseConsumer
       }
     end
 
-    DT[:done] = true
+    DT[:done] = true if DT[:processed_offsets].size >= 100
   end
 end
 

@@ -44,7 +44,7 @@ class Consumer < Karafka::BaseConsumer
       mark_as_consumed(messages.last)
     end
 
-    DT[:done] = true
+    DT[:done] = true if DT[:sync_count] + DT[:async_count] >= 10
   end
 end
 
