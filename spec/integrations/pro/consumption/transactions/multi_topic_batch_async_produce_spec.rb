@@ -21,6 +21,7 @@ setup_karafka do |config|
   config.max_messages = 20
 end
 
+
 DT[:done] = false
 DT[:processed] = []
 DT[:analytics] = []
@@ -66,7 +67,7 @@ class Consumer < Karafka::BaseConsumer
       mark_as_consumed(messages.last)
     end
 
-    DT[:done] = true
+    DT[:done] = true if DT[:processed].size >= 20
   end
 end
 
