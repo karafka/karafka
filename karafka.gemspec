@@ -28,7 +28,19 @@ Gem::Specification.new do |spec|
 
   spec.required_ruby_version = '>= 3.2.0'
 
-  spec.files         = `git ls-files -z`.split("\x0").reject { |f| f.match(%r{^(spec)/}) }
+  gem_files = %w[
+    lib/**/*
+    bin/karafka
+    certs/*
+    config/**/*
+    LICENSE*
+    CHANGELOG.md
+    README.md
+    karafka.gemspec
+  ]
+
+  spec.files = Dir.glob(gem_files) & `git ls-files -z`.split("\x0")
+
   spec.executables   = %w[karafka]
   spec.require_paths = %w[lib]
 
