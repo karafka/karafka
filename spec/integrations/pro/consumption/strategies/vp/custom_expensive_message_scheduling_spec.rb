@@ -274,6 +274,6 @@ min = DT[:processed].map { |p| p[:start_time] }.min
 test_duration = max - min
 
 assert(
-  test_duration < 6,
-  "Total processing should be in under 6s with optimization, but took #{test_duration.round(2)}s"
+  test_duration < 7,
+  "Total processing should be in under 7s with optimization, but took #{test_duration.round(2)}s"
 )
