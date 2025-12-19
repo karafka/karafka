@@ -72,7 +72,7 @@ jobs:
       - name: Set up Ruby
         uses: ruby/setup-ruby@f8d7259c7a66155a7c4a157a1a10ca601f186594 # v1.271.0
         with:
-          ruby-version: '3.4.7'
+          ruby-version: '3.4.8'
           bundler-cache: true
       - name: Run yard-lint
         run: bundle exec yard-lint lib/
