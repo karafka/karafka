@@ -33,7 +33,7 @@ def median(array)
 end
 
 # on slow CI small lags may occur
-assert median(DT[:processing_lags]) < 3
+assert median(DT[:processing_lags]) <= 4
 
 # 200ms for slow ci
 max_lag = DT[:processing_lags].max
