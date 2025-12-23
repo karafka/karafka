@@ -70,7 +70,7 @@ jobs:
         with:
           fetch-depth: 0
       - name: Set up Ruby
-        uses: ruby/setup-ruby@ed55d55e820a01da7d3e4863a8c51a61d73c3228 # v1.274.0
+        uses: ruby/setup-ruby@d354de180d0c9e813cfddfcbdc079945d4be589b # v1.275.0
         with:
           ruby-version: '3.4.8'
           bundler-cache: true
@@ -112,7 +112,7 @@ jobs:
         run: rm -f Gemfile.lock
 
       - name: Set up Ruby
-        uses: ruby/setup-ruby@ed55d55e820a01da7d3e4863a8c51a61d73c3228 # v1.274.0
+        uses: ruby/setup-ruby@d354de180d0c9e813cfddfcbdc079945d4be589b # v1.275.0
         with:
           ruby-version: ${{matrix.ruby}}
           bundler-cache: true
@@ -162,7 +162,7 @@ jobs:
           docker compose up -d || (sleep 5 && docker compose up -d)
 
       - name: Set up Ruby
-        uses: ruby/setup-ruby@ed55d55e820a01da7d3e4863a8c51a61d73c3228 # v1.274.0
+        uses: ruby/setup-ruby@d354de180d0c9e813cfddfcbdc079945d4be589b # v1.275.0
         with:
           # Do not use cache here as we run bundle install also later in some of the integration
           # tests and we need to be able to run it without cache
@@ -233,7 +233,7 @@ jobs:
           docker compose up -d || (sleep 5 && docker compose up -d)
 
       - name: Set up Ruby
-        uses: ruby/setup-ruby@ed55d55e820a01da7d3e4863a8c51a61d73c3228 # v1.274.0
+        uses: ruby/setup-ruby@d354de180d0c9e813cfddfcbdc079945d4be589b # v1.275.0
         with:
           ruby-version: ${{matrix.ruby}}
           bundler: 'latest'
