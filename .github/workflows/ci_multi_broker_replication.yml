@@ -10,9 +10,10 @@ on:
       ruby_version:
         description: 'Ruby version to test'
         required: false
-        default: '3.4'
+        default: '4.0'
         type: choice
         options:
+          - '4.0'
           - '3.4'
           - '3.3'
           - '3.2'
@@ -44,7 +45,7 @@ jobs:
       fail-fast: false
       matrix:
         ruby:
-          - ${{ github.event.inputs.ruby_version || '3.4' }}
+          - ${{ github.event.inputs.ruby_version || '4.0' }}
     steps:
       - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
 

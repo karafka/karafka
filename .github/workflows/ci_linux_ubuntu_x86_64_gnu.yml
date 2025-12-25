@@ -72,7 +72,7 @@ jobs:
       - name: Set up Ruby
         uses: ruby/setup-ruby@d354de180d0c9e813cfddfcbdc079945d4be589b # v1.275.0
         with:
-          ruby-version: '3.4.8'
+          ruby-version: '4.0.0'
           bundler-cache: true
       - name: Run yard-lint
         run: bundle exec yard-lint lib/
@@ -88,7 +88,7 @@ jobs:
       fail-fast: false
       matrix:
         ruby:
-          - '4.0.0-preview2'
+          - '4.0'
           - '3.4'
           - '3.3'
           - '3.2'
@@ -96,7 +96,7 @@ jobs:
           - true
           - false
         include:
-          - ruby: '3.4'
+          - ruby: '4.0'
             coverage: 'true'
     steps:
       - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
@@ -142,7 +142,7 @@ jobs:
       fail-fast: false
       matrix:
         ruby:
-          - '4.0.0-preview2'
+          - '4.0'
           - '3.4'
           - '3.3'
           - '3.2'
@@ -179,8 +179,8 @@ jobs:
 
       - name: Fix directory permissions for Bundler
         run: |
-          chmod -R o-w /opt/hostedtoolcache/Ruby/3*/x64/lib/ruby/gems/3*/gems
-          chmod +t /opt/hostedtoolcache/Ruby/3*/x64/lib/ruby/gems/3*/gems
+          chmod -R o-w /opt/hostedtoolcache/Ruby/*/x64/lib/ruby/gems/*/gems
+          chmod +t /opt/hostedtoolcache/Ruby/*/x64/lib/ruby/gems/*/gems
 
       - name: Force Ruby platform for ffi gem on dev/preview Ruby
         if: contains(matrix.ruby, 'dev') || contains(matrix.ruby, 'preview') || contains(matrix.ruby, 'rc')
@@ -213,7 +213,7 @@ jobs:
       fail-fast: false
       matrix:
         ruby:
-          - '4.0.0-preview2'
+          - '4.0'
           - '3.4'
           - '3.3'
           - '3.2'
