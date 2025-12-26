@@ -25,22 +25,19 @@ jobs:
       fail-fast: false
       matrix:
         ruby:
-          - '4.0.0-preview2'
+          - '4.0'
           - '3.4'
           - '3.3'
           - '3.2'
         macos-version:
           - 'macos-14'
           - 'macos-15'
-        exclude:
-          - ruby: '4.0.0-preview2'
-            macos-version: 'macos-14'
     runs-on: ${{ matrix.macos-version }}
     steps:
       - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
 
-      - name: Remove Gemfile.lock for Ruby preview versions
-        if: contains(matrix.ruby, 'preview')
+      - name: Remove Gemfile.lock for Ruby dev/preview/rc versions
+        if: contains(matrix.ruby, 'dev') || contains(matrix.ruby, 'preview') || contains(matrix.ruby, 'rc')
         run: rm -f Gemfile.lock
 
       - name: Install Bash 4+ and Kerberos
