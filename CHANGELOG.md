@@ -1,6 +1,6 @@
 # Karafka Framework Changelog
 
-## 2.5.4 (Unreleased)
+## 2.5.4 (2025-12-28)
 - [Enhancement] Align Datadog logger listener error handling with the main logger listener by adding missing error types and replacing `UnsupportedCaseError` with generic error logging to support dynamic errors reporting.
 - [Enhancement] Align Appsignal metrics listener `USER_CONSUMER_ERROR_TYPES` with all consumer error types for complete error tracking.
 - [Enhancement] Reduce gem package size by excluding development files (spec, examples, CI configs, dev scripts) from the gem build.
