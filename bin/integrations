@@ -262,7 +262,11 @@ if RUBY_VERSION.split('.').first.to_i >= 4
     'web/end_to_end_install_flow_pristine/install_with_rails_spec.rb',
     'installation/with_rails7_pristine/install_spec.rb',
     'web/incompatible_version_pristine_0.7/console_with_rails_spec.rb',
-    'instrumentation/vendors/datadog/with_original_client_pristine/with_proper_ddtrace_spec.rb'
+    'instrumentation/vendors/datadog/with_original_client_pristine/with_proper_ddtrace_spec.rb',
+    # sqlite3 gem 2.9.0 has ABI incompatibility with Ruby 4.0 preview
+    'rails/rails72_pristine/with-active-job-transactional/schedule_with_sqlite_spec.rb',
+    'rails/rails80_pristine/with-active-job-transactional/schedule_with_sqlite_spec.rb',
+    'rails/rails81_pristine/with-active-job-transactional/schedule_with_sqlite_spec.rb'
   ].freeze
 
   specs.delete_if do |spec|
