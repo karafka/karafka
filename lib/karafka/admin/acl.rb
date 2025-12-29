@@ -107,33 +107,33 @@ module Karafka
       # @note For the sake of consistency all methods from this API return array of Acls
       class << self
         # @param acl [Acl] ACL rule to create
-        # @see #do_create
+        # @see #create
         def create(acl)
-          new.do_create(acl)
+          new.create(acl)
         end
 
         # @param acl [Acl] ACL pattern to match for deletion
-        # @see #do_delete
+        # @see #delete
         def delete(acl)
-          new.do_delete(acl)
+          new.delete(acl)
         end
 
         # @param acl [Acl] ACL pattern to describe
-        # @see #do_describe
+        # @see #describe
         def describe(acl)
-          new.do_describe(acl)
+          new.describe(acl)
         end
 
-        # @see #do_all
+        # @see #all
         def all
-          new.do_all
+          new.all
         end
       end
 
       # Creates (unless already present) a given ACL rule in Kafka
       # @param acl [Acl]
       # @return [Array<Acl>] created acls
-      def do_create(acl)
+      def create(acl)
         with_admin_wait do |admin|
           admin.create_acl(**acl.to_native_hash)
         end
@@ -145,7 +145,7 @@ module Karafka
       # @param acl [Acl]
       # @return [Array<Acl>] deleted acls
       # @note More than one Acl may be removed if rules match that way
-      def do_delete(acl)
+      def delete(acl)
         result = with_admin_wait do |admin|
           admin.delete_acl(**acl.to_native_hash)
         end
@@ -158,7 +158,7 @@ module Karafka
       # Takes an Acl definition and describes all existing Acls matching its criteria
       # @param acl [Acl]
       # @return [Array<Acl>] described acls
-      def do_describe(acl)
+      def describe(acl)
         result = with_admin_wait do |admin|
           admin.describe_acl(**acl.to_native_hash)
         end
@@ -170,8 +170,8 @@ module Karafka
 
       # Returns all acls on a cluster level
       # @return [Array<Acl>] all acls
-      def do_all
-        do_describe(
+      def all
+        describe(
           self.class.new(
             resource_type: :any,
             resource_name: nil,
