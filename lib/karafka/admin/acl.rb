@@ -106,87 +106,79 @@ module Karafka
       # Class level APIs that operate on Acl instances and/or return Acl instances.
       # @note For the sake of consistency all methods from this API return array of Acls
       class << self
-        # Creates (unless already present) a given ACL rule in Kafka
-        # @param acl [Acl]
-        # @return [Array<Acl>] created acls
+        # @see #do_create
         def create(acl)
-          with_admin_wait do |admin|
-            admin.create_acl(**acl.to_native_hash)
-          end
-
-          [acl]
+          new.do_create(acl)
         end
 
-        # Removes acls matching provide acl pattern.
-        # @param acl [Acl]
-        # @return [Array<Acl>] deleted acls
-        # @note More than one Acl may be removed if rules match that way
+        # @see #do_delete
         def delete(acl)
-          result = with_admin_wait do |admin|
-            admin.delete_acl(**acl.to_native_hash)
-          end
-
-          result.deleted_acls.map do |result_acl|
-            from_rdkafka(result_acl)
-          end
+          new.do_delete(acl)
         end
 
-        # Takes an Acl definition and describes all existing Acls matching its criteria
-        # @param acl [Acl]
-        # @return [Array<Acl>] described acls
+        # @see #do_describe
         def describe(acl)
-          result = with_admin_wait do |admin|
-            admin.describe_acl(**acl.to_native_hash)
-          end
-
-          result.acls.map do |result_acl|
-            from_rdkafka(result_acl)
-          end
+          new.do_describe(acl)
         end
 
-        # Returns all acls on a cluster level
-        # @return [Array<Acl>] all acls
+        # @see #do_all
         def all
-          describe(
-            new(
-              resource_type: :any,
-              resource_name: nil,
-              resource_pattern_type: :any,
-              principal: nil,
-              operation: :any,
-              permission_type: :any,
-              host: '*'
-            )
+          new.do_all
+        end
+      end
+
+      # Creates (unless already present) a given ACL rule in Kafka
+      # @param acl [Acl]
+      # @return [Array<Acl>] created acls
+      def do_create(acl)
+        with_admin_wait do |admin|
+          admin.create_acl(**acl.to_native_hash)
+        end
+
+        [acl]
+      end
+
+      # Removes acls matching provide acl pattern.
+      # @param acl [Acl]
+      # @return [Array<Acl>] deleted acls
+      # @note More than one Acl may be removed if rules match that way
+      def do_delete(acl)
+        result = with_admin_wait do |admin|
+          admin.delete_acl(**acl.to_native_hash)
+        end
+
+        result.deleted_acls.map do |result_acl|
+          from_rdkafka(result_acl)
+        end
+      end
+
+      # Takes an Acl definition and describes all existing Acls matching its criteria
+      # @param acl [Acl]
+      # @return [Array<Acl>] described acls
+      def do_describe(acl)
+        result = with_admin_wait do |admin|
+          admin.describe_acl(**acl.to_native_hash)
+        end
+
+        result.acls.map do |result_acl|
+          from_rdkafka(result_acl)
+        end
+      end
+
+      # Returns all acls on a cluster level
+      # @return [Array<Acl>] all acls
+      def do_all
+        do_describe(
+          self.class.new(
+            resource_type: :any,
+            resource_name: nil,
+            resource_pattern_type: :any,
+            principal: nil,
+            operation: :any,
+            permission_type: :any,
+            host: '*'
           )
-        end
-
-        private
-
-        # Yields admin instance, allows to run Acl operations and awaits on the final result
-        # Makes sure that admin is closed afterwards.
-        def with_admin_wait
-          with_admin do |admin|
-            yield(admin).wait(max_wait_timeout: max_wait_time)
-          end
-        end
-
-        # Takes a rdkafka Acl result and converts it into our local Acl representation. Since the
-        # rdkafka Acl object is an integer based on on types, etc we remap it into our "more" Ruby
-        # form.
-        #
-        # @param rdkafka_acl [Rdkafka::Admin::AclBindingResult]
-        # return [Acl] mapped acl
-        def from_rdkafka(rdkafka_acl)
-          new(
-            resource_type: rdkafka_acl.matching_acl_resource_type,
-            resource_name: rdkafka_acl.matching_acl_resource_name,
-            resource_pattern_type: rdkafka_acl.matching_acl_pattern_type,
-            principal: rdkafka_acl.matching_acl_principal,
-            host: rdkafka_acl.matching_acl_host,
-            operation: rdkafka_acl.matching_acl_operation,
-            permission_type: rdkafka_acl.matching_acl_permission_type
-          )
-        end
+        )
       end
 
       attr_reader(
@@ -196,6 +188,11 @@ module Karafka
 
       # Initializes a new Acl instance with specified attributes.
       #
+      # This class serves dual purposes:
+      # 1. As an ACL rule definition when called with resource_type and other ACL parameters
+      # 2. As an admin operations instance when called with only kafka: parameter
+      #
+      # @param kafka [Hash] custom kafka configuration for admin operations (optional)
       # @param resource_type [Symbol, Integer] Specifies the type of Kafka resource
       #   (like :topic, :consumer_group).
       #   Accepts either a symbol from RESOURCE_TYPES_MAP or a direct rdkafka numerical type.
@@ -215,24 +212,45 @@ module Karafka
       #
       # Each parameter is mapped to its corresponding value in the respective *_MAP constant,
       # allowing usage of more descriptive Ruby symbols instead of numerical types.
+      #
+      # @example Create an ACL rule
+      #   acl = Karafka::Admin::Acl.new(
+      #     resource_type: :topic,
+      #     resource_name: 'my-topic',
+      #     resource_pattern_type: :literal,
+      #     principal: 'User:my-user',
+      #     operation: :read,
+      #     permission_type: :allow
+      #   )
+      #
+      # @example Create an admin instance for a different cluster
+      #   admin = Karafka::Admin::Acl.new(kafka: { 'bootstrap.servers': 'other:9092' })
+      #   admin.do_create(acl)
       def initialize(
-        resource_type:,
-        resource_name:,
-        resource_pattern_type:,
-        principal:,
+        kafka: nil,
+        resource_type: nil,
+        resource_name: nil,
+        resource_pattern_type: nil,
+        principal: nil,
         host: '*',
-        operation:,
-        permission_type:
+        operation: nil,
+        permission_type: nil
       )
-        @resource_type = map(resource_type, RESOURCE_TYPES_MAP)
-        @resource_name = resource_name
-        @resource_pattern_type = map(resource_pattern_type, RESOURCE_PATTERNS_TYPE_MAP)
-        @principal = principal
-        @host = host
-        @operation = map(operation, OPERATIONS_MAP)
-        @permission_type = map(permission_type, PERMISSION_TYPES_MAP)
-        super()
-        freeze
+        # If resource_type is provided, this is an ACL rule definition
+        if resource_type
+          @resource_type = map(resource_type, RESOURCE_TYPES_MAP)
+          @resource_name = resource_name
+          @resource_pattern_type = map(resource_pattern_type, RESOURCE_PATTERNS_TYPE_MAP)
+          @principal = principal
+          @host = host
+          @operation = map(operation, OPERATIONS_MAP)
+          @permission_type = map(permission_type, PERMISSION_TYPES_MAP)
+          super(kafka: kafka || {})
+          freeze
+        else
+          # This is an admin operations instance
+          super(kafka: kafka || {})
+        end
       end
 
       # Converts the Acl into a hash with native rdkafka types
@@ -250,6 +268,32 @@ module Karafka
       end
 
       private
+
+      # Yields admin instance, allows to run Acl operations and awaits on the final result
+      # Makes sure that admin is closed afterwards.
+      def with_admin_wait
+        with_admin do |admin|
+          yield(admin).wait(max_wait_timeout: self.class.max_wait_time)
+        end
+      end
+
+      # Takes a rdkafka Acl result and converts it into our local Acl representation. Since the
+      # rdkafka Acl object is an integer based on on types, etc we remap it into our "more" Ruby
+      # form.
+      #
+      # @param rdkafka_acl [Rdkafka::Admin::AclBindingResult]
+      # return [Acl] mapped acl
+      def from_rdkafka(rdkafka_acl)
+        self.class.new(
+          resource_type: rdkafka_acl.matching_acl_resource_type,
+          resource_name: rdkafka_acl.matching_acl_resource_name,
+          resource_pattern_type: rdkafka_acl.matching_acl_pattern_type,
+          principal: rdkafka_acl.matching_acl_principal,
+          host: rdkafka_acl.matching_acl_host,
+          operation: rdkafka_acl.matching_acl_operation,
+          permission_type: rdkafka_acl.matching_acl_permission_type
+        )
+      end
 
       # Maps the provided attribute based on the mapping hash and if not found returns the
       # attribute itself. Useful when converting from Acl symbol based representation to the
