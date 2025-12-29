@@ -58,9 +58,15 @@ RSpec.describe Karafka::Admin::Replication do
 
   describe '.plan' do
     before do
-      allow(described_class).to receive(:fetch_topic_info)
+      allow_any_instance_of(described_class).to receive(:fetch_topic_info)
         .with(topic_name).and_return(mock_topic_info)
-      allow(described_class).to receive(:cluster_info).and_return(mock_cluster_info)
+      allow_any_instance_of(described_class).to receive(:fetch_cluster_info).and_return(
+        {
+          brokers: mock_cluster_info.brokers.map do |broker|
+            { node_id: broker.node_id, host: "#{broker.host}:#{broker.port}" }
+          end
+        }
+      )
     end
 
     context 'when increasing replication factor with automatic assignment' do
@@ -242,9 +248,15 @@ RSpec.describe Karafka::Admin::Replication do
 
   describe '.rebalance' do
     before do
-      allow(described_class).to receive(:fetch_topic_info)
+      allow_any_instance_of(described_class).to receive(:fetch_topic_info)
         .with(topic_name).and_return(mock_topic_info)
-      allow(described_class).to receive(:cluster_info).and_return(mock_cluster_info)
+      allow_any_instance_of(described_class).to receive(:fetch_cluster_info).and_return(
+        {
+          brokers: mock_cluster_info.brokers.map do |broker|
+            { node_id: broker.node_id, host: "#{broker.host}:#{broker.port}" }
+          end
+        }
+      )
     end
 
     it 'generates a rebalancing plan without changing replication factor' do
@@ -317,27 +329,37 @@ RSpec.describe Karafka::Admin::Replication do
   end
 
   describe 'Karafka::Admin.plan_topic_replication' do
+    before do
+      allow_any_instance_of(described_class).to receive(:fetch_topic_info)
+        .with(topic_name).and_return(mock_topic_info)
+      allow_any_instance_of(described_class).to receive(:fetch_cluster_info).and_return(
+        {
+          brokers: mock_cluster_info.brokers.map do |broker|
+            { node_id: broker.node_id, host: "#{broker.host}:#{broker.port}" }
+          end
+        }
+      )
+    end
+
     it 'delegates to Replication correctly' do
-      allow(described_class).to receive(:plan).and_return(OpenStruct.new)
+      result = Karafka::Admin.plan_topic_replication(topic: topic_name, replication_factor: 3)
 
-      Karafka::Admin.plan_topic_replication(topic: topic_name, replication_factor: 3)
-
-      expect(described_class).to have_received(:plan)
-        .with(topic: topic_name, to: 3, brokers: nil)
+      expect(result).to be_a(described_class)
+      expect(result.topic).to eq(topic_name)
+      expect(result.target_replication_factor).to eq(3)
     end
 
     it 'passes manual broker assignments when provided' do
-      manual_brokers = { 0 => [1, 2, 3] }
-      allow(described_class).to receive(:plan).and_return(OpenStruct.new)
+      manual_brokers = { 0 => [1, 2, 3], 1 => [2, 3, 4] }
 
-      Karafka::Admin.plan_topic_replication(
+      result = Karafka::Admin.plan_topic_replication(
         topic: topic_name,
         replication_factor: 3,
         brokers: manual_brokers
       )
 
-      expect(described_class).to have_received(:plan)
-        .with(topic: topic_name, to: 3, brokers: manual_brokers)
+      expect(result).to be_a(described_class)
+      expect(result.partitions_assignment).to eq(manual_brokers)
     end
   end
 end
