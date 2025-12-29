@@ -266,7 +266,14 @@ if RUBY_VERSION.split('.').first.to_i >= 4
     # sqlite3 gem 2.9.0 has ABI incompatibility with Ruby 4.0 preview
     'rails/rails72_pristine/with-active-job-transactional/schedule_with_sqlite_spec.rb',
     'rails/rails80_pristine/with-active-job-transactional/schedule_with_sqlite_spec.rb',
-    'rails/rails81_pristine/with-active-job-transactional/schedule_with_sqlite_spec.rb'
+    'rails/rails81_pristine/with-active-job-transactional/schedule_with_sqlite_spec.rb',
+    # ffi gem has ABI incompatibility with Ruby 4.0 preview
+    'rails/rails80_pristine/with_setup_via_initializers/rails_console_spec.rb',
+    'rails/rails80_pristine/with_kubernetes_listener_in_the_console/console_with_rails_spec.rb',
+    'rails/rails81_pristine/with_kubernetes_listener_in_the_console/console_with_rails_spec.rb',
+    'rails/rails72_pristine/without-active_job_rspec/rspec_rails_setup_spec.rb',
+    'rails/rails80_pristine/without-active_job_rspec/rspec_rails_setup_spec.rb',
+    'rails/rails80_pristine/without-active_job_rspec/console_with_rails_spec.rb'
   ].freeze
 
   specs.delete_if do |spec|
