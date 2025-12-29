@@ -18,31 +18,45 @@ module Karafka
       private_constant :LONG_TIME_AGO, :DAY_IN_SECONDS
 
       class << self
+        # @param consumer_group_id [String] consumer group for which we want to move offsets
+        # @param topics_with_partitions_and_offsets [Hash] hash with topics and settings
         # @see #seek
         def seek(consumer_group_id, topics_with_partitions_and_offsets)
           new.seek(consumer_group_id, topics_with_partitions_and_offsets)
         end
 
+        # @param previous_name [String] old consumer group name
+        # @param new_name [String] new consumer group name
+        # @param topics [Array<String>] topics for which we want to copy offsets
         # @see #copy
         def copy(previous_name, new_name, topics)
           new.copy(previous_name, new_name, topics)
         end
 
+        # @param previous_name [String] old consumer group name
+        # @param new_name [String] new consumer group name
+        # @param topics [Array<String>] topics for which we want to migrate offsets
+        # @param delete_previous [Boolean] should we delete previous consumer group after rename
         # @see #rename
         def rename(previous_name, new_name, topics, delete_previous: true)
           new.rename(previous_name, new_name, topics, delete_previous: delete_previous)
         end
 
+        # @param consumer_group_id [String] consumer group name
         # @see #delete
         def delete(consumer_group_id)
           new.delete(consumer_group_id)
         end
 
+        # @param consumer_group_id [String] consumer group id to trigger rebalance for
         # @see #trigger_rebalance
         def trigger_rebalance(consumer_group_id)
           new.trigger_rebalance(consumer_group_id)
         end
 
+        # @param consumer_groups_with_topics [Hash{String => Array<String>}] hash with consumer
+        #   groups names with array of topics
+        # @param active_topics_only [Boolean] if set to false, will select also inactive topics
         # @see #read_lags_with_offsets
         def read_lags_with_offsets(consumer_groups_with_topics = {}, active_topics_only: true)
           new.read_lags_with_offsets(

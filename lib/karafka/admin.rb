@@ -229,37 +229,54 @@ module Karafka
 
     # Instance methods - these use the custom kafka configuration
 
-    # @see Topics.read
+    # @param name [String, Symbol] topic name
+    # @param partition [Integer] partition
+    # @param count [Integer] how many messages we want to get at most
+    # @param start_offset [Integer, Time] offset from which we should start
+    # @param settings [Hash] kafka extra settings (optional)
+    # @see Topics#read
     def read_topic(name, partition, count, start_offset = -1, settings = {})
       Topics.new(kafka: @custom_kafka).read(name, partition, count, start_offset, settings)
     end
 
-    # @see Topics.create
+    # @param name [String] topic name
+    # @param partitions [Integer] number of partitions for this topic
+    # @param replication_factor [Integer] number of replicas
+    # @param topic_config [Hash] topic config details
+    # @see Topics#create
     def create_topic(name, partitions, replication_factor, topic_config = {})
       Topics.new(kafka: @custom_kafka).create(name, partitions, replication_factor, topic_config)
     end
 
-    # @see Topics.delete
+    # @param name [String] topic name
+    # @see Topics#delete
     def delete_topic(name)
       Topics.new(kafka: @custom_kafka).delete(name)
     end
 
-    # @see Topics.create_partitions
+    # @param name [String] topic name
+    # @param partitions [Integer] total number of partitions we expect to end up with
+    # @see Topics#create_partitions
     def create_partitions(name, partitions)
       Topics.new(kafka: @custom_kafka).create_partitions(name, partitions)
     end
 
-    # @see Topics.read_watermark_offsets
+    # @param name_or_hash [String, Symbol, Hash] topic name or hash with topics and partitions
+    # @param partition [Integer, nil] partition (nil when using hash format)
+    # @see Topics#read_watermark_offsets
     def read_watermark_offsets(name_or_hash, partition = nil)
       Topics.new(kafka: @custom_kafka).read_watermark_offsets(name_or_hash, partition)
     end
 
-    # @see Topics.info
+    # @param topic_name [String] name of the topic we're interested in
+    # @see Topics#info
     def topic_info(topic_name)
       Topics.new(kafka: @custom_kafka).info(topic_name)
     end
 
-    # @see ConsumerGroups.seek
+    # @param consumer_group_id [String] consumer group for which we want to move offsets
+    # @param topics_with_partitions_and_offsets [Hash] hash with topics and settings
+    # @see ConsumerGroups#seek
     def seek_consumer_group(consumer_group_id, topics_with_partitions_and_offsets)
       ConsumerGroups.new(kafka: @custom_kafka).seek(
         consumer_group_id,
@@ -267,12 +284,19 @@ module Karafka
       )
     end
 
-    # @see ConsumerGroups.copy
+    # @param previous_name [String] old consumer group name
+    # @param new_name [String] new consumer group name
+    # @param topics [Array<String>] topics for which we want to copy offsets
+    # @see ConsumerGroups#copy
     def copy_consumer_group(previous_name, new_name, topics)
       ConsumerGroups.new(kafka: @custom_kafka).copy(previous_name, new_name, topics)
     end
 
-    # @see ConsumerGroups.rename
+    # @param previous_name [String] old consumer group name
+    # @param new_name [String] new consumer group name
+    # @param topics [Array<String>] topics for which we want to migrate offsets
+    # @param delete_previous [Boolean] should we delete previous consumer group after rename
+    # @see ConsumerGroups#rename
     def rename_consumer_group(previous_name, new_name, topics, delete_previous: true)
       ConsumerGroups.new(kafka: @custom_kafka).rename(
         previous_name,
@@ -282,17 +306,22 @@ module Karafka
       )
     end
 
-    # @see ConsumerGroups.delete
+    # @param consumer_group_id [String] consumer group name
+    # @see ConsumerGroups#delete
     def delete_consumer_group(consumer_group_id)
       ConsumerGroups.new(kafka: @custom_kafka).delete(consumer_group_id)
     end
 
-    # @see ConsumerGroups.trigger_rebalance
+    # @param consumer_group_id [String] consumer group id to trigger rebalance for
+    # @see ConsumerGroups#trigger_rebalance
     def trigger_rebalance(consumer_group_id)
       ConsumerGroups.new(kafka: @custom_kafka).trigger_rebalance(consumer_group_id)
     end
 
-    # @see ConsumerGroups.read_lags_with_offsets
+    # @param consumer_groups_with_topics [Hash{String => Array<String>}] hash with consumer
+    #   groups names with array of topics
+    # @param active_topics_only [Boolean] if set to false, will select also inactive topics
+    # @see ConsumerGroups#read_lags_with_offsets
     def read_lags_with_offsets(consumer_groups_with_topics = {}, active_topics_only: true)
       ConsumerGroups.new(kafka: @custom_kafka).read_lags_with_offsets(
         consumer_groups_with_topics,
@@ -300,7 +329,10 @@ module Karafka
       )
     end
 
-    # @see Replication.plan
+    # @param topic [String] topic name to plan replication for
+    # @param replication_factor [Integer] target replication factor
+    # @param brokers [Hash, nil] optional manual broker assignments per partition
+    # @see Replication#plan
     def plan_topic_replication(topic:, replication_factor:, brokers: nil)
       Replication.new(kafka: @custom_kafka).plan(
         topic: topic,

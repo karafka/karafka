@@ -106,16 +106,19 @@ module Karafka
       # Class level APIs that operate on Acl instances and/or return Acl instances.
       # @note For the sake of consistency all methods from this API return array of Acls
       class << self
+        # @param acl [Acl] ACL rule to create
         # @see #do_create
         def create(acl)
           new.do_create(acl)
         end
 
+        # @param acl [Acl] ACL pattern to match for deletion
         # @see #do_delete
         def delete(acl)
           new.do_delete(acl)
         end
 
+        # @param acl [Acl] ACL pattern to describe
         # @see #do_describe
         def describe(acl)
           new.do_describe(acl)

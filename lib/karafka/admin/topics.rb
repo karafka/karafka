@@ -7,31 +7,47 @@ module Karafka
     # introspection
     class Topics < Admin
       class << self
+        # @param name [String, Symbol] topic name
+        # @param partition [Integer] partition
+        # @param count [Integer] how many messages we want to get at most
+        # @param start_offset [Integer, Time] offset from which we should start
+        # @param settings [Hash] kafka extra settings (optional)
         # @see #read
         def read(name, partition, count, start_offset = -1, settings = {})
           new.read(name, partition, count, start_offset, settings)
         end
 
+        # @param name [String] topic name
+        # @param partitions [Integer] number of partitions for this topic
+        # @param replication_factor [Integer] number of replicas
+        # @param topic_config [Hash] topic config details as described in the
+        #   `base topic configuration`))
         # @see #create
         def create(name, partitions, replication_factor, topic_config = {})
           new.create(name, partitions, replication_factor, topic_config)
         end
 
+        # @param name [String] topic name
         # @see #delete
         def delete(name)
           new.delete(name)
         end
 
+        # @param name [String] topic name
+        # @param partitions [Integer] total number of partitions we expect to end up with
         # @see #create_partitions
         def create_partitions(name, partitions)
           new.create_partitions(name, partitions)
         end
 
+        # @param name_or_hash [String, Symbol, Hash] topic name or hash with topics and partitions
+        # @param partition [Integer, nil] partition (nil when using hash format)
         # @see #read_watermark_offsets
         def read_watermark_offsets(name_or_hash, partition = nil)
           new.read_watermark_offsets(name_or_hash, partition)
         end
 
+        # @param topic_name [String] name of the topic we're interested in
         # @see #info
         def info(topic_name)
           new.info(topic_name)

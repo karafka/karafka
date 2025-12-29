@@ -61,11 +61,15 @@ module Karafka
 
       # Class level APIs for convenience
       class << self
+        # @param topic [String] topic name to plan replication for
+        # @param to [Integer] target replication factor
+        # @param brokers [Hash, nil] optional manual broker assignments per partition
         # @see #plan
         def plan(topic:, to:, brokers: nil)
           new.plan(topic: topic, to: to, brokers: brokers)
         end
 
+        # @param topic [String] topic name to rebalance
         # @see #rebalance
         def rebalance(topic:)
           new.rebalance(topic: topic)

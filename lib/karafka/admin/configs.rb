@@ -11,11 +11,15 @@ module Karafka
     # Altering is done in the incremental way.
     class Configs < Admin
       class << self
+        # @param resources [Resource, Array<Resource>] single resource or list of resources
+        #   to fetch configuration from Kafka
         # @see #describe
         def describe(*resources)
           new.describe(*resources)
         end
 
+        # @param resources [Resource, Array<Resource>] single resource or list of resources
+        #   with accumulated alteration operations to apply
         # @see #alter
         def alter(*resources)
           new.alter(*resources)
