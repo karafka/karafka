@@ -149,6 +149,9 @@ jobs:
         force_ruby_platform:
           - true
           - false
+        parallel_group:
+          - '0'
+          - '1'
     steps:
       - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
       - name: Install package dependencies
@@ -196,6 +199,9 @@ jobs:
           bundle exec bin/wait_for_kafka
 
       - name: Run OSS integration tests
+        env:
+          SPECS_SEED: ${{ github.run_id }}
+          SPECS_GROUP: ${{ matrix.parallel_group }}
         run: bin/integrations --exclude '/pro' --exclude '/multi_broker'
 
       - name: Check Kafka logs for unexpected warnings
