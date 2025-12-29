@@ -275,7 +275,8 @@ if RUBY_VERSION.split('.').first.to_i >= 4
     'rails/rails81_pristine/with_kubernetes_listener_in_the_console/console_with_rails_spec.rb',
     'rails/rails72_pristine/without-active_job_rspec/rspec_rails_setup_spec.rb',
     'rails/rails80_pristine/without-active_job_rspec/rspec_rails_setup_spec.rb',
-    'rails/rails80_pristine/without-active_job_rspec/console_with_rails_spec.rb'
+    'rails/rails80_pristine/without-active_job_rspec/console_with_rails_spec.rb',
+    'rails/rails81_pristine/without-active_job_rspec/rspec_rails_setup_spec.rb'
   ].freeze
 
   specs.delete_if do |spec|
