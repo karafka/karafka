@@ -431,13 +431,15 @@ module Karafka
     # @return [::Rdkafka::Config] rdkafka config
     def config(type, settings)
       kafka_config = self.class.app_kafka.dup
-      kafka_config.merge!(@custom_kafka)
       kafka_config.merge!(self.class.admin_kafka)
       kafka_config[:'group.id'] = self.class.group_id
       # We merge after setting the group id so it can be altered if needed
       # In general in admin we only should alter it when we need to impersonate a given
       # consumer group or do something similar
       kafka_config.merge!(settings)
+      # Custom kafka config is merged last so it can override all other settings
+      # This enables multi-cluster support where custom_kafka specifies a different cluster
+      kafka_config.merge!(@custom_kafka)
 
       mapped_config = Karafka::Setup::AttributesMap.public_send(type, kafka_config)
 
