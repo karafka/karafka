@@ -6,9 +6,9 @@ module Karafka
   # @note It always initializes a new admin instance as we want to ensure it is always closed
   #   Since admin actions are not performed that often, that should be ok.
   #
-  # @note It always uses the primary defined cluster and does not support multi-cluster work.
-  #   Cluster on which operations are performed can be changed via `admin.kafka` config, however
-  #   there is no multi-cluster runtime support.
+  # @note By default it uses the primary defined cluster. For multi-cluster operations, create
+  #   an Admin instance with custom kafka configuration:
+  #   `Karafka::Admin.new(kafka: { 'bootstrap.servers': 'other:9092' })`
   class Admin
     extend Core::Helpers::Time
 
@@ -22,6 +22,22 @@ module Karafka
       admin_kafka: %i[admin kafka]
     )
 
+    # Custom kafka configuration for this admin instance
+    # @return [Hash] custom kafka settings to merge with defaults
+    attr_reader :custom_kafka
+
+    # Creates a new Admin instance
+    #
+    # @param kafka [Hash] custom kafka configuration to merge with app defaults.
+    #   Useful for multi-cluster operations where you want to target a different cluster.
+    #
+    # @example Create admin for a different cluster
+    #   admin = Karafka::Admin.new(kafka: { 'bootstrap.servers': 'other-cluster:9092' })
+    #   admin.cluster_info
+    def initialize(kafka: {})
+      @custom_kafka = kafka
+    end
+
     class << self
       # Delegate topic-related operations to Topics class
 
@@ -32,7 +48,7 @@ module Karafka
       # @param settings [Hash] kafka extra settings
       # @see Topics.read
       def read_topic(name, partition, count, start_offset = -1, settings = {})
-        Topics.read(name, partition, count, start_offset, settings)
+        new.read_topic(name, partition, count, start_offset, settings)
       end
 
       # @param name [String] topic name
@@ -41,33 +57,33 @@ module Karafka
       # @param topic_config [Hash] topic config details
       # @see Topics.create
       def create_topic(name, partitions, replication_factor, topic_config = {})
-        Topics.create(name, partitions, replication_factor, topic_config)
+        new.create_topic(name, partitions, replication_factor, topic_config)
       end
 
       # @param name [String] topic name
       # @see Topics.delete
       def delete_topic(name)
-        Topics.delete(name)
+        new.delete_topic(name)
       end
 
       # @param name [String] topic name
       # @param partitions [Integer] total number of partitions we expect to end up with
       # @see Topics.create_partitions
       def create_partitions(name, partitions)
-        Topics.create_partitions(name, partitions)
+        new.create_partitions(name, partitions)
       end
 
       # @param name_or_hash [String, Symbol, Hash] topic name or hash with topics and partitions
       # @param partition [Integer, nil] partition (nil when using hash format)
       # @see Topics.read_watermark_offsets
       def read_watermark_offsets(name_or_hash, partition = nil)
-        Topics.read_watermark_offsets(name_or_hash, partition)
+        new.read_watermark_offsets(name_or_hash, partition)
       end
 
       # @param topic_name [String] name of the topic we're interested in
       # @see Topics.info
       def topic_info(topic_name)
-        Topics.info(topic_name)
+        new.topic_info(topic_name)
       end
 
       # @param consumer_group_id [String] id of the consumer group for which we want to move the
@@ -75,7 +91,7 @@ module Karafka
       # @param topics_with_partitions_and_offsets [Hash] Hash with list of topics and settings
       # @see ConsumerGroups.seek
       def seek_consumer_group(consumer_group_id, topics_with_partitions_and_offsets)
-        ConsumerGroups.seek(consumer_group_id, topics_with_partitions_and_offsets)
+        new.seek_consumer_group(consumer_group_id, topics_with_partitions_and_offsets)
       end
 
       # Takes consumer group and its topics and copies all the offsets to a new named group
@@ -86,7 +102,7 @@ module Karafka
       # @return [Boolean] true if anything was migrated, otherwise false
       # @see ConsumerGroups.copy
       def copy_consumer_group(previous_name, new_name, topics)
-        ConsumerGroups.copy(previous_name, new_name, topics)
+        new.copy_consumer_group(previous_name, new_name, topics)
       end
 
       # Takes consumer group and its topics and migrates all the offsets to a new named group
@@ -100,7 +116,12 @@ module Karafka
       #   nothing really to rename
       # @see ConsumerGroups.rename
       def rename_consumer_group(previous_name, new_name, topics, delete_previous: true)
-        ConsumerGroups.rename(previous_name, new_name, topics, delete_previous: delete_previous)
+        new.rename_consumer_group(
+          previous_name,
+          new_name,
+          topics,
+          delete_previous: delete_previous
+        )
       end
 
       # Removes given consumer group (if exists)
@@ -108,7 +129,7 @@ module Karafka
       # @param consumer_group_id [String] consumer group name
       # @see ConsumerGroups.delete
       def delete_consumer_group(consumer_group_id)
-        ConsumerGroups.delete(consumer_group_id)
+        new.delete_consumer_group(consumer_group_id)
       end
 
       # Triggers a rebalance for the specified consumer group
@@ -117,7 +138,7 @@ module Karafka
       # @see ConsumerGroups.trigger_rebalance
       # @note This API should be used only for development.
       def trigger_rebalance(consumer_group_id)
-        ConsumerGroups.trigger_rebalance(consumer_group_id)
+        new.trigger_rebalance(consumer_group_id)
       end
 
       # Reads lags and offsets for given topics in the context of consumer groups defined in the
@@ -131,7 +152,7 @@ module Karafka
       #   partitions with lags and offsets
       # @see ConsumerGroups.read_lags_with_offsets
       def read_lags_with_offsets(consumer_groups_with_topics = {}, active_topics_only: true)
-        ConsumerGroups.read_lags_with_offsets(
+        new.read_lags_with_offsets(
           consumer_groups_with_topics,
           active_topics_only: active_topics_only
         )
@@ -177,16 +198,16 @@ module Karafka
       #
       # @see Replication.plan for more details
       def plan_topic_replication(topic:, replication_factor:, brokers: nil)
-        Replication.plan(
+        new.plan_topic_replication(
           topic: topic,
-          to: replication_factor,
+          replication_factor: replication_factor,
           brokers: brokers
         )
       end
 
       # @return [Rdkafka::Metadata] cluster metadata info
       def cluster_info
-        with_admin(&:metadata)
+        new.cluster_info
       end
 
       # Creates consumer instance and yields it. After usage it closes the consumer instance
@@ -196,126 +217,265 @@ module Karafka
       #
       # @note We always ship and yield a proxied consumer because admin API performance is not
       #   that relevant. That is, there are no high frequency calls that would have to be delegated
-      def with_consumer(settings = {})
-        bind_id = SecureRandom.uuid
-
-        consumer = config(:consumer, settings).consumer(native_kafka_auto_start: false)
-        bind_oauth(bind_id, consumer)
-
-        consumer.start
-        proxy = Karafka::Connection::Proxy.new(consumer)
-        yield(proxy)
-      ensure
-        # Always unsubscribe consumer just to be sure, that no metadata requests are running
-        # when we close the consumer. This in theory should prevent from some race-conditions
-        # that originate from librdkafka
-        begin
-          consumer&.unsubscribe
-        # Ignore any errors and continue to close consumer despite them
-        rescue Rdkafka::RdkafkaError
-          nil
-        end
-
-        consumer&.close
-
-        unbind_oauth(bind_id)
+      def with_consumer(settings = {}, &)
+        new.with_consumer(settings, &)
       end
 
       # Creates admin instance and yields it. After usage it closes the admin instance
-      def with_admin
-        bind_id = SecureRandom.uuid
+      def with_admin(&)
+        new.with_admin(&)
+      end
+    end
 
-        admin = config(:producer, {}).admin(
-          native_kafka_auto_start: false,
-          native_kafka_poll_timeout_ms: poll_timeout
+    # Instance methods - these use the custom kafka configuration
+
+    # @param name [String, Symbol] topic name
+    # @param partition [Integer] partition
+    # @param count [Integer] how many messages we want to get at most
+    # @param start_offset [Integer, Time] offset from which we should start
+    # @param settings [Hash] kafka extra settings (optional)
+    # @see Topics#read
+    def read_topic(name, partition, count, start_offset = -1, settings = {})
+      Topics.new(kafka: @custom_kafka).read(name, partition, count, start_offset, settings)
+    end
+
+    # @param name [String] topic name
+    # @param partitions [Integer] number of partitions for this topic
+    # @param replication_factor [Integer] number of replicas
+    # @param topic_config [Hash] topic config details
+    # @see Topics#create
+    def create_topic(name, partitions, replication_factor, topic_config = {})
+      Topics.new(kafka: @custom_kafka).create(name, partitions, replication_factor, topic_config)
+    end
+
+    # @param name [String] topic name
+    # @see Topics#delete
+    def delete_topic(name)
+      Topics.new(kafka: @custom_kafka).delete(name)
+    end
+
+    # @param name [String] topic name
+    # @param partitions [Integer] total number of partitions we expect to end up with
+    # @see Topics#create_partitions
+    def create_partitions(name, partitions)
+      Topics.new(kafka: @custom_kafka).create_partitions(name, partitions)
+    end
+
+    # @param name_or_hash [String, Symbol, Hash] topic name or hash with topics and partitions
+    # @param partition [Integer, nil] partition (nil when using hash format)
+    # @see Topics#read_watermark_offsets
+    def read_watermark_offsets(name_or_hash, partition = nil)
+      Topics.new(kafka: @custom_kafka).read_watermark_offsets(name_or_hash, partition)
+    end
+
+    # @param topic_name [String] name of the topic we're interested in
+    # @see Topics#info
+    def topic_info(topic_name)
+      Topics.new(kafka: @custom_kafka).info(topic_name)
+    end
+
+    # @param consumer_group_id [String] consumer group for which we want to move offsets
+    # @param topics_with_partitions_and_offsets [Hash] hash with topics and settings
+    # @see ConsumerGroups#seek
+    def seek_consumer_group(consumer_group_id, topics_with_partitions_and_offsets)
+      ConsumerGroups.new(kafka: @custom_kafka).seek(
+        consumer_group_id,
+        topics_with_partitions_and_offsets
+      )
+    end
+
+    # @param previous_name [String] old consumer group name
+    # @param new_name [String] new consumer group name
+    # @param topics [Array<String>] topics for which we want to copy offsets
+    # @see ConsumerGroups#copy
+    def copy_consumer_group(previous_name, new_name, topics)
+      ConsumerGroups.new(kafka: @custom_kafka).copy(previous_name, new_name, topics)
+    end
+
+    # @param previous_name [String] old consumer group name
+    # @param new_name [String] new consumer group name
+    # @param topics [Array<String>] topics for which we want to migrate offsets
+    # @param delete_previous [Boolean] should we delete previous consumer group after rename
+    # @see ConsumerGroups#rename
+    def rename_consumer_group(previous_name, new_name, topics, delete_previous: true)
+      ConsumerGroups.new(kafka: @custom_kafka).rename(
+        previous_name,
+        new_name,
+        topics,
+        delete_previous: delete_previous
+      )
+    end
+
+    # @param consumer_group_id [String] consumer group name
+    # @see ConsumerGroups#delete
+    def delete_consumer_group(consumer_group_id)
+      ConsumerGroups.new(kafka: @custom_kafka).delete(consumer_group_id)
+    end
+
+    # @param consumer_group_id [String] consumer group id to trigger rebalance for
+    # @see ConsumerGroups#trigger_rebalance
+    def trigger_rebalance(consumer_group_id)
+      ConsumerGroups.new(kafka: @custom_kafka).trigger_rebalance(consumer_group_id)
+    end
+
+    # @param consumer_groups_with_topics [Hash{String => Array<String>}] hash with consumer
+    #   groups names with array of topics
+    # @param active_topics_only [Boolean] if set to false, will select also inactive topics
+    # @see ConsumerGroups#read_lags_with_offsets
+    def read_lags_with_offsets(consumer_groups_with_topics = {}, active_topics_only: true)
+      ConsumerGroups.new(kafka: @custom_kafka).read_lags_with_offsets(
+        consumer_groups_with_topics,
+        active_topics_only: active_topics_only
+      )
+    end
+
+    # @param topic [String] topic name to plan replication for
+    # @param replication_factor [Integer] target replication factor
+    # @param brokers [Hash, nil] optional manual broker assignments per partition
+    # @see Replication#plan
+    def plan_topic_replication(topic:, replication_factor:, brokers: nil)
+      Replication.new(kafka: @custom_kafka).plan(
+        topic: topic,
+        to: replication_factor,
+        brokers: brokers
+      )
+    end
+
+    # @return [Rdkafka::Metadata] cluster metadata info
+    def cluster_info
+      with_admin(&:metadata)
+    end
+
+    # Creates consumer instance and yields it. After usage it closes the consumer instance
+    # This API can be used in other pieces of code and allows for low-level consumer usage
+    #
+    # @param settings [Hash] extra settings to customize consumer
+    #
+    # @note We always ship and yield a proxied consumer because admin API performance is not
+    #   that relevant. That is, there are no high frequency calls that would have to be delegated
+    def with_consumer(settings = {})
+      bind_id = SecureRandom.uuid
+
+      consumer = config(:consumer, settings).consumer(native_kafka_auto_start: false)
+      bind_oauth(bind_id, consumer)
+
+      consumer.start
+      proxy = Karafka::Connection::Proxy.new(consumer)
+      yield(proxy)
+    ensure
+      # Always unsubscribe consumer just to be sure, that no metadata requests are running
+      # when we close the consumer. This in theory should prevent from some race-conditions
+      # that originate from librdkafka
+      begin
+        consumer&.unsubscribe
+      # Ignore any errors and continue to close consumer despite them
+      rescue Rdkafka::RdkafkaError
+        nil
+      end
+
+      consumer&.close
+
+      unbind_oauth(bind_id)
+    end
+
+    # Creates admin instance and yields it. After usage it closes the admin instance
+    def with_admin
+      bind_id = SecureRandom.uuid
+
+      admin = config(:producer, {}).admin(
+        native_kafka_auto_start: false,
+        native_kafka_poll_timeout_ms: self.class.poll_timeout
+      )
+
+      bind_oauth(bind_id, admin)
+
+      admin.start
+      proxy = Karafka::Connection::Proxy.new(admin)
+      yield(proxy)
+    ensure
+      admin&.close
+
+      unbind_oauth(bind_id)
+    end
+
+    private
+
+    # @return [Integer] number of seconds to wait. `rdkafka` requires this value
+    #   (`max_wait_time`) to be provided in seconds while we define it in ms hence the conversion
+    def max_wait_time_seconds
+      self.class.max_wait_time / 1_000.0
+    end
+
+    # Adds a new callback for given rdkafka instance for oauth token refresh (if needed)
+    #
+    # @param id [String, Symbol] unique (for the lifetime of instance) id that we use for
+    #   callback referencing
+    # @param instance [Rdkafka::Consumer, Rdkafka::Admin] rdkafka instance to be used to set
+    #   appropriate oauth token when needed
+    def bind_oauth(id, instance)
+      Karafka::Core::Instrumentation.oauthbearer_token_refresh_callbacks.add(
+        id,
+        Instrumentation::Callbacks::OauthbearerTokenRefresh.new(
+          instance
         )
+      )
+    end
 
-        bind_oauth(bind_id, admin)
+    # Removes the callback from no longer used instance
+    #
+    # @param id [String, Symbol] unique (for the lifetime of instance) id that we use for
+    #   callback referencing
+    def unbind_oauth(id)
+      Karafka::Core::Instrumentation.oauthbearer_token_refresh_callbacks.delete(id)
+    end
 
-        admin.start
-        proxy = Karafka::Connection::Proxy.new(admin)
-        yield(proxy)
-      ensure
-        admin&.close
+    # There are some cases where rdkafka admin operations finish successfully but without the
+    # callback being triggered to materialize the post-promise object. Until this is fixed we
+    # can figure out, that operation we wanted to do finished successfully by checking that the
+    # effect of the command (new topic, more partitions, etc) is handled. Exactly for that we
+    # use the breaker. It we get a timeout, we can check that what we wanted to achieve has
+    # happened via the breaker check, hence we do not need to wait any longer.
+    #
+    # @param handler [Proc] the wait handler operation
+    # @param breaker [Proc] extra condition upon timeout that indicates things were finished ok
+    def with_re_wait(handler, breaker)
+      start_time = self.class.monotonic_now
+      # Convert milliseconds to seconds for sleep
+      sleep_time = self.class.retry_backoff / 1000.0
 
-        unbind_oauth(bind_id)
+      loop do
+        handler.call
+
+        sleep(sleep_time)
+
+        return if breaker.call
+      rescue Rdkafka::AbstractHandle::WaitTimeoutError
+        return if breaker.call
+
+        next if self.class.monotonic_now - start_time < self.class.max_retries_duration
+
+        raise(Errors::ResultNotVisibleError)
       end
+    end
 
-      private
+    # @param type [Symbol] type of config we want
+    # @param settings [Hash] extra settings for config (if needed)
+    # @return [::Rdkafka::Config] rdkafka config
+    def config(type, settings)
+      kafka_config = self.class.app_kafka.dup
+      kafka_config.merge!(self.class.admin_kafka)
+      kafka_config[:'group.id'] = self.class.group_id
+      # We merge after setting the group id so it can be altered if needed
+      # In general in admin we only should alter it when we need to impersonate a given
+      # consumer group or do something similar
+      kafka_config.merge!(settings)
+      # Custom kafka config is merged last so it can override all other settings
+      # This enables multi-cluster support where custom_kafka specifies a different cluster
+      kafka_config.merge!(@custom_kafka)
 
-      # @return [Integer] number of seconds to wait. `rdkafka` requires this value
-      #   (`max_wait_time`) to be provided in seconds while we define it in ms hence the conversion
-      def max_wait_time_seconds
-        max_wait_time / 1_000.0
-      end
+      mapped_config = Karafka::Setup::AttributesMap.public_send(type, kafka_config)
 
-      # Adds a new callback for given rdkafka instance for oauth token refresh (if needed)
-      #
-      # @param id [String, Symbol] unique (for the lifetime of instance) id that we use for
-      #   callback referencing
-      # @param instance [Rdkafka::Consumer, Rdkafka::Admin] rdkafka instance to be used to set
-      #   appropriate oauth token when needed
-      def bind_oauth(id, instance)
-        Karafka::Core::Instrumentation.oauthbearer_token_refresh_callbacks.add(
-          id,
-          Instrumentation::Callbacks::OauthbearerTokenRefresh.new(
-            instance
-          )
-        )
-      end
-
-      # Removes the callback from no longer used instance
-      #
-      # @param id [String, Symbol] unique (for the lifetime of instance) id that we use for
-      #   callback referencing
-      def unbind_oauth(id)
-        Karafka::Core::Instrumentation.oauthbearer_token_refresh_callbacks.delete(id)
-      end
-
-      # There are some cases where rdkafka admin operations finish successfully but without the
-      # callback being triggered to materialize the post-promise object. Until this is fixed we
-      # can figure out, that operation we wanted to do finished successfully by checking that the
-      # effect of the command (new topic, more partitions, etc) is handled. Exactly for that we
-      # use the breaker. It we get a timeout, we can check that what we wanted to achieve has
-      # happened via the breaker check, hence we do not need to wait any longer.
-      #
-      # @param handler [Proc] the wait handler operation
-      # @param breaker [Proc] extra condition upon timeout that indicates things were finished ok
-      def with_re_wait(handler, breaker)
-        start_time = monotonic_now
-        # Convert milliseconds to seconds for sleep
-        sleep_time = retry_backoff / 1000.0
-
-        loop do
-          handler.call
-
-          sleep(sleep_time)
-
-          return if breaker.call
-        rescue Rdkafka::AbstractHandle::WaitTimeoutError
-          return if breaker.call
-
-          next if monotonic_now - start_time < max_retries_duration
-
-          raise(Errors::ResultNotVisibleError)
-        end
-      end
-
-      # @param type [Symbol] type of config we want
-      # @param settings [Hash] extra settings for config (if needed)
-      # @return [::Rdkafka::Config] rdkafka config
-      def config(type, settings)
-        app_kafka
-          .then(&:dup)
-          .merge(admin_kafka)
-          .tap { |config| config[:'group.id'] = group_id }
-          # We merge after setting the group id so it can be altered if needed
-          # In general in admin we only should alter it when we need to impersonate a given
-          # consumer group or do something similar
-          .merge!(settings)
-          .then { |config| Karafka::Setup::AttributesMap.public_send(type, config) }
-          .then { |config| Rdkafka::Config.new(config) }
-      end
+      Rdkafka::Config.new(mapped_config)
     end
   end
 end

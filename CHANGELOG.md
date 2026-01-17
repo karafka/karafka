@@ -1,8 +1,16 @@
 # Karafka Framework Changelog
 
-## 2.5.4 (Unreleased)
+## 2.5.5 (Unreleased)
+- [Feature] Add multi-cluster Admin support via `Karafka::Admin.new(kafka: { ... })` allowing operations against different Kafka clusters while maintaining backward compatibility with existing class-method API.
+
+## 2.5.4 (2025-12-28)
+- [Enhancement] Align Datadog logger listener error handling with the main logger listener by adding missing error types and replacing `UnsupportedCaseError` with generic error logging to support dynamic errors reporting.
+- [Enhancement] Align Appsignal metrics listener `USER_CONSUMER_ERROR_TYPES` with all consumer error types for complete error tracking.
+- [Enhancement] Reduce gem package size by excluding development files (spec, examples, CI configs, dev scripts) from the gem build.
 - [Fix] Multiple route draws don't seem to work.
+- [Fix] Fix internal code compatibility with external libraries that prepend modules to `Messages#each` method (e.g., DataDog tracing) by introducing `Messages#raw` for internal iteration that bypasses patched enumerable methods.
 - [Maintenance] Removed `base64` dependency.
+- [Maintenance] Add `ErrorTypesChecker` spec support module to programmatically verify listener error type coverage against source code definitions.
 
 ## 2.5.3 (2025-11-14)
 - [Enhancement] Dynamically support `librdkafka` fatal errors with correct reported details.

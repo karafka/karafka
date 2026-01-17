@@ -64,6 +64,38 @@ module Karafka
         @messages_array.dup
       end
 
+      # Returns the underlying messages array directly without duplication.
+      #
+      # This method exists to provide Karafka internals with direct access to the messages array,
+      # bypassing any monkey patches that external libraries may apply to enumerable methods.
+      #
+      # ## Why this method exists
+      #
+      # External instrumentation libraries like DataDog's `dd-trace-rb` patch the `#each` method
+      # on this class to create tracing spans around message iteration. While this is desirable
+      # for user code (to trace message processing), it causes problems when Karafka's internal
+      # infrastructure iterates over messages for housekeeping tasks (offset tracking,
+      # deserialization, etc.) - creating empty/unwanted spans.
+      #
+      # By using `raw.map` or `raw.each` instead of `map` or `each` directly, internal code
+      # bypasses the patched `#each` method since it operates on the raw Array, not this class.
+      #
+      # ## Usage
+      #
+      # This method should ONLY be used by Karafka internals. User-facing code (consumers,
+      # ActiveJob processors, etc.) should use regular `#each`/`#map` so that instrumentation
+      # libraries can properly trace message processing.
+      #
+      # @return [Array<Karafka::Messages::Message>] the underlying messages array (not a copy)
+      #
+      # @note This returns the actual internal array, not a copy. Do not modify it.
+      # @see https://github.com/karafka/karafka/issues/2939
+      #
+      # @private
+      def raw
+        @messages_array
+      end
+
       alias count size
     end
   end

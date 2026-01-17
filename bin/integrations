@@ -270,9 +270,6 @@ if RUBY_VERSION.split('.').first.to_i >= 4
   # This should be revisited once in a while
   RUBY_4_INCOMPATIBLE_SPECS = [
     'instrumentation/vendors/datadog_native_pristine/consume_with_tracing_spec.rb',
-    'web/end_to_end_install_flow_pristine/install_with_rails_spec.rb',
-    'installation/with_rails7_pristine/install_spec.rb',
-    'web/incompatible_version_pristine_0.7/console_with_rails_spec.rb',
     'instrumentation/vendors/datadog/with_original_client_pristine/with_proper_ddtrace_spec.rb'
   ].freeze
 

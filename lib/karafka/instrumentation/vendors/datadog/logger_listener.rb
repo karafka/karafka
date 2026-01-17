@@ -90,42 +90,58 @@ module Karafka
             client.active_span&.set_error(error)
 
             case event[:type]
+            when 'consumer.initialized.error'
+              error "Consumer initialized error: #{error}"
+            when 'consumer.wrap.error'
+              error "Consumer wrap failed due to an error: #{error}"
             when 'consumer.consume.error'
               error "Consumer consuming error: #{error}"
             when 'consumer.revoked.error'
               error "Consumer on revoked failed due to an error: #{error}"
-            when 'consumer.before_schedule.error'
-              error "Consumer before schedule failed due to an error: #{error}"
-            when 'consumer.before_consume.error'
-              error "Consumer before consume failed due to an error: #{error}"
-            when 'consumer.after_consume.error'
-              error "Consumer after consume failed due to an error: #{error}"
+            when 'consumer.idle.error'
+              error "Consumer idle failed due to an error: #{error}"
             when 'consumer.shutdown.error'
               error "Consumer on shutdown failed due to an error: #{error}"
             when 'consumer.tick.error'
-              error "Consumer tick failed due to an error: #{error}"
+              error "Consumer on tick failed due to an error: #{error}"
             when 'consumer.eofed.error'
-              error "Consumer eofed failed due to an error: #{error}"
+              error "Consumer on eofed failed due to an error: #{error}"
+            when 'consumer.after_consume.error'
+              error "Consumer on after_consume failed due to an error: #{error}"
             when 'worker.process.error'
               fatal "Worker processing failed due to an error: #{error}"
             when 'connection.listener.fetch_loop.error'
               error "Listener fetch loop error: #{error}"
+            when 'swarm.supervisor.error'
+              fatal "Swarm supervisor crashed due to an error: #{error}"
             when 'runner.call.error'
               fatal "Runner crashed due to an error: #{error}"
             when 'app.stopping.error'
               error 'Forceful Karafka server stop'
-            when 'swarm.supervisor.error'
-              fatal "Swarm supervisor crashed due to an error: #{error}"
+            when 'app.forceful_stopping.error'
+              error "Forceful shutdown error occurred: #{error}"
             when 'librdkafka.error'
               error "librdkafka internal error occurred: #{error}"
-              # Those will only occur when retries in the client fail and when they did not stop
-              # after back-offs
+            when 'callbacks.statistics.error'
+              error "callbacks.statistics processing failed due to an error: #{error}"
+            when 'callbacks.error.error'
+              error "callbacks.error processing failed due to an error: #{error}"
+            # Those will only occur when retries in the client fail and when they did not stop
+            # after back-offs
             when 'connection.client.poll.error'
               error "Data polling error occurred: #{error}"
+            when 'connection.client.rebalance_callback.error'
+              error "Rebalance callback error occurred: #{error}"
+            when 'connection.client.unsubscribe.error'
+              error "Client unsubscribe error occurred: #{error}"
+            when 'parallel_segments.reducer.error'
+              error "Parallel segments reducer error occurred: #{error}"
+            when 'parallel_segments.partitioner.error'
+              error "Parallel segments partitioner error occurred: #{error}"
+            when 'virtual_partitions.partitioner.error'
+              error "Virtual partitions partitioner error occurred: #{error}"
             else
-              pop_tags
-              # This should never happen. Please contact the maintainers
-              raise Errors::UnsupportedCaseError, event
+              error "#{event[:type]} error occurred: #{error}"
             end
 
             pop_tags

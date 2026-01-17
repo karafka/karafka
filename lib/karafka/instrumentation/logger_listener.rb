@@ -24,8 +24,6 @@ module Karafka
         @log_polling = log_polling
       end
 
-      #
-      #
       # @param event [Karafka::Core::Monitoring::Event] event details including payload
       def on_connection_listener_before_fetch_loop(event)
         listener_id = event[:caller].id
