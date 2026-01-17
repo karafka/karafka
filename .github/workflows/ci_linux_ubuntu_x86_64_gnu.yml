@@ -50,7 +50,7 @@ jobs:
           chmod +x coditsu_script.sh
       - name: Verify Coditsu script checksum
         run: |
-          EXPECTED_SHA256="0aecc5aa010f53fca264548a41467a2b0a1208d750ce1da3e98a217304cacbbc"
+          EXPECTED_SHA256="7dc7f736b81ad79cfa065ceb87506908dfcd1ec1202f384426d72342396f7377"
 
           ACTUAL_SHA256=$(sha256sum coditsu_script.sh | awk '{ print $1 }')
           if [ "$ACTUAL_SHA256" != "$EXPECTED_SHA256" ]; then
