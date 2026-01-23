@@ -82,8 +82,6 @@ jobs:
   specs:
     timeout-minutes: 15
     runs-on: ubuntu-latest
-    env:
-      BUNDLE_FORCE_RUBY_PLATFORM: ${{ matrix.force_ruby_platform }}
     strategy:
       fail-fast: false
       matrix:
@@ -92,9 +90,6 @@ jobs:
           - '3.4'
           - '3.3'
           - '3.2'
-        force_ruby_platform:
-          - true
-          - false
         include:
           - ruby: '3.4'
             coverage: 'true'
@@ -136,8 +131,6 @@ jobs:
   integrations_oss:
     timeout-minutes: 30
     runs-on: ubuntu-latest
-    env:
-      BUNDLE_FORCE_RUBY_PLATFORM: ${{ matrix.force_ruby_platform }}
     strategy:
       fail-fast: false
       matrix:
@@ -146,9 +139,6 @@ jobs:
           - '3.4'
           - '3.3'
           - '3.2'
-        force_ruby_platform:
-          - true
-          - false
         parallel_group:
           - '0'
           - '1'
@@ -213,8 +203,6 @@ jobs:
   integrations_pro:
     timeout-minutes: 45
     runs-on: ubuntu-latest
-    env:
-      BUNDLE_FORCE_RUBY_PLATFORM: ${{ matrix.force_ruby_platform }}
     strategy:
       fail-fast: false
       matrix:
@@ -223,9 +211,6 @@ jobs:
           - '3.4'
           - '3.3'
           - '3.2'
-        force_ruby_platform:
-          - true
-          - false
         parallel_group:
           - '0'
           - '1'
