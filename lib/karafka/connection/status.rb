@@ -59,7 +59,7 @@ module Karafka
         if pending?
           @status = :stopping
           conductor.signal
-          monitor.instrument('connection.listener.stopping', caller: self)
+          monitor.instrument("connection.listener.stopping", caller: self)
 
           stopped!
         elsif stopped?
@@ -69,7 +69,7 @@ module Karafka
         else
           @status = :stopping
           conductor.signal
-          monitor.instrument('connection.listener.stopping', caller: self)
+          monitor.instrument("connection.listener.stopping", caller: self)
         end
       end
 

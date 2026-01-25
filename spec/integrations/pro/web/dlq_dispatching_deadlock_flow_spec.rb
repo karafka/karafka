@@ -24,7 +24,7 @@
 # ensuring tracking data is properly synchronized across many partitions
 
 setup_karafka(allow_errors: %w[consumer.consume.error]) do |config|
-  config.kafka[:'transactional.id'] = SecureRandom.uuid
+  config.kafka[:"transactional.id"] = SecureRandom.uuid
   config.concurrency = 20
   config.pause.timeout = 100
   config.pause.max_timeout = 100
@@ -36,7 +36,7 @@ setup_web do |config|
   config.tracking.consumers.sync_threshold = 1
 end
 
-Karafka.monitor.subscribe('error.occurred') do
+Karafka.monitor.subscribe("error.occurred") do
   DT[:errors] << true
 end
 

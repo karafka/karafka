@@ -129,11 +129,11 @@ module Karafka
             # Earliest is not always 0. When compacting/deleting it can be much later, that's why
             # we fetch the oldest possible offset
             # false is treated the same as 'earliest'
-            when 'earliest', false
+            when "earliest", false
               LONG_TIME_AGO
             # Latest will always be the high-watermark offset and we can get it just by getting
             # a future position
-            when 'latest'
+            when "latest"
               Time.now + DAY_IN_SECONDS
             # Regular offset case
             else
@@ -161,7 +161,7 @@ module Karafka
           end
         end
 
-        settings = { 'group.id': consumer_group_id }
+        settings = { "group.id": consumer_group_id }
 
         with_consumer(settings) do |consumer|
           # If we have any time based stuff to resolve, we need to do it prior to commits
@@ -333,9 +333,9 @@ module Karafka
         # This ensures we use the same settings as the actual consumers
         # Following the same pattern as in Karafka::Connection::Client#build_kafka
         consumer_settings = Setup::AttributesMap.consumer(first_topic.kafka.dup)
-        consumer_settings[:'group.id'] = consumer_group.id
-        consumer_settings[:'enable.auto.offset.store'] = false
-        consumer_settings[:'auto.offset.reset'] ||= first_topic.initial_offset
+        consumer_settings[:"group.id"] = consumer_group.id
+        consumer_settings[:"enable.auto.offset.store"] = false
+        consumer_settings[:"auto.offset.reset"] ||= first_topic.initial_offset
 
         with_consumer(consumer_settings) do |consumer|
           # Subscribe to the topics - this triggers the first rebalance
@@ -408,7 +408,7 @@ module Karafka
 
           tpl = Rdkafka::Consumer::TopicPartitionList.new
 
-          with_consumer('group.id': cg) do |consumer|
+          with_consumer("group.id": cg) do |consumer|
             topics.each { |topic| tpl.add_topic(topic, existing_topics[topic]) }
 
             commit_offsets = consumer.committed(tpl)

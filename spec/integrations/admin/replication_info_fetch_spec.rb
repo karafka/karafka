@@ -27,7 +27,7 @@ min_insync_replicas_config = -1
 
 Karafka::Admin::Configs.describe(resource).each do |topic_config|
   topic_config.configs.each do |config|
-    next unless config.name == 'min.insync.replicas'
+    next unless config.name == "min.insync.replicas"
 
     min_insync_replicas_config = config.value.to_i
   end

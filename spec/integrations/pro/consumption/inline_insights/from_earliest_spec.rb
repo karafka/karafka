@@ -48,4 +48,4 @@ start_karafka_and_wait_until do
   DT.key?(:stats) && DT[:stats_exist].include?(true) && !DT[:stats].last.empty?
 end
 
-assert_equal 0, DT[:stats].last['partition']
+assert_equal 0, DT[:stats].last["partition"]

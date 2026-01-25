@@ -16,7 +16,7 @@ class VariableBatchSizeConsumer < Karafka::BaseConsumer
       message_data = JSON.parse(message.raw_payload)
 
       processed_messages << {
-        message_id: message_data['id'],
+        message_id: message_data["id"],
         batch_position: index,
         content_size: message.raw_payload.bytesize
       }
@@ -38,8 +38,8 @@ draw_routes(VariableBatchSizeConsumer)
   2.times do |i|
     message = {
       id: "small_#{batch_num}_#{i}",
-      content: 'small_batch_message',
-      batch_type: 'small'
+      content: "small_batch_message",
+      batch_type: "small"
     }.to_json
 
     produce(DT.topic, message)
@@ -51,8 +51,8 @@ end
 50.times do |i|
   message = {
     id: "large_#{i}",
-    content: 'large_batch_message_with_more_content_to_test_processing_performance',
-    batch_type: 'large',
+    content: "large_batch_message_with_more_content_to_test_processing_performance",
+    batch_type: "large",
     sequence: i
   }.to_json
 
@@ -68,7 +68,7 @@ end
 total_processed = DT[:batches].sum { |batch| batch[:batch_size] }
 assert(
   total_processed >= 56,
-  'Should process all messages across different batch sizes'
+  "Should process all messages across different batch sizes"
 )
 
 # Analyze batch size distribution
@@ -78,36 +78,36 @@ large_batches = batch_sizes.select { |size| size > 5 }
 
 assert(
   batch_sizes.any?,
-  'Should have processed at least one batch'
+  "Should have processed at least one batch"
 )
 
 # Verify batch processing performance characteristics and message ordering
 DT[:batches].each do |batch|
   assert(
     batch[:processing_time] > 0,
-    'Should record positive processing time'
+    "Should record positive processing time"
   )
 
   assert(
     batch[:processing_time] < 1.0,
-    'Processing should be reasonably fast (under 1 second)'
+    "Processing should be reasonably fast (under 1 second)"
   )
 
   assert_equal(
     batch[:batch_size], batch[:messages].size,
-    'Batch size should match number of processed messages'
+    "Batch size should match number of processed messages"
   )
 
   assert(
     batch[:total_content_size] > 0,
-    'Should calculate total content size'
+    "Should calculate total content size"
   )
 
   # Verify message ordering within batches
   batch[:messages].each_with_index do |msg, index|
     assert_equal(
       index, msg[:batch_position],
-      'Message positions should be sequential within batch'
+      "Message positions should be sequential within batch"
     )
   end
 end
@@ -124,12 +124,12 @@ if large_batches.any? && small_batches.any?
     # Both should be reasonable (under 100ms per message)
     assert(
       large_per_msg_time < 0.1,
-      'Large batch per-message processing should be efficient'
+      "Large batch per-message processing should be efficient"
     )
 
     assert(
       small_per_msg_time < 0.1,
-      'Small batch per-message processing should be efficient'
+      "Small batch per-message processing should be efficient"
     )
   end
 end
@@ -137,5 +137,5 @@ end
 # The key success criteria: variable batch sizes handled efficiently
 assert(
   total_processed >= 56,
-  'Should handle both small and large batches efficiently'
+  "Should handle both small and large batches efficiently"
 )

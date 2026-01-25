@@ -148,7 +148,7 @@ module Karafka
           #   compatibility checks.
           def version_4_or_newer?
             @version_4_or_newer ||=
-              Gem::Version.new(::Appsignal::VERSION) >= Gem::Version.new('4.0.0')
+              Gem::Version.new(::Appsignal::VERSION) >= Gem::Version.new("4.0.0")
           end
         end
       end

@@ -9,11 +9,11 @@ failed = false
 
 begin
   draw_routes(create_topics: false) do
-    topic 'namespace_collision' do
+    topic "namespace_collision" do
       consumer Class.new
     end
 
-    topic 'namespace.collision' do # Creates metrics namespace collision
+    topic "namespace.collision" do # Creates metrics namespace collision
       consumer Class.new
     end
   end
@@ -21,7 +21,7 @@ rescue Karafka::Errors::InvalidConfigurationError
   failed = true
 end
 
-assert failed, 'Should have raised InvalidConfigurationError for namespace collision'
+assert failed, "Should have raised InvalidConfigurationError for namespace collision"
 
 # Test empty consumer class assignment
 Karafka::App.routes.clear
@@ -59,5 +59,5 @@ rescue Karafka::Errors::InvalidConfigurationError
 end
 
 # Core configuration conflicts should be detected
-assert failed, 'Namespace collisions should be detected'
-assert multiple_topics_passed, 'Same consumer on different topics should be allowed'
+assert failed, "Namespace collisions should be detected"
+assert multiple_topics_passed, "Same consumer on different topics should be allowed"

@@ -84,8 +84,8 @@ end
 # Produce message that should be sent the "next" day (today)
 message = {
   topic: DT.topics[1],
-  key: '0',
-  payload: 'payload'
+  key: "0",
+  payload: "payload"
 }
 
 Karafka.producer.produce_sync Karafka::Pro::ScheduledMessages.schedule(

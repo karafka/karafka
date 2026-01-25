@@ -14,7 +14,7 @@ draw_routes do
   topic DT.topics[1] do
     config(
       partitions: 2,
-      'cleanup.policy': 'compact'
+      "cleanup.policy": "compact"
     )
 
     consumer Consumer
@@ -28,8 +28,8 @@ assert cluster_topics.include?(DT.topics[1])
 
 # This should not remove nor change the topics
 # Since the `draw_routes` auto-creator
-ARGV[0] = 'topics'
-ARGV[1] = 'create'
+ARGV[0] = "topics"
+ARGV[1] = "create"
 
 Karafka::Cli.start
 

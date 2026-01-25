@@ -46,53 +46,53 @@ RSpec.describe_current do
   let(:aj_active) { false }
   let(:tags) { [] }
 
-  context 'when config is valid' do
+  context "when config is valid" do
     it { expect(check).to be_success }
   end
 
-  context 'when virtual partitions max_partitions is too low' do
+  context "when virtual partitions max_partitions is too low" do
     before { config[:virtual_partitions][:max_partitions] = 0 }
 
     it { expect(check).not_to be_success }
   end
 
-  context 'when virtual partitions offset_metadata_strategy is not a symbol' do
+  context "when virtual partitions offset_metadata_strategy is not a symbol" do
     before { config[:virtual_partitions][:offset_metadata_strategy] = 0 }
 
     it { expect(check).not_to be_success }
   end
 
-  context 'when virtual partitions are active but no partitioner' do
+  context "when virtual partitions are active but no partitioner" do
     before { config[:virtual_partitions][:partitioner] = nil }
 
     it { expect(check).not_to be_success }
   end
 
-  context 'when there is no reducer' do
+  context "when there is no reducer" do
     before { config[:virtual_partitions][:reducer] = nil }
 
     it { expect(check).not_to be_success }
   end
 
-  context 'when distribution is not a valid value' do
+  context "when distribution is not a valid value" do
     before { config[:virtual_partitions][:distribution] = :invalid }
 
     it { expect(check).not_to be_success }
   end
 
-  context 'when distribution is consistent' do
+  context "when distribution is consistent" do
     before { config[:virtual_partitions][:distribution] = :consistent }
 
     it { expect(check).to be_success }
   end
 
-  context 'when distribution is balanced' do
+  context "when distribution is balanced" do
     before { config[:virtual_partitions][:distribution] = :balanced }
 
     it { expect(check).to be_success }
   end
 
-  context 'when manual offset management is on with virtual partitions for active job' do
+  context "when manual offset management is on with virtual partitions for active job" do
     let(:mom_active) { true }
     let(:aj_active) { true }
 

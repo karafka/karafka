@@ -101,10 +101,10 @@ end
 
 # Produce test messages to the special character topic
 test_messages = [
-  'Message for special character topic',
-  'Another message with special chars: àáâãäå',
+  "Message for special character topic",
+  "Another message with special chars: àáâãäå",
   'JSON message: {"special": "characters in topic name"}',
-  'Binary content test'
+  "Binary content test"
 ]
 
 test_messages.each { |msg| produce(test_topic, msg) }
@@ -116,7 +116,7 @@ end
 # Verify messages were consumed from the special character topic
 assert_equal(
   test_messages.size, DT[:consumed].size,
-  'Should consume messages from topic with special characters'
+  "Should consume messages from topic with special characters"
 )
 
 # Verify all messages came from the correct topic
@@ -124,15 +124,15 @@ consumed_topics = DT[:consumed].map { |msg| msg[:topic] }.uniq
 assert_equal(
   [test_topic],
   consumed_topics,
-  'All messages should come from the special character topic'
+  "All messages should come from the special character topic"
 )
 
 # Verify consumer class was correctly assigned
 consumer_classes = DT[:consumed].map { |msg| msg[:consumer_class] }.uniq
 assert_equal(
-  ['SpecialCharacterConsumer'],
+  ["SpecialCharacterConsumer"],
   consumer_classes,
-  'Should use correct consumer class for special character topic'
+  "Should use correct consumer class for special character topic"
 )
 
 # Verify payloads were preserved correctly
@@ -146,10 +146,10 @@ test_messages.each do |expected_msg|
       true
     # Try forcing UTF-8 encoding
     elsif consumed.respond_to?(:force_encoding)
-      consumed.dup.force_encoding('UTF-8') == expected_msg
+      consumed.dup.force_encoding("UTF-8") == expected_msg
     # Try converting bytes back to UTF-8
     elsif consumed.respond_to?(:bytes)
-      consumed.bytes.pack('C*').force_encoding('UTF-8') == expected_msg
+      consumed.bytes.pack("C*").force_encoding("UTF-8") == expected_msg
     else
       false
     end
@@ -161,18 +161,18 @@ end
 # Test that valid topic names were accepted in routing configuration
 assert(
   valid_topics.size >= 10,
-  'Should accept multiple topic names with special characters in routing'
+  "Should accept multiple topic names with special characters in routing"
 )
 
 # Test that invalid topic names were rejected
 assert(
   rejected_topics.size >= 2,
-  'Should reject topic names with mixed namespacing styles'
+  "Should reject topic names with mixed namespacing styles"
 )
 
 # The key success criteria: special character topic names work correctly
 assert_equal(
   test_messages.size,
   DT[:consumed].size,
-  'Should handle topic names with special characters without issues'
+  "Should handle topic names with special characters without issues"
 )

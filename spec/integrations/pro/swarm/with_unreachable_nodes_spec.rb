@@ -30,8 +30,8 @@ guarded = []
 
 begin
   draw_routes(create_topics: false) do
-    consumer_group 'regular' do
-      topic 't1' do
+    consumer_group "regular" do
+      topic "t1" do
         swarm(nodes: (100..200))
         consumer Class.new
       end
@@ -45,8 +45,8 @@ Karafka::App.routes.clear
 
 begin
   draw_routes(create_topics: false) do
-    consumer_group 't2' do
-      topic 'regular' do
+    consumer_group "t2" do
+      topic "regular" do
         swarm(nodes: [100, 123])
         consumer Class.new
       end
@@ -60,8 +60,8 @@ Karafka::App.routes.clear
 
 begin
   draw_routes(create_topics: false) do
-    consumer_group 't2' do
-      topic 'regular' do
+    consumer_group "t2" do
+      topic "regular" do
         swarm(nodes: [2])
         consumer Class.new
       end

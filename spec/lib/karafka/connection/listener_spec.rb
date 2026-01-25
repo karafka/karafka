@@ -32,14 +32,14 @@ RSpec.describe_current do
 
   after { client.stop }
 
-  context 'when all goes well' do
+  context "when all goes well" do
     before do
       allow(client).to receive(:commit_offsets)
       listener.call
     end
 
-    it 'expect to run proper instrumentation' do
-      Karafka.monitor.subscribe('connection.listener.before_fetch_loop') do |event|
+    it "expect to run proper instrumentation" do
+      Karafka.monitor.subscribe("connection.listener.before_fetch_loop") do |event|
         expect(event.payload[:subscription_group]).to eq(subscription_group)
         expect(event.payload[:client]).to eq(subscription_group)
         expect(event.payload[:caller]).to eq(listener)
@@ -47,7 +47,7 @@ RSpec.describe_current do
     end
   end
 
-  context 'when we have lost partitions during rebalance and actions need to be taken' do
+  context "when we have lost partitions during rebalance and actions need to be taken" do
     let(:revoked_partitions) { { routing_topic.name => [2] } }
 
     before do
@@ -64,12 +64,12 @@ RSpec.describe_current do
       sleep(0.5)
     end
 
-    it 'expect the revoke job to be consumed meanwhile' do
+    it "expect the revoke job to be consumed meanwhile" do
       expect(jobs_queue.statistics).to eq(busy: 0, enqueued: 0)
     end
   end
 
-  context 'when there is a serious exception' do
+  context "when there is a serious exception" do
     let(:error) { Exception }
 
     before do
@@ -81,28 +81,28 @@ RSpec.describe_current do
       listener.call
     end
 
-    it 'expect to run proper instrumentation' do
-      Karafka.monitor.subscribe('error.occurred') do |event|
+    it "expect to run proper instrumentation" do
+      Karafka.monitor.subscribe("error.occurred") do |event|
         expect(event.payload[:caller]).to eq(listener)
         expect(event.payload[:error]).to eq(error)
-        expect(event.payload[:type]).to eq('connection.listener.fetch_loop.error')
+        expect(event.payload[:type]).to eq("connection.listener.fetch_loop.error")
       end
     end
 
-    it 'expect to wait on the jobs queue' do
+    it "expect to wait on the jobs queue" do
       expect(jobs_queue).to have_received(:wait).with(subscription_group.id).at_least(:once)
     end
 
-    it 'expect to clear the jobs queue from any jobs from this subscription group' do
+    it "expect to clear the jobs queue from any jobs from this subscription group" do
       expect(jobs_queue).to have_received(:clear).with(subscription_group.id)
     end
 
-    it 'expect to reset the client' do
+    it "expect to reset the client" do
       expect(client).to have_received(:reset)
     end
   end
 
-  describe '#start!' do
+  describe "#start!" do
     before do
       allow(listener).to receive(:stopped?).and_return(stopped)
       allow(client).to receive(:reset)
@@ -113,10 +113,10 @@ RSpec.describe_current do
       listener.start!
     end
 
-    context 'when listener was stopped' do
+    context "when listener was stopped" do
       let(:stopped) { true }
 
-      it 'expect to reset client and status before running in async again' do
+      it "expect to reset client and status before running in async again" do
         expect(client).to have_received(:reset)
         expect(status).to have_received(:reset!)
         expect(status).to have_received(:start!)
@@ -124,10 +124,10 @@ RSpec.describe_current do
       end
     end
 
-    context 'when listener was not stopped' do
+    context "when listener was not stopped" do
       let(:stopped) { false }
 
-      it 'expect not to reset and run async' do
+      it "expect not to reset and run async" do
         expect(client).not_to have_received(:reset)
         expect(status).not_to have_received(:reset!)
         expect(status).to have_received(:start!)

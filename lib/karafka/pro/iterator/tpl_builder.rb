@@ -177,8 +177,8 @@ module Karafka
 
               next unless SUPPORTED_NAMED_POSITIONS.include?(named_offset)
 
-              @mapped_topics[name][partition] = -1 if named_offset == 'latest'
-              @mapped_topics[name][partition] = -2 if named_offset == 'earliest'
+              @mapped_topics[name][partition] = -1 if named_offset == "latest"
+              @mapped_topics[name][partition] = -2 if named_offset == "earliest"
             end
           end
         end

@@ -27,11 +27,11 @@ setup_karafka do |config|
   config.max_messages = 10
   config.max_wait_time = 5_000
   # We set it here that way not too wait too long on stuff
-  config.kafka[:'max.poll.interval.ms'] = 10_000
-  config.kafka[:'session.timeout.ms'] = 10_000
+  config.kafka[:"max.poll.interval.ms"] = 10_000
+  config.kafka[:"session.timeout.ms"] = 10_000
   config.concurrency = 10
   config.shutdown_timeout = 120_000
-  config.initial_offset = 'latest'
+  config.initial_offset = "latest"
 end
 
 class Consumer < Karafka::BaseConsumer
@@ -72,9 +72,9 @@ Thread.new do
 
   5.times do
     10.times do
-      produce(DT.topic, '1', partition: 0)
-      produce(DT.topic, '1', partition: 1)
-    rescue StandardError
+      produce(DT.topic, "1", partition: 0)
+      produce(DT.topic, "1", partition: 1)
+    rescue
       nil
     end
 

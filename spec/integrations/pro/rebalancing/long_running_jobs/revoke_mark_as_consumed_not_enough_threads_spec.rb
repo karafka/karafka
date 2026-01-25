@@ -78,7 +78,7 @@ thread = Thread.new do
 end
 
 start_karafka_and_wait_until do
-  (DT.key?('0-revoked') || DT.key?('1-revoked')) && DT.key?(:revoked_data)
+  (DT.key?("0-revoked") || DT.key?("1-revoked")) && DT.key?(:revoked_data)
 end
 
 thread.join

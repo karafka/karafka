@@ -23,7 +23,7 @@
 # When working with transactions if all success and the strategy is current, last should be picked
 
 setup_karafka do |config|
-  config.kafka[:'transactional.id'] = SecureRandom.uuid
+  config.kafka[:"transactional.id"] = SecureRandom.uuid
   config.concurrency = 10
 end
 

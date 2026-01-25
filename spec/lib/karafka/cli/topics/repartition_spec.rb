@@ -5,11 +5,11 @@ RSpec.describe Karafka::Cli::Topics::Repartition do
 
   let(:config_class) { Karafka::Routing::Features::Declaratives::Config }
 
-  describe '#call' do
+  describe "#call" do
     let(:existing_topics) do
       [
-        { topic_name: 'topic_1', partition_count: 1 },
-        { topic_name: 'topic_2', partition_count: 2 }
+        { topic_name: "topic_1", partition_count: 1 },
+        { topic_name: "topic_2", partition_count: 2 }
       ]
     end
 
@@ -17,17 +17,17 @@ RSpec.describe Karafka::Cli::Topics::Repartition do
       [
         instance_double(
           Karafka::Routing::Topic,
-          name: 'topic_1',
+          name: "topic_1",
           config: instance_double(config_class, partitions: 3)
         ),
         instance_double(
           Karafka::Routing::Topic,
-          name: 'topic_2',
+          name: "topic_2",
           config: instance_double(config_class, partitions: 2)
         ),
         instance_double(
           Karafka::Routing::Topic,
-          name: 'topic_3',
+          name: "topic_3",
           config: instance_double(config_class, partitions: 1)
         )
       ]
@@ -44,30 +44,30 @@ RSpec.describe Karafka::Cli::Topics::Repartition do
       allow(Karafka::Admin).to receive(:create_partitions)
     end
 
-    it 'repartitions topics that have less partitions than defined and skips the rest' do
+    it "repartitions topics that have less partitions than defined and skips the rest" do
       expect { repartition_topics.call }.not_to raise_error
 
-      expect(Karafka::Admin).to have_received(:create_partitions).with('topic_1', 3).once
-      expect(Karafka::Admin).not_to have_received(:create_partitions).with('topic_2', anything)
-      expect(Karafka::Admin).not_to have_received(:create_partitions).with('topic_3', anything)
+      expect(Karafka::Admin).to have_received(:create_partitions).with("topic_1", 3).once
+      expect(Karafka::Admin).not_to have_received(:create_partitions).with("topic_2", anything)
+      expect(Karafka::Admin).not_to have_received(:create_partitions).with("topic_3", anything)
     end
 
-    it 'returns true if any topic was repartitioned' do
+    it "returns true if any topic was repartitioned" do
       expect(repartition_topics.call).to be_truthy
     end
 
-    context 'when no topics need repartitioning' do
+    context "when no topics need repartitioning" do
       let(:declaratives_routing_topics) do
         [
           instance_double(
             Karafka::Routing::Topic,
-            name: 'topic_2',
+            name: "topic_2",
             config: instance_double(config_class, partitions: 2)
           )
         ]
       end
 
-      it 'does not repartition any topic and returns false' do
+      it "does not repartition any topic and returns false" do
         expect(repartition_topics.call).to be_falsey
         expect(Karafka::Admin).not_to have_received(:create_partitions)
       end

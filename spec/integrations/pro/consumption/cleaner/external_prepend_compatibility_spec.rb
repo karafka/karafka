@@ -115,5 +115,5 @@ assert DT[3].size == 5
 # Verify cleaning happened after each message within batches
 # Only check if we had multi-message batches
 if DT[4] && DT[4].any?
-  assert DT[4].all?(true), 'Some messages weren\'t cleaned after processing'
+  assert DT[4].all?(true), "Some messages weren't cleaned after processing"
 end

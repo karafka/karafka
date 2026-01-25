@@ -74,5 +74,5 @@ partitioned_data.each do |partition, messages|
     offset += 1
   end
 
-  assert_equal messages.size, messages.first.topic == DT.topics[0] ? 10 : 20
+  assert_equal messages.size, (messages.first.topic == DT.topics[0]) ? 10 : 20
 end

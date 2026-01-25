@@ -31,15 +31,15 @@ draw_routes do
   end
 end
 
-Karafka::Pro::RecurringTasks.define('1.1.0') do
-  schedule(id: 'run', cron: '* * * * *', previous_time: Time.now - 600_000) do
+Karafka::Pro::RecurringTasks.define("1.1.0") do
+  schedule(id: "run", cron: "* * * * *", previous_time: Time.now - 600_000) do
     DT[:done] = true
   end
 end
 
 start_karafka_and_wait_until(reset_status: true) do
   unless @dispatched
-    Karafka::Pro::RecurringTasks.trigger('run')
+    Karafka::Pro::RecurringTasks.trigger("run")
     @dispatched = true
   end
 
@@ -48,8 +48,8 @@ end
 
 setup_karafka
 
-Karafka::Pro::RecurringTasks.define('1.2.0') do
-  schedule(id: 'run', cron: '* * * * *') do
+Karafka::Pro::RecurringTasks.define("1.2.0") do
+  schedule(id: "run", cron: "* * * * *") do
     DT[:done2] = true
   end
 end
@@ -57,7 +57,7 @@ end
 start_karafka_and_wait_until(reset_status: true) do
   unless @dispatched2
     sleep(2)
-    Karafka::Pro::RecurringTasks.trigger('run')
+    Karafka::Pro::RecurringTasks.trigger("run")
     @dispatched2 = true
   end
 

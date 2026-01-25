@@ -76,19 +76,19 @@ default_group = Karafka::App.routes.find do |cg|
 end
 
 # Verify first named group has both topics
-raise 'first named group should exist' if group_a.nil?
+raise "first named group should exist" if group_a.nil?
 
 assert_equal 2, group_a.topics.size
 assert_equal [DT.topics[0], DT.topics[3]].sort, group_a.topics.map(&:name).sort
 
 # Verify second named group has both topics
-raise 'second named group should exist' if group_b.nil?
+raise "second named group should exist" if group_b.nil?
 
 assert_equal 2, group_b.topics.size
 assert_equal [DT.topics[1], DT.topics[5]].sort, group_b.topics.map(&:name).sort
 
 # Verify default implicit group has both implicit topics
-raise 'default implicit group should exist' if default_group.nil?
+raise "default implicit group should exist" if default_group.nil?
 
 assert_equal 2, default_group.topics.size
 assert_equal [DT.topics[2], DT.topics[4]].sort, default_group.topics.map(&:name).sort

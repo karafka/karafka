@@ -28,13 +28,11 @@ draw_routes(create_topics: false) do
   recurring_tasks(true)
 end
 
-Karafka::Pro::RecurringTasks.define('1.0.0') do
-  schedule(id: 'cleanup', cron: '0 0 * * *') do
-    puts 'Cleanup'
+Karafka::Pro::RecurringTasks.define("1.0.0") do
+  schedule(id: "cleanup", cron: "0 0 * * *") do
   end
 
-  schedule(id: 'send_emails', cron: '*/5 * * * *') do
-    puts 'Email'
+  schedule(id: "send_emails", cron: "*/5 * * * *") do
   end
 end
 

@@ -103,7 +103,7 @@ module Karafka
         # Executes the given task and publishes appropriate notification bus events.
         def call
           monitor.instrument(
-            'recurring_tasks.task.executed',
+            "recurring_tasks.task.executed",
             task: self
           ) do
             # We check for presence of the `@executable` because user can define cron schedule
@@ -112,13 +112,13 @@ module Karafka
 
             execute
           end
-        rescue StandardError => e
+        rescue => e
           monitor.instrument(
-            'error.occurred',
+            "error.occurred",
             caller: self,
             error: e,
             task: self,
-            type: 'recurring_tasks.task.execute.error'
+            type: "recurring_tasks.task.execute.error"
           )
         ensure
           @trigger = false

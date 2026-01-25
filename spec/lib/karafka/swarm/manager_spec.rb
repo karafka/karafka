@@ -40,33 +40,33 @@ RSpec.describe_current do
     end
   end
 
-  describe '#signal' do
+  describe "#signal" do
     let(:signal) { rand.to_s }
 
     before { manager.nodes.each { |node| allow(node).to receive(:signal) } }
 
-    it 'expect to pass same to all nodes' do
+    it "expect to pass same to all nodes" do
       manager.signal(signal)
       expect(manager.nodes).to all have_received(:signal).with(signal)
     end
   end
 
-  describe '#stopped?' do
-    context 'when even one is alive' do
+  describe "#stopped?" do
+    context "when even one is alive" do
       it { expect(manager.stopped?).to be(false) }
     end
 
-    context 'when none alive' do
+    context "when none alive" do
       before { manager.nodes.each { |node| allow(node).to receive(:alive?).and_return(false) } }
 
       it { expect(manager.stopped?).to be(true) }
     end
   end
 
-  describe '#control' do
+  describe "#control" do
     let(:target_node) { manager.nodes.first }
 
-    context 'when node is alive and healthy' do
+    context "when node is alive and healthy" do
       before do
         manager.nodes.each do |node|
           allow(node).to receive(:stop)
@@ -74,7 +74,7 @@ RSpec.describe_current do
         end
       end
 
-      it 'expect not to trigger any actions on it' do
+      it "expect not to trigger any actions on it" do
         manager.control
 
         manager.nodes.each do |node|
@@ -84,7 +84,7 @@ RSpec.describe_current do
       end
     end
 
-    context 'when node is alive but reported that is unhealthy' do
+    context "when node is alive but reported that is unhealthy" do
       before do
         allow(target_node).to receive(:status).and_return(1)
 
@@ -94,13 +94,13 @@ RSpec.describe_current do
         end
       end
 
-      it 'expect to trigger stop on target node' do
+      it "expect to trigger stop on target node" do
         manager.control
 
         expect(target_node).to have_received(:stop)
       end
 
-      it 'expect not to trigger terminate on any node' do
+      it "expect not to trigger terminate on any node" do
         manager.control
 
         manager.nodes.each do |node|
@@ -108,7 +108,7 @@ RSpec.describe_current do
         end
       end
 
-      it 'expect not to trigger stop on other nodes' do
+      it "expect not to trigger stop on other nodes" do
         manager.control
 
         manager.nodes.each do |node|
@@ -119,7 +119,7 @@ RSpec.describe_current do
       end
     end
 
-    context 'when node is not reporting any health for a short period of time' do
+    context "when node is not reporting any health for a short period of time" do
       before do
         allow(target_node).to receive(:status).and_return(-1)
 
@@ -129,7 +129,7 @@ RSpec.describe_current do
         end
       end
 
-      it 'expect not to trigger stop or terminate on any nodes' do
+      it "expect not to trigger stop or terminate on any nodes" do
         manager.control
 
         manager.nodes.each do |node|
@@ -139,7 +139,7 @@ RSpec.describe_current do
       end
     end
 
-    context 'when node is not reporting any health for a long period of time' do
+    context "when node is not reporting any health for a long period of time" do
       before do
         original_node_report_timeout
         swarm_cfg.node_report_timeout = 100
@@ -162,13 +162,13 @@ RSpec.describe_current do
 
       after { swarm_cfg.node_report_timeout = original_node_report_timeout }
 
-      it 'expect to trigger stop on target node' do
+      it "expect to trigger stop on target node" do
         manager.control
 
         expect(target_node).to have_received(:stop)
       end
 
-      it 'expect not to trigger terminate on any node' do
+      it "expect not to trigger terminate on any node" do
         manager.control
 
         manager.nodes.each do |node|
@@ -176,7 +176,7 @@ RSpec.describe_current do
         end
       end
 
-      it 'expect not to trigger stop on other nodes' do
+      it "expect not to trigger stop on other nodes" do
         manager.nodes.each do |node|
           next if node == target_node
 
@@ -185,7 +185,7 @@ RSpec.describe_current do
       end
     end
 
-    context 'when node is alive but did not respond to stop request for a short time' do
+    context "when node is alive but did not respond to stop request for a short time" do
       before do
         original_node_report_timeout
         swarm_cfg.node_report_timeout = 100
@@ -208,13 +208,13 @@ RSpec.describe_current do
         manager.control
       end
 
-      it 'expect to trigger stop on target node except the first one' do
+      it "expect to trigger stop on target node except the first one" do
         manager.control
 
         expect(target_node).to have_received(:stop).once
       end
 
-      it 'expect not to trigger terminate on any node' do
+      it "expect not to trigger terminate on any node" do
         manager.control
 
         manager.nodes.each do |node|
@@ -222,7 +222,7 @@ RSpec.describe_current do
         end
       end
 
-      it 'expect not to trigger stop on other nodes' do
+      it "expect not to trigger stop on other nodes" do
         manager.nodes.each do |node|
           next if node == target_node
 
@@ -231,7 +231,7 @@ RSpec.describe_current do
       end
     end
 
-    context 'when node is alive but did not respond to stop request for a long time' do
+    context "when node is alive but did not respond to stop request for a long time" do
       before do
         swarm_cfg.node_report_timeout = 100
         cfg.shutdown_timeout = 50
@@ -254,14 +254,14 @@ RSpec.describe_current do
         manager.control
       end
 
-      it 'expect to trigger stop on target node except the first one' do
+      it "expect to trigger stop on target node except the first one" do
         manager.control
 
         expect(target_node).to have_received(:stop).once
         expect(target_node).to have_received(:terminate).once
       end
 
-      it 'expect not to trigger terminate on other nodes' do
+      it "expect not to trigger terminate on other nodes" do
         manager.control
 
         manager.nodes.each do |node|
@@ -271,7 +271,7 @@ RSpec.describe_current do
         end
       end
 
-      it 'expect not to trigger stop on other nodes' do
+      it "expect not to trigger stop on other nodes" do
         manager.nodes.each do |node|
           next if node == target_node
 
@@ -280,7 +280,7 @@ RSpec.describe_current do
       end
     end
 
-    context 'when node has been stopped and it is still in a zombie mode' do
+    context "when node has been stopped and it is still in a zombie mode" do
       before do
         manager.nodes.each do |node|
           allow(node).to receive(:start)
@@ -296,15 +296,15 @@ RSpec.describe_current do
         manager.control
       end
 
-      it 'expect to collect state and not restart' do
+      it "expect to collect state and not restart" do
         expect(target_node).to have_received(:cleanup).once
       end
 
-      it 'expect not to start it yet' do
+      it "expect not to start it yet" do
         expect(target_node).not_to have_received(:start)
       end
 
-      it 'expect not to clean other nodes' do
+      it "expect not to clean other nodes" do
         manager.nodes.each do |node|
           next if node == target_node
 
@@ -313,7 +313,7 @@ RSpec.describe_current do
       end
     end
 
-    context 'when node has been stopped and it is time to restart it' do
+    context "when node has been stopped and it is time to restart it" do
       before do
         swarm_cfg.node_restart_timeout = 50
 
@@ -332,15 +332,15 @@ RSpec.describe_current do
         manager.control
       end
 
-      it 'expect to collect state and not restart' do
+      it "expect to collect state and not restart" do
         expect(target_node).to have_received(:cleanup).once
       end
 
-      it 'expect to start it' do
+      it "expect to start it" do
         expect(target_node).to have_received(:start)
       end
 
-      it 'expect not to clean or start other nodes' do
+      it "expect not to clean or start other nodes" do
         manager.nodes.each do |node|
           next if node == target_node
 

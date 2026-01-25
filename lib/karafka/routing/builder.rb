@@ -60,14 +60,14 @@ module Karafka
             # Validate consumer group settings
             Contracts::ConsumerGroup.new.validate!(
               consumer_group.to_h,
-              scope: ['routes', consumer_group.name]
+              scope: ["routes", consumer_group.name]
             )
 
             # and then its topics settings
             consumer_group.topics.each do |topic|
               Contracts::Topic.new.validate!(
                 topic.to_h,
-                scope: ['routes', consumer_group.name, topic.name]
+                scope: ["routes", consumer_group.name, topic.name]
               )
             end
 
@@ -78,7 +78,7 @@ module Karafka
       end
 
       # Clear out the drawn routes.
-      alias array_clear clear
+      alias_method :array_clear, :clear
       private :array_clear
 
       # Clear routes and draw them again with the given block. Helpful for testing purposes.

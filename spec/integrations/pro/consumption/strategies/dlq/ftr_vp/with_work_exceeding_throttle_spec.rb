@@ -50,7 +50,7 @@ draw_routes do
 end
 
 # This should never happen because throttle expires and we seek to the correct location
-Karafka.monitor.subscribe 'filtering.throttled' do
+Karafka.monitor.subscribe "filtering.throttled" do
   raise
 end
 

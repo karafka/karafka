@@ -30,20 +30,22 @@ end
 
 class JobA < ActiveJob::Base
   karafka_options(
-    partitioner: ->(_) { 'a' },
+    partitioner: ->(_) { "a" },
     dispatch_method: :produce_sync
   )
 
-  def perform; end
+  def perform
+  end
 end
 
 class JobB < ActiveJob::Base
   karafka_options(
-    partitioner: ->(_) { 'b' },
+    partitioner: ->(_) { "b" },
     dispatch_method: :produce_sync
   )
 
-  def perform; end
+  def perform
+  end
 end
 
 class JobC < JobA

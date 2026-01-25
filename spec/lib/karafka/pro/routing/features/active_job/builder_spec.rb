@@ -29,8 +29,8 @@ RSpec.describe_current do
 
   let(:topic) { builder.first.topics.first }
 
-  describe '#active_job_pattern' do
-    context 'when defining AJ pattern without any extra settings' do
+  describe "#active_job_pattern" do
+    context "when defining AJ pattern without any extra settings" do
       before { builder.active_job_pattern(/test/) }
 
       it { expect(topic.consumer).to eq(Karafka::Pro::ActiveJob::Consumer) }
@@ -39,7 +39,7 @@ RSpec.describe_current do
       it { expect(topic.patterns.matcher?).to be(true) }
     end
 
-    context 'when defining AJ pattern with extra settings' do
+    context "when defining AJ pattern with extra settings" do
       before do
         builder.active_job_pattern(/test/) do
           max_messages 5

@@ -58,9 +58,9 @@ end
 
 dispatch = Thread.new do
   10.times do
-    produce(DT.topic, '1', partition: 0)
+    produce(DT.topic, "1", partition: 0)
     sleep 2
-    produce(DT.topic, '1', partition: 1)
+    produce(DT.topic, "1", partition: 1)
   end
 rescue WaterDrop::Errors::ProducerClosedError
   nil
@@ -82,7 +82,7 @@ Thread.new do
 end
 
 start_karafka_and_wait_until do
-  (DT.key?('0-revoked') || DT.key?('1-revoked')) && DT.key?(:revoked_data)
+  (DT.key?("0-revoked") || DT.key?("1-revoked")) && DT.key?(:revoked_data)
 end
 
 consumer.close

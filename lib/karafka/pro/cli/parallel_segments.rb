@@ -31,11 +31,11 @@ module Karafka
           kafka_config: %i[kafka]
         )
 
-        desc 'Allows for parallel segments management'
+        desc "Allows for parallel segments management"
 
         option(
           :groups,
-          'Names of consumer groups on which we want to run the command. All if not provided',
+          "Names of consumer groups on which we want to run the command. All if not provided",
           Array,
           %w[
             --groups
@@ -50,7 +50,7 @@ module Karafka
         # their existing distributed offsets to be reset.
         option(
           :force,
-          'Should an operation on the parallel segments consumer group be forced',
+          "Should an operation on the parallel segments consumer group be forced",
           TrueClass,
           %w[
             --force
@@ -58,13 +58,13 @@ module Karafka
         )
 
         # @param action [String] action we want to take
-        def call(action = 'distribute')
+        def call(action = "distribute")
           case action
-          when 'distribute'
+          when "distribute"
             Distribute.new(options).call
-          when 'collapse'
+          when "collapse"
             Collapse.new(options).call
-          when 'reset'
+          when "reset"
             Collapse.new(options).call
             Distribute.new(options).call
           else

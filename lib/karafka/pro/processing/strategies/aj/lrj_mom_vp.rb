@@ -78,8 +78,8 @@ module Karafka
                 coordinator.revoke
               end
 
-              monitor.instrument('consumer.revoke', caller: self)
-              monitor.instrument('consumer.revoked', caller: self) do
+              monitor.instrument("consumer.revoke", caller: self)
+              monitor.instrument("consumer.revoked", caller: self) do
                 revoked
               end
             ensure

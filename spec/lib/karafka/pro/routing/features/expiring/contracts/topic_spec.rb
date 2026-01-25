@@ -32,24 +32,24 @@ RSpec.describe_current do
     }
   end
 
-  context 'when config is valid' do
+  context "when config is valid" do
     it { expect(check).to be_success }
   end
 
-  context 'when active flag is not boolean' do
+  context "when active flag is not boolean" do
     before { config[:expiring][:active] = rand }
 
     it { expect(check).not_to be_success }
   end
 
-  context 'when ttl is zero' do
+  context "when ttl is zero" do
     before { config[:expiring][:ttl] = rand }
 
     it { expect(check).not_to be_success }
   end
 
-  context 'when ttl is not an integer' do
-    before { config[:expiring][:ttl] = 'test' }
+  context "when ttl is not an integer" do
+    before { config[:expiring][:ttl] = "test" }
 
     it { expect(check).not_to be_success }
   end

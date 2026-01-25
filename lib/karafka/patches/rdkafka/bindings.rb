@@ -80,7 +80,7 @@ module Karafka
           tpl = ::Rdkafka::Consumer::TopicPartitionList.from_native_tpl(partitions_ptr).freeze
           opaque = ::Rdkafka::Config.opaques[opaque_ptr.to_i]
 
-          if RB.rd_kafka_rebalance_protocol(client_ptr) == 'COOPERATIVE'
+          if RB.rd_kafka_rebalance_protocol(client_ptr) == "COOPERATIVE"
             pr.on_cooperative_rebalance(client_ptr, code, partitions_ptr, tpl, opaque)
           else
             pr.on_eager_rebalance(client_ptr, code, partitions_ptr, tpl, opaque)
@@ -95,7 +95,7 @@ end
 # At the moment there is no API in rdkafka-ruby to do so
 Rdkafka::Bindings.send(
   :remove_const,
-  'RebalanceCallback'
+  "RebalanceCallback"
 )
 
 Rdkafka::Bindings.const_set(

@@ -37,7 +37,7 @@ module Karafka
 
               # We only require zlib when we decide to run recurring tasks because it is not needed
               # otherwise.
-              require 'zlib'
+              require "zlib"
               ensure_fugit_availability!
 
               tasks_cfg = App.config.recurring_tasks
@@ -62,7 +62,7 @@ module Karafka
                   consumer_persistence(true)
 
                   # This needs to be enabled for the eof to work correctly
-                  kafka('enable.partition.eof': true, inherit: true)
+                  kafka("enable.partition.eof": true, inherit: true)
                   eofed(true)
 
                   # Favour latency. This is a low traffic topic that only accepts user initiated
@@ -80,8 +80,8 @@ module Karafka
 
                   # Keep older data for a day and compact to the last state available
                   config(
-                    'cleanup.policy': 'compact,delete',
-                    'retention.ms': 86_400_000
+                    "cleanup.policy": "compact,delete",
+                    "retention.ms": 86_400_000
                   )
 
                   # This is the core of execution. Since we're producers of states, we need a way
@@ -108,8 +108,8 @@ module Karafka
                   # Keep cron logs of executions for a week and after that remove. Week should be
                   # enough and should not produce too much data.
                   config(
-                    'cleanup.policy': 'delete',
-                    'retention.ms': 604_800_000
+                    "cleanup.policy": "delete",
+                    "retention.ms": 604_800_000
                   )
                 end
 
@@ -122,7 +122,7 @@ module Karafka
             def ensure_fugit_availability!
               return if Object.const_defined?(:Fugit)
 
-              require 'fugit'
+              require "fugit"
             rescue LoadError
               raise(
                 Karafka::Errors::DependencyConstraintsError,

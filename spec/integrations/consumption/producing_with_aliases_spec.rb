@@ -8,10 +8,10 @@ class Consumer < Karafka::BaseConsumer
   def consume
     DT[:done] = true
 
-    produce_async(topic: topic.name, payload: '1')
-    produce_sync(topic: topic.name, payload: '2')
-    produce_many_async([{ topic: topic.name, payload: '2' }])
-    produce_many_sync([{ topic: topic.name, payload: '2' }])
+    produce_async(topic: topic.name, payload: "1")
+    produce_sync(topic: topic.name, payload: "2")
+    produce_many_async([{ topic: topic.name, payload: "2" }])
+    produce_many_sync([{ topic: topic.name, payload: "2" }])
   end
 end
 

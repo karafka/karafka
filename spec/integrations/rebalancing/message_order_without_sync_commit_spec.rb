@@ -4,13 +4,13 @@
 # by an unhealthy consumer without additional manual synchronous commits.
 
 setup_karafka(allow_errors: %w[connection.client.poll.error]) do |config|
-  config.kafka[:'max.poll.interval.ms'] = 10_000
-  config.kafka[:'session.timeout.ms'] = 10_000
-  config.kafka[:'auto.commit.interval.ms'] = 5_000
+  config.kafka[:"max.poll.interval.ms"] = 10_000
+  config.kafka[:"session.timeout.ms"] = 10_000
+  config.kafka[:"auto.commit.interval.ms"] = 5_000
 
   config.max_wait_time = 10_000
   config.max_messages = 20
-  config.initial_offset = 'latest'
+  config.initial_offset = "latest"
 end
 
 class Consumer < Karafka::BaseConsumer
@@ -18,8 +18,8 @@ class Consumer < Karafka::BaseConsumer
     messages.each do |message|
       # Wait until some amount of messages has been already processed to spice things up
       if condition_met?(message) &&
-         DT.data[:contested_message].empty? &&
-         DT.data[:consecutive_messages].size >= 60
+          DT.data[:contested_message].empty? &&
+          DT.data[:consecutive_messages].size >= 60
         DT[:contested_message_tuple] << [message, messages.metadata.first_offset]
         sleep(0.1) until DT.data.key?(:second_closed)
       end
@@ -64,7 +64,7 @@ Thread.new do
         {
           topic: DT.topic,
           partition: partitions.next,
-          payload: { 'key' => SecureRandom.uuid }.to_json
+          payload: { "key" => SecureRandom.uuid }.to_json
         }
       end
 
@@ -84,13 +84,13 @@ other_consumer = Thread.new do
   consumer.subscribe(DT.topic)
 
   consumer.each do |message|
-    key = JSON.parse(message.payload)['key']
+    key = JSON.parse(message.payload)["key"]
 
     DT[:second_consumer] << [key, message.partition, message.offset]
     DT[:consecutive_messages] << [:second, message.partition, message.offset]
     consumer.store_offset(message)
 
-    next unless DT[:contested_message_tuple].first.first&.payload&.dig('key') == key
+    next unless DT[:contested_message_tuple].first.first&.payload&.dig("key") == key
 
     # Stop at the contested message
     break
@@ -121,9 +121,9 @@ end
 # Each message from the contested batch should have been processed once by both consumers,
 # twice in total
 duplicate_counts = messages_from_contested_batch
-                   .group_by { |_, _, offset| offset }
-                   .values
-                   .map { |group| group.uniq.size }
+  .group_by { |_, _, offset| offset }
+  .values
+  .map { |group| group.uniq.size }
 
 assert(duplicate_counts.all?(2))
 

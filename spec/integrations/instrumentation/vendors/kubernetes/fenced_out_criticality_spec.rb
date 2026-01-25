@@ -5,7 +5,7 @@
 INSTANCE_ID = SecureRandom.uuid
 
 setup_karafka(allow_errors: true) do |config|
-  config.kafka[:'group.instance.id'] = INSTANCE_ID
+  config.kafka[:"group.instance.id"] = INSTANCE_ID
 end
 
 class Consumer < Karafka::BaseConsumer
@@ -20,7 +20,7 @@ produce_many(DT.topic, DT.uuids(1))
 # This one (our current one) will be fenced out by the fork
 fenced = Thread.new do
   start_karafka_and_wait_until do
-    DT[:probing].include?('500')
+    DT[:probing].include?("500")
   end
 end
 
@@ -38,11 +38,11 @@ pid = fork do
   end
 end
 
-require 'net/http'
-require 'karafka/instrumentation/vendors/kubernetes/liveness_listener'
+require "net/http"
+require "karafka/instrumentation/vendors/kubernetes/liveness_listener"
 
 listener = Karafka::Instrumentation::Vendors::Kubernetes::LivenessListener.new(
-  hostname: '127.0.0.1',
+  hostname: "127.0.0.1",
   port: 9013,
   polling_ttl: 1_000
 )
@@ -55,14 +55,14 @@ Karafka.monitor.subscribe(listener)
 Thread.new do
   until Karafka::App.stopping?
     sleep(1)
-    uri = URI.parse('http://127.0.0.1:9013/')
+    uri = URI.parse("http://127.0.0.1:9013/")
     response = Net::HTTP.get_response(uri)
     DT[:probing] << response.code
     DT[:bodies] << response.body
   end
 end
 
-sleep(0.1) until DT[:probing].include?('500')
+sleep(0.1) until DT[:probing].include?("500")
 
 # Terminate the fork as it is no longer needed
 # We do not care about its state as we're done testing
@@ -71,15 +71,15 @@ Process.wait(pid)
 
 fenced.join
 
-assert DT[:probing].include?('200')
-assert DT[:probing].include?('500')
+assert DT[:probing].include?("200")
+assert DT[:probing].include?("500")
 
 last = JSON.parse(DT[:bodies].last)
 
-assert_equal 'unhealthy', last['status']
-assert last.key?('timestamp')
-assert_equal 9013, last['port']
-assert_equal Process.pid, last['process_id']
-assert_equal false, last['errors']['polling_ttl_exceeded']
-assert_equal false, last['errors']['consumption_ttl_exceeded']
-assert_equal 'fenced_instance_id', last['errors']['unrecoverable']
+assert_equal "unhealthy", last["status"]
+assert last.key?("timestamp")
+assert_equal 9013, last["port"]
+assert_equal Process.pid, last["process_id"]
+assert_equal false, last["errors"]["polling_ttl_exceeded"]
+assert_equal false, last["errors"]["consumption_ttl_exceeded"]
+assert_equal "fenced_instance_id", last["errors"]["unrecoverable"]

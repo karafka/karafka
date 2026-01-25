@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require 'karafka/core/helpers/rspec_locator'
+require "karafka/core/helpers/rspec_locator"
 
 # We need a slightly special locator because of Pro
 class RSpecLocator < Karafka::Core::Helpers::RSpecLocator
@@ -16,7 +16,7 @@ class RSpecLocator < Karafka::Core::Helpers::RSpecLocator
     # @param block [Proc] block with specs
     rspec.define_singleton_method :describe_current do |&block|
       # Mark specs from pro namespace as pro
-      type = this.inherited.to_s.include?('::Pro::') ? :pro : :regular
+      type = this.inherited.to_s.include?("::Pro::") ? :pro : :regular
 
       describe(this.inherited, type: type, &block)
     end

@@ -25,7 +25,7 @@
 # high-watermark - 1 on transactional but it will just wait for more data
 
 setup_karafka do |config|
-  config.kafka[:'transactional.id'] = SecureRandom.uuid
+  config.kafka[:"transactional.id"] = SecureRandom.uuid
 end
 
 class Consumer < Karafka::BaseConsumer

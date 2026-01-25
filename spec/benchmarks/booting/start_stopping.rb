@@ -11,7 +11,7 @@ TOPICS = 5
 
 100.times do
   TOPICS.times do |i|
-    Karafka.producer.buffer(topic: DT.topics[i], payload: 'a')
+    Karafka.producer.buffer(topic: DT.topics[i], payload: "a")
   end
 
   Karafka.producer.flush_sync

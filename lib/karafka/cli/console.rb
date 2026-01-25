@@ -20,7 +20,7 @@ module Karafka
         # @return [String] Console executing command for Rails setup
         # @note In case of Rails, it has its own console, hence we can just defer to it
         def rails_console
-          'bundle exec rails console'
+          "bundle exec rails console"
         end
       end
 

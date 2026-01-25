@@ -35,9 +35,9 @@ draw_routes(create_topics: false) do
   end
 end
 
-ARGV[0] = 'server'
-ARGV[1] = '--exclude-subscription-groups'
-ARGV[2] = 'test'
+ARGV[0] = "server"
+ARGV[1] = "--exclude-subscription-groups"
+ARGV[2] = "test"
 
 failed = false
 

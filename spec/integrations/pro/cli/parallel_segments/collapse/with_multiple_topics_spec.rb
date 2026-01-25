@@ -59,15 +59,15 @@ end
 Karafka::Admin.seek_consumer_group(segment1, segment1_offsets)
 Karafka::Admin.seek_consumer_group(segment2, segment2_offsets)
 
-ARGV[0] = 'parallel_segments'
-ARGV[1] = 'collapse'
+ARGV[0] = "parallel_segments"
+ARGV[1] = "collapse"
 
 results = capture_stdout do
   Karafka::Cli.start
 end
 
-assert results.include?('Collapse completed')
-assert results.include?('successfully')
+assert results.include?("Collapse completed")
+assert results.include?("successfully")
 
 offsets = Karafka::Admin.read_lags_with_offsets({ DT.consumer_group => topics })
 

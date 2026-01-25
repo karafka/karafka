@@ -24,7 +24,7 @@
 # Operating in transactional mode
 
 setup_karafka do |config|
-  config.kafka[:'transactional.id'] = SecureRandom.uuid
+  config.kafka[:"transactional.id"] = SecureRandom.uuid
   config.max_messages = 10
 end
 
@@ -82,10 +82,10 @@ EXPECTED_KEYS = %w[BBBBBBBBB AAAAAAAAA].freeze
 DT[:piped].each do |message|
   headers = message.headers
 
-  source_partition = headers['source_partition'].to_i
+  source_partition = headers["source_partition"].to_i
   assert SETS[source_partition].include?(message.raw_payload)
   assert EXPECTED_PARTITIONS.include?(source_partition)
   assert EXPECTED_KEYS.include?(message.key)
-  assert_equal headers['source_topic'], DT.topics.first
-  assert_equal headers['source_consumer_group'], DT.consumer_group
+  assert_equal headers["source_topic"], DT.topics.first
+  assert_equal headers["source_consumer_group"], DT.consumer_group
 end

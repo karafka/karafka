@@ -24,8 +24,8 @@
 # partitions back, it should not have duplicated data.
 
 setup_karafka do |config|
-  config.kafka[:'transactional.id'] = SecureRandom.uuid
-  config.kafka[:'isolation.level'] = 'read_committed'
+  config.kafka[:"transactional.id"] = SecureRandom.uuid
+  config.kafka[:"isolation.level"] = "read_committed"
   config.max_messages = 1_000
 end
 
@@ -51,7 +51,7 @@ class Consumer < Karafka::BaseConsumer
         raise if @buffer.include?(message.offset)
 
         @buffer << message.offset
-        produce_async(topic: DT.topics[1], payload: '1')
+        produce_async(topic: DT.topics[1], payload: "1")
       end
 
       unless DT.key?(:marked)

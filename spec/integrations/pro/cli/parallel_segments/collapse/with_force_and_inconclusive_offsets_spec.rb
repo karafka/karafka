@@ -46,16 +46,16 @@ produce_many(DT.topic, DT.uuids(10))
 Karafka::Admin.seek_consumer_group(segment1, { DT.topic => { 0 => 5, 1 => 2 } })
 Karafka::Admin.seek_consumer_group(segment2, { DT.topic => { 0 => 3, 1 => 8 } })
 
-ARGV[0] = 'parallel_segments'
-ARGV[1] = 'collapse'
-ARGV[2] = '--force'
+ARGV[0] = "parallel_segments"
+ARGV[1] = "collapse"
+ARGV[2] = "--force"
 
 results = capture_stdout do
   Karafka::Cli.start
 end
 
-assert results.include?('Collapse completed')
-assert results.include?('successfully')
+assert results.include?("Collapse completed")
+assert results.include?("successfully")
 
 offsets = Karafka::Admin.read_lags_with_offsets({ DT.consumer_group => [DT.topic] })
 assert_equal offsets[DT.consumer_group][DT.topic][0][:offset], 3

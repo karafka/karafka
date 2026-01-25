@@ -27,7 +27,7 @@ RSpec.describe_current do
   let(:distribute_instance) { instance_double(distribute_cmd) }
   let(:collapse_cmd) { Karafka::Pro::Cli::ParallelSegments::Collapse }
   let(:collapse_instance) { instance_double(collapse_cmd) }
-  let(:options) { { groups: ['test-group'], force: false } }
+  let(:options) { { groups: ["test-group"], force: false } }
 
   before do
     allow(command)
@@ -45,10 +45,10 @@ RSpec.describe_current do
       .to receive(:call)
   end
 
-  describe '#call' do
+  describe "#call" do
     context 'when action is "distribute"' do
-      it 'initializes Distribute with options and calls it' do
-        command.call('distribute')
+      it "initializes Distribute with options and calls it" do
+        command.call("distribute")
 
         expect(distribute_cmd).to have_received(:new).with(options)
         expect(distribute_instance).to have_received(:call)
@@ -63,8 +63,8 @@ RSpec.describe_current do
     end
 
     context 'when action is "collapse"' do
-      it 'initializes Collapse with options and calls it' do
-        command.call('collapse')
+      it "initializes Collapse with options and calls it" do
+        command.call("collapse")
 
         expect(collapse_cmd).to have_received(:new).with(options)
         expect(collapse_instance).to have_received(:call)
@@ -72,8 +72,8 @@ RSpec.describe_current do
     end
 
     context 'when action is "reset"' do
-      it 'calls both collapse and distribute in sequence' do
-        command.call('reset')
+      it "calls both collapse and distribute in sequence" do
+        command.call("reset")
 
         expect(collapse_cmd).to have_received(:new).with(options)
         expect(collapse_instance).to have_received(:call)
@@ -82,11 +82,11 @@ RSpec.describe_current do
       end
     end
 
-    context 'when action is invalid' do
-      it 'raises ArgumentError with appropriate message' do
-        expect { command.call('invalid_action') }.to raise_error(
+    context "when action is invalid" do
+      it "raises ArgumentError with appropriate message" do
+        expect { command.call("invalid_action") }.to raise_error(
           ArgumentError,
-          'Invalid topics action: invalid_action'
+          "Invalid topics action: invalid_action"
         )
       end
     end

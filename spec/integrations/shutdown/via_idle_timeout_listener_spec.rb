@@ -30,19 +30,20 @@ class IdleStopper
     return if (now - @last_message_received_at) < @max_idle_ms
 
     @signaled = true
-    ::Process.kill('QUIT', ::Process.pid)
+    ::Process.kill("QUIT", ::Process.pid)
   end
 end
 
 Karafka::App.monitor.subscribe(IdleStopper.new(15_000))
 
 class Consumer < Karafka::BaseConsumer
-  def consume; end
+  def consume
+  end
 end
 
 draw_routes(Consumer)
 
-produce(DT.topic, '1')
+produce(DT.topic, "1")
 
 # If stopping via signal from listener won't work, this spec will run forever
 start_karafka_and_wait_until do

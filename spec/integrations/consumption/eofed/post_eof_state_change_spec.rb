@@ -3,7 +3,7 @@
 # When we had an eof but then not, it should be reflected in the `#eofed?` status
 
 setup_karafka do |config|
-  config.kafka[:'enable.partition.eof'] = true
+  config.kafka[:"enable.partition.eof"] = true
   config.max_messages = 10
 end
 

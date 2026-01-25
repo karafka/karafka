@@ -20,12 +20,12 @@ RSpec.describe_current do
 
   after { Karafka::App.config.monitor = previous_monitor }
 
-  describe '#on_partitions_revoke' do
+  describe "#on_partitions_revoke" do
     before { callback.on_partitions_revoke(tpl) }
 
-    it 'expect to publish appropriate event' do
+    it "expect to publish appropriate event" do
       expect(monitor).to have_received(:instrument).with(
-        'rebalance.partitions_revoke',
+        "rebalance.partitions_revoke",
         caller: callback,
         subscription_group_id: subscription_group_id,
         subscription_group: subscription_group,
@@ -36,37 +36,37 @@ RSpec.describe_current do
       )
     end
 
-    context 'when handler contains error' do
+    context "when handler contains error" do
       let(:tracked_errors) { [] }
 
       before do
         allow(monitor).to receive(:instrument).and_call_original
 
-        monitor.subscribe('rebalance.partitions_revoke') do
+        monitor.subscribe("rebalance.partitions_revoke") do
           raise
         end
 
         local_errors = tracked_errors
 
-        monitor.subscribe('error.occurred') do |event|
+        monitor.subscribe("error.occurred") do |event|
           local_errors << event
         end
       end
 
-      it 'expect to contain in, notify and continue as we do not want to crash rdkafka' do
+      it "expect to contain in, notify and continue as we do not want to crash rdkafka" do
         expect { callback.on_partitions_revoke(tpl) }.not_to raise_error
         expect(tracked_errors.size).to eq(1)
-        expect(tracked_errors.first[:type]).to eq('callbacks.rebalance.partitions_revoke.error')
+        expect(tracked_errors.first[:type]).to eq("callbacks.rebalance.partitions_revoke.error")
       end
     end
   end
 
-  describe '#on_partitions_assign' do
+  describe "#on_partitions_assign" do
     before { callback.on_partitions_assign(tpl) }
 
-    it 'expect to publish appropriate event' do
+    it "expect to publish appropriate event" do
       expect(monitor).to have_received(:instrument).with(
-        'rebalance.partitions_assign',
+        "rebalance.partitions_assign",
         caller: callback,
         subscription_group_id: subscription_group_id,
         subscription_group: subscription_group,
@@ -78,12 +78,12 @@ RSpec.describe_current do
     end
   end
 
-  describe '#on_partitions_revoked' do
+  describe "#on_partitions_revoked" do
     before { callback.on_partitions_revoked(tpl) }
 
-    it 'expect to publish appropriate event' do
+    it "expect to publish appropriate event" do
       expect(monitor).to have_received(:instrument).with(
-        'rebalance.partitions_revoked',
+        "rebalance.partitions_revoked",
         caller: callback,
         subscription_group_id: subscription_group_id,
         subscription_group: subscription_group,
@@ -95,12 +95,12 @@ RSpec.describe_current do
     end
   end
 
-  describe '#on_partitions_assigned' do
+  describe "#on_partitions_assigned" do
     before { callback.on_partitions_assigned(tpl) }
 
-    it 'expect to publish appropriate event' do
+    it "expect to publish appropriate event" do
       expect(monitor).to have_received(:instrument).with(
-        'rebalance.partitions_assigned',
+        "rebalance.partitions_assigned",
         caller: callback,
         subscription_group_id: subscription_group_id,
         subscription_group: subscription_group,

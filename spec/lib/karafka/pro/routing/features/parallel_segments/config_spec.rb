@@ -35,35 +35,35 @@ RSpec.describe_current do
   let(:count) { 5 }
   let(:partitioner) { ->(message) { message.key } }
   let(:reducer) { ->(messages) { messages.last } }
-  let(:merge_key) { 'user_id' }
+  let(:merge_key) { "user_id" }
 
-  describe '#active?' do
-    context 'when active' do
+  describe "#active?" do
+    context "when active" do
       it { expect(config.active?).to be(true) }
     end
 
-    context 'when not active' do
+    context "when not active" do
       let(:active) { false }
 
       it { expect(config.active?).to be(false) }
     end
   end
 
-  describe 'struct attributes' do
-    describe '#count' do
+  describe "struct attributes" do
+    describe "#count" do
       it { expect(config.count).to eq(5) }
     end
 
-    describe '#partitioner' do
+    describe "#partitioner" do
       it { expect(config.partitioner).to be_a(Proc) }
     end
 
-    describe '#reducer' do
+    describe "#reducer" do
       it { expect(config.reducer).to be_a(Proc) }
     end
 
-    describe '#merge_key' do
-      it { expect(config.merge_key).to eq('user_id') }
+    describe "#merge_key" do
+      it { expect(config.merge_key).to eq("user_id") }
     end
   end
 end

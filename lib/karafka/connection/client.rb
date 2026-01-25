@@ -66,7 +66,7 @@ module Karafka
       def initialize(subscription_group, batch_poll_breaker)
         @id = SecureRandom.hex(6)
         # Name is set when we build consumer
-        @name = ''
+        @name = ""
         @closed = false
         @subscription_group = subscription_group
         @buffer = RawMessagesBuffer.new
@@ -247,7 +247,7 @@ module Karafka
           return unless tpl
 
           Karafka.monitor.instrument(
-            'client.pause',
+            "client.pause",
             caller: self,
             subscription_group: @subscription_group,
             topic: topic,
@@ -292,7 +292,7 @@ module Karafka
           return unless @paused_tpls[topic].delete(partition)
 
           Karafka.monitor.instrument(
-            'client.resume',
+            "client.resume",
             caller: self,
             subscription_group: @subscription_group,
             topic: topic,
@@ -370,7 +370,7 @@ module Karafka
       # Closes and resets the client completely.
       def reset
         Karafka.monitor.instrument(
-          'client.reset',
+          "client.reset",
           caller: self,
           subscription_group: @subscription_group
         ) do
@@ -410,7 +410,7 @@ module Karafka
         # Emit event for monitoring - happens once per tick_interval (default 5s)
         # Listeners can check assignment_lost?, track polling health, etc.
         Karafka.monitor.instrument(
-          'client.events_poll',
+          "client.events_poll",
           caller: self,
           subscription_group: @subscription_group
         )
@@ -448,7 +448,7 @@ module Karafka
       # @return [String] safe inspection string that is causing circular dependencies and other
       #   issues
       def inspect
-        state = @closed ? 'closed' : 'open'
+        state = @closed ? "closed" : "open"
         "#<#{self.class.name} id=#{@id.inspect} name=#{@name.inspect} state=#{state}>"
       end
 
@@ -507,8 +507,8 @@ module Karafka
         end
 
         # Those two are librdkafka hardcoded values
-        message.offset = -1 if message.offset.to_s == 'latest'
-        message.offset = -2 if message.offset.to_s == 'earliest'
+        message.offset = -1 if message.offset.to_s == "latest"
+        message.offset = -2 if message.offset.to_s == "earliest"
 
         # Never seek if we would get the same location as we would get without seeking
         # This prevents us from the expensive buffer purges that can lead to increased network
@@ -563,10 +563,10 @@ module Karafka
         kafka.unsubscribe
       rescue Rdkafka::RdkafkaError => e
         Karafka.monitor.instrument(
-          'error.occurred',
+          "error.occurred",
           caller: self,
           error: e,
-          type: 'connection.client.unsubscribe.error'
+          type: "connection.client.unsubscribe.error"
         )
       end
 
@@ -575,9 +575,9 @@ module Karafka
       # @return [Rdkafka::Consumer::TopicPartitionList]
       def topic_partition_list(topic, partition)
         rdkafka_partition = kafka
-                            .assignment
-                            .to_h[topic]
-                            &.detect { |part| part.partition == partition }
+          .assignment
+          .to_h[topic]
+          &.detect { |part| part.partition == partition }
 
         return unless rdkafka_partition
 
@@ -661,7 +661,7 @@ module Karafka
         # This will be raised each time poll detects a non-existing topic. When auto creation is
         # on, we can safely ignore it
         when :unknown_topic_or_part # 3
-          return nil if @subscription_group.kafka[:'allow.auto.create.topics']
+          return nil if @subscription_group.kafka[:"allow.auto.create.topics"]
 
           early_report = true
 
@@ -681,10 +681,10 @@ module Karafka
 
         if early_report || !retryable
           Karafka.monitor.instrument(
-            'error.occurred',
+            "error.occurred",
             caller: self,
             error: e,
-            type: 'connection.client.poll.error'
+            type: "connection.client.poll.error"
           )
         end
 
@@ -790,7 +790,7 @@ module Karafka
       # @return [Boolean] should we unsubscribe prior to shutdown
       def unsubscribe?
         return false if @unsubscribing
-        return false if @subscription_group.kafka.key?(:'group.instance.id')
+        return false if @subscription_group.kafka.key?(:"group.instance.id")
         return false unless @mode.subscribe?
         return false if assignment.empty?
 

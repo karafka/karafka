@@ -5,7 +5,7 @@
 # @see https://github.com/karafka/karafka/issues/1144
 
 # Load all the Railtie stuff like when `rails server`
-ENV['KARAFKA_CLI'] = 'true'
+ENV["KARAFKA_CLI"] = "true"
 
 # rubocop:disable Lint/EmptyClass
 class Builder
@@ -19,17 +19,17 @@ end
 # rubocop:enable Lint/EmptyClass
 
 Bundler.require(:default)
-require 'action_controller'
+require "action_controller"
 
-ENV['RAILS_ENV'] = 'test'
+ENV["RAILS_ENV"] = "test"
 
 Bundler.require(:default)
 
 class ExampleApp < Rails::Application
-  config.eager_load = 'test'
+  config.eager_load = "test"
 end
 
-ENV['KARAFKA_BOOT_FILE'] = 'false'
+ENV["KARAFKA_BOOT_FILE"] = "false"
 
 disabled = true
 

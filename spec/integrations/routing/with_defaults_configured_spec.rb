@@ -12,15 +12,15 @@ draw_routes(create_topics: false) do
   end
 
   subscription_group do
-    topic 'topic1' do
+    topic "topic1" do
       consumer Class.new
-      dead_letter_queue(topic: 'xyz', max_retries: 2)
+      dead_letter_queue(topic: "xyz", max_retries: 2)
       manual_offset_management true
       config(replication_factor: 12, partitions: 15)
     end
   end
 
-  topic 'topic2' do
+  topic "topic2" do
     consumer Class.new
   end
 end

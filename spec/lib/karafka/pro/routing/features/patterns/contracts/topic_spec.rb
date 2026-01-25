@@ -25,7 +25,7 @@ RSpec.describe_current do
 
   subject(:contract) { described_class.new }
 
-  context 'when patterns configuration is valid' do
+  context "when patterns configuration is valid" do
     let(:topic) do
       {
         patterns: {
@@ -38,7 +38,7 @@ RSpec.describe_current do
     it { expect(check).to be_success }
   end
 
-  context 'when patterns active attribute is not valid' do
+  context "when patterns active attribute is not valid" do
     let(:topic) do
       {
         patterns: {
@@ -51,7 +51,7 @@ RSpec.describe_current do
     it { expect(check).not_to be_success }
   end
 
-  context 'when patterns type attribute is not valid' do
+  context "when patterns type attribute is not valid" do
     let(:topic) do
       {
         patterns: {

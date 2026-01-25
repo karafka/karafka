@@ -45,14 +45,14 @@ draw_routes do
   topic DT.topic do
     consumer Consumer
     virtual_partitions(
-      partitioner: ->(msg) { msg.payload['key'] }
+      partitioner: ->(msg) { msg.payload["key"] }
     )
   end
 end
 
 produce_many(
   DT.topic,
-  Array.new(1_000) { { key: '1', data: rand }.to_json }
+  Array.new(1_000) { { key: "1", data: rand }.to_json }
 )
 
 start_karafka_and_wait_until do

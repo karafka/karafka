@@ -39,7 +39,7 @@ module Karafka
             # @return [String] subscription name or the regexp string representing matching of
             #   new topics that should be detected.
             def subscription_name
-              patterns.active? && patterns.matcher? ? patterns.pattern.regexp_string : super
+              (patterns.active? && patterns.matcher?) ? patterns.pattern.regexp_string : super
             end
 
             # @param active [Boolean] is this topic active member of patterns

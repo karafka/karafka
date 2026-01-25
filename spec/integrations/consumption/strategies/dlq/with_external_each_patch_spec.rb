@@ -17,13 +17,13 @@ end
 module ExternalEachPatchSimulationDlq
   def each(&)
     caller_location = caller_locations(1, 10).find do |loc|
-      loc.path.include?('karafka') && !loc.path.include?('spec')
+      loc.path.include?("karafka") && !loc.path.include?("spec")
     end
 
     DT[:each_calls] << {
       caller: caller_location&.label,
       path: caller_location&.path,
-      from_dlq_strategy: caller_location&.path&.include?('strategies/dlq')
+      from_dlq_strategy: caller_location&.path&.include?("strategies/dlq")
     }
 
     super
@@ -39,7 +39,7 @@ class Consumer < Karafka::BaseConsumer
       DT[:consumed] << message.offset
 
       # Always raise on first message to trigger DLQ after max_retries
-      raise StandardError, 'Test error' if message.offset == 0
+      raise StandardError, "Test error" if message.offset == 0
     end
   end
 end
@@ -83,4 +83,4 @@ MSG
 
 # Verify that #each WAS called from user code
 user_calls = DT[:each_calls].reject { |call| call[:from_dlq_strategy] }
-assert user_calls.any?, 'User code should trigger the patched #each method'
+assert user_calls.any?, "User code should trigger the patched #each method"

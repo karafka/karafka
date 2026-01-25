@@ -30,11 +30,11 @@ draw_routes do
   end
 end
 
-produce(DT.topic, '1')
+produce(DT.topic, "1")
 
 iterator = Karafka::Pro::Iterator.new(
   { DT.topic => -1 },
-  settings: { 'enable.partition.eof': false },
+  settings: { "enable.partition.eof": false },
   yield_nil: true
 )
 

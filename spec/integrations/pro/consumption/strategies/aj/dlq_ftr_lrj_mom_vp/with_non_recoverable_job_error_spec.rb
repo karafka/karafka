@@ -28,8 +28,8 @@ setup_active_job
 
 setup_karafka(allow_errors: true) do |config|
   config.max_messages = 10
-  config.kafka[:'max.poll.interval.ms'] = 10_000
-  config.kafka[:'session.timeout.ms'] = 10_000
+  config.kafka[:"max.poll.interval.ms"] = 10_000
+  config.kafka[:"session.timeout.ms"] = 10_000
   # Use the non-Pro scheduler to achieve FIFO scheduling to stabilize this spec
   config.internal.processing.scheduler_class = Karafka::Processing::Schedulers::Default
 end
@@ -37,7 +37,7 @@ end
 class DlqConsumer < Karafka::BaseConsumer
   def consume
     messages.each do |message|
-      DT[1] << message.headers['source_offset'].to_i
+      DT[1] << message.headers["source_offset"].to_i
     end
   end
 end

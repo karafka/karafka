@@ -14,7 +14,7 @@ RSpec.describe_current do
     end
   end
 
-  describe 'delegation' do
+  describe "delegation" do
     subject(:delegator) do
       described_class
         .delegate(*methods)
@@ -28,7 +28,7 @@ RSpec.describe_current do
       end
     end
 
-    it 'delegates to all' do
+    it "delegates to all" do
       methods.each do |mname|
         delegator.send(mname)
 

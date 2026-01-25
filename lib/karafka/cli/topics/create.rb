@@ -13,7 +13,7 @@ module Karafka
             name = topic.name
 
             if existing_topics_names.include?(name)
-              puts "#{yellow('Skipping')} because topic #{name} already exists."
+              puts "#{yellow("Skipping")} because topic #{name} already exists."
             else
               supervised("Creating topic #{name}") do
                 Admin.create_topic(
@@ -24,7 +24,7 @@ module Karafka
                 )
               end
 
-              puts "#{green('Created')} topic #{name}."
+              puts "#{green("Created")} topic #{name}."
               any_created = true
             end
           end

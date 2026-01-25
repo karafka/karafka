@@ -45,8 +45,8 @@ draw_routes do
   topic DT.topics[0] do
     consumer Consumer
     deserializers(
-      headers: ->(_) { { 'a' => '100' } },
-      key: ->(_) { '100' }
+      headers: ->(_) { { "a" => "100" } },
+      key: ->(_) { "100" }
     )
     dead_letter_queue(topic: DT.topics[1], max_retries: 0)
   end
@@ -74,9 +74,9 @@ end
   assert_equal dlq_message.key, i.to_s
   assert_equal dlq_message.raw_payload, elements[i]
   assert_equal dlq_message.headers["test#{i}"], (i + 1).to_s
-  assert_equal dlq_message.headers.fetch('source_topic'), DT.topic
-  assert_equal dlq_message.headers.fetch('source_partition'), 0.to_s
-  assert_equal dlq_message.headers.fetch('source_offset'), i.to_s
-  assert_equal dlq_message.headers.fetch('source_attempts'), '1'
-  assert_equal dlq_message.headers.fetch('source_consumer_group'), cg
+  assert_equal dlq_message.headers.fetch("source_topic"), DT.topic
+  assert_equal dlq_message.headers.fetch("source_partition"), 0.to_s
+  assert_equal dlq_message.headers.fetch("source_offset"), i.to_s
+  assert_equal dlq_message.headers.fetch("source_attempts"), "1"
+  assert_equal dlq_message.headers.fetch("source_consumer_group"), cg
 end

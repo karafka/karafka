@@ -26,15 +26,15 @@ setup_karafka
 
 draw_routes(create_topics: false) do
   subscription_group do
-    topic 'topic1' do
+    topic "topic1" do
       consumer Class.new
-      dead_letter_queue(topic: 'xyz', max_retries: 2)
+      dead_letter_queue(topic: "xyz", max_retries: 2)
       manual_offset_management true
       long_running_job true
     end
   end
 
-  topic 'topic2' do
+  topic "topic2" do
     consumer Class.new
   end
 end

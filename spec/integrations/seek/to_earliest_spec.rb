@@ -3,7 +3,7 @@
 # If we seek to the earliest, we should start from the beginning
 
 setup_karafka do |config|
-  config.initial_offset = 'latest'
+  config.initial_offset = "latest"
 end
 
 class Consumer < Karafka::BaseConsumer

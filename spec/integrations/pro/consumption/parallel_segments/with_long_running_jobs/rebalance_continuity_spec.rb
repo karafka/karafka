@@ -25,8 +25,8 @@
 setup_karafka do |config|
   config.concurrency = 5
   config.max_messages = 1
-  config.kafka[:'max.poll.interval.ms'] = 10_000
-  config.kafka[:'session.timeout.ms'] = 10_000
+  config.kafka[:"max.poll.interval.ms"] = 10_000
+  config.kafka[:"session.timeout.ms"] = 10_000
 end
 
 class Consumer < Karafka::BaseConsumer
@@ -150,13 +150,13 @@ rebalance_thread.join
 # 1. Verify rebalance was triggered
 assert(
   DT[:rebalance_triggered],
-  'Rebalance was not triggered during the test'
+  "Rebalance was not triggered during the test"
 )
 
 # 2. Verify revocation was detected
 assert(
   !DT[:revoked].empty?,
-  'No revocations were detected during the test'
+  "No revocations were detected during the test"
 )
 
 # 3. Group received messages by key to check segment assignment consistency

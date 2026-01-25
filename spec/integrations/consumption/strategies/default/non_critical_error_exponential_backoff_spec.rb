@@ -25,7 +25,7 @@ end
 
 draw_routes(Consumer)
 
-produce(DT.topic, '0')
+produce(DT.topic, "0")
 
 start_karafka_and_wait_until do
   DT[0].size >= 10

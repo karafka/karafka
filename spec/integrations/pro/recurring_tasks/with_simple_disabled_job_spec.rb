@@ -30,27 +30,27 @@ draw_routes do
   end
 end
 
-Karafka::Pro::RecurringTasks.define('1.0.0') do
+Karafka::Pro::RecurringTasks.define("1.0.0") do
   # This one should trigger only once during the explicit trigger request
-  schedule(id: 'stop', cron: '* * * * *', enabled: false) do
+  schedule(id: "stop", cron: "* * * * *", enabled: false) do
     DT[:disabled_done] << true
   end
 
   # This should never run. Alongside of this case, we also check that the command matching
   # works correctly and does not trigger this one
-  schedule(id: 'crash', cron: '* * * * *', enabled: false) do
+  schedule(id: "crash", cron: "* * * * *", enabled: false) do
     raise
   end
 
   # This one will trigger fast because we set previous time in the past
-  schedule(id: 'trigger', cron: '* * * * *', previous_time: Time.now - 120_000) do
+  schedule(id: "trigger", cron: "* * * * *", previous_time: Time.now - 120_000) do
     DT[:active_done] = true
   end
 end
 
 start_karafka_and_wait_until do
   if DT.key?(:active_done) && !@dispatched
-    Karafka::Pro::RecurringTasks.trigger('stop')
+    Karafka::Pro::RecurringTasks.trigger("stop")
     @dispatched = true
 
     true

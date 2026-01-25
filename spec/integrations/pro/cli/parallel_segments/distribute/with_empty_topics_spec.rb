@@ -42,15 +42,15 @@ end
 
 # Create topic but don't produce any messages, so it's empty
 
-ARGV[0] = 'parallel_segments'
-ARGV[1] = 'distribute'
+ARGV[0] = "parallel_segments"
+ARGV[1] = "distribute"
 
 results = capture_stdout do
   Karafka::Cli.start
 end
 
-assert results.include?('Distribution completed')
-assert results.include?('successfully')
+assert results.include?("Distribution completed")
+assert results.include?("successfully")
 
 # Verify offsets were distributed to both segments
 offsets1 = Karafka::Admin.read_lags_with_offsets({ segment1 => [DT.topic] })

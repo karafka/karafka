@@ -2,9 +2,9 @@
 
 begin
   # Do not load active job if already loaded
-  require 'active_job' unless Object.const_defined?('ActiveJob')
+  require "active_job" unless Object.const_defined?("ActiveJob")
 
-  require_relative 'queue_adapters/karafka_adapter'
+  require_relative "queue_adapters/karafka_adapter"
 
   module ActiveJob
     # Namespace for usage simplification outside of Rails where Railtie will not kick in.

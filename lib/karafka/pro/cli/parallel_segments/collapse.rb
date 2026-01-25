@@ -37,12 +37,12 @@ module Karafka
         class Collapse < Base
           # Runs the collapse operation
           def call
-            puts 'Starting parallel segments collapse...'
+            puts "Starting parallel segments collapse..."
 
             segments_count = applicable_groups.size
 
             if segments_count.zero?
-              puts "#{red('No')} consumer groups with parallel segments configuration found"
+              puts "#{red("No")} consumer groups with parallel segments configuration found"
 
               return
             end
@@ -74,7 +74,7 @@ module Karafka
             end
 
             puts
-            puts "Collapse completed #{green('successfully')}!"
+            puts "Collapse completed #{green("successfully")}!"
           end
 
           private
@@ -141,7 +141,7 @@ module Karafka
 
                 puts(
                   "  Inconclusive offsets for #{red(topic_name)}##{red(partition_id)}: " \
-                  "#{parallel_offsets.to_a.join(', ')}"
+                  "#{parallel_offsets.to_a.join(", ")}"
                 )
               end
             end
@@ -150,7 +150,7 @@ module Karafka
 
             raise(
               Karafka::Errors::CommandValidationError,
-              "Parallel segments for #{red(segment_origin)} have #{red('inconclusive')} offsets"
+              "Parallel segments for #{red(segment_origin)} have #{red("inconclusive")} offsets"
             )
           end
 

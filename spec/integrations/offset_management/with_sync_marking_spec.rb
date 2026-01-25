@@ -10,7 +10,7 @@ class Consumer < Karafka::BaseConsumer
       mark_as_consumed!(message)
       DT[0] << message.offset
     end
-  rescue StandardError
+  rescue
     exit! 5
   end
 end

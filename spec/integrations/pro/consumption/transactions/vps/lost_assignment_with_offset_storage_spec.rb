@@ -24,10 +24,10 @@
 # transaction is expected to fail.
 
 setup_karafka(allow_errors: true) do |config|
-  config.kafka[:'transactional.id'] = SecureRandom.uuid
+  config.kafka[:"transactional.id"] = SecureRandom.uuid
   config.max_messages = 100
-  config.kafka[:'max.poll.interval.ms'] = 10_000
-  config.kafka[:'session.timeout.ms'] = 10_000
+  config.kafka[:"max.poll.interval.ms"] = 10_000
+  config.kafka[:"session.timeout.ms"] = 10_000
 end
 
 class Consumer < Karafka::BaseConsumer
@@ -42,7 +42,7 @@ class Consumer < Karafka::BaseConsumer
 
     begin
       transaction do
-        produce_async(topic: topic.name, payload: '1')
+        produce_async(topic: topic.name, payload: "1")
         mark_as_consumed(messages.last)
       end
     rescue Karafka::Errors::AssignmentLostError => e

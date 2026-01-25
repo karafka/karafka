@@ -4,14 +4,14 @@
 # to bypass the issue. This will not work and this spec illustrates this.
 
 setup_karafka(allow_errors: %w[connection.client.poll.error]) do |config|
-  config.kafka[:'max.poll.interval.ms'] = 10_000
-  config.kafka[:'session.timeout.ms'] = 10_000
+  config.kafka[:"max.poll.interval.ms"] = 10_000
+  config.kafka[:"session.timeout.ms"] = 10_000
   config.max_messages = 1
 end
 
 errors = []
 
-Karafka::App.monitor.subscribe('error.occurred') do |event|
+Karafka::App.monitor.subscribe("error.occurred") do |event|
   errors << event[:error]
 end
 
@@ -36,7 +36,7 @@ end
 
 draw_routes(Consumer)
 
-produce(DT.topic, '')
+produce(DT.topic, "")
 
 start_karafka_and_wait_until do
   DT.key?(:post)

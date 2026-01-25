@@ -5,11 +5,11 @@ RSpec.describe_current do
 
   let(:topic) { build(:routing_topic) }
 
-  context 'when inline insights are disabled' do
+  context "when inline insights are disabled" do
     it { expect(expansions).to eq([]) }
   end
 
-  context 'when inline insights are enabled' do
+  context "when inline insights are enabled" do
     before { topic.inline_insights(true) }
 
     it { expect(expansions).to eq([Karafka::Processing::InlineInsights::Consumer]) }

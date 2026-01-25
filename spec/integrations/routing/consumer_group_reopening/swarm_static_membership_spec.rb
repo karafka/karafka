@@ -8,7 +8,7 @@
 setup_karafka do |config|
   config.swarm.nodes = 2
   # Configure static group membership
-  config.kafka[:'group.instance.id'] = 'test-static-instance'
+  config.kafka[:"group.instance.id"] = "test-static-instance"
 end
 
 Consumer1 = Class.new(Karafka::BaseConsumer)
@@ -42,15 +42,15 @@ sg2_initial = group2.subscription_groups.first
 
 sg1_initial_id = sg1_initial.id
 sg2_initial_id = sg2_initial.id
-sg1_initial_instance_id = sg1_initial.kafka[:'group.instance.id']
-sg2_initial_instance_id = sg2_initial.kafka[:'group.instance.id']
+sg1_initial_instance_id = sg1_initial.kafka[:"group.instance.id"]
+sg2_initial_instance_id = sg2_initial.kafka[:"group.instance.id"]
 
 # Verify initial state - both groups should have unique instance IDs
 unless sg1_initial_instance_id && sg2_initial_instance_id
-  raise 'Both groups should have group.instance.id set'
+  raise "Both groups should have group.instance.id set"
 end
 
-raise 'Instance IDs should be different' if sg1_initial_instance_id == sg2_initial_instance_id
+raise "Instance IDs should be different" if sg1_initial_instance_id == sg2_initial_instance_id
 
 # Third draw - reopen first consumer group and add another topic
 draw_routes(create_topics: false) do
@@ -66,11 +66,11 @@ sg1_after = group1.subscription_groups.first
 sg2_after = group2.subscription_groups.first
 
 # Group1's subscription group should be stable
-assert_equal sg1_initial_id, sg1_after.id, 'Group1 subscription group ID should remain stable'
+assert_equal sg1_initial_id, sg1_after.id, "Group1 subscription group ID should remain stable"
 assert_equal(
   sg1_initial_instance_id,
-  sg1_after.kafka[:'group.instance.id'],
-  'Group1 group.instance.id should remain stable'
+  sg1_after.kafka[:"group.instance.id"],
+  "Group1 group.instance.id should remain stable"
 )
 
 # Group1 should now have both topics
@@ -78,14 +78,14 @@ assert_equal 2, sg1_after.topics.size
 assert_equal [DT.topics[0], DT.topics[2]].sort, sg1_after.topics.map(&:name).sort
 
 # Group2 should remain unchanged
-assert_equal sg2_initial_id, sg2_after.id, 'Group2 subscription group ID should remain unchanged'
+assert_equal sg2_initial_id, sg2_after.id, "Group2 subscription group ID should remain unchanged"
 assert_equal(
   sg2_initial_instance_id,
-  sg2_after.kafka[:'group.instance.id'],
-  'Group2 group.instance.id should remain unchanged'
+  sg2_after.kafka[:"group.instance.id"],
+  "Group2 group.instance.id should remain unchanged"
 )
 
 # Verify instance IDs are still different
-sg1_final_instance_id = sg1_after.kafka[:'group.instance.id']
-sg2_final_instance_id = sg2_after.kafka[:'group.instance.id']
-raise 'Instance IDs should still be different' if sg1_final_instance_id == sg2_final_instance_id
+sg1_final_instance_id = sg1_after.kafka[:"group.instance.id"]
+sg2_final_instance_id = sg2_after.kafka[:"group.instance.id"]
+raise "Instance IDs should still be different" if sg1_final_instance_id == sg2_final_instance_id

@@ -69,4 +69,4 @@ start_karafka_and_wait_until do
     DT[:offsets] == (0..9).to_a
 end
 
-assert_equal 0, DT[:stats].last['partition']
+assert_equal 0, DT[:stats].last["partition"]

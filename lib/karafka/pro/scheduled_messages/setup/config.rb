@@ -30,7 +30,7 @@ module Karafka
           extend Karafka::Core::Configurable
 
           setting(:consumer_class, default: Consumer)
-          setting(:group_id, default: 'karafka_scheduled_messages')
+          setting(:group_id, default: "karafka_scheduled_messages")
 
           # By default we will run the scheduling every 15 seconds since we provide a minute-based
           # precision. Can be increased when having dedicated processes to run this. Lower values
@@ -52,7 +52,7 @@ module Karafka
           setting(:dispatcher_class, default: Dispatcher)
 
           # Postfix for the states topic to build the states based on the group name + postfix
-          setting(:states_postfix, default: '_states')
+          setting(:states_postfix, default: "_states")
 
           setting(:deserializers) do
             # Deserializer for schedules messages to convert epochs

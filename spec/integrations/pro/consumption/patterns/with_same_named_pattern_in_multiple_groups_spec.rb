@@ -23,7 +23,7 @@
 # Karafka should work as expected when having same matching used in multiple CGs.
 
 setup_karafka do |config|
-  config.kafka[:'topic.metadata.refresh.interval.ms'] = 2_000
+  config.kafka[:"topic.metadata.refresh.interval.ms"] = 2_000
 end
 
 class Consumer1 < Karafka::BaseConsumer

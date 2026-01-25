@@ -11,7 +11,7 @@ class Consumer < Karafka::BaseConsumer
   def consume
     produce_sync(topic: DT.topic, payload: DT.uuid)
 
-    WRITER.puts('1')
+    WRITER.puts("1")
   end
 end
 

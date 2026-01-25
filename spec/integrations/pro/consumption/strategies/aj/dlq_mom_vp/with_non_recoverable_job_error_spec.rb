@@ -31,14 +31,14 @@ setup_karafka(allow_errors: true) do |config|
   config.max_messages = 10
   # Having one partition will remove the unpredictability of VP+AJ early return on failing
   config.concurrency = 1
-  config.kafka[:'max.poll.interval.ms'] = 10_000
-  config.kafka[:'session.timeout.ms'] = 10_000
+  config.kafka[:"max.poll.interval.ms"] = 10_000
+  config.kafka[:"session.timeout.ms"] = 10_000
 end
 
 class DlqConsumer < Karafka::BaseConsumer
   def consume
     messages.each do |message|
-      DT[1] << message.headers['source_offset'].to_i
+      DT[1] << message.headers["source_offset"].to_i
     end
   end
 end

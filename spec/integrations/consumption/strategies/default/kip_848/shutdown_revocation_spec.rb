@@ -4,7 +4,7 @@
 
 setup_karafka(consumer_group_protocol: true) do |config|
   # Remove session timeout for this test
-  config.kafka.delete(:'session.timeout.ms')
+  config.kafka.delete(:"session.timeout.ms")
 end
 
 class Consumer < Karafka::BaseConsumer
@@ -28,7 +28,7 @@ draw_routes do
 end
 
 # Produce a message
-produce(DT.topic, 'test message')
+produce(DT.topic, "test message")
 
 start_karafka_and_wait_until do
   DT.key?(:consumed)

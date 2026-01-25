@@ -51,7 +51,7 @@ module Karafka
               count: 1,
               partitioner: nil,
               reducer: nil,
-              merge_key: '-parallel-'
+              merge_key: "-parallel-"
             )
               @parallel_segments ||= Config.new(
                 active: count > 1,
@@ -73,10 +73,10 @@ module Karafka
               return @segment_id if @segment_id
 
               @segment_id = if parallel_segments?
-                              name.split(parallel_segments.merge_key).last.to_i
-                            else
-                              -1
-                            end
+                name.split(parallel_segments.merge_key).last.to_i
+              else
+                -1
+              end
             end
 
             # @return [String] original segment consumer group name

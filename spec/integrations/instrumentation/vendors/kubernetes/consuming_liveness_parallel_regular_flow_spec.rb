@@ -3,8 +3,8 @@
 # When consuming using multiple subscription groups and all of them are within time limits,
 # we should never get 500
 
-require 'net/http'
-require 'karafka/instrumentation/vendors/kubernetes/liveness_listener'
+require "net/http"
+require "karafka/instrumentation/vendors/kubernetes/liveness_listener"
 
 setup_karafka do |config|
   config.concurrency = 10
@@ -17,7 +17,7 @@ class Consumer < Karafka::BaseConsumer
 end
 
 listener = Karafka::Instrumentation::Vendors::Kubernetes::LivenessListener.new(
-  hostname: '127.0.0.1',
+  hostname: "127.0.0.1",
   port: 9000,
   consuming_ttl: 2_000
 )
@@ -30,7 +30,7 @@ Thread.new do
 
   until Karafka::App.stopping?
     sleep(0.1)
-    uri = URI.parse('http://127.0.0.1:9000/')
+    uri = URI.parse("http://127.0.0.1:9000/")
     response = Net::HTTP.get_response(uri)
     DT[:probing] << response.code
     DT[:bodies] << response.body
@@ -62,15 +62,15 @@ start_karafka_and_wait_until do
   end
 end
 
-assert DT[:probing].include?('200')
-assert !DT[:probing].include?('500')
+assert DT[:probing].include?("200")
+assert !DT[:probing].include?("500")
 
 last = JSON.parse(DT[:bodies].last)
 
-assert_equal 'healthy', last['status']
-assert last.key?('timestamp')
-assert_equal 9000, last['port']
-assert_equal Process.pid, last['process_id']
-assert_equal false, last['errors']['polling_ttl_exceeded']
-assert_equal false, last['errors']['consumption_ttl_exceeded']
-assert_equal false, last['errors']['unrecoverable']
+assert_equal "healthy", last["status"]
+assert last.key?("timestamp")
+assert_equal 9000, last["port"]
+assert_equal Process.pid, last["process_id"]
+assert_equal false, last["errors"]["polling_ttl_exceeded"]
+assert_equal false, last["errors"]["consumption_ttl_exceeded"]
+assert_equal false, last["errors"]["unrecoverable"]

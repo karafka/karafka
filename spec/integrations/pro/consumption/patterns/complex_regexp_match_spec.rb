@@ -24,12 +24,12 @@
 # https://github.com/ccxvii/minilibs/blob/master/regexp.c
 
 setup_karafka do |config|
-  config.kafka[:'topic.metadata.refresh.interval.ms'] = 2_000
+  config.kafka[:"topic.metadata.refresh.interval.ms"] = 2_000
 end
 
 class Consumer < Karafka::BaseConsumer
   def consume
-    raise if topic.name.include?('sandbox')
+    raise if topic.name.include?("sandbox")
 
     DT[0] << topic
   end
@@ -38,7 +38,7 @@ end
 ENDING = SecureRandom.uuid
 
 draw_routes(create_topics: false) do
-  pattern(/it-(us([0-9]){2}\.)?production\.#{ENDING}/) do
+  pattern(/it-(us([0-9]){2}\.)?production\.#{ENDING}/o) do
     consumer Consumer
   end
 end

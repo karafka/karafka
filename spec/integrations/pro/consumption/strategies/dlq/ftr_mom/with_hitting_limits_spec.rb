@@ -42,7 +42,7 @@ draw_routes do
   end
 end
 
-Karafka.monitor.subscribe 'filtering.throttled' do
+Karafka.monitor.subscribe "filtering.throttled" do
   DT[:times] << Time.now.to_f
 end
 

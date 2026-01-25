@@ -30,20 +30,20 @@ draw_routes do
   end
 end
 
-Karafka::Pro::RecurringTasks.define('2.0.0') do
+Karafka::Pro::RecurringTasks.define("2.0.0") do
   10.times do |i|
-    schedule(id: "j#{i}", cron: '* * * * *', previous_time: Time.now - 120_000) do
+    schedule(id: "j#{i}", cron: "* * * * *", previous_time: Time.now - 120_000) do
       DT[:"j#{i}"] << true
     end
   end
 end
 
 start_karafka_and_wait_until do
-  Karafka::Pro::RecurringTasks.disable('*')
+  Karafka::Pro::RecurringTasks.disable("*")
   sleep(1)
-  Karafka::Pro::RecurringTasks.enable('*')
+  Karafka::Pro::RecurringTasks.enable("*")
   sleep(1)
-  Karafka::Pro::RecurringTasks.trigger('*')
+  Karafka::Pro::RecurringTasks.trigger("*")
 
   Array.new(10) { |i| DT[:"j#{i}"] }.all? { |accu| accu.size >= 5 }
 end

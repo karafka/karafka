@@ -27,7 +27,7 @@ setup_karafka
 
 TRANSACTIONAL_PRODUCER = WaterDrop::Producer.new do |producer_config|
   producer_config.kafka = Karafka::Setup::AttributesMap.producer(Karafka::App.config.kafka.dup)
-  producer_config.kafka[:'transactional.id'] = SecureRandom.uuid
+  producer_config.kafka[:"transactional.id"] = SecureRandom.uuid
   producer_config.logger = Karafka::App.config.logger
 end
 
@@ -62,7 +62,7 @@ start_karafka_and_wait_until do
   DT.key?(:done)
 end
 
-assert_equal '0', DT[:metadata].first
+assert_equal "0", DT[:metadata].first
 assert_equal Karafka.producer, DT[:before_producer]
 assert_equal TRANSACTIONAL_PRODUCER, DT[:during_producer]
 assert_equal Karafka.producer, DT[:after_producer]

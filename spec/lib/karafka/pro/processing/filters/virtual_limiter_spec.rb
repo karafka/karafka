@@ -28,43 +28,43 @@ RSpec.describe_current do
   let(:messages) { [message1, message2, message3, message4] }
   let(:collapser) { Karafka::Pro::Processing::Collapser.new }
   let(:manager) do
-    Karafka::Pro::Processing::Coordinators::VirtualOffsetManager.new('topic', 0, :exact)
+    Karafka::Pro::Processing::Coordinators::VirtualOffsetManager.new("topic", 0, :exact)
   end
 
   before { manager.register(messages.map(&:offset)) }
 
-  context 'when not collapsed' do
-    it 'expect not to filter anything' do
+  context "when not collapsed" do
+    it "expect not to filter anything" do
       expect { limiter.apply!(messages) }.not_to(change { messages })
     end
   end
 
-  context 'when collapsed' do
+  context "when collapsed" do
     before do
       collapser.collapse_until!(messages.last.offset)
       collapser.refresh!(messages.first.offset)
     end
 
-    context 'when nothing marked' do
+    context "when nothing marked" do
       it { expect { limiter.apply!(messages) }.not_to(change { messages }) }
     end
 
-    context 'when all marked' do
+    context "when all marked" do
       before { manager.mark_until(messages.last, nil) }
 
-      it 'expect to remove all' do
+      it "expect to remove all" do
         limiter.apply!(messages)
         expect(messages).to eq([])
       end
     end
 
-    context 'when some marked' do
+    context "when some marked" do
       before do
         manager.mark(messages[0], nil)
         manager.mark(messages[1], nil)
       end
 
-      it 'expect to remove non-marked' do
+      it "expect to remove non-marked" do
         limiter.apply!(messages)
         expect(messages).to eq([message3, message4])
       end

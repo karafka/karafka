@@ -40,7 +40,7 @@ module Karafka
           @daily = Hash.new { |h, k| h[k] = 0 }
           @started_at = Time.now.to_i
           @offsets = { low: -1, high: -1 }
-          @state = 'fresh'
+          @state = "fresh"
           @reloads = 0
         end
 
@@ -71,7 +71,7 @@ module Karafka
         #   drastically increase complexity. For given day we use the accurate counter and for
         #   future days we use estimates.
         def future(message)
-          epoch = message.headers['schedule_target_epoch']
+          epoch = message.headers["schedule_target_epoch"]
 
           @daily[epoch_to_date(epoch)] += 1
         end

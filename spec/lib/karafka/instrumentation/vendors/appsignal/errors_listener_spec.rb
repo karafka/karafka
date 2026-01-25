@@ -1,11 +1,11 @@
 # frozen_string_literal: true
 
-require 'karafka/instrumentation/vendors/appsignal/errors_listener'
+require "karafka/instrumentation/vendors/appsignal/errors_listener"
 
 RSpec.describe_current do
   subject(:listener) { described_class.new }
 
-  describe 'events mapping' do
+  describe "events mapping" do
     it { expect(NotificationsChecker.valid?(listener)).to be(true) }
   end
 end

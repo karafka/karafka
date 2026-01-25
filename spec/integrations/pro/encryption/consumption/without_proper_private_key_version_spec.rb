@@ -22,20 +22,20 @@
 
 # When producing with version that is not supported in reading, it should raise an error
 
-PUBLIC_KEY = fixture_file('rsa/public_key_2.pem')
+PUBLIC_KEY = fixture_file("rsa/public_key_2.pem")
 
 PRIVATE_KEYS = {
-  '1' => fixture_file('rsa/private_key_1.pem')
+  "1" => fixture_file("rsa/private_key_1.pem")
 }.freeze
 
 setup_karafka(allow_errors: %w[consumer.consume.error]) do |config|
   config.encryption.active = true
-  config.encryption.version = '2'
+  config.encryption.version = "2"
   config.encryption.public_key = PUBLIC_KEY
   config.encryption.private_keys = PRIVATE_KEYS
 end
 
-Karafka.monitor.subscribe('error.occurred') do |event|
+Karafka.monitor.subscribe("error.occurred") do |event|
   DT[:errors] << event
 end
 

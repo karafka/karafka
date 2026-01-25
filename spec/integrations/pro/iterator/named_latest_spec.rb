@@ -44,7 +44,7 @@ iterator = Karafka::Pro::Iterator.new(
   {
     DT.topics[0] => {
       0 => :latest,
-      1 => 'latest'
+      1 => "latest"
     }
   }
 )

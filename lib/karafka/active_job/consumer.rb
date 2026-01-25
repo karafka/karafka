@@ -29,13 +29,13 @@ module Karafka
       # @param job_message [Karafka::Messages::Message] message with active job
       def consume_job(job_message)
         with_deserialized_job(job_message) do |job|
-          tags.add(:job_class, job['job_class'])
+          tags.add(:job_class, job["job_class"])
 
           payload = { caller: self, job: job, message: job_message }
 
           # We publish both to make it consistent with `consumer.x` events
-          Karafka.monitor.instrument('active_job.consume', payload)
-          Karafka.monitor.instrument('active_job.consumed', payload) do
+          Karafka.monitor.instrument("active_job.consume", payload)
+          Karafka.monitor.instrument("active_job.consumed", payload) do
             ::ActiveJob::Base.execute(job)
           end
         end

@@ -98,7 +98,7 @@ module Karafka
     # Informs monitoring about trapped signal
     # @param signal [Symbol] signal type that we received
     def notice_signal(signal)
-      Karafka.monitor.instrument('process.notice_signal', caller: self, signal: signal)
+      Karafka.monitor.instrument("process.notice_signal", caller: self, signal: signal)
     end
   end
 end

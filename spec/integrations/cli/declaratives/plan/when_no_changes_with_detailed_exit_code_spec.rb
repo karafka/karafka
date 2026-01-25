@@ -12,12 +12,12 @@ draw_routes(create_topics: false) do
   topic DT.topics[0] do
     active false
     # This retention should be cluster default for this to work
-    config(partitions: 2, 'retention.ms': 604_800_000)
+    config(partitions: 2, "retention.ms": 604_800_000)
   end
 end
 
-ARGV[0] = 'topics'
-ARGV[1] = 'plan'
-ARGV[2] = '--detailed-exitcode'
+ARGV[0] = "topics"
+ARGV[1] = "plan"
+ARGV[2] = "--detailed-exitcode"
 
 Karafka::Cli.start

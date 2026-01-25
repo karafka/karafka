@@ -13,11 +13,11 @@ class Consumer < Karafka::BaseConsumer
   end
 end
 
-Karafka::App.monitor.subscribe('consumer.consume') do |event|
+Karafka::App.monitor.subscribe("consumer.consume") do |event|
   DT[2] << event[:caller].messages.size
 end
 
-Karafka::App.monitor.subscribe('consumer.consumed') do |event|
+Karafka::App.monitor.subscribe("consumer.consumed") do |event|
   DT[1] << event[:caller].messages.size
 end
 

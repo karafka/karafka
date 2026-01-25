@@ -90,7 +90,7 @@ module Karafka
               @periodic_job
             end
 
-            alias periodic periodic_job
+            alias_method :periodic, :periodic_job
 
             # @return [Boolean] is periodics active
             def periodic_job?

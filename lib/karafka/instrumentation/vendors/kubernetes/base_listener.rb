@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require 'socket'
+require "socket"
 
 module Karafka
   module Instrumentation
@@ -13,10 +13,10 @@ module Karafka
           include Karafka::Core::Helpers::Time
 
           # All good with Karafka
-          OK_CODE = '200 OK'
+          OK_CODE = "200 OK"
 
           # Some timeouts, fail
-          FAIL_CODE = '500 Internal Server Error'
+          FAIL_CODE = "500 Internal Server Error"
 
           private_constant :OK_CODE, :FAIL_CODE
 
@@ -32,7 +32,7 @@ module Karafka
 
           # @return [Boolean] true if all good, false if we should tell k8s to kill this process
           def healthy?
-            raise NotImplementedError, 'Implement in a subclass'
+            raise NotImplementedError, "Implement in a subclass"
           end
 
           private
@@ -58,7 +58,7 @@ module Karafka
           # @return [Hash] hash that will be the response body
           def status_body
             {
-              status: healthy? ? 'healthy' : 'unhealthy',
+              status: healthy? ? "healthy" : "unhealthy",
               timestamp: Time.now.to_i,
               port: @port,
               process_id: ::Process.pid

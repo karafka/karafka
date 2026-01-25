@@ -3,7 +3,7 @@
 RSpec.describe_current do
   subject(:delete_topics) { described_class.new }
 
-  describe '#call' do
+  describe "#call" do
     let(:declaratives_routing_topics) { [double, double] }
     let(:existing_topics_names) { %w[existing_topic] }
 
@@ -29,30 +29,30 @@ RSpec.describe_current do
       allow(Karafka::Admin).to receive(:delete_topic)
     end
 
-    context 'when all topics exist' do
+    context "when all topics exist" do
       let(:existing_topics_names) { %w[topic_0 topic_1] }
 
-      it 'deletes all topics and returns true' do
+      it "deletes all topics and returns true" do
         expect(delete_topics.call).to be_truthy
 
         expect(Karafka::Admin).to have_received(:delete_topic).twice
       end
     end
 
-    context 'when some topics do not exist' do
+    context "when some topics do not exist" do
       let(:existing_topics_names) { %w[topic_0] }
 
-      it 'deletes existing topics, skips non-existing ones, and returns true' do
+      it "deletes existing topics, skips non-existing ones, and returns true" do
         expect(delete_topics.call).to be_truthy
 
-        expect(Karafka::Admin).to have_received(:delete_topic).with('topic_0').once
+        expect(Karafka::Admin).to have_received(:delete_topic).with("topic_0").once
       end
     end
 
-    context 'when no topics exist' do
+    context "when no topics exist" do
       let(:existing_topics_names) { [] }
 
-      it 'does not delete any topics and returns false' do
+      it "does not delete any topics and returns false" do
         expect(delete_topics.call).to be_falsey
 
         expect(Karafka::Admin).not_to have_received(:delete_topic)

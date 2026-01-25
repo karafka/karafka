@@ -48,18 +48,18 @@ RSpec.describe_current do
           topic
         end
 
-        it 'expect all of them to have #collapsed? method' do
+        it "expect all of them to have #collapsed? method" do
           expect(strategy.method_defined?(:collapsed?)).to be(true)
         end
 
-        it 'expect all of them to have #failing? method' do
+        it "expect all of them to have #failing? method" do
           expect(strategy.method_defined?(:failing?)).to be(true)
         end
 
-        context 'when using VPs and VPs virtual marking' do
+        context "when using VPs and VPs virtual marking" do
           before { consumer.singleton_class.include(strategy) }
 
-          it 'expect #handle_before_schedule_consume to always register virtual offsets groups' do
+          it "expect #handle_before_schedule_consume to always register virtual offsets groups" do
             consumer.send(:handle_before_schedule_consume)
 
             expect(coordinator.virtual_offset_manager.groups).not_to be_empty
@@ -73,7 +73,7 @@ RSpec.describe_current do
     .select { |strategy| strategy::FEATURES.include?(:dead_letter_queue) }
     .each do |strategy|
       context "when having DLQ and VP strategy: #{strategy}" do
-        it 'expect to include the Dlq::Vp strategy in the chain' do
+        it "expect to include the Dlq::Vp strategy in the chain" do
           expect(strategy.ancestors).to include(Karafka::Pro::Processing::Strategies::Dlq::Vp)
         end
       end
@@ -85,22 +85,22 @@ RSpec.describe_current do
       context "when having non-VP strategy: #{strategy}" do
         before { consumer.singleton_class.include(strategy) }
 
-        it 'expect not to have any VP related components' do
+        it "expect not to have any VP related components" do
           strategy.ancestors.each do |ancestor|
-            next if ancestor.to_s.end_with?('::Base')
+            next if ancestor.to_s.end_with?("::Base")
 
             expect(ancestor::FEATURES).not_to include(:virtual_partitions)
-            expect(ancestor.to_s).not_to include('::Vp')
+            expect(ancestor.to_s).not_to include("::Vp")
           end
         end
 
-        it 'expect #handle_before_schedule_consume to never register virtual offsets groups' do
+        it "expect #handle_before_schedule_consume to never register virtual offsets groups" do
           consumer.send(:handle_before_schedule_consume)
 
           expect(coordinator.virtual_offset_manager).to be_nil
         end
 
-        it 'expect #handle_before_schedule_consume to not fail without virtual_offset_manager' do
+        it "expect #handle_before_schedule_consume to not fail without virtual_offset_manager" do
           expect { consumer.send(:handle_before_schedule_consume) }.not_to raise_error
         end
       end
@@ -112,7 +112,7 @@ RSpec.describe_current do
       context "when having an LRJ strategy: #{strategy}" do
         let(:topic) do
           topic = build(:routing_topic)
-          topic.virtual_partitions(partitioner: true) if strategy.to_s.include?('Vp')
+          topic.virtual_partitions(partitioner: true) if strategy.to_s.include?("Vp")
           topic
         end
 
@@ -121,7 +121,7 @@ RSpec.describe_current do
           allow(client).to receive(:pause)
         end
 
-        it 'expect #handle_before_schedule_consume to invoke pause on a client' do
+        it "expect #handle_before_schedule_consume to invoke pause on a client" do
           consumer.send(:handle_before_schedule_consume)
 
           expect(client).to have_received(:pause)
@@ -135,7 +135,7 @@ RSpec.describe_current do
       context "when having a non LRJ strategy: #{strategy}" do
         let(:topic) do
           topic = build(:routing_topic)
-          topic.virtual_partitions(partitioner: true) if strategy.to_s.include?('Vp')
+          topic.virtual_partitions(partitioner: true) if strategy.to_s.include?("Vp")
           topic
         end
 
@@ -144,7 +144,7 @@ RSpec.describe_current do
           allow(client).to receive(:pause)
         end
 
-        it 'expect #handle_before_schedule_consume to never invoke pause on a client' do
+        it "expect #handle_before_schedule_consume to never invoke pause on a client" do
           consumer.send(:handle_before_schedule_consume)
 
           expect(client).not_to have_received(:pause)

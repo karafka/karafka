@@ -6,7 +6,7 @@
 
 setup_karafka do |config|
   # This will trigger extensive logs that should be visible from a fork
-  config.kafka[:debug] = 'all'
+  config.kafka[:debug] = "all"
 end
 
 reader, writer = IO.pipe
@@ -14,7 +14,7 @@ reader, writer = IO.pipe
 pid = fork do
   $stdout.reopen(writer)
   reader.close
-  Karafka.producer.produce_sync(topic: DT.topic, payload: '1')
+  Karafka.producer.produce_sync(topic: DT.topic, payload: "1")
   writer.close
 end
 

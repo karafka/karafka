@@ -26,14 +26,14 @@ setup_karafka
 
 draw_routes(create_topics: false) do
   subscription_group :a do
-    pattern('super-name', /non-existing-ever-na/) do
+    pattern("super-name", /non-existing-ever-na/) do
       consumer Class.new
     end
   end
 
   consumer_group :b do
     subscription_group :a do
-      pattern('super-name', /non-existing-ever-na/) do
+      pattern("super-name", /non-existing-ever-na/) do
         consumer Class.new
       end
     end

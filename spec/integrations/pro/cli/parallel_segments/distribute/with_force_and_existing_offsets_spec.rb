@@ -48,16 +48,16 @@ Karafka::Admin.seek_consumer_group(DT.consumer_group, { DT.topic => { 0 => 5, 1 
 # Set existing offsets in parallel segments (that would normally cause failure)
 Karafka::Admin.seek_consumer_group(segment1, { DT.topic => { 0 => 2, 1 => 3 } })
 
-ARGV[0] = 'parallel_segments'
-ARGV[1] = 'distribute'
-ARGV[2] = '--force'
+ARGV[0] = "parallel_segments"
+ARGV[1] = "distribute"
+ARGV[2] = "--force"
 
 results = capture_stdout do
   Karafka::Cli.start
 end
 
-assert results.include?('Distribution completed')
-assert results.include?('successfully')
+assert results.include?("Distribution completed")
+assert results.include?("successfully")
 
 # Verify offsets were overwritten in both segments
 offsets1 = Karafka::Admin.read_lags_with_offsets({ segment1 => [DT.topic] })

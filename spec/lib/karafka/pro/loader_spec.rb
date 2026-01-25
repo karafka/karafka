@@ -28,7 +28,7 @@ RSpec.describe_current do
     allow(loader).to receive(:load_routing_extensions)
   end
 
-  context 'when we are loading active_job pro compoments' do
+  context "when we are loading active_job pro compoments" do
     let(:aj_defaults) { Karafka::App.config.internal.active_job.deep_dup.tap(&:configure) }
     let(:aj_config) { Karafka::App.config.internal.active_job }
 
@@ -40,7 +40,7 @@ RSpec.describe_current do
       end
     end
 
-    context 'when we run pre_setup_all loader' do
+    context "when we run pre_setup_all loader" do
       before do
         allow(Karafka::Pro::Routing::Features::VirtualPartitions).to receive(:activate)
         allow(Karafka::Pro::Routing::Features::LongRunningJob).to receive(:activate)
@@ -48,7 +48,7 @@ RSpec.describe_current do
         loader.pre_setup_all(Karafka::App.config)
       end
 
-      it 'expect to change active job components into pro' do
+      it "expect to change active job components into pro" do
         expect(aj_config.dispatcher).to be_a(Karafka::Pro::ActiveJob::Dispatcher)
         expect(aj_config.job_options_contract).to be_a(Karafka::Pro::ActiveJob::JobOptionsContract)
       end

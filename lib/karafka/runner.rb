@@ -59,12 +59,12 @@ module Karafka
       workers.each(&:join)
     # If anything crashes here, we need to raise the error and crush the runner because it means
     # that something terrible happened
-    rescue StandardError => e
+    rescue => e
       Karafka.monitor.instrument(
-        'error.occurred',
+        "error.occurred",
         caller: self,
         error: e,
-        type: 'runner.call.error'
+        type: "runner.call.error"
       )
       Karafka::App.stop!
       raise e

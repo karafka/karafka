@@ -20,8 +20,8 @@ assert cluster_topics.include?(DT.topics[0])
 
 Karafka::App.routes.clear
 
-ARGV[0] = 'topics'
-ARGV[1] = 'delete'
+ARGV[0] = "topics"
+ARGV[1] = "delete"
 
 Karafka::Cli.start
 

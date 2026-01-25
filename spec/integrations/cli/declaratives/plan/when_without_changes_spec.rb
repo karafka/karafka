@@ -19,8 +19,8 @@ draw_routes(create_topics: false) do
   end
 end
 
-ARGV[0] = 'topics'
-ARGV[1] = 'plan'
+ARGV[0] = "topics"
+ARGV[1] = "plan"
 
 results = capture_stdout do
   Karafka::Cli.start
@@ -40,10 +40,10 @@ end
   assert !results.include?(part)
 end
 
-assert !results.include?('Following topics will have configuration changes:')
-assert results.include?('perform any actions. No changes needed.')
-assert !results.include?('Following topics will be created:')
-assert !results.include?('Following topics will be repartitioned:')
+assert !results.include?("Following topics will have configuration changes:")
+assert results.include?("perform any actions. No changes needed.")
+assert !results.include?("Following topics will be created:")
+assert !results.include?("Following topics will be repartitioned:")
 assert !results.include?(DT.topics[0])
 assert !results.include?(DT.topics[1])
 assert !results.include?(DT.topics[2])

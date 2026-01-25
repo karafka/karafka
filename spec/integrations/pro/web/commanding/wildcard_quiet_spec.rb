@@ -31,11 +31,11 @@ class Consumer < Karafka::BaseConsumer
   end
 end
 
-Karafka.monitor.subscribe('app.quieting') do
+Karafka.monitor.subscribe("app.quieting") do
   DT[:flow] << true
 end
 
-Karafka.monitor.subscribe('app.quiet') do
+Karafka.monitor.subscribe("app.quiet") do
   DT[:flow] << true
 end
 
@@ -47,7 +47,7 @@ produce_many(DT.topic, elements)
 Thread.new do
   sleep(0.1) until DT.key?(:is)
 
-  Karafka::Web::Pro::Commanding::Dispatcher.request('consumers.quiet', '*')
+  Karafka::Web::Pro::Commanding::Dispatcher.request("consumers.quiet", "*")
 end
 
 # Nothing needed. Won't stop unless commanding works

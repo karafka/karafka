@@ -73,8 +73,8 @@ consumer = setup_rdkafka_consumer
 
 # 1 and 4 are picked because they will dispatch messages to 0 and 1 partition
 10.times do |i|
-  Job.perform_later('1', i)
-  Job.perform_later('4', i)
+  Job.perform_later("1", i)
+  Job.perform_later("4", i)
 end
 
 revoked = false

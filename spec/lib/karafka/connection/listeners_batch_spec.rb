@@ -9,14 +9,14 @@ RSpec.describe_current do
 
   after { batch.each(&:shutdown) }
 
-  describe '#each' do
+  describe "#each" do
     before do
       allow(Karafka::App).to receive(:subscription_groups).and_return(
         consumer_group => [subscription_group]
       )
     end
 
-    it 'expect to yield each listener' do
+    it "expect to yield each listener" do
       expect(batch).to all be_a(Karafka::Connection::Listener)
     end
   end

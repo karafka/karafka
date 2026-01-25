@@ -50,8 +50,8 @@ draw_routes do
   end
 end
 
-ARGV[0] = 'swarm'
-ARGV[1] = '--exclude-topics'
+ARGV[0] = "swarm"
+ARGV[1] = "--exclude-topics"
 ARGV[2] = DT.topics[1]
 
 produce_many(DT.topics[0], DT.uuids(5))
@@ -69,7 +69,7 @@ while consumed.size < 2
   end
 end
 
-Process.kill('QUIT', Process.pid)
+Process.kill("QUIT", Process.pid)
 thread.join
 
 # Should consume from topics[0] and topics[2], but not topics[1] (which was excluded)

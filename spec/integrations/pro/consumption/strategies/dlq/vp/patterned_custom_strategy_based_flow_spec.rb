@@ -27,7 +27,7 @@ setup_karafka(allow_errors: %w[consumer.consume.error]) do |config|
   config.max_messages = 10
 end
 
-Karafka.monitor.subscribe('error.occurred') do
+Karafka.monitor.subscribe("error.occurred") do
   DT[:count] << true
 end
 

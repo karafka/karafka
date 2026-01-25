@@ -5,28 +5,28 @@ RSpec.describe_current do
 
   let(:consumer_group_topics) { [topic1, topic2] }
 
-  context 'when there is just one topic in the consumer group' do
+  context "when there is just one topic in the consumer group" do
     let(:consumer_group_topics) { [build(:routing_topic)] }
 
     it { expect(groups.size).to eq(1) }
   end
 
-  context 'when there are more topics with the same settings' do
+  context "when there are more topics with the same settings" do
     let(:consumer_group_topics) do
-      Array.new(3) { build(:routing_topic, subscription_group_details: { name: '1' }) }
+      Array.new(3) { build(:routing_topic, subscription_group_details: { name: "1" }) }
     end
 
     it { expect(groups.size).to eq(1) }
   end
 
-  context 'when there are topics but they have different kafka settings' do
-    let(:topic1) { build(:routing_topic, kafka: { 'bootstrap.servers' => rand.to_s }) }
-    let(:topic2) { build(:routing_topic, kafka: { 'bootstrap.servers' => rand.to_s }) }
+  context "when there are topics but they have different kafka settings" do
+    let(:topic1) { build(:routing_topic, kafka: { "bootstrap.servers" => rand.to_s }) }
+    let(:topic2) { build(:routing_topic, kafka: { "bootstrap.servers" => rand.to_s }) }
 
     it { expect(groups.size).to eq(2) }
   end
 
-  context 'when there are topics but they have different max_messages settings' do
+  context "when there are topics but they have different max_messages settings" do
     let(:topic1) { build(:routing_topic) }
     let(:topic2) { build(:routing_topic) }
 
@@ -35,7 +35,7 @@ RSpec.describe_current do
     it { expect(groups.size).to eq(2) }
   end
 
-  context 'when there are topics but they have different max_wait_time settings' do
+  context "when there are topics but they have different max_wait_time settings" do
     let(:topic1) { build(:routing_topic) }
     let(:topic2) { build(:routing_topic) }
 
@@ -44,11 +44,11 @@ RSpec.describe_current do
     it { expect(groups.size).to eq(2) }
   end
 
-  context 'when there are topics but they have different subscription_group settings' do
+  context "when there are topics but they have different subscription_group settings" do
     let(:topic1) { build(:routing_topic) }
     let(:topic2) { build(:routing_topic) }
 
-    before { topic1.subscription_group_details = { name: '1' } }
+    before { topic1.subscription_group_details = { name: "1" } }
 
     it { expect(groups.size).to eq(2) }
   end

@@ -7,7 +7,8 @@ setup_karafka do |config|
 end
 
 class Consumer < Karafka::BaseConsumer
-  def consume; end
+  def consume
+  end
 end
 
 draw_routes(Consumer)
@@ -15,12 +16,12 @@ draw_routes(Consumer)
 elements = DT.uuids(10)
 produce_many(DT.topic, elements)
 
-Karafka::App.monitor.subscribe('consumer.before_schedule_consume') do |event|
+Karafka::App.monitor.subscribe("consumer.before_schedule_consume") do |event|
   DT[:events] << event[:caller]
   DT[:consumes] << Time.now.to_f
 end
 
-Karafka::App.monitor.subscribe('consumer.before_schedule_shutdown') do
+Karafka::App.monitor.subscribe("consumer.before_schedule_shutdown") do
   DT[:shutdown] << Time.now.to_f
 end
 

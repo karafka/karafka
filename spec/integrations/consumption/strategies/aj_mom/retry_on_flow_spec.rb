@@ -46,7 +46,7 @@ class FailingJob < ActiveJob::Base
     DT[:failed_attempts] ||= []
     DT[:failed_attempts] << "failing_job#{job_id}_attempt_#{DT[:failed_executions][job_id]}"
 
-    raise StandardError, 'Always fails'
+    raise StandardError, "Always fails"
   end
 end
 
@@ -62,9 +62,9 @@ start_karafka_and_wait_until do
   success_count == 2 && failed_count == 3
 end
 
-assert_equal 3, DT[:executions][1], 'Job 1 should have been executed 3 times'
-assert_equal 3, DT[:executions][2], 'Job 2 should have been executed 3 times'
-assert_equal 3, DT[:failed_executions][3], 'Failing job should have been executed 3 times'
+assert_equal 3, DT[:executions][1], "Job 1 should have been executed 3 times"
+assert_equal 3, DT[:executions][2], "Job 2 should have been executed 3 times"
+assert_equal 3, DT[:failed_executions][3], "Failing job should have been executed 3 times"
 
 expected_attempts = %w[job1_attempt_1 job1_attempt_2 job2_attempt_1 job2_attempt_2]
 

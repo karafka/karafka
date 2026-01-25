@@ -67,17 +67,17 @@ Karafka::Admin.seek_consumer_group(
 )
 
 # Run distribute only for the first consumer group
-ARGV[0] = 'parallel_segments'
-ARGV[1] = 'distribute'
-ARGV[2] = '--groups'
+ARGV[0] = "parallel_segments"
+ARGV[1] = "distribute"
+ARGV[2] = "--groups"
 ARGV[3] = DT.consumer_group
 
 results = capture_stdout do
   Karafka::Cli.start
 end
 
-assert results.include?('Distribution completed')
-assert results.include?('successfully')
+assert results.include?("Distribution completed")
+assert results.include?("successfully")
 assert results.include?(DT.consumer_group)
 assert !results.include?("#{DT.consumer_group}_2")
 

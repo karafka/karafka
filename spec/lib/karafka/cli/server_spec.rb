@@ -5,28 +5,28 @@ RSpec.describe_current do
 
   specify { expect(described_class).to be < Karafka::Cli::Base }
 
-  describe '#call' do
+  describe "#call" do
     before { allow(Karafka::Server).to receive(:run) }
 
-    context 'when we run in foreground (not daemonized)' do
-      it 'expect not to daemonize anything' do
+    context "when we run in foreground (not daemonized)" do
+      it "expect not to daemonize anything" do
         expect(server_cli).not_to receive(:daemonize)
         server_cli.call
       end
     end
   end
 
-  describe '#print_marketing_info' do
+  describe "#print_marketing_info" do
     it { expect { server_cli.send(:print_marketing_info) }.not_to raise_error }
 
-    context 'when in pro' do
+    context "when in pro" do
       before { allow(Karafka).to receive(:pro?).and_return(true) }
 
       it { expect { server_cli.send(:print_marketing_info) }.not_to raise_error }
     end
   end
 
-  describe '#names' do
+  describe "#names" do
     it { expect(server_cli.class.names.sort).to eq %w[s server consumer].sort }
   end
 end

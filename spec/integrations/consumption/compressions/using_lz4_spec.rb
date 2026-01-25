@@ -3,7 +3,7 @@
 # Karafka should be able to produce and consume messages compressed with lz4 codec
 
 setup_karafka do |config|
-  config.kafka[:'compression.codec'] = 'lz4'
+  config.kafka[:"compression.codec"] = "lz4"
 end
 
 class Consumer < Karafka::BaseConsumer

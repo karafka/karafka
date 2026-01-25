@@ -49,7 +49,7 @@ draw_routes do
 end
 
 # Should not happen
-Karafka.monitor.subscribe 'filtering.throttled' do
+Karafka.monitor.subscribe "filtering.throttled" do
   raise
 end
 

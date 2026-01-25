@@ -50,7 +50,7 @@ module Karafka
         def require_all
           FORCE_LOADED.each { |file| require_relative(file) }
 
-          PRO_LOADER.push_dir(Karafka.core_root.join('pro'), namespace: Karafka::Pro)
+          PRO_LOADER.push_dir(Karafka.core_root.join("pro"), namespace: Karafka::Pro)
           PRO_LOADER.setup
           PRO_LOADER.eager_load
         end

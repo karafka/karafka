@@ -5,17 +5,17 @@
 setup_karafka
 
 draw_routes(create_topics: false) do
-  consumer_group 'a' do
-    subscription_group 'b' do
-      topic 'c' do
+  consumer_group "a" do
+    subscription_group "b" do
+      topic "c" do
         active false
       end
     end
   end
 
-  consumer_group 'd' do
-    subscription_group 'e' do
-      topic 'f' do
+  consumer_group "d" do
+    subscription_group "e" do
+      topic "f" do
         consumer Class.new
 
         # This is not needed but we nonetheless check such a case

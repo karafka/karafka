@@ -8,8 +8,8 @@
 setup_karafka(allow_errors: true) do |config|
   config.concurrency = 1
   config.max_messages = 1_000
-  config.kafka[:'max.poll.interval.ms'] = 10_000
-  config.kafka[:'session.timeout.ms'] = 10_000
+  config.kafka[:"max.poll.interval.ms"] = 10_000
+  config.kafka[:"session.timeout.ms"] = 10_000
 end
 
 class Consumer < Karafka::BaseConsumer
@@ -34,7 +34,7 @@ draw_routes do
   end
 end
 
-Karafka.monitor.subscribe('connection.listener.fetch_loop.received') do |event|
+Karafka.monitor.subscribe("connection.listener.fetch_loop.received") do |event|
   partitions = 0
 
   event.payload[:messages_buffer].each do

@@ -62,7 +62,7 @@ class Consumer < Karafka::BaseConsumer
   private
 
   def extract_vp_key(message)
-    message.raw_payload.split('-').first
+    message.raw_payload.split("-").first
   end
 end
 
@@ -70,14 +70,14 @@ draw_routes do
   consumer_group DT.consumer_group do
     parallel_segments(
       count: 3,
-      partitioner: ->(message) { message.raw_key.split('-').first }
+      partitioner: ->(message) { message.raw_key.split("-").first }
     )
 
     topic DT.topic do
       consumer Consumer
 
       virtual_partitions(
-        partitioner: ->(message) { message.raw_payload.split('-').first },
+        partitioner: ->(message) { message.raw_payload.split("-").first },
         max_partitions: 4
       )
     end

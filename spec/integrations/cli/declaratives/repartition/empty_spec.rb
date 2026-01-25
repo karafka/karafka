@@ -4,7 +4,7 @@
 
 setup_karafka
 
-ARGV[0] = 'topics'
-ARGV[1] = 'repartition'
+ARGV[0] = "topics"
+ARGV[1] = "repartition"
 
 Karafka::Cli.start

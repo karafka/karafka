@@ -7,11 +7,11 @@ module Karafka
     class Logger < ::Logger
       # Map containing information about log level for given environment
       ENV_MAP = {
-        'production' => Logger::ERROR,
-        'test' => Logger::ERROR,
-        'development' => Logger::INFO,
-        'debug' => Logger::DEBUG,
-        'default' => Logger::INFO
+        "production" => Logger::ERROR,
+        "test" => Logger::ERROR,
+        "development" => Logger::INFO,
+        "debug" => Logger::DEBUG,
+        "default" => Logger::INFO
       }.freeze
 
       private_constant :ENV_MAP
@@ -21,7 +21,7 @@ module Karafka
       #   make this logger compatible with the default Ruby one
       def initialize(*_args)
         super(target)
-        self.level = ENV_MAP[Karafka.env] || ENV_MAP['default']
+        self.level = ENV_MAP[Karafka.env] || ENV_MAP["default"]
       end
 
       private
@@ -45,7 +45,7 @@ module Karafka
       def file
         FileUtils.mkdir_p(File.dirname(log_path))
 
-        @file ||= File.open(log_path, 'a')
+        @file ||= File.open(log_path, "a")
       rescue Errno::EACCES, Errno::EROFS
         nil
       end

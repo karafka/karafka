@@ -3,7 +3,7 @@
 # If we seek to the latest, we should start from the high watermark
 
 setup_karafka do |config|
-  config.initial_offset = 'earliest'
+  config.initial_offset = "earliest"
 end
 
 class Consumer < Karafka::BaseConsumer
@@ -36,7 +36,7 @@ Thread.new do
 end
 
 start_karafka_and_wait_until do
-  DT[0].include?('test')
+  DT[0].include?("test")
 end
 
-assert_equal DT[0].last, 'test'
+assert_equal DT[0].last, "test"

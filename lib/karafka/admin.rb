@@ -464,7 +464,7 @@ module Karafka
     def config(type, settings)
       kafka_config = self.class.app_kafka.dup
       kafka_config.merge!(self.class.admin_kafka)
-      kafka_config[:'group.id'] = self.class.group_id
+      kafka_config[:"group.id"] = self.class.group_id
       # We merge after setting the group id so it can be altered if needed
       # In general in admin we only should alter it when we need to impersonate a given
       # consumer group or do something similar

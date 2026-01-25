@@ -14,8 +14,8 @@ draw_routes(create_topics: false) do
   end
 end
 
-ARGV[0] = 'topics'
-ARGV[1] = 'plan'
-ARGV[2] = '--detailed_exitcode'
+ARGV[0] = "topics"
+ARGV[1] = "plan"
+ARGV[2] = "--detailed_exitcode"
 
 Karafka::Cli.start

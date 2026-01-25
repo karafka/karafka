@@ -26,8 +26,8 @@
 # We make sure here that DLQ does not interact when no errors.
 
 setup_karafka(allow_errors: true) do |config|
-  config.kafka[:'max.poll.interval.ms'] = 10_000
-  config.kafka[:'session.timeout.ms'] = 10_000
+  config.kafka[:"max.poll.interval.ms"] = 10_000
+  config.kafka[:"session.timeout.ms"] = 10_000
 end
 
 class Consumer < Karafka::BaseConsumer

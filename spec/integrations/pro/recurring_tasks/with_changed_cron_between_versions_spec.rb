@@ -33,8 +33,8 @@ end
 past_date = Time.now + (7 * 24 * 60 * 60)
 PAST_CRON = "0 0 #{past_date.day} #{past_date.month} *".freeze
 
-Karafka::Pro::RecurringTasks.define('1.0.0') do
-  schedule(id: 'run', cron: PAST_CRON, previous_time: Time.now - 60_000) do
+Karafka::Pro::RecurringTasks.define("1.0.0") do
+  schedule(id: "run", cron: PAST_CRON, previous_time: Time.now - 60_000) do
     # Should never run until cron schedule is updated
     raise
   end
@@ -46,8 +46,8 @@ end
 
 setup_karafka
 
-Karafka::Pro::RecurringTasks.define('1.2.0') do
-  schedule(id: 'run', cron: '* * * * *') do
+Karafka::Pro::RecurringTasks.define("1.2.0") do
+  schedule(id: "run", cron: "* * * * *") do
     DT[:done] = true
   end
 end

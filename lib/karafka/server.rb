@@ -127,10 +127,10 @@ module Karafka
         raise Errors::ForcefulShutdownError
       rescue Errors::ForcefulShutdownError => e
         Karafka.monitor.instrument(
-          'error.occurred',
+          "error.occurred",
           caller: self,
           error: e,
-          type: 'app.stopping.error'
+          type: "app.stopping.error"
         )
 
         # We're done waiting, lets kill them!
@@ -144,13 +144,13 @@ module Karafka
         # indefinitely even with risk of VM crash as this is a last resort.
         Thread.new do
           listeners.each(&:shutdown)
-        rescue StandardError => e
+        rescue => e
           # If anything wrong happened during shutdown, we also want to record it
           Karafka.monitor.instrument(
-            'error.occurred',
+            "error.occurred",
             caller: self,
             error: e,
-            type: 'app.forceful_stopping.error'
+            type: "app.forceful_stopping.error"
           )
         end.join(forceful_shutdown_wait / 1_000.0)
 

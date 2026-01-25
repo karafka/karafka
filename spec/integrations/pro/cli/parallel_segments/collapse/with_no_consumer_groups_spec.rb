@@ -36,11 +36,11 @@ end
 
 produce_many(DT.topic, DT.uuids(10))
 
-ARGV[0] = 'parallel_segments'
-ARGV[1] = 'collapse'
+ARGV[0] = "parallel_segments"
+ARGV[1] = "collapse"
 
 results = capture_stdout do
   Karafka::Cli.start
 end
 
-assert results.include?('consumer groups with parallel segments configuration found')
+assert results.include?("consumer groups with parallel segments configuration found")

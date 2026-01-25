@@ -25,8 +25,8 @@
 setup_karafka(allow_errors: %w[consumer.consume.error]) do |config|
   config.max_messages = 1
   # We set it here that way not too wait too long on stuff
-  config.kafka[:'max.poll.interval.ms'] = 10_000
-  config.kafka[:'session.timeout.ms'] = 10_000
+  config.kafka[:"max.poll.interval.ms"] = 10_000
+  config.kafka[:"session.timeout.ms"] = 10_000
 end
 
 class Consumer < Karafka::BaseConsumer
@@ -42,7 +42,7 @@ end
 class DlqConsumer < Karafka::BaseConsumer
   def consume
     messages.each do |message|
-      DT[1] << [message.headers['source_offset'].to_i, message.offset]
+      DT[1] << [message.headers["source_offset"].to_i, message.offset]
     end
   end
 end

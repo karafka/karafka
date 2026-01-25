@@ -7,22 +7,22 @@ RSpec.describe_current do
     end
   end
 
-  describe '#manual_offset_management' do
-    context 'when we use manual_offset_management without any arguments' do
-      it 'expect to initialize with defaults' do
+  describe "#manual_offset_management" do
+    context "when we use manual_offset_management without any arguments" do
+      it "expect to initialize with defaults" do
         expect(topic.manual_offset_management.active?).to be(false)
       end
     end
 
-    context 'when we use manual_offset_management with active status' do
-      it 'expect to use proper active status' do
+    context "when we use manual_offset_management with active status" do
+      it "expect to use proper active status" do
         topic.manual_offset_management(true)
         expect(topic.manual_offset_management.active?).to be(true)
       end
     end
 
-    context 'when we use manual_offset_management multiple times with different values' do
-      it 'expect to use proper active status' do
+    context "when we use manual_offset_management multiple times with different values" do
+      it "expect to use proper active status" do
         topic.manual_offset_management(true)
         topic.manual_offset_management(false)
         expect(topic.manual_offset_management.active?).to be(true)
@@ -30,21 +30,21 @@ RSpec.describe_current do
     end
   end
 
-  describe '#manual_offset_management?' do
-    context 'when active' do
+  describe "#manual_offset_management?" do
+    context "when active" do
       before { topic.manual_offset_management(true) }
 
       it { expect(topic.manual_offset_management?).to be(true) }
     end
 
-    context 'when not active' do
+    context "when not active" do
       before { topic.manual_offset_management(false) }
 
       it { expect(topic.manual_offset_management?).to be(false) }
     end
   end
 
-  describe '#to_h' do
+  describe "#to_h" do
     it { expect(topic.to_h[:manual_offset_management]).to eq(topic.manual_offset_management.to_h) }
   end
 end

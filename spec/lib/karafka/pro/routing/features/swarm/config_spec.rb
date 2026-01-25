@@ -31,33 +31,33 @@ RSpec.describe_current do
   let(:active) { true }
   let(:nodes) { [0, 1, 2] }
 
-  describe '#active?' do
-    context 'when active' do
-      it 'returns true' do
+  describe "#active?" do
+    context "when active" do
+      it "returns true" do
         expect(config.active?).to be(true)
       end
     end
 
-    context 'when not active' do
+    context "when not active" do
       let(:active) { false }
 
-      it 'returns false' do
+      it "returns false" do
         expect(config.active?).to be(false)
       end
     end
   end
 
-  describe '#nodes' do
-    context 'with multiple nodes' do
-      it 'returns all nodes' do
+  describe "#nodes" do
+    context "with multiple nodes" do
+      it "returns all nodes" do
         expect(config.nodes).to contain_exactly(0, 1, 2)
       end
     end
 
-    context 'with no nodes' do
+    context "with no nodes" do
       let(:nodes) { [] }
 
-      it 'returns an empty array' do
+      it "returns an empty array" do
         expect(config.nodes).to be_empty
       end
     end

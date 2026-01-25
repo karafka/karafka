@@ -181,7 +181,7 @@ module Karafka
 
         # @return [Integer] RSS in MB for the current process
         def rss_mb
-          RUBY_PLATFORM.include?('linux') ? rss_mb_linux : rss_mb_macos
+          RUBY_PLATFORM.include?("linux") ? rss_mb_linux : rss_mb_macos
         end
 
         # @return [Integer] RSS in MB for the current process on Linux
@@ -189,7 +189,7 @@ module Karafka
           kb_rss = 0
 
           File.readlines("/proc/#{node.pid}/status").each do |line|
-            next unless line.start_with?('VmRSS:')
+            next unless line.start_with?("VmRSS:")
 
             kb_rss = line.split[1].to_i
             break

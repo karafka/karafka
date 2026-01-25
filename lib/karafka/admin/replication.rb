@@ -262,7 +262,7 @@ module Karafka
         change = @target_replication_factor - @current_replication_factor
         broker_nodes = @cluster_info[:brokers].map do |broker_info|
           broker_info[:node_id]
-        end.join(', ')
+        end.join(", ")
 
         <<~SUMMARY
           Replication Increase Plan for Topic: #{@topic}
@@ -328,10 +328,10 @@ module Karafka
           # Handle both :replicas (array of objects) and :replica_brokers (array of IDs)
           replicas = partition_info[:replicas] || partition_info[:replica_brokers] || []
           current_replicas = if replicas.first.respond_to?(:node_id)
-                               replicas.map(&:node_id).sort
-                             else
-                               replicas.sort
-                             end
+            replicas.map(&:node_id).sort
+          else
+            replicas.sort
+          end
 
           if rebalance_only
             # For rebalancing, redistribute current replicas optimally
@@ -442,22 +442,22 @@ module Karafka
       # Builds the kafka-reassign-partitions.sh command for generating reassignment plan
       # @return [String] command template with placeholder for broker addresses
       def build_generate_command
-        'kafka-reassign-partitions.sh --bootstrap-server <KAFKA_BROKERS> ' \
-          '--reassignment-json-file reassignment.json --generate'
+        "kafka-reassign-partitions.sh --bootstrap-server <KAFKA_BROKERS> " \
+          "--reassignment-json-file reassignment.json --generate"
       end
 
       # Builds the kafka-reassign-partitions.sh command for executing reassignment
       # @return [String] command template with placeholder for broker addresses
       def build_execute_command
-        'kafka-reassign-partitions.sh --bootstrap-server <KAFKA_BROKERS> ' \
-          '--reassignment-json-file reassignment.json --execute'
+        "kafka-reassign-partitions.sh --bootstrap-server <KAFKA_BROKERS> " \
+          "--reassignment-json-file reassignment.json --execute"
       end
 
       # Builds the kafka-reassign-partitions.sh command for verifying reassignment progress
       # @return [String] command template with placeholder for broker addresses
       def build_verify_command
-        'kafka-reassign-partitions.sh --bootstrap-server <KAFKA_BROKERS> ' \
-          '--reassignment-json-file reassignment.json --verify'
+        "kafka-reassign-partitions.sh --bootstrap-server <KAFKA_BROKERS> " \
+          "--reassignment-json-file reassignment.json --verify"
       end
 
       # Generates detailed step-by-step instructions for executing the reassignment
@@ -469,16 +469,16 @@ module Karafka
           "2. Validate the plan (optional): #{@execution_commands[:generate]}",
           "3. Execute the reassignment: #{@execution_commands[:execute]}",
           "4. Monitor progress: #{@execution_commands[:verify]}",
-          '5. Verify completion by checking topic metadata',
-          '',
-          'IMPORTANT NOTES:',
-          '- Replace <KAFKA_BROKERS> with your actual Kafka broker addresses',
-          '- The reassignment process may take time depending on data size',
-          '- Monitor disk space and network I/O during reassignment',
-          '- Consider running during low-traffic periods',
-          '- For large topics, consider throttling replica transfer rate',
-          '- Ensure sufficient disk space on target brokers before starting',
-          '- Keep monitoring until all replicas are in-sync (ISR)'
+          "5. Verify completion by checking topic metadata",
+          "",
+          "IMPORTANT NOTES:",
+          "- Replace <KAFKA_BROKERS> with your actual Kafka broker addresses",
+          "- The reassignment process may take time depending on data size",
+          "- Monitor disk space and network I/O during reassignment",
+          "- Consider running during low-traffic periods",
+          "- For large topics, consider throttling replica transfer rate",
+          "- Ensure sufficient disk space on target brokers before starting",
+          "- Keep monitoring until all replicas are in-sync (ISR)"
         ]
       end
     end

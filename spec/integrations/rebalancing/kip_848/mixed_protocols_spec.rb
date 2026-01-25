@@ -47,8 +47,8 @@ draw_routes do
       # Configure this group to use KIP-848
       kafka(
         Karafka::App.config.kafka
-          .merge('group.protocol': 'consumer')
-          .except(:'partition.assignment.strategy', :'heartbeat.interval.ms')
+          .merge("group.protocol": "consumer")
+          .except(:"partition.assignment.strategy", :"heartbeat.interval.ms")
       )
     end
   end
@@ -60,7 +60,7 @@ draw_routes do
       # Use old protocol with cooperative-sticky
       kafka(
         Karafka::App.config.kafka.merge(
-          'partition.assignment.strategy': 'cooperative-sticky'
+          "partition.assignment.strategy": "cooperative-sticky"
         )
       )
     end
@@ -73,7 +73,7 @@ draw_routes do
       # Use old protocol with range,roundrobin
       kafka(
         Karafka::App.config.kafka.merge(
-          'partition.assignment.strategy': 'range,roundrobin'
+          "partition.assignment.strategy": "range,roundrobin"
         )
       )
     end
@@ -107,6 +107,6 @@ assert((DT[:range_messages].to_set - all_produced).empty?)
 
 # Verify that different protocols can coexist
 # Each group should have consumed messages independently
-assert DT[:kip848_messages].any?, 'KIP-848 group should have consumed messages'
-assert DT[:cooperative_messages].any?, 'Cooperative group should have consumed messages'
-assert DT[:range_messages].any?, 'Range group should have consumed messages'
+assert DT[:kip848_messages].any?, "KIP-848 group should have consumed messages"
+assert DT[:cooperative_messages].any?, "Cooperative group should have consumed messages"
+assert DT[:range_messages].any?, "Range group should have consumed messages"

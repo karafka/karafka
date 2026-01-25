@@ -4,10 +4,10 @@
 # error to occur.
 
 setup_karafka(allow_errors: %w[connection.client.poll.error]) do |config|
-  config.kafka[:'auto.offset.reset'] = 'error'
+  config.kafka[:"auto.offset.reset"] = "error"
 end
 
-Karafka.monitor.subscribe('error.occurred') do |event|
+Karafka.monitor.subscribe("error.occurred") do |event|
   DT[:error] = event[:error]
 end
 

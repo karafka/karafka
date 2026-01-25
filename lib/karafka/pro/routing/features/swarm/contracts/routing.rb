@@ -36,8 +36,8 @@ module Karafka
             class Routing < Karafka::Contracts::Base
               configure do |config|
                 config.error_messages = YAML.safe_load_file(
-                  File.join(Karafka.gem_root, 'config', 'locales', 'pro_errors.yml')
-                ).fetch('en').fetch('validations').fetch('routing')
+                  File.join(Karafka.gem_root, "config", "locales", "pro_errors.yml")
+                ).fetch("en").fetch("validations").fetch("routing")
               end
 
               # Validates that each node has at least one assignment.

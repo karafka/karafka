@@ -23,14 +23,14 @@ module Karafka
         #
         # @param tpl [Rdkafka::Consumer::TopicPartitionList]
         def on_partitions_revoke(tpl)
-          instrument('partitions_revoke', tpl)
+          instrument("partitions_revoke", tpl)
         end
 
         # Publishes an event that partitions are going to be assigned
         #
         # @param tpl [Rdkafka::Consumer::TopicPartitionList]
         def on_partitions_assign(tpl)
-          instrument('partitions_assign', tpl)
+          instrument("partitions_assign", tpl)
         end
 
         # Publishes an event that partitions were revoked. This is after we've lost them, so no
@@ -38,14 +38,14 @@ module Karafka
         #
         # @param tpl [Rdkafka::Consumer::TopicPartitionList]
         def on_partitions_revoked(tpl)
-          instrument('partitions_revoked', tpl)
+          instrument("partitions_revoked", tpl)
         end
 
         # Publishes an event that partitions were assigned.
         #
         # @param tpl [Rdkafka::Consumer::TopicPartitionList]
         def on_partitions_assigned(tpl)
-          instrument('partitions_assigned', tpl)
+          instrument("partitions_assigned", tpl)
         end
 
         private
@@ -67,9 +67,9 @@ module Karafka
             client_id: @client_id,
             tpl: tpl
           )
-        rescue StandardError => e
+        rescue => e
           monitor.instrument(
-            'error.occurred',
+            "error.occurred",
             caller: self,
             subscription_group_id: @subscription_group.id,
             consumer_group_id: @subscription_group.consumer_group.id,

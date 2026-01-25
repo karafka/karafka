@@ -24,7 +24,7 @@
 # for offset reset
 
 setup_karafka do |config|
-  config.kafka[:'auto.offset.reset'] = 'latest'
+  config.kafka[:"auto.offset.reset"] = "latest"
 end
 
 draw_routes do
@@ -39,7 +39,7 @@ end
 
 cg = Karafka::App.routes.to_a.first
 
-assert_equal 'earliest', cg.topics[0].kafka[:'auto.offset.reset']
-assert_equal 'latest', cg.topics[1].kafka[:'auto.offset.reset']
-assert_equal 'earliest', cg.topics[2].kafka[:'auto.offset.reset']
-assert_equal 'latest', cg.topics[3].kafka[:'auto.offset.reset']
+assert_equal "earliest", cg.topics[0].kafka[:"auto.offset.reset"]
+assert_equal "latest", cg.topics[1].kafka[:"auto.offset.reset"]
+assert_equal "earliest", cg.topics[2].kafka[:"auto.offset.reset"]
+assert_equal "latest", cg.topics[3].kafka[:"auto.offset.reset"]

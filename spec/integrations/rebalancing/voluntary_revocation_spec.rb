@@ -27,7 +27,7 @@ draw_routes do
   end
 end
 
-produce(DT.topic, '1')
+produce(DT.topic, "1")
 
 consumer = setup_rdkafka_consumer
 

@@ -24,7 +24,7 @@
 
 failed_as_expected = false
 
-ENV['KARAFKA_PRO_LICENSE_TOKEN'] = rand.to_s
+ENV["KARAFKA_PRO_LICENSE_TOKEN"] = rand.to_s
 
 begin
   setup_karafka

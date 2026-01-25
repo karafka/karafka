@@ -39,7 +39,7 @@ draw_routes do
   topic DT.topic do
     consumer Consumer
     virtual_partitions(
-      partitioner: ->(_msg) { '1' }
+      partitioner: ->(_msg) { "1" }
     )
   end
 end

@@ -49,8 +49,8 @@ draw_routes do
   end
 end
 
-ARGV[0] = 'swarm'
-ARGV[1] = '--exclude-subscription-groups'
+ARGV[0] = "swarm"
+ARGV[1] = "--exclude-subscription-groups"
 ARGV[2] = DT.consumer_groups[0]
 
 produce_many(DT.topics[0], DT.uuids(10))
@@ -60,6 +60,6 @@ thread = Thread.new { Karafka::Cli.start }
 
 READER.gets
 
-Process.kill('QUIT', Process.pid)
+Process.kill("QUIT", Process.pid)
 
 thread.join

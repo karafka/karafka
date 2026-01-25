@@ -51,10 +51,10 @@ class ComplexDlqStrategy
       :skip
     # Business errors in general should be retried a few times
     when BusinessError
-      attempt > 3 ? :dispatch : :retry
+      (attempt > 3) ? :dispatch : :retry
     else
       # Default behavior
-      attempt > 5 ? :dispatch : :retry
+      (attempt > 5) ? :dispatch : :retry
     end
   end
 end
@@ -67,12 +67,12 @@ class Consumer < Karafka::BaseConsumer
       DT[:processing_attempts] << [error_type, attempt]
 
       case error_type
-      when 'validation'
-        raise ValidationError, 'Invalid data format'
-      when 'business'
-        raise BusinessError, 'Business rule violation'
+      when "validation"
+        raise ValidationError, "Invalid data format"
+      when "business"
+        raise BusinessError, "Business rule violation"
       else
-        raise StandardError, 'Unknown error'
+        raise StandardError, "Unknown error"
       end
     end
   end
@@ -105,9 +105,9 @@ start_karafka_and_wait_until do
 end
 
 # Analyze processing patterns for each error type
-validation_attempts = DT[:processing_attempts].select { |type, _| type == 'validation' }
-business_attempts = DT[:processing_attempts].select { |type, _| type == 'business' }
-unknown_attempts = DT[:processing_attempts].select { |type, _| type == 'unknown' }
+validation_attempts = DT[:processing_attempts].slice("validation")
+business_attempts = DT[:processing_attempts].slice("business")
+unknown_attempts = DT[:processing_attempts].slice("unknown")
 
 # Validation errors should be skipped immediately (only 1 attempt)
 assert_equal [1], validation_attempts.map(&:last).uniq

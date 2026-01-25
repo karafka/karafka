@@ -31,7 +31,7 @@
 # Note: This spec works correctly regardless of how Kafka batches messages for delivery.
 
 setup_karafka do |config|
-  config.kafka[:'transactional.id'] = SecureRandom.uuid
+  config.kafka[:"transactional.id"] = SecureRandom.uuid
   config.max_messages = 5
 end
 

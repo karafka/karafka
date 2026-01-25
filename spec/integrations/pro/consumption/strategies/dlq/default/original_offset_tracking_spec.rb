@@ -39,7 +39,7 @@ end
 class DlqConsumer < Karafka::BaseConsumer
   def consume
     messages.each do |message|
-      DT[:broken] << message.headers['source_offset']
+      DT[:broken] << message.headers["source_offset"]
     end
   end
 end
@@ -55,8 +55,8 @@ draw_routes do
   end
 end
 
-Karafka.monitor.subscribe('error.occurred') do |event|
-  next unless event[:type] == 'consumer.consume.error'
+Karafka.monitor.subscribe("error.occurred") do |event|
+  next unless event[:type] == "consumer.consume.error"
 
   DT[:errors] << 1
 end

@@ -7,7 +7,7 @@ setup_karafka do |config|
   config.concurrency = 1
   # Publish every one second to check if this is going to be as often within the time-frame of
   # the processing as expected
-  config.kafka[:'statistics.interval.ms'] = 1_000
+  config.kafka[:"statistics.interval.ms"] = 1_000
   config.internal.tick_interval = 1_000
 end
 
@@ -27,7 +27,7 @@ end
 
 produce_many(DT.topic, DT.uuids(1))
 
-Karafka::App.monitor.subscribe('statistics.emitted') do |_event|
+Karafka::App.monitor.subscribe("statistics.emitted") do |_event|
   DT[:stats] << Time.now.to_f
 end
 

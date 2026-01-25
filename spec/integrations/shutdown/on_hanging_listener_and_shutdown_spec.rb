@@ -5,7 +5,7 @@
 
 setup_karafka(allow_errors: true) { |config| config.shutdown_timeout = 1_000 }
 
-produce(DT.topic, '1')
+produce(DT.topic, "1")
 
 class Consumer < Karafka::BaseConsumer
   def consume
@@ -21,7 +21,7 @@ draw_routes(create_topics: false) do
 end
 
 # This will force Karafka fetcher to hang
-Karafka.monitor.subscribe('connection.listener.fetch_loop.received') do
+Karafka.monitor.subscribe("connection.listener.fetch_loop.received") do
   sleep unless DT[0].empty?
 end
 

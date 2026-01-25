@@ -30,8 +30,8 @@ module Karafka
             class ConsumerGroup < Karafka::Contracts::Base
               configure do |config|
                 config.error_messages = YAML.safe_load_file(
-                  File.join(Karafka.gem_root, 'config', 'locales', 'pro_errors.yml')
-                ).fetch('en').fetch('validations').fetch('routing').fetch('consumer_group')
+                  File.join(Karafka.gem_root, "config", "locales", "pro_errors.yml")
+                ).fetch("en").fetch("validations").fetch("routing").fetch("consumer_group")
 
                 virtual do |data, errors|
                   next unless errors.empty?

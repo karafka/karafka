@@ -45,7 +45,7 @@ module Karafka
             Fetcher.find(topic, partition, cache: cache)
           end
 
-          alias committed_offset_metadata offset_metadata
+          alias_method :committed_offset_metadata, :offset_metadata
         end
       end
     end

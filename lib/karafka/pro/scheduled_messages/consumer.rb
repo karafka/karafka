@@ -143,8 +143,8 @@ module Karafka
           # are always considered immediate as they indicate, that a message with a given key
           # was already dispatched or that user decided not to dispatch and cancelled the dispatch
           # via tombstone publishing.
-          if message.headers['schedule_source_type'] == 'schedule'
-            time = message.headers['schedule_target_epoch']
+          if message.headers["schedule_source_type"] == "schedule"
+            time = message.headers["schedule_target_epoch"]
 
             # Do not track historical below today as those will be reflected in the daily buffer
             @tracker.future(message) if time >= @today.starts_at
@@ -162,8 +162,8 @@ module Karafka
           # that we've got that far in the dispatching time. This allows us (with a certain buffer)
           # to quickly reject older messages (older in sense of being scheduled for previous times)
           # instead of loading them into memory until they are expired
-          if message.headers['schedule_source_type'] == 'tombstone'
-            @max_epoch.update(message.headers['schedule_target_epoch'])
+          if message.headers["schedule_source_type"] == "tombstone"
+            @max_epoch.update(message.headers["schedule_target_epoch"])
           end
 
           # Add to buffer all tombstones and messages for the same day

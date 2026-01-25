@@ -26,7 +26,7 @@ module Karafka
       # Converts schedule command and log details into data we can dispatch to Kafka.
       class Serializer
         # Current recurring tasks related schema structure
-        SCHEMA_VERSION = '1.0'
+        SCHEMA_VERSION = "1.0"
 
         # Serializes and compresses the schedule with all its tasks and their execution state
         # @param schedule [Karafka::Pro::RecurringTasks::Schedule]
@@ -49,7 +49,7 @@ module Karafka
             schema_version: SCHEMA_VERSION,
             schedule_version: schedule.version,
             dispatched_at: Time.now.to_f,
-            type: 'schedule',
+            type: "schedule",
             tasks: tasks
           }
 
@@ -66,7 +66,7 @@ module Karafka
             schema_version: SCHEMA_VERSION,
             schedule_version: Karafka::Pro::RecurringTasks.schedule.version,
             dispatched_at: Time.now.to_f,
-            type: 'command',
+            type: "command",
             command: {
               name: command_name
             },
@@ -89,11 +89,11 @@ module Karafka
             schema_version: SCHEMA_VERSION,
             schedule_version: Karafka::Pro::RecurringTasks.schedule.version,
             dispatched_at: Time.now.to_f,
-            type: 'log',
+            type: "log",
             task: {
               id: task.id,
               time_taken: event.payload[:time] || -1,
-              result: event.payload.key?(:error) ? 'failure' : 'success'
+              result: event.payload.key?(:error) ? "failure" : "success"
             }
           }
 

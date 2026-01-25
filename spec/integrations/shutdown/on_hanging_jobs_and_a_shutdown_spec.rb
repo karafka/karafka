@@ -4,7 +4,7 @@
 
 setup_karafka(allow_errors: true) { |config| config.shutdown_timeout = 1_000 }
 
-produce(DT.topic, '1')
+produce(DT.topic, "1")
 
 class Consumer < Karafka::BaseConsumer
   def consume

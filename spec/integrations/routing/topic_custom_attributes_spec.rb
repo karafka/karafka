@@ -58,7 +58,7 @@ assert_equal t1.custom_attributes.yours, 2
 assert_equal t2.custom_attributes.mine, 3
 assert_equal t2.custom_attributes.yours, 4
 
-produce(DT.topics[0], '{}')
+produce(DT.topics[0], "{}")
 
 start_karafka_and_wait_until do
   DT.key?(:state)

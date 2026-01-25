@@ -24,7 +24,7 @@
 
 setup_karafka(allow_errors: true)
 
-Karafka.monitor.subscribe('error.occurred') do |event|
+Karafka.monitor.subscribe("error.occurred") do |event|
   DT[:errors] << event.payload[:error]
 end
 
@@ -44,7 +44,7 @@ draw_routes do
   topic DT.topic do
     consumer Consumer
     dead_letter_queue(
-      topic: 'dead_messages',
+      topic: "dead_messages",
       max_retries: 0
     )
   end

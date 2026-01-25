@@ -10,7 +10,7 @@ setup_karafka(allow_errors: true) do |config|
   config.pause.timeout = 1_000
   config.pause.max_timeout = 1_000
   config.pause.with_exponential_backoff = false
-  config.initial_offset = 'latest'
+  config.initial_offset = "latest"
 end
 
 before = DT.uuids(2)

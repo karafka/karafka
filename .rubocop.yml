@@ -1,0 +1,298 @@
+# frozen_string_literal: true
+
+plugins:
+  - rubocop-capybara
+  - rubocop-factory_bot
+  - rubocop-performance
+  - rubocop-rspec
+  - rubocop-rspec_rails
+  - rubocop-thread_safety
+
+inherit_gem:
+  standard: config/base.yml
+  standard-performance: config/base.yml
+  standard-rspec: config/base.yml
+
+AllCops:
+  NewCops: enable
+  TargetRubyVersion: 3.2
+  Exclude:
+    - bin/**/*
+    - db/schema.rb
+    - .gemspec/**/*
+    - .bundle/**/*
+    - vendor/**/*
+    - db/migrate/**/*
+    - "**/dummy**/*"
+    - !ruby/regexp /old_and_unused\.rb$/
+
+# Disabled departments - not a Rails project, no Capybara/FactoryBot
+Capybara:
+  Enabled: false
+
+FactoryBot:
+  Enabled: false
+
+RSpecRails:
+  Enabled: false
+
+# Naming
+Naming/MemoizedInstanceVariableName:
+  Exclude:
+    - lib/karafka/routing/features/declaratives/topic.rb
+    - lib/karafka/processing/coordinator.rb
+    - lib/karafka/pro/routing/features/periodics/topic.rb
+
+Naming/PredicateMethod:
+  Enabled: false
+
+Naming/AccessorMethodName:
+  Exclude:
+    # Not our convention. This is DD api
+    - lib/karafka/instrumentation/vendors/**/*.rb
+    - spec/support/vendors/**/*.rb
+
+Naming/FileName:
+  Exclude:
+    - "*.gemspec"
+
+Naming/VariableNumber:
+  Enabled: false
+
+# Metrics
+Metrics/ClassLength:
+  CountComments: false
+  Max: 500
+  Exclude:
+    - lib/karafka/connection/client.rb
+
+Metrics/ParameterLists:
+  Enabled: false
+
+Metrics/PerceivedComplexity:
+  Enabled: false
+
+Metrics/MethodLength:
+  Enabled: false
+
+Metrics/BlockLength:
+  Enabled: false
+
+Metrics/ModuleLength:
+  Enabled: false
+
+Metrics/CyclomaticComplexity:
+  Enabled: false
+
+Metrics/AbcSize:
+  Enabled: false
+
+# Layout
+Layout/LineLength:
+  Max: 99
+
+Layout/SpaceInsideHashLiteralBraces:
+  EnforcedStyle: space
+
+Layout/IndentationWidth:
+  Exclude:
+    - lib/karafka/pro/routing/features/direct_assignments/topic.rb
+
+Layout/ElseAlignment:
+  Exclude:
+    - lib/karafka/pro/routing/features/direct_assignments/topic.rb
+
+Layout/EndAlignment:
+  Exclude:
+    - lib/karafka/pro/routing/features/direct_assignments/topic.rb
+
+Layout/FirstParameterIndentation:
+  EnforcedStyle: consistent
+
+Layout/ParameterAlignment:
+  EnforcedStyle: with_fixed_indentation
+
+Layout/ArgumentAlignment:
+  EnforcedStyle: with_fixed_indentation
+
+# Lint
+Lint/DuplicateBranch:
+  Enabled: false
+
+Lint/EmptyClass:
+  Exclude:
+    - lib/karafka/railtie.rb
+    - "spec/integrations/**/*.rb"
+
+Lint/InheritException:
+  Exclude:
+    - "spec/integrations/**/*.rb"
+
+Lint/RaiseException:
+  Exclude:
+    - "spec/integrations/**/*.rb"
+
+Lint/SuppressedException:
+  Exclude:
+    - spec/lib/karafka/pro/routing/features/patterns/detector_spec.rb
+
+Lint/UnreachableLoop:
+  Exclude:
+    - "spec/integrations/**/*"
+    - spec/integrations_helper.rb
+
+Lint/MissingSuper:
+  Exclude:
+    - "spec/support/rspec_locator.rb"
+
+Lint/HashCompareByIdentity:
+  Exclude:
+    - "spec/integrations/**/*"
+
+Lint/Void:
+  Exclude:
+    # Reports incorrectly for the topic=
+    - "lib/karafka/routing/consumer_group.rb"
+
+Lint/NonLocalExitFromIterator:
+  Enabled: false
+
+Lint/StructNewOverride:
+  Enabled: false
+
+# Style
+Style/AccessModifierDeclarations:
+  Exclude:
+    - "lib/karafka/base_consumer.rb"
+    - "lib/karafka/routing/router.rb"
+
+Style/GlobalVars:
+  Exclude:
+    - "spec/benchmarks/**/*"
+
+Style/HashSyntax:
+  EnforcedShorthandSyntax: never
+
+Style/KeywordParametersOrder:
+  Exclude:
+    - lib/karafka/admin/acl.rb
+
+Style/IfUnlessModifier:
+  Exclude:
+    - lib/karafka/routing/features/base.rb
+
+Style/OpenStructUse:
+  Exclude:
+    - "spec/**/*"
+
+Style/SafeNavigation:
+  Enabled: false
+
+Style/SlicingWithRange:
+  Enabled: false
+
+Style/OptionalBooleanParameter:
+  Enabled: false
+
+Style/GuardClause:
+  Enabled: false
+
+Style/SymbolProc:
+  Enabled: false
+
+Style/HashEachMethods:
+  Enabled: false
+
+Style/ExplicitBlockArgument:
+  Enabled: false
+
+Style/RedundantCondition:
+  Enabled: false
+
+Style/UnlessLogicalOperators:
+  Enabled: false
+
+# Security
+Security/Open:
+  Exclude:
+    - lib/karafka/swarm/pidfd.rb
+
+# Performance
+Performance/RedundantBlockCall:
+  Exclude:
+    - spec/benchmarks_helper.rb
+
+# Gemspec
+Gemspec/RequiredRubyVersion:
+  Enabled: false
+
+# RSpec
+RSpec/SpecFilePathFormat:
+  CustomTransform:
+    RuboCop: rubo_cop
+    Rspec: r_spec
+
+  Exclude:
+    - spec/integrations/**/*
+    - spec/lib/karafka/pro/base_consumer_spec.rb
+
+RSpec/MultipleExpectations:
+  Enabled: false
+
+RSpec/NestedGroups:
+  Enabled: true
+  Max: 5
+
+RSpec/MessageSpies:
+  EnforcedStyle: have_received
+
+RSpec/MultipleMemoizedHelpers:
+  Enabled: true
+  Max: 20
+
+RSpec/SubjectStub:
+  Enabled: false
+
+RSpec/ExampleLength:
+  Enabled: false
+
+RSpec/IndexedLet:
+  Enabled: false
+
+RSpec/NoExpectationExample:
+  Enabled: false
+
+RSpec/DescribeClass:
+  Enabled: false
+
+RSpec/VerifiedDoubles:
+  Enabled: false
+
+RSpec/AnyInstance:
+  Enabled: false
+
+RSpec/MessageSpies:
+  Enabled: false
+
+RSpec/LeakyLocalVariable:
+  Enabled: false
+
+RSpec/ExpectOutput:
+  Enabled: false
+
+RSpec/SpecFilePathSuffix:
+  Enabled: false
+
+RSpec/Output:
+  Exclude:
+    - spec/benchmarks_helper.rb
+
+# ThreadSafety
+ThreadSafety/ClassAndModuleAttributes:
+  Enabled: false
+
+ThreadSafety/ClassInstanceVariable:
+  Enabled: false
+
+ThreadSafety/NewThread:
+  Enabled: false

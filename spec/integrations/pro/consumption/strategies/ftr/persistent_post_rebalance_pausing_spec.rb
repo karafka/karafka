@@ -109,7 +109,7 @@ end
 consumer = setup_rdkafka_consumer
 
 # Trigger rebalance
-other =  Thread.new do
+other = Thread.new do
   sleep(0.1) until DT.key?(:times)
 
   consumer.subscribe(DT.topic)

@@ -34,8 +34,8 @@ end
 
 message = {
   topic: DT.topics[1],
-  key: '0',
-  payload: 'payload'
+  key: "0",
+  payload: "payload"
 }
 
 proxy = Karafka::Pro::ScheduledMessages.schedule(

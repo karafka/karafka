@@ -25,7 +25,7 @@
 setup_karafka
 
 draw_routes(create_topics: false) do
-  topic 'topic1' do
+  topic "topic1" do
     consumer Class.new
     pause(
       timeout: 100,
@@ -34,7 +34,7 @@ draw_routes(create_topics: false) do
     )
   end
 
-  topic 'topic2' do
+  topic "topic2" do
     consumer Class.new
     pause(
       timeout: 200,

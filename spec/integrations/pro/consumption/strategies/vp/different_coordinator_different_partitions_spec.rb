@@ -25,7 +25,7 @@
 setup_karafka do |config|
   config.concurrency = 10
   config.max_messages = 5
-  config.initial_offset = 'latest'
+  config.initial_offset = "latest"
 end
 
 class Consumer < Karafka::BaseConsumer
@@ -47,8 +47,8 @@ draw_routes do
 end
 
 start_karafka_and_wait_until do
-  produce(DT.topic, '1', partition: 0)
-  produce(DT.topic, '1', partition: 1)
+  produce(DT.topic, "1", partition: 0)
+  produce(DT.topic, "1", partition: 1)
 
   DT[:messages].size >= 100
 end

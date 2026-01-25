@@ -22,8 +22,8 @@
 
 # When providing invalid config details for encryption, validation should kick in.
 
-PUBLIC_KEY = 'def not a public key'
-PRIVATE_KEYS = { '1' => 'def not a private key' }.freeze
+PUBLIC_KEY = "def not a public key"
+PRIVATE_KEYS = { "1" => "def not a private key" }.freeze
 
 guarded = false
 error = nil
@@ -43,5 +43,5 @@ assert guarded
 
 assert_equal(
   error.message,
-  { 'config.encryption.public_key': 'is not a valid public RSA key' }.to_s
+  { "config.encryption.public_key": "is not a valid public RSA key" }.to_s
 )

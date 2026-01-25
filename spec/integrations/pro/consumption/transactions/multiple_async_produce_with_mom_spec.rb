@@ -30,7 +30,7 @@
 # and could lead to skipped message processing if later productions fail.
 
 setup_karafka do |config|
-  config.kafka[:'transactional.id'] = SecureRandom.uuid
+  config.kafka[:"transactional.id"] = SecureRandom.uuid
 end
 
 class Consumer < Karafka::BaseConsumer
@@ -115,8 +115,8 @@ end
 DT[:handlers].each do |handler|
   report = handler.wait
   assert report.error.nil?, "Handler should not have error: #{report.error}"
-  assert report.offset >= 0, 'Handler should have valid offset'
-  assert report.partition >= 0, 'Handler should have valid partition'
+  assert report.offset >= 0, "Handler should have valid offset"
+  assert report.partition >= 0, "Handler should have valid partition"
 end
 
 # Verify all messages were produced to all target topics
@@ -129,7 +129,7 @@ assert_equal 10, fetch_next_offset
 
 # Verify message content integrity
 10.times do
-  assert(DT[:target1].any? { |payload| payload.start_with?('target1_') })
-  assert(DT[:target2].any? { |payload| payload.start_with?('target2_') })
-  assert(DT[:target3].any? { |payload| payload.start_with?('target3_') })
+  assert(DT[:target1].any? { |payload| payload.start_with?("target1_") })
+  assert(DT[:target2].any? { |payload| payload.start_with?("target2_") })
+  assert(DT[:target3].any? { |payload| payload.start_with?("target3_") })
 end

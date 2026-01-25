@@ -40,12 +40,12 @@ class Consumer < Karafka::BaseConsumer
     end
 
     # Should not be called when all messages are filtered
-    raise 'Consumer should not process when all messages are filtered'
+    raise "Consumer should not process when all messages are filtered"
   end
 end
 
 class EventFilter < Karafka::Pro::Processing::Filters::Base
-  TARGET_EVENT = 'order_created'
+  TARGET_EVENT = "order_created"
 
   def apply!(messages)
     initialize_filter_state
@@ -82,7 +82,7 @@ class EventFilter < Karafka::Pro::Processing::Filters::Base
   end
 
   def should_filter_message?(message)
-    event_name = message.payload.dig('event', 'name')
+    event_name = message.payload.dig("event", "name")
     return false if event_name == TARGET_EVENT
 
     @applied = true
@@ -102,7 +102,7 @@ end
 
 # Produce 100 messages, all with different event types (none matching "order_created")
 elements = Array.new(100) do |i|
-  { event: { name: 'user_updated', id: i } }.to_json
+  { event: { name: "user_updated", id: i } }.to_json
 end
 
 produce_many(DT.topic, elements)
@@ -119,7 +119,7 @@ assert_equal (0...100).to_a, DT[:filtered].sort
 assert_equal 0, DT[:processed].size
 
 # Verify all batches were marked as all_filtered
-assert DT[:all_filtered_batches].size >= 10, 'Should have multiple all_filtered batches'
+assert DT[:all_filtered_batches].size >= 10, "Should have multiple all_filtered batches"
 
 # Verify offset advanced to the end despite all messages being filtered
-assert_equal 100, fetch_next_offset(DT.topic), 'Offset should advance when all filtered'
+assert_equal 100, fetch_next_offset(DT.topic), "Offset should advance when all filtered"

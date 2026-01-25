@@ -23,7 +23,7 @@
 # In VPs we should also be safeguarded when trying to start transaction inside of a transaction
 
 setup_karafka(allow_errors: %w[consumer.consume.error]) do |config|
-  config.kafka[:'transactional.id'] = SecureRandom.uuid
+  config.kafka[:"transactional.id"] = SecureRandom.uuid
   config.concurrency = 10
 end
 

@@ -12,17 +12,17 @@ module Karafka
           #
           # @param _config [Karafka::Core::Configurable::Node] app config
           def post_setup(_config)
-            Karafka::App.monitor.subscribe('app.running') do
+            Karafka::App.monitor.subscribe("app.running") do
               # Do not activate tracking of statistics if none of our active topics uses it
               # This prevents us from tracking metrics when user just runs a subset of topics
               # in a given process and none of those actually utilizes this feature
               next unless Karafka::App
-                          .subscription_groups
-                          .values
-                          .flat_map(&:itself)
-                          .flat_map(&:topics)
-                          .flat_map(&:to_a)
-                          .any?(&:inline_insights?)
+                .subscription_groups
+                .values
+                .flat_map(&:itself)
+                .flat_map(&:topics)
+                .flat_map(&:to_a)
+                .any?(&:inline_insights?)
 
               # Initialize the tracker prior to becoming multi-threaded
               Karafka::Processing::InlineInsights::Tracker.instance

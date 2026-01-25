@@ -55,9 +55,9 @@ module Karafka
 
         if job
           job.wrap do
-            monitor.instrument('worker.process', instrument_details)
+            monitor.instrument("worker.process", instrument_details)
 
-            monitor.instrument('worker.processed', instrument_details) do
+            monitor.instrument("worker.processed", instrument_details) do
               job.before_call
 
               # If a job is marked as non blocking, we can run a tick in the job queue and if there
@@ -87,12 +87,12 @@ module Karafka
       rescue Exception => e
         # rubocop:enable Lint/RescueException
         monitor.instrument(
-          'error.occurred',
+          "error.occurred",
           caller: self,
           job: job,
           jobs_queue: @jobs_queue,
           error: e,
-          type: 'worker.process.error'
+          type: "worker.process.error"
         )
       ensure
         # job can be nil when the queue is being closed
@@ -102,7 +102,7 @@ module Karafka
         end
 
         # Always publish info, that we completed all the work despite its result
-        monitor.instrument('worker.completed', instrument_details)
+        monitor.instrument("worker.completed", instrument_details)
       end
     end
   end

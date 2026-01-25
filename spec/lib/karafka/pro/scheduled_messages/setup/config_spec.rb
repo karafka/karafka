@@ -21,7 +21,7 @@
 # Contact: contact@karafka.io
 
 RSpec.describe_current do
-  it 'expect to use Karafka.producer by default' do
+  it "expect to use Karafka.producer by default" do
     expect(Karafka::App.config.scheduled_messages.producer).to eq(Karafka.producer)
   end
 end

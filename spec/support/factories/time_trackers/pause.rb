@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 FactoryBot.define do
-  factory :time_trackers_pause, class: 'Karafka::TimeTrackers::Pause' do
+  factory :time_trackers_pause, class: "Karafka::TimeTrackers::Pause" do
     timeout { 500 }
 
     max_timeout { 1_000 }

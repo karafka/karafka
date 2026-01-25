@@ -13,7 +13,7 @@ module Karafka
         # Per recommendation, this should not run in children nodes
         return if Karafka::App.config.swarm.node
 
-        monitor.instrument('app.before_warmup', caller: self)
+        monitor.instrument("app.before_warmup", caller: self)
 
         return GC.compact unless ::Process.respond_to?(:warmup)
 
@@ -48,7 +48,7 @@ module Karafka
       end
 
       # Just a nicer name for the consumer groups
-      alias routes consumer_groups
+      alias_method :routes, :consumer_groups
 
       # Returns current assignments of this process. Both topics and partitions
       #
@@ -101,7 +101,7 @@ module Karafka
       # producing messages.
       #
       # @param contexts [String] librdkafka low level debug contexts for granular debugging
-      def debug!(contexts = 'all')
+      def debug!(contexts = "all")
         logger.level = Logger::DEBUG
         producer.config.logger.level = Logger::DEBUG
 

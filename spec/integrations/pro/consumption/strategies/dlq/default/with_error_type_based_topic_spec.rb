@@ -58,10 +58,10 @@ class DqlErrorStrategy
       :skip
     # On this specific recoverable retry at most 2 times
     when RecoverableError
-      attempt > 2 ? [:dispatch, DT.topics[2]] : :retry
+      (attempt > 2) ? [:dispatch, DT.topics[2]] : :retry
     else
       # And for any other errors, retry 5 times
-      attempt > 5 ? [:dispatch, DT.topics[3]] : :retry
+      (attempt > 5) ? [:dispatch, DT.topics[3]] : :retry
     end
   end
 end
@@ -112,7 +112,7 @@ end
 
 start_karafka_and_wait_until do
   4.times do |i|
-    produce(DT.topic, '', partition: i)
+    produce(DT.topic, "", partition: i)
   end
 
   sleep(0.1)

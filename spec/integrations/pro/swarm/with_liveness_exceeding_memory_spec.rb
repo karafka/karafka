@@ -33,14 +33,14 @@ READER, WRITER = IO.pipe
 Karafka.monitor.subscribe(
   Karafka::Pro::Swarm::LivenessListener.new(
     # This is below what we use on start, so it will terminate quite fast
-    memory_limit: '10MB'
+    memory_limit: "10MB"
   )
 )
 
 class Consumer < Karafka::BaseConsumer
   def consume
     unless DT.key?(:reported)
-      WRITER.puts('1')
+      WRITER.puts("1")
       WRITER.flush
       DT[:reported] = true
     end

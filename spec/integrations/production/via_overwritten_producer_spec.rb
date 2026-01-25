@@ -9,8 +9,8 @@ setup_karafka
 Karafka::App.config.producer = WaterDrop::Producer.new do |config|
   config.deliver = true
   config.kafka = {
-    'bootstrap.servers': 'localhost:999',
-    'message.timeout.ms': 1_000
+    "bootstrap.servers": "localhost:999",
+    "message.timeout.ms": 1_000
   }
 end
 
@@ -24,7 +24,7 @@ class Consumer < Karafka::BaseConsumer
       DT[0] << 1
     end
 
-    producer.produce_sync(topic: topic.name, payload: '')
+    producer.produce_sync(topic: topic.name, payload: "")
   end
 
   def producer
@@ -34,7 +34,7 @@ end
 
 draw_routes(Consumer)
 
-SUPER_PRODUCER.produce_sync(topic: DT.topic, payload: '')
+SUPER_PRODUCER.produce_sync(topic: DT.topic, payload: "")
 
 start_karafka_and_wait_until do
   DT[0].size >= 2

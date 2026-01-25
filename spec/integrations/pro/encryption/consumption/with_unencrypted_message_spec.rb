@@ -23,8 +23,8 @@
 # When despite using encryption we get an unencrypted message, all should work.
 # This is expected as some producers may not yet be migrated, etc.
 
-PUBLIC_KEY = fixture_file('rsa/public_key_1.pem')
-PRIVATE_KEYS = { '1' => fixture_file('rsa/private_key_1.pem') }.freeze
+PUBLIC_KEY = fixture_file("rsa/public_key_1.pem")
+PRIVATE_KEYS = { "1" => fixture_file("rsa/private_key_1.pem") }.freeze
 
 setup_karafka do |config|
   config.encryption.active = true
@@ -53,7 +53,7 @@ elements = DT.uuids(10)
 
 # We needed a new producer that is without encryption middleware
 producer = WaterDrop::Producer.new do |config|
-  config.kafka = { 'bootstrap.servers': '127.0.0.1:9092' }
+  config.kafka = { "bootstrap.servers": "127.0.0.1:9092" }
 end
 
 # We publish again and we will check that only one topic got consumed afterwards

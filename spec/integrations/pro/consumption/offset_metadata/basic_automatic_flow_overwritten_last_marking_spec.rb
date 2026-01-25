@@ -25,7 +25,7 @@
 
 setup_karafka do |config|
   config.max_messages = 1
-  config.kafka[:'auto.commit.interval.ms'] = 100
+  config.kafka[:"auto.commit.interval.ms"] = 100
 end
 
 class Consumer < Karafka::BaseConsumer
@@ -36,7 +36,7 @@ class Consumer < Karafka::BaseConsumer
 
     store_offset_metadata(messages.last.offset.to_s)
 
-    mark_as_consumed(messages.last, 'cs')
+    mark_as_consumed(messages.last, "cs")
   end
 end
 
@@ -48,4 +48,4 @@ start_karafka_and_wait_until do
   DT[:metadata].size >= 10
 end
 
-assert_equal DT[:metadata].uniq, ['', 'cs']
+assert_equal DT[:metadata].uniq, ["", "cs"]

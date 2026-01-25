@@ -33,16 +33,16 @@ draw_routes do
   end
 end
 
-ARGV[0] = 'swarm'
-ARGV[1] = '--topics'
-ARGV[2] = 't1,t2'
+ARGV[0] = "swarm"
+ARGV[1] = "--topics"
+ARGV[2] = "t1,t2"
 
 failed = false
 
 begin
   Karafka::Cli.start
 rescue Karafka::Errors::InvalidConfigurationError => e
-  assert e.message.include?('swarm.cli.include_topics')
+  assert e.message.include?("swarm.cli.include_topics")
   failed = true
 end
 

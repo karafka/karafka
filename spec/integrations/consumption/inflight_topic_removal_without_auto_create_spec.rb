@@ -3,10 +3,10 @@
 # When topic in use is removed, Karafka should emit an error
 
 setup_karafka(allow_errors: true) do |config|
-  config.kafka[:'allow.auto.create.topics'] = false
+  config.kafka[:"allow.auto.create.topics"] = false
 end
 
-Karafka.monitor.subscribe('error.occurred') do |event|
+Karafka.monitor.subscribe("error.occurred") do |event|
   DT[:errors] << event[:error]
 end
 
@@ -14,7 +14,7 @@ class Consumer < Karafka::BaseConsumer
   def consume
     Thread.new do
       Karafka::Admin.delete_topic(DT.topic)
-    rescue StandardError
+    rescue
       nil
     end
 

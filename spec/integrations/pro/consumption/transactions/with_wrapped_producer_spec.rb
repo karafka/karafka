@@ -28,12 +28,12 @@ setup_karafka(allow_errors: %w[consumer.consume.error])
 
 TRANSACTIONAL_PRODUCER = WaterDrop::Producer.new do |producer_config|
   producer_config.kafka = Karafka::Setup::AttributesMap.producer(Karafka::App.config.kafka.dup)
-  producer_config.kafka[:'transactional.id'] = SecureRandom.uuid
+  producer_config.kafka[:"transactional.id"] = SecureRandom.uuid
   producer_config.logger = Karafka::App.config.logger
 end
 
 DEFAULT_PRODUCER = WaterDrop::Producer.new do |producer_config|
-  producer_config.kafka = { 'bootstrap.servers': '127.0.0.1:9090' }
+  producer_config.kafka = { "bootstrap.servers": "127.0.0.1:9090" }
   producer_config.logger = Karafka::App.config.logger
 end
 
@@ -66,7 +66,7 @@ draw_routes do
   end
 end
 
-TRANSACTIONAL_PRODUCER.produce_sync(topic: DT.topic, payload: '1')
+TRANSACTIONAL_PRODUCER.produce_sync(topic: DT.topic, payload: "1")
 
 start_karafka_and_wait_until do
   DT.key?(:done)

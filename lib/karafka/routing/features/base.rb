@@ -13,35 +13,35 @@ module Karafka
         class << self
           # Extends topic and builder with given feature API
           def activate
-            if const_defined?('Topic', false)
+            if const_defined?("Topic", false)
               Topic.prepend(self::Topic)
             end
 
-            if const_defined?('Topics', false)
+            if const_defined?("Topics", false)
               Topics.prepend(self::Topics)
             end
 
-            if const_defined?('ConsumerGroup', false)
+            if const_defined?("ConsumerGroup", false)
               ConsumerGroup.prepend(self::ConsumerGroup)
             end
 
-            if const_defined?('Proxy', false)
+            if const_defined?("Proxy", false)
               Proxy.prepend(self::Proxy)
             end
 
-            if const_defined?('Builder', false)
+            if const_defined?("Builder", false)
               Builder.prepend(self::Builder)
             end
 
-            if const_defined?('Contracts', false)
+            if const_defined?("Contracts", false)
               Builder.prepend(Base::Expander.new(self))
             end
 
-            if const_defined?('SubscriptionGroup', false)
+            if const_defined?("SubscriptionGroup", false)
               SubscriptionGroup.prepend(self::SubscriptionGroup)
             end
 
-            if const_defined?('SubscriptionGroupsBuilder', false)
+            if const_defined?("SubscriptionGroupsBuilder", false)
               SubscriptionGroupsBuilder.prepend(self::SubscriptionGroupsBuilder)
             end
           end

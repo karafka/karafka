@@ -24,7 +24,7 @@
 # This pattern allows pause state to survive restarts and rebalances, unlike Web UI pausing.
 
 class FeatureToggle
-  @flags = {}
+  @flags = {}.freeze
   @mutex = Mutex.new
 
   class << self

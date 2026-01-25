@@ -26,33 +26,33 @@ RSpec.describe_current do
   let(:event) { instance_double(Karafka::Core::Monitoring::Event) }
   let(:dispatcher) { Karafka::Pro::RecurringTasks::Dispatcher }
 
-  describe '#on_recurring_tasks_task_executed' do
+  describe "#on_recurring_tasks_task_executed" do
     before { allow(dispatcher).to receive(:log) }
 
-    it 'logs the event using Dispatcher' do
+    it "logs the event using Dispatcher" do
       listener.on_recurring_tasks_task_executed(event)
 
       expect(dispatcher).to have_received(:log).with(event)
     end
   end
 
-  describe '#on_error_occurred' do
+  describe "#on_error_occurred" do
     before { allow(dispatcher).to receive(:log) }
 
-    context 'when event type is recurring_tasks.task.execute.error' do
-      let(:event) { { type: 'recurring_tasks.task.execute.error', other_data: 'data' } }
+    context "when event type is recurring_tasks.task.execute.error" do
+      let(:event) { { type: "recurring_tasks.task.execute.error", other_data: "data" } }
 
-      it 'logs the event using Dispatcher' do
+      it "logs the event using Dispatcher" do
         listener.on_error_occurred(event)
 
         expect(dispatcher).to have_received(:log).with(event)
       end
     end
 
-    context 'when event type is not recurring_tasks.task.execute.error' do
-      let(:event) { { type: 'some_other_error', other_data: 'data' } }
+    context "when event type is not recurring_tasks.task.execute.error" do
+      let(:event) { { type: "some_other_error", other_data: "data" } }
 
-      it 'does not log the event' do
+      it "does not log the event" do
         listener.on_error_occurred(event)
 
         expect(dispatcher).not_to have_received(:log)

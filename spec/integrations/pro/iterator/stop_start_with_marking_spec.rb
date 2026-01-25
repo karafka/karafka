@@ -36,9 +36,9 @@ topics = { DT.topic => { 0 => true } }
 
 settings = {
   # Setup a custom group that you want to use for offset storage
-  'group.id': SecureRandom.uuid,
+  "group.id": SecureRandom.uuid,
   # Start from beginning if needed
-  'auto.offset.reset': 'beginning'
+  "auto.offset.reset": "beginning"
 }
 
 iterator = Karafka::Pro::Iterator.new(topics, settings: settings)

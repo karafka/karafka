@@ -26,7 +26,7 @@ become_pro!
 
 begin
   Karafka::App.setup do |config|
-    config.kafka = { 'bootstrap.servers': '127.0.0.1:9092' }
+    config.kafka = { "bootstrap.servers": "127.0.0.1:9092" }
     config.recurring_tasks.interval = -1
   end
 rescue Karafka::Errors::InvalidConfigurationError => e
@@ -38,5 +38,5 @@ assert guarded
 
 assert_equal(
   error.message,
-  { 'config.recurring_tasks.interval': 'needs to be equal or more than 1000 and an integer' }.to_s
+  { "config.recurring_tasks.interval": "needs to be equal or more than 1000 and an integer" }.to_s
 )

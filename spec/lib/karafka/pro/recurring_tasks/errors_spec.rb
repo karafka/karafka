@@ -21,19 +21,19 @@
 # Contact: contact@karafka.io
 
 RSpec.describe_current do
-  describe 'BaseError' do
+  describe "BaseError" do
     subject(:error) { described_class::BaseError }
 
     specify { expect(error).to be < Karafka::Errors::BaseError }
   end
 
-  describe 'IncompatibleSchemaError' do
+  describe "IncompatibleSchemaError" do
     subject(:error) { described_class::IncompatibleSchemaError }
 
     specify { expect(error).to be < described_class::BaseError }
   end
 
-  describe 'IncompatibleScheduleError' do
+  describe "IncompatibleScheduleError" do
     subject(:error) { described_class::IncompatibleScheduleError }
 
     specify { expect(error).to be < described_class::BaseError }

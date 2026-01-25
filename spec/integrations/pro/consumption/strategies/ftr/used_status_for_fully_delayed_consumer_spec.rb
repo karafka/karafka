@@ -24,12 +24,13 @@
 
 setup_karafka
 
-Karafka.monitor.subscribe('filtering.throttled') do
+Karafka.monitor.subscribe("filtering.throttled") do
   DT[:done] << true
 end
 
 class Consumer < Karafka::BaseConsumer
-  def consume; end
+  def consume
+  end
 
   def shutdown
     DT[:status] = used?

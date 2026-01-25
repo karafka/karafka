@@ -14,8 +14,8 @@ draw_routes(create_topics: false) do
     config(
       partitions: 1,
       # This should not be used because it is overwritten by the one below
-      'retention.bytes': 100_000,
-      'log.retention.bytes': -1
+      "retention.bytes": 100_000,
+      "log.retention.bytes": -1
     )
   end
 
@@ -25,8 +25,8 @@ draw_routes(create_topics: false) do
   end
 end
 
-ARGV[0] = 'topics'
-ARGV[1] = 'align'
+ARGV[0] = "topics"
+ARGV[1] = "align"
 
 Karafka::Cli.start
 
@@ -39,18 +39,18 @@ tr1, tr2 = Karafka::Admin::Configs.describe(resources)
 
 tr1.configs.each do |config|
   case config.name
-  when 'retention.bytes'
-    assert_equal config.value, '-1'
-  when 'cleanup.policy'
-    assert_equal config.value, 'delete'
+  when "retention.bytes"
+    assert_equal config.value, "-1"
+  when "cleanup.policy"
+    assert_equal config.value, "delete"
   end
 end
 
 tr2.configs.each do |config|
   case config.name
-  when 'retention.bytes'
-    assert_equal config.value, '-1'
-  when 'cleanup.policy'
-    assert_equal config.value, 'delete'
+  when "retention.bytes"
+    assert_equal config.value, "-1"
+  when "cleanup.policy"
+    assert_equal config.value, "delete"
   end
 end

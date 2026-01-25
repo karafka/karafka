@@ -84,9 +84,9 @@ module Karafka
             )
 
             headers = (message[:headers] || {}).merge(
-              'schedule_schema_version' => ScheduledMessages::SCHEMA_VERSION,
-              'schedule_target_epoch' => epoch.to_i.to_s,
-              'schedule_source_type' => 'schedule'
+              "schedule_schema_version" => ScheduledMessages::SCHEMA_VERSION,
+              "schedule_target_epoch" => epoch.to_i.to_s,
+              "schedule_source_type" => "schedule"
             )
 
             export(headers, message, :topic)
@@ -118,8 +118,8 @@ module Karafka
               key: key,
               payload: nil,
               headers: {
-                'schedule_schema_version' => ScheduledMessages::SCHEMA_VERSION,
-                'schedule_source_type' => 'cancel'
+                "schedule_schema_version" => ScheduledMessages::SCHEMA_VERSION,
+                "schedule_source_type" => "cancel"
               }
             }.merge(envelope)
 
@@ -140,9 +140,9 @@ module Karafka
               topic: message.topic,
               partition: message.partition,
               headers: message.raw_headers.merge(
-                'schedule_schema_version' => ScheduledMessages::SCHEMA_VERSION,
-                'schedule_source_type' => 'tombstone',
-                'schedule_source_offset' => message.offset.to_s
+                "schedule_schema_version" => ScheduledMessages::SCHEMA_VERSION,
+                "schedule_source_type" => "tombstone",
+                "schedule_source_offset" => message.offset.to_s
               )
             }
           end

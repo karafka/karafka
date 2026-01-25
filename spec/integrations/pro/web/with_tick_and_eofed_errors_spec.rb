@@ -25,13 +25,14 @@
 # from not (yet) existing marking
 
 setup_karafka(allow_errors: %w[consumer.tick.error consumer.eofed.error]) do |config|
-  config.kafka[:'enable.partition.eof'] = true
+  config.kafka[:"enable.partition.eof"] = true
 end
 
 setup_web
 
 class Consumer < Karafka::BaseConsumer
-  def consume; end
+  def consume
+  end
 
   def eofed
     DT[:eofed] = true

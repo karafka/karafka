@@ -19,7 +19,7 @@ draw_routes(Consumer)
 
 produce_many(DT.topic, DT.uuids(10))
 
-Karafka.monitor.subscribe('error.occurred') do |event|
+Karafka.monitor.subscribe("error.occurred") do |event|
   next unless event.payload.key?(:seek_offset)
 
   DT[:seek_offsets] << event.payload[:seek_offset]

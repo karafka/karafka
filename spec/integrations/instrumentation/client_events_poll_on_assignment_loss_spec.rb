@@ -4,12 +4,12 @@
 # detected, and that the AssignmentsTracker properly clears assignments in response.
 
 setup_karafka(allow_errors: true) do |config|
-  config.kafka[:'max.poll.interval.ms'] = 10_000
-  config.kafka[:'session.timeout.ms'] = 10_000
+  config.kafka[:"max.poll.interval.ms"] = 10_000
+  config.kafka[:"session.timeout.ms"] = 10_000
 end
 
 # Subscribe to client.events_poll to verify the event is emitted
-Karafka.monitor.subscribe('client.events_poll') do |event|
+Karafka.monitor.subscribe("client.events_poll") do |event|
   DT[:events_poll_events] << {
     time: Time.now.to_f,
     client_id: event[:caller].id,
@@ -33,7 +33,7 @@ end
 
 draw_routes(Consumer)
 
-produce(DT.topic, '1')
+produce(DT.topic, "1")
 
 start_karafka_and_wait_until do
   DT.key?(:done)
@@ -53,7 +53,7 @@ assert !first_event[:subscription_group_id].nil?
 
 # Verify assignments were present initially
 initial_topic = DT[:initial_assignments].keys.first
-assert !initial_topic.nil?, 'Should have initial topic assignment'
+assert !initial_topic.nil?, "Should have initial topic assignment"
 assert !DT[:initial_assignments][initial_topic].empty?
 
 # Verify assignments were cleared after exceeding max.poll.interval.ms

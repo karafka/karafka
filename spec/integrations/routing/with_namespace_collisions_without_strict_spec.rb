@@ -11,11 +11,11 @@ failed = false
 
 begin
   draw_routes(create_topics: false) do
-    topic 'namespace_collision' do
+    topic "namespace_collision" do
       consumer Class.new
     end
 
-    topic 'namespace.collision' do
+    topic "namespace.collision" do
       consumer Class.new
     end
   end

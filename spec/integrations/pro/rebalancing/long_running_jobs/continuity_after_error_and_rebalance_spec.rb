@@ -68,7 +68,7 @@ SAMPLE_PARTITIONS = [0, 1].freeze
 
 Thread.new do
   loop do
-    produce(DT.topic, '1', partition: SAMPLE_PARTITIONS.sample)
+    produce(DT.topic, "1", partition: SAMPLE_PARTITIONS.sample)
     sleep(0.1)
   rescue WaterDrop::Errors::ProducerClosedError
     break
@@ -83,7 +83,7 @@ end
 other.join
 
 lost = DT[:jumped][0][0]
-not_lost = lost == 0 ? 1 : 0
+not_lost = (lost == 0) ? 1 : 0
 
 assert_equal [0], DT[not_lost].uniq
 assert DT[not_lost].size >= 3

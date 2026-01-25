@@ -54,15 +54,15 @@ module Karafka
       # @return [String] thread-safe and lock-safe inspect implementation
       def inspect
         info = if @mutex.try_lock
-                 begin
-                   assignments = @assignments.dup.transform_keys(&:name).inspect
-                   "assignments=#{assignments}"
-                 ensure
-                   @mutex.unlock
-                 end
-               else
-                 'busy'
-               end
+          begin
+            assignments = @assignments.dup.transform_keys(&:name).inspect
+            "assignments=#{assignments}"
+          ensure
+            @mutex.unlock
+          end
+        else
+          "busy"
+        end
 
         "#<#{self.class.name} #{info}>"
       end

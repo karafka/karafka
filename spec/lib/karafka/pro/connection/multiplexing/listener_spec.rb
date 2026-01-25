@@ -30,8 +30,8 @@ RSpec.describe_current do
 
   before { allow(manager).to receive(:notice) }
 
-  describe '#on_statistics_emitted' do
-    it 'expect to be noticed' do
+  describe "#on_statistics_emitted" do
+    it "expect to be noticed" do
       listener.on_statistics_emitted(event)
 
       expect(manager).to have_received(:notice).with(subscription_group_id, statistics)

@@ -5,28 +5,28 @@ RSpec.describe_current do
 
   let(:executor) { build(:processing_executor) }
 
-  describe '#consume' do
+  describe "#consume" do
     it do
       job = builder.consume(executor, [])
       expect(job).to be_a(Karafka::Processing::Jobs::Consume)
     end
   end
 
-  describe '#eofed' do
+  describe "#eofed" do
     it do
       job = builder.eofed(executor)
       expect(job).to be_a(Karafka::Processing::Jobs::Eofed)
     end
   end
 
-  describe '#revoked' do
+  describe "#revoked" do
     it do
       job = builder.revoked(executor)
       expect(job).to be_a(Karafka::Processing::Jobs::Revoked)
     end
   end
 
-  describe '#shutdown' do
+  describe "#shutdown" do
     it do
       job = builder.shutdown(executor)
       expect(job).to be_a(Karafka::Processing::Jobs::Shutdown)

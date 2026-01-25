@@ -54,7 +54,7 @@ module Karafka
       #   so we don't stop polling data even when reaching the end (end on a given moment)
       def initialize(
         topics,
-        settings: { 'auto.offset.reset': 'beginning' },
+        settings: { "auto.offset.reset": "beginning" },
         yield_nil: false,
         max_wait_time: 200
       )

@@ -26,7 +26,7 @@ RSpec.describe_current do
   let(:old) { build(:messages_message, timestamp: Time.now.utc - 6) }
   let(:young) { build(:messages_message) }
 
-  context 'when there are no messages' do
+  context "when there are no messages" do
     before { delayer.apply!([]) }
 
     it { expect(delayer.applied?).to be(false) }
@@ -34,7 +34,7 @@ RSpec.describe_current do
     it { expect(delayer.action).to eq(:skip) }
   end
 
-  context 'when there are only too young messages' do
+  context "when there are only too young messages" do
     let(:messages) { [young] }
 
     before { delayer.apply!(messages) }
@@ -46,7 +46,7 @@ RSpec.describe_current do
     it { expect(messages.size).to eq(0) }
   end
 
-  context 'when there are only old enough messages' do
+  context "when there are only old enough messages" do
     let(:messages) { [old] }
 
     before { delayer.apply!(messages) }
@@ -58,7 +58,7 @@ RSpec.describe_current do
     it { expect(messages.size).to eq(1) }
   end
 
-  context 'when we get some old and young messages' do
+  context "when we get some old and young messages" do
     let(:messages) { [old, young] }
 
     before { delayer.apply!(messages) }

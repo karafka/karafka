@@ -12,17 +12,17 @@ end
 
 if Karafka.rails?
   # Load ActiveJob adapter
-  require 'active_job/karafka'
+  require "active_job/karafka"
 
   # Setup env if configured (may be configured later by .net, etc)
-  ENV['KARAFKA_ENV'] ||= ENV['RAILS_ENV'] if ENV.key?('RAILS_ENV')
+  ENV["KARAFKA_ENV"] ||= ENV["RAILS_ENV"] if ENV.key?("RAILS_ENV")
 
   module Karafka
     # Railtie for setting up Rails integration
     class Railtie < Rails::Railtie
       railtie_name :karafka
 
-      initializer 'karafka.active_job_integration' do
+      initializer "karafka.active_job_integration" do
         ActiveSupport.on_load(:active_job) do
           # Extend ActiveJob with some Karafka specific ActiveJob magic
           extend ::Karafka::ActiveJob::JobExtensions
@@ -32,12 +32,12 @@ if Karafka.rails?
       # This lines will make Karafka print to stdout like puma or unicorn when we run karafka
       # server + will support code reloading with each fetched loop. We do it only for karafka
       # based commands as Rails processes and console will have it enabled already
-      initializer 'karafka.configure_rails_logger' do
+      initializer "karafka.configure_rails_logger" do
         # Make Karafka uses Rails logger
         ::Karafka::App.config.logger = Rails.logger
 
         next unless Rails.env.development?
-        next unless ENV.key?('KARAFKA_CLI')
+        next unless ENV.key?("KARAFKA_CLI")
         # If we are already publishing to STDOUT, no need to add it again.
         # If added again, would print stuff twice
         next if ActiveSupport::Logger.logger_outputs_to?(Rails.logger, $stdout)
@@ -46,7 +46,7 @@ if Karafka.rails?
         # Inherit the logger level from Rails, otherwise would always run with the debug level
         stdout_logger.level = Rails.logger.level
 
-        rails71plus = Rails.gem_version >= Gem::Version.new('7.1.0')
+        rails71plus = Rails.gem_version >= Gem::Version.new("7.1.0")
 
         # Rails 7.1 replaced the broadcast module with a broadcast logger
         # While 7.1 is EOL, we keep this for users who may still use it without official support
@@ -61,20 +61,20 @@ if Karafka.rails?
         end
       end
 
-      initializer 'karafka.configure_rails_auto_load_paths' do |app|
+      initializer "karafka.configure_rails_auto_load_paths" do |app|
         # Consumers should autoload by default in the Rails app so they are visible
         app.config.autoload_paths += %w[app/consumers]
       end
 
-      initializer 'karafka.require_karafka_boot_file' do |app|
-        rails6plus = Rails.gem_version >= Gem::Version.new('6.0.0')
+      initializer "karafka.require_karafka_boot_file" do |app|
+        rails6plus = Rails.gem_version >= Gem::Version.new("6.0.0")
 
         # If the boot file location is set to "false", we should not raise an exception and we
         # should just not load karafka stuff. Setting this explicitly to false indicates, that
         # karafka is part of the supply chain but it is not a first class citizen of a given
         # system (may be just a dependency of a dependency), thus railtie should not kick in to
         # load the non-existing boot file
-        next if Karafka.boot_file.to_s == 'false'
+        next if Karafka.boot_file.to_s == "false"
 
         karafka_boot_file = Rails.root.join(Karafka.boot_file.to_s).to_s
 
@@ -96,7 +96,7 @@ if Karafka.rails?
         end
       end
 
-      initializer 'karafka.configure_worker_external_executor' do |app|
+      initializer "karafka.configure_worker_external_executor" do |app|
         app.config.after_initialize do
           app_config = Karafka::App.config
 

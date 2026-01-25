@@ -22,8 +22,8 @@
 
 # When using correct public and private keys, there should be no issues.
 
-PUBLIC_KEY = fixture_file('rsa/public_key_1.pem')
-PRIVATE_KEYS = { '1' => fixture_file('rsa/private_key_1.pem') }.freeze
+PUBLIC_KEY = fixture_file("rsa/public_key_1.pem")
+PRIVATE_KEYS = { "1" => fixture_file("rsa/private_key_1.pem") }.freeze
 
 setup_karafka do |config|
   config.encryption.active = true

@@ -32,24 +32,24 @@ RSpec.describe_current do
     }
   end
 
-  context 'when config is valid' do
+  context "when config is valid" do
     it { expect(check).to be_success }
   end
 
-  context 'when active flag is not boolean' do
+  context "when active flag is not boolean" do
     before { config[:delaying][:active] = rand }
 
     it { expect(check).not_to be_success }
   end
 
-  context 'when delay is zero' do
+  context "when delay is zero" do
     before { config[:delaying][:delay] = rand }
 
     it { expect(check).not_to be_success }
   end
 
-  context 'when delay is not an integer' do
-    before { config[:delaying][:delay] = 'test' }
+  context "when delay is not an integer" do
+    before { config[:delaying][:delay] = "test" }
 
     it { expect(check).not_to be_success }
   end

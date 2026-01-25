@@ -37,7 +37,7 @@ begin
           partitioner: ->(msg) { msg.raw_payload }
         )
         dead_letter_queue(
-          topic: 'test',
+          topic: "test",
           max_retries: 0
         )
       end

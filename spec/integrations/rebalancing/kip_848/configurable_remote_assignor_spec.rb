@@ -5,7 +5,7 @@
 
 setup_karafka(consumer_group_protocol: true) do |config|
   # Configure the remote assignor to use uniform distribution
-  config.kafka[:'group.remote.assignor'] = 'uniform'
+  config.kafka[:"group.remote.assignor"] = "uniform"
 end
 
 class Consumer < Karafka::BaseConsumer

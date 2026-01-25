@@ -10,9 +10,9 @@ setup_karafka do |config|
   config.internal.swarm.node_report_timeout = 200_000_000
 end
 
-2.times { produce(DT.topic, '1') }
+2.times { produce(DT.topic, "1") }
 
-Karafka.monitor.subscribe('connection.listener.fetch_loop') do
+Karafka.monitor.subscribe("connection.listener.fetch_loop") do
   DT[:runs] << true
 end
 

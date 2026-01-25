@@ -10,7 +10,7 @@ class SingleMessageBatchConsumer < Karafka::BaseConsumer
       message_data = JSON.parse(message.raw_payload)
 
       batch_info = {
-        message_id: message_data['id'],
+        message_id: message_data["id"],
         batch_size: messages.size,
         is_single_message: messages.size == 1,
         message_offset: message.metadata.offset,
@@ -48,7 +48,7 @@ end
 # Verify all messages were processed
 assert_equal(
   single_messages.size, DT[:consumed].size,
-  'Should process all single messages'
+  "Should process all single messages"
 )
 
 # Verify batch processing occurred (may be single or multi-message batches)
@@ -56,24 +56,24 @@ assert_equal(
 total_batches = DT[:consumed].map { |entry| entry[:batch_size] }.uniq.size
 assert(
   total_batches >= 1,
-  'Should have processed messages in batches'
+  "Should have processed messages in batches"
 )
 
 # Verify message data integrity
 DT[:consumed].each do |entry|
   assert(
     entry[:batch_size] > 0,
-    'Batch size should be positive'
+    "Batch size should be positive"
   )
 
   assert(
     entry[:message_offset].is_a?(Integer),
-    'Should have valid message offset'
+    "Should have valid message offset"
   )
 
   assert_equal(
     0, entry[:partition],
-    'Should be from partition 0'
+    "Should be from partition 0"
   )
 
   # If it's marked as single message, verify batch size is 1
@@ -81,7 +81,7 @@ DT[:consumed].each do |entry|
 
   assert_equal(
     1, entry[:batch_size],
-    'Single message flag should match batch size of 1'
+    "Single message flag should match batch size of 1"
   )
 end
 
@@ -90,11 +90,11 @@ consumed_ids = DT[:consumed].map { |entry| entry[:message_id] }.sort
 expected_ids = (1..single_messages.size).to_a
 assert_equal(
   expected_ids, consumed_ids,
-  'Should preserve message ordering'
+  "Should preserve message ordering"
 )
 
 # The key success criteria: batch processing handled correctly
 assert_equal(
   single_messages.size, DT[:consumed].size,
-  'Should handle message batch processing without issues'
+  "Should handle message batch processing without issues"
 )

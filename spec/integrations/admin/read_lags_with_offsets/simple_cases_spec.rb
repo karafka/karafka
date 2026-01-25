@@ -31,8 +31,8 @@ produce_many(DT.topics[0], DT.uuids(10))
 
 # Case 1 - CG that never consumed a non-existing topic
 assert_equal(
-  { 'nonexisting' => { 'na-topic1' => {}, 'na-topic2' => {} } },
-  read_lags_with_offsets('nonexisting' => %w[na-topic1 na-topic2])
+  { "nonexisting" => { "na-topic1" => {}, "na-topic2" => {} } },
+  read_lags_with_offsets("nonexisting" => %w[na-topic1 na-topic2])
 )
 
 NA = { lag: -1, offset: -1 }.freeze

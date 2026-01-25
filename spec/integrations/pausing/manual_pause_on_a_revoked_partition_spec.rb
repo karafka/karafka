@@ -4,8 +4,8 @@
 # we get it back (if we get it back)
 
 setup_karafka(allow_errors: true) do |config|
-  config.kafka[:'max.poll.interval.ms'] = 10_000
-  config.kafka[:'session.timeout.ms'] = 10_000
+  config.kafka[:"max.poll.interval.ms"] = 10_000
+  config.kafka[:"session.timeout.ms"] = 10_000
   config.concurrency = 1
 end
 

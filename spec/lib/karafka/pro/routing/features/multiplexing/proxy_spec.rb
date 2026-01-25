@@ -25,7 +25,7 @@ RSpec.describe_current do
 
   let(:topic) { builder.first.topics.first }
 
-  describe '#multiplexing' do
+  describe "#multiplexing" do
     before do
       builder.draw do
         consumer_group(:a) do
@@ -40,6 +40,6 @@ RSpec.describe_current do
 
     it { expect(topic.subscription_group_details[:multiplexing_min]).to eq(2) }
     it { expect(topic.subscription_group_details[:multiplexing_max]).to eq(3) }
-    it { expect(topic.subscription_group_details[:name]).to eq('test') }
+    it { expect(topic.subscription_group_details[:name]).to eq("test") }
   end
 end

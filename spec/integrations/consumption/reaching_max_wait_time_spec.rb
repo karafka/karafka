@@ -22,7 +22,7 @@ end
 
 draw_routes(Consumer)
 
-3.times { produce(DT.topic, 'data') }
+3.times { produce(DT.topic, "data") }
 
 started_at = Time.now.to_f
 

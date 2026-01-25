@@ -49,7 +49,7 @@ Thread.new do
     produce_many(DT.topic, DT.uuids(2), partition: 1)
 
     sleep(0.5)
-  rescue StandardError
+  rescue
     nil
   end
 end
@@ -83,7 +83,7 @@ start_karafka_and_wait_until do
 end
 
 taken_partition = DT[:jumped].first
-non_taken = taken_partition == 1 ? 0 : 1
+non_taken = (taken_partition == 1) ? 0 : 1
 
 assert_equal 2, DT.data[taken_partition].uniq.size
 assert_equal 3, DT.data[non_taken].uniq.size

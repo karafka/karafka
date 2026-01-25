@@ -54,10 +54,10 @@ end
 
 Thread.new do
   loop do
-    produce(DT.topic, '1', partition: 0)
+    produce(DT.topic, "1", partition: 0)
 
     sleep(0.1)
-  rescue StandardError
+  rescue
     nil
   end
 end

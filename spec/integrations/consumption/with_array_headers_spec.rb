@@ -14,11 +14,11 @@ end
 
 draw_routes(Consumer)
 
-HEADERS = { 'a' => 'b', 'c' => %w[d e] }.freeze
+HEADERS = { "a" => "b", "c" => %w[d e] }.freeze
 
 Karafka.producer.produce_sync(
   topic: DT.topic,
-  payload: '',
+  payload: "",
   headers: HEADERS
 )
 

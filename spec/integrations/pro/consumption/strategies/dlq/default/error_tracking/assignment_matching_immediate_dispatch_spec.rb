@@ -26,7 +26,7 @@ setup_karafka(allow_errors: %w[consumer.consume.error]) do |config|
   config.max_messages = 10
 end
 
-Karafka.monitor.subscribe('error.occurred') do |event|
+Karafka.monitor.subscribe("error.occurred") do |event|
   DT[:traces] << event[:caller].errors_tracker.trace_id
 end
 
@@ -64,8 +64,8 @@ end
 sleep(1)
 
 dlq_traces = Karafka::Admin
-             .read_topic(DT.topics[1], 0, 100)
-             .map { |message| message.headers['source_trace_id'] }
+  .read_topic(DT.topics[1], 0, 100)
+  .map { |message| message.headers["source_trace_id"] }
 
 assert_equal(
   DT[:traces],

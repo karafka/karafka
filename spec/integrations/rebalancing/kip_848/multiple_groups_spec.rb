@@ -68,14 +68,14 @@ start_karafka_and_wait_until do
 end
 
 # Verify all groups consumed all messages independently
-assert_equal elements.size, DT[:group1].size, 'Group 1 should consume all messages'
-assert_equal elements.size, DT[:group2].size, 'Group 2 should consume all messages'
-assert_equal elements.size, DT[:group3].size, 'Group 3 should consume all messages'
+assert_equal elements.size, DT[:group1].size, "Group 1 should consume all messages"
+assert_equal elements.size, DT[:group2].size, "Group 2 should consume all messages"
+assert_equal elements.size, DT[:group3].size, "Group 3 should consume all messages"
 
 # Verify all groups consumed the same messages (but independently)
-assert_equal elements.sort, DT[:group1].sort, 'Group 1 should consume all expected messages'
-assert_equal elements.sort, DT[:group2].sort, 'Group 2 should consume all expected messages'
-assert_equal elements.sort, DT[:group3].sort, 'Group 3 should consume all expected messages'
+assert_equal elements.sort, DT[:group1].sort, "Group 1 should consume all expected messages"
+assert_equal elements.sort, DT[:group2].sort, "Group 2 should consume all expected messages"
+assert_equal elements.sort, DT[:group3].sort, "Group 3 should consume all expected messages"
 
 # Verify that each group processed messages independently
 # (they all should have processed all messages since they're separate consumer groups)

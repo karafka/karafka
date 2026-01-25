@@ -129,10 +129,10 @@ start_karafka_and_wait_until do
 end
 
 # 1. Verify filter removed the expected messages
-assert_equal [4, 5, 6], DT[:removed].sort, 'Should remove offsets 4-6'
+assert_equal [4, 5, 6], DT[:removed].sort, "Should remove offsets 4-6"
 
 # 2. Verify cursor was set to last removed offset
-assert_equal 6, DT[:cursor_offset], 'Cursor should be set to offset 6 (last removed)'
+assert_equal 6, DT[:cursor_offset], "Cursor should be set to offset 6 (last removed)"
 
 # 3. Verify removed messages were not consumed
 DT[:removed].each do |offset|
@@ -140,15 +140,15 @@ DT[:removed].each do |offset|
 end
 
 # 4. Verify marking behavior
-assert DT[:marked].include?(3), 'Offset 3 should be marked'
-assert DT[:marked].include?(9), 'Offset 9 should be marked ahead'
+assert DT[:marked].include?(3), "Offset 3 should be marked"
+assert DT[:marked].include?(9), "Offset 9 should be marked ahead"
 
 # 5. Verify marking ahead happened from offset 7
-assert_equal 7, DT[:marked_ahead_from], 'Marking ahead should happen from offset 7'
+assert_equal 7, DT[:marked_ahead_from], "Marking ahead should happen from offset 7"
 
 # 6. Ensure correct offsets were consumed (all except removed)
 expected_consumed = (0..19).to_a - [4, 5, 6]
-assert_equal expected_consumed, DT[:consumed].sort, 'Should consume all except filtered offsets'
+assert_equal expected_consumed, DT[:consumed].sort, "Should consume all except filtered offsets"
 
 # 7. Verify no duplicate consumption
-assert_equal DT[:consumed].uniq.size, DT[:consumed].size, 'No duplicate consumption'
+assert_equal DT[:consumed].uniq.size, DT[:consumed].size, "No duplicate consumption"

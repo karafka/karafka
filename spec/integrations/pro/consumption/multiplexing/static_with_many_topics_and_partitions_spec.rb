@@ -25,8 +25,8 @@
 
 setup_karafka do |config|
   config.concurrency = 10
-  config.kafka[:'group.instance.id'] = SecureRandom.uuid
-  config.kafka[:'partition.assignment.strategy'] = 'cooperative-sticky'
+  config.kafka[:"group.instance.id"] = SecureRandom.uuid
+  config.kafka[:"partition.assignment.strategy"] = "cooperative-sticky"
 end
 
 DT[:used] = Set.new

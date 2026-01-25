@@ -32,7 +32,7 @@ class Consumer < Karafka::BaseConsumer
     segment_id = topic.consumer_group.segment_id
 
     messages.each do |message|
-      vp_key = message.raw_payload.split('-').first
+      vp_key = message.raw_payload.split("-").first
       DT[:processed] << [message.key, segment_id, vp_key]
       DT[segment_id] << message.raw_payload
       DT["segment-#{segment_id}-vpkey-#{vp_key}"] << message.raw_payload
@@ -51,7 +51,7 @@ draw_routes do
       consumer Consumer
 
       virtual_partitions(
-        partitioner: ->(message) { message.raw_payload.split('-').first },
+        partitioner: ->(message) { message.raw_payload.split("-").first },
         max_partitions: 3
       )
     end

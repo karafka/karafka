@@ -22,11 +22,11 @@ module ActiveJob
     #
     # @see https://github.com/sidekiq/sidekiq/issues/6746 Similar issue in Sidekiq
     base = if defined?(Rails::VERSION)
-             (Rails::VERSION::MAJOR == 7 && Rails::VERSION::MINOR < 2 ? Object : AbstractAdapter)
-           else
-             # Fallback when Rails is not loaded
-             Object
-           end
+      ((Rails::VERSION::MAJOR == 7 && Rails::VERSION::MINOR < 2) ? Object : AbstractAdapter)
+    else
+      # Fallback when Rails is not loaded
+      Object
+    end
 
     # Karafka adapter for enqueuing jobs
     # This is here for ease of integration with ActiveJob.

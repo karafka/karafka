@@ -29,8 +29,8 @@ module Karafka
         class Config < Karafka::Contracts::Base
           configure do |config|
             config.error_messages = YAML.safe_load_file(
-              File.join(Karafka.gem_root, 'config', 'locales', 'pro_errors.yml')
-            ).fetch('en').fetch('validations').fetch('setup').fetch('config')
+              File.join(Karafka.gem_root, "config", "locales", "pro_errors.yml")
+            ).fetch("en").fetch("validations").fetch("setup").fetch("config")
           end
 
           nested(:encryption) do

@@ -25,7 +25,7 @@ RSpec.describe_current do
 
   subject(:manager) { described_class.new }
 
-  let(:statistics) { JSON.parse(fixture_file('statistics.json')) }
+  let(:statistics) { JSON.parse(fixture_file("statistics.json")) }
   let(:listener_class) { Karafka::Connection::Listener }
   let(:listener_g11) { listener_class.new(subscription_group1, jobs_queue, nil) }
   let(:listener_g12) { listener_class.new(subscription_group2, jobs_queue, nil) }
@@ -39,19 +39,19 @@ RSpec.describe_current do
   let(:app) { Karafka::App }
 
   let(:subscription_group1) do
-    build(:routing_subscription_group, name: 'g1', topics: [routing_topic1])
+    build(:routing_subscription_group, name: "g1", topics: [routing_topic1])
   end
 
   let(:subscription_group2) do
-    build(:routing_subscription_group, name: 'g1', topics: [routing_topic2])
+    build(:routing_subscription_group, name: "g1", topics: [routing_topic2])
   end
 
   let(:subscription_group3) do
-    build(:routing_subscription_group, name: 'g2', topics: [routing_topic3])
+    build(:routing_subscription_group, name: "g2", topics: [routing_topic3])
   end
 
   let(:subscription_group4) do
-    build(:routing_subscription_group, name: 'g2', topics: [routing_topic4])
+    build(:routing_subscription_group, name: "g2", topics: [routing_topic4])
   end
 
   let(:listeners) do
@@ -71,14 +71,14 @@ RSpec.describe_current do
     listeners.each { |listener| allow(listener).to receive(:start!) }
   end
 
-  describe '#register' do
-    it 'expect to start all listeners if none in multiplexed mode' do
+  describe "#register" do
+    it "expect to start all listeners if none in multiplexed mode" do
       manager.register(listeners)
 
       expect(listeners).to all have_received(:start!)
     end
 
-    context 'when we operate in a non-dynamic multiplexed mode' do
+    context "when we operate in a non-dynamic multiplexed mode" do
       before do
         subscription_group1.multiplexing.active = true
         subscription_group1.multiplexing.min = 2
@@ -86,14 +86,14 @@ RSpec.describe_current do
         subscription_group1.multiplexing.boot = 2
       end
 
-      it 'expect to start all listeners' do
+      it "expect to start all listeners" do
         manager.register(listeners)
 
         expect(listeners).to all have_received(:start!)
       end
     end
 
-    context 'when we operate in a dynamic multiplexed mode' do
+    context "when we operate in a dynamic multiplexed mode" do
       before do
         subscription_group1.multiplexing.active = true
         subscription_group1.multiplexing.min = 1
@@ -103,51 +103,51 @@ RSpec.describe_current do
         manager.register(listeners)
       end
 
-      it 'expect to start all non-dynamic' do
+      it "expect to start all non-dynamic" do
         expect(listener_g21).to have_received(:start!)
         expect(listener_g22).to have_received(:start!)
       end
 
-      it 'expect to start boot dynamic' do
+      it "expect to start boot dynamic" do
         expect(listener_g11).to have_received(:start!)
         expect(listener_g12).not_to have_received(:start!)
       end
     end
   end
 
-  describe '#notice' do
+  describe "#notice" do
     let(:changes) { manager.instance_variable_get(:@changes) }
     let(:details) { changes.values.first }
 
     before { manager.register(listeners) }
 
-    context 'when notice was used' do
+    context "when notice was used" do
       before { manager.notice(subscription_group1.id, statistics) }
 
       it { expect(details[:state_age]).to eq(13_995) }
-      it { expect(details[:join_state]).to eq('steady') }
-      it { expect(details[:state]).to eq('up') }
+      it { expect(details[:join_state]).to eq("steady") }
+      it { expect(details[:state]).to eq("up") }
       it { expect(monotonic_now - details[:changed_at]).to be < 50 }
     end
   end
 
-  describe '#control' do
+  describe "#control" do
     before { allow(app).to receive(:done?).and_return(done) }
 
-    context 'when processing is done' do
+    context "when processing is done" do
       let(:done) { true }
 
-      it 'expect to run shutdown' do
+      it "expect to run shutdown" do
         allow(manager).to receive(:shutdown)
         manager.control
         expect(manager).to have_received(:shutdown)
       end
     end
 
-    context 'when processing is not done' do
+    context "when processing is not done" do
       let(:done) { false }
 
-      it 'expect to run rescale' do
+      it "expect to run rescale" do
         allow(manager).to receive(:rescale)
         manager.control
         expect(manager).to have_received(:rescale)
@@ -155,7 +155,7 @@ RSpec.describe_current do
     end
   end
 
-  describe '#shutdown' do
+  describe "#shutdown" do
     let(:quiet) { false }
 
     before do
@@ -170,7 +170,7 @@ RSpec.describe_current do
       )
     end
 
-    context 'when under quiet' do
+    context "when under quiet" do
       before do
         allow(app).to receive_messages(
           done?: true,
@@ -179,7 +179,7 @@ RSpec.describe_current do
         )
       end
 
-      context 'when it just started' do
+      context "when it just started" do
         before { manager.control }
 
         it { expect(listener_g11).to have_received(:quiet!) }
@@ -188,15 +188,15 @@ RSpec.describe_current do
         it { expect(listener_g22).not_to have_received(:quiet!) }
       end
 
-      context 'when not all listeners are quieted' do
-        it 'expect not to switch process to quiet' do
+      context "when not all listeners are quieted" do
+        it "expect not to switch process to quiet" do
           manager.control
 
           expect(app).not_to have_received(:quieted!)
         end
       end
 
-      context 'when all listeners are quieted' do
+      context "when all listeners are quieted" do
         before do
           allow(app).to receive(:quiet?).and_return(true)
 
@@ -205,11 +205,11 @@ RSpec.describe_current do
           manager.control
         end
 
-        it 'expect to switch whole process to quieted' do
+        it "expect to switch whole process to quieted" do
           expect(app).to have_received(:quieted!)
         end
 
-        it 'expect not to move them forward to stopping' do
+        it "expect not to move them forward to stopping" do
           listeners.each do |listener|
             expect(listener).not_to have_received(:stop!)
           end
@@ -217,7 +217,7 @@ RSpec.describe_current do
       end
     end
 
-    context 'when stopping' do
+    context "when stopping" do
       before do
         allow(app).to receive_messages(
           done?: true,
@@ -227,7 +227,7 @@ RSpec.describe_current do
         )
       end
 
-      context 'when it just started' do
+      context "when it just started" do
         before { manager.control }
 
         it { expect(listener_g11).to have_received(:quiet!) }
@@ -236,15 +236,15 @@ RSpec.describe_current do
         it { expect(listener_g22).not_to have_received(:quiet!) }
       end
 
-      context 'when not all listeners are quieted' do
-        it 'expect not to switch process to quiet' do
+      context "when not all listeners are quieted" do
+        it "expect not to switch process to quiet" do
           manager.control
 
           expect(app).not_to have_received(:quieted!)
         end
       end
 
-      context 'when all listeners are quieted' do
+      context "when all listeners are quieted" do
         before do
           allow(app).to receive(:quiet?).and_return(false)
 
@@ -253,16 +253,16 @@ RSpec.describe_current do
           manager.control
         end
 
-        it 'expect to switch whole process to quieted' do
+        it "expect to switch whole process to quieted" do
           expect(app).to have_received(:quieted!)
         end
 
-        it 'expect to move them forward to stopping' do
+        it "expect to move them forward to stopping" do
           expect(listeners).to all have_received(:stop!)
         end
       end
 
-      context 'when all listeners are stopped' do
+      context "when all listeners are stopped" do
         before do
           allow(app).to receive(:quiet?).and_return(false)
 
@@ -271,14 +271,14 @@ RSpec.describe_current do
           manager.control
         end
 
-        it 'expect to move them forward to stopping' do
+        it "expect to move them forward to stopping" do
           expect(listeners).to all have_received(:stopped!).twice
         end
       end
     end
   end
 
-  describe '#scale_down' do
+  describe "#scale_down" do
     let(:done) { false }
     let(:assignments) { {} }
 
@@ -290,7 +290,7 @@ RSpec.describe_current do
       manager.notice(routing_topic1.subscription_group.id, statistics)
     end
 
-    context 'when there are no assignments' do
+    context "when there are no assignments" do
       before { manager.control }
 
       it do
@@ -300,23 +300,23 @@ RSpec.describe_current do
       end
     end
 
-    context 'when there are assignments that are maxed out and active but one with partition' do
+    context "when there are assignments that are maxed out and active but one with partition" do
       let(:assignments) { { routing_topic1 => [0] } }
 
-      context 'when multiplexing is off for this group' do
+      context "when multiplexing is off for this group" do
         before do
           subscription_group1.multiplexing.active = false
           manager.control
         end
 
-        it 'expect not to downscale' do
+        it "expect not to downscale" do
           listeners.each do |listener|
             expect(listener).not_to have_received(:stop!)
           end
         end
       end
 
-      context 'when multiplexing is on but not in dynamic mode' do
+      context "when multiplexing is on but not in dynamic mode" do
         before do
           subscription_group1.multiplexing.active = true
           subscription_group1.multiplexing.min = 5
@@ -324,14 +324,14 @@ RSpec.describe_current do
           manager.control
         end
 
-        it 'expect not to downscale' do
+        it "expect not to downscale" do
           listeners.each do |listener|
             expect(listener).not_to have_received(:stop!)
           end
         end
       end
 
-      context 'when multiplexing is on and in a dynamic mode and we could downscale' do
+      context "when multiplexing is on and in a dynamic mode and we could downscale" do
         before do
           subscription_group1.multiplexing.scale_delay = 0
           subscription_group1.multiplexing.active = true
@@ -346,7 +346,7 @@ RSpec.describe_current do
           manager.control
         end
 
-        it 'expect to downscale one listener out of stable group' do
+        it "expect to downscale one listener out of stable group" do
           listeners.each.with_index do |listener, i|
             if i == 1
               expect(listener).to have_received(:stop!)
@@ -359,7 +359,7 @@ RSpec.describe_current do
     end
   end
 
-  describe '#scale_up' do
+  describe "#scale_up" do
     let(:done) { false }
     let(:assignments) { {} }
 
@@ -371,7 +371,7 @@ RSpec.describe_current do
       manager.notice(routing_topic1.subscription_group.id, statistics)
     end
 
-    context 'when there are no assignments' do
+    context "when there are no assignments" do
       before { manager.control }
 
       it do
@@ -381,21 +381,21 @@ RSpec.describe_current do
       end
     end
 
-    context 'when there are assignments that are maxed out and active with many partitions' do
+    context "when there are assignments that are maxed out and active with many partitions" do
       let(:assignments) { { routing_topic1 => [0, 1, 2] } }
 
-      context 'when multiplexing is off for this group' do
+      context "when multiplexing is off for this group" do
         before do
           subscription_group1.multiplexing.active = false
           manager.control
         end
 
-        it 'expect not to upscale' do
+        it "expect not to upscale" do
           expect(listeners).to all have_received(:start!).once
         end
       end
 
-      context 'when multiplexing is on but not in dynamic mode' do
+      context "when multiplexing is on but not in dynamic mode" do
         before do
           subscription_group1.multiplexing.active = true
           subscription_group1.multiplexing.min = 5
@@ -403,12 +403,12 @@ RSpec.describe_current do
           manager.control
         end
 
-        it 'expect not to upscale' do
+        it "expect not to upscale" do
           expect(listeners).to all have_received(:start!).once
         end
       end
 
-      context 'when multiplexing is on and in a dynamic mode and we could upscale' do
+      context "when multiplexing is on and in a dynamic mode and we could upscale" do
         before do
           subscription_group1.multiplexing.scale_delay = 0
           subscription_group1.multiplexing.active = true
@@ -419,7 +419,7 @@ RSpec.describe_current do
           manager.control
         end
 
-        it 'expect to upscale one listener out of stable group' do
+        it "expect to upscale one listener out of stable group" do
           listeners.each.with_index do |listener, i|
             if i == 1
               expect(listener).to have_received(:start!).twice

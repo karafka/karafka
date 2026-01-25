@@ -14,7 +14,8 @@ class JobA < ActiveJob::Base
     dispatch_many_method: :produce_many_sync
   )
 
-  def perform; end
+  def perform
+  end
 end
 
 class JobB < ActiveJob::Base
@@ -22,7 +23,8 @@ class JobB < ActiveJob::Base
     dispatch_method: :produce_async
   )
 
-  def perform; end
+  def perform
+  end
 end
 
 class JobC < JobA

@@ -31,7 +31,7 @@ draw_routes do
   end
 end
 
-2.times { produce(DT.topic, '1') }
+2.times { produce(DT.topic, "1") }
 
 iterator = Karafka::Pro::Iterator.new(
   { DT.topic => { 0 => -100 } }

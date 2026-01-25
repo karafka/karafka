@@ -82,12 +82,12 @@ module Karafka
               # If we are not inside a transaction but this is a transactional topic, we mark with
               # artificially created transaction
               stored = if producer.transactional?
-                         mark_with_transaction(message, offset_metadata, true)
-                       elsif @_transactional_marking
-                         raise Errors::NonTransactionalMarkingAttemptError
-                       else
-                         client.mark_as_consumed(message, offset_metadata)
-                       end
+                mark_with_transaction(message, offset_metadata, true)
+              elsif @_transactional_marking
+                raise Errors::NonTransactionalMarkingAttemptError
+              else
+                client.mark_as_consumed(message, offset_metadata)
+              end
 
               return revoked? unless stored
 
@@ -124,12 +124,12 @@ module Karafka
               # If we are not inside a transaction but this is a transactional topic, we mark with
               # artificially created transaction
               stored = if producer.transactional?
-                         mark_with_transaction(message, offset_metadata, false)
-                       elsif @_transactional_marking
-                         raise Errors::NonTransactionalMarkingAttemptError
-                       else
-                         client.mark_as_consumed!(message, offset_metadata)
-                       end
+                mark_with_transaction(message, offset_metadata, false)
+              elsif @_transactional_marking
+                raise Errors::NonTransactionalMarkingAttemptError
+              else
+                client.mark_as_consumed!(message, offset_metadata)
+              end
 
               return revoked? unless stored
 
@@ -165,7 +165,7 @@ module Karafka
             default_producer = nil
             transaction_started = nil
 
-            monitor.instrument('consumer.consuming.transaction', caller: self) do
+            monitor.instrument("consumer.consuming.transaction", caller: self) do
               default_producer = producer
               self.producer = active_producer
 
@@ -311,7 +311,7 @@ module Karafka
 
           # No actions needed for the standard flow here
           def handle_before_schedule_consume
-            monitor.instrument('consumer.before_schedule_consume', caller: self)
+            monitor.instrument("consumer.before_schedule_consume", caller: self)
 
             nil
           end
@@ -330,15 +330,15 @@ module Karafka
             # This can happen primarily when an LRJ job gets to the internal worker queue and
             # this partition is revoked prior processing.
             unless revoked?
-              monitor.instrument('consumer.consume', caller: self)
-              monitor.instrument('consumer.consumed', caller: self) do
+              monitor.instrument("consumer.consume", caller: self)
+              monitor.instrument("consumer.consumed", caller: self) do
                 consume
               end
             end
 
             # Mark job as successful
             coordinator.success!(self)
-          rescue StandardError => e
+          rescue => e
             # If failed, mark as failed
             coordinator.failure!(self, e)
 
@@ -377,8 +377,8 @@ module Karafka
               coordinator.revoke
             end
 
-            monitor.instrument('consumer.revoke', caller: self)
-            monitor.instrument('consumer.revoked', caller: self) do
+            monitor.instrument("consumer.revoke", caller: self)
+            monitor.instrument("consumer.revoked", caller: self) do
               revoked
             end
           ensure
@@ -387,15 +387,15 @@ module Karafka
 
           # No action needed for the tick standard flow
           def handle_before_schedule_tick
-            monitor.instrument('consumer.before_schedule_tick', caller: self)
+            monitor.instrument("consumer.before_schedule_tick", caller: self)
 
             nil
           end
 
           # Runs the consumer `#tick` method with reporting
           def handle_tick
-            monitor.instrument('consumer.tick', caller: self)
-            monitor.instrument('consumer.ticked', caller: self) do
+            monitor.instrument("consumer.tick", caller: self)
+            monitor.instrument("consumer.ticked", caller: self) do
               tick
             end
           ensure

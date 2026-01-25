@@ -46,7 +46,7 @@ module Karafka
 
         # Initializes the state as fresh
         def initialize
-          @state = 'fresh'
+          @state = "fresh"
         end
 
         STATES.each do |state|

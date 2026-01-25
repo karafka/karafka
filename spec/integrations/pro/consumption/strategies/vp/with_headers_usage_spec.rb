@@ -29,8 +29,8 @@ end
 class Consumer < Karafka::BaseConsumer
   def consume
     messages
-      .select { |message| message.headers.key?('iteration') }
-      .select { |message| message.headers['iteration'].to_i > 5 }
+      .select { |message| message.headers.key?("iteration") }
+      .select { |message| message.headers["iteration"].to_i > 5 }
       .each do |message|
         1_000.times do
           message.headers.to_h.dup.transform_keys!(&:to_s)
@@ -52,7 +52,7 @@ draw_routes do
 end
 
 10.times do |i|
-  produce_many(DT.topic, DT.uuids(10), headers: { 'iteration' => i.to_s, 'transform' => 'test' })
+  produce_many(DT.topic, DT.uuids(10), headers: { "iteration" => i.to_s, "transform" => "test" })
 end
 
 start_karafka_and_wait_until do

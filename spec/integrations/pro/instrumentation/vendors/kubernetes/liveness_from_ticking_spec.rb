@@ -22,8 +22,8 @@
 
 # When we only tick, it should be considered good as long as within time boundaries
 
-require 'net/http'
-require 'karafka/instrumentation/vendors/kubernetes/liveness_listener'
+require "net/http"
+require "karafka/instrumentation/vendors/kubernetes/liveness_listener"
 
 setup_karafka
 
@@ -39,14 +39,14 @@ class Consumer < Karafka::BaseConsumer
 end
 
 listener = Karafka::Instrumentation::Vendors::Kubernetes::LivenessListener.new(
-  hostname: '127.0.0.1',
+  hostname: "127.0.0.1",
   port: 9006,
   consuming_ttl: 1_000
 )
 
 Karafka.monitor.subscribe(listener)
 
-raw_flows = +''
+raw_flows = +""
 
 Thread.new do
   sleep(0.1) until Karafka::App.running?
@@ -55,14 +55,14 @@ Thread.new do
   until Karafka::App.stopping?
     sleep(0.1)
 
-    req = Net::HTTP::Get.new('/')
-    client = Net::HTTP.new('127.0.0.1', 9006)
+    req = Net::HTTP::Get.new("/")
+    client = Net::HTTP.new("127.0.0.1", 9006)
     client.set_debug_output(raw_flows)
     response = client.request(req)
 
     DT[:probing] << response.code
 
-    next if response.code == '200'
+    next if response.code == "200"
 
     DT[:bodies] << response.body
   end
@@ -79,16 +79,16 @@ start_karafka_and_wait_until do
   DT.key?(0)
 end
 
-assert DT[:probing].include?('200')
+assert DT[:probing].include?("200")
 # 500 should happen as we tuned it aggressively and it should react to "hanging" tick
-assert DT[:probing].include?('500')
+assert DT[:probing].include?("500")
 
 last = JSON.parse(DT[:bodies].last)
 
-assert_equal 'unhealthy', last['status']
-assert last.key?('timestamp')
-assert_equal 9006, last['port']
-assert_equal Process.pid, last['process_id']
-assert_equal false, last['errors']['polling_ttl_exceeded']
-assert_equal true, last['errors']['consumption_ttl_exceeded']
-assert_equal false, last['errors']['unrecoverable']
+assert_equal "unhealthy", last["status"]
+assert last.key?("timestamp")
+assert_equal 9006, last["port"]
+assert_equal Process.pid, last["process_id"]
+assert_equal false, last["errors"]["polling_ttl_exceeded"]
+assert_equal true, last["errors"]["consumption_ttl_exceeded"]
+assert_equal false, last["errors"]["unrecoverable"]

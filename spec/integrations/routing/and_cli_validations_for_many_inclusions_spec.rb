@@ -15,27 +15,27 @@ def redraw
     defaults { consumer Class.new }
 
     consumer_group :c1 do
-      topic 't1'
+      topic "t1"
     end
 
     consumer_group :c2 do
-      topic 't2'
+      topic "t2"
 
       subscription_group :s1 do
-        topic 't3'
+        topic "t3"
       end
 
       subscription_group :s2 do
-        topic 't5'
+        topic "t5"
       end
 
       subscription_group :s3 do
-        topic 't6'
+        topic "t6"
       end
     end
 
     consumer_group :c3 do
-      topic 't4'
+      topic "t4"
     end
   end
 
@@ -61,61 +61,61 @@ module Karafka
 end
 
 redraw do
-  ARGV[0] = 'server'
-  ARGV[1] = '--topics'
-  ARGV[2] = 't1,t2'
+  ARGV[0] = "server"
+  ARGV[1] = "--topics"
+  ARGV[2] = "t1,t2"
 end
 
-assert AM.active?(:topics, 't1')
-assert AM.active?(:topics, 't2')
-assert !AM.active?(:topics, 't3')
+assert AM.active?(:topics, "t1")
+assert AM.active?(:topics, "t2")
+assert !AM.active?(:topics, "t3")
 
 redraw do
-  ARGV[0] = 'server'
-  ARGV[1] = '--exclude-topics'
-  ARGV[2] = 't1'
+  ARGV[0] = "server"
+  ARGV[1] = "--exclude-topics"
+  ARGV[2] = "t1"
 end
 
-assert !AM.active?(:topics, 't1')
-assert AM.active?(:topics, 't2')
-assert AM.active?(:topics, 't3')
+assert !AM.active?(:topics, "t1")
+assert AM.active?(:topics, "t2")
+assert AM.active?(:topics, "t3")
 
 redraw do
-  ARGV[0] = 'server'
-  ARGV[1] = '--exclude-consumer-groups'
-  ARGV[2] = 'c1'
+  ARGV[0] = "server"
+  ARGV[1] = "--exclude-consumer-groups"
+  ARGV[2] = "c1"
 end
 
-assert !AM.active?(:consumer_groups, 'c1')
-assert AM.active?(:consumer_groups, 'c2')
-assert AM.active?(:consumer_groups, 'c3')
+assert !AM.active?(:consumer_groups, "c1")
+assert AM.active?(:consumer_groups, "c2")
+assert AM.active?(:consumer_groups, "c3")
 
 redraw do
-  ARGV[0] = 'server'
-  ARGV[1] = '--exclude-consumer-groups'
-  ARGV[2] = 'c1,c2'
+  ARGV[0] = "server"
+  ARGV[1] = "--exclude-consumer-groups"
+  ARGV[2] = "c1,c2"
 end
 
-assert !AM.active?(:consumer_groups, 'c1')
-assert !AM.active?(:consumer_groups, 'c2')
-assert AM.active?(:consumer_groups, 'c3')
+assert !AM.active?(:consumer_groups, "c1")
+assert !AM.active?(:consumer_groups, "c2")
+assert AM.active?(:consumer_groups, "c3")
 
 redraw do
-  ARGV[0] = 'server'
-  ARGV[1] = '--exclude-subscription-groups'
-  ARGV[2] = 's1,s3'
+  ARGV[0] = "server"
+  ARGV[1] = "--exclude-subscription-groups"
+  ARGV[2] = "s1,s3"
 end
 
-assert !AM.active?(:subscription_groups, 's1')
-assert !AM.active?(:subscription_groups, 's3')
-assert AM.active?(:subscription_groups, 's2')
+assert !AM.active?(:subscription_groups, "s1")
+assert !AM.active?(:subscription_groups, "s3")
+assert AM.active?(:subscription_groups, "s2")
 
 redraw do
-  ARGV[0] = 'server'
-  ARGV[1] = '--include-subscription-groups'
-  ARGV[2] = 's1,s3'
+  ARGV[0] = "server"
+  ARGV[1] = "--include-subscription-groups"
+  ARGV[2] = "s1,s3"
 end
 
-assert AM.active?(:subscription_groups, 's1')
-assert AM.active?(:subscription_groups, 's3')
-assert !AM.active?(:subscription_groups, 's2')
+assert AM.active?(:subscription_groups, "s1")
+assert AM.active?(:subscription_groups, "s3")
+assert !AM.active?(:subscription_groups, "s2")

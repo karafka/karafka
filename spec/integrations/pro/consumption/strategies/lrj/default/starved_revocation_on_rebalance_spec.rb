@@ -49,8 +49,8 @@ draw_routes do
   end
 end
 
-produce(DT.topic, '0', partition: 0)
-produce(DT.topic, '1', partition: 1)
+produce(DT.topic, "0", partition: 0)
+produce(DT.topic, "1", partition: 1)
 
 start_karafka_and_wait_until do
   if DT[:started].size >= 2

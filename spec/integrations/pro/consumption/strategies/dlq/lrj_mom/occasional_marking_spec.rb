@@ -26,8 +26,8 @@
 setup_karafka do |config|
   config.max_messages = 5
   # We set it here that way not too wait too long on stuff
-  config.kafka[:'max.poll.interval.ms'] = 10_000
-  config.kafka[:'session.timeout.ms'] = 10_000
+  config.kafka[:"max.poll.interval.ms"] = 10_000
+  config.kafka[:"session.timeout.ms"] = 10_000
 end
 
 class Consumer < Karafka::BaseConsumer

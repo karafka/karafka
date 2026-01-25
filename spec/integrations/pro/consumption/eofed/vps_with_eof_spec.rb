@@ -23,12 +23,13 @@
 # When using virtual partitions with eof, each VP should receive its own `#eofed` execution.
 
 setup_karafka do |config|
-  config.kafka[:'enable.partition.eof'] = true
+  config.kafka[:"enable.partition.eof"] = true
   config.concurrency = 10
 end
 
 class Consumer < Karafka::BaseConsumer
-  def consume; end
+  def consume
+  end
 
   def eofed
     DT[:eofed] << object_id

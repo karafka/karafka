@@ -36,17 +36,17 @@ RSpec.describe_current do
 
   subject(:distributor) { described_class.new(config) }
 
-  describe '#call' do
+  describe "#call" do
     let(:messages) do
       [
-        build(:messages_message, raw_key: 'a'),
-        build(:messages_message, raw_key: 'b'),
-        build(:messages_message, raw_key: 'a'),
-        build(:messages_message, raw_key: 'c')
+        build(:messages_message, raw_key: "a"),
+        build(:messages_message, raw_key: "b"),
+        build(:messages_message, raw_key: "a"),
+        build(:messages_message, raw_key: "c")
       ]
     end
 
-    it 'groups messages by partition key and sorts by size' do
+    it "groups messages by partition key and sorts by size" do
       result = distributor.call(messages)
 
       expect(result).to be_a(Hash)

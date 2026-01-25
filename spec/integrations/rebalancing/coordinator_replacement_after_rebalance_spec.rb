@@ -25,12 +25,12 @@ end
 Thread.new do
   loop do
     2.times do
-      produce(DT.topic, '1', partition: 0)
-      produce(DT.topic, '1', partition: 1)
+      produce(DT.topic, "1", partition: 0)
+      produce(DT.topic, "1", partition: 1)
     end
 
     sleep(0.5)
-  rescue StandardError
+  rescue
     nil
   end
 end
@@ -64,7 +64,7 @@ start_karafka_and_wait_until do
 end
 
 taken_partition = DT[:jumped].first.partition
-non_taken = taken_partition == 1 ? 0 : 1
+non_taken = (taken_partition == 1) ? 0 : 1
 
 assert_equal 2, DT.data[taken_partition].uniq.size
 assert_equal 3, DT.data[non_taken].uniq.size

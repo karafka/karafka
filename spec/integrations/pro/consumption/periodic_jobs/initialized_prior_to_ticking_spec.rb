@@ -29,7 +29,8 @@ class Consumer < Karafka::BaseConsumer
     DT[:initialized] = Time.now.to_f
   end
 
-  def consume; end
+  def consume
+  end
 
   def tick
     DT[:tick] = Time.now.to_f

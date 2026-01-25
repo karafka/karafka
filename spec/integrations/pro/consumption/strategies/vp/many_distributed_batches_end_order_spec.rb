@@ -27,7 +27,7 @@ setup_karafka do |config|
   config.concurrency = 10
 end
 
-Karafka.monitor.subscribe('connection.listener.fetch_loop.received') do |event|
+Karafka.monitor.subscribe("connection.listener.fetch_loop.received") do |event|
   next if event.payload[:messages_buffer].empty?
 
   DT[:batches] << []

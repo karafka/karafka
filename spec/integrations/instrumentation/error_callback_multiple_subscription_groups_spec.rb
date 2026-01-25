@@ -6,7 +6,7 @@
 
 setup_karafka(allow_errors: true) do |config|
   # Bad port on purpose to trigger the error
-  config.kafka = { 'bootstrap.servers': '127.0.0.1:9090' }
+  config.kafka = { "bootstrap.servers": "127.0.0.1:9090" }
 end
 
 draw_routes(nil, create_topics: false) do
@@ -25,7 +25,7 @@ end
 
 error_events = {}
 
-Karafka::App.monitor.subscribe('error.occurred') do |event|
+Karafka::App.monitor.subscribe("error.occurred") do |event|
   error_events[event[:subscription_group_id]] ||= []
   error_events[event[:subscription_group_id]] << event
 end
@@ -45,5 +45,5 @@ g2 = error_events.values.last.map { |event| event.payload[:error] }
 # If this would not be true, all would go everywhere
 assert !g1.intersect?(g2)
 
-assert_equal 'error.occurred', error_events.values.first.first.id
-assert_equal 'librdkafka.error', error_events.values.first.first[:type]
+assert_equal "error.occurred", error_events.values.first.first.id
+assert_equal "librdkafka.error", error_events.values.first.first[:type]

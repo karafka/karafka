@@ -65,17 +65,17 @@ Karafka::Admin.seek_consumer_group(segment_2_1, { "#{DT.topic}_2" => { 0 => 6, 1
 Karafka::Admin.seek_consumer_group(segment_2_2, { "#{DT.topic}_2" => { 0 => 6, 1 => 8 } })
 
 # Run collapse only for the first consumer group
-ARGV[0] = 'parallel_segments'
-ARGV[1] = 'collapse'
-ARGV[2] = '--groups'
+ARGV[0] = "parallel_segments"
+ARGV[1] = "collapse"
+ARGV[2] = "--groups"
 ARGV[3] = DT.consumer_group
 
 results = capture_stdout do
   Karafka::Cli.start
 end
 
-assert results.include?('Collapse completed')
-assert results.include?('successfully')
+assert results.include?("Collapse completed")
+assert results.include?("successfully")
 assert results.include?(DT.consumer_group)
 assert !results.include?("#{DT.consumer_group}_2")
 

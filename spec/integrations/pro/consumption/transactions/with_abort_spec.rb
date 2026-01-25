@@ -24,10 +24,10 @@
 # ActiveRecord transaction does not propagate and is handled internally, thus no error.
 
 setup_karafka do |config|
-  config.kafka[:'transactional.id'] = SecureRandom.uuid
+  config.kafka[:"transactional.id"] = SecureRandom.uuid
 end
 
-Karafka.monitor.subscribe('consumer.consuming.transaction') do
+Karafka.monitor.subscribe("consumer.consuming.transaction") do
   DT[:occurred] = true
 end
 

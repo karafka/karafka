@@ -34,7 +34,7 @@ draw_routes do
   end
 end
 
-produce(DT.topic, '10')
+produce(DT.topic, "10")
 
 message = Karafka::Admin.read_topic(DT.topic, 0, 1).last
 assert_equal 4, message.payload

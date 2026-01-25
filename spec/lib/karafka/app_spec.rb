@@ -3,15 +3,15 @@
 RSpec.describe_current do
   subject(:app_class) { described_class }
 
-  describe '#consumer_groups' do
+  describe "#consumer_groups" do
     let(:builder) { described_class.config.internal.routing.builder }
 
-    it 'returns consumer_groups builder' do
+    it "returns consumer_groups builder" do
       expect(app_class.consumer_groups).to eq builder
     end
   end
 
-  describe 'Karafka delegations' do
+  describe "Karafka delegations" do
     %i[
       root
       env
@@ -29,7 +29,7 @@ RSpec.describe_current do
     end
   end
 
-  describe 'Karafka::Status delegations' do
+  describe "Karafka::Status delegations" do
     %i[
       run!
       running?
@@ -54,13 +54,13 @@ RSpec.describe_current do
     end
   end
 
-  describe '#subscription_groups' do
-    context 'when no routes are drawn' do
+  describe "#subscription_groups" do
+    context "when no routes are drawn" do
       it { expect(app_class.subscription_groups).to eq({}) }
     end
   end
 
-  describe '#assignments' do
+  describe "#assignments" do
     let(:assignments) { rand }
 
     before do
@@ -69,7 +69,7 @@ RSpec.describe_current do
         .and_return(assignments)
     end
 
-    it 'expect to delegate to the assignments tracker' do
+    it "expect to delegate to the assignments tracker" do
       expect(app_class.assignments).to eq(assignments)
     end
   end

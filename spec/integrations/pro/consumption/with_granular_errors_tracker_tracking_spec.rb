@@ -67,7 +67,7 @@ draw_routes do
 end
 
 # Produce a single message that will trigger multiple errors
-produce(DT.topic, 'test')
+produce(DT.topic, "test")
 
 # Start Karafka and wait for multiple retries
 start_karafka_and_wait_until do
@@ -76,6 +76,6 @@ end
 
 # Verify error counts are accumulating for different error classes
 last_counts = DT[:error_counts].last
-assert_equal 2, last_counts[E1], 'Should count E1 errors correctly'
-assert_equal 2, last_counts[E2], 'Should count E2 errors correctly'
-assert_equal 1, last_counts[E3], 'Should count E3 errors correctly'
+assert_equal 2, last_counts[E1], "Should count E1 errors correctly"
+assert_equal 2, last_counts[E2], "Should count E2 errors correctly"
+assert_equal 1, last_counts[E3], "Should count E3 errors correctly"

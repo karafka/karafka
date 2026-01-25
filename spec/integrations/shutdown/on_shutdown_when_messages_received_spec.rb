@@ -37,8 +37,8 @@ draw_routes do
   end
 end
 
-produce(topic1, '1')
-produce(topic2, '1')
+produce(topic1, "1")
+produce(topic2, "1")
 
 start_karafka_and_wait_until do
   DT[0].size >= 2

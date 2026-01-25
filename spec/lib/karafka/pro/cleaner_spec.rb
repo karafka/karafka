@@ -25,7 +25,7 @@
 RSpec.describe_current do
   subject(:cleaner) { described_class }
 
-  describe '#post_setup' do
+  describe "#post_setup" do
     it { expect { cleaner }.not_to raise_error }
   end
 end

@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require_relative 'base'
+require_relative "base"
 
 module Karafka
   module Instrumentation
@@ -14,30 +14,30 @@ module Karafka
           # Value object for storing a single rdkafka metric publishing details
           RdKafkaMetric = Struct.new(:type, :scope, :name, :key_location)
 
-          setting :namespace, default: 'karafka'
+          setting :namespace, default: "karafka"
 
           setting :client, default: Client.new
 
           setting :rd_kafka_metrics, default: [
             # Broker metrics
-            RdKafkaMetric.new(:count, :brokers, 'requests_retries', 'txretries_d'),
-            RdKafkaMetric.new(:count, :brokers, 'transmission_errors', 'txerrs_d'),
-            RdKafkaMetric.new(:count, :brokers, 'receive_errors', 'rxerrs_d'),
-            RdKafkaMetric.new(:count, :brokers, 'connection_connects', 'connects_d'),
-            RdKafkaMetric.new(:count, :brokers, 'connection_disconnects', 'disconnects_d'),
-            RdKafkaMetric.new(:gauge, :brokers, 'network_latency_avg', %w[rtt avg]),
-            RdKafkaMetric.new(:gauge, :brokers, 'network_latency_p95', %w[rtt p95]),
-            RdKafkaMetric.new(:gauge, :brokers, 'network_latency_p99', %w[rtt p99]),
+            RdKafkaMetric.new(:count, :brokers, "requests_retries", "txretries_d"),
+            RdKafkaMetric.new(:count, :brokers, "transmission_errors", "txerrs_d"),
+            RdKafkaMetric.new(:count, :brokers, "receive_errors", "rxerrs_d"),
+            RdKafkaMetric.new(:count, :brokers, "connection_connects", "connects_d"),
+            RdKafkaMetric.new(:count, :brokers, "connection_disconnects", "disconnects_d"),
+            RdKafkaMetric.new(:gauge, :brokers, "network_latency_avg", %w[rtt avg]),
+            RdKafkaMetric.new(:gauge, :brokers, "network_latency_p95", %w[rtt p95]),
+            RdKafkaMetric.new(:gauge, :brokers, "network_latency_p99", %w[rtt p99]),
 
             # Topics partitions metrics
-            RdKafkaMetric.new(:gauge, :topics, 'consumer_lag', 'consumer_lag_stored'),
-            RdKafkaMetric.new(:gauge, :topics, 'consumer_lag_delta', 'consumer_lag_stored_d')
+            RdKafkaMetric.new(:gauge, :topics, "consumer_lag", "consumer_lag_stored"),
+            RdKafkaMetric.new(:gauge, :topics, "consumer_lag_delta", "consumer_lag_stored_d")
           ].freeze
 
           # Metrics that sum values on topics levels and not on partition levels
           setting :aggregated_rd_kafka_metrics, default: [
             # Topic aggregated metrics
-            RdKafkaMetric.new(:gauge, :topics, 'consumer_aggregated_lag', 'consumer_lag_stored')
+            RdKafkaMetric.new(:gauge, :topics, "consumer_aggregated_lag", "consumer_lag_stored")
           ].freeze
 
           configure
@@ -65,7 +65,7 @@ module Karafka
           def on_consumer_consume(event)
             consumer = event.payload[:caller]
 
-            start_transaction(consumer, 'consume')
+            start_transaction(consumer, "consume")
 
             client.metadata = {
               batch_size: consumer.messages.size,
@@ -87,9 +87,9 @@ module Karafka
             metadata = messages.metadata
 
             with_multiple_resolutions(consumer) do |tags|
-              count('consumer_messages', messages.size, tags)
-              count('consumer_batches', 1, tags)
-              gauge('consumer_offsets', metadata.last_offset, tags)
+              count("consumer_messages", messages.size, tags)
+              count("consumer_batches", 1, tags)
+              gauge("consumer_offsets", metadata.last_offset, tags)
             end
 
             stop_transaction
@@ -140,7 +140,7 @@ module Karafka
             consumer = event.payload[:caller]
 
             with_multiple_resolutions(consumer) do |tags|
-              count('consumer_dead', 1, tags)
+              count("consumer_dead", 1, tags)
             end
           end
 
@@ -154,7 +154,7 @@ module Karafka
               consumer = event.payload[:caller]
 
               with_multiple_resolutions(consumer) do |tags|
-                count('consumer_errors', 1, tags)
+                count("consumer_errors", 1, tags)
               end
             end
 
@@ -186,32 +186,32 @@ module Karafka
               # way from other places
               nil
             when :brokers
-              statistics.fetch('brokers').each_value do |broker_statistics|
+              statistics.fetch("brokers").each_value do |broker_statistics|
                 # Skip bootstrap nodes
                 # Bootstrap nodes have nodeid -1, other nodes have positive
                 # node ids
-                next if broker_statistics['nodeid'] == -1
+                next if broker_statistics["nodeid"] == -1
 
                 public_send(
                   metric.type,
                   metric.name,
                   broker_statistics.dig(*metric.key_location),
                   {
-                    broker: broker_statistics['nodename']
+                    broker: broker_statistics["nodename"]
                   }
                 )
               end
             when :topics
-              statistics.fetch('topics').each do |topic_name, topic_values|
-                topic_values['partitions'].each do |partition_name, partition_statistics|
-                  next if partition_name == '-1'
+              statistics.fetch("topics").each do |topic_name, topic_values|
+                topic_values["partitions"].each do |partition_name, partition_statistics|
+                  next if partition_name == "-1"
                   # Skip until lag info is available
-                  next if partition_statistics['consumer_lag'] == -1
-                  next if partition_statistics['consumer_lag_stored'] == -1
+                  next if partition_statistics["consumer_lag"] == -1
+                  next if partition_statistics["consumer_lag_stored"] == -1
 
                   # Skip if we do not own the fetch assignment
-                  next if partition_statistics['fetch_state'] == 'stopped'
-                  next if partition_statistics['fetch_state'] == 'none'
+                  next if partition_statistics["fetch_state"] == "stopped"
+                  next if partition_statistics["fetch_state"] == "none"
 
                   public_send(
                     metric.type,
@@ -236,14 +236,14 @@ module Karafka
           # @param consumer_group_id [String] cg in context which we operate
           def report_aggregated_topics_metrics(statistics, consumer_group_id)
             config.aggregated_rd_kafka_metrics.each do |metric|
-              statistics.fetch('topics').each do |topic_name, topic_values|
+              statistics.fetch("topics").each do |topic_name, topic_values|
                 sum = 0
 
-                topic_values['partitions'].each do |partition_name, partition_statistics|
-                  next if partition_name == '-1'
+                topic_values["partitions"].each do |partition_name, partition_statistics|
+                  next if partition_name == "-1"
                   # Skip until lag info is available
-                  next if partition_statistics['consumer_lag'] == -1
-                  next if partition_statistics['consumer_lag_stored'] == -1
+                  next if partition_statistics["consumer_lag"] == -1
+                  next if partition_statistics["consumer_lag_stored"] == -1
 
                   sum += partition_statistics.dig(*metric.key_location)
                 end
@@ -330,8 +330,8 @@ module Karafka
           def minute_probe
             concurrency = Karafka::App.config.concurrency
 
-            count('processes_count', 1, {})
-            count('threads_count', concurrency, {})
+            count("processes_count", 1, {})
+            count("threads_count", concurrency, {})
           end
         end
       end

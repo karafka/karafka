@@ -46,11 +46,11 @@ RSpec.describe_current do
   let(:job) { job_class.new }
   let(:serialized_payload) { ActiveSupport::JSON.encode(job.serialize) }
 
-  describe '#dispatch' do
-    context 'when we dispatch without any changes to the defaults' do
+  describe "#dispatch" do
+    context "when we dispatch without any changes to the defaults" do
       before { allow(Karafka.producer).to receive(:produce_async) }
 
-      it 'expect to use proper encoder and async producer to dispatch the job' do
+      it "expect to use proper encoder and async producer to dispatch the job" do
         dispatcher.dispatch(job)
 
         expect(Karafka.producer).to have_received(:produce_async).with(
@@ -60,7 +60,7 @@ RSpec.describe_current do
       end
     end
 
-    context 'when we dispatch with a custom producer' do
+    context "when we dispatch with a custom producer" do
       let(:variant) { Karafka.producer.with(max_wait_timeout: 100) }
 
       before do
@@ -72,25 +72,25 @@ RSpec.describe_current do
         dispatcher.dispatch(job)
       end
 
-      it 'expect to use proper producer to dispatch the job' do
+      it "expect to use proper producer to dispatch the job" do
         expect(variant).to have_received(:produce_async).with(
           topic: job.queue_name,
           payload: serialized_payload
         )
       end
 
-      it 'expect not to use the default producer' do
+      it "expect not to use the default producer" do
         expect(Karafka.producer).not_to have_received(:produce_async)
       end
     end
 
-    context 'when we want to dispatch sync' do
+    context "when we want to dispatch sync" do
       before do
         job_class.karafka_options(dispatch_method: :produce_sync)
         allow(Karafka.producer).to receive(:produce_sync)
       end
 
-      it 'expect to use proper encoder and sync producer to dispatch the job' do
+      it "expect to use proper encoder and sync producer to dispatch the job" do
         dispatcher.dispatch(job)
 
         expect(Karafka.producer).to have_received(:produce_sync).with(
@@ -100,7 +100,7 @@ RSpec.describe_current do
       end
     end
 
-    context 'when we want to dispatch with partitioner using key' do
+    context "when we want to dispatch with partitioner using key" do
       let(:expected_args) do
         {
           topic: job.queue_name,
@@ -114,14 +114,14 @@ RSpec.describe_current do
         allow(Karafka.producer).to receive(:produce_async)
       end
 
-      it 'expect to use its result alongside other options' do
+      it "expect to use its result alongside other options" do
         dispatcher.dispatch(job)
 
         expect(Karafka.producer).to have_received(:produce_async).with(expected_args)
       end
     end
 
-    context 'when we want to dispatch with partitioner using partition_key' do
+    context "when we want to dispatch with partitioner using partition_key" do
       let(:expected_args) do
         {
           topic: job.queue_name,
@@ -136,7 +136,7 @@ RSpec.describe_current do
         allow(Karafka.producer).to receive(:produce_async)
       end
 
-      it 'expect to use its result alongside other options' do
+      it "expect to use its result alongside other options" do
         dispatcher.dispatch(job)
 
         expect(Karafka.producer).to have_received(:produce_async).with(expected_args)
@@ -144,7 +144,7 @@ RSpec.describe_current do
     end
   end
 
-  describe '#dispatch_many' do
+  describe "#dispatch_many" do
     let(:jobs) { [job_class.new, job_class.new] }
     let(:jobs_messages) do
       [
@@ -159,30 +159,30 @@ RSpec.describe_current do
       ]
     end
 
-    context 'when we dispatch without any changes to the defaults' do
+    context "when we dispatch without any changes to the defaults" do
       before { allow(Karafka.producer).to receive(:produce_many_async) }
 
-      it 'expect to use proper encoder and async producer to dispatch the jobs' do
+      it "expect to use proper encoder and async producer to dispatch the jobs" do
         dispatcher.dispatch_many(jobs)
 
         expect(Karafka.producer).to have_received(:produce_many_async).with(jobs_messages)
       end
     end
 
-    context 'when we want to dispatch sync' do
+    context "when we want to dispatch sync" do
       before do
         job_class.karafka_options(dispatch_many_method: :produce_many_sync)
         allow(Karafka.producer).to receive(:produce_many_sync)
       end
 
-      it 'expect to use proper encoder and sync producer to dispatch the jobs' do
+      it "expect to use proper encoder and sync producer to dispatch the jobs" do
         dispatcher.dispatch_many(jobs)
 
         expect(Karafka.producer).to have_received(:produce_many_sync).with(jobs_messages)
       end
     end
 
-    context 'when we want to dispatch with custom producer' do
+    context "when we want to dispatch with custom producer" do
       let(:variant) { Karafka.producer.with(max_wait_timeout: 100) }
 
       before do
@@ -192,16 +192,16 @@ RSpec.describe_current do
         dispatcher.dispatch_many(jobs)
       end
 
-      it 'expect to use proper producer to dispatch the jobs' do
+      it "expect to use proper producer to dispatch the jobs" do
         expect(variant).to have_received(:produce_many_async).with(jobs_messages)
       end
 
-      it 'expect not to use the default producer' do
+      it "expect not to use the default producer" do
         expect(Karafka.producer).not_to have_received(:produce_many_async)
       end
     end
 
-    context 'when jobs have different dispatch many methods' do
+    context "when jobs have different dispatch many methods" do
       let(:jobs) { [job_class.new, job_class2.new] }
       let(:jobs_messages) do
         [
@@ -221,7 +221,7 @@ RSpec.describe_current do
         allow(Karafka.producer).to receive(:produce_many_sync)
       end
 
-      it 'expect to dispatch them with correct dispatching methods' do
+      it "expect to dispatch them with correct dispatching methods" do
         dispatcher.dispatch_many(jobs)
 
         expect(Karafka.producer).to have_received(:produce_many_async).with([jobs_messages[0]])
@@ -230,9 +230,9 @@ RSpec.describe_current do
     end
   end
 
-  describe '#dispatch_at' do
+  describe "#dispatch_at" do
     let(:timestamp) { current_time + 3600 }
-    let(:proxy_topic) { 'scheduled_jobs' }
+    let(:proxy_topic) { "scheduled_jobs" }
     let(:proxy_message) do
       {
         topic: proxy_topic,
@@ -250,7 +250,7 @@ RSpec.describe_current do
       allow(Karafka.producer).to receive(:produce_async)
     end
 
-    it 'expects to use scheduled messages feature with correct parameters' do
+    it "expects to use scheduled messages feature with correct parameters" do
       dispatcher.dispatch_at(job, timestamp)
 
       expect(Karafka::Pro::ScheduledMessages).to have_received(:schedule).with(
@@ -267,20 +267,20 @@ RSpec.describe_current do
       expect(Karafka.producer).to have_received(:produce_async).with(proxy_message)
     end
 
-    context 'when scheduled_messages_topic is not defined' do
-      it 'raises an error' do
+    context "when scheduled_messages_topic is not defined" do
+      it "raises an error" do
         expect { job_class.karafka_options(scheduled_messages_topic: nil) }
           .to raise_error(Karafka::Errors::InvalidConfigurationError)
       end
     end
 
-    context 'when scheduled_messages_topic is not scheduled messages topic' do
+    context "when scheduled_messages_topic is not scheduled messages topic" do
       before do
         allow(Karafka::Pro::ScheduledMessages).to receive(:schedule).and_call_original
-        job_class.karafka_options(scheduled_messages_topic: 'not-a-proper-proxy')
+        job_class.karafka_options(scheduled_messages_topic: "not-a-proper-proxy")
       end
 
-      it 'raises an error' do
+      it "raises an error" do
         expect { dispatcher.dispatch_at(job, timestamp) }
           .to raise_error(Karafka::Errors::InvalidConfigurationError)
       end

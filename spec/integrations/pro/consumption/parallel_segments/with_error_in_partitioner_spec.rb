@@ -28,7 +28,7 @@ setup_karafka(allow_errors: true)
 class ErroringPartitioner
   def call(message)
     # For special "error" payloads, raise an error to test error handling
-    if message.raw_payload.include?('error')
+    if message.raw_payload.include?("error")
       raise StandardError, "Simulated partitioner error for message: #{message.raw_payload}"
     end
 
@@ -171,8 +171,8 @@ error_messages.each do |message|
 end
 
 # Subscribe to errors to verify partitioner errors are caught
-Karafka.monitor.subscribe('error.occurred') do |event|
-  next unless event[:error].message.include?('Simulated partitioner error')
+Karafka.monitor.subscribe("error.occurred") do |event|
+  next unless event[:error].message.include?("Simulated partitioner error")
 
   DT[:partitioner_errors] << {
     error: event[:error].message,
@@ -188,7 +188,7 @@ end
 # 1. Verify that partitioner errors were captured
 assert(
   !DT[:partitioner_errors].empty?,
-  'Expected partitioner errors to be captured, but none were found'
+  "Expected partitioner errors to be captured, but none were found"
 )
 
 # 2. Verify normal messages went to the correct segments
@@ -234,5 +234,5 @@ assert(
 # 5. Verify the consumer didn't crash (processed many messages)
 assert(
   DT[:consumed_messages].size >= 15,
-  'Not enough messages processed, consumer may have crashed'
+  "Not enough messages processed, consumer may have crashed"
 )

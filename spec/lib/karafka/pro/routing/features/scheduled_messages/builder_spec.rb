@@ -29,17 +29,17 @@ RSpec.describe_current do
 
   let(:topic) { builder.first.topics.first }
 
-  describe '#scheduled_messages' do
-    context 'when defining scheduled messages without any extra settings' do
-      before { builder.scheduled_messages('test_name') }
+  describe "#scheduled_messages" do
+    context "when defining scheduled messages without any extra settings" do
+      before { builder.scheduled_messages("test_name") }
 
       it { expect(topic.consumer).to eq(Karafka::Pro::ScheduledMessages::Consumer) }
       it { expect(topic.scheduled_messages?).to be(true) }
     end
 
-    context 'when defining scheduled messages with extra settings' do
+    context "when defining scheduled messages with extra settings" do
       before do
-        builder.scheduled_messages('test_name') do
+        builder.scheduled_messages("test_name") do
           max_messages 5
         end
       end
@@ -51,13 +51,13 @@ RSpec.describe_current do
       it { expect(builder.size).to eq(1) }
     end
 
-    context 'when defining multiple scheduled topics' do
+    context "when defining multiple scheduled topics" do
       before do
-        builder.scheduled_messages('test_name1') do
+        builder.scheduled_messages("test_name1") do
           max_messages 5
         end
 
-        builder.scheduled_messages('test_name2')
+        builder.scheduled_messages("test_name2")
       end
 
       it { expect(builder.first.topics.size).to eq(4) }

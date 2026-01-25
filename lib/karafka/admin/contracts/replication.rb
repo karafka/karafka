@@ -8,8 +8,8 @@ module Karafka
       class Replication < Karafka::Contracts::Base
         configure do |config|
           config.error_messages = YAML.safe_load_file(
-            File.join(Karafka.gem_root, 'config', 'locales', 'errors.yml')
-          ).fetch('en').fetch('validations').fetch('admin').fetch('replication')
+            File.join(Karafka.gem_root, "config", "locales", "errors.yml")
+          ).fetch("en").fetch("validations").fetch("admin").fetch("replication")
         end
 
         required(:topic) { |val| val.is_a?(String) && !val.empty? }

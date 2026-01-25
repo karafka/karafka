@@ -138,7 +138,7 @@ has_parallel_processing = time_diffs.any? { |diff| diff < 1.0 }
 
 assert(
   has_parallel_processing,
-  'No evidence of parallel processing between segments, suggesting global throttling'
+  "No evidence of parallel processing between segments, suggesting global throttling"
 )
 
 assert segment0_times.size >= 5, "Segment 0 didn't process enough messages: #{segment0_times.size}"

@@ -31,8 +31,8 @@ draw_routes do
   end
 end
 
-ARGV[0] = 'topics'
-ARGV[1] = 'delete'
+ARGV[0] = "topics"
+ARGV[1] = "delete"
 
 Karafka::Cli.start
 

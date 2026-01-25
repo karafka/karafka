@@ -27,7 +27,7 @@ start_karafka_and_wait_until do
   if DT[0].size >= 10
     # Should not crash
     draw_routes do
-      consumer_group 'test2' do
+      consumer_group "test2" do
         topic DT.topics[0] do
           consumer Consumer
         end
@@ -36,7 +36,7 @@ start_karafka_and_wait_until do
 
     begin
       draw_routes(create_topics: false) do
-        consumer_group 'regular' do
+        consumer_group "regular" do
           topic DT.topics[1] do
             consumer Consumer
             max_wait_time(-2)
@@ -54,4 +54,4 @@ start_karafka_and_wait_until do
 end
 
 assert_equal [true], guarded
-assert Karafka::App.consumer_groups.map(&:name).include?('test2')
+assert Karafka::App.consumer_groups.map(&:name).include?("test2")

@@ -38,18 +38,18 @@ module Karafka
           def call(metadata)
             raw_headers = metadata.raw_headers
 
-            type = raw_headers.fetch('schedule_source_type')
+            type = raw_headers.fetch("schedule_source_type")
 
             # tombstone and cancellation events are not operable, thus we do not have to cast any
             # of the headers pieces
             return raw_headers unless WORKABLE_TYPES.include?(type)
 
             headers = raw_headers.dup
-            headers['schedule_target_epoch'] = headers['schedule_target_epoch'].to_i
+            headers["schedule_target_epoch"] = headers["schedule_target_epoch"].to_i
 
             # This attribute is optional, this is why we have to check for its existence
-            if headers.key?('schedule_target_partition')
-              headers['schedule_target_partition'] = headers['schedule_target_partition'].to_i
+            if headers.key?("schedule_target_partition")
+              headers["schedule_target_partition"] = headers["schedule_target_partition"].to_i
             end
 
             headers

@@ -27,7 +27,7 @@
 # Note: This spec works correctly regardless of how Kafka batches messages for delivery.
 
 setup_karafka do |config|
-  config.kafka[:'transactional.id'] = SecureRandom.uuid
+  config.kafka[:"transactional.id"] = SecureRandom.uuid
   config.max_messages = 5
 end
 
@@ -66,9 +66,9 @@ end
 class ValidationConsumer < Karafka::BaseConsumer
   def consume
     messages.each do |msg|
-      if msg.raw_payload.start_with?('consume_')
+      if msg.raw_payload.start_with?("consume_")
         DT[:consume_messages] << msg.raw_payload
-      elsif msg.raw_payload.start_with?('tick_')
+      elsif msg.raw_payload.start_with?("tick_")
         DT[:tick_messages] << msg.raw_payload
       end
     end
@@ -101,8 +101,8 @@ assert DT[:consume_messages].size >= 10
 assert DT[:tick_messages].size >= 3
 
 # Verify message prefixes
-DT[:consume_messages].each { |msg| assert msg.start_with?('consume_') }
-DT[:tick_messages].each { |msg| assert msg.start_with?('tick_') }
+DT[:consume_messages].each { |msg| assert msg.start_with?("consume_") }
+DT[:tick_messages].each { |msg| assert msg.start_with?("tick_") }
 
 # Verify offset committed
 assert_equal 10, fetch_next_offset

@@ -58,4 +58,4 @@ start_karafka_and_wait_until(mode: :swarm) do
 end
 
 # Two processes should get assignments
-assert_equal 2, done.map { |report| report.split('-').last }.uniq.size
+assert_equal 2, done.map { |report| report.split("-").last }.uniq.size

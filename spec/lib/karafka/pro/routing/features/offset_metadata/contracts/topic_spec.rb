@@ -33,23 +33,23 @@ RSpec.describe_current do
     }
   end
 
-  context 'when config is valid' do
+  context "when config is valid" do
     it { expect(check).to be_success }
   end
 
-  context 'when active flag is not boolean' do
+  context "when active flag is not boolean" do
     before { config[:offset_metadata][:active] = rand }
 
     it { expect(check).not_to be_success }
   end
 
-  context 'when cache flag is not boolean' do
+  context "when cache flag is not boolean" do
     before { config[:offset_metadata][:cache] = rand }
 
     it { expect(check).not_to be_success }
   end
 
-  context 'when deserializer is not callable' do
+  context "when deserializer is not callable" do
     before { config[:offset_metadata][:deserializer] = rand }
 
     it { expect(check).not_to be_success }

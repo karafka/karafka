@@ -22,7 +22,7 @@ module Karafka
           RdKafkaMetric = Struct.new(:type, :scope, :name, :key_location)
 
           # Namespace under which the DD metrics should be published
-          setting :namespace, default: 'karafka'
+          setting :namespace, default: "karafka"
 
           # Datadog client that we should use to publish the metrics
           setting :client
@@ -37,22 +37,22 @@ module Karafka
           # Note, that the once with `_d` come from Karafka, not rdkafka or Kafka
           setting :rd_kafka_metrics, default: [
             # Client metrics
-            RdKafkaMetric.new(:count, :root, 'messages.consumed', 'rxmsgs_d'),
-            RdKafkaMetric.new(:count, :root, 'messages.consumed.bytes', 'rxmsg_bytes'),
+            RdKafkaMetric.new(:count, :root, "messages.consumed", "rxmsgs_d"),
+            RdKafkaMetric.new(:count, :root, "messages.consumed.bytes", "rxmsg_bytes"),
 
             # Broker metrics
-            RdKafkaMetric.new(:count, :brokers, 'consume.attempts', 'txretries_d'),
-            RdKafkaMetric.new(:count, :brokers, 'consume.errors', 'txerrs_d'),
-            RdKafkaMetric.new(:count, :brokers, 'receive.errors', 'rxerrs_d'),
-            RdKafkaMetric.new(:count, :brokers, 'connection.connects', 'connects_d'),
-            RdKafkaMetric.new(:count, :brokers, 'connection.disconnects', 'disconnects_d'),
-            RdKafkaMetric.new(:gauge, :brokers, 'network.latency.avg', %w[rtt avg]),
-            RdKafkaMetric.new(:gauge, :brokers, 'network.latency.p95', %w[rtt p95]),
-            RdKafkaMetric.new(:gauge, :brokers, 'network.latency.p99', %w[rtt p99]),
+            RdKafkaMetric.new(:count, :brokers, "consume.attempts", "txretries_d"),
+            RdKafkaMetric.new(:count, :brokers, "consume.errors", "txerrs_d"),
+            RdKafkaMetric.new(:count, :brokers, "receive.errors", "rxerrs_d"),
+            RdKafkaMetric.new(:count, :brokers, "connection.connects", "connects_d"),
+            RdKafkaMetric.new(:count, :brokers, "connection.disconnects", "disconnects_d"),
+            RdKafkaMetric.new(:gauge, :brokers, "network.latency.avg", %w[rtt avg]),
+            RdKafkaMetric.new(:gauge, :brokers, "network.latency.p95", %w[rtt p95]),
+            RdKafkaMetric.new(:gauge, :brokers, "network.latency.p99", %w[rtt p99]),
 
             # Topics metrics
-            RdKafkaMetric.new(:gauge, :topics, 'consumer.lags', 'consumer_lag_stored'),
-            RdKafkaMetric.new(:gauge, :topics, 'consumer.lags_delta', 'consumer_lag_stored_d')
+            RdKafkaMetric.new(:gauge, :topics, "consumer.lags", "consumer_lag_stored"),
+            RdKafkaMetric.new(:gauge, :topics, "consumer.lags_delta", "consumer_lag_stored_d")
           ].freeze
 
           # Whether histogram metrics should be sent as distributions or histograms.
@@ -101,7 +101,7 @@ module Karafka
               tags.concat(consumer_tags(event.payload[:caller]))
             end
 
-            count('error_occurred', 1, tags: tags)
+            count("error_occurred", 1, tags: tags)
           end
 
           # Reports how many messages we've polled and how much time did we spend on it
@@ -116,8 +116,8 @@ module Karafka
             tags = ["consumer_group:#{consumer_group_id}"]
             tags.concat(default_tags)
 
-            histogram('listener.polling.time_taken', time_taken, tags: tags)
-            histogram('listener.polling.messages', messages_count, tags: tags)
+            histogram("listener.polling.time_taken", time_taken, tags: tags)
+            histogram("listener.polling.messages", messages_count, tags: tags)
           end
 
           # Here we report majority of things related to processing as we have access to the
@@ -131,13 +131,13 @@ module Karafka
             tags = consumer_tags(consumer)
             tags.concat(default_tags)
 
-            count('consumer.messages', messages.size, tags: tags)
-            count('consumer.batches', 1, tags: tags)
-            gauge('consumer.offset', metadata.last_offset, tags: tags)
-            histogram('consumer.consumed.time_taken', event[:time], tags: tags)
-            histogram('consumer.batch_size', messages.size, tags: tags)
-            histogram('consumer.processing_lag', metadata.processing_lag, tags: tags)
-            histogram('consumer.consumption_lag', metadata.consumption_lag, tags: tags)
+            count("consumer.messages", messages.size, tags: tags)
+            count("consumer.batches", 1, tags: tags)
+            gauge("consumer.offset", metadata.last_offset, tags: tags)
+            histogram("consumer.consumed.time_taken", event[:time], tags: tags)
+            histogram("consumer.batch_size", messages.size, tags: tags)
+            histogram("consumer.processing_lag", metadata.processing_lag, tags: tags)
+            histogram("consumer.consumption_lag", metadata.consumption_lag, tags: tags)
           end
 
           {
@@ -164,9 +164,9 @@ module Karafka
             jq_stats = event[:jobs_queue].statistics
 
             tags = default_tags
-            gauge('worker.total_threads', Karafka::App.config.concurrency, tags: tags)
-            histogram('worker.processing', jq_stats[:busy], tags: tags)
-            histogram('worker.enqueued_jobs', jq_stats[:enqueued], tags: tags)
+            gauge("worker.total_threads", Karafka::App.config.concurrency, tags: tags)
+            histogram("worker.processing", jq_stats[:busy], tags: tags)
+            histogram("worker.enqueued_jobs", jq_stats[:enqueued], tags: tags)
           end
 
           # We report this metric before and after processing for higher accuracy
@@ -175,7 +175,7 @@ module Karafka
           def on_worker_processed(event)
             jq_stats = event[:jobs_queue].statistics
 
-            histogram('worker.processing', jq_stats[:busy], tags: default_tags)
+            histogram("worker.processing", jq_stats[:busy], tags: default_tags)
           end
 
           private
@@ -213,7 +213,7 @@ module Karafka
             else
               raise(
                 ArgumentError,
-                'distribution_mode setting value must be either :histogram or :distribution'
+                "distribution_mode setting value must be either :histogram or :distribution"
               )
             end
           end
@@ -239,13 +239,13 @@ module Karafka
                 tags: base_tags
               )
             when :brokers
-              statistics.fetch('brokers').each_value do |broker_statistics|
+              statistics.fetch("brokers").each_value do |broker_statistics|
                 # Skip bootstrap nodes
                 # Bootstrap nodes have nodeid -1, other nodes have positive
                 # node ids
-                next if broker_statistics['nodeid'] == -1
+                next if broker_statistics["nodeid"] == -1
 
-                tags = ["broker:#{broker_statistics['nodename']}"]
+                tags = ["broker:#{broker_statistics["nodename"]}"]
                 tags.concat(base_tags)
 
                 public_send(
@@ -256,16 +256,16 @@ module Karafka
                 )
               end
             when :topics
-              statistics.fetch('topics').each do |topic_name, topic_values|
-                topic_values['partitions'].each do |partition_name, partition_statistics|
-                  next if partition_name == '-1'
+              statistics.fetch("topics").each do |topic_name, topic_values|
+                topic_values["partitions"].each do |partition_name, partition_statistics|
+                  next if partition_name == "-1"
                   # Skip until lag info is available
-                  next if partition_statistics['consumer_lag'] == -1
-                  next if partition_statistics['consumer_lag_stored'] == -1
+                  next if partition_statistics["consumer_lag"] == -1
+                  next if partition_statistics["consumer_lag_stored"] == -1
 
                   # Skip if we do not own the fetch assignment
-                  next if partition_statistics['fetch_state'] == 'stopped'
-                  next if partition_statistics['fetch_state'] == 'none'
+                  next if partition_statistics["fetch_state"] == "stopped"
+                  next if partition_statistics["fetch_state"] == "none"
 
                   tags = ["topic:#{topic_name}", "partition:#{partition_name}"]
                   tags.concat(base_tags)

@@ -3,8 +3,8 @@
 # Karafka should integrate with Datadog native tracing and enable distributed tracing for
 # message consumption
 
-require 'karafka'
-require 'datadog/auto_instrument'
+require "karafka"
+require "datadog/auto_instrument"
 
 class Consumer < Karafka::BaseConsumer
   def consume

@@ -26,9 +26,9 @@
 # have ownership of this partition.
 
 setup_karafka(allow_errors: true) do |config|
-  config.kafka[:'transactional.id'] = SecureRandom.uuid
-  config.kafka[:'max.poll.interval.ms'] = 10_000
-  config.kafka[:'session.timeout.ms'] = 10_000
+  config.kafka[:"transactional.id"] = SecureRandom.uuid
+  config.kafka[:"max.poll.interval.ms"] = 10_000
+  config.kafka[:"session.timeout.ms"] = 10_000
   config.concurrency = 1
 end
 

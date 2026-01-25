@@ -3,7 +3,7 @@
 # Karafka should not allow to use eofed when kafka scope setup is with eof in different sub-scope
 
 setup_karafka do |config|
-  config.kafka[:'enable.partition.eof'] = true
+  config.kafka[:"enable.partition.eof"] = true
 end
 
 failed = false
@@ -13,7 +13,7 @@ begin
     topic :topic1 do
       consumer Class.new
       eofed true
-      kafka('bootstrap.servers': '127.0.0.1:9092')
+      kafka("bootstrap.servers": "127.0.0.1:9092")
     end
   end
 rescue Karafka::Errors::InvalidConfigurationError

@@ -30,8 +30,8 @@ guarded = []
 
 begin
   draw_routes(create_topics: false) do
-    consumer_group 'regular' do
-      topic 't1' do
+    consumer_group "regular" do
+      topic "t1" do
         swarm(nodes: (1..2))
         consumer Class.new
       end

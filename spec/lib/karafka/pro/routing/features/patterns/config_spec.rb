@@ -26,20 +26,20 @@ RSpec.describe_current do
   let(:type) { 1 }
   let(:active) { true }
 
-  describe '#active?' do
-    context 'when active' do
+  describe "#active?" do
+    context "when active" do
       it { expect(config.active?).to be(true) }
     end
 
-    context 'when not active' do
+    context "when not active" do
       let(:active) { false }
 
       it { expect(config.active?).to be(false) }
     end
   end
 
-  describe 'types values' do
-    context 'when matcher' do
+  describe "types values" do
+    context "when matcher" do
       let(:type) { :matcher }
 
       it { expect(config.matcher?).to be(true) }
@@ -47,7 +47,7 @@ RSpec.describe_current do
       it { expect(config.regular?).to be(false) }
     end
 
-    context 'when discovered' do
+    context "when discovered" do
       let(:type) { :discovered }
 
       it { expect(config.matcher?).to be(false) }
@@ -55,7 +55,7 @@ RSpec.describe_current do
       it { expect(config.regular?).to be(false) }
     end
 
-    context 'when regular' do
+    context "when regular" do
       let(:type) { :regular }
 
       it { expect(config.matcher?).to be(false) }
@@ -64,7 +64,7 @@ RSpec.describe_current do
     end
   end
 
-  describe '#to_h' do
+  describe "#to_h" do
     it { expect(config.to_h[:type]).to eq(type) }
     it { expect(config.to_h[:active]).to be(true) }
   end

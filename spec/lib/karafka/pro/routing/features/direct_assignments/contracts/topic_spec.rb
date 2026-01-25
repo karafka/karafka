@@ -23,7 +23,7 @@
 RSpec.describe_current do
   subject(:validation_result) { described_class.new.call(config) }
 
-  context 'with valid configurations' do
+  context "with valid configurations" do
     let(:config) do
       {
         direct_assignments: {
@@ -39,16 +39,16 @@ RSpec.describe_current do
       }
     end
 
-    it 'is expected to be successful' do
+    it "is expected to be successful" do
       expect(validation_result).to be_success
     end
   end
 
-  context 'when active is not a boolean' do
+  context "when active is not a boolean" do
     let(:config) do
       {
         direct_assignments: {
-          active: 'true', # Invalid type
+          active: "true", # Invalid type
           partitions: { 1 => true }
         },
         swarm: {
@@ -60,17 +60,17 @@ RSpec.describe_current do
       }
     end
 
-    it 'is expected to fail' do
+    it "is expected to fail" do
       expect(validation_result).not_to be_success
     end
   end
 
-  context 'when partitions are not exclusively integers mapping to true' do
+  context "when partitions are not exclusively integers mapping to true" do
     let(:config) do
       {
         direct_assignments: {
           active: true,
-          partitions: { '1' => true, 2 => false } # Invalid key type and value
+          partitions: { "1" => true, 2 => false } # Invalid key type and value
         },
         swarm: {
           active: false
@@ -81,12 +81,12 @@ RSpec.describe_current do
       }
     end
 
-    it 'is expected to fail' do
+    it "is expected to fail" do
       expect(validation_result).not_to be_success
     end
   end
 
-  context 'when partitions are set to true' do
+  context "when partitions are set to true" do
     let(:config) do
       {
         direct_assignments: {
@@ -102,12 +102,12 @@ RSpec.describe_current do
       }
     end
 
-    it 'is expected to be successful' do
+    it "is expected to be successful" do
       expect(validation_result).to be_success
     end
   end
 
-  context 'when partitions is an empty hash' do
+  context "when partitions is an empty hash" do
     let(:config) do
       {
         direct_assignments: {
@@ -123,12 +123,12 @@ RSpec.describe_current do
       }
     end
 
-    it 'is expected to fail' do
+    it "is expected to fail" do
       expect(validation_result).not_to be_success
     end
   end
 
-  context 'when we assigned more partitions than allocated in swarm' do
+  context "when we assigned more partitions than allocated in swarm" do
     let(:config) do
       {
         direct_assignments: {
@@ -148,7 +148,7 @@ RSpec.describe_current do
     it { expect(validation_result).not_to be_success }
   end
 
-  context 'when we allocated more partitions than assigned' do
+  context "when we allocated more partitions than assigned" do
     let(:config) do
       {
         direct_assignments: {
@@ -168,7 +168,7 @@ RSpec.describe_current do
     it { expect(validation_result).not_to be_success }
   end
 
-  context 'when direct assignments are used with patterns' do
+  context "when direct assignments are used with patterns" do
     let(:config) do
       {
         direct_assignments: {
@@ -184,7 +184,7 @@ RSpec.describe_current do
       }
     end
 
-    it 'is expected to fail' do
+    it "is expected to fail" do
       expect(validation_result).not_to be_success
     end
   end

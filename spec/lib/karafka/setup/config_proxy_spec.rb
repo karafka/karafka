@@ -3,24 +3,24 @@
 RSpec.describe_current do
   subject(:proxy) { described_class.new(config) }
 
-  let(:config) { double('config') }
+  let(:config) { double("config") }
 
-  describe '#initialize' do
-    it 'initializes producer_initialization_block as empty lambda' do
+  describe "#initialize" do
+    it "initializes producer_initialization_block as empty lambda" do
       expect(proxy.producer_initialization_block).to be_a(Proc)
       # Verify it's a no-op by calling it with a test object
-      test_obj = double('test')
+      test_obj = double("test")
       expect { proxy.producer_initialization_block.call(test_obj) }.not_to raise_error
     end
 
-    it 'wraps the config object using SimpleDelegator' do
+    it "wraps the config object using SimpleDelegator" do
       expect(proxy).to be_a(SimpleDelegator)
     end
   end
 
-  describe '#producer' do
-    context 'when called with a block' do
-      it 'stores the block' do
+  describe "#producer" do
+    context "when called with a block" do
+      it "stores the block" do
         test_block = proc { |_| }
         proxy.producer(&test_block)
 
@@ -28,8 +28,8 @@ RSpec.describe_current do
       end
     end
 
-    context 'when called with an instance' do
-      it 'delegates to config.producer=' do
+    context "when called with an instance" do
+      it "delegates to config.producer=" do
         producer_instance = instance_double(WaterDrop::Producer)
         allow(config).to receive(:producer=)
 
@@ -40,31 +40,31 @@ RSpec.describe_current do
     end
   end
 
-  describe 'delegation' do
-    it 'delegates method calls to config' do
-      allow(config).to receive(:some_method).with('arg1', 'arg2').and_return('result')
+  describe "delegation" do
+    it "delegates method calls to config" do
+      allow(config).to receive(:some_method).with("arg1", "arg2").and_return("result")
 
-      result = proxy.some_method('arg1', 'arg2')
+      result = proxy.some_method("arg1", "arg2")
 
-      expect(result).to eq('result')
+      expect(result).to eq("result")
     end
 
-    it 'delegates methods with blocks to config' do
-      allow(config).to receive(:some_method).and_yield('value')
+    it "delegates methods with blocks to config" do
+      allow(config).to receive(:some_method).and_yield("value")
 
       yielded_value = nil
       proxy.some_method { |val| yielded_value = val }
 
-      expect(yielded_value).to eq('value')
+      expect(yielded_value).to eq("value")
     end
 
-    it 'responds to methods that config responds to' do
+    it "responds to methods that config responds to" do
       allow(config).to receive(:respond_to?).with(:some_method, false).and_return(true)
 
       expect(proxy.respond_to?(:some_method)).to be true
     end
 
-    it 'does not respond to methods that config does not respond to' do
+    it "does not respond to methods that config does not respond to" do
       allow(config).to receive(:respond_to?).with(:unknown_method, false).and_return(false)
 
       expect(proxy.respond_to?(:unknown_method)).to be false

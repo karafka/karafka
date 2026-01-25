@@ -5,7 +5,7 @@
 
 # Here it is enabled by default
 
-require 'stringio'
+require "stringio"
 
 strio = StringIO.new
 
@@ -15,24 +15,25 @@ end
 
 class Consumer < Karafka::BaseConsumer
   # Do nothing
-  def consume; end
+  def consume
+  end
 end
 
 draw_routes(Consumer)
 
-produce(DT.topic, '1')
+produce(DT.topic, "1")
 
 Thread.new do
   sleep(5)
 
-  Process.kill('TTIN', Process.pid)
+  Process.kill("TTIN", Process.pid)
 
   sleep(1)
 
-  Process.kill('INT', Process.pid)
+  Process.kill("INT", Process.pid)
 end
 
 start_karafka_and_wait_until { false }
 
-assert strio.string.include?('Received SIGTTIN system signal')
-assert strio.string.include?('Thread TID-')
+assert strio.string.include?("Received SIGTTIN system signal")
+assert strio.string.include?("Thread TID-")

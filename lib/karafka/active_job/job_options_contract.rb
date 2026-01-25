@@ -9,8 +9,8 @@ module Karafka
     class JobOptionsContract < Contracts::Base
       configure do |config|
         config.error_messages = YAML.safe_load_file(
-          File.join(Karafka.gem_root, 'config', 'locales', 'errors.yml')
-        ).fetch('en').fetch('validations').fetch('job_options')
+          File.join(Karafka.gem_root, "config", "locales", "errors.yml")
+        ).fetch("en").fetch("validations").fetch("job_options")
       end
 
       optional(:dispatch_method) do |val|

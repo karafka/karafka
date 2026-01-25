@@ -24,7 +24,7 @@
 # location where we retry
 
 setup_karafka(allow_errors: true) do |config|
-  config.kafka[:'transactional.id'] = SecureRandom.uuid
+  config.kafka[:"transactional.id"] = SecureRandom.uuid
   config.max_messages = 2
 end
 

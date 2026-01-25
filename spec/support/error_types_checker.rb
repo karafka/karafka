@@ -26,7 +26,7 @@ module ErrorTypesChecker
   ].freeze
 
   # Pattern to detect dynamic rebalance error type generation in source
-  REBALANCE_ERROR_PATTERN = 'callbacks.rebalance.#{name}.error'
+  REBALANCE_ERROR_PATTERN = "callbacks.rebalance.#{name}.error"
 
   class << self
     # Extracts all error types from the Karafka lib source code
@@ -34,17 +34,17 @@ module ErrorTypesChecker
     # @return [Array<String>] sorted list of unique error types found in source code
     # @note This scans for patterns like `type: 'something.error'` in the lib directory
     def extract_error_types_from_source
-      lib_path = File.expand_path('../../lib', __dir__)
+      lib_path = File.expand_path("../../lib", __dir__)
       error_types = Set.new
 
       # Scan all Ruby files in lib directory
-      Dir.glob(File.join(lib_path, '**', '*.rb')).each do |file|
+      Dir.glob(File.join(lib_path, "**", "*.rb")).each do |file|
         content = File.read(file)
 
         # Match static error type definitions: type: 'something.error' or type: "something.error"
         content.scan(/type:\s*['"]([^'"]+\.error)['"]/).flatten.each do |type|
           # Skip dynamic patterns that contain interpolation markers
-          next if type.include?('#')
+          next if type.include?("#")
 
           error_types << type
         end
@@ -96,7 +96,7 @@ module ErrorTypesChecker
     #
     # @return [Array<String>] sorted list of consumer error types
     def consumer_error_types
-      extract_error_types_from_source.select { |t| t.start_with?('consumer.') }.sort
+      extract_error_types_from_source.select { |t| t.start_with?("consumer.") }.sort
     end
 
     # Checks if a listener handles all source-defined error types (for logging listeners)

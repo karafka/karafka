@@ -33,7 +33,7 @@
 # Note: This spec works correctly regardless of how Kafka batches messages for delivery.
 
 setup_karafka do |config|
-  config.kafka[:'transactional.id'] = SecureRandom.uuid
+  config.kafka[:"transactional.id"] = SecureRandom.uuid
   config.max_wait_time = 100
   config.max_messages = 20
 end
@@ -155,10 +155,10 @@ assert_equal 20, DT[:audit].size
 assert_equal 20, DT[:archival].size
 
 # Verify message prefixes
-DT[:analytics].each { |msg| assert msg.start_with?('analytics_') }
-DT[:notifications].each { |msg| assert msg.start_with?('notifications_') }
-DT[:audit].each { |msg| assert msg.start_with?('audit_') }
-DT[:archival].each { |msg| assert msg.start_with?('archival_') }
+DT[:analytics].each { |msg| assert msg.start_with?("analytics_") }
+DT[:notifications].each { |msg| assert msg.start_with?("notifications_") }
+DT[:audit].each { |msg| assert msg.start_with?("audit_") }
+DT[:archival].each { |msg| assert msg.start_with?("archival_") }
 
 # Verify offset committed
 assert_equal 20, fetch_next_offset

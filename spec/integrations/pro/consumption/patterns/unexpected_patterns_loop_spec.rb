@@ -26,7 +26,7 @@
 TOPIC_NAME = "it-not-funny-at-all-#{SecureRandom.uuid}".freeze
 
 setup_karafka(allow_errors: %w[consumer.consume.error]) do |config|
-  config.kafka[:'topic.metadata.refresh.interval.ms'] = 2_000
+  config.kafka[:"topic.metadata.refresh.interval.ms"] = 2_000
 end
 
 class Consumer < Karafka::BaseConsumer
@@ -38,7 +38,7 @@ class Consumer < Karafka::BaseConsumer
 end
 
 draw_routes(create_topics: false) do
-  pattern(/#{TOPIC_NAME}/) do
+  pattern(/#{TOPIC_NAME}/o) do
     consumer Consumer
 
     dead_letter_queue(

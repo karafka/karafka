@@ -26,7 +26,7 @@
 
 setup_karafka(consumer_group_protocol: true) do |config|
   # Refresh topic metadata more frequently to discover pattern-matched topics
-  config.kafka[:'topic.metadata.refresh.interval.ms'] = 2_000
+  config.kafka[:"topic.metadata.refresh.interval.ms"] = 2_000
 end
 
 class Consumer1 < Karafka::BaseConsumer

@@ -31,7 +31,7 @@ test_topics = [
 Karafka::App.routes.clear
 
 draw_routes do
-  subscription_group 'pattern_group' do
+  subscription_group "pattern_group" do
     test_topics.each do |topic_name|
       topic topic_name do
         consumer PatternMatchConsumer
@@ -74,7 +74,7 @@ end
 # Verify all pattern topics received messages correctly
 assert_equal(
   test_messages.size, DT[:consumed].size,
-  'Should consume messages from all pattern-based topics'
+  "Should consume messages from all pattern-based topics"
 )
 
 # Verify each topic received exactly one message
@@ -101,7 +101,7 @@ end
 topic_message_pairs.each do |pair|
   assert_equal(
     pair[:expected], pair[:consumed],
-    'Message content should match for topic pattern'
+    "Message content should match for topic pattern"
   )
 end
 
@@ -109,5 +109,5 @@ end
 total_consumed = DT[:consumed].size
 assert_equal(
   test_messages.size, total_consumed,
-  'Should handle topic pattern matching without issues'
+  "Should handle topic pattern matching without issues"
 )

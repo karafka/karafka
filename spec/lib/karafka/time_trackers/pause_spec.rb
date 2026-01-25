@@ -12,25 +12,25 @@ RSpec.describe_current do
   before do
     # We use different clock in 3.2 that does not require multiplication
     # @see `::Karafka::Core::Helpers::Time` for more details
-    normalized = RUBY_VERSION >= '3.2' ? times.map { |time| time * 1_000 } : times
+    normalized = (RUBY_VERSION >= "3.2") ? times.map { |time| time * 1_000 } : times
 
     allow(Process).to receive(:clock_gettime).and_return(*normalized)
   end
 
   let(:times) { [0, 0] }
 
-  context 'when max timeout not defined and no exponential backoff' do
+  context "when max timeout not defined and no exponential backoff" do
     let(:timeout) { 10 }
     let(:max_timeout) { nil }
     let(:exponential_backoff) { false }
 
-    context 'when pause tracker is created' do
+    context "when pause tracker is created" do
       it { expect(tracker.expired?).to be(true) }
       it { expect(tracker.paused?).to be(false) }
       it { expect(tracker.attempt).to eq(0) }
     end
 
-    context 'when immediately after paused and incremented' do
+    context "when immediately after paused and incremented" do
       before do
         tracker.pause
         tracker.increment
@@ -41,7 +41,7 @@ RSpec.describe_current do
       it { expect(tracker.attempt).to eq(1) }
     end
 
-    context 'when not paused over timeout' do
+    context "when not paused over timeout" do
       let(:times) { [0.763, 0.764] }
 
       before do
@@ -54,7 +54,7 @@ RSpec.describe_current do
       it { expect(tracker.attempt).to eq(1) }
     end
 
-    context 'when paused over timeout' do
+    context "when paused over timeout" do
       let(:times) { [0.763, 1.764] }
 
       before do
@@ -67,7 +67,7 @@ RSpec.describe_current do
       it { expect(tracker.attempt).to eq(1) }
     end
 
-    context 'when paused over timeout several times' do
+    context "when paused over timeout several times" do
       before do
         5.times do
           tracker.pause
@@ -81,7 +81,7 @@ RSpec.describe_current do
       it { expect(tracker.attempt).to eq(5) }
     end
 
-    context 'when paused over timeout and resumed' do
+    context "when paused over timeout and resumed" do
       let(:times) { [0.763, 1.764] }
 
       before do
@@ -95,7 +95,7 @@ RSpec.describe_current do
       it { expect(tracker.attempt).to eq(1) }
     end
 
-    context 'when paused over timeout, resumed and reset' do
+    context "when paused over timeout, resumed and reset" do
       let(:times) { [0.763, 1.764] }
 
       before do
@@ -111,18 +111,18 @@ RSpec.describe_current do
     end
   end
 
-  context 'when max timeout defined and no exponential backoff' do
+  context "when max timeout defined and no exponential backoff" do
     let(:timeout) { 10 }
     let(:max_timeout) { 5 }
     let(:exponential_backoff) { false }
 
-    context 'when pause tracker is created' do
+    context "when pause tracker is created" do
       it { expect(tracker.expired?).to be(true) }
       it { expect(tracker.paused?).to be(false) }
       it { expect(tracker.attempt).to eq(0) }
     end
 
-    context 'when immediately after paused' do
+    context "when immediately after paused" do
       before do
         tracker.pause
         tracker.increment
@@ -133,7 +133,7 @@ RSpec.describe_current do
       it { expect(tracker.attempt).to eq(1) }
     end
 
-    context 'when not paused over timeout nor max timeout' do
+    context "when not paused over timeout nor max timeout" do
       # 1 ms of a difference
       let(:times) { [0.763, 0.764] }
 
@@ -147,7 +147,7 @@ RSpec.describe_current do
       it { expect(tracker.attempt).to eq(1) }
     end
 
-    context 'when paused over max timeout' do
+    context "when paused over max timeout" do
       let(:times) { [0.763, 0.769] }
 
       before do
@@ -160,7 +160,7 @@ RSpec.describe_current do
       it { expect(tracker.attempt).to eq(1) }
     end
 
-    context 'when paused over timeout and resumed' do
+    context "when paused over timeout and resumed" do
       let(:times) { [0.763, 0.769] }
 
       before do
@@ -174,7 +174,7 @@ RSpec.describe_current do
       it { expect(tracker.attempt).to eq(1) }
     end
 
-    context 'when paused over timeout, resumed and reset' do
+    context "when paused over timeout, resumed and reset" do
       let(:times) { [0.763, 0.769] }
 
       before do
@@ -190,18 +190,18 @@ RSpec.describe_current do
     end
   end
 
-  context 'when max timeout defined and exponential backoff' do
+  context "when max timeout defined and exponential backoff" do
     let(:timeout) { 10 }
     let(:max_timeout) { 100 }
     let(:exponential_backoff) { true }
 
-    context 'when pause tracker is created' do
+    context "when pause tracker is created" do
       it { expect(tracker.expired?).to be(true) }
       it { expect(tracker.paused?).to be(false) }
       it { expect(tracker.attempt).to eq(0) }
     end
 
-    context 'when immediately after paused' do
+    context "when immediately after paused" do
       before do
         tracker.pause
         tracker.increment
@@ -212,7 +212,7 @@ RSpec.describe_current do
       it { expect(tracker.attempt).to eq(1) }
     end
 
-    context 'when not paused over timeout nor max timeout' do
+    context "when not paused over timeout nor max timeout" do
       let(:times) { [0.763, 0.764] }
 
       before do
@@ -225,7 +225,7 @@ RSpec.describe_current do
       it { expect(tracker.attempt).to eq(1) }
     end
 
-    context 'when paused over max timeout' do
+    context "when paused over max timeout" do
       let(:times) { [0.763, 1.764] }
 
       before do
@@ -238,7 +238,7 @@ RSpec.describe_current do
       it { expect(tracker.attempt).to eq(1) }
     end
 
-    context 'when paused over timeout and resumed' do
+    context "when paused over timeout and resumed" do
       let(:times) { [0.763, 1.764] }
 
       before do
@@ -252,7 +252,7 @@ RSpec.describe_current do
       it { expect(tracker.attempt).to eq(1) }
     end
 
-    context 'when paused over timeout, resumed and reset' do
+    context "when paused over timeout, resumed and reset" do
       let(:times) { [0.763, 1.764] }
 
       before do
@@ -268,18 +268,18 @@ RSpec.describe_current do
     end
   end
 
-  context 'when we define a custom manual pause time' do
+  context "when we define a custom manual pause time" do
     let(:timeout) { 5000 }
     let(:max_timeout) { 5000 }
     let(:exponential_backoff) { false }
 
-    context 'when pause tracker is created' do
+    context "when pause tracker is created" do
       it { expect(tracker.expired?).to be(true) }
       it { expect(tracker.paused?).to be(false) }
       it { expect(tracker.attempt).to eq(0) }
     end
 
-    context 'when immediately after paused' do
+    context "when immediately after paused" do
       before do
         tracker.pause(1)
         tracker.increment
@@ -290,7 +290,7 @@ RSpec.describe_current do
       it { expect(tracker.attempt).to eq(1) }
     end
 
-    context 'when paused and manually expired' do
+    context "when paused and manually expired" do
       before do
         tracker.pause(1_000)
         tracker.increment
@@ -302,7 +302,7 @@ RSpec.describe_current do
       it { expect(tracker.attempt).to eq(1) }
     end
 
-    context 'when not paused over timeout nor max timeout' do
+    context "when not paused over timeout nor max timeout" do
       let(:times) { [0.763, 0.764] }
 
       before do
@@ -315,7 +315,7 @@ RSpec.describe_current do
       it { expect(tracker.attempt).to eq(1) }
     end
 
-    context 'when paused over max timeout' do
+    context "when paused over max timeout" do
       let(:times) { [0.763, 1.764] }
 
       before do
@@ -328,7 +328,7 @@ RSpec.describe_current do
       it { expect(tracker.attempt).to eq(1) }
     end
 
-    context 'when paused over timeout and resumed' do
+    context "when paused over timeout and resumed" do
       let(:times) { [0.763, 1.764] }
 
       before do
@@ -342,7 +342,7 @@ RSpec.describe_current do
       it { expect(tracker.attempt).to eq(1) }
     end
 
-    context 'when paused over timeout, resumed and reset' do
+    context "when paused over timeout, resumed and reset" do
       let(:times) { [0.763, 1.764] }
 
       before do

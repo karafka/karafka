@@ -7,7 +7,7 @@ setup_karafka do |config|
   config.strict_declarative_topics = true
 end
 
-ARGV[0] = 'info'
+ARGV[0] = "info"
 
 def draw_and_validate(valid:, &block)
   guarded = false
@@ -28,43 +28,43 @@ def draw_and_validate(valid:, &block)
 end
 
 draw_and_validate(valid: false) do
-  topic 'a' do
+  topic "a" do
     consumer Class.new
     config(active: false)
   end
 end
 
 draw_and_validate(valid: true) do
-  topic 'a' do
+  topic "a" do
     consumer Class.new
   end
 end
 
 draw_and_validate(valid: false) do
-  topic 'a' do
+  topic "a" do
     consumer Class.new
-    dead_letter_queue(topic: 'dlq')
+    dead_letter_queue(topic: "dlq")
   end
 end
 
 draw_and_validate(valid: true) do
-  topic 'a' do
+  topic "a" do
     consumer Class.new
-    dead_letter_queue(topic: 'dlq')
+    dead_letter_queue(topic: "dlq")
   end
 
-  topic 'dlq' do
+  topic "dlq" do
     active(false)
   end
 end
 
 draw_and_validate(valid: false) do
-  topic 'a' do
+  topic "a" do
     consumer Class.new
-    dead_letter_queue(topic: 'dlq')
+    dead_letter_queue(topic: "dlq")
   end
 
-  topic 'dlq' do
+  topic "dlq" do
     active(false)
     config(active: false)
   end
@@ -74,12 +74,12 @@ end
 Karafka::App.config.strict_declarative_topics = false
 
 draw_and_validate(valid: true) do
-  topic 'a' do
+  topic "a" do
     consumer Class.new
-    dead_letter_queue(topic: 'dlq')
+    dead_letter_queue(topic: "dlq")
   end
 
-  topic 'dlq' do
+  topic "dlq" do
     active(false)
     config(active: false)
   end

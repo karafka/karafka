@@ -31,13 +31,13 @@ class Consumer < Karafka::BaseConsumer
     segment_id = topic.consumer_group.segment_id
 
     messages.each do |message|
-      key_info = message.key.nil? ? 'nil_key' : message.key
+      key_info = message.key.nil? ? "nil_key" : message.key
       DT[:key_assignments] << [key_info, segment_id]
 
-      if message.raw_payload.start_with?('nil-key')
-        DT[:batch] << ['first', key_info, segment_id]
-      elsif message.raw_payload.start_with?('second-batch')
-        DT[:batch] << ['second', key_info, segment_id]
+      if message.raw_payload.start_with?("nil-key")
+        DT[:batch] << ["first", key_info, segment_id]
+      elsif message.raw_payload.start_with?("second-batch")
+        DT[:batch] << ["second", key_info, segment_id]
       end
 
       DT[segment_id] << message.raw_payload
@@ -90,7 +90,7 @@ first_batch_nil_payloads = nil_key_messages.map { |m| m[:payload] }
 second_batch_nil_payloads = second_batch_nil_keys.map { |m| m[:payload] }
 
 producer_thread = Thread.new do
-  sleep(1) until DT[:key_assignments].count { |key, _| key == 'nil_key' } >= 20
+  sleep(1) until DT[:key_assignments].count { |key, _| key == "nil_key" } >= 20
 
   Karafka::App.producer.produce_many_sync(second_batch_nil_keys)
 end
@@ -99,14 +99,14 @@ all_messages = nil_key_messages + regular_messages
 Karafka::App.producer.produce_many_sync(all_messages)
 
 start_karafka_and_wait_until do
-  if producer_thread.alive? && DT[:key_assignments].count { |key, _| key == 'nil_key' } >= 20
+  if producer_thread.alive? && DT[:key_assignments].count { |key, _| key == "nil_key" } >= 20
     producer_thread.join
   end
 
-  DT[:key_assignments].count { |key, _| key == 'nil_key' } >= 30
+  DT[:key_assignments].count { |key, _| key == "nil_key" } >= 30
 end
 
-nil_key_assignments = DT[:key_assignments].select { |key, _| key == 'nil_key' }
+nil_key_assignments = DT[:key_assignments].slice("nil_key")
 nil_key_segments = nil_key_assignments.map { |_, segment| segment }.uniq
 
 assert_equal(
@@ -119,26 +119,26 @@ assert_equal(
 nil_key_segment = nil_key_segments.first
 
 # Verify all nil key messages from first batch were processed
-first_batch_processed = DT[nil_key_segment].select { |p| p.start_with?('nil-key') }
+first_batch_processed = DT[nil_key_segment].select { |p| p.start_with?("nil-key") }
 assert_equal(
   first_batch_nil_payloads.sort,
   first_batch_processed.sort,
-  'Not all first batch nil key messages were processed'
+  "Not all first batch nil key messages were processed"
 )
 
 # Verify all nil key messages from second batch were processed by the same segment
-second_batch_processed = DT[nil_key_segment].select { |p| p.start_with?('second-batch') }
+second_batch_processed = DT[nil_key_segment].select { |p| p.start_with?("second-batch") }
 assert_equal(
   second_batch_nil_payloads.sort,
   second_batch_processed.sort,
-  'Not all second batch nil key messages were processed'
+  "Not all second batch nil key messages were processed"
 )
 
 # Verify other segments didn't process nil key messages
 other_segments = [0, 1, 2] - [nil_key_segment]
 other_segments.each do |segment|
   nil_key_in_segment = DT[segment].any? do |p|
-    p.start_with?('nil-key', 'second-batch')
+    p.start_with?("nil-key", "second-batch")
   end
 
   assert !nil_key_in_segment, "Segment #{segment} incorrectly processed nil key messages"

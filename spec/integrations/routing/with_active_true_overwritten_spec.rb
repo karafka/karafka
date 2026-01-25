@@ -5,7 +5,8 @@
 setup_karafka
 
 class Consumer < Karafka::BaseConsumer
-  def consume; end
+  def consume
+  end
 end
 
 draw_routes(create_topics: false) do
@@ -13,12 +14,12 @@ draw_routes(create_topics: false) do
     active true
   end
 
-  topic 'topic1' do
+  topic "topic1" do
     consumer Consumer
   end
 
   consumer_group :test do
-    topic 'topic2' do
+    topic "topic2" do
       active false
     end
   end

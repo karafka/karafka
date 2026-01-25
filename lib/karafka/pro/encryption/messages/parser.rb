@@ -39,8 +39,8 @@ module Karafka
           # @return [Object] deserialized payload
           def call(message)
             headers = message.headers
-            encryption = headers['encryption']
-            fingerprint = headers['encryption_fingerprint']
+            encryption = headers["encryption"]
+            fingerprint = headers["encryption_fingerprint"]
 
             return super unless active && encryption
 

@@ -31,7 +31,7 @@
 
 setup_karafka do |config|
   config.concurrency = 10
-  config.kafka[:'transactional.id'] = SecureRandom.uuid
+  config.kafka[:"transactional.id"] = SecureRandom.uuid
 end
 
 class Transactioner
@@ -52,7 +52,7 @@ class Transactioner
 
       producer.produce_async(
         topic: DT.topics[2],
-        payload: [@data.values.map(&:offset)].join(',')
+        payload: [@data.values.map(&:offset)].join(",")
       )
 
       @data.each do |cur_consumer, message|
@@ -141,7 +141,7 @@ end
 
 sleep(2)
 
-committed = DT[:merged].last.split(',').map(&:to_i).sort
+committed = DT[:merged].last.split(",").map(&:to_i).sort
 lags = Karafka::Admin.read_lags_with_offsets["#{DT.consumer_group}_merger"]
 stored = lags.values.map { |parts| parts[0][:offset] - 1 }.sort
 

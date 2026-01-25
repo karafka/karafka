@@ -5,67 +5,67 @@ RSpec.describe_current do
 
   let(:kafka_config) { {} }
 
-  describe '#consumer' do
-    context 'when in production environment' do
+  describe "#consumer" do
+    context "when in production environment" do
       before do
         allow(Karafka::App.env).to receive(:production?).and_return(true)
         injector.consumer(kafka_config)
       end
 
-      it 'adds only consumer kafka defaults' do
+      it "adds only consumer kafka defaults" do
         expect(kafka_config).to include(
-          'statistics.interval.ms': 5_000,
-          'client.software.name': 'karafka',
-          'max.poll.interval.ms': 300_000,
-          'socket.nagle.disable': true,
-          'client.software.version': [
+          "statistics.interval.ms": 5_000,
+          "client.software.name": "karafka",
+          "max.poll.interval.ms": 300_000,
+          "socket.nagle.disable": true,
+          "client.software.version": [
             "v#{Karafka::VERSION}",
             "rdkafka-ruby-v#{Rdkafka::VERSION}",
             "librdkafka-v#{Rdkafka::LIBRDKAFKA_VERSION}"
-          ].join('-')
+          ].join("-")
         )
       end
 
-      it 'does not add consumer kafka dev defaults' do
+      it "does not add consumer kafka dev defaults" do
         expect(kafka_config).not_to include(
-          'allow.auto.create.topics': 'true',
-          'topic.metadata.refresh.interval.ms': 5_000
+          "allow.auto.create.topics": "true",
+          "topic.metadata.refresh.interval.ms": 5_000
         )
       end
     end
 
-    context 'when not in production environment' do
+    context "when not in production environment" do
       before do
         allow(Karafka::App.env).to receive(:production?).and_return(false)
         injector.consumer(kafka_config)
       end
 
-      it 'adds both consumer kafka defaults and dev defaults' do
+      it "adds both consumer kafka defaults and dev defaults" do
         expect(kafka_config).to include(
-          'statistics.interval.ms': 5_000,
-          'client.software.name': 'karafka',
-          'max.poll.interval.ms': 300_000,
-          'socket.nagle.disable': true,
-          'client.software.version': [
+          "statistics.interval.ms": 5_000,
+          "client.software.name": "karafka",
+          "max.poll.interval.ms": 300_000,
+          "socket.nagle.disable": true,
+          "client.software.version": [
             "v#{Karafka::VERSION}",
             "rdkafka-ruby-v#{Rdkafka::VERSION}",
             "librdkafka-v#{Rdkafka::LIBRDKAFKA_VERSION}"
-          ].join('-'),
-          'allow.auto.create.topics': 'true',
-          'topic.metadata.refresh.interval.ms': 5_000
+          ].join("-"),
+          "allow.auto.create.topics": "true",
+          "topic.metadata.refresh.interval.ms": 5_000
         )
       end
     end
 
-    context 'when defaults are already present in kafka_config' do
+    context "when defaults are already present in kafka_config" do
       let(:kafka_config) do
         {
-          'statistics.interval.ms': 10_000,
-          'client.software.name': 'custom_name',
-          'max.poll.interval.ms': 200_000,
-          'client.software.version': 'custom_version',
-          'allow.auto.create.topics': 'false',
-          'topic.metadata.refresh.interval.ms': 10_000
+          "statistics.interval.ms": 10_000,
+          "client.software.name": "custom_name",
+          "max.poll.interval.ms": 200_000,
+          "client.software.version": "custom_version",
+          "allow.auto.create.topics": "false",
+          "topic.metadata.refresh.interval.ms": 10_000
         }
       end
 
@@ -74,52 +74,52 @@ RSpec.describe_current do
         injector.consumer(kafka_config)
       end
 
-      it 'does not overwrite existing settings' do
+      it "does not overwrite existing settings" do
         expect(kafka_config).to eq(
-          'statistics.interval.ms': 10_000,
-          'client.software.name': 'custom_name',
-          'max.poll.interval.ms': 200_000,
-          'client.software.version': 'custom_version',
-          'allow.auto.create.topics': 'false',
-          'topic.metadata.refresh.interval.ms': 10_000,
-          'socket.nagle.disable': true
+          "statistics.interval.ms": 10_000,
+          "client.software.name": "custom_name",
+          "max.poll.interval.ms": 200_000,
+          "client.software.version": "custom_version",
+          "allow.auto.create.topics": "false",
+          "topic.metadata.refresh.interval.ms": 10_000,
+          "socket.nagle.disable": true
         )
       end
     end
   end
 
-  describe '#producer' do
-    context 'when in production environment' do
+  describe "#producer" do
+    context "when in production environment" do
       before do
         allow(Karafka::App.env).to receive(:production?).and_return(true)
         injector.producer(kafka_config)
       end
 
-      it 'does not add any producer kafka defaults' do
+      it "does not add any producer kafka defaults" do
         expect(kafka_config).to be_empty
       end
     end
 
-    context 'when not in production environment' do
+    context "when not in production environment" do
       before do
         allow(Karafka::App.env).to receive(:production?).and_return(false)
         injector.producer(kafka_config)
       end
 
-      it 'adds producer kafka dev defaults' do
+      it "adds producer kafka dev defaults" do
         expect(kafka_config).to include(
-          'allow.auto.create.topics': 'true',
-          'topic.metadata.refresh.interval.ms': 5_000,
-          'socket.nagle.disable': true
+          "allow.auto.create.topics": "true",
+          "topic.metadata.refresh.interval.ms": 5_000,
+          "socket.nagle.disable": true
         )
       end
     end
 
-    context 'when defaults are already present in kafka_config' do
+    context "when defaults are already present in kafka_config" do
       let(:kafka_config) do
         {
-          'allow.auto.create.topics': 'false',
-          'topic.metadata.refresh.interval.ms': 10_000
+          "allow.auto.create.topics": "false",
+          "topic.metadata.refresh.interval.ms": 10_000
         }
       end
 
@@ -128,11 +128,11 @@ RSpec.describe_current do
         injector.producer(kafka_config)
       end
 
-      it 'does not overwrite existing settings' do
+      it "does not overwrite existing settings" do
         expect(kafka_config).to eq(
-          'allow.auto.create.topics': 'false',
-          'topic.metadata.refresh.interval.ms': 10_000,
-          'socket.nagle.disable': true
+          "allow.auto.create.topics": "false",
+          "topic.metadata.refresh.interval.ms": 10_000,
+          "socket.nagle.disable": true
         )
       end
     end

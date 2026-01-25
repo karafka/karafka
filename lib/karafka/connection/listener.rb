@@ -75,7 +75,7 @@ module Karafka
       #   start consuming data
       def call
         Karafka.monitor.instrument(
-          'connection.listener.before_fetch_loop',
+          "connection.listener.before_fetch_loop",
           caller: self,
           client: @client,
           subscription_group: @subscription_group
@@ -84,7 +84,7 @@ module Karafka
         fetch_loop
 
         Karafka.monitor.instrument(
-          'connection.listener.after_fetch_loop',
+          "connection.listener.after_fetch_loop",
           caller: self,
           client: @client,
           subscription_group: @subscription_group
@@ -174,7 +174,7 @@ module Karafka
         # Run the main loop as long as we are not stopping or moving into quiet mode
         while running?
           Karafka.monitor.instrument(
-            'connection.listener.fetch_loop',
+            "connection.listener.fetch_loop",
             caller: self,
             client: @client,
             subscription_group: @subscription_group
@@ -183,7 +183,7 @@ module Karafka
           resume_paused_partitions
 
           Karafka.monitor.instrument(
-            'connection.listener.fetch_loop.received',
+            "connection.listener.fetch_loop.received",
             caller: self,
             client: @client,
             subscription_group: @subscription_group,
@@ -260,10 +260,10 @@ module Karafka
       rescue Exception => e
         # rubocop:enable Lint/RescueException
         Karafka.monitor.instrument(
-          'error.occurred',
+          "error.occurred",
           caller: self,
           error: e,
-          type: 'connection.listener.fetch_loop.error'
+          type: "connection.listener.fetch_loop.error"
         )
 
         reset

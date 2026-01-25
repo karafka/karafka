@@ -33,14 +33,14 @@ RSpec.describe_current do
     )
   end
 
-  describe '#offset_metadata' do
-    context 'when assignment is revoked' do
+  describe "#offset_metadata" do
+    context "when assignment is revoked" do
       before { allow(consumer).to receive(:revoked?).and_return(true) }
 
       it { expect(consumer.offset_metadata).to be(false) }
     end
 
-    context 'when assignment is active' do
+    context "when assignment is active" do
       let(:result) { rand }
 
       before do
@@ -48,14 +48,14 @@ RSpec.describe_current do
         allow(fetcher).to receive(:find).and_return(result)
       end
 
-      it 'expect to reach out to fetcher' do
+      it "expect to reach out to fetcher" do
         expect(consumer.offset_metadata).to eq(result)
         expect(fetcher).to have_received(:find).with(topic, partition, cache: true)
       end
     end
   end
 
-  describe '#committed_offset_metadata' do
+  describe "#committed_offset_metadata" do
     it do
       expect(consumer.method(:offset_metadata)).to eq(consumer.method(:committed_offset_metadata))
     end

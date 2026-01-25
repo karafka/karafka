@@ -33,7 +33,7 @@
 # Note: This spec works correctly regardless of how Kafka batches messages for delivery.
 
 setup_karafka(allow_errors: true) do |config|
-  config.kafka[:'transactional.id'] = SecureRandom.uuid
+  config.kafka[:"transactional.id"] = SecureRandom.uuid
   config.max_messages = 3
 end
 
@@ -71,7 +71,7 @@ class Consumer < Karafka::BaseConsumer
           # On first attempt when starting from offset 0, inject a failure for offset 1
           if should_fail && message.offset == 1
             # This should cause the entire transaction to fail
-            raise StandardError, 'Production failure for offset 1 in first attempt'
+            raise StandardError, "Production failure for offset 1 in first attempt"
           end
 
           # Each message goes to its own unique target topic based on offset
@@ -121,7 +121,7 @@ class Consumer < Karafka::BaseConsumer
           error: result.error
         }
       end
-    rescue StandardError => e
+    rescue => e
       DT[:failed_attempts] << attempt_id
       DT[:errors] << {
         attempt: attempt_id,
@@ -173,7 +173,7 @@ assert DT[:failed_attempts].size >= 1
 # Verify exactly one error
 assert_equal 1, DT[:errors].size
 assert_equal 0, DT[:errors].first[:first_offset]
-assert DT[:errors].first[:message].include?('offset 1')
+assert DT[:errors].first[:message].include?("offset 1")
 
 # Verify all 15 messages were eventually produced and received
 assert_equal 15, DT[:total_received]

@@ -27,7 +27,7 @@
 setup_karafka
 setup_web
 
-Karafka.monitor.subscribe('filtering.throttled') do
+Karafka.monitor.subscribe("filtering.throttled") do
   DT[:done] << true
 end
 
