@@ -40,7 +40,7 @@ RSpec.describe_current do
     end
 
     let(:deserializers) do
-      Karafka::Routing::Features::Deserializers::Config.new(
+      Karafka::Routing::Features::Deserializing::Config.new(
         key: key_deserializer_proc,
         headers: headers_deserializer_proc
       )
