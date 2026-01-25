@@ -25,5 +25,4 @@ group :test do
   gem 'factory_bot'
   gem 'ostruct'
   gem 'simplecov'
-  gem 'yard-lint', '>= 1.3.0'
 end

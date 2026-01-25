@@ -4,6 +4,11 @@
     "config:recommended"
   ],
   "minimumReleaseAge": "7 days",
+  "includePaths": [
+    "Gemfile",
+    "Gemfile.lint",
+    ".github/workflows/**"
+  ],
   "ignorePaths": [
     "spec/integrations"
   ],
