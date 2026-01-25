@@ -145,10 +145,6 @@ GEM
       karafka-core (>= 2.4.9, < 3.0.0)
       karafka-rdkafka (>= 0.23.1)
       zeitwerk (~> 2.3)
-    yard (0.9.38)
-    yard-lint (1.3.0)
-      yard (~> 0.9)
-      zeitwerk (~> 2.6)
     zeitwerk (2.7.4)
 
 PLATFORMS
@@ -177,7 +173,6 @@ DEPENDENCIES
   simplecov
   stringio
   warning
-  yard-lint (>= 1.3.0)
 
 CHECKSUMS
   activejob (8.1.2) sha256=908dab3713b101859536375819f4156b07bdf4c232cc645e7538adb9e302f825
@@ -243,8 +238,6 @@ CHECKSUMS
   uri (1.1.1) sha256=379fa58d27ffb1387eaada68c749d1426738bd0f654d812fcc07e7568f5c57c6
   warning (1.5.0) sha256=0f12c49fea0c06757778eefdcc7771e4fd99308901e3d55c504d87afdd718c53
   waterdrop (2.8.15) sha256=1a8f515533dc9ef2528f1cd33d6135b6ed1cc33e8d2a8562212ebc1bb4c60c10
-  yard (0.9.38) sha256=721fb82afb10532aa49860655f6cc2eaa7130889df291b052e1e6b268283010f
-  yard-lint (1.3.0) sha256=473aa7b4d5632af873ae66bbd056b07827d81e9340f83a07a123123da6b1c25c
   zeitwerk (2.7.4) sha256=2bef90f356bdafe9a6c2bd32bcd804f83a4f9b8bc27f3600fff051eb3edcec8b
 
 BUNDLED WITH
