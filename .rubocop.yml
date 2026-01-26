@@ -212,11 +212,10 @@ Style/RedundantCondition:
 Style/UnlessLogicalOperators:
   Enabled: false
 
-Style/CollectionCompact:
-  Enabled: false
-
-Style/MutableConstant:
-  Enabled: false
+Style/HashSlice:
+  Exclude:
+    - spec/integrations/pro/consumption/parallel_segments/with_nil_key_handling_spec.rb
+    - spec/integrations/pro/consumption/strategies/dlq/complex_error_classification_spec.rb
 
 # Security
 Security/Open:
@@ -305,3 +304,7 @@ ThreadSafety/ClassInstanceVariable:
 
 ThreadSafety/NewThread:
   Enabled: false
+
+ThreadSafety/MutableClassInstanceVariable:
+  Exclude:
+    - spec/integrations/pro/consumption/strategies/ftr/feature_toggle_persistent_pausing_spec.rb
