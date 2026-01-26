@@ -10,18 +10,18 @@ module Karafka
       CONSUMER_KAFKA_DEFAULTS = {
         # We emit the statistics by default, so all the instrumentation and web-ui work out of
         # the box, without requiring users to take any extra actions aside from enabling.
-        'statistics.interval.ms': 5_000,
-        'client.software.name': 'karafka',
+        "statistics.interval.ms": 5_000,
+        "client.software.name": "karafka",
         # Same as librdkafka default, we inject it nonetheless to have it always available as
         # some features may use this value for computation and it is better to ensure, we do
         # always have it
-        'max.poll.interval.ms': 300_000,
-        'socket.nagle.disable': true,
-        'client.software.version': [
+        "max.poll.interval.ms": 300_000,
+        "socket.nagle.disable": true,
+        "client.software.version": [
           "v#{Karafka::VERSION}",
           "rdkafka-ruby-v#{Rdkafka::VERSION}",
           "librdkafka-v#{Rdkafka::LIBRDKAFKA_VERSION}"
-        ].join('-')
+        ].join("-")
       }.freeze
 
       # Contains settings that should not be used in production but make life easier in dev
@@ -29,12 +29,12 @@ module Karafka
         # Will create non-existing topics automatically.
         # Note that the broker needs to be configured with `auto.create.topics.enable=true`
         # While it is not recommended in prod, it simplifies work in dev
-        'allow.auto.create.topics': 'true',
+        "allow.auto.create.topics": "true",
         # We refresh the cluster state often as newly created topics in dev may not be detected
         # fast enough. Fast enough means within reasonable time to provide decent user experience
         # While it's only a one time thing for new topics, it can still be irritating to have to
         # restart the process.
-        'topic.metadata.refresh.interval.ms': 5_000
+        "topic.metadata.refresh.interval.ms": 5_000
       }.freeze
 
       # Contains settings that should not be used in production but make life easier in dev
@@ -42,9 +42,9 @@ module Karafka
       # they have to set this by themselves.
       PRODUCER_KAFKA_DEV_DEFAULTS = {
         # For all of those same reasoning as for the consumer
-        'allow.auto.create.topics': 'true',
-        'topic.metadata.refresh.interval.ms': 5_000,
-        'socket.nagle.disable': true
+        "allow.auto.create.topics": "true",
+        "topic.metadata.refresh.interval.ms": 5_000,
+        "socket.nagle.disable": true
       }.freeze
 
       private_constant(

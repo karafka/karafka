@@ -5,13 +5,13 @@
 # commits using #mark_as_consumed!.
 
 setup_karafka(allow_errors: %w[connection.client.poll.error]) do |config|
-  config.kafka[:'max.poll.interval.ms'] = 10_000
-  config.kafka[:'session.timeout.ms'] = 10_000
-  config.kafka[:'auto.commit.interval.ms'] = 5_000
+  config.kafka[:"max.poll.interval.ms"] = 10_000
+  config.kafka[:"session.timeout.ms"] = 10_000
+  config.kafka[:"auto.commit.interval.ms"] = 5_000
 
   config.max_wait_time = 10_000
   config.max_messages = 20
-  config.initial_offset = 'latest'
+  config.initial_offset = "latest"
 end
 
 class Consumer < Karafka::BaseConsumer
@@ -19,18 +19,18 @@ class Consumer < Karafka::BaseConsumer
     messages.each do |message|
       # Wait until some amount of messages has been already processed to spice things up
       if condition_met?(message) &&
-         !DT.key?(:contested_message) &&
-         DT[:consecutive_messages].size >= 60
+          !DT.key?(:contested_message) &&
+          DT[:consecutive_messages].size >= 60
         DT[:contested_message] << message
 
         sleep(0.1) until DT.key?(:second_closed)
       end
 
-      DT[:consecutive_messages] << [message.payload['key'], message.partition, message.offset]
+      DT[:consecutive_messages] << [message.payload["key"], message.partition, message.offset]
 
       next if mark_as_consumed!(message)
 
-      DT[:failed_commits] << message.payload['key']
+      DT[:failed_commits] << message.payload["key"]
 
       return
     end
@@ -68,7 +68,7 @@ Thread.new do
         {
           topic: DT.topic,
           partition: partitions.next,
-          payload: { 'key' => SecureRandom.uuid }.to_json
+          payload: { "key" => SecureRandom.uuid }.to_json
         }
       end
 
@@ -88,13 +88,13 @@ other_consumer = Thread.new do
   consumer.subscribe(DT.topic)
 
   consumer.each do |message|
-    key = JSON.parse(message.payload)['key']
+    key = JSON.parse(message.payload)["key"]
 
     DT[:second_consumer] << [key, message.partition, message.offset]
     DT[:consecutive_messages] << [key, message.partition, message.offset]
     consumer.store_offset(message)
 
-    next unless DT[:contested_message].first&.payload&.dig('key') == key
+    next unless DT[:contested_message].first&.payload&.dig("key") == key
 
     # Stop at the contested message
     break
@@ -139,17 +139,17 @@ end
 second_consumer_offsets = messages_processed_by_second_consumer.map { |_, _, offset| offset }
 contested_message_key, = messages_processed_by_second_consumer.first
 
-assert_equal contested_message_key, DT[:contested_message].first.payload['key']
+assert_equal contested_message_key, DT[:contested_message].first.payload["key"]
 
 assert(second_consumer_offsets.none? { |offset| offset < DT[:contested_message].first.offset })
 
 # Contested message should have been reprocessed twice
 count = DT[:consecutive_messages].count do |key, _, _|
-  key == DT[:contested_message].first.payload['key']
+  key == DT[:contested_message].first.payload["key"]
 end
 
 assert_equal(count, 2)
 
 # The only failed commit should be that of the contested message
 assert_equal 1, DT[:failed_commits].size
-assert_equal DT[:contested_message].first.payload['key'], DT[:failed_commits].first
+assert_equal DT[:contested_message].first.payload["key"], DT[:failed_commits].first

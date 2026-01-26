@@ -6,22 +6,22 @@
 setup_karafka
 
 draw_routes(create_topics: false) do
-  topic 'topic1' do
+  topic "topic1" do
     consumer Class.new
     kafka(
-      'enable.partition.eof': true,
+      "enable.partition.eof": true,
       inherit: true
     )
   end
 
-  topic 'topic2' do
+  topic "topic2" do
     consumer Class.new
   end
 
-  topic 'topic4' do
+  topic "topic4" do
     consumer Class.new
     kafka(
-      'enable.partition.eof': true,
+      "enable.partition.eof": true,
       inherit: true
     )
   end
@@ -38,12 +38,12 @@ assert_equal %w[topic1 topic4], cgs.first.subscription_groups.first.topics.map(&
 t1k = cgs.first.subscription_groups.first.topics[0].kafka
 t2k = cgs.first.subscription_groups.first.topics[1].kafka
 
-assert_equal '127.0.0.1:9092', t1k[:'bootstrap.servers']
-assert_equal true, t1k[:'enable.partition.eof']
-assert_equal '127.0.0.1:9092', t2k[:'bootstrap.servers']
-assert_equal true, t2k[:'enable.partition.eof']
+assert_equal "127.0.0.1:9092", t1k[:"bootstrap.servers"]
+assert_equal true, t1k[:"enable.partition.eof"]
+assert_equal "127.0.0.1:9092", t2k[:"bootstrap.servers"]
+assert_equal true, t2k[:"enable.partition.eof"]
 
 # The merged SG should have the alterations
 t1sg = cgs.first.subscription_groups.first.kafka
-assert_equal '127.0.0.1:9092', t1sg[:'bootstrap.servers']
-assert_equal true, t1sg[:'enable.partition.eof']
+assert_equal "127.0.0.1:9092", t1sg[:"bootstrap.servers"]
+assert_equal true, t1sg[:"enable.partition.eof"]

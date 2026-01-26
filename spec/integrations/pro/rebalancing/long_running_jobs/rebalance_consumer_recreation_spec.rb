@@ -25,7 +25,7 @@
 
 setup_karafka do |config|
   config.concurrency = 4
-  config.initial_offset = 'latest'
+  config.initial_offset = "latest"
 end
 
 class Consumer < Karafka::BaseConsumer
@@ -61,12 +61,12 @@ end
 Thread.new do
   loop do
     2.times do
-      produce(DT.topic, '1', partition: 0)
-      produce(DT.topic, '1', partition: 1)
+      produce(DT.topic, "1", partition: 0)
+      produce(DT.topic, "1", partition: 1)
     end
 
     sleep(0.5)
-  rescue StandardError
+  rescue
     nil
   end
 end
@@ -76,8 +76,8 @@ consumer = setup_rdkafka_consumer
 
 # This part makes sure we do not run rebalance until karafka got both partitions work to do
 def got_both?
-  DT['0-object_ids'].uniq.size >= 1 &&
-    DT['1-object_ids'].uniq.size >= 1
+  DT["0-object_ids"].uniq.size >= 1 &&
+    DT["1-object_ids"].uniq.size >= 1
 end
 
 other = Thread.new do
@@ -102,12 +102,12 @@ end
 start_karafka_and_wait_until do
   other.join &&
     got_both? &&
-    DT['0-object_ids'].uniq.size >= 2 &&
-    DT['1-object_ids'].uniq.size >= 2
+    DT["0-object_ids"].uniq.size >= 2 &&
+    DT["1-object_ids"].uniq.size >= 2
 end
 
 # Since there are two rebalances here, one of those may actually have 3 ids, that's why we check
 # that it is two or more
-assert DT.data['0-object_ids'].uniq.size >= 2
-assert DT.data['1-object_ids'].uniq.size >= 2
+assert DT.data["0-object_ids"].uniq.size >= 2
+assert DT.data["1-object_ids"].uniq.size >= 2
 assert !DT[:revoked].empty?

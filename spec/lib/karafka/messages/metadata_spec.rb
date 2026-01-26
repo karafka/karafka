@@ -22,7 +22,7 @@ RSpec.describe_current do
     end
   end
 
-  context 'when deserializing raw components' do
+  context "when deserializing raw components" do
     subject(:metadata) do
       described_class.new(
         deserializers: deserializers,
@@ -32,8 +32,8 @@ RSpec.describe_current do
     end
 
     let(:key_deserializer_proc) { ->(metadata) { "deserialized_#{metadata.raw_key}" } }
-    let(:raw_key) { 'test_key' }
-    let(:raw_headers) { { 'content-type' => 'text/plain' } }
+    let(:raw_key) { "test_key" }
+    let(:raw_headers) { { "content-type" => "text/plain" } }
 
     let(:headers_deserializer_proc) do
       ->(metadata) { metadata.raw_headers.transform_keys(&:to_sym).transform_values(&:upcase) }
@@ -51,23 +51,23 @@ RSpec.describe_current do
       allow(headers_deserializer_proc).to receive(:call).and_call_original
     end
 
-    describe '#key' do
-      it 'returns the deserialized key using the provided deserializer' do
-        expect(metadata.key).to eq('deserialized_test_key')
+    describe "#key" do
+      it "returns the deserialized key using the provided deserializer" do
+        expect(metadata.key).to eq("deserialized_test_key")
       end
 
-      it 'memoizes the deserialized key' do
+      it "memoizes the deserialized key" do
         2.times { metadata.key }
         expect(key_deserializer_proc).to have_received(:call).once
       end
     end
 
-    describe '#headers' do
-      it 'returns the deserialized headers using the provided deserializer' do
-        expect(metadata.headers).to eq({ 'content-type': 'TEXT/PLAIN' })
+    describe "#headers" do
+      it "returns the deserialized headers using the provided deserializer" do
+        expect(metadata.headers).to eq({ "content-type": "TEXT/PLAIN" })
       end
 
-      it 'memoizes the deserialized headers' do
+      it "memoizes the deserialized headers" do
         2.times { metadata.headers }
         expect(headers_deserializer_proc).to have_received(:call).once
       end

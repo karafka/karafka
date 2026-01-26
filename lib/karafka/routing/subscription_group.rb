@@ -58,7 +58,7 @@ module Karafka
 
       # @return [String] consumer group id
       def consumer_group_id
-        kafka[:'group.id']
+        kafka[:"group.id"]
       end
 
       # @return [Integer] max messages fetched in a single go
@@ -107,7 +107,7 @@ module Karafka
       # node identifier. This refreshes this if needed when in swarm.
       def refresh
         return unless node
-        return unless kafka.key?(:'group.instance.id')
+        return unless kafka.key?(:"group.instance.id")
 
         @kafka = build_kafka
       end
@@ -124,11 +124,11 @@ module Karafka
         inject_group_instance_id(kafka)
         inject_client_id(kafka)
 
-        kafka[:'group.id'] ||= @consumer_group.id
-        kafka[:'auto.offset.reset'] ||= @topics.first.initial_offset
+        kafka[:"group.id"] ||= @consumer_group.id
+        kafka[:"auto.offset.reset"] ||= @topics.first.initial_offset
         # Karafka manages the offsets based on the processing state, thus we do not rely on the
         # rdkafka offset auto-storing
-        kafka[:'enable.auto.offset.store'] = false
+        kafka[:"enable.auto.offset.store"] = false
         kafka.freeze
         kafka
       end
@@ -146,9 +146,9 @@ module Karafka
       def inject_client_id(kafka)
         # If client id is set directly on librdkafka level, we do nothing and just go with what
         # end user has configured
-        return if kafka.key?(:'client.id')
+        return if kafka.key?(:"client.id")
 
-        kafka[:'client.id'] = client_id
+        kafka[:"client.id"] = client_id
       end
 
       # If we use static group memberships, there can be a case, where same instance id would
@@ -161,7 +161,7 @@ module Karafka
       # affecting the instance id and causing conflicts
       # @param kafka [Hash] kafka level config
       def inject_group_instance_id(kafka)
-        group_instance_prefix = kafka.fetch(:'group.instance.id', false)
+        group_instance_prefix = kafka.fetch(:"group.instance.id", false)
 
         # If group instance id was not even configured, do nothing
         return unless group_instance_prefix
@@ -170,7 +170,7 @@ module Karafka
         # have different instances ids but they are reproducible
         components = [group_instance_prefix, node ? node.id : nil, @position]
 
-        kafka[:'group.instance.id'] = components.compact.join('_')
+        kafka[:"group.instance.id"] = components.compact.join("_")
       end
     end
   end

@@ -13,15 +13,15 @@ module Karafka
       # Verifies that optional requirements are met.
       def verify!
         # Skip verification if web is not used at all
-        return unless require_version('karafka/web')
+        return unless require_version("karafka/web")
 
         # All good if version higher than 0.10.0 because we expect 0.10.0 or higher
-        return if version(Karafka::Web::VERSION) >= version('0.10.0')
+        return if version(Karafka::Web::VERSION) >= version("0.10.0")
 
         # If older web-ui used, we cannot allow it
         raise(
           Errors::DependencyConstraintsError,
-          'karafka-web < 0.10.0 is not compatible with this karafka version'
+          "karafka-web < 0.10.0 is not compatible with this karafka version"
         )
       end
 

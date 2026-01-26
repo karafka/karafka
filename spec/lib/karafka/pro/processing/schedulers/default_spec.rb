@@ -26,7 +26,7 @@ RSpec.describe_current do
   let(:queue) { [] }
   let(:jobs_array) { [] }
 
-  describe '#schedule_consumption' do
+  describe "#schedule_consumption" do
     subject(:schedule) { scheduler.on_schedule_consumption(jobs_array) }
 
     4.times { |i| let("message#{i}") { build(:messages_message) } }
@@ -34,7 +34,7 @@ RSpec.describe_current do
     let(:tracker) { Karafka::Pro::Instrumentation::PerformanceTracker.instance }
     let(:jobs_array) { [] }
 
-    context 'when there are no metrics on any of the topics data' do
+    context "when there are no metrics on any of the topics data" do
       before do
         4.times do |i|
           jobs_array << Karafka::Processing::Jobs::Consume.new(
@@ -54,7 +54,7 @@ RSpec.describe_current do
       it { expect(queue[3]).to eq(jobs_array[0]) }
     end
 
-    context 'when metrics on the computation cost for messages from topics are present' do
+    context "when metrics on the computation cost for messages from topics are present" do
       times = [5, 20, 7, 100]
 
       4.times do |i|
@@ -89,7 +89,7 @@ RSpec.describe_current do
       it { expect(queue[3]).to eq(jobs_array[0]) }
     end
 
-    context 'when metrics on the computation cost are present with other jobs' do
+    context "when metrics on the computation cost are present with other jobs" do
       times = [5, 20, 7, 100]
 
       4.times do |i|
@@ -137,14 +137,14 @@ RSpec.describe_current do
     describe "##{action}" do
       subject(:schedule) { scheduler.public_send(action, jobs_array) }
 
-      context 'when there are no messages' do
-        it 'expect not to schedule anything' do
+      context "when there are no messages" do
+        it "expect not to schedule anything" do
           schedule
           expect(queue).to be_empty
         end
       end
 
-      context 'when there are jobs' do
+      context "when there are jobs" do
         let(:jobs_array) do
           [
             Karafka::Processing::Jobs::Consume.new(nil, []),
@@ -154,7 +154,7 @@ RSpec.describe_current do
           ]
         end
 
-        it 'expect to schedule in the fifo order' do
+        it "expect to schedule in the fifo order" do
           schedule
           expect(queue).to eq(jobs_array)
         end
@@ -162,11 +162,11 @@ RSpec.describe_current do
     end
   end
 
-  describe '#manage' do
+  describe "#manage" do
     it { expect { scheduler.on_manage }.not_to raise_error }
   end
 
-  describe '#clear' do
+  describe "#clear" do
     it { expect { scheduler.on_clear(rand.to_s) }.not_to raise_error }
   end
 end

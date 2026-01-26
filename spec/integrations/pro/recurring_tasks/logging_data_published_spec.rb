@@ -46,23 +46,23 @@ draw_routes do
   end
 end
 
-Karafka::Pro::RecurringTasks.define('1.0.0') do
-  schedule(id: 'a', cron: '0 12 31 12 *', enabled: false) do
+Karafka::Pro::RecurringTasks.define("1.0.0") do
+  schedule(id: "a", cron: "0 12 31 12 *", enabled: false) do
     DT[:a] = true
   end
 
-  schedule(id: 'b', cron: '0 12 31 12 *', enabled: false) do
+  schedule(id: "b", cron: "0 12 31 12 *", enabled: false) do
     DT[:b] = true
   end
 
-  schedule(id: 'c', cron: '0 12 31 12 *', previous_time: Time.now - 120_000) do
+  schedule(id: "c", cron: "0 12 31 12 *", previous_time: Time.now - 120_000) do
     DT[:c] = true
   end
 end
 
 start_karafka_and_wait_until do
   unless @dispatched
-    Karafka::Pro::RecurringTasks.trigger('*')
+    Karafka::Pro::RecurringTasks.trigger("*")
     @dispatched = true
   end
 
@@ -70,9 +70,9 @@ start_karafka_and_wait_until do
 end
 
 DT[:messages].each_with_index do |payload, i|
-  assert_equal payload[:schema_version], '1.0'
-  assert_equal payload[:schedule_version], '1.0.0'
-  assert_equal payload[:type], 'log'
+  assert_equal payload[:schema_version], "1.0"
+  assert_equal payload[:schedule_version], "1.0.0"
+  assert_equal payload[:type], "log"
   assert payload[:dispatched_at].is_a?(Float)
 
   task = payload[:task]
@@ -80,5 +80,5 @@ DT[:messages].each_with_index do |payload, i|
   # Assertions for the task
   assert_equal task[:id], TASK_IDS[i]
   assert task[:time_taken].is_a?(Float)
-  assert_equal task[:result], 'success'
+  assert_equal task[:result], "success"
 end

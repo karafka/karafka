@@ -21,7 +21,7 @@ end
 
 draw_routes(Consumer)
 
-produce(DT.topic, '1')
+produce(DT.topic, "1")
 
 start_karafka_and_wait_until do
   DT.key?(0)

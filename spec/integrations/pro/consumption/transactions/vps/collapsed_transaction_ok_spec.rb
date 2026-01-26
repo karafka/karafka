@@ -23,7 +23,7 @@
 # When we operate in a collapsed mode, transactions should operate in a linear fashion
 
 setup_karafka(allow_errors: %w[consumer.consume.error]) do |config|
-  config.kafka[:'transactional.id'] = SecureRandom.uuid
+  config.kafka[:"transactional.id"] = SecureRandom.uuid
   config.concurrency = 10
 end
 
@@ -34,7 +34,7 @@ class Consumer < Karafka::BaseConsumer
     DT[:done] = true
 
     transaction do
-      mark_as_consumed(messages.first, 'test-metadata')
+      mark_as_consumed(messages.first, "test-metadata")
     end
   end
 
@@ -62,5 +62,5 @@ start_karafka_and_wait_until do
   DT.key?(:done)
 end
 
-assert_equal DT[:metadata].last, 'test-metadata'
+assert_equal DT[:metadata].last, "test-metadata"
 assert_equal fetch_next_offset, 1

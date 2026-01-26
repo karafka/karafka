@@ -31,7 +31,7 @@ class Consumer < Karafka::BaseConsumer
   def consume
     messages.each do |message|
       mark_as_consumed!(message, { offset: message.offset }.to_json)
-      DT[:metadata] << offset_metadata.fetch('offset')
+      DT[:metadata] << offset_metadata.fetch("offset")
     end
   end
 end

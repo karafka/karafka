@@ -4,7 +4,7 @@
 # `#eofed`. Shutdown should also work and respond to `#eofed?`
 
 setup_karafka do |config|
-  config.kafka[:'enable.partition.eof'] = true
+  config.kafka[:"enable.partition.eof"] = true
 end
 
 class Consumer < Karafka::BaseConsumer

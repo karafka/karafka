@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require 'karafka/instrumentation/vendors/kubernetes/base_listener'
+require "karafka/instrumentation/vendors/kubernetes/base_listener"
 
 module Karafka
   module Instrumentation

@@ -44,12 +44,12 @@ module Karafka
         class Distribute < Base
           # Runs the distribution process
           def call
-            puts 'Starting parallel segments distribution...'
+            puts "Starting parallel segments distribution..."
 
             segments_count = applicable_groups.size
 
             if segments_count.zero?
-              puts "#{red('No')} consumer groups with parallel segments configuration found"
+              puts "#{red("No")} consumer groups with parallel segments configuration found"
 
               return
             end
@@ -79,7 +79,7 @@ module Karafka
             end
 
             puts
-            puts "Distribution completed #{green('successfully')}!"
+            puts "Distribution completed #{green("successfully")}!"
           end
 
           private

@@ -6,41 +6,41 @@ RSpec.describe_current do
   let(:job) { ActiveJob::Base.new }
   let(:dispatcher) { Karafka::App.config.internal.active_job.dispatcher }
 
-  describe '#enqueue_at' do
-    it 'expect to indicate, that it is not supported' do
+  describe "#enqueue_at" do
+    it "expect to indicate, that it is not supported" do
       expect { adapter.enqueue_at(job, 5.minutes.from_now) }.to raise_error(NotImplementedError)
     end
   end
 
-  describe '#enqueue' do
+  describe "#enqueue" do
     before do
       allow(dispatcher).to receive(:dispatch).with(job)
     end
 
-    it 'expect to delegate to a proper dispatcher based on the configuration' do
+    it "expect to delegate to a proper dispatcher based on the configuration" do
       adapter.enqueue(job)
       expect(dispatcher).to have_received(:dispatch).with(job)
     end
   end
 
-  describe '#enqueue_all' do
+  describe "#enqueue_all" do
     let(:jobs) { [ActiveJob::Base.new, ActiveJob::Base.new] }
 
     before do
       allow(dispatcher).to receive(:dispatch_many).with(jobs)
     end
 
-    it 'expect to delegate to a proper dispatcher based on the configuration' do
+    it "expect to delegate to a proper dispatcher based on the configuration" do
       adapter.enqueue_all(jobs)
       expect(dispatcher).to have_received(:dispatch_many).with(jobs)
     end
 
-    it 'expect to return total count of enqueued jobs' do
+    it "expect to return total count of enqueued jobs" do
       expect(adapter.enqueue_all(jobs)).to eql jobs.size
     end
   end
 
-  describe '.enqueue_after_transaction_commit?' do
+  describe ".enqueue_after_transaction_commit?" do
     it { expect(adapter.enqueue_after_transaction_commit?).to be(true) }
   end
 end

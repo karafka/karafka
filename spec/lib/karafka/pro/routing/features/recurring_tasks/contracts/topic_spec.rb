@@ -31,11 +31,11 @@ RSpec.describe_current do
     }
   end
 
-  context 'when config is valid' do
+  context "when config is valid" do
     it { expect(check).to be_success }
   end
 
-  context 'when active flag is not boolean' do
+  context "when active flag is not boolean" do
     before { config[:recurring_tasks][:active] = rand }
 
     it { expect(check).not_to be_success }

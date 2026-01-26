@@ -77,7 +77,7 @@ module Karafka
 
       # Checks on nodes if they are ok one after another
       def control
-        monitor.instrument('swarm.manager.control', caller: self) do
+        monitor.instrument("swarm.manager.control", caller: self) do
           @nodes.each do |node|
             statuses = @statuses[node]
 
@@ -107,7 +107,7 @@ module Karafka
         # Do not run any other checks on this node if it is during stopping but still has time
         return true unless over?(statuses[:stop], shutdown_timeout)
 
-        monitor.instrument('swarm.manager.terminating', caller: self, node: node) do
+        monitor.instrument("swarm.manager.terminating", caller: self, node: node) do
           node.terminate
           statuses[:terminate] = monotonic_now
         end
@@ -135,7 +135,7 @@ module Karafka
         else
           # A single invalid report will cause it to stop. We do not support intermediate failures
           # that would recover. Such states should be implemented in the listener.
-          monitor.instrument('swarm.manager.stopping', caller: self, node: node, status: status) do
+          monitor.instrument("swarm.manager.stopping", caller: self, node: node, status: status) do
             node.stop
             statuses[:stop] = monotonic_now
           end
@@ -157,7 +157,7 @@ module Karafka
 
         # Start the stopping procedure if the node stopped reporting frequently enough
         monitor.instrument(
-          'swarm.manager.stopping',
+          "swarm.manager.stopping",
           caller: self,
           node: node,
           status: NOT_RESPONDING_SHUTDOWN_STATUS
@@ -210,9 +210,9 @@ module Karafka
         statuses.clear
         statuses[:control] = monotonic_now
 
-        monitor.instrument('swarm.manager.before_fork', instr_args)
+        monitor.instrument("swarm.manager.before_fork", instr_args)
         node.start
-        monitor.instrument('swarm.manager.after_fork', instr_args)
+        monitor.instrument("swarm.manager.after_fork", instr_args)
 
         node
       end

@@ -37,23 +37,23 @@ RSpec.describe_current do
     }
   end
 
-  context 'when config is valid' do
+  context "when config is valid" do
     it { expect(check).to be_success }
   end
 
-  context 'when active is not boolean' do
+  context "when active is not boolean" do
     before { throttling[:active] = 1 }
 
     it { expect(check).not_to be_success }
   end
 
-  context 'when limit is less than 1' do
+  context "when limit is less than 1" do
     before { throttling[:limit] = 0 }
 
     it { expect(check).not_to be_success }
   end
 
-  context 'when interval is less than 1' do
+  context "when interval is less than 1" do
     before { throttling[:interval] = 0 }
 
     it { expect(check).not_to be_success }

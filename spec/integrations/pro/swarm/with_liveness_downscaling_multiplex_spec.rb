@@ -42,23 +42,24 @@ Karafka.monitor.subscribe(
 
 # The downscale should not cause monitor to think this listener is hanging
 # If this crashes under this scenario, it means it does
-Karafka.monitor.subscribe('swarm.manager.before_fork') do
+Karafka.monitor.subscribe("swarm.manager.before_fork") do
   DT[:forks] << 1
 
   raise if DT[:forks].size > 1
 end
 
-Karafka.monitor.subscribe('connection.listener.stopped') do
-  WRITER.puts('1')
+Karafka.monitor.subscribe("connection.listener.stopped") do
+  WRITER.puts("1")
   WRITER.flush
 end
 
-Karafka.monitor.subscribe('swarm.manager.stopping') do |event|
+Karafka.monitor.subscribe("swarm.manager.stopping") do |event|
   raise if event[:status].positive?
 end
 
 class Consumer < Karafka::BaseConsumer
-  def consume; end
+  def consume
+  end
 end
 
 draw_routes do

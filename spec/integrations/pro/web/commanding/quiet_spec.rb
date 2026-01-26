@@ -31,11 +31,11 @@ class Consumer < Karafka::BaseConsumer
   end
 end
 
-Karafka.monitor.subscribe('app.quieting') do
+Karafka.monitor.subscribe("app.quieting") do
   DT[:flow] << true
 end
 
-Karafka.monitor.subscribe('app.quiet') do
+Karafka.monitor.subscribe("app.quiet") do
   DT[:flow] << true
 end
 
@@ -48,7 +48,7 @@ Thread.new do
   sleep(0.1) until DT.key?(:is)
 
   Karafka::Web::Pro::Commanding::Dispatcher.request(
-    'consumers.quiet', Karafka::Web.config.tracking.consumers.sampler.process_id
+    "consumers.quiet", Karafka::Web.config.tracking.consumers.sampler.process_id
   )
 end
 

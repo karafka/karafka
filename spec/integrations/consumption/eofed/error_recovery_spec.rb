@@ -6,10 +6,10 @@
 # eofed errors should not leak and processing should continue
 
 setup_karafka(allow_errors: %w[consumer.eofed.error]) do |config|
-  config.kafka[:'enable.partition.eof'] = true
+  config.kafka[:"enable.partition.eof"] = true
 end
 
-Karafka.monitor.subscribe('error.occurred') do |event|
+Karafka.monitor.subscribe("error.occurred") do |event|
   DT[:errors] << event[:type]
 end
 

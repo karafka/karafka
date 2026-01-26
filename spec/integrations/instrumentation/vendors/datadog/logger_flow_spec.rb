@@ -2,8 +2,8 @@
 
 # Here we subscribe to our listener and make sure nothing breaks during the notifications
 # We use a dummy client that will intercept calls that should go to DataDog
-require 'karafka/instrumentation/vendors/datadog/logger_listener'
-require Karafka.gem_root.join('spec/support/vendors/datadog/logger_dummy_client')
+require "karafka/instrumentation/vendors/datadog/logger_listener"
+require Karafka.gem_root.join("spec/support/vendors/datadog/logger_dummy_client")
 
 strio = StringIO.new
 
@@ -35,7 +35,7 @@ client = Vendors::Datadog::LoggerDummyClient.new
 
 listener = Karafka::Instrumentation::Vendors::Datadog::LoggerListener.new do |config|
   config.client = client
-  config.service_name = 'myservice-karafka'
+  config.service_name = "myservice-karafka"
 end
 
 Karafka.monitor.subscribe(listener)
@@ -49,13 +49,13 @@ start_karafka_and_wait_until do
   DT[0].size >= 100 && sleep(5)
 end
 
-assert client.buffer.include?(['karafka.consumer', 'myservice-karafka']), client.buffer
-assert client.buffer.include?('Consumer#consume'), client.buffer
+assert client.buffer.include?(["karafka.consumer", "myservice-karafka"]), client.buffer
+assert client.buffer.include?("Consumer#consume"), client.buffer
 assert client.errors.any?(StandardError), client.errors
 assert client.errors.all?(StandardError), client.errors
 
 $stdout = proper_stdout
 $stderr = proper_stderr
 
-assert strio.string.include?('Consume job for Consumer on')
-assert strio.string.include?('Consumer consuming error')
+assert strio.string.include?("Consume job for Consumer on")
+assert strio.string.include?("Consumer consuming error")

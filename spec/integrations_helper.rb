@@ -2,47 +2,47 @@
 
 # This helper content is being used only in the forked integration tests processes.
 
-unless ENV.key?('PRISTINE_MODE')
-  Warning[:performance] = true if RUBY_VERSION >= '3.3'
+unless ENV.key?("PRISTINE_MODE")
+  Warning[:performance] = true if RUBY_VERSION >= "3.3"
   Warning[:deprecated] = true
   $VERBOSE = true
 
-  require 'warning'
+  require "warning"
 
   Warning.process do |warning|
     next unless warning.include?(Dir.pwd)
     # Filter out warnings we don't care about in specs
-    next if warning.include?('_spec')
+    next if warning.include?("_spec")
     # We redefine whole bunch of stuff to simulate various scenarios
-    next if warning.include?('previous definition of')
-    next if warning.include?('method redefined')
-    next if warning.include?('vendor/')
+    next if warning.include?("previous definition of")
+    next if warning.include?("method redefined")
+    next if warning.include?("vendor/")
     # Multi-delegator redefining is expected
-    next if warning.include?('multi_delegator.rb')
+    next if warning.include?("multi_delegator.rb")
     # We redefine it on purpose
-    next if warning.include?('fixture_file')
+    next if warning.include?("fixture_file")
 
     raise "Warning in your code: #{warning}"
   end
 end
 
-ENV['KARAFKA_ENV'] = 'test'
+ENV["KARAFKA_ENV"] = "test"
 
-unless ENV['PRISTINE_MODE']
-  require 'bundler'
+unless ENV["PRISTINE_MODE"]
+  require "bundler"
   Bundler.setup(:default, :test, :integrations)
-  require_relative '../lib/karafka'
-  require 'byebug'
+  require_relative "../lib/karafka"
+  require "byebug"
 end
 
-require 'singleton'
-require 'securerandom'
-require 'stringio'
-require 'tempfile'
-require 'timeout'
-require 'tmpdir'
-require_relative 'support/data_collector'
-require_relative 'support/duplications_detector'
+require "singleton"
+require "securerandom"
+require "stringio"
+require "tempfile"
+require "timeout"
+require "tmpdir"
+require_relative "support/data_collector"
+require_relative "support/duplications_detector"
 
 Thread.abort_on_exception = true
 
@@ -61,7 +61,7 @@ DT = DataCollector
 def setup_karafka(
   allow_errors: false,
   # automatically load pro for all the pro specs unless stated otherwise
-  pro: caller_locations(1..1).first.path.include?('integrations/pro/'),
+  pro: caller_locations(1..1).first.path.include?("integrations/pro/"),
   log_messages: true,
   consumer_group_protocol: false
 )
@@ -70,13 +70,13 @@ def setup_karafka(
 
   Karafka::App.setup do |config|
     config.kafka = {
-      'bootstrap.servers': ENV.fetch('KAFKA_BOOTSTRAP_SERVERS', '127.0.0.1:9092'),
-      'statistics.interval.ms': 100,
+      "bootstrap.servers": ENV.fetch("KAFKA_BOOTSTRAP_SERVERS", "127.0.0.1:9092"),
+      "statistics.interval.ms": 100,
       # We need to send this often as in specs we do time sensitive things and we may be kicked
       # out of the consumer group if it is not delivered fast enough
-      'heartbeat.interval.ms': 1_000,
-      'queue.buffering.max.ms': 5,
-      'partition.assignment.strategy': 'range,roundrobin'
+      "heartbeat.interval.ms": 1_000,
+      "queue.buffering.max.ms": 5,
+      "partition.assignment.strategy": "range,roundrobin"
     }
     config.client_id = DT.consumer_group
     # Prevents conflicts when running in parallel
@@ -94,9 +94,9 @@ def setup_karafka(
 
     # Apply KIP-848 consumer group protocol configuration if requested
     if consumer_group_protocol
-      config.kafka[:'group.protocol'] = 'consumer'
-      config.kafka.delete(:'partition.assignment.strategy')
-      config.kafka.delete(:'heartbeat.interval.ms')
+      config.kafka[:"group.protocol"] = "consumer"
+      config.kafka.delete(:"partition.assignment.strategy")
+      config.kafka.delete(:"heartbeat.interval.ms")
     end
 
     # Configure producer once everything else has been configured
@@ -125,7 +125,7 @@ def setup_karafka(
     end
   end
 
-  Karafka.logger.level = 'debug'
+  Karafka.logger.level = "debug"
 
   unless @setup_karafka_first_run
     # We turn on all the instrumentation just to make sure it works also in the integration specs
@@ -150,7 +150,7 @@ def setup_karafka(
   # immediately exit when any error occurs in the flow
   # There are some specs where we want to allow only a particular type of error, then we can set
   # it explicitly
-  Karafka::App.monitor.subscribe('error.occurred') do |event|
+  Karafka::App.monitor.subscribe("error.occurred") do |event|
     # This allows us to specify errors we expect while not ignoring others
     next if allow_errors.is_a?(Array) && allow_errors.include?(event[:type])
 
@@ -169,7 +169,7 @@ end
 # Loads the web UI for integration specs of tracking
 # @param migrate [Boolean] should we migrate and create topics. Defaults to true
 def setup_web(migrate: true)
-  require 'karafka/web'
+  require "karafka/web"
 
   # Use new groups and topics for each spec, so we don't end up with conflicts
   Karafka::Web.setup do |config|
@@ -195,10 +195,10 @@ end
 # @param framework [Symbol] framework we want to configure
 def setup_testing(framework)
   if framework == :rspec
-    require 'rspec'
-    require 'rspec/autorun'
-    require 'karafka/testing'
-    require 'karafka/testing/rspec/helpers'
+    require "rspec"
+    require "rspec/autorun"
+    require "karafka/testing"
+    require "karafka/testing/rspec/helpers"
 
     RSpec.configure do |config|
       config.include Karafka::Testing::RSpec::Helpers
@@ -229,20 +229,20 @@ def become_pro!
 
   mod = Module.new do
     def self.token
-      ENV.fetch('KARAFKA_PRO_LICENSE_TOKEN')
+      ENV.fetch("KARAFKA_PRO_LICENSE_TOKEN")
     end
   end
 
   Karafka.const_set(:License, mod) unless Karafka.const_defined?(:License)
-  require 'karafka/pro/loader'
+  require "karafka/pro/loader"
   Karafka::Pro::Loader.require_all
-  require_relative 'support/vp_stabilizer'
+  require_relative "support/vp_stabilizer"
 end
 
 # Configures ActiveJob stuff in a similar way as the Railtie does for full Rails setup
 def setup_active_job
-  require 'active_job'
-  require 'active_job/karafka'
+  require "active_job"
+  require "active_job/karafka"
 
   # This is done in Railtie but here we use only ActiveJob, not Rails
   ActiveJob::Base.extend Karafka::ActiveJob::JobExtensions
@@ -253,11 +253,11 @@ end
 # @param options [Hash] rdkafka consumer options if we need to overwrite defaults
 def setup_rdkafka_consumer(options = {})
   config = {
-    'bootstrap.servers': ENV.fetch('KAFKA_BOOTSTRAP_SERVERS', '127.0.0.1:9092'),
-    'group.id': Karafka::App.consumer_groups.first.id,
-    'auto.offset.reset': 'earliest',
-    'enable.auto.offset.store': 'false',
-    'partition.assignment.strategy': 'range,roundrobin'
+    "bootstrap.servers": ENV.fetch("KAFKA_BOOTSTRAP_SERVERS", "127.0.0.1:9092"),
+    "group.id": Karafka::App.consumer_groups.first.id,
+    "auto.offset.reset": "earliest",
+    "enable.auto.offset.store": "false",
+    "partition.assignment.strategy": "range,roundrobin"
   }.merge!(options)
 
   Rdkafka::Config.new(
@@ -342,22 +342,21 @@ end
 #   of topics created concurrently but some particular specs create topics on their own. The
 #   quantity however should be small enough for Kafka to handle.
 def create_routes_topics
-  lock = File.open(File.join(Dir.tmpdir, 'create_routes_topics.lock'), File::CREAT | File::RDWR)
+  lock = File.open(File.join(Dir.tmpdir, "create_routes_topics.lock"), File::CREAT | File::RDWR)
   lock.flock(File::LOCK_EX)
 
   # Create 3 topics in parallel to make specs bootstrapping faster
   fetch_declarative_routes_topics_configs.each_slice(3).to_a.each do |slice|
     slice.map do |name, config|
       args = if config
-               [config.partitions, config.replication_factor, config.details]
-             else
-               [1, 1, {}]
-             end
+        [config.partitions, config.replication_factor, config.details]
+      else
+        [1, 1, {}]
+      end
 
       # All integration tests topics names always have to start with it-
-      unless name.start_with?('it-')
-        puts 'All integration tests topics need to start with "it-"'
-        puts "Attempt to create topic with name: #{name}"
+      unless name.start_with?("it-")
+
         raise
       end
 
@@ -368,7 +367,7 @@ def create_routes_topics
         )
       # Ignore if exists, some specs may try to create few times
       rescue Rdkafka::RdkafkaError => e
-        e.code == :topic_already_exists ? nil : raise
+        (e.code == :topic_already_exists) ? nil : raise
       end
     end.each(&:join)
   end
@@ -389,8 +388,8 @@ def wait_until(mode: :server, sleep: 0.01)
     # Stop if it was running for 4 minutes and nothing changed
     # This prevent from hanging in case of specs instability
     if (Time.now - started_at) > 240
-      puts DT.data
-      raise StandardError, 'Execution expired'
+
+      raise StandardError, "Execution expired"
     end
 
     sleep(sleep)
@@ -400,7 +399,7 @@ def wait_until(mode: :server, sleep: 0.01)
   when :server
     Karafka::Server.stop
   when :swarm
-    Process.kill('TERM', Process.pid)
+    Process.kill("TERM", Process.pid)
   else
     raise Karafka::Errors::UnsupportedCaseError, mode
   end
@@ -448,9 +447,9 @@ def wait_for_assignments(*topics)
   topics << DT.topic if topics.empty?
 
   unless @topics_assignments_subscribed
-    Karafka.monitor.subscribe('statistics.emitted') do |event|
+    Karafka.monitor.subscribe("statistics.emitted") do |event|
       next unless topics.all? do |topic|
-        event[:statistics]['topics'].key?(topic)
+        event[:statistics]["topics"].key?(topic)
       end
 
       DT[:topics_assignments_ready] = true
@@ -540,9 +539,9 @@ def fixture_file(file_path)
   File.read(
     File.join(
       Karafka.gem_root,
-      'spec',
-      'support',
-      'fixtures',
+      "spec",
+      "support",
+      "fixtures",
       file_path
     )
   )

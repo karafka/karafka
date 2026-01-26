@@ -46,7 +46,7 @@ proxies = Array.new(10) do |i|
   message = {
     topic: DT.topics[1],
     key: i.to_s,
-    payload: 'payload'
+    payload: "payload"
   }
 
   Karafka::Pro::ScheduledMessages.schedule(
@@ -63,7 +63,7 @@ Karafka.producer.produce_many_sync(proxies)
 class Crasher
   def call(message)
     # Don't crash on async state reporting, just proxy dispatches
-    return message if message[:key].end_with?('_state')
+    return message if message[:key].end_with?("_state")
 
     DT[:totals] << 1
 

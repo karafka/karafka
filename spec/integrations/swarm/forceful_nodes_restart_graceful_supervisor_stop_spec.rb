@@ -11,7 +11,7 @@ setup_karafka(allow_errors: true) do |config|
   config.internal.swarm.node_report_timeout = 2_000
 end
 
-Karafka::App.monitor.subscribe('swarm.manager.before_fork') do
+Karafka::App.monitor.subscribe("swarm.manager.before_fork") do
   DT[:forks] << true
 
   # Give them a bit more time if they are suppose to be legit
@@ -39,17 +39,18 @@ module Karafka
 end
 
 stoppings = []
-Karafka::App.monitor.subscribe('swarm.manager.stopping') do |event|
+Karafka::App.monitor.subscribe("swarm.manager.stopping") do |event|
   stoppings << event[:status]
 end
 
 terminations = []
-Karafka::App.monitor.subscribe('swarm.manager.terminating') do
+Karafka::App.monitor.subscribe("swarm.manager.terminating") do
   terminations << true
 end
 
 class Consumer < Karafka::BaseConsumer
-  def consume; end
+  def consume
+  end
 end
 
 draw_routes(Consumer)

@@ -32,7 +32,7 @@ module Karafka
               long_running_job(*)
             end
 
-            alias non_blocking non_blocking_job
+            alias_method :non_blocking, :non_blocking_job
           end
         end
       end

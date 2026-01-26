@@ -33,13 +33,13 @@ consumer_class = Class.new
 begin
   draw_routes(create_topics: false) do
     subscription_group :a do
-      topic 'namespace_collision' do
+      topic "namespace_collision" do
         consumer consumer_class
       end
     end
 
     subscription_group :b do
-      topic 'namespace_collision' do
+      topic "namespace_collision" do
         consumer consumer_class
       end
     end

@@ -3,11 +3,11 @@
 RSpec.describe_current do
   subject(:client) { described_class.new(500) }
 
-  describe '#wait and #signal' do
-    context 'when there was a signal' do
+  describe "#wait and #signal" do
+    context "when there was a signal" do
       before { client.signal }
 
-      it 'expect not to wait for 500ms' do
+      it "expect not to wait for 500ms" do
         before = Time.now.to_f
         client.wait
         after = Time.now.to_f
@@ -16,8 +16,8 @@ RSpec.describe_current do
       end
     end
 
-    context 'when there was no signal' do
-      it 'expect to wait for 500ms' do
+    context "when there was no signal" do
+      it "expect to wait for 500ms" do
         before = Time.now.to_f
         client.wait
         after = Time.now.to_f

@@ -106,7 +106,7 @@ segment2_offset = fetch_next_offset(DT.topic, consumer_group_id: segment2_group_
 consumed_by_segment0 = DT[:consumed_messages].select { |m| m[:segment_id] == 0 }
 assert(
   !consumed_by_segment0.empty?,
-  'Segment 0 should have received and processed messages'
+  "Segment 0 should have received and processed messages"
 )
 
 # 4. Verify segments 1 and 2 didn't receive any messages (all filtered)

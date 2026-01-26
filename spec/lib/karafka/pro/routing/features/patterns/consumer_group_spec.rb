@@ -31,7 +31,7 @@ RSpec.describe_current do
 
   it { expect(cg.patterns).to be_empty }
 
-  describe '#patterns and #pattern=' do
+  describe "#patterns and #pattern=" do
     it do
       expect { adding_pattern }.to change(cg.patterns, :size).from(0).to(1)
     end
@@ -47,17 +47,17 @@ RSpec.describe_current do
     end
   end
 
-  describe '#to_h' do
-    context 'when no patterns' do
+  describe "#to_h" do
+    context "when no patterns" do
       it { expect(cg.to_h[:patterns]).to eq([]) }
     end
 
-    context 'when there are patterns' do
-      let(:expected_hash) { { regexp: /test/, name: cg.topics.last.name, regexp_string: '^test' } }
+    context "when there are patterns" do
+      let(:expected_hash) { { regexp: /test/, name: cg.topics.last.name, regexp_string: "^test" } }
 
       before { adding_pattern }
 
-      it 'expect to add patterns to hash' do
+      it "expect to add patterns to hash" do
         expect(cg.to_h[:patterns]).to eq([expected_hash])
       end
     end

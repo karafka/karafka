@@ -26,8 +26,8 @@ setup_karafka do |config|
   config.max_messages = 50
   config.max_wait_time = 1_000
   # We set it here that way not too wait too long on stuff
-  config.kafka[:'max.poll.interval.ms'] = 10_000
-  config.kafka[:'session.timeout.ms'] = 10_000
+  config.kafka[:"max.poll.interval.ms"] = 10_000
+  config.kafka[:"session.timeout.ms"] = 10_000
   config.concurrency = 5
 end
 

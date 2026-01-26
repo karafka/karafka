@@ -27,11 +27,11 @@
 
 setup_karafka
 
-Karafka.monitor.subscribe('filtering.throttled') do
+Karafka.monitor.subscribe("filtering.throttled") do
   DT[:done] << true
 end
 
-Karafka.monitor.subscribe('consumer.before_schedule_idle') do
+Karafka.monitor.subscribe("consumer.before_schedule_idle") do
   DT[:before_schedule_idle] << true
 end
 

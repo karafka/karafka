@@ -29,19 +29,19 @@ event_count = 0
 event_times = []
 
 # Subscribe to consumer events to track performance
-Karafka.monitor.subscribe('consumer.consumed') do |_event|
+Karafka.monitor.subscribe("consumer.consumed") do |_event|
   event_count += 1
   event_times << Time.now.to_f
   DT[:consumer_events] << 1
 end
 
 # Subscribe to statistics to monitor performance
-Karafka.monitor.subscribe('statistics.emitted') do |event|
+Karafka.monitor.subscribe("statistics.emitted") do |event|
   next unless event[:statistics]
 
   # Track memory and timing metrics
   stats = event[:statistics]
-  (DT[:memory_usage] << stats['msg_cnt']) || 0
+  (DT[:memory_usage] << stats["msg_cnt"]) || 0
   DT[:stats_received] << 1
 end
 

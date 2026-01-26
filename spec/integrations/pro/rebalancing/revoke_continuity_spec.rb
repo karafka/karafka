@@ -56,12 +56,12 @@ end
 Thread.new do
   loop do
     2.times do
-      produce(DT.topic, '1', partition: 0)
-      produce(DT.topic, '1', partition: 1)
+      produce(DT.topic, "1", partition: 0)
+      produce(DT.topic, "1", partition: 1)
     end
 
     sleep(0.5)
-  rescue StandardError
+  rescue
     nil
   end
 end

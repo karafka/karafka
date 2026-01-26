@@ -22,7 +22,7 @@ module Karafka
       OPTIONS_BUILDER = lambda do
         option(
           :consumer_groups,
-          'Runs server only with specified consumer groups',
+          "Runs server only with specified consumer groups",
           Array,
           %w[
             -g
@@ -33,7 +33,7 @@ module Karafka
 
         option(
           :subscription_groups,
-          'Runs server only with specified subscription groups',
+          "Runs server only with specified subscription groups",
           Array,
           %w[
             --subscription_groups
@@ -43,7 +43,7 @@ module Karafka
 
         option(
           :topics,
-          'Runs server only with specified topics',
+          "Runs server only with specified topics",
           Array,
           %w[
             --topics
@@ -53,7 +53,7 @@ module Karafka
 
         option(
           :exclude_consumer_groups,
-          'Runs server without specified consumer groups',
+          "Runs server without specified consumer groups",
           Array,
           %w[
             --exclude_consumer_groups
@@ -62,7 +62,7 @@ module Karafka
 
         option(
           :exclude_subscription_groups,
-          'Runs server without specified subscription groups',
+          "Runs server without specified subscription groups",
           Array,
           %w[
             --exclude_subscription_groups
@@ -71,7 +71,7 @@ module Karafka
 
         option(
           :exclude_topics,
-          'Runs server without specified topics',
+          "Runs server without specified topics",
           Array,
           %w[
             --exclude_topics

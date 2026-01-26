@@ -40,7 +40,7 @@ Karafka::App.routes.draw do
     subscription_group do
       multiplexing(min: 5, max: 5)
 
-      topic 'benchmarks_00_05' do
+      topic "benchmarks_00_05" do
         consumer Consumer
       end
     end
@@ -52,7 +52,7 @@ Karafka::App.routes.draw do
   end
 end
 
-Karafka.producer.monitor.subscribe('message.acknowledged') do
+Karafka.producer.monitor.subscribe("message.acknowledged") do
   $start ||= Time.monotonic
 
   $total += 1

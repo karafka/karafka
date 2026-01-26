@@ -37,7 +37,7 @@ draw_routes do
   end
 end
 
-Karafka.monitor.subscribe('dead_letter_queue.dispatched') do |event|
+Karafka.monitor.subscribe("dead_letter_queue.dispatched") do |event|
   assert !event[:message].nil?
   DT[:events] << 1
 end

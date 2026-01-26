@@ -29,32 +29,32 @@ RSpec.describe_current do
     listeners.each { |listener| allow(listener).to receive(:start!) }
   end
 
-  describe '#register' do
-    it 'expect to start all listeners' do
+  describe "#register" do
+    it "expect to start all listeners" do
       manager.register(listeners)
 
       expect(listeners).to all have_received(:start!)
     end
   end
 
-  describe '#done?' do
+  describe "#done?" do
     before { manager.register(listeners) }
 
-    context 'when all listeners are done' do
+    context "when all listeners are done" do
       before { listeners.each(&:stopped!) }
 
       it { expect(manager.done?).to be(true) }
     end
 
-    context 'when some listeners are not done' do
+    context "when some listeners are not done" do
       it { expect(manager.done?).to be(false) }
     end
   end
 
-  describe '#control' do
+  describe "#control" do
     before { manager.register(listeners) }
 
-    context 'when under quiet' do
+    context "when under quiet" do
       before do
         allow(app).to receive_messages(
           done?: true,
@@ -63,23 +63,23 @@ RSpec.describe_current do
         )
       end
 
-      context 'when it just started' do
-        it 'expect to switch listeners to quieting' do
+      context "when it just started" do
+        it "expect to switch listeners to quieting" do
           manager.control
 
           expect(listeners.all?(&:quieting?)).to be(true)
         end
       end
 
-      context 'when not all listeners are quieted' do
-        it 'expect not to switch process to quiet' do
+      context "when not all listeners are quieted" do
+        it "expect not to switch process to quiet" do
           manager.control
 
           expect(app).not_to have_received(:quieted!)
         end
       end
 
-      context 'when all listeners are quieted' do
+      context "when all listeners are quieted" do
         before do
           allow(app).to receive(:quiet?).and_return(true)
 
@@ -88,11 +88,11 @@ RSpec.describe_current do
           manager.control
         end
 
-        it 'expect to switch whole process to quieting' do
+        it "expect to switch whole process to quieting" do
           expect(app).to have_received(:quieted!)
         end
 
-        it 'expect not to move them forward to stopping' do
+        it "expect not to move them forward to stopping" do
           listeners.each do |listener|
             expect(listener).not_to have_received(:stop!)
           end
@@ -100,33 +100,33 @@ RSpec.describe_current do
       end
     end
 
-    context 'when under shutdown' do
+    context "when under shutdown" do
       before { allow(app).to receive(:done?).and_return(true) }
 
-      context 'when shutdown is happening' do
-        context 'when it just started' do
-          it 'expect to switch listeners to quieting' do
+      context "when shutdown is happening" do
+        context "when it just started" do
+          it "expect to switch listeners to quieting" do
             manager.control
 
             expect(listeners.all?(&:quieting?)).to be(true)
           end
         end
 
-        context 'when we run control multiple times during quieting' do
+        context "when we run control multiple times during quieting" do
           before { 10.times { manager.control } }
 
-          it 'expect not to change state from quieting' do
+          it "expect not to change state from quieting" do
             expect(listeners.all?(&:quieting?)).to be(true)
           end
         end
 
-        context 'when all listeners are quiet' do
+        context "when all listeners are quiet" do
           before do
             manager.control
             listeners.each { |listener| allow(listener).to receive(:quiet?).and_return(true) }
           end
 
-          it 'expect to request all of them to stop' do
+          it "expect to request all of them to stop" do
             manager.control
             expect(listeners.all?(&:stopping?)).to be(true)
           end
@@ -134,8 +134,8 @@ RSpec.describe_current do
       end
     end
 
-    context 'when not under shutdown' do
-      it 'expect to do nothing' do
+    context "when not under shutdown" do
+      it "expect to do nothing" do
         manager.control
 
         expect { listeners }.not_to(change { listeners.all?(&:quieting?) })

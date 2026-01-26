@@ -5,7 +5,7 @@ RSpec.describe_current do
 
   let(:message) { build(:messages_message) }
 
-  it 'expect to call the message deserializer and return the deserialized payload' do
+  it "expect to call the message deserializer and return the deserialized payload" do
     expect(parser.call(message)).to eq({})
   end
 end

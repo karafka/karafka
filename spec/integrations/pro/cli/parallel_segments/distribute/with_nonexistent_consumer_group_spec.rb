@@ -42,9 +42,9 @@ end
 
 produce_many(DT.topic, DT.uuids(10))
 
-ARGV[0] = 'parallel_segments'
-ARGV[1] = 'distribute'
-ARGV[2] = '--groups'
+ARGV[0] = "parallel_segments"
+ARGV[1] = "distribute"
+ARGV[2] = "--groups"
 ARGV[3] = nonexistent_group
 
 failed = false

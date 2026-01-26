@@ -25,8 +25,8 @@ RSpec.describe_current do
 
   let(:pattern_class) { Karafka::Pro::Routing::Features::Patterns::Pattern }
 
-  describe '#find' do
-    let(:topic_name) { 'test_topic' }
+  describe "#find" do
+    let(:topic_name) { "test_topic" }
     let(:matching_pattern) { pattern_class.new(nil, /test_/, -> {}) }
     let(:non_matching_pattern) { pattern_class.new(nil, /not_matching_/, -> {}) }
 
@@ -35,22 +35,22 @@ RSpec.describe_current do
       patterns << matching_pattern
     end
 
-    it 'expects to find a pattern matching the topic name' do
+    it "expects to find a pattern matching the topic name" do
       expect(patterns.find(topic_name)).to eq(matching_pattern)
     end
 
-    context 'when multiple patterns match' do
+    context "when multiple patterns match" do
       let(:another_matching_pattern) { pattern_class.new(nil, /_topic/, -> {}) }
 
       before { patterns << another_matching_pattern }
 
-      it 'expects to return the first matching pattern' do
+      it "expects to return the first matching pattern" do
         expect(patterns.find(topic_name)).to eq(matching_pattern)
       end
     end
 
-    context 'when no pattern matches' do
-      let(:topic_name) { 'unmatched_topic' }
+    context "when no pattern matches" do
+      let(:topic_name) { "unmatched_topic" }
 
       it { expect(patterns.find(topic_name)).to be_nil }
     end

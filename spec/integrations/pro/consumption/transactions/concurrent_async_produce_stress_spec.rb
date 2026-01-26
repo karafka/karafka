@@ -35,7 +35,7 @@
 # Note: This spec works correctly regardless of how Kafka batches messages for delivery.
 
 setup_karafka do |config|
-  config.kafka[:'transactional.id'] = SecureRandom.uuid
+  config.kafka[:"transactional.id"] = SecureRandom.uuid
   config.concurrency = 5
   config.max_messages = 50
 end
@@ -59,7 +59,7 @@ class Consumer < Karafka::BaseConsumer
             topic: DT.topics[i + 1],
             key: message.key,
             payload: "#{i}_#{message.raw_payload}",
-            headers: { 'source_offset' => message.offset.to_s }
+            headers: { "source_offset" => message.offset.to_s }
           )
         end
 
@@ -131,9 +131,9 @@ assert_equal message_count, DT[:target2].size
 assert_equal message_count, DT[:target3].size
 
 # Verify message prefixes
-DT[:target1].each { |msg| assert msg.start_with?('0_') }
-DT[:target2].each { |msg| assert msg.start_with?('1_') }
-DT[:target3].each { |msg| assert msg.start_with?('2_') }
+DT[:target1].each { |msg| assert msg.start_with?("0_") }
+DT[:target2].each { |msg| assert msg.start_with?("1_") }
+DT[:target3].each { |msg| assert msg.start_with?("2_") }
 
 # Verify offset committed
 assert_equal message_count, fetch_next_offset

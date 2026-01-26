@@ -35,19 +35,19 @@ draw_routes(SerializationEdgeCaseConsumer)
 # Test various serialization edge cases
 edge_case_messages = [
   # Valid JSON
-  { payload: '{}', description: 'empty_json' },
-  { payload: '[]', description: 'empty_array' },
-  { payload: 'null', description: 'json_null' },
-  { payload: '{"data":"test"}', description: 'valid_json' },
+  { payload: "{}", description: "empty_json" },
+  { payload: "[]", description: "empty_array" },
+  { payload: "null", description: "json_null" },
+  { payload: '{"data":"test"}', description: "valid_json" },
 
   # Invalid JSON - should handle gracefully
-  { payload: '', description: 'empty_message' },
-  { payload: 'not json', description: 'plain_text' },
-  { payload: "\x00\x01\x02\x03binary\xFF\xFE", description: 'binary_data' },
+  { payload: "", description: "empty_message" },
+  { payload: "not json", description: "plain_text" },
+  { payload: "\x00\x01\x02\x03binary\xFF\xFE", description: "binary_data" },
 
   # Edge case strings
-  { payload: '9223372036854775807', description: 'number_as_string' },
-  { payload: '"string with \\"quotes\\""', description: 'json_string_with_quotes' }
+  { payload: "9223372036854775807", description: "number_as_string" },
+  { payload: '"string with \\"quotes\\""', description: "json_string_with_quotes" }
 ]
 
 edge_case_messages.each do |msg_data|

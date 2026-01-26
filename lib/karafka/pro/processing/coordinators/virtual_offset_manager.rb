@@ -150,13 +150,13 @@ module Karafka
             raise Errors::InvalidRealOffsetUsageError unless markable?
 
             offset_metadata = case @offset_metadata_strategy
-                              when :exact
-                                @offsets_metadata.fetch(@real_offset)
-                              when :current
-                                @current_offset_metadata
-                              else
-                                raise Errors::UnsupportedCaseError, @offset_metadata_strategy
-                              end
+            when :exact
+              @offsets_metadata.fetch(@real_offset)
+            when :current
+              @current_offset_metadata
+            else
+              raise Errors::UnsupportedCaseError, @offset_metadata_strategy
+            end
 
             [
               Messages::Seek.new(

@@ -129,7 +129,7 @@ module Karafka
 
               # Notify about dispatch on the events bus
               monitor.instrument(
-                'dead_letter_queue.dispatched',
+                "dead_letter_queue.dispatched",
                 caller: self,
                 message: skippable_message
               )
@@ -170,12 +170,12 @@ module Karafka
                 partition_key: source_partition,
                 payload: skippable_message.raw_payload,
                 headers: skippable_message.raw_headers.merge(
-                  'source_topic' => topic.name,
-                  'source_partition' => source_partition,
-                  'source_offset' => skippable_message.offset.to_s,
-                  'source_consumer_group' => topic.consumer_group.id,
-                  'source_attempts' => attempt.to_s,
-                  'source_trace_id' => errors_tracker.trace_id
+                  "source_topic" => topic.name,
+                  "source_partition" => source_partition,
+                  "source_offset" => skippable_message.offset.to_s,
+                  "source_consumer_group" => topic.consumer_group.id,
+                  "source_attempts" => attempt.to_s,
+                  "source_trace_id" => errors_tracker.trace_id
                 )
               }
 

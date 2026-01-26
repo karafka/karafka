@@ -17,8 +17,8 @@ class EarlyTerminationConsumer < Karafka::BaseConsumer
       message_data = JSON.parse(message.raw_payload)
 
       # Check for early termination conditions
-      if message_data['terminate_early']
-        termination_info[:termination_reason] = 'early_termination_requested'
+      if message_data["terminate_early"]
+        termination_info[:termination_reason] = "early_termination_requested"
         termination_info[:processed_count] = index
         termination_info[:processing_end] = Time.now.to_f
         termination_info[:early_terminated] = true
@@ -29,7 +29,7 @@ class EarlyTerminationConsumer < Karafka::BaseConsumer
 
       # Normal processing
       DT[:processed_messages] << {
-        message_id: message_data['id'],
+        message_id: message_data["id"],
         batch_position: index,
         processed_at: Time.now.to_f
       }
@@ -40,7 +40,7 @@ class EarlyTerminationConsumer < Karafka::BaseConsumer
     # Completed full batch
     termination_info[:processing_end] = Time.now.to_f
     termination_info[:early_terminated] = false
-    termination_info[:termination_reason] = 'completed_normally'
+    termination_info[:termination_reason] = "completed_normally"
 
     DT[:completed_batches] << termination_info
   end
@@ -55,7 +55,7 @@ early_termination_messages = []
 5.times do |i|
   early_termination_messages << {
     id: "normal_#{i}",
-    content: 'normal_message',
+    content: "normal_message",
     terminate_early: false
   }.to_json
 end
@@ -65,7 +65,7 @@ end
   should_terminate = (i == 2) # Terminate on the 3rd message
   early_termination_messages << {
     id: "early_term_#{i}",
-    content: 'early_termination_batch',
+    content: "early_termination_batch",
     terminate_early: should_terminate
   }.to_json
 end
@@ -74,7 +74,7 @@ end
 5.times do |i|
   early_termination_messages << {
     id: "final_#{i}",
-    content: 'final_batch',
+    content: "final_batch",
     terminate_early: false
   }.to_json
 end
@@ -95,52 +95,52 @@ end
 total_batches = DT[:completed_batches].size + DT[:terminated_batches].size
 assert(
   total_batches >= 1,
-  'Should have processed at least one batch'
+  "Should have processed at least one batch"
 )
 
 # Verify normal batch completion
 DT[:completed_batches].each do |batch|
   assert_equal(
-    'completed_normally', batch[:termination_reason],
-    'Completed batches should have normal termination reason'
+    "completed_normally", batch[:termination_reason],
+    "Completed batches should have normal termination reason"
   )
 
   assert(
     !batch[:early_terminated],
-    'Completed batches should not be marked as early terminated'
+    "Completed batches should not be marked as early terminated"
   )
 
   assert_equal(
     batch[:batch_size], batch[:processed_count],
-    'Completed batches should process all messages'
+    "Completed batches should process all messages"
   )
 
   assert(
     batch[:processing_end] > batch[:processing_start],
-    'Should have valid processing time range'
+    "Should have valid processing time range"
   )
 end
 
 # Verify early termination behavior
 DT[:terminated_batches].each do |batch|
   assert_equal(
-    'early_termination_requested', batch[:termination_reason],
-    'Terminated batches should have early termination reason'
+    "early_termination_requested", batch[:termination_reason],
+    "Terminated batches should have early termination reason"
   )
 
   assert(
     batch[:early_terminated],
-    'Terminated batches should be marked as early terminated'
+    "Terminated batches should be marked as early terminated"
   )
 
   assert(
     batch[:processed_count] < batch[:batch_size],
-    'Terminated batches should process fewer messages than batch size'
+    "Terminated batches should process fewer messages than batch size"
   )
 
   assert(
     batch[:processing_end] > batch[:processing_start],
-    'Terminated batches should have valid processing time range'
+    "Terminated batches should have valid processing time range"
   )
 end
 
@@ -148,17 +148,17 @@ end
 processed_ids = DT[:processed_messages].map { |msg| msg[:message_id] }
 assert(
   processed_ids.any?,
-  'Should have processed at least some messages'
+  "Should have processed at least some messages"
 )
 
 # Verify batch position consistency
-processed_by_batch = DT[:processed_messages].group_by { |msg| msg[:message_id].split('_')[0] }
+processed_by_batch = DT[:processed_messages].group_by { |msg| msg[:message_id].split("_")[0] }
 processed_by_batch.each do |_batch_type, messages|
   messages.each_with_index do |msg, _expected_position|
     # NOTE: batch_position might not match expected_position due to early termination
     assert(
       msg[:batch_position] >= 0,
-      'Batch position should be non-negative'
+      "Batch position should be non-negative"
     )
   end
 end
@@ -166,5 +166,5 @@ end
 # The key success criteria: early termination handled correctly
 assert(
   !DT[:processed_messages].empty?,
-  'Should handle batch processing with early termination scenarios'
+  "Should handle batch processing with early termination scenarios"
 )

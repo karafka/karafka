@@ -5,8 +5,8 @@
 # Karafka should maintain all the ordering and should not have duplicated.
 
 setup_karafka do |config|
-  config.initial_offset = 'latest'
-  config.kafka[:'group.instance.id'] = SecureRandom.hex(6)
+  config.initial_offset = "latest"
+  config.kafka[:"group.instance.id"] = SecureRandom.hex(6)
 end
 
 class Consumer < Karafka::BaseConsumer
@@ -61,8 +61,8 @@ sleep(2)
 # one partition assigned, so we don't have to worry about figuring out which partition it got
 other = Thread.new do
   consumer = setup_rdkafka_consumer(
-    'group.instance.id': SecureRandom.hex(6),
-    'auto.offset.reset': 'latest'
+    "group.instance.id": SecureRandom.hex(6),
+    "auto.offset.reset": "latest"
   )
 
   consumer.subscribe(DT.topic)
@@ -131,9 +131,9 @@ end
 # consuming
 after = DT[:process2].index(:stop)
 post_rebalance_messages = DT
-                          .data[:process2]
-                          .select
-                          .with_index { |_, index| index > after }
-                          .select { |message| message.is_a?(Array) }
+  .data[:process2]
+  .select
+  .with_index { |_, index| index > after }
+  .select { |message| message.is_a?(Array) }
 
 assert !DT[:process1].intersect?(post_rebalance_messages)

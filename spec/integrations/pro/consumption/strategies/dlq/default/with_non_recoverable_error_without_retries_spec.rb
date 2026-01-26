@@ -56,8 +56,8 @@ draw_routes do
   end
 end
 
-Karafka.monitor.subscribe('error.occurred') do |event|
-  next unless event[:type] == 'consumer.consume.error'
+Karafka.monitor.subscribe("error.occurred") do |event|
+  next unless event[:type] == "consumer.consume.error"
 
   DT[:errors] << 1
 end

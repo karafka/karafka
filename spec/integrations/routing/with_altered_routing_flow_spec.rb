@@ -8,8 +8,8 @@
 
 setup_karafka do |config|
   config.kafka = {
-    'bootstrap.servers': 'something.super',
-    'max.poll.interval.ms': 1_000
+    "bootstrap.servers": "something.super",
+    "max.poll.interval.ms": 1_000
   }
 end
 
@@ -35,7 +35,7 @@ class Matcher
           elsif ref.is_a?(Hash)
             ref.merge!(kwargs)
           else
-            raise 'No idea if such case exists, if so, similar handling as config'
+            raise "No idea if such case exists, if so, similar handling as config"
           end
         end
       end
@@ -52,10 +52,10 @@ class Matcher
 
   def method_missing(method_name, *args, **kwargs)
     @applications << if args.empty?
-                       [method_name, kwargs]
-                     else
-                       [method_name, args]
-                     end
+      [method_name, kwargs]
+    else
+      [method_name, args]
+    end
   end
 
   def respond_to_missing?(_method_name, _include_private = false)
@@ -87,23 +87,23 @@ Karafka::Routing::ConsumerGroup.prepend ConsumerGroup
 draw_routes(create_topics: false) do
   defaults do
     dead_letter_queue(
-      topic: 'dead_messages',
+      topic: "dead_messages",
       max_retries: 2,
       independent: false,
       mark_after_dispatch: true
     )
   end
 
-  topic 'test' do
+  topic "test" do
     active(false)
     dead_letter_queue(
-      topic: 'dead_messages2'
+      topic: "dead_messages2"
     )
   end
 end
 
 dlq_config = Karafka::App.routes.first.topics.first.dead_letter_queue
 
-assert_equal dlq_config.topic, 'dead_messages2'
+assert_equal dlq_config.topic, "dead_messages2"
 assert_equal dlq_config.max_retries, 2
 assert_equal dlq_config.independent, false

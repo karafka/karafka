@@ -53,8 +53,8 @@ produce_many(DT.topic, elements)
 Karafka::App.config.producer = WaterDrop::Producer.new do |config|
   config.deliver = true
   config.kafka = {
-    'bootstrap.servers': 'localhost:999',
-    'message.timeout.ms': 1_000
+    "bootstrap.servers": "localhost:999",
+    "message.timeout.ms": 1_000
   }
 end
 

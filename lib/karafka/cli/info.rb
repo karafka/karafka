@@ -11,7 +11,7 @@ module Karafka
         client_id: %i[client_id]
       )
 
-      desc 'Prints configuration details and other options of your application'
+      desc "Prints configuration details and other options of your application"
 
       # Nice karafka banner
       BANNER = <<~BANNER
@@ -35,7 +35,7 @@ module Karafka
 
       # @return [Array<String>] core framework related info
       def core_info
-        postfix = Karafka.pro? ? ' + Pro' : ''
+        postfix = Karafka.pro? ? " + Pro" : ""
 
         [
           "Karafka version: #{Karafka::VERSION}#{postfix}",
@@ -54,12 +54,12 @@ module Karafka
       def license_info
         if Karafka.pro?
           [
-            'License: Commercial',
+            "License: Commercial",
             "License entity: #{license.entity}"
           ]
         else
           [
-            'License: LGPL-3.0'
+            "License: LGPL-3.0"
           ]
         end
       end

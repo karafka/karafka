@@ -33,14 +33,14 @@ RSpec.describe_current do
   let(:min) { 1 }
   let(:max) { 1 }
 
-  describe '#active?' do
-    context 'when not active' do
+  describe "#active?" do
+    context "when not active" do
       let(:active) { false }
 
       it { expect(config.active?).to be(false) }
     end
 
-    context 'when active' do
+    context "when active" do
       let(:active) { true }
 
       it { expect(config.active?).to be(true) }

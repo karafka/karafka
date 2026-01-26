@@ -35,7 +35,7 @@ setup_karafka do |config|
   config.shutdown_timeout = 60_000
 end
 
-Karafka.monitor.subscribe('connection.listener.fetch_loop.received') do
+Karafka.monitor.subscribe("connection.listener.fetch_loop.received") do
   DT[:polls] << Time.now
 end
 

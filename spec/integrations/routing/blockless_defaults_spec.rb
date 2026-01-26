@@ -12,18 +12,18 @@ draw_routes(create_topics: false) do
     active false
   end
 
-  topic 'topic1'
+  topic "topic1"
 
   consumer_group :test do
-    topic 'topic2'
+    topic "topic2"
   end
 end
 
 t1 = Karafka::App.consumer_groups.first.topics.first
 t2 = Karafka::App.consumer_groups.last.topics.first
 
-assert_equal 'topic1', t1.name
-assert_equal 'topic2', t2.name
+assert_equal "topic1", t1.name
+assert_equal "topic2", t2.name
 
 assert !t1.active?
 assert !t2.active?

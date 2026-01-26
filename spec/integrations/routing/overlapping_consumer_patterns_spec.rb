@@ -47,7 +47,7 @@ end
 Karafka::App.routes.clear
 
 draw_routes do
-  subscription_group 'multi_topic_group' do
+  subscription_group "multi_topic_group" do
     topic DT.topic do
       consumer PatternConsumerA
     end
@@ -64,9 +64,9 @@ end
 
 # Test consumer patterns - produce messages to different topics
 test_messages = [
-  { topic: DT.topic, message: 'Message for primary topic' },
-  { topic: "#{DT.topic}_secondary", message: 'Message for secondary topic' },
-  { topic: "#{DT.topic}_tertiary", message: 'Message for tertiary topic' }
+  { topic: DT.topic, message: "Message for primary topic" },
+  { topic: "#{DT.topic}_secondary", message: "Message for secondary topic" },
+  { topic: "#{DT.topic}_tertiary", message: "Message for tertiary topic" }
 ]
 
 test_messages.each do |msg_info|
@@ -78,40 +78,40 @@ start_karafka_and_wait_until do
 end
 
 # Verify messages went to correct consumers
-assert_equal 1, DT[:consumed_a].size, 'Consumer A should receive 1 message'
-assert_equal 1, DT[:consumed_b].size, 'Consumer B should receive 1 message'
-assert_equal 1, DT[:consumed_c].size, 'Consumer C should receive 1 message'
+assert_equal 1, DT[:consumed_a].size, "Consumer A should receive 1 message"
+assert_equal 1, DT[:consumed_b].size, "Consumer B should receive 1 message"
+assert_equal 1, DT[:consumed_c].size, "Consumer C should receive 1 message"
 
 # Verify each consumer received the correct topic's message
 assert_equal(
   DT.topic, DT[:consumed_a].first[:topic],
-  'Consumer A should receive message from primary topic'
+  "Consumer A should receive message from primary topic"
 )
 
 assert_equal(
   "#{DT.topic}_secondary", DT[:consumed_b].first[:topic],
-  'Consumer B should receive message from secondary topic'
+  "Consumer B should receive message from secondary topic"
 )
 
 assert_equal(
   "#{DT.topic}_tertiary", DT[:consumed_c].first[:topic],
-  'Consumer C should receive message from tertiary topic'
+  "Consumer C should receive message from tertiary topic"
 )
 
 # Verify correct consumer class assignment
 assert_equal(
-  'PatternConsumerA', DT[:consumed_a].first[:consumer_class],
-  'Should use PatternConsumerA for primary topic'
+  "PatternConsumerA", DT[:consumed_a].first[:consumer_class],
+  "Should use PatternConsumerA for primary topic"
 )
 
 assert_equal(
-  'PatternConsumerB', DT[:consumed_b].first[:consumer_class],
-  'Should use PatternConsumerB for secondary topic'
+  "PatternConsumerB", DT[:consumed_b].first[:consumer_class],
+  "Should use PatternConsumerB for secondary topic"
 )
 
 assert_equal(
-  'PatternConsumerC', DT[:consumed_c].first[:consumer_class],
-  'Should use PatternConsumerC for tertiary topic'
+  "PatternConsumerC", DT[:consumed_c].first[:consumer_class],
+  "Should use PatternConsumerC for tertiary topic"
 )
 
 # Test that attempting to assign same topic to multiple consumers fails
@@ -120,7 +120,7 @@ duplicate_assignment_failed = false
 
 begin
   draw_routes(create_topics: false) do
-    subscription_group 'conflicting_group' do
+    subscription_group "conflicting_group" do
       topic :same_topic_name do
         consumer PatternConsumerA
       end
@@ -141,13 +141,13 @@ multiple_groups_failed = false
 
 begin
   draw_routes(create_topics: false) do
-    subscription_group 'group_1' do
+    subscription_group "group_1" do
       topic :shared_topic_name do
         consumer PatternConsumerA
       end
     end
 
-    subscription_group 'group_2' do
+    subscription_group "group_2" do
       # This should fail - same topic name in different subscription groups
       topic :shared_topic_name do
         consumer PatternConsumerB
@@ -161,19 +161,19 @@ end
 # Test overlapping configuration validation
 assert(
   duplicate_assignment_failed,
-  'Should prevent duplicate topic assignment within same subscription group'
+  "Should prevent duplicate topic assignment within same subscription group"
 )
 
 assert(
   multiple_groups_failed,
-  'Should prevent same topic name across different subscription groups'
+  "Should prevent same topic name across different subscription groups"
 )
 
 # Test successful multi-consumer pattern within single subscription group
 total_consumed = DT[:consumed_a].size + DT[:consumed_b].size + DT[:consumed_c].size
 assert_equal(
   test_messages.size, total_consumed,
-  'Should handle multiple consumers in same subscription group correctly'
+  "Should handle multiple consumers in same subscription group correctly"
 )
 
 # Verify no message duplication occurred

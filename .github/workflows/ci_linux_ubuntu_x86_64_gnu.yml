@@ -35,30 +35,24 @@ jobs:
           KARAFKA_PRO_LICENSE_CHECKSUM: ${{ secrets.KARAFKA_PRO_LICENSE_CHECKSUM }}
         run: bin/verify_license_integrity
 
-  coditsu:
+  rubocop:
     runs-on: ubuntu-latest
     timeout-minutes: 5
     strategy:
       fail-fast: false
+    env:
+      BUNDLE_GEMFILE: Gemfile.lint
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           fetch-depth: 0
-      - name: Download Coditsu script
-        run: |
-          curl -sSL https://api.coditsu.io/run/ci -o coditsu_script.sh
-          chmod +x coditsu_script.sh
-      - name: Verify Coditsu script checksum
-        run: |
-          EXPECTED_SHA256="7dc7f736b81ad79cfa065ceb87506908dfcd1ec1202f384426d72342396f7377"
-
-          ACTUAL_SHA256=$(sha256sum coditsu_script.sh | awk '{ print $1 }')
-          if [ "$ACTUAL_SHA256" != "$EXPECTED_SHA256" ]; then
-            echo "::error::Checksum verification failed. Expected $EXPECTED_SHA256 but got $ACTUAL_SHA256."
-            exit 1
-          fi
-      - name: Run Coditsu
-        run: ./coditsu_script.sh
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@708024e6c902387ab41de36e1669e43b5ee7085e # v1.283.0
+        with:
+          ruby-version: '4.0.1'
+          bundler-cache: true
+      - name: Run RuboCop
+        run: bundle exec rubocop
 
   yard-lint:
     runs-on: ubuntu-latest
@@ -274,7 +268,7 @@ jobs:
     if: always()
     needs:
       - karafka-checksum
-      - coditsu
+      - rubocop
       - yard-lint
       - specs
       - integrations_oss

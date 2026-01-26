@@ -70,7 +70,7 @@ module Karafka
               end
             end
 
-            alias assign direct_assignments
+            alias_method :assign, :direct_assignments
 
             # @return [Hash] topic with all its native configuration options plus direct
             #   assignments

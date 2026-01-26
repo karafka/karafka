@@ -14,7 +14,7 @@ module Karafka
 
         raise(
           Errors::UnsupportedOptionError,
-          'Swarm mode not supported on this platform'
+          "Swarm mode not supported on this platform"
         )
       end
 

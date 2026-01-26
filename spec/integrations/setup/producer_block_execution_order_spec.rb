@@ -9,20 +9,20 @@ setup_karafka do |config|
   # Producer block runs after setup
   config.producer do |producer_config|
     # Should be able to customize producer kafka settings
-    producer_config.kafka[:'max.in.flight.requests.per.connection'] = 1
+    producer_config.kafka[:"max.in.flight.requests.per.connection"] = 1
   end
 
-  config.kafka[:'bootstrap.servers'] = 'test'
+  config.kafka[:"bootstrap.servers"] = "test"
 end
 
 producer = Karafka::App.config.producer
 
 # Producer should have the setting from the block
-assert_equal 1, producer.config.kafka[:'max.in.flight.requests.per.connection']
-assert_equal 'test', producer.config.kafka[:'bootstrap.servers']
+assert_equal 1, producer.config.kafka[:"max.in.flight.requests.per.connection"]
+assert_equal "test", producer.config.kafka[:"bootstrap.servers"]
 
 # Producer config should NOT leak back to Karafka
-assert_equal nil, Karafka::App.config.kafka[:'max.in.flight.requests.per.connection']
+assert_equal nil, Karafka::App.config.kafka[:"max.in.flight.requests.per.connection"]
 
 # Producer should be properly created
 assert producer.is_a?(WaterDrop::Producer)

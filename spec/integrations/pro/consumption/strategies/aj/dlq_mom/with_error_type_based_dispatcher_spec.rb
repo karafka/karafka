@@ -58,10 +58,10 @@ class DqlErrorStrategy
       :skip
     # On this specific recoverable retry at most 2 times
     when RecoverableError
-      attempt > 2 ? :dispatch : :retry
+      (attempt > 2) ? :dispatch : :retry
     else
       # And for any other errors, retry 5 times
-      attempt > 5 ? :dispatch : :retry
+      (attempt > 5) ? :dispatch : :retry
     end
   end
 end

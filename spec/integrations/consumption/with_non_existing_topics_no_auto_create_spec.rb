@@ -4,11 +4,12 @@
 
 # We need to allow errors so we can track them and check the propagation
 setup_karafka(allow_errors: true) do |config|
-  config.kafka[:'allow.auto.create.topics'] = false
+  config.kafka[:"allow.auto.create.topics"] = false
 end
 
 class Consumer < Karafka::BaseConsumer
-  def consume; end
+  def consume
+  end
 end
 
 draw_routes(create_topics: false) do
@@ -23,7 +24,7 @@ draw_routes(create_topics: false) do
   end
 end
 
-Karafka.monitor.subscribe('error.occurred') do |event|
+Karafka.monitor.subscribe("error.occurred") do |event|
   # Interested only in the first one, the remaining can leak out on re-raise
   DT[:events] << event unless DT.key?(:events)
 end
@@ -35,5 +36,5 @@ end
 payload = DT[:events].last.payload
 
 assert_equal Karafka::Connection::Client, payload[:caller].class, payload[:caller].class
-assert_equal 'connection.client.poll.error', payload[:type], payload[:type]
+assert_equal "connection.client.poll.error", payload[:type], payload[:type]
 assert_equal :unknown_topic_or_part, payload[:error].code, payload[:error].code

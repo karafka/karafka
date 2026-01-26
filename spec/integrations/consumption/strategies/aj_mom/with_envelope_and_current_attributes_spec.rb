@@ -3,7 +3,7 @@
 # Karafka should correctly handle current attributes when using a custom envelope deserializer
 # This ensures that current attributes persistence works with custom serialization formats
 
-require 'karafka/active_job/current_attributes'
+require "karafka/active_job/current_attributes"
 
 # Custom deserializer that wraps jobs in an envelope with metadata
 class EnvelopedWithCurrentAttributesDeserializer < Karafka::ActiveJob::Deserializer
@@ -15,8 +15,8 @@ class EnvelopedWithCurrentAttributesDeserializer < Karafka::ActiveJob::Deseriali
       schema_id: 456,
       schema_version: 2,
       metadata: {
-        service: 'test',
-        environment: 'integration'
+        service: "test",
+        environment: "integration"
       },
       payload: job_hash
     }
@@ -28,11 +28,11 @@ class EnvelopedWithCurrentAttributesDeserializer < Karafka::ActiveJob::Deseriali
     envelope = ::ActiveSupport::JSON.decode(message.raw_payload)
 
     # Validate envelope structure
-    raise 'Invalid envelope: missing schema_id' unless envelope['schema_id']
-    raise 'Invalid envelope: missing payload' unless envelope['payload']
+    raise "Invalid envelope: missing schema_id" unless envelope["schema_id"]
+    raise "Invalid envelope: missing payload" unless envelope["payload"]
 
     # Extract and return the actual job data (which includes current attributes)
-    envelope['payload']
+    envelope["payload"]
   end
 end
 

@@ -15,14 +15,14 @@ draw_routes(create_topics: false) do
     # This retention should be cluster default for this to work
     config(
       partitions: 2,
-      'retention.bytes': 100_000,
-      'log.retention.bytes': -1
+      "retention.bytes": 100_000,
+      "log.retention.bytes": -1
     )
   end
 end
 
-ARGV[0] = 'topics'
-ARGV[1] = 'plan'
+ARGV[0] = "topics"
+ARGV[1] = "plan"
 
 results = capture_stdout do
   Karafka::Cli.start
@@ -44,5 +44,5 @@ end
   assert !results.include?(part), part
 end
 
-assert !results.include?('Following topics will have configuration changes:')
-assert results.include?('perform any actions. No changes needed.')
+assert !results.include?("Following topics will have configuration changes:")
+assert results.include?("perform any actions. No changes needed.")

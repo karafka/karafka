@@ -55,15 +55,15 @@ segments.each do |segment|
   )
 end
 
-ARGV[0] = 'parallel_segments'
-ARGV[1] = 'collapse'
+ARGV[0] = "parallel_segments"
+ARGV[1] = "collapse"
 
 results = capture_stdout do
   Karafka::Cli.start
 end
 
-assert results.include?('Collapse completed')
-assert results.include?('successfully')
+assert results.include?("Collapse completed")
+assert results.include?("successfully")
 
 offsets = Karafka::Admin.read_lags_with_offsets({ DT.consumer_group => [DT.topic] })
 assert_equal offsets[DT.consumer_group][DT.topic][0][:offset], 5

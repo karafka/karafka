@@ -1,9 +1,9 @@
 # frozen_string_literal: true
 
-source 'https://rubygems.org'
+source "https://rubygems.org"
 
-gem 'activemodel', '7.2.3'
-gem 'activesupport', '7.2.3'
-gem 'karafka', path: ENV.fetch('KARAFKA_GEM_DIR'), require: true
-gem 'karafka-web', '>= 0.10.1'
-gem 'railties', '7.2.3'
+gem "activemodel", "7.2.3"
+gem "activesupport", "7.2.3"
+gem "karafka", path: ENV.fetch("KARAFKA_GEM_DIR"), require: true
+gem "karafka-web", ">= 0.10.1"
+gem "railties", "7.2.3"

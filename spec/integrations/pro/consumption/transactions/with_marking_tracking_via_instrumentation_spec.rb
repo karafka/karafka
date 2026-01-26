@@ -23,10 +23,10 @@
 # When using transactions, we should be able to track the stored offset by taking the seek offset
 
 setup_karafka do |config|
-  config.kafka[:'transactional.id'] = SecureRandom.uuid
+  config.kafka[:"transactional.id"] = SecureRandom.uuid
 end
 
-Karafka.monitor.subscribe('consumer.consuming.transaction') do |event|
+Karafka.monitor.subscribe("consumer.consuming.transaction") do |event|
   DT[:seeks] << event[:caller].seek_offset
 end
 

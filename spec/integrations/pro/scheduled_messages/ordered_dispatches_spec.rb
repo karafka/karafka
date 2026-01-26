@@ -37,7 +37,7 @@ schedules = Array.new(50) do |i|
   message = {
     topic: DT.topics[1],
     key: i.to_s,
-    headers: { 'b' => i.to_s },
+    headers: { "b" => i.to_s },
     payload: "payload#{i}"
   }
 

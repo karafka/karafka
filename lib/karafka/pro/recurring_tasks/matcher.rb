@@ -30,10 +30,10 @@ module Karafka
         # @return [Boolean] is this message dedicated to current process and is actionable
         def matches?(task, payload)
           # We only match commands
-          return false unless payload[:type] == 'command'
+          return false unless payload[:type] == "command"
 
           # * is a wildcard to match all for batch commands
-          return false unless payload[:task][:id] == '*' || payload[:task][:id] == task.id
+          return false unless payload[:task][:id] == "*" || payload[:task][:id] == task.id
 
           # Ignore messages that have different schema. This can happen in the middle of
           # upgrades of the framework. We ignore this not to risk compatibility issues

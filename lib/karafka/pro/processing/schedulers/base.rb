@@ -65,7 +65,7 @@ module Karafka
           #   [Array<Karafka::Processing::Jobs::Consume, Processing::Jobs::ConsumeNonBlocking>]
           #   jobs for scheduling
           def schedule_consumption(_jobs_array)
-            raise NotImplementedError, 'Implement in a subclass'
+            raise NotImplementedError, "Implement in a subclass"
           end
 
           # Runs the revocation jobs scheduling flow under a mutex
@@ -109,10 +109,10 @@ module Karafka
           end
 
           # Schedule by default all except consumption as fifo
-          alias schedule_revocation schedule_fifo
-          alias schedule_shutdown schedule_fifo
-          alias schedule_idle schedule_fifo
-          alias schedule_periodic schedule_fifo
+          alias_method :schedule_revocation, :schedule_fifo
+          alias_method :schedule_shutdown, :schedule_fifo
+          alias_method :schedule_idle, :schedule_fifo
+          alias_method :schedule_periodic, :schedule_fifo
 
           # Runs the manage tick under mutex
           def on_manage

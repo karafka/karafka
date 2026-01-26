@@ -27,13 +27,13 @@ setup_karafka do |config|
   config.max_messages = 10
 end
 
-Karafka::App.monitor.subscribe('statistics.emitted') do |event|
-  next unless event[:statistics]['topics'][DT.topic]
-  next unless event[:statistics]['topics'][DT.topic]['partitions']
-  next unless event[:statistics]['topics'][DT.topic]['partitions']
-  next unless event[:statistics]['topics'][DT.topic]['partitions']['0']
+Karafka::App.monitor.subscribe("statistics.emitted") do |event|
+  next unless event[:statistics]["topics"][DT.topic]
+  next unless event[:statistics]["topics"][DT.topic]["partitions"]
+  next unless event[:statistics]["topics"][DT.topic]["partitions"]
+  next unless event[:statistics]["topics"][DT.topic]["partitions"]["0"]
 
-  DT[:lags] << event[:statistics]['topics'][DT.topic]['partitions']['0']['consumer_lag']
+  DT[:lags] << event[:statistics]["topics"][DT.topic]["partitions"]["0"]["consumer_lag"]
 end
 
 class Consumer < Karafka::BaseConsumer

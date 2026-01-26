@@ -26,10 +26,10 @@ RSpec.describe_current do
   let(:message) do
     build(
       :messages_message,
-      raw_key: 'message_key',
+      raw_key: "message_key",
       raw_headers: {
-        'schedule_source_type' => 'schedule',
-        'schedule_target_epoch' => epoch
+        "schedule_source_type" => "schedule",
+        "schedule_target_epoch" => epoch
       }
     )
   end
@@ -37,100 +37,100 @@ RSpec.describe_current do
   let(:message2) do
     build(
       :messages_message,
-      raw_key: 'message_key2',
+      raw_key: "message_key2",
       raw_headers: {
-        'schedule_source_type' => 'schedule',
-        'schedule_target_epoch' => epoch
+        "schedule_source_type" => "schedule",
+        "schedule_target_epoch" => epoch
       }
     )
   end
 
   let(:epoch) { Time.now.to_i }
 
-  describe '#size' do
-    context 'when buffer is empty' do
-      it 'returns 0' do
+  describe "#size" do
+    context "when buffer is empty" do
+      it "returns 0" do
         expect(buffer.size).to eq(0)
       end
     end
 
-    context 'when buffer has one message' do
+    context "when buffer has one message" do
       before { buffer << message }
 
-      it 'returns 1' do
+      it "returns 1" do
         expect(buffer.size).to eq(1)
       end
     end
 
-    context 'when buffer has multiple messages with different keys' do
+    context "when buffer has multiple messages with different keys" do
       before do
         buffer << message
         buffer << message2
       end
 
-      it 'returns the correct size' do
+      it "returns the correct size" do
         expect(buffer.size).to eq(2)
       end
     end
   end
 
-  describe '#<<' do
-    context 'when adding a message' do
-      it 'adds the message to the buffer' do
+  describe "#<<" do
+    context "when adding a message" do
+      it "adds the message to the buffer" do
         buffer << message
         expect(buffer.size).to eq(1)
       end
     end
 
-    context 'when adding a tombstone message' do
+    context "when adding a tombstone message" do
       before do
-        message.headers['schedule_source_type'] = 'tombstone'
+        message.headers["schedule_source_type"] = "tombstone"
         buffer << message
       end
 
-      it 'removes the message from the buffer' do
+      it "removes the message from the buffer" do
         expect(buffer.size).to eq(0)
       end
     end
   end
 
-  describe '#for_dispatch' do
-    context 'when there are messages due for dispatch' do
+  describe "#for_dispatch" do
+    context "when there are messages due for dispatch" do
       before { buffer << message }
 
-      it 'yields messages that should be dispatched' do
+      it "yields messages that should be dispatched" do
         expect do |b|
           buffer.for_dispatch(&b)
         end.to yield_with_args(message)
       end
     end
 
-    context 'when there are messages not yet due for dispatch' do
+    context "when there are messages not yet due for dispatch" do
       let(:future_epoch) { Time.now.to_i + 3_600 }
 
       before do
-        message.headers['schedule_target_epoch'] = future_epoch
+        message.headers["schedule_target_epoch"] = future_epoch
         buffer << message
       end
 
-      it 'does not yield any messages' do
+      it "does not yield any messages" do
         expect do |b|
           buffer.for_dispatch(&b)
         end.not_to yield_control
       end
     end
 
-    context 'when multiple messages have the same epoch' do
+    context "when multiple messages have the same epoch" do
       let(:past_epoch) { Time.now.to_i - 100 }
 
       let(:message1) do
         build(
           :messages_message,
-          raw_key: 'key1',
+          raw_key: "key1",
           offset: 100,
           raw_headers: {
-            'schedule_source_type' => 'schedule',
-            'schedule_target_epoch' => past_epoch
+            "schedule_source_type" => "schedule",
+            "schedule_target_epoch" => past_epoch
           }
         )
       end
@@ -138,11 +138,11 @@ RSpec.describe_current do
       let(:message2) do
         build(
           :messages_message,
-          raw_key: 'key2',
+          raw_key: "key2",
           offset: 50,
           raw_headers: {
-            'schedule_source_type' => 'schedule',
-            'schedule_target_epoch' => past_epoch
+            "schedule_source_type" => "schedule",
+            "schedule_target_epoch" => past_epoch
           }
         )
       end
@@ -150,11 +150,11 @@ RSpec.describe_current do
       let(:message3) do
         build(
           :messages_message,
-          raw_key: 'key3',
+          raw_key: "key3",
           offset: 150,
           raw_headers: {
-            'schedule_source_type' => 'schedule',
-            'schedule_target_epoch' => past_epoch
+            "schedule_source_type" => "schedule",
+            "schedule_target_epoch" => past_epoch
           }
         )
       end
@@ -165,7 +165,7 @@ RSpec.describe_current do
         buffer << message3
       end
 
-      it 'yields messages sorted by offset when epochs are the same' do
+      it "yields messages sorted by offset when epochs are the same" do
         dispatched = []
         buffer.for_dispatch { |msg| dispatched << msg }
 
@@ -174,18 +174,18 @@ RSpec.describe_current do
       end
     end
 
-    context 'when messages have different epochs and some have the same epoch' do
+    context "when messages have different epochs and some have the same epoch" do
       let(:epoch1) { Time.now.to_i - 200 }
       let(:epoch2) { Time.now.to_i - 100 }
 
       let(:message1) do
         build(
           :messages_message,
-          raw_key: 'key1',
+          raw_key: "key1",
           offset: 100,
           raw_headers: {
-            'schedule_source_type' => 'schedule',
-            'schedule_target_epoch' => epoch2
+            "schedule_source_type" => "schedule",
+            "schedule_target_epoch" => epoch2
           }
         )
       end
@@ -193,11 +193,11 @@ RSpec.describe_current do
       let(:message2) do
         build(
           :messages_message,
-          raw_key: 'key2',
+          raw_key: "key2",
           offset: 50,
           raw_headers: {
-            'schedule_source_type' => 'schedule',
-            'schedule_target_epoch' => epoch2
+            "schedule_source_type" => "schedule",
+            "schedule_target_epoch" => epoch2
           }
         )
       end
@@ -205,11 +205,11 @@ RSpec.describe_current do
       let(:message3) do
         build(
           :messages_message,
-          raw_key: 'key3',
+          raw_key: "key3",
           offset: 75,
           raw_headers: {
-            'schedule_source_type' => 'schedule',
-            'schedule_target_epoch' => epoch1
+            "schedule_source_type" => "schedule",
+            "schedule_target_epoch" => epoch1
           }
         )
       end
@@ -220,36 +220,36 @@ RSpec.describe_current do
         buffer << message3
       end
 
-      it 'yields messages sorted by epoch first, then by offset for same epoch' do
+      it "yields messages sorted by epoch first, then by offset for same epoch" do
         dispatched = []
         buffer.for_dispatch { |msg| dispatched << msg }
 
         expect(dispatched).to eq([message3, message2, message1])
-        expect(dispatched[0].headers['schedule_target_epoch']).to eq(epoch1)
-        expect(dispatched[1].headers['schedule_target_epoch']).to eq(epoch2)
+        expect(dispatched[0].headers["schedule_target_epoch"]).to eq(epoch1)
+        expect(dispatched[1].headers["schedule_target_epoch"]).to eq(epoch2)
         expect(dispatched[1].offset).to eq(50)
-        expect(dispatched[2].headers['schedule_target_epoch']).to eq(epoch2)
+        expect(dispatched[2].headers["schedule_target_epoch"]).to eq(epoch2)
         expect(dispatched[2].offset).to eq(100)
       end
     end
   end
 
-  describe '#delete' do
-    context 'when deleting an existing key' do
+  describe "#delete" do
+    context "when deleting an existing key" do
       before do
         buffer << message
-        buffer.delete('message_key')
+        buffer.delete("message_key")
       end
 
-      it 'removes the message from the buffer' do
+      it "removes the message from the buffer" do
         expect(buffer.size).to eq(0)
       end
     end
 
-    context 'when deleting a non-existing key' do
-      before { buffer.delete('non_existing_key') }
+    context "when deleting a non-existing key" do
+      before { buffer.delete("non_existing_key") }
 
-      it 'does not affect the buffer' do
+      it "does not affect the buffer" do
         expect(buffer.size).to eq(0)
       end
     end

@@ -5,7 +5,7 @@ RSpec.describe_current do
   let(:fetched_message) { build(:kafka_fetched_message) }
   let(:received_at) { Time.now }
 
-  describe '#call' do
+  describe "#call" do
     subject(:result) { described_class.call(fetched_message, routing_topic, received_at) }
 
     it { is_expected.to be_a(Karafka::Messages::Message) }
@@ -21,12 +21,12 @@ RSpec.describe_current do
     it { expect(result.timestamp).to eq fetched_message.timestamp }
     it { expect(result.received_at).to eq received_at }
 
-    context 'when message does not have headers' do
+    context "when message does not have headers" do
       it { expect(result.metadata.headers).to eq({}) }
       it { expect(result.headers).to eq({}) }
     end
 
-    context 'when message does have headers' do
+    context "when message does have headers" do
       let(:headers) { { rand => rand } }
       let(:fetched_message) { build(:kafka_fetched_message, headers: headers) }
 

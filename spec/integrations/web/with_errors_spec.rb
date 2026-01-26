@@ -42,6 +42,6 @@ end
 assert DT[0].size >= 6
 assert_equal 1, DT[1].uniq.size
 assert_equal StandardError, DT[:errors].first[:error].class
-assert_equal 'consumer.consume.error', DT[:errors].first[:type]
-assert_equal 'error.occurred', DT[:errors].first.id
+assert_equal "consumer.consume.error", DT[:errors].first[:type]
+assert_equal "error.occurred", DT[:errors].first.id
 assert_equal 5, DT[0].uniq.size

@@ -37,8 +37,8 @@ draw_routes do
   end
 end
 
-ARGV[0] = 'parallel_segments'
-ARGV[1] = 'invalid_action'
+ARGV[0] = "parallel_segments"
+ARGV[1] = "invalid_action"
 
 failed = false
 begin

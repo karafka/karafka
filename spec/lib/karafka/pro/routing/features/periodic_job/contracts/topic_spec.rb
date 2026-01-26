@@ -35,35 +35,35 @@ RSpec.describe_current do
     }
   end
 
-  context 'when config is valid' do
+  context "when config is valid" do
     it { expect(check).to be_success }
   end
 
-  context 'when active flag is not boolean' do
+  context "when active flag is not boolean" do
     before { config[:periodic_job][:active] = rand }
 
     it { expect(check).not_to be_success }
   end
 
-  context 'when during_pause flag is not boolean' do
+  context "when during_pause flag is not boolean" do
     before { config[:periodic_job][:during_pause] = rand }
 
     it { expect(check).not_to be_success }
   end
 
-  context 'when during_retry flag is not boolean' do
+  context "when during_retry flag is not boolean" do
     before { config[:periodic_job][:during_retry] = rand }
 
     it { expect(check).not_to be_success }
   end
 
-  context 'when interval is not integer' do
+  context "when interval is not integer" do
     before { config[:periodic_job][:interval] = 1.4 }
 
     it { expect(check).not_to be_success }
   end
 
-  context 'when interval is less than 100ms' do
+  context "when interval is less than 100ms" do
     before { config[:periodic_job][:interval] = 99 }
 
     it { expect(check).not_to be_success }

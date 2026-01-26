@@ -16,4 +16,4 @@ rescue Karafka::Errors::InvalidConfigurationError
   failed = true
 end
 
-assert failed, 'Should have raised InvalidConfigurationError for empty subscription group'
+assert failed, "Should have raised InvalidConfigurationError for empty subscription group"

@@ -14,7 +14,7 @@ draw_routes do
   end
 end
 
-ARGV[0] = 'topics'
-ARGV[1] = 'align'
+ARGV[0] = "topics"
+ARGV[1] = "align"
 
 Karafka::Cli.start

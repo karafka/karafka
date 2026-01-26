@@ -11,15 +11,16 @@ setup_karafka(
   allow_errors: %w[connection.client.poll.error],
   consumer_group_protocol: true
 ) do |config|
-  config.kafka[:'group.instance.id'] = GROUP_INSTANCE_ID
+  config.kafka[:"group.instance.id"] = GROUP_INSTANCE_ID
 end
 
-Karafka.monitor.subscribe('error.occurred') do |event|
+Karafka.monitor.subscribe("error.occurred") do |event|
   DT[:errored] = event[:error]
 end
 
 class Consumer < Karafka::BaseConsumer
-  def consume; end
+  def consume
+  end
 end
 
 draw_routes do
@@ -29,16 +30,16 @@ draw_routes do
   end
 end
 
-produce(DT.topic, '1')
+produce(DT.topic, "1")
 
 thread = Thread.new do
   consumer = Rdkafka::Config.new(
     Karafka::Setup::AttributesMap.consumer(
-      'bootstrap.servers': Karafka::App.config.kafka[:'bootstrap.servers'],
-      'group.id': Karafka::App.consumer_groups.first.id,
-      'group.protocol': 'consumer',
-      'group.instance.id': "#{GROUP_INSTANCE_ID}_0",
-      'auto.offset.reset': 'earliest'
+      "bootstrap.servers": Karafka::App.config.kafka[:"bootstrap.servers"],
+      "group.id": Karafka::App.consumer_groups.first.id,
+      "group.protocol": "consumer",
+      "group.instance.id": "#{GROUP_INSTANCE_ID}_0",
+      "auto.offset.reset": "earliest"
     )
   ).consumer
 

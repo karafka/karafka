@@ -33,7 +33,7 @@ module Karafka
             #
             # @param config [Karafka::Core::Configurable::Node]
             def post_setup(config)
-              config.monitor.subscribe('app.before_warmup') do
+              config.monitor.subscribe("app.before_warmup") do
                 Contracts::Routing.new.validate!(
                   config.internal.routing.builder,
                   scope: %w[swarm]

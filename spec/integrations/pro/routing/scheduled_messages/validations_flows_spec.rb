@@ -35,5 +35,5 @@ assert guarded
 
 assert_equal(
   error.message,
-  { 'config.scheduled_messages.flush_batch_size': 'needs to be an integer bigger than 0' }.to_s
+  { "config.scheduled_messages.flush_batch_size": "needs to be an integer bigger than 0" }.to_s
 )

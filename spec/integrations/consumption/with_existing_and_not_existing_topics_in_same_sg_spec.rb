@@ -4,7 +4,7 @@
 # off, it should emit an error but at the same time should consume from existing topic
 
 setup_karafka(allow_errors: true) do |config|
-  config.kafka[:'allow.auto.create.topics'] = false
+  config.kafka[:"allow.auto.create.topics"] = false
 end
 
 class Consumer < Karafka::BaseConsumer
@@ -16,7 +16,7 @@ end
 Karafka::Admin.create_topic(DT.topics[0], 1, 1)
 produce_many(DT.topics[0], DT.uuids(1))
 
-Karafka.monitor.subscribe('error.occurred') do |event|
+Karafka.monitor.subscribe("error.occurred") do |event|
   DT[:error] = event[:error]
 end
 
@@ -34,5 +34,5 @@ start_karafka_and_wait_until do
   DT.key?(:consumed) && DT.key?(:error)
 end
 
-assert DT[:error].message.include?('Subscribed topic not available')
+assert DT[:error].message.include?("Subscribed topic not available")
 assert DT[:error].message.include?(DT.topics[1])

@@ -36,7 +36,7 @@ begin
       subscription_group SG_UUID do
         multiplexing(min: 2, max: 5)
 
-        topic 'namespace_collision' do
+        topic "namespace_collision" do
           consumer Class.new
         end
       end

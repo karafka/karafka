@@ -32,9 +32,9 @@ end
 
 READER, WRITER = IO.pipe
 
-Karafka::Pro::RecurringTasks.define('1.0.0') do
-  schedule(id: SecureRandom.uuid, cron: '* * * * *', enabled: true) do
-    WRITER.puts('1')
+Karafka::Pro::RecurringTasks.define("1.0.0") do
+  schedule(id: SecureRandom.uuid, cron: "* * * * *", enabled: true) do
+    WRITER.puts("1")
     WRITER.flush
   end
 end

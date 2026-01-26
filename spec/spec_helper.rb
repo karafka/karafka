@@ -1,25 +1,25 @@
 # frozen_string_literal: true
 
-Warning[:performance] = true if RUBY_VERSION >= '3.3'
+Warning[:performance] = true if RUBY_VERSION >= "3.3"
 Warning[:deprecated] = true
 $VERBOSE = true
 
-require 'warning'
+require "warning"
 
 Warning.process do |warning|
   next unless warning.include?(Dir.pwd)
   # Allow OpenStruct usage only in specs
-  next if warning.include?('OpenStruct use') && warning.include?('/spec/')
-  next if warning.include?('vendor/')
-  next if warning.include?('rspec_locator.rb')
-  next if warning.include?('fixture_file')
+  next if warning.include?("OpenStruct use") && warning.include?("/spec/")
+  next if warning.include?("vendor/")
+  next if warning.include?("rspec_locator.rb")
+  next if warning.include?("fixture_file")
 
   raise "Warning in your code: #{warning}"
 end
 
-ENV['KARAFKA_ENV'] = 'test'
+ENV["KARAFKA_ENV"] = "test"
 $LOAD_PATH.unshift(File.dirname(__FILE__))
-$LOAD_PATH.unshift(File.join(File.dirname(__FILE__), '..', 'lib'))
+$LOAD_PATH.unshift(File.join(File.dirname(__FILE__), "..", "lib"))
 
 %w[
   byebug
@@ -36,36 +36,36 @@ $LOAD_PATH.unshift(File.join(File.dirname(__FILE__), '..', 'lib'))
 end
 
 # Are we running regular specs or pro specs
-SPECS_TYPE = ENV.fetch('SPECS_TYPE', 'default')
+SPECS_TYPE = ENV.fetch("SPECS_TYPE", "default")
 
 # Don't include unnecessary stuff into rcov
 SimpleCov.start do
-  add_filter '/vendor/'
-  add_filter '/gems/'
-  add_filter '/.bundle/'
-  add_filter '/doc/'
-  add_filter '/spec/'
-  add_filter '/config/'
-  add_filter '/lib/karafka/railtie'
-  add_filter '/lib/karafka/patches'
+  add_filter "/vendor/"
+  add_filter "/gems/"
+  add_filter "/.bundle/"
+  add_filter "/doc/"
+  add_filter "/spec/"
+  add_filter "/config/"
+  add_filter "/lib/karafka/railtie"
+  add_filter "/lib/karafka/patches"
   # We do not spec strategies here. We do it via integration test suite
-  add_filter '/lib/karafka/cli/topics/align'
-  add_filter '/lib/karafka/cli/topics/base'
-  add_filter '/lib/karafka/cli/topics/plan'
-  add_filter '/processing/strategies'
+  add_filter "/lib/karafka/cli/topics/align"
+  add_filter "/lib/karafka/cli/topics/base"
+  add_filter "/lib/karafka/cli/topics/plan"
+  add_filter "/processing/strategies"
   # Consumers are tested in integrations
-  add_filter '/consumer'
+  add_filter "/consumer"
   # CLI commands are also checked via integrations
-  add_filter '/cli/topics.rb'
-  add_filter '/vendors/'
+  add_filter "/cli/topics.rb"
+  add_filter "/vendors/"
 
   # enable_coverage :branch
-  command_name [SPECS_TYPE, ARGV].flatten.join('-')
+  command_name [SPECS_TYPE, ARGV].flatten.join("-")
   merge_timeout 3600
 end
 
 # Require total coverage after running both regular and pro
-SimpleCov.minimum_coverage(93.6) if SPECS_TYPE == 'pro'
+SimpleCov.minimum_coverage(93.6) if SPECS_TYPE == "pro"
 
 Dir["#{File.dirname(__FILE__)}/support/**/*.rb"].each { |f| require f }
 
@@ -104,12 +104,12 @@ RSpec.configure do |config|
   end
 end
 
-require 'karafka'
-require 'active_job/karafka'
-require 'karafka/pro/loader'
+require "karafka"
+require "active_job/karafka"
+require "karafka/pro/loader"
 
 # This will make all the pro components visible but will not use them anywhere
-Karafka::Pro::Loader.require_all if ENV['SPECS_TYPE'] == 'pro'
+Karafka::Pro::Loader.require_all if ENV["SPECS_TYPE"] == "pro"
 
 # We extend this manually since it's done by a Railtie that we do not run here
 ActiveJob::Base.extend Karafka::ActiveJob::JobExtensions
@@ -119,7 +119,7 @@ module Karafka
   # Configuration for test env
   class App
     setup do |config|
-      config.kafka = { 'bootstrap.servers': '127.0.0.1:9092' }
+      config.kafka = { "bootstrap.servers": "127.0.0.1:9092" }
       config.client_id = rand.to_s
       config.pause.timeout = 1
       config.pause.max_timeout = 1
@@ -137,7 +137,7 @@ PRODUCERS = Producers.new(
   regular: Karafka.producer,
   transactional: WaterDrop::Producer.new do |p_config|
     p_config.kafka = Karafka::Setup::AttributesMap.producer(Karafka::App.config.kafka.dup)
-    p_config.kafka[:'transactional.id'] = SecureRandom.uuid
+    p_config.kafka[:"transactional.id"] = SecureRandom.uuid
     p_config.logger = Karafka::App.config.logger
   end
 ).freeze
@@ -153,9 +153,9 @@ def fixture_file(file_path)
   File.read(
     File.join(
       Karafka.gem_root,
-      'spec',
-      'support',
-      'fixtures',
+      "spec",
+      "support",
+      "fixtures",
       file_path
     )
   )
@@ -167,7 +167,7 @@ end
 #
 # We can run this when waiting is needed to ensure state stability.
 def wait_if_needed
-  return unless ENV.key?('CI')
+  return unless ENV.key?("CI")
 
   sleep(1)
 end

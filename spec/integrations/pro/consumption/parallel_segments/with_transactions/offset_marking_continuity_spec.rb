@@ -24,7 +24,7 @@
 
 setup_karafka do |config|
   config.concurrency = 10
-  config.kafka[:'transactional.id'] = SecureRandom.uuid
+  config.kafka[:"transactional.id"] = SecureRandom.uuid
 end
 
 class Consumer < Karafka::BaseConsumer
@@ -175,9 +175,9 @@ segment1_offset = fetch_next_offset(DT.topics[0], consumer_group_id: segment1_gr
 segment2_offset = fetch_next_offset(DT.topics[0], consumer_group_id: segment2_group_id)
 
 # All segments should have committed offsets
-assert(segment0_offset > 0, 'Segment 0 did not commit any offsets')
-assert(segment1_offset > 0, 'Segment 1 did not commit any offsets')
-assert(segment2_offset > 0, 'Segment 2 did not commit any offsets')
+assert(segment0_offset > 0, "Segment 0 did not commit any offsets")
+assert(segment1_offset > 0, "Segment 1 did not commit any offsets")
+assert(segment2_offset > 0, "Segment 2 did not commit any offsets")
 
 # 5. Verify consumer lag - with parallel segments, some lag is expected since each segment
 # only processes a subset of messages
@@ -238,7 +238,7 @@ unique_produced_messages = produced_messages.uniq
 assert_equal(
   produced_messages.size,
   unique_produced_messages.size,
-  'Target topic contains duplicate messages, indicating transaction failures'
+  "Target topic contains duplicate messages, indicating transaction failures"
 )
 
 # 8. Verify all messages from each segment are successfully processed

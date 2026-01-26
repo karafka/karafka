@@ -3,12 +3,13 @@
 # We should be able to mark as consumed from the `#eofed`
 
 setup_karafka do |config|
-  config.kafka[:'enable.partition.eof'] = true
+  config.kafka[:"enable.partition.eof"] = true
   config.max_messages = 1
 end
 
 class Consumer < Karafka::BaseConsumer
-  def consume; end
+  def consume
+  end
 
   def eofed
     return if messages.empty?

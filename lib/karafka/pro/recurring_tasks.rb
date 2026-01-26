@@ -31,7 +31,7 @@ module Karafka
       class << self
         # @return [Schedule, nil] current defined schedule or nil if not defined
         def schedule
-          @schedule || define('0.0.0') { nil }
+          @schedule || define("0.0.0") { nil }
         end
 
         # Simplified API for schedules definitions and validates the tasks data
@@ -44,14 +44,14 @@ module Karafka
         #       MailingJob.perform_async
         #     end
         #   end
-        def define(version = '1.0.0', &)
+        def define(version = "1.0.0", &)
           @schedule = Schedule.new(version: version)
           @schedule.instance_exec(&)
 
           @schedule.each do |task|
             Contracts::Task.new.validate!(
               task.to_h,
-              scope: ['recurring_tasks', task.id]
+              scope: ["recurring_tasks", task.id]
             )
           end
 
@@ -88,7 +88,7 @@ module Karafka
           )
 
           # Published after task is successfully executed
-          Karafka.monitor.notifications_bus.register_event('recurring_tasks.task.executed')
+          Karafka.monitor.notifications_bus.register_event("recurring_tasks.task.executed")
 
           # Initialize empty dummy schedule, so we always have one and so we do not have to
           # deal with a case where there is no schedule

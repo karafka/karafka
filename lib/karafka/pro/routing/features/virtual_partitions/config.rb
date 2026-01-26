@@ -43,13 +43,13 @@ module Karafka
             # @return [Object] distributor instance for the current distribution
             def distributor
               @distributor ||= case distribution
-                               when :balanced
-                                 Processing::VirtualPartitions::Distributors::Balanced.new(self)
-                               when :consistent
-                                 Processing::VirtualPartitions::Distributors::Consistent.new(self)
-                               else
-                                 raise Karafka::Errors::UnsupportedCaseError, distribution
-                               end
+              when :balanced
+                Processing::VirtualPartitions::Distributors::Balanced.new(self)
+              when :consistent
+                Processing::VirtualPartitions::Distributors::Consistent.new(self)
+              else
+                raise Karafka::Errors::UnsupportedCaseError, distribution
+              end
             end
           end
         end

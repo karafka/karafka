@@ -334,7 +334,7 @@ module Karafka
       ].freeze
 
       # Location of the file with rdkafka settings list
-      SOURCE = <<~SOURCE.delete("\n").gsub(/\s+/, '/')
+      SOURCE = <<~SOURCE.delete("\n").gsub(/\s+/, "/")
         https://raw.githubusercontent.com
           confluentinc/librdkafka
           v#{Rdkafka::LIBRDKAFKA_VERSION}
@@ -365,21 +365,21 @@ module Karafka
         #   options list in case it would change
         def generate
           # Not used anywhere else, hence required here
-          require 'open-uri'
+          require "open-uri"
 
           attributes = { consumer: Set.new, producer: Set.new }
 
           URI.parse(SOURCE).open.readlines.each do |line|
-            next unless line.include?('|')
+            next unless line.include?("|")
 
-            attribute, attribute_type = line.split('|').map(&:strip)
+            attribute, attribute_type = line.split("|").map(&:strip)
 
             case attribute_type
-            when 'C'
+            when "C"
               attributes[:consumer] << attribute
-            when 'P'
+            when "P"
               attributes[:producer] << attribute
-            when '*'
+            when "*"
               attributes[:consumer] << attribute
               attributes[:producer] << attribute
             else

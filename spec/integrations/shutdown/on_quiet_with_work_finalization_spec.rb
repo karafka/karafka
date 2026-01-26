@@ -7,11 +7,11 @@ setup_karafka do |config|
   config.concurrency = 1
 end
 
-Karafka::App.monitor.subscribe('app.quieting') do
+Karafka::App.monitor.subscribe("app.quieting") do
   DT[:states] << Karafka::App.config.internal.status.to_s
 end
 
-Karafka::App.monitor.subscribe('app.quiet') do
+Karafka::App.monitor.subscribe("app.quiet") do
   DT[:states] << Karafka::App.config.internal.status.to_s
 end
 
@@ -24,11 +24,11 @@ end
 
 draw_routes(Consumer)
 
-produce(DT.topic, '1')
+produce(DT.topic, "1")
 
 Thread.new do
   sleep(0.1) while DT[:in].empty?
-  Process.kill('TSTP', Process.pid)
+  Process.kill("TSTP", Process.pid)
 end
 
 start_karafka_and_wait_until do

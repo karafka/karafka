@@ -27,7 +27,7 @@
 setup_karafka do |config|
   config.concurrency = 2
   config.max_messages = 100
-  config.initial_offset = 'earliest'
+  config.initial_offset = "earliest"
 end
 
 class Consumer < Karafka::BaseConsumer

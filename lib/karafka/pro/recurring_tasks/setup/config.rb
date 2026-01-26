@@ -31,7 +31,7 @@ module Karafka
 
           setting(:consumer_class, default: Consumer)
           setting(:deserializer, default: Deserializer.new)
-          setting(:group_id, default: 'karafka_recurring_tasks')
+          setting(:group_id, default: "karafka_recurring_tasks")
           # By default we will run the scheduling every 15 seconds since we provide a minute-based
           # precision
           setting(:interval, default: 15_000)
@@ -50,11 +50,11 @@ module Karafka
 
           setting(:topics) do
             setting(:schedules) do
-              setting(:name, default: 'karafka_recurring_tasks_schedules')
+              setting(:name, default: "karafka_recurring_tasks_schedules")
             end
 
             setting(:logs) do
-              setting(:name, default: 'karafka_recurring_tasks_logs')
+              setting(:name, default: "karafka_recurring_tasks_logs")
             end
           end
 

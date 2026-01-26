@@ -5,23 +5,24 @@
 # This is a TRUE INTEGRATION TEST that validates our JSON is compatible with
 # Kafka's official tooling by actually executing kafka-reassign-partitions.sh
 
-require 'tempfile'
-require 'securerandom'
+require "tempfile"
+require "securerandom"
 
 # Skip this spec if Docker is not available or kafka container is not running
 # This allows the spec to run on platforms without Docker (e.g., macOS in some CI environments)
-docker_available = system('docker --version > /dev/null 2>&1')
-kafka_container_running = docker_available && system('docker exec kafka true > /dev/null 2>&1')
+docker_available = system("docker --version > /dev/null 2>&1")
+kafka_container_running = docker_available && system("docker exec kafka true > /dev/null 2>&1")
 
 unless docker_available && kafka_container_running
-  puts 'Skipping Kafka tool compatibility spec: Docker or kafka container not available'
+
   exit 0
 end
 
 setup_karafka
 
 class ReplicationKafkaToolConsumer < Karafka::BaseConsumer
-  def consume; end
+  def consume
+  end
 end
 
 draw_routes(ReplicationKafkaToolConsumer)
@@ -40,7 +41,7 @@ end
 plan = Karafka::Admin::Replication.rebalance(topic: test_topic)
 
 # Export to file
-temp_file = Tempfile.new(['kafka_reassignment', '.json'])
+temp_file = Tempfile.new(["kafka_reassignment", ".json"])
 
 begin
   plan.export_to_file(temp_file.path)
@@ -50,10 +51,10 @@ begin
   `docker cp #{temp_file.path} kafka:#{container_path} 2>&1`
 
   # Execute kafka-reassign-partitions.sh with our JSON
-  kafka_output = `docker exec kafka kafka-reassign-partitions \
+  kafka_output = %x(docker exec kafka kafka-reassign-partitions \
     --bootstrap-server localhost:9092 \
     --reassignment-json-file #{container_path} \
-    --execute 2>&1`
+    --execute 2>&1)
 
   # Clean up
   `docker exec kafka rm #{container_path} 2>/dev/null`
@@ -64,9 +65,9 @@ begin
 
   # Validate Kafka accepted the JSON format
   # Even if reassignment fails for business reasons, JSON should be valid
-  json_format_valid = !kafka_output.include?('Failed to parse') &&
-                      !kafka_output.include?('Invalid JSON') &&
-                      !kafka_output.include?('Unexpected')
+  json_format_valid = !kafka_output.include?("Failed to parse") &&
+    !kafka_output.include?("Invalid JSON") &&
+    !kafka_output.include?("Unexpected")
 
   assert(
     json_format_valid,

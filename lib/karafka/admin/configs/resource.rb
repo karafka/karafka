@@ -45,7 +45,7 @@ module Karafka
           #   def set(name, value)
           #     @operations[0] << Config.new(name: name, value: value.to_s)
           #   end
-          default_value = op_name == :delete ? ' = nil' : ''
+          default_value = (op_name == :delete) ? " = nil" : ""
           class_eval <<~RUBY, __FILE__, __LINE__ + 1
             # @param name [String] name of the config to alter
             # @param value [String] value of the config

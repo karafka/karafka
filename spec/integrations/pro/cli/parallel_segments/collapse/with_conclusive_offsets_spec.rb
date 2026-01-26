@@ -47,15 +47,15 @@ produce_many(DT.topic, DT.uuids(10))
 Karafka::Admin.seek_consumer_group(segment1, { DT.topic => { 0 => 1, 1 => 2 } })
 Karafka::Admin.seek_consumer_group(segment2, { DT.topic => { 0 => 1, 1 => 2 } })
 
-ARGV[0] = 'parallel_segments'
-ARGV[1] = 'collapse'
+ARGV[0] = "parallel_segments"
+ARGV[1] = "collapse"
 
 results = capture_stdout do
   Karafka::Cli.start
 end
 
-assert results.include?('Collapse completed')
-assert results.include?('successfully')
+assert results.include?("Collapse completed")
+assert results.include?("successfully")
 
 # Verify the segment origin group now has the offsets
 offsets = Karafka::Admin.read_lags_with_offsets({ DT.consumer_group => [DT.topic] })

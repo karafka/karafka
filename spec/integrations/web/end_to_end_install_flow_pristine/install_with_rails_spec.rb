@@ -2,7 +2,7 @@
 
 # Karafka 2.4+ should work ok with 0.9.0+
 
-require 'open3'
+require "open3"
 
 InvalidExitCode = Class.new(StandardError)
 InvalidState = Class.new(StandardError)
@@ -32,8 +32,8 @@ Bundler.with_unbundled_env do
       app
   CMD
 
-  system!('cp Gemfile ./app/')
-  system!('cd app && bundle install')
-  system!('cd app && bundle exec karafka install')
-  system!('cd app && bundle exec karafka-web install')
+  system!("cp Gemfile ./app/")
+  system!("cd app && bundle install")
+  system!("cd app && bundle exec karafka install")
+  system!("cd app && bundle exec karafka-web install")
 end

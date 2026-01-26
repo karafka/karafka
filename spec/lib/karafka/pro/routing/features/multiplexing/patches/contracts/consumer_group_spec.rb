@@ -29,8 +29,8 @@ RSpec.describe_current do
     end
   end
 
-  describe '#topic_unique_key' do
-    let(:topic) { { name: 'test', subscription_group_details: 'sg', other: 'na' } }
+  describe "#topic_unique_key" do
+    let(:topic) { { name: "test", subscription_group_details: "sg", other: "na" } }
 
     it { expect(expanded.topic_unique_key(topic)).to eq(%w[test sg]) }
   end

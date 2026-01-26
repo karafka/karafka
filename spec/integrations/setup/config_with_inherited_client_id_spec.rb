@@ -4,11 +4,11 @@
 # is injected when we define routes
 
 setup_karafka do |config|
-  config.client_id = 'test-app'
+  config.client_id = "test-app"
 end
 
-assert_equal Karafka::App.config.kafka[:'client.id'], nil
+assert_equal Karafka::App.config.kafka[:"client.id"], nil
 
 draw_routes(Karafka::BaseConsumer)
 
-assert_equal Karafka::App.routes.first.subscription_groups.first.kafka[:'client.id'], 'test-app'
+assert_equal Karafka::App.routes.first.subscription_groups.first.kafka[:"client.id"], "test-app"

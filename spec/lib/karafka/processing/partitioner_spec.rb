@@ -6,11 +6,11 @@ RSpec.describe_current do
   let(:subscription_group) { build(:routing_subscription_group) }
   let(:coordinator) { build(:processing_coordinator) }
 
-  describe '#call' do
-    let(:topic) { 'topic-name' }
+  describe "#call" do
+    let(:topic) { "topic-name" }
     let(:messages) { [build(:messages_message)] }
 
-    it 'expect to yield with 0 and input messages' do
+    it "expect to yield with 0 and input messages" do
       expect do |block|
         partitioner.call(topic, messages, coordinator, &block)
       end.to yield_with_args(0, messages)

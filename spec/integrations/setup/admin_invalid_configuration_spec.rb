@@ -10,8 +10,8 @@ begin
   end
 
   draw_routes do
-    consumer_group 'usual' do
-      topic 'regular' do
+    consumer_group "usual" do
+      topic "regular" do
         consumer Class.new
       end
     end

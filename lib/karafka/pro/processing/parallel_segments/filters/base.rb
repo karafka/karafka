@@ -47,16 +47,16 @@ module Karafka
             # @return [String, Numeric] segment assignment key
             def partition(message)
               @partitioner.call(message)
-            rescue StandardError => e
+            rescue => e
               # This should not happen. If you are seeing this it means your partitioner code
               # failed and raised an error. We highly recommend mitigating partitioner level errors
               # on the user side because this type of collapse should be considered a last resort
               Karafka.monitor.instrument(
-                'error.occurred',
+                "error.occurred",
                 caller: self,
                 error: e,
                 message: message,
-                type: 'parallel_segments.partitioner.error'
+                type: "parallel_segments.partitioner.error"
               )
 
               :failure
@@ -70,14 +70,14 @@ module Karafka
               return 0 if message_segment_key == :failure
 
               @reducer.call(message_segment_key)
-            rescue StandardError => e
+            rescue => e
               # @see `#partition` method error handling doc
               Karafka.monitor.instrument(
-                'error.occurred',
+                "error.occurred",
                 caller: self,
                 error: e,
                 message_segment_key: message_segment_key,
-                type: 'parallel_segments.reducer.error'
+                type: "parallel_segments.reducer.error"
               )
 
               0

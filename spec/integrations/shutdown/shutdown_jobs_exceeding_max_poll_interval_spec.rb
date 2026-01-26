@@ -5,8 +5,8 @@
 
 setup_karafka(allow_errors: %w[app.stopping.error]) do |config|
   # We set it here that way not too wait too long on stuff
-  config.kafka[:'max.poll.interval.ms'] = 10_000
-  config.kafka[:'session.timeout.ms'] = 10_000
+  config.kafka[:"max.poll.interval.ms"] = 10_000
+  config.kafka[:"session.timeout.ms"] = 10_000
   config.max_wait_time = 1_000
 end
 
@@ -28,7 +28,7 @@ draw_routes(Consumer)
 
 Thread.new do
   loop do
-    produce(DT.topic, '1')
+    produce(DT.topic, "1")
     sleep(0.5)
   rescue WaterDrop::Errors::ProducerClosedError
     break

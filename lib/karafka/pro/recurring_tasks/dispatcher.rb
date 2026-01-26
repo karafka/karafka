@@ -34,7 +34,7 @@ module Karafka
           def schedule
             produce(
               topics.schedules.name,
-              'state:schedule',
+              "state:schedule",
               serializer.schedule(::Karafka::Pro::RecurringTasks.schedule)
             )
           end
@@ -87,7 +87,7 @@ module Karafka
               key: key,
               partition: 0,
               payload: payload,
-              headers: { 'zlib' => 'true' }
+              headers: { "zlib" => "true" }
             )
           end
         end

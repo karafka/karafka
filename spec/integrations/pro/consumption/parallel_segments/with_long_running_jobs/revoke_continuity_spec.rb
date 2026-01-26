@@ -26,12 +26,12 @@
 setup_karafka do |config|
   config.concurrency = 5
   config.max_messages = 1
-  config.kafka[:'max.poll.interval.ms'] = 10_000
-  config.kafka[:'session.timeout.ms'] = 10_000
+  config.kafka[:"max.poll.interval.ms"] = 10_000
+  config.kafka[:"session.timeout.ms"] = 10_000
 end
 
 # Subscribe to the revocation notification event
-Karafka.monitor.subscribe('consumer.revoked') do |event|
+Karafka.monitor.subscribe("consumer.revoked") do |event|
   DT[:revoked_events] << event
 end
 
@@ -217,7 +217,7 @@ revocation_detected = !DT[:revoked_called].empty? || !DT[:revoked_events].empty?
 # The logs show revocation happening, so this should pass with either method
 assert(
   revocation_detected,
-  'Revocation was not detected during the test. ' \
+  "Revocation was not detected during the test. " \
   "Revoked called: #{DT[:revoked_called].inspect}, Revoked events: #{DT[:revoked_events].inspect}"
 )
 

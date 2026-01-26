@@ -23,7 +23,7 @@
 # If transaction fails we should mark as consumed only to the consecutive offset that was reached
 
 setup_karafka(allow_errors: %w[consumer.consume.error]) do |config|
-  config.kafka[:'transactional.id'] = SecureRandom.uuid
+  config.kafka[:"transactional.id"] = SecureRandom.uuid
   config.concurrency = 10
 end
 
@@ -33,7 +33,7 @@ class Consumer < Karafka::BaseConsumer
 
     if messages.first.offset.zero?
       transaction do
-        mark_as_consumed(messages.first, 'test-metadata')
+        mark_as_consumed(messages.first, "test-metadata")
       end
     else
       transaction do

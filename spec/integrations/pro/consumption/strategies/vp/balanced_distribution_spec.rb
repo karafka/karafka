@@ -71,18 +71,18 @@ end
 2.times do
   Karafka.producer.produce_many_sync(
     [
-      { topic: DT.topic, payload: '1', key: 'a' },
-      { topic: DT.topic, payload: '2', key: 'a' },
-      { topic: DT.topic, payload: '3', key: 'a' },
-      { topic: DT.topic, payload: '4', key: 'a' },
-      { topic: DT.topic, payload: '5', key: 'b' },
-      { topic: DT.topic, payload: '6', key: 'b' },
-      { topic: DT.topic, payload: '7', key: 'b' },
-      { topic: DT.topic, payload: '8', key: 'c' },
-      { topic: DT.topic, payload: '9', key: 'c' },
-      { topic: DT.topic, payload: '10', key: 'd' },
-      { topic: DT.topic, payload: '11', key: 'e' },
-      { topic: DT.topic, payload: '12', key: 'a' }
+      { topic: DT.topic, payload: "1", key: "a" },
+      { topic: DT.topic, payload: "2", key: "a" },
+      { topic: DT.topic, payload: "3", key: "a" },
+      { topic: DT.topic, payload: "4", key: "a" },
+      { topic: DT.topic, payload: "5", key: "b" },
+      { topic: DT.topic, payload: "6", key: "b" },
+      { topic: DT.topic, payload: "7", key: "b" },
+      { topic: DT.topic, payload: "8", key: "c" },
+      { topic: DT.topic, payload: "9", key: "c" },
+      { topic: DT.topic, payload: "10", key: "d" },
+      { topic: DT.topic, payload: "11", key: "e" },
+      { topic: DT.topic, payload: "12", key: "a" }
     ]
   )
 end

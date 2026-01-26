@@ -46,7 +46,7 @@ module Karafka
           # @param messages [Array<Karafka::Messages::Message>] array with messages. Please keep
           #   in mind, this may already be partial due to execution of previous filters.
           def apply!(messages)
-            raise NotImplementedError, 'Implement in a subclass'
+            raise NotImplementedError, "Implement in a subclass"
           end
 
           # @return [Symbol] filter post-execution action on consumer. Either `:skip`, `:pause` or

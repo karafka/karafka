@@ -63,14 +63,14 @@ module Karafka
 
             timeout = (@delay / 1_000.0) - (::Time.now.utc - @cursor.timestamp)
 
-            timeout <= 0 ? 0 : timeout * 1_000
+            (timeout <= 0) ? 0 : timeout * 1_000
           end
 
           # @return [Symbol] action to take on post-filtering
           def action
             return :skip unless applied?
 
-            timeout <= 0 ? :seek : :pause
+            (timeout <= 0) ? :seek : :pause
           end
         end
       end

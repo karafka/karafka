@@ -23,7 +23,7 @@
 # Karafka should use default deserializers when defaults exist and topic is detected
 
 setup_karafka do |config|
-  config.kafka[:'topic.metadata.refresh.interval.ms'] = 2_000
+  config.kafka[:"topic.metadata.refresh.interval.ms"] = 2_000
 end
 
 class Consumer < Karafka::BaseConsumer
@@ -37,7 +37,7 @@ draw_routes(create_topics: false) do
     deserializers(
       payload: ->(_) { 1 },
       key: ->(_) { 2 },
-      headers: ->(_) { { 'test' => 3 } }
+      headers: ->(_) { { "test" => 3 } }
     )
   end
 
@@ -58,4 +58,4 @@ end
 
 assert_equal DT[0].payload, 1
 assert_equal DT[0].key, 2
-assert_equal DT[0].headers, { 'test' => 3 }
+assert_equal DT[0].headers, { "test" => 3 }

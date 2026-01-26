@@ -34,7 +34,7 @@ draw_routes(create_topics: false) do
   topic DT.topics[1] do
     config(
       partitions: 2,
-      'cleanup.policy': 'compact'
+      "cleanup.policy": "compact"
     )
 
     consumer Consumer
@@ -45,8 +45,8 @@ draw_routes(create_topics: false) do
   end
 end
 
-ARGV[0] = 'topics'
-ARGV[1] = 'create'
+ARGV[0] = "topics"
+ARGV[1] = "create"
 
 Karafka::Cli.start
 

@@ -16,7 +16,7 @@ end
 
 draw_routes(Consumer)
 
-produce(DT.topic, nil, key: 'a')
+produce(DT.topic, nil, key: "a")
 
 start_karafka_and_wait_until do
   DT.key?(0)

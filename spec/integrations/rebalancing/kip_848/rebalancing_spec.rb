@@ -28,9 +28,9 @@ thread = Thread.new do
   # Start a second consumer that will join and cause rebalancing
   consumer = Rdkafka::Config.new(
     Karafka::Setup::AttributesMap.consumer(
-      'bootstrap.servers': Karafka::App.config.kafka[:'bootstrap.servers'],
-      'group.id': Karafka::App.consumer_groups.first.id,
-      'group.protocol': 'consumer'
+      "bootstrap.servers": Karafka::App.config.kafka[:"bootstrap.servers"],
+      "group.id": Karafka::App.consumer_groups.first.id,
+      "group.protocol": "consumer"
     )
   ).consumer
 

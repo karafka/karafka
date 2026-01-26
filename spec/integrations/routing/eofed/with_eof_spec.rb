@@ -3,7 +3,7 @@
 # Karafka should allow to use eofed when kafka scope setup is with eof
 
 setup_karafka do |config|
-  config.kafka[:'enable.partition.eof'] = true
+  config.kafka[:"enable.partition.eof"] = true
 end
 
 failed = false

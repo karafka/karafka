@@ -4,10 +4,10 @@
 
 # @see https://github.com/karafka/karafka/issues/1155
 
-ENV['KARAFKA_CLI'] = 'true'
+ENV["KARAFKA_CLI"] = "true"
 
-require 'action_controller'
-require 'stringio'
+require "action_controller"
+require "stringio"
 
 strio = StringIO.new
 
@@ -17,7 +17,7 @@ proper_stderr = $stderr
 $stdout = strio
 $stderr = strio
 
-require 'active_support'
+require "active_support"
 
 class CustomFormatter < Logger::Formatter
   def call(severity, timestamp, _, input)
@@ -29,10 +29,10 @@ end
 
 Bundler.require(:default)
 
-require 'tempfile'
+require "tempfile"
 
 class ExampleApp < Rails::Application
-  config.eager_load = 'test'
+  config.eager_load = "test"
 end
 
 logger = ActiveSupport::Logger.new($stdout)
@@ -42,7 +42,7 @@ Rails.configuration.logger = logger
 
 dummy_boot_file = "#{Tempfile.new.path}.rb"
 FileUtils.touch(dummy_boot_file)
-ENV['KARAFKA_BOOT_FILE'] = dummy_boot_file
+ENV["KARAFKA_BOOT_FILE"] = dummy_boot_file
 
 ExampleApp.initialize!
 
@@ -55,7 +55,7 @@ class Consumer < Karafka::BaseConsumer
 end
 
 draw_routes(Consumer)
-produce(DT.topic, '1')
+produce(DT.topic, "1")
 
 start_karafka_and_wait_until do
   DT[0].size >= 1
@@ -64,4 +64,4 @@ end
 $stdout = proper_stdout
 $stderr = proper_stderr
 
-assert_equal 2, strio.string.split('Running Karafka').size, strio.string
+assert_equal 2, strio.string.split("Running Karafka").size, strio.string

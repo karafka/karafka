@@ -28,10 +28,10 @@ module Karafka
           # rdkafka does not have per-instance statistics hook, thus we need to make sure that we
           # emit only stats that are related to current producer. Otherwise we would emit all of
           # all the time.
-          return unless @client_name == statistics['name']
+          return unless @client_name == statistics["name"]
 
           monitor.instrument(
-            'statistics.emitted',
+            "statistics.emitted",
             subscription_group_id: @subscription_group_id,
             consumer_group_id: @consumer_group_id,
             statistics: @statistics_decorator.call(statistics)
@@ -39,13 +39,13 @@ module Karafka
         # We need to catch and handle any potential errors coming from the instrumentation pipeline
         # as otherwise, in case of statistics which run in the main librdkafka thread, any crash
         # will hang the whole process.
-        rescue StandardError => e
+        rescue => e
           monitor.instrument(
-            'error.occurred',
+            "error.occurred",
             caller: self,
             subscription_group_id: @subscription_group_id,
             consumer_group_id: @consumer_group_id,
-            type: 'callbacks.statistics.error',
+            type: "callbacks.statistics.error",
             error: e
           )
         end

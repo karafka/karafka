@@ -100,9 +100,9 @@ module Karafka
 
           swarm.node = self
           monitor.subscribe(liveness_listener)
-          monitor.instrument('swarm.node.after_fork', caller: self)
+          monitor.instrument("swarm.node.after_fork", caller: self)
 
-          Karafka::Process.tags.add(:execution_mode, 'mode:swarm')
+          Karafka::Process.tags.add(:execution_mode, "mode:swarm")
           Karafka::Process.tags.add(:swarm_nodeid, "node:#{@id}")
 
           Server.execution_mode.swarm!
@@ -118,7 +118,7 @@ module Karafka
       # Indicates that this node is doing well
       # @note Child API
       def healthy
-        write('0')
+        write("0")
       end
 
       # Indicates, that this node has failed
@@ -127,7 +127,7 @@ module Karafka
       #   have complex health-checking with reporting.
       # @note Child API
       # @note We convert this to string to normalize the API
-      def unhealthy(reason_code = '1')
+      def unhealthy(reason_code = "1")
         write(reason_code.to_s)
       end
 
@@ -192,19 +192,19 @@ module Karafka
       # Sends sigterm to the node
       # @note Parent API
       def stop
-        signal('TERM')
+        signal("TERM")
       end
 
       # Sends sigtstp to the node
       # @note Parent API
       def quiet
-        signal('TSTP')
+        signal("TSTP")
       end
 
       # Terminates node
       # @note Parent API
       def terminate
-        signal('KILL')
+        signal("KILL")
       end
 
       # Sends provided signal to the node

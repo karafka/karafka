@@ -26,8 +26,8 @@
 setup_karafka do |config|
   config.recurring_tasks.producer = WaterDrop::Producer.new do |p_config|
     p_config.kafka = {
-      'bootstrap.servers': 'localhost:999',
-      'message.timeout.ms': 1_000
+      "bootstrap.servers": "localhost:999",
+      "message.timeout.ms": 1_000
     }
   end
 end
@@ -40,9 +40,9 @@ end
 
 READER, WRITER = IO.pipe
 
-Karafka::Pro::RecurringTasks.define('1.0.0') do
-  schedule(id: SecureRandom.uuid, cron: '* * * * *', enabled: true) do
-    WRITER.puts('1')
+Karafka::Pro::RecurringTasks.define("1.0.0") do
+  schedule(id: SecureRandom.uuid, cron: "* * * * *", enabled: true) do
+    WRITER.puts("1")
     WRITER.flush
   end
 end

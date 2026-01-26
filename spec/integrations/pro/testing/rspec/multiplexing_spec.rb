@@ -44,9 +44,9 @@ end
 RSpec.describe Consumer do
   subject(:consumer) { karafka.consumer_for(DT.topic) }
 
-  before { karafka.produce('test') }
+  before { karafka.produce("test") }
 
-  it 'expects to increase count' do
+  it "expects to increase count" do
     expect { consumer.consume }.to change(DT[0], :count).by(1)
   end
 end

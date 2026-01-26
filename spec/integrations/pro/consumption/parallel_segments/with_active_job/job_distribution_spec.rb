@@ -53,7 +53,7 @@ class SegmentMonitorConsumer < Karafka::BaseConsumer
     messages.each do |message|
       payload = JSON.parse(message.raw_payload)
 
-      arguments = payload['arguments']
+      arguments = payload["arguments"]
       job_id = arguments.first
 
       DT[:segments] << segment_id

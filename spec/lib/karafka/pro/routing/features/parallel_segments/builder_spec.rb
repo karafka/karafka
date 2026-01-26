@@ -33,7 +33,7 @@ RSpec.describe_current do
     Karafka::Pro::Routing::Features::ParallelSegments::Config.new(
       active: parallel_active,
       count: segments_count,
-      merge_key: '-parallel-',
+      merge_key: "-parallel-",
       partitioner: nil,
       reducer: ->(key) { key }
     )
@@ -42,9 +42,9 @@ RSpec.describe_current do
   let(:parallel_active) { false }
   let(:segments_count) { 1 }
 
-  describe '#consumer_group' do
-    context 'when reopening an existing consumer group' do
-      let(:consumer_group) { instance_double(Karafka::Routing::ConsumerGroup, name: 'test-group') }
+  describe "#consumer_group" do
+    context "when reopening an existing consumer group" do
+      let(:consumer_group) { instance_double(Karafka::Routing::ConsumerGroup, name: "test-group") }
       let(:proxy) { instance_double(Karafka::Routing::Proxy, target: consumer_group) }
       let(:consumer_group_class_spy) { class_spy(Karafka::Routing::ConsumerGroup) }
 
@@ -53,14 +53,14 @@ RSpec.describe_current do
         allow(Karafka::Routing::Proxy).to receive(:new).and_return(proxy)
       end
 
-      it 'uses the existing consumer group' do
-        stub_const('Karafka::Routing::ConsumerGroup', consumer_group_class_spy)
-        builder.consumer_group('test-group') { nil }
+      it "uses the existing consumer group" do
+        stub_const("Karafka::Routing::ConsumerGroup", consumer_group_class_spy)
+        builder.consumer_group("test-group") { nil }
         expect(consumer_group_class_spy).not_to have_received(:new)
       end
     end
 
-    context 'when creating a new consumer group' do
+    context "when creating a new consumer group" do
       let(:proxy_block) { proc {} }
 
       before do
@@ -68,10 +68,10 @@ RSpec.describe_current do
         allow(builder).to receive(:<<)
       end
 
-      context 'with parallel segments disabled' do
+      context "with parallel segments disabled" do
         let(:parallel_active) { false }
         let(:temp_consumer_group) do
-          instance_double(Karafka::Routing::ConsumerGroup, name: 'test-group')
+          instance_double(Karafka::Routing::ConsumerGroup, name: "test-group")
         end
 
         let(:temp_target) do
@@ -90,19 +90,19 @@ RSpec.describe_current do
           allow(Karafka::Routing::Proxy).to receive(:new).and_return(temp_proxy)
         end
 
-        it 'creates a single consumer group' do
+        it "creates a single consumer group" do
           allow(builder).to receive(:<<)
-          builder.consumer_group('test-group', &proxy_block)
+          builder.consumer_group("test-group", &proxy_block)
           expect(builder).to have_received(:<<).once
         end
       end
 
-      context 'with parallel segments enabled' do
+      context "with parallel segments enabled" do
         let(:parallel_active) { true }
         let(:segments_count) { 3 }
 
         let(:temp_consumer_group) do
-          instance_double(Karafka::Routing::ConsumerGroup, name: 'test-group')
+          instance_double(Karafka::Routing::ConsumerGroup, name: "test-group")
         end
 
         let(:temp_target) do
@@ -143,20 +143,20 @@ RSpec.describe_current do
           end
         end
 
-        it 'creates multiple consumer groups based on the count' do
+        it "creates multiple consumer groups based on the count" do
           allow(builder).to receive(:<<)
-          builder.consumer_group('test-group', &proxy_block)
+          builder.consumer_group("test-group", &proxy_block)
           expect(builder).to have_received(:<<).exactly(segments_count).times
         end
 
-        it 'uses the merge key in the group names' do
+        it "uses the merge key in the group names" do
           consumer_group_class_spy = class_spy(Karafka::Routing::ConsumerGroup)
-          stub_const('Karafka::Routing::ConsumerGroup', consumer_group_class_spy)
+          stub_const("Karafka::Routing::ConsumerGroup", consumer_group_class_spy)
 
           # Create the necessary doubles for the test
           temp_consumer_group = instance_double(
             Karafka::Routing::ConsumerGroup,
-            name: 'test-group'
+            name: "test-group"
           )
           temp_target = instance_double(
             Karafka::Routing::ConsumerGroup,
@@ -190,12 +190,12 @@ RSpec.describe_current do
           end
 
           # Execute the action
-          builder.consumer_group('test-group', &proxy_block)
+          builder.consumer_group("test-group", &proxy_block)
 
           # Verify expectations
-          expect(consumer_group_class_spy).to have_received(:new).with('test-group-parallel-0')
-          expect(consumer_group_class_spy).to have_received(:new).with('test-group-parallel-1')
-          expect(consumer_group_class_spy).to have_received(:new).with('test-group-parallel-2')
+          expect(consumer_group_class_spy).to have_received(:new).with("test-group-parallel-0")
+          expect(consumer_group_class_spy).to have_received(:new).with("test-group-parallel-1")
+          expect(consumer_group_class_spy).to have_received(:new).with("test-group-parallel-2")
         end
       end
     end

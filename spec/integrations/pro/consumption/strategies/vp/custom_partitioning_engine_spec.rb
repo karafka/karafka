@@ -55,7 +55,7 @@ setup_karafka do |config|
   config.concurrency = 2
   config.max_messages = 500
   config.max_wait_time = 5_000
-  config.initial_offset = 'earliest'
+  config.initial_offset = "earliest"
   config.internal.processing.partitioner_class = CustomPartitioner
 end
 

@@ -33,7 +33,7 @@ module Karafka
           #
           # @param message [Karafka::Messages::Message]
           def call(message)
-            message_version = message.headers['schedule_schema_version']
+            message_version = message.headers["schedule_schema_version"]
 
             return if message_version <= ScheduledMessages::SCHEMA_VERSION
 

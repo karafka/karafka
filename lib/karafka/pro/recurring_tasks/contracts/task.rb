@@ -29,8 +29,8 @@ module Karafka
         class Task < Karafka::Contracts::Base
           configure do |config|
             config.error_messages = YAML.safe_load_file(
-              File.join(Karafka.gem_root, 'config', 'locales', 'pro_errors.yml')
-            ).fetch('en').fetch('validations').fetch('recurring_tasks')
+              File.join(Karafka.gem_root, "config", "locales", "pro_errors.yml")
+            ).fetch("en").fetch("validations").fetch("recurring_tasks")
           end
 
           # Regexp to ensure all tasks ids are URL safe

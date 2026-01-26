@@ -5,9 +5,9 @@
 setup_karafka
 
 draw_routes(create_topics: false) do
-  consumer_group 'a' do
-    subscription_group 'b' do
-      topic 'c' do
+  consumer_group "a" do
+    subscription_group "b" do
+      topic "c" do
         consumer Class.new
       end
     end
@@ -19,7 +19,7 @@ Karafka::App
   .internal
   .routing
   .activity_manager
-  .exclude(:consumer_groups, 'x')
+  .exclude(:consumer_groups, "x")
 
 spotted = false
 

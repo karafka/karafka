@@ -7,7 +7,7 @@
 
 setup_karafka do |config|
   # Configure static group membership
-  config.kafka[:'group.instance.id'] = 'test-instance'
+  config.kafka[:"group.instance.id"] = "test-instance"
 end
 
 Consumer1 = Class.new(Karafka::BaseConsumer)
@@ -27,11 +27,11 @@ group = Karafka::App.routes.find { |cg| cg.name == DT.consumer_groups[0] }
 first_sg = group.subscription_groups.first
 first_sg_id = first_sg.id
 first_sg_kafka = first_sg.kafka.dup
-first_group_instance_id = first_sg_kafka[:'group.instance.id']
+first_group_instance_id = first_sg_kafka[:"group.instance.id"]
 
 # Verify static membership is configured
-raise 'group.instance.id should be set' unless first_group_instance_id
-raise 'group.instance.id should include position' unless first_group_instance_id.include?('_0')
+raise "group.instance.id should be set" unless first_group_instance_id
+raise "group.instance.id should include position" unless first_group_instance_id.include?("_0")
 
 # Second draw - reopen consumer group and add another topic
 draw_routes(create_topics: false) do
@@ -49,17 +49,17 @@ assert_equal 1, group.subscription_groups.size
 second_sg = group.subscription_groups.first
 second_sg_id = second_sg.id
 second_sg_kafka = second_sg.kafka.dup
-second_group_instance_id = second_sg_kafka[:'group.instance.id']
+second_group_instance_id = second_sg_kafka[:"group.instance.id"]
 
 # The subscription group ID should remain stable (same position)
 # This is critical for static group membership consistency
-assert_equal first_sg_id, second_sg_id, 'Subscription group ID should remain stable'
+assert_equal first_sg_id, second_sg_id, "Subscription group ID should remain stable"
 
 # The group.instance.id should remain stable (same position suffix)
 assert_equal(
   first_group_instance_id,
   second_group_instance_id,
-  'group.instance.id should remain stable after reopening for static membership'
+  "group.instance.id should remain stable after reopening for static membership"
 )
 
 # Verify both topics are now in the subscription group

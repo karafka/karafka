@@ -26,7 +26,7 @@
 setup_karafka
 
 draw_routes(create_topics: false) do
-  pattern('my_special_name', /non-existing-ever-na/) do
+  pattern("my_special_name", /non-existing-ever-na/) do
     consumer Class.new
   end
 end
@@ -36,7 +36,7 @@ Karafka::App
   .internal
   .routing
   .activity_manager
-  .include(:topics, 'my_special_name')
+  .include(:topics, "my_special_name")
 
 start_karafka_and_wait_until do
   true

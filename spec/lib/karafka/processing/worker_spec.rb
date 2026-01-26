@@ -3,7 +3,7 @@
 RSpec.describe_current do
   subject(:worker) do
     described_class.new(queue).tap do |worker|
-      worker.async_call('spec.worker')
+      worker.async_call("spec.worker")
     end
   end
 
@@ -15,14 +15,14 @@ RSpec.describe_current do
 
   after { worker.terminate }
 
-  describe '#join' do
+  describe "#join" do
     before { queue.close }
 
     it { expect { worker.join }.not_to raise_error }
   end
 
-  describe '#terminate' do
-    it 'expect to kill the underlying thread' do
+  describe "#terminate" do
+    it "expect to kill the underlying thread" do
       expect(worker.alive?).to be(true)
       worker.terminate
       worker.join
@@ -30,16 +30,16 @@ RSpec.describe_current do
     end
   end
 
-  describe '#process' do
+  describe "#process" do
     before { allow(queue).to receive(:complete) }
 
-    context 'when the job is a queue closing operation' do
+    context "when the job is a queue closing operation" do
       before { queue.close }
 
       it { expect(queue).not_to have_received(:complete) }
     end
 
-    context 'when it is a non-closing, blocking job' do
+    context "when it is a non-closing, blocking job" do
       let(:job) { OpenStruct.new(group_id: 1, id: 1, call: true, wrap: true) }
 
       before do
@@ -63,7 +63,7 @@ RSpec.describe_current do
       it { expect(queue).to have_received(:complete).with(job) }
     end
 
-    context 'when it is a non-closing, non-blocking job' do
+    context "when it is a non-closing, non-blocking job" do
       let(:job) { OpenStruct.new(group_id: 1, id: 1, call: true, non_blocking?: true) }
 
       before do
@@ -87,18 +87,18 @@ RSpec.describe_current do
       it { expect(queue).to have_received(:complete).with(job) }
     end
 
-    context 'when an error occurs in the worker' do
+    context "when an error occurs in the worker" do
       let(:job) { OpenStruct.new(group_id: 1, id: 1, call: true) }
 
       let(:detected_errors) do
         errors = []
-        Karafka.monitor.subscribe('error.occurred') { |occurred| errors << occurred }
+        Karafka.monitor.subscribe("error.occurred") { |occurred| errors << occurred }
         errors
       end
 
       let(:completions) do
         completions = []
-        Karafka.monitor.subscribe('worker.completed') { |event| completions << event }
+        Karafka.monitor.subscribe("worker.completed") { |event| completions << event }
         completions
       end
 
@@ -114,13 +114,13 @@ RSpec.describe_current do
         sleep(0.05)
       end
 
-      it 'expect to instrument on it' do
-        expect(detected_errors[0].id).to eq('error.occurred')
-        expect(detected_errors[0].payload[:type]).to eq('worker.process.error')
+      it "expect to instrument on it" do
+        expect(detected_errors[0].id).to eq("error.occurred")
+        expect(detected_errors[0].payload[:type]).to eq("worker.process.error")
       end
 
-      it 'expect to publish completion even despite error' do
-        expect(completions[0].id).to eq('worker.completed')
+      it "expect to publish completion even despite error" do
+        expect(completions[0].id).to eq("worker.completed")
       end
     end
   end

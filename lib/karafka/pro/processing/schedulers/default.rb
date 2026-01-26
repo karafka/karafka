@@ -71,11 +71,11 @@ module Karafka
           end
 
           # By default all non-consumption work is scheduled in a fifo order
-          alias on_schedule_revocation schedule_fifo
-          alias on_schedule_shutdown schedule_fifo
-          alias on_schedule_idle schedule_fifo
-          alias on_schedule_periodic schedule_fifo
-          alias on_schedule_eofed schedule_fifo
+          alias_method :on_schedule_revocation, :schedule_fifo
+          alias_method :on_schedule_shutdown, :schedule_fifo
+          alias_method :on_schedule_idle, :schedule_fifo
+          alias_method :on_schedule_periodic, :schedule_fifo
+          alias_method :on_schedule_eofed, :schedule_fifo
 
           # This scheduler does not have anything to manage as it is a pass through and has no
           # state

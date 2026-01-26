@@ -1,8 +1,8 @@
 # frozen_string_literal: true
 
-source 'https://rubygems.org'
+source "https://rubygems.org"
 
-gem 'appsignal'
-gem 'karafka', path: ENV.fetch('KARAFKA_GEM_DIR')
-gem 'logger'
-gem 'ostruct'
+gem "appsignal"
+gem "karafka", path: ENV.fetch("KARAFKA_GEM_DIR")
+gem "logger"
+gem "ostruct"

@@ -28,14 +28,14 @@ DT[0] = Set.new
 
 class Consumer < Karafka::BaseConsumer
   def consume
-    raise "#{topic.name} matched" if topic.name.include?('activities')
+    raise "#{topic.name} matched" if topic.name.include?("activities")
 
     DT[0] << topic
   end
 end
 
 ENDING = SecureRandom.uuid
-NEGATIVE_MATCHING = <<~PATTERN.gsub(/\s+/, '')
+NEGATIVE_MATCHING = <<~PATTERN.gsub(/\s+/, "")
   ^(
     [^i]|
     i[^t]|

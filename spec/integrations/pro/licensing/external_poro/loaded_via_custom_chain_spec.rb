@@ -27,17 +27,17 @@ module Karafka
   module License
     class << self
       def token
-        ENV.fetch('KARAFKA_PRO_LICENSE_TOKEN')
+        ENV.fetch("KARAFKA_PRO_LICENSE_TOKEN")
       end
     end
   end
 end
 
-require 'karafka'
+require "karafka"
 
 class KarafkaApp < Karafka::App
   setup do |config|
-    config.kafka = { 'bootstrap.servers': 'host:9092' }
+    config.kafka = { "bootstrap.servers": "host:9092" }
   end
 
   routes.draw do

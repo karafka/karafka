@@ -31,32 +31,33 @@ RSpec.describe_current do
   let(:coordinator) { build(:processing_coordinator) }
   let(:consumer) do
     ClassBuilder.inherit(topic.consumer) do
-      def consume; end
+      def consume
+      end
     end.new
   end
 
   before { allow(topic.consumer).to receive(:new).and_return(consumer) }
 
-  describe '#before_schedule_periodic' do
+  describe "#before_schedule_periodic" do
     before { allow(consumer).to receive(:on_before_schedule_tick) }
 
     it do
       expect { executor.before_schedule_periodic }.not_to raise_error
     end
 
-    it 'expect to run consumer on_before_schedule' do
+    it "expect to run consumer on_before_schedule" do
       executor.before_schedule_periodic
       expect(consumer).to have_received(:on_before_schedule_tick).with(no_args)
     end
   end
 
-  describe '#periodic' do
+  describe "#periodic" do
     before do
       allow(consumer).to receive(:on_tick)
       executor.periodic
     end
 
-    it 'expect to run consumer on_tick' do
+    it "expect to run consumer on_tick" do
       expect(consumer).to have_received(:on_tick).with(no_args)
     end
   end

@@ -32,17 +32,17 @@ end
 
 Thread.new do
   loop do
-    produce(DT.topic, '1')
+    produce(DT.topic, "1")
 
     sleep(0.02)
-  rescue StandardError
+  rescue
     nil
   end
 end
 
 iterator = Karafka::Pro::Iterator.new(
   { DT.topic => -1 },
-  settings: { 'enable.partition.eof': false },
+  settings: { "enable.partition.eof": false },
   yield_nil: true
 )
 

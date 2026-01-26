@@ -33,10 +33,10 @@ module Karafka
           !insights.empty?
         end
 
-        alias statistics insights
-        alias statistics? insights?
-        alias inline_insights insights
-        alias inline_insights? insights?
+        alias_method :statistics, :insights
+        alias_method :statistics?, :insights?
+        alias_method :inline_insights, :insights
+        alias_method :inline_insights?, :insights?
       end
     end
   end

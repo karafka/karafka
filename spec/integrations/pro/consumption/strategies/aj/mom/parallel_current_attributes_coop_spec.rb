@@ -28,7 +28,7 @@ end
 
 setup_active_job
 
-require 'karafka/active_job/current_attributes'
+require "karafka/active_job/current_attributes"
 
 draw_routes do
   active_job_topic DT.topic do

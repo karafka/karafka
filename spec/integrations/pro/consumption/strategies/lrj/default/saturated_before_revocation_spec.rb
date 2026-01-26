@@ -26,14 +26,14 @@
 setup_karafka(allow_errors: %w[connection.client.poll.error]) do |config|
   config.concurrency = 2
   config.max_messages = 1
-  config.kafka[:'max.poll.interval.ms'] = 10_000
-  config.kafka[:'session.timeout.ms'] = 10_000
+  config.kafka[:"max.poll.interval.ms"] = 10_000
+  config.kafka[:"session.timeout.ms"] = 10_000
 end
 
 events = []
 
-Karafka::App.monitor.subscribe('error.occurred') do |event|
-  next unless event[:type] == 'connection.client.poll.error'
+Karafka::App.monitor.subscribe("error.occurred") do |event|
+  next unless event[:type] == "connection.client.poll.error"
 
   events << event
 end
@@ -57,8 +57,8 @@ draw_routes do
   end
 end
 
-produce(DT.topic, '1', partition: 0)
-produce(DT.topic, '1', partition: 1)
+produce(DT.topic, "1", partition: 0)
+produce(DT.topic, "1", partition: 1)
 
 def trigger_rebalance
   consumer = setup_rdkafka_consumer

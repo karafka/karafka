@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 RSpec.describe_current do
-  describe '#async_call' do
+  describe "#async_call" do
     subject(:async_executor) do
       Class.new do
         include Karafka::Helpers::Async
@@ -15,11 +15,11 @@ RSpec.describe_current do
     end
 
     # The easiest way to check it is to run the code and save object id
-    it 'expect to run call async' do
-      async_executor.async_call('name')
+    it "expect to run call async" do
+      async_executor.async_call("name")
       async_executor.join
 
-      expect(async_executor.name).to eq('name')
+      expect(async_executor.name).to eq("name")
       expect(async_executor.thread_id).not_to eq(Thread.current.object_id)
     end
   end

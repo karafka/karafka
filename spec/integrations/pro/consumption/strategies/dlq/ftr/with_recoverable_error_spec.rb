@@ -36,7 +36,7 @@ class Consumer < Karafka::BaseConsumer
       if message.offset == 7 && !@raised
         @raised = true
 
-        raise StandardError, 'failure'
+        raise StandardError, "failure"
       end
 
       mark_as_consumed(message)

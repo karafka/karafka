@@ -29,7 +29,7 @@ module Karafka
         listener_id = event[:caller].id
         subscription_group = event[:subscription_group]
         consumer_group_id = subscription_group.consumer_group.id
-        topics = subscription_group.topics.select(&:active?).map(&:name).join(', ')
+        topics = subscription_group.topics.select(&:active?).map(&:name).join(", ")
         group_details = "#{consumer_group_id}/#{subscription_group.id}"
 
         info(
@@ -70,7 +70,7 @@ module Karafka
       # @param event [Karafka::Core::Monitoring::Event] event details including payload
       def on_worker_process(event)
         job = event[:job]
-        job_type = job.class.to_s.split('::').last
+        job_type = job.class.to_s.split("::").last
         consumer = job.executor.topic.consumer
         topic = job.executor.topic.name
         partition = job.executor.partition
@@ -83,11 +83,11 @@ module Karafka
       def on_worker_processed(event)
         job = event[:job]
         time = event[:time].round(2)
-        job_type = job.class.to_s.split('::').last
+        job_type = job.class.to_s.split("::").last
         consumer = job.executor.topic.consumer
         topic = job.executor.topic.name
         partition = job.executor.partition
-        info <<~MSG.tr("\n", ' ').strip!
+        info <<~MSG.tr("\n", " ").strip!
           [#{job.id}] #{job_type} job for #{consumer}
           on #{topic}-#{partition} finished in #{time} ms
         MSG
@@ -104,10 +104,10 @@ module Karafka
         offset = event[:offset]
         client = event[:caller]
 
-        info <<~MSG.tr("\n", ' ').strip!
+        info <<~MSG.tr("\n", " ").strip!
           [#{client.id}]
           Pausing on topic #{topic}-#{partition}
-          on #{offset ? "offset #{offset}" : 'the consecutive offset'}
+          on #{offset ? "offset #{offset}" : "the consecutive offset"}
         MSG
       end
 
@@ -119,7 +119,7 @@ module Karafka
         partition = event[:partition]
         client = event[:caller]
 
-        info <<~MSG.tr("\n", ' ').strip!
+        info <<~MSG.tr("\n", " ").strip!
           [#{client.id}] Resuming on topic #{topic}-#{partition}
         MSG
       end
@@ -134,7 +134,7 @@ module Karafka
         consumer = event[:caller]
         timeout = event[:timeout]
 
-        info <<~MSG.tr("\n", ' ').strip!
+        info <<~MSG.tr("\n", " ").strip!
           [#{consumer.id}] Retrying of #{consumer.class} after #{timeout} ms
           on topic #{topic}-#{partition} from offset #{offset}
         MSG
@@ -149,7 +149,7 @@ module Karafka
         seek_offset = event[:message].offset
         consumer = event[:caller]
 
-        info <<~MSG.tr("\n", ' ').strip!
+        info <<~MSG.tr("\n", " ").strip!
           [#{consumer.id}] Seeking from #{consumer.class}
           on topic #{topic}-#{partition} to offset #{seek_offset}
         MSG
@@ -170,13 +170,13 @@ module Karafka
         Thread.list.each do |thread|
           tid = (thread.object_id ^ ::Process.pid).to_s(36)
 
-          warn ''
+          warn ""
           warn "Thread TID-#{tid} #{thread.name}"
 
           if thread.backtrace && !thread.backtrace.empty?
             warn thread.backtrace.join("\n")
           else
-            warn '<no backtrace available>'
+            warn "<no backtrace available>"
           end
         end
       end
@@ -232,7 +232,7 @@ module Karafka
           info "#{group_prefix}: No partitions revoked"
         else
           revoked_partitions.each do |topic, partitions|
-            info "#{group_prefix}: #{topic}-[#{partitions.join(',')}] revoked"
+            info "#{group_prefix}: #{topic}-[#{partitions.join(",")}] revoked"
           end
         end
       end
@@ -250,7 +250,7 @@ module Karafka
           info "#{group_prefix}: No partitions assigned"
         else
           assigned_partitions.each do |topic, partitions|
-            info "#{group_prefix}: #{topic}-[#{partitions.join(',')}] assigned"
+            info "#{group_prefix}: #{topic}-[#{partitions.join(",")}] assigned"
           end
         end
       end
@@ -266,7 +266,7 @@ module Karafka
         dlq_topic = consumer.topic.dead_letter_queue.topic
         partition = message.partition
 
-        info <<~MSG.tr("\n", ' ').strip!
+        info <<~MSG.tr("\n", " ").strip!
           [#{consumer.id}] Dispatched message #{offset}
           from #{topic}-#{partition}
           to DLQ topic: #{dlq_topic}
@@ -284,7 +284,7 @@ module Karafka
         partition = message.partition
         offset = message.offset
 
-        info <<~MSG.tr("\n", ' ').strip!
+        info <<~MSG.tr("\n", " ").strip!
           [#{consumer.id}] Throttled and will resume
           from message #{offset}
           on #{topic}-#{partition}
@@ -300,7 +300,7 @@ module Karafka
         partition = message.partition
         offset = message.offset
 
-        info <<~MSG.tr("\n", ' ').strip!
+        info <<~MSG.tr("\n", " ").strip!
           [#{consumer.id}] Post-filtering seeking to message #{offset}
           on #{topic}-#{partition}
         MSG
@@ -330,7 +330,7 @@ module Karafka
 
       # @param event [Karafka::Core::Monitoring::Event] event details including payload
       def on_swarm_manager_control(event)
-        pids = event[:caller].nodes.map(&:pid).join(', ')
+        pids = event[:caller].nodes.map(&:pid).join(", ")
         debug "Swarm manager checking nodes: #{pids}"
       end
 
@@ -342,49 +342,49 @@ module Karafka
         error = event[:error]
         backtrace = (error.backtrace || []).join("\n")
 
-        details = [error.to_s, error_details(event)].compact.join(' ')
+        details = [error.to_s, error_details(event)].compact.join(" ")
 
         case type
-        when 'consumer.initialized.error'
+        when "consumer.initialized.error"
           error "Consumer initialized error: #{details}"
           error backtrace
-        when 'consumer.wrap.error'
+        when "consumer.wrap.error"
           error "Consumer wrap failed due to an error: #{details}"
           error backtrace
-        when 'consumer.consume.error'
+        when "consumer.consume.error"
           error "Consumer consuming error: #{details}"
           error backtrace
-        when 'consumer.revoked.error'
+        when "consumer.revoked.error"
           error "Consumer on revoked failed due to an error: #{details}"
           error backtrace
-        when 'consumer.idle.error'
+        when "consumer.idle.error"
           error "Consumer idle failed due to an error: #{details}"
           error backtrace
-        when 'consumer.shutdown.error'
+        when "consumer.shutdown.error"
           error "Consumer on shutdown failed due to an error: #{details}"
           error backtrace
-        when 'consumer.tick.error'
+        when "consumer.tick.error"
           error "Consumer on tick failed due to an error: #{details}"
           error backtrace
-        when 'consumer.eofed.error'
+        when "consumer.eofed.error"
           error "Consumer on eofed failed due to an error: #{details}"
           error backtrace
-        when 'consumer.after_consume.error'
+        when "consumer.after_consume.error"
           error "Consumer on after_consume failed due to an error: #{details}"
           error backtrace
-        when 'worker.process.error'
+        when "worker.process.error"
           fatal "Worker processing failed due to an error: #{details}"
           fatal backtrace
-        when 'connection.listener.fetch_loop.error'
+        when "connection.listener.fetch_loop.error"
           error "Listener fetch loop error: #{details}"
           error backtrace
-        when 'swarm.supervisor.error'
+        when "swarm.supervisor.error"
           fatal "Swarm supervisor crashed due to an error: #{details}"
           fatal backtrace
-        when 'runner.call.error'
+        when "runner.call.error"
           fatal "Runner crashed due to an error: #{details}"
           fatal backtrace
-        when 'app.stopping.error'
+        when "app.stopping.error"
           # Counts number of workers and listeners that were still active when forcing the
           # shutdown. Please note, that unless all listeners are closed, workers will not finalize
           # their operations as well.
@@ -393,46 +393,46 @@ module Karafka
           listeners = Server.listeners ? Server.listeners.count(&:active?) : 0
           workers = Server.workers ? Server.workers.count(&:alive?) : 0
 
-          message = <<~MSG.tr("\n", ' ').strip!
+          message = <<~MSG.tr("\n", " ").strip!
             Forceful Karafka server stop with:
             #{workers} active workers and
             #{listeners} active listeners
           MSG
 
           error message
-        when 'app.forceful_stopping.error'
+        when "app.forceful_stopping.error"
           error "Forceful shutdown error occurred: #{details}"
           error backtrace
-        when 'librdkafka.error'
+        when "librdkafka.error"
           error "librdkafka internal error occurred: #{details}"
           error backtrace
         # Those can occur when emitted statistics are consumed by the end user and the processing
         # of statistics fails. The statistics are emitted from librdkafka main loop thread and
         # any errors there crash the whole thread
-        when 'callbacks.statistics.error'
+        when "callbacks.statistics.error"
           error "callbacks.statistics processing failed due to an error: #{details}"
           error backtrace
-        when 'callbacks.error.error'
+        when "callbacks.error.error"
           error "callbacks.error processing failed due to an error: #{details}"
           error backtrace
         # Those will only occur when retries in the client fail and when they did not stop after
         # back-offs
-        when 'connection.client.poll.error'
+        when "connection.client.poll.error"
           error "Data polling error occurred: #{details}"
           error backtrace
-        when 'connection.client.rebalance_callback.error'
+        when "connection.client.rebalance_callback.error"
           error "Rebalance callback error occurred: #{details}"
           error backtrace
-        when 'connection.client.unsubscribe.error'
+        when "connection.client.unsubscribe.error"
           error "Client unsubscribe error occurred: #{details}"
           error backtrace
-        when 'parallel_segments.reducer.error'
+        when "parallel_segments.reducer.error"
           error "Parallel segments reducer error occurred: #{details}"
           error backtrace
-        when 'parallel_segments.partitioner.error'
+        when "parallel_segments.partitioner.error"
           error "Parallel segments partitioner error occurred: #{details}"
           error backtrace
-        when 'virtual_partitions.partitioner.error'
+        when "virtual_partitions.partitioner.error"
           error "Virtual partitions partitioner error occurred: #{details}"
           error backtrace
         # This handles any custom errors coming from places like Web-UI, etc
@@ -465,19 +465,19 @@ module Karafka
         # Collect extra info if it was a consumer related error.
         # Those come from user code
         details = case caller_ref
-                  when Karafka::BaseConsumer
-                    extract_consumer_info(caller_ref)
-                  when Karafka::Connection::Client
-                    extract_client_info(caller_ref)
-                  when Karafka::Connection::Listener
-                    extract_listener_info(caller_ref)
-                  else
-                    {}
-                  end
+        when Karafka::BaseConsumer
+          extract_consumer_info(caller_ref)
+        when Karafka::Connection::Client
+          extract_client_info(caller_ref)
+        when Karafka::Connection::Listener
+          extract_listener_info(caller_ref)
+        else
+          {}
+        end
 
         return nil if details.empty?
 
-        "[#{details.map { |label, value| "#{label}: #{value}" }.join(', ')}]"
+        "[#{details.map { |label, value| "#{label}: #{value}" }.join(", ")}]"
       end
 
       # @param consumer [::Karafka::BaseConsumer]

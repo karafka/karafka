@@ -7,7 +7,7 @@
 setup_karafka
 
 # The last one will act as an indicator that we're done
-elements = DT.uuids(99) << '1'
+elements = DT.uuids(99) << "1"
 produce_many(DT.topic, elements)
 
 class Consumer < Karafka::BaseConsumer
@@ -17,7 +17,7 @@ class Consumer < Karafka::BaseConsumer
       DT[0] << message.raw_payload
 
       # When we encounter last message out of those that we expected, let's rewind
-      seek(20) if message.raw_payload == '1'
+      seek(20) if message.raw_payload == "1"
     end
   end
 end
@@ -40,7 +40,7 @@ end
 assert DT[0].size >= 420
 
 # The last message should be consumed at least 5 times (first + min 4 loops)
-assert DT[0].count { |val| val == '1' } >= 5
+assert DT[0].count { |val| val == "1" } >= 5
 
 # First 20 messages should be consumed only once
 elements[0..19].each do |payload|
@@ -62,7 +62,7 @@ DT[0].each do |payload|
   end
 
   # since the '1' is the one where we rewind, it will not match with previous
-  assert_equal(elements.index(previous), elements.index(payload) - 1) unless previous == '1'
+  assert_equal(elements.index(previous), elements.index(payload) - 1) unless previous == "1"
 
   previous = payload
 end

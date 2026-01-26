@@ -33,11 +33,11 @@ module Karafka
       # Version of the schema we use for envelops in scheduled messages.
       # We use it to detect any potential upgrades similar to other components of Karafka and to
       # stop processing of incompatible versions
-      SCHEMA_VERSION = '1.0.0'
+      SCHEMA_VERSION = "1.0.0"
 
       # Version of the states schema. Used to publish per partition simple aggregated metrics
       # that can be used for schedules reporting
-      STATES_SCHEMA_VERSION = '1.0.0'
+      STATES_SCHEMA_VERSION = "1.0.0"
 
       class << self
         # Runs the `Proxy.call`

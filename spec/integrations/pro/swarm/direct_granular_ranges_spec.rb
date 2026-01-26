@@ -57,7 +57,7 @@ end
 results = {}
 
 done.each do |result|
-  partition, pid = result.split('-')
+  partition, pid = result.split("-")
 
   results[pid] ||= []
   results[pid] << partition

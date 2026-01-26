@@ -23,7 +23,7 @@
 # Karafka should track offsets in transaction but only mark last on success
 
 setup_karafka do |config|
-  config.kafka[:'transactional.id'] = SecureRandom.uuid
+  config.kafka[:"transactional.id"] = SecureRandom.uuid
 end
 
 class Consumer < Karafka::BaseConsumer
@@ -56,7 +56,7 @@ start_karafka_and_wait_until do
   DT.key?(:done)
 end
 
-assert_equal '99', DT[:metadata].first
+assert_equal "99", DT[:metadata].first
 
 # +1 from 99 because of the transaction marker
 assert_equal 100, fetch_next_offset

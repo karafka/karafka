@@ -8,7 +8,7 @@
 # one (empty) rebalance.
 
 setup_karafka do |config|
-  config.kafka[:'partition.assignment.strategy'] = 'cooperative-sticky'
+  config.kafka[:"partition.assignment.strategy"] = "cooperative-sticky"
 end
 
 class Consumer < Karafka::BaseConsumer
@@ -24,10 +24,10 @@ draw_routes do
   end
 end
 
-produce(DT.topic, '1')
+produce(DT.topic, "1")
 
 consumer = setup_rdkafka_consumer(
-  'partition.assignment.strategy': 'cooperative-sticky'
+  "partition.assignment.strategy": "cooperative-sticky"
 )
 
 other = Thread.new do

@@ -45,7 +45,7 @@ draw_routes do
     manual_offset_management(true)
     consumer Consumer
     virtual_partitions(
-      partitioner: ->(message) { message.offset < 20 || message.offset == 49 ? 0 : 1 }
+      partitioner: ->(message) { (message.offset < 20 || message.offset == 49) ? 0 : 1 }
     )
   end
 end

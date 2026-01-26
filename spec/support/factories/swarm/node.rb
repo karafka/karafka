@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 FactoryBot.define do
-  factory :swarm_node, class: 'Karafka::Swarm::Node' do
+  factory :swarm_node, class: "Karafka::Swarm::Node" do
     transient do
       id { 0 }
       parent_pid { Process.pid }

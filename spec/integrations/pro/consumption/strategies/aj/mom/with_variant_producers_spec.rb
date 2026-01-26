@@ -59,7 +59,8 @@ class JobA < ActiveJob::Base
     end
   )
 
-  def perform; end
+  def perform
+  end
 end
 
 class JobB < ActiveJob::Base
@@ -71,7 +72,8 @@ class JobB < ActiveJob::Base
     producer: nil
   )
 
-  def perform; end
+  def perform
+  end
 end
 
 slow = Bench.new.bench { 1000.times { JobA.perform_later } }

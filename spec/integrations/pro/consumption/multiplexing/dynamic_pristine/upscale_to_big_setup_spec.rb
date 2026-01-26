@@ -35,9 +35,9 @@
 Bundler.require(:default)
 
 CONFIG = {
-  'bootstrap.servers': '127.0.0.1:9092',
-  'partition.assignment.strategy': 'cooperative-sticky',
-  'group.id': SecureRandom.uuid
+  "bootstrap.servers": "127.0.0.1:9092",
+  "partition.assignment.strategy": "cooperative-sticky",
+  "group.id": SecureRandom.uuid
 }.freeze
 
 setup_karafka
@@ -117,7 +117,7 @@ high_usage = 0
   # We exit that way because only that way it will fully crash and not hang the process for too
   # long
   if high_usage >= 6
-    puts 'Exiting due to prolonged high usage'
+
     exit!(1)
   end
 

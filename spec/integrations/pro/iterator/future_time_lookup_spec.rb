@@ -30,7 +30,7 @@ draw_routes do
   end
 end
 
-produce(DT.topic, '1')
+produce(DT.topic, "1")
 
 iterator = Karafka::Pro::Iterator.new(
   { DT.topic => { 0 => Time.now + 60 } }

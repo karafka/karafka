@@ -31,7 +31,8 @@ setup_karafka do |config|
 end
 
 class Consumer < Karafka::BaseConsumer
-  def consume; end
+  def consume
+  end
 end
 
 draw_routes do

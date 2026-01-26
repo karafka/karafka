@@ -25,8 +25,8 @@
 setup_karafka do |config|
   config.concurrency = 10
   config.max_messages = 1
-  config.kafka[:'max.poll.interval.ms'] = 10_000
-  config.kafka[:'session.timeout.ms'] = 10_000
+  config.kafka[:"max.poll.interval.ms"] = 10_000
+  config.kafka[:"session.timeout.ms"] = 10_000
 end
 
 class Consumer < Karafka::BaseConsumer
@@ -127,15 +127,15 @@ DT[:initial_assignments].each do |assignment|
   assert_equal(
     expected_segment,
     segment_id,
-    'Initial assignment: ' \
+    "Initial assignment: " \
     "Key #{key} was assigned to segment #{segment_id} but should be segment #{expected_segment}"
   )
 end
 
 # 2. Verify final segment assignments match initial assignments
 matched_keys = DT[:initial_assignments]
-               .map { |a| a[:key] } & DT[:final_assignments]
-               .map { |a| a[:key] }
+  .map { |a| a[:key] } & DT[:final_assignments]
+    .map { |a| a[:key] }
 
 matched_keys.each do |key|
   initial = DT[:initial_assignments].find { |a| a[:key] == key }
@@ -144,7 +144,7 @@ matched_keys.each do |key|
   assert_equal(
     initial[:segment_id],
     final[:segment_id],
-    'Assignment changed during processing: ' \
+    "Assignment changed during processing: " \
     "Key #{key} moved from segment #{initial[:segment_id]} to #{final[:segment_id]}"
   )
 
@@ -162,8 +162,8 @@ end
 
   # Get all keys processed by this segment
   processed_keys = DT[:final_assignments]
-                   .select { |a| a[:segment_id] == segment_id }
-                   .map { |a| a[:key] }
+    .select { |a| a[:segment_id] == segment_id }
+    .map { |a| a[:key] }
 
   processed_keys.each do |key|
     expected_segment = expected_assignments[key]

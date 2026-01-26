@@ -83,13 +83,13 @@ multi_group_passed = true
 
 begin
   draw_routes(create_topics: false) do
-    subscription_group 'group_a' do
+    subscription_group "group_a" do
       topic :shared_across_groups do
         consumer CircularConsumerA
       end
     end
 
-    subscription_group 'group_b' do
+    subscription_group "group_b" do
       topic :shared_across_groups do
         consumer CircularConsumerB
       end
@@ -102,15 +102,15 @@ end
 # Core circular dependencies should be detected
 assert(
   same_topic_failed,
-  'Should detect duplicate topic names within same subscription group'
+  "Should detect duplicate topic names within same subscription group"
 )
 
 assert(
   self_ref_passed,
-  'Self-referencing consumer should not fail at configuration time'
+  "Self-referencing consumer should not fail at configuration time"
 )
 
 assert(
   !multi_group_passed,
-  'Same topic in different subscription groups should not be allowed'
+  "Same topic in different subscription groups should not be allowed"
 )

@@ -24,7 +24,7 @@
 
 setup_karafka
 
-produce(DT.topic, '1')
+produce(DT.topic, "1")
 
 class Consumer < Karafka::BaseConsumer
   def consume

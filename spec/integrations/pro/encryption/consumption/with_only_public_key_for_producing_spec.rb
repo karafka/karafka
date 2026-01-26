@@ -23,7 +23,7 @@
 # Karafka should work correctly when we configure it only to have public key and for messages
 # producing only. Decryption will not be possible.
 
-PUBLIC_KEY = fixture_file('rsa/public_key_1.pem')
+PUBLIC_KEY = fixture_file("rsa/public_key_1.pem")
 
 setup_karafka do |config|
   config.encryption.active = true
@@ -34,7 +34,7 @@ class Consumer < Karafka::BaseConsumer
   def consume
     messages.each do |message|
       DT[message.metadata.partition] << message.raw_payload
-      DT[:encryption] << message.headers['encryption']
+      DT[:encryption] << message.headers["encryption"]
     end
   end
 end
@@ -53,7 +53,7 @@ start_karafka_and_wait_until do
 end
 
 # There should be no raw info available
-chunk = elements.first.split('-').first
+chunk = elements.first.split("-").first
 assert(DT[0].none? { |payload| payload.include?(chunk) })
 
 # Correct encryption version headers should be present

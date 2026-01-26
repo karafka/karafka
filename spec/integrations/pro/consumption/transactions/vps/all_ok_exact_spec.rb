@@ -23,7 +23,7 @@
 # When working with transactions if all success and the strategy is current, last should be picked
 
 setup_karafka do |config|
-  config.kafka[:'transactional.id'] = SecureRandom.uuid
+  config.kafka[:"transactional.id"] = SecureRandom.uuid
   config.concurrency = 10
 end
 
@@ -67,4 +67,4 @@ start_karafka_and_wait_until do
 end
 
 assert_equal fetch_next_offset, 100
-assert_equal DT[:metadata].last, '99'
+assert_equal DT[:metadata].last, "99"

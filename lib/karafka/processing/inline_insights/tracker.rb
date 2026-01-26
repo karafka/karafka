@@ -68,8 +68,8 @@ module Karafka
         # @param statistics [Hash] librdkafka enriched statistics
         def add(consumer_group_id, statistics)
           @mutex.synchronize do
-            statistics.fetch('topics', EMPTY_HASH).each do |topic_name, t_details|
-              t_details.fetch('partitions', EMPTY_HASH).each do |partition_id, p_details|
+            statistics.fetch("topics", EMPTY_HASH).each do |topic_name, t_details|
+              t_details.fetch("partitions", EMPTY_HASH).each do |partition_id, p_details|
                 next unless track?(partition_id, p_details)
 
                 key = "#{consumer_group_id}_#{topic_name}_#{partition_id}"
@@ -114,12 +114,12 @@ module Karafka
         # @param p_details [Hash] partition statistics details
         # @return [Boolean] true if we should track given partition
         def track?(partition_id, p_details)
-          return false if partition_id == '-1'
+          return false if partition_id == "-1"
 
-          fetch_state = p_details.fetch('fetch_state')
+          fetch_state = p_details.fetch("fetch_state")
 
-          return false if fetch_state == 'stopped'
-          return false if fetch_state == 'none'
+          return false if fetch_state == "stopped"
+          return false if fetch_state == "none"
 
           true
         end

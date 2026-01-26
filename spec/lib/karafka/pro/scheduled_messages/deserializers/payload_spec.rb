@@ -36,32 +36,32 @@ RSpec.describe_current do
 
   let(:raw_payload) { Zlib::Deflate.deflate('{"key":"value"}') }
 
-  context 'when JSON is parsed successfully' do
-    it 'returns a hash' do
+  context "when JSON is parsed successfully" do
+    it "returns a hash" do
       expect(parsing).to be_a(Hash)
     end
 
-    it 'returns a hash with symbolized keys' do
+    it "returns a hash with symbolized keys" do
       expect(parsing.keys.all?(Symbol)).to be(true)
     end
 
-    it 'returns a hash with expected values' do
-      expect(parsing).to eq({ key: 'value' })
+    it "returns a hash with expected values" do
+      expect(parsing).to eq({ key: "value" })
     end
   end
 
-  context 'when JSON parsing fails' do
-    let(:raw_payload) { Zlib::Deflate.deflate('invalid json') }
+  context "when JSON parsing fails" do
+    let(:raw_payload) { Zlib::Deflate.deflate("invalid json") }
 
-    it 'raises a JSON::ParserError' do
+    it "raises a JSON::ParserError" do
       expect { parsing }.to raise_error(JSON::ParserError)
     end
   end
 
-  context 'when data is not compressed' do
-    let(:raw_payload) { 'not compressed' }
+  context "when data is not compressed" do
+    let(:raw_payload) { "not compressed" }
 
-    it 'raises a Zlib::DataError' do
+    it "raises a Zlib::DataError" do
       expect { parsing }.to raise_error(Zlib::DataError)
     end
   end

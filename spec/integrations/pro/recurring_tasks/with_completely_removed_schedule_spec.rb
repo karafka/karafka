@@ -33,16 +33,16 @@ end
 future_date = Time.now + (7 * 24 * 60 * 60) # 7 days in seconds
 FUTURE_CRON = "0 12 #{future_date.day} #{future_date.month} *".freeze
 
-Karafka::Pro::RecurringTasks.define('1.0.0') do
-  schedule(id: 'a', cron: FUTURE_CRON, enabled: false) do
+Karafka::Pro::RecurringTasks.define("1.0.0") do
+  schedule(id: "a", cron: FUTURE_CRON, enabled: false) do
     raise
   end
 
-  schedule(id: 'b', cron: FUTURE_CRON, enabled: false) do
+  schedule(id: "b", cron: FUTURE_CRON, enabled: false) do
     raise
   end
 
-  schedule(id: 'c', cron: FUTURE_CRON, previous_time: Time.now - 120_000) do
+  schedule(id: "c", cron: FUTURE_CRON, previous_time: Time.now - 120_000) do
     raise
   end
 end
@@ -54,11 +54,11 @@ end
 setup_karafka
 
 # This will simulate removing whole schedule
-Karafka::Pro::RecurringTasks.define('1.0.0') { nil }
+Karafka::Pro::RecurringTasks.define("1.0.0") { nil }
 
 start_karafka_and_wait_until do
   unless @dispatched
-    Karafka::Pro::RecurringTasks.trigger('*')
+    Karafka::Pro::RecurringTasks.trigger("*")
     @dispatched = true
     sleep(5)
   end

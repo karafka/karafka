@@ -28,32 +28,32 @@ module Karafka
 
         # What should happen before we kick in the processing
         def handle_before_consume
-          raise NotImplementedError, 'Implement in a subclass'
+          raise NotImplementedError, "Implement in a subclass"
         end
 
         # What should happen in the processing
         def handle_consume
-          raise NotImplementedError, 'Implement in a subclass'
+          raise NotImplementedError, "Implement in a subclass"
         end
 
         # Post-consumption handling
         def handle_after_consume
-          raise NotImplementedError, 'Implement in a subclass'
+          raise NotImplementedError, "Implement in a subclass"
         end
 
         # Idle run handling
         def handle_idle
-          raise NotImplementedError, 'Implement in a subclass'
+          raise NotImplementedError, "Implement in a subclass"
         end
 
         # Revocation handling
         def handle_revoked
-          raise NotImplementedError, 'Implement in a subclass'
+          raise NotImplementedError, "Implement in a subclass"
         end
 
         # Shutdown handling
         def handle_shutdown
-          raise NotImplementedError, 'Implement in a subclass'
+          raise NotImplementedError, "Implement in a subclass"
         end
       end
     end

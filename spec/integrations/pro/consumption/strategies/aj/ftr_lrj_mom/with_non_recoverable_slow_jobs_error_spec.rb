@@ -26,8 +26,8 @@ setup_active_job
 
 setup_karafka(allow_errors: true) do |config|
   config.max_messages = 10
-  config.kafka[:'max.poll.interval.ms'] = 10_000
-  config.kafka[:'session.timeout.ms'] = 10_000
+  config.kafka[:"max.poll.interval.ms"] = 10_000
+  config.kafka[:"session.timeout.ms"] = 10_000
 end
 
 class Job < ActiveJob::Base

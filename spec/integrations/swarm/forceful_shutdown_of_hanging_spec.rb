@@ -9,13 +9,13 @@ end
 READER, WRITER = IO.pipe
 
 # Redefine it so it takes longer than supervisor forceful kill
-Karafka::App.monitor.subscribe('swarm.node.after_fork') do
+Karafka::App.monitor.subscribe("swarm.node.after_fork") do
   Karafka::App.config.shutdown_timeout = 60_000
 end
 
 class Consumer < Karafka::BaseConsumer
   def consume
-    WRITER.puts('1')
+    WRITER.puts("1")
     sleep
   end
 end

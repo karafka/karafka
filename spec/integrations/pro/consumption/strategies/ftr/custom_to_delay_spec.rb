@@ -64,7 +64,7 @@ class DelayThrottler < Karafka::Pro::Processing::Filters::Base
 
   def action
     if applied?
-      timeout <= 0 ? :seek : :pause
+      (timeout <= 0) ? :seek : :pause
     else
       :skip
     end

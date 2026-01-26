@@ -5,8 +5,8 @@
 # metrics presence.
 # Listener is instantiated with `use_distributions` set to `true`, replacing all histogram
 # metrics with distribution metrics.
-require 'karafka/instrumentation/vendors/datadog/metrics_listener'
-require Karafka.gem_root.join('spec/support/vendors/datadog/statsd_dummy_client')
+require "karafka/instrumentation/vendors/datadog/metrics_listener"
+require Karafka.gem_root.join("spec/support/vendors/datadog/statsd_dummy_client")
 
 # We allow errors to raise one to make sure things are published as expected
 setup_karafka(allow_errors: true)

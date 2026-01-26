@@ -13,34 +13,34 @@ class ThreadLocalIsolationConsumer < Karafka::BaseConsumer
 
       # Set thread-local data
       Thread.current[:karafka_test_data] = {
-        message_id: message_data['id'],
+        message_id: message_data["id"],
         processing_start: Time.now.to_f,
         thread_id: thread_id
       }
 
       # Simulate some processing time
-      sleep_time = message_data['sleep_time'] || 0.001
+      sleep_time = message_data["sleep_time"] || 0.001
       sleep(sleep_time)
 
       # Read thread-local data (should be unchanged despite concurrent processing)
       thread_local_data = Thread.current[:karafka_test_data]
 
       # Verify thread-local data integrity
-      unless thread_local_data[:message_id] == message_data['id']
-        DT[:errors] << 'Thread-local data corruption detected'
+      unless thread_local_data[:message_id] == message_data["id"]
+        DT[:errors] << "Thread-local data corruption detected"
       end
 
       unless thread_local_data[:thread_id] == thread_id
-        DT[:errors] << 'Thread-local data corruption detected: thread_id mismatch'
+        DT[:errors] << "Thread-local data corruption detected: thread_id mismatch"
       end
 
       # Test instance variables per thread
-      @instance_var = "message_#{message_data['id']}_thread_#{thread_id}"
+      @instance_var = "message_#{message_data["id"]}_thread_#{thread_id}"
 
       # Store results for verification
       DT[:consumed] << {
         thread_id: thread_id,
-        message_id: message_data['id'],
+        message_id: message_data["id"],
         instance_var: @instance_var,
         thread_local_message_id: thread_local_data[:message_id],
         thread_local_thread_id: thread_local_data[:thread_id],
@@ -75,28 +75,28 @@ end
 # Verify all messages were processed
 assert_equal(
   thread_local_messages.size, DT[:consumed].size,
-  'Should process all messages despite thread-local variable usage'
+  "Should process all messages despite thread-local variable usage"
 )
 
 # Verify no thread-local data corruption occurred
-assert DT[:errors].empty?, "Thread-local data corruption detected: #{DT[:errors].join(', ')}"
+assert DT[:errors].empty?, "Thread-local data corruption detected: #{DT[:errors].join(", ")}"
 
 # Verify each message was processed with correct thread-local data
 DT[:consumed].each do |entry|
   assert_equal(
     entry[:message_id], entry[:thread_local_message_id],
-    'Thread-local message ID should match actual message ID'
+    "Thread-local message ID should match actual message ID"
   )
 
   assert_equal(
     entry[:thread_id], entry[:thread_local_thread_id],
-    'Thread-local thread ID should match actual thread ID'
+    "Thread-local thread ID should match actual thread ID"
   )
 
   expected_instance_var = "message_#{entry[:message_id]}_thread_#{entry[:thread_id]}"
   assert_equal(
     expected_instance_var, entry[:instance_var],
-    'Instance variable should contain correct thread-specific data'
+    "Instance variable should contain correct thread-specific data"
   )
 end
 
@@ -107,23 +107,23 @@ thread_groups.each do |thread_id, entries|
   entries.each do |entry|
     assert_equal(
       thread_id, entry[:thread_id],
-      'Thread ID should be consistent within thread group'
+      "Thread ID should be consistent within thread group"
     )
 
     assert_equal(
       thread_id, entry[:thread_local_thread_id],
-      'Thread-local data should be consistent within thread'
+      "Thread-local data should be consistent within thread"
     )
 
     assert entry[:instance_var].include?("thread_#{thread_id}"),
-      'Instance variable should contain correct thread ID'
+      "Instance variable should contain correct thread ID"
   end
 end
 
 # Verify timing consistency - processing times should be reasonable
 processing_times = DT[:consumed].map { |entry| entry[:processing_time] }
 assert processing_times.all? { |time| time > 0 && time < 0.1 },
-  'Processing times should be reasonable (between 0 and 0.1 seconds)'
+  "Processing times should be reasonable (between 0 and 0.1 seconds)"
 
 # Verify thread independence - different threads should have different data
 if thread_groups.size > 1
@@ -137,7 +137,7 @@ if thread_groups.size > 1
 
     assert(
       intersection.empty?,
-      'Different threads should not share instance variable data'
+      "Different threads should not share instance variable data"
     )
   end
 end
@@ -146,5 +146,5 @@ end
 
 assert_equal(
   thread_local_messages.size, DT[:consumed].size,
-  'Should handle thread-local variable isolation without cross-thread contamination'
+  "Should handle thread-local variable isolation without cross-thread contamination"
 )

@@ -47,7 +47,7 @@ module Karafka
             type = payload[:type]
 
             case type
-            when 'schedule'
+            when "schedule"
               # If we're replaying data, we need to record the most recent stored state, so we
               # can use this data to fully initialize the scheduler
               @executor.update_state(payload) if @executor.replaying?
@@ -62,7 +62,7 @@ module Karafka
                 partition,
                 message.offset - 1
               )
-            when 'command'
+            when "command"
               @executor.apply_command(payload)
 
               next if @executor.replaying?

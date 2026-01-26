@@ -27,7 +27,7 @@
 # Note: This spec works correctly regardless of how Kafka batches messages for delivery.
 
 setup_karafka do |config|
-  config.kafka[:'transactional.id'] = SecureRandom.uuid
+  config.kafka[:"transactional.id"] = SecureRandom.uuid
   config.max_messages = 10
 end
 
@@ -109,8 +109,8 @@ assert_equal 5, DT[:sync_messages].size
 assert_equal 5, DT[:async_messages].size
 
 # Verify message prefixes
-DT[:sync_messages].each { |msg| assert msg.start_with?('sync_') }
-DT[:async_messages].each { |msg| assert msg.start_with?('async_') }
+DT[:sync_messages].each { |msg| assert msg.start_with?("sync_") }
+DT[:async_messages].each { |msg| assert msg.start_with?("async_") }
 
 # Verify offset committed
 assert_equal 10, fetch_next_offset

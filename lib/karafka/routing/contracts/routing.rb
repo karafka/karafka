@@ -7,8 +7,8 @@ module Karafka
       class Routing < Karafka::Contracts::Base
         configure do |config|
           config.error_messages = YAML.safe_load_file(
-            File.join(Karafka.gem_root, 'config', 'locales', 'errors.yml')
-          ).fetch('en').fetch('validations').fetch('routing')
+            File.join(Karafka.gem_root, "config", "locales", "errors.yml")
+          ).fetch("en").fetch("validations").fetch("routing")
         end
 
         # Ensures, that when declarative topics strict requirement is on, all topics have

@@ -36,7 +36,7 @@ class Consumer < Karafka::BaseConsumer
 
   def enhance_dlq_message(dlq_message, skippable_message)
     dlq_message[:payload] = { orig: skippable_message.raw_payload, extra: 1 }.to_json
-    dlq_message[:headers]['total-remap'] = 'yes'
+    dlq_message[:headers]["total-remap"] = "yes"
   end
 end
 
@@ -77,9 +77,9 @@ end
 
   assert_equal dlq_message.raw_payload, expected_payload
   assert_equal dlq_message.headers["test#{i}"], (i + 1).to_s
-  assert_equal dlq_message.headers.fetch('source_topic'), DT.topic
-  assert_equal dlq_message.headers.fetch('source_partition'), 0.to_s
-  assert_equal dlq_message.headers.fetch('source_offset'), i.to_s
-  assert_equal dlq_message.headers.fetch('source_consumer_group'), cg
-  assert_equal dlq_message.headers.fetch('total-remap'), 'yes'
+  assert_equal dlq_message.headers.fetch("source_topic"), DT.topic
+  assert_equal dlq_message.headers.fetch("source_partition"), 0.to_s
+  assert_equal dlq_message.headers.fetch("source_offset"), i.to_s
+  assert_equal dlq_message.headers.fetch("source_consumer_group"), cg
+  assert_equal dlq_message.headers.fetch("total-remap"), "yes"
 end

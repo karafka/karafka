@@ -42,7 +42,7 @@ elements.each { |data| produce(DT.topic, data, partition: rand(0..2)) }
 
 consumer = setup_rdkafka_consumer
 
-other =  Thread.new do
+other = Thread.new do
   sleep(10)
 
   consumer.subscribe(DT.topic)

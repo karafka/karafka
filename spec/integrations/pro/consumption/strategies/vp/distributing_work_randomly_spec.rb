@@ -27,7 +27,7 @@
 setup_karafka do |config|
   config.concurrency = 5
   config.max_messages = 20
-  config.initial_offset = 'latest'
+  config.initial_offset = "latest"
 end
 
 class VirtualPartitioner
@@ -63,8 +63,8 @@ draw_routes do
 end
 
 start_karafka_and_wait_until do
-  produce(DT.topic, '1', key: %w[a b c d].sample)
-  produce(DT.topic, '1', key: %w[a b c d].sample)
+  produce(DT.topic, "1", key: %w[a b c d].sample)
+  produce(DT.topic, "1", key: %w[a b c d].sample)
 
   DT.data.values.sum(&:count) >= 1_000
 end

@@ -8,8 +8,8 @@ module Karafka
       class ConsumerGroup < Karafka::Contracts::Base
         configure do |config|
           config.error_messages = YAML.safe_load_file(
-            File.join(Karafka.gem_root, 'config', 'locales', 'errors.yml')
-          ).fetch('en').fetch('validations').fetch('routing').fetch('consumer_group')
+            File.join(Karafka.gem_root, "config", "locales", "errors.yml")
+          ).fetch("en").fetch("validations").fetch("routing").fetch("consumer_group")
         end
 
         required(:id) { |val| val.is_a?(String) && Karafka::Contracts::TOPIC_REGEXP.match?(val) }
@@ -49,18 +49,18 @@ module Karafka
           names = data.fetch(:topics).map { |topic| topic[:name] }
           names_hash = names.each_with_object({}) { |n, h| h[n] = true }
           error_occured = false
-          namespace_chars = ['.', '_'].freeze
+          namespace_chars = [".", "_"].freeze
           names.each do |n|
             # Skip topic names that are not namespaced
             next unless n.chars.find { |c| namespace_chars.include?(c) }
 
-            if n.chars.include?('.')
+            if n.chars.include?(".")
               # Check underscore styled topic
-              underscored_topic = n.tr('.', '_')
+              underscored_topic = n.tr(".", "_")
               error_occured = names_hash[underscored_topic] ? true : false
             else
               # Check dot styled topic
-              dot_topic = n.tr('_', '.')
+              dot_topic = n.tr("_", ".")
               error_occured = names_hash[dot_topic] ? true : false
             end
           end

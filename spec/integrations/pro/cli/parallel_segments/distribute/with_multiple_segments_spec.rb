@@ -55,15 +55,15 @@ Karafka::Admin.seek_consumer_group(
   }
 )
 
-ARGV[0] = 'parallel_segments'
-ARGV[1] = 'distribute'
+ARGV[0] = "parallel_segments"
+ARGV[1] = "distribute"
 
 results = capture_stdout do
   Karafka::Cli.start
 end
 
-assert results.include?('Distribution completed')
-assert results.include?('successfully')
+assert results.include?("Distribution completed")
+assert results.include?("successfully")
 
 # Verify all segments received the offsets
 segments.each do |segment|

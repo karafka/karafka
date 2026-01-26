@@ -55,19 +55,19 @@ class ComplexPredicateFilter < Karafka::Pro::Processing::Filters::Base
       should_filter = false
 
       # Filter 1: Skip messages with invalid user_id format
-      should_filter = true if data['user_id'] && !data['user_id'].match?(/^user_\d+$/)
+      should_filter = true if data["user_id"] && !data["user_id"].match?(/^user_\d+$/)
 
       # Filter 2: Skip messages older than 1 hour (simulated)
-      should_filter = true if data['timestamp'] && data['timestamp'] < (Time.now.to_i - 3600)
+      should_filter = true if data["timestamp"] && data["timestamp"] < (Time.now.to_i - 3600)
 
       # Filter 3: Skip messages with sensitive data
-      should_filter = true if data['type'] == 'sensitive'
+      should_filter = true if data["type"] == "sensitive"
 
       # Filter 4: Skip messages from blocked domains
-      should_filter = true if data['email'] && data['email'].end_with?('@blocked.com')
+      should_filter = true if data["email"] && data["email"].end_with?("@blocked.com")
 
       # Filter 5: Complex business logic - skip incomplete orders
-      should_filter = true if data['type'] == 'order' && (!data['items'] || data['items'].empty?)
+      should_filter = true if data["type"] == "order" && (!data["items"] || data["items"].empty?)
 
       should_filter
     rescue JSON::ParserError
@@ -102,27 +102,27 @@ end
 # Produce messages with various filtering scenarios
 test_messages = [
   # Valid messages that should pass
-  { user_id: 'user_123', timestamp: Time.now.to_i, type: 'login', email: 'user@example.com' },
-  { user_id: 'user_456', timestamp: Time.now.to_i, type: 'order', items: %w[item1 item2] },
-  { user_id: 'user_789', timestamp: Time.now.to_i, type: 'notification' },
+  { user_id: "user_123", timestamp: Time.now.to_i, type: "login", email: "user@example.com" },
+  { user_id: "user_456", timestamp: Time.now.to_i, type: "order", items: %w[item1 item2] },
+  { user_id: "user_789", timestamp: Time.now.to_i, type: "notification" },
 
   # Messages that should be filtered
-  { user_id: 'invalid_id', timestamp: Time.now.to_i, type: 'login' }, # Invalid user_id format
-  { user_id: 'user_111', timestamp: Time.now.to_i - 7200, type: 'old_event' }, # Too old
-  { user_id: 'user_222', timestamp: Time.now.to_i, type: 'sensitive' }, # Sensitive type
-  { user_id: 'user_333', timestamp: Time.now.to_i, email: 'bad@blocked.com' }, # Blocked domain
-  { user_id: 'user_444', timestamp: Time.now.to_i, type: 'order', items: [] }, # Empty order
+  { user_id: "invalid_id", timestamp: Time.now.to_i, type: "login" }, # Invalid user_id format
+  { user_id: "user_111", timestamp: Time.now.to_i - 7200, type: "old_event" }, # Too old
+  { user_id: "user_222", timestamp: Time.now.to_i, type: "sensitive" }, # Sensitive type
+  { user_id: "user_333", timestamp: Time.now.to_i, email: "bad@blocked.com" }, # Blocked domain
+  { user_id: "user_444", timestamp: Time.now.to_i, type: "order", items: [] }, # Empty order
 
   # More valid messages
-  { user_id: 'user_555', timestamp: Time.now.to_i, type: 'purchase', amount: 99.99 },
-  { user_id: 'user_666', timestamp: Time.now.to_i, type: 'order', items: ['special_item'] }
+  { user_id: "user_555", timestamp: Time.now.to_i, type: "purchase", amount: 99.99 },
+  { user_id: "user_666", timestamp: Time.now.to_i, type: "order", items: ["special_item"] }
 ]
 
 # Also produce some invalid JSON to test JSON parsing filter
 invalid_json_messages = [
-  'invalid json',
-  '{ incomplete json',
-  'not json at all'
+  "invalid json",
+  "{ incomplete json",
+  "not json at all"
 ]
 
 # Produce all test messages
@@ -143,9 +143,9 @@ valid_message_count = test_messages.count do |msg|
   # Simulate the same filtering logic to count expected valid messages
   next false if msg[:user_id] && !msg[:user_id].match?(/^user_\d+$/)
   next false if msg[:timestamp] && msg[:timestamp] < (Time.now.to_i - 3600)
-  next false if msg[:type] == 'sensitive'
-  next false if msg[:email] && msg[:email].end_with?('@blocked.com')
-  next false if msg[:type] == 'order' && (!msg[:items] || msg[:items].empty?)
+  next false if msg[:type] == "sensitive"
+  next false if msg[:email] && msg[:email].end_with?("@blocked.com")
+  next false if msg[:type] == "order" && (!msg[:items] || msg[:items].empty?)
 
   true
 end
@@ -153,20 +153,20 @@ end
 assert_equal valid_message_count, DT[:processed_data].size
 
 # Verify specific filtering behaviors
-processed_user_ids = DT[:processed_data].filter_map { |data| data['user_id'] }
+processed_user_ids = DT[:processed_data].filter_map { |data| data["user_id"] }
 invalid_user_ids = processed_user_ids.grep_v(/^user_\d+$/)
 assert_equal [], invalid_user_ids
 
 # Verify no sensitive data was processed
-sensitive_messages = DT[:processed_data].select { |data| data['type'] == 'sensitive' }
+sensitive_messages = DT[:processed_data].select { |data| data["type"] == "sensitive" }
 assert_equal [], sensitive_messages
 
 # Verify no blocked emails were processed
-blocked_emails = DT[:processed_data].select { |data| data['email']&.end_with?('@blocked.com') }
+blocked_emails = DT[:processed_data].select { |data| data["email"]&.end_with?("@blocked.com") }
 assert_equal [], blocked_emails
 
 # Verify no empty orders were processed
 empty_orders = DT[:processed_data].select do |data|
-  data['type'] == 'order' && (!data['items'] || data['items'].empty?)
+  data["type"] == "order" && (!data["items"] || data["items"].empty?)
 end
 assert_equal [], empty_orders

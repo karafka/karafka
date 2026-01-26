@@ -42,9 +42,9 @@ end
 iterator = Karafka::Pro::Iterator.new(
   DT.topic,
   settings: {
-    'auto.offset.reset': 'beginning',
+    "auto.offset.reset": "beginning",
     # In case something would be off with pausing, this will cause hang
-    'enable.partition.eof': false
+    "enable.partition.eof": false
   }
 )
 

@@ -61,7 +61,7 @@ draw_routes do
   end
 end
 
-3.times { |i| produce(DT.topics[i], '0') }
+3.times { |i| produce(DT.topics[i], "0") }
 
 start_karafka_and_wait_until do
   DT.data.size >= 3 && DT.data.all? { |_, v| v.size >= 5 }

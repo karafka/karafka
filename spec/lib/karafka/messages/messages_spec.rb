@@ -13,12 +13,12 @@ RSpec.describe_current do
   let(:messages_array) { [message1, message2] }
   let(:received_at) { Time.now }
 
-  describe '#to_a' do
-    it 'expect not to deserialize data and return raw messages' do
+  describe "#to_a" do
+    it "expect not to deserialize data and return raw messages" do
       expect(messages.to_a.first.deserialized?).to be(false)
     end
 
-    it 'expect to return copy of the underlying array' do
+    it "expect to return copy of the underlying array" do
       ar1 = messages.to_a
       ar2 = messages.to_a
 
@@ -26,23 +26,23 @@ RSpec.describe_current do
     end
   end
 
-  describe '#raw' do
-    it 'expect to return the underlying messages array directly' do
+  describe "#raw" do
+    it "expect to return the underlying messages array directly" do
       expect(messages.raw).to eq(messages_array)
     end
 
-    it 'expect to return the same array instance each time' do
+    it "expect to return the same array instance each time" do
       ar1 = messages.raw
       ar2 = messages.raw
 
       expect(ar1).to be(ar2)
     end
 
-    it 'expect not to deserialize messages' do
+    it "expect not to deserialize messages" do
       expect(messages.raw.first.deserialized?).to be(false)
     end
 
-    it 'expect to bypass any patched each method' do
+    it "expect to bypass any patched each method" do
       # Track #each calls via a prepended module on a subclass to avoid polluting the main class
       each_calls = []
 
@@ -73,15 +73,15 @@ RSpec.describe_current do
     end
   end
 
-  describe '#deserialize!' do
-    it 'expect to deserialize all the messages and return deserialized' do
+  describe "#deserialize!" do
+    it "expect to deserialize all the messages and return deserialized" do
       messages.deserialize!
       messages.to_a.each { |params| expect(params.deserialized?).to be(true) }
     end
   end
 
-  describe '#each' do
-    it 'expect not to deserialize each at a time' do
+  describe "#each" do
+    it "expect not to deserialize each at a time" do
       messages.each_with_index do |params, index|
         expect(params.deserialized?).to be(false)
         next if index > 0
@@ -91,53 +91,53 @@ RSpec.describe_current do
     end
   end
 
-  describe '#payloads' do
-    it 'expect to return deserialized payloads from messages within a batch' do
+  describe "#payloads" do
+    it "expect to return deserialized payloads from messages within a batch" do
       expect(messages.payloads).to eq [deserialized_payload, deserialized_payload]
     end
 
-    context 'when payloads were used for the first time' do
+    context "when payloads were used for the first time" do
       before { messages.payloads }
 
-      it 'expect to mark as serialized all the messages inside the batch' do
+      it "expect to mark as serialized all the messages inside the batch" do
         expect(messages.to_a.all?(&:deserialized?)).to be(true)
       end
     end
   end
 
-  describe '#raw_payloads' do
-    it 'expect to return raw payloads from messages within a batch' do
+  describe "#raw_payloads" do
+    it "expect to return raw payloads from messages within a batch" do
       expect(messages.raw_payloads).to eq [serialized_payload, serialized_payload]
     end
 
-    context 'when payloads were used for the first time' do
+    context "when payloads were used for the first time" do
       before { messages.payloads }
 
-      it 'expect to still keep the raw references' do
+      it "expect to still keep the raw references" do
         expect(messages.raw_payloads).to eq [serialized_payload, serialized_payload]
       end
     end
   end
 
-  describe '#first' do
-    it 'expect to return first element without deserializing' do
+  describe "#first" do
+    it "expect to return first element without deserializing" do
       expect(messages.first).to eq messages.to_a[0]
       expect(messages.first.deserialized?).to be(false)
     end
   end
 
-  describe '#last' do
-    it 'expect to return last element without deserializing' do
+  describe "#last" do
+    it "expect to return last element without deserializing" do
       expect(messages.last).to eq messages.to_a[-1]
       expect(messages.last.deserialized?).to be(false)
     end
   end
 
-  describe '#size' do
+  describe "#size" do
     it { expect(messages.size).to eq messages.to_a.size }
   end
 
-  describe '#empty?' do
+  describe "#empty?" do
     it { expect(messages.empty?).to be(false) }
   end
 end

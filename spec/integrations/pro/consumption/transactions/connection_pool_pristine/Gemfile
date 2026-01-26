@@ -20,7 +20,7 @@
 # License: https://karafka.io/docs/Pro-License-Comm/
 # Contact: contact@karafka.io
 
-source 'https://rubygems.org'
+source "https://rubygems.org"
 
-gem 'connection_pool', '2.5.0', require: true
-gem 'karafka', path: ENV.fetch('KARAFKA_GEM_DIR'), require: true
+gem "connection_pool", "2.5.0", require: true
+gem "karafka", path: ENV.fetch("KARAFKA_GEM_DIR"), require: true

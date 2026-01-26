@@ -15,9 +15,9 @@ result = Karafka.producer.produce_sync(
   topic: DT.topics[0],
   payload: nil,
   # This alone would target partition 6
-  key: 'test',
+  key: "test",
   # This will target partition 4
-  partition_key: '12345'
+  partition_key: "12345"
 )
 
 assert_equal 4, result.partition, result.partition

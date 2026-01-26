@@ -4,7 +4,7 @@
 
 setup_karafka do |config|
   config.concurrency = 10
-  config.initial_offset = 'latest'
+  config.initial_offset = "latest"
 end
 
 class Consumer < Karafka::BaseConsumer
@@ -33,7 +33,7 @@ end
 
 polls = 0
 
-Karafka::App.monitor.subscribe('connection.listener.fetch_loop') do
+Karafka::App.monitor.subscribe("connection.listener.fetch_loop") do
   polls += 1
 end
 

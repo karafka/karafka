@@ -41,7 +41,7 @@ RSpec.describe VisitsConsumer do
 
   before { visits.each { |visit| karafka.produce(visit.to_json) } }
 
-  it 'expects to save the visits' do
+  it "expects to save the visits" do
     expect { consumer.consume }.to change(Visit, :count).by(2)
   end
 end

@@ -25,7 +25,7 @@
 setup_karafka
 
 draw_routes(create_topics: false) do
-  pattern('named-pattern', /non-existing-ever-na/) do
+  pattern("named-pattern", /non-existing-ever-na/) do
     consumer Class.new
   end
 end
@@ -35,7 +35,7 @@ Karafka::App
   .internal
   .routing
   .activity_manager
-  .exclude(:topics, 'named-pattern')
+  .exclude(:topics, "named-pattern")
 
 guarded = []
 

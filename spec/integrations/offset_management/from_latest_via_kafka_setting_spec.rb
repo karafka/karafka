@@ -3,7 +3,7 @@
 # Karafka should be able to start consuming from the latest offset
 
 setup_karafka do |config|
-  config.initial_offset = 'latest'
+  config.initial_offset = "latest"
 end
 
 before = DT.uuids(10)

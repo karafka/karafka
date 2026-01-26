@@ -25,10 +25,10 @@
 
 setup_karafka do |config|
   config.max_messages = 1
-  config.kafka[:'transactional.id'] = SecureRandom.uuid
+  config.kafka[:"transactional.id"] = SecureRandom.uuid
 end
 
-Karafka.monitor.subscribe('statistics.emitted') do |event|
+Karafka.monitor.subscribe("statistics.emitted") do |event|
   DT[:statistics] << event[:statistics]
 end
 
@@ -49,7 +49,7 @@ start_karafka_and_wait_until do
   DT[:statistics].size >= 100 && DT[:counts].size >= 100
 end
 
-p_stats = DT[:statistics].last['topics'][DT.topic]['partitions']['0']
+p_stats = DT[:statistics].last["topics"][DT.topic]["partitions"]["0"]
 
-assert_equal(-1, p_stats['consumer_lag'])
-assert_equal(-1, p_stats['consumer_lag_stored'])
+assert_equal(-1, p_stats["consumer_lag"])
+assert_equal(-1, p_stats["consumer_lag_stored"])

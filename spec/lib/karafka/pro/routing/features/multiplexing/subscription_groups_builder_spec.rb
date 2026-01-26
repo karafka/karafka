@@ -31,19 +31,19 @@ RSpec.describe_current do
   let(:topic2) { build(:routing_topic) }
   let(:topics_array) { [topic1, topic2] }
 
-  describe '#expand' do
-    context 'when multiplexing is off' do
+  describe "#expand" do
+    context "when multiplexing is off" do
       before { topic1.subscription_group_details[:multiplexing_max] = 1 }
 
       it { expect(expansion.size).to eq(1) }
     end
 
-    context 'when multiplexing is on with 3 copies' do
+    context "when multiplexing is on with 3 copies" do
       before { topic1.subscription_group_details[:multiplexing_max] = 3 }
 
       it { expect(expansion.size).to eq(3) }
 
-      it 'expect to share the same name' do
+      it "expect to share the same name" do
         names = []
 
         expansion.each do |topics|

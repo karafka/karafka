@@ -88,4 +88,4 @@ start_karafka_and_wait_until do
   DT[:metadata].size >= 2
 end
 
-assert_equal ['', '0'], DT[:metadata]
+assert_equal ["", "0"], DT[:metadata]

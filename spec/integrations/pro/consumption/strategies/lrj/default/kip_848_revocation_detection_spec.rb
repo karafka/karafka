@@ -26,8 +26,8 @@
 
 setup_karafka(consumer_group_protocol: true) do |config|
   # Remove session timeout and configure max poll interval
-  config.kafka.delete(:'session.timeout.ms')
-  config.kafka[:'max.poll.interval.ms'] = 10_000
+  config.kafka.delete(:"session.timeout.ms")
+  config.kafka[:"max.poll.interval.ms"] = 10_000
 end
 
 DT[:started] = Set.new
@@ -69,9 +69,9 @@ thread = Thread.new do
 
   consumer = Rdkafka::Config.new(
     Karafka::Setup::AttributesMap.consumer(
-      'bootstrap.servers': Karafka::App.config.kafka[:'bootstrap.servers'],
-      'group.id': Karafka::App.consumer_groups.first.id,
-      'group.protocol': 'consumer'
+      "bootstrap.servers": Karafka::App.config.kafka[:"bootstrap.servers"],
+      "group.id": Karafka::App.consumer_groups.first.id,
+      "group.protocol": "consumer"
     )
   ).consumer
   consumer.subscribe(DT.topic)

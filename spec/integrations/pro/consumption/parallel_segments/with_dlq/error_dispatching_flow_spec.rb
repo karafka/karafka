@@ -69,7 +69,7 @@ DT[:dlq_topics] = Set.new
 class DlqConsumer < Karafka::BaseConsumer
   def consume
     # Extract segment ID from topic name
-    segment_id = topic.name.split('-').last.to_i
+    segment_id = topic.name.split("-").last.to_i
 
     # Track messages in the DLQ
     messages.each do |message|
@@ -182,7 +182,7 @@ expected_dlq_topics = Array.new(3) { |i| "#{DT.topics[1]}-#{i}" }.sort
 assert_equal(
   expected_dlq_topics.sort,
   DT[:dlq_topics].to_a.sort,
-  'Not all expected DLQ topics received messages'
+  "Not all expected DLQ topics received messages"
 )
 
 # 4. Verify segments only processed keys assigned to them

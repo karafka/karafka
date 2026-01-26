@@ -66,8 +66,8 @@ consumer = setup_rdkafka_consumer
 # the partition we have regained (then shutdown)
 # 1 and 4 are picked because they will dispatch messages to 0 and 1 partition
 10.times do
-  Job.perform_later('1')
-  Job.perform_later('4')
+  Job.perform_later("1")
+  Job.perform_later("4")
 end
 
 revoked = false

@@ -3,8 +3,8 @@
 # Here we subscribe to our listener and make sure nothing breaks during the notifications
 # We use a dummy client that will intercept calls that should go to DataDog and check basic
 # metrics presence
-require 'karafka/instrumentation/vendors/datadog/metrics_listener'
-require Karafka.gem_root.join('spec/support/vendors/datadog/statsd_dummy_client')
+require "karafka/instrumentation/vendors/datadog/metrics_listener"
+require Karafka.gem_root.join("spec/support/vendors/datadog/statsd_dummy_client")
 
 # We allow errors to raise one to make sure things are published as expected
 setup_karafka(allow_errors: true)
@@ -57,12 +57,12 @@ end
   assert_equal true, statsd_dummy.buffer[:count].key?(count_key), "#{count_key} missing"
 end
 
-error_tracks = statsd_dummy.buffer[:count]['karafka.error_occurred']
+error_tracks = statsd_dummy.buffer[:count]["karafka.error_occurred"]
 
 # Expect to have one error report from te consumption
 assert_equal 1, error_tracks.size
 assert_equal 1, error_tracks[0][0]
-assert_equal true, error_tracks[0][1][:tags].include?('type:consumer.consume.error')
+assert_equal true, error_tracks[0][1][:tags].include?("type:consumer.consume.error")
 
 %w[
   karafka.network.latency.avg

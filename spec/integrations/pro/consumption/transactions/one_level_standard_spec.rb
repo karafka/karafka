@@ -23,7 +23,7 @@
 # Karafka should be able to use transactions with offset storage with metadata
 
 setup_karafka do |config|
-  config.kafka[:'transactional.id'] = SecureRandom.uuid
+  config.kafka[:"transactional.id"] = SecureRandom.uuid
 end
 
 class Consumer < Karafka::BaseConsumer
@@ -48,4 +48,4 @@ start_karafka_and_wait_until do
   DT.key?(:done)
 end
 
-assert_equal '0', DT[:metadata].first
+assert_equal "0", DT[:metadata].first

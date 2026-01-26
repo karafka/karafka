@@ -28,7 +28,7 @@ guarded = []
 
 begin
   draw_routes(create_topics: false) do
-    pattern('not-a-regexp') do
+    pattern("not-a-regexp") do
       consumer Class.new
     end
   end

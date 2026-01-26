@@ -17,10 +17,10 @@ module Karafka
                 Admin.delete_topic(name)
               end
 
-              puts "#{green('Deleted')} topic #{name}."
+              puts "#{green("Deleted")} topic #{name}."
               any_deleted = true
             else
-              puts "#{yellow('Skipping')} because topic #{name} does not exist."
+              puts "#{yellow("Skipping")} because topic #{name} does not exist."
             end
           end
 

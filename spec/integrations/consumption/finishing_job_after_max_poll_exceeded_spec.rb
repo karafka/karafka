@@ -4,8 +4,8 @@
 # stop in any way the job that was being executed
 
 setup_karafka(allow_errors: %w[connection.client.poll.error]) do |config|
-  config.kafka[:'max.poll.interval.ms'] = 10_000
-  config.kafka[:'session.timeout.ms'] = 10_000
+  config.kafka[:"max.poll.interval.ms"] = 10_000
+  config.kafka[:"session.timeout.ms"] = 10_000
   config.max_messages = 1
 end
 
@@ -25,7 +25,7 @@ end
 
 draw_routes(Consumer)
 
-produce(DT.topic, '')
+produce(DT.topic, "")
 
 start_karafka_and_wait_until do
   DT.key?(:post)

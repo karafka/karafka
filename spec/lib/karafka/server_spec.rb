@@ -25,7 +25,7 @@ RSpec.describe_current do
     described_class.workers = []
   end
 
-  describe '#run' do
+  describe "#run" do
     before { allow(process).to receive(:supervise) }
 
     after do
@@ -34,61 +34,61 @@ RSpec.describe_current do
       sleep(0.5)
     end
 
-    it 'expect to start supervision' do
+    it "expect to start supervision" do
       server_class.run
       expect(process).to have_received(:supervise)
     end
 
-    context 'when we want to run in supervision' do
-      it 'runs in supervision, start consuming' do
+    context "when we want to run in supervision" do
+      it "runs in supervision, start consuming" do
         expect(process).to receive(:on_sigint)
         expect(process).to receive(:on_sigquit)
         expect(process).to receive(:on_sigterm)
       end
     end
 
-    context 'when sigint is received' do
+    context "when sigint is received" do
       before do
         allow(process).to receive(:supervise)
         allow(process).to receive(:on_sigquit)
         allow(process).to receive(:on_sigterm)
       end
 
-      it 'defines a proper action for sigint' do
+      it "defines a proper action for sigint" do
         expect(described_class).to receive(:stop)
         expect(process).to receive(:on_sigint).and_yield
       end
     end
 
-    context 'when sigquit is received' do
+    context "when sigquit is received" do
       before do
         allow(process).to receive(:supervise)
         allow(process).to receive(:on_sigint)
         allow(process).to receive(:on_sigterm)
       end
 
-      it 'defines a proper action for sigquit' do
+      it "defines a proper action for sigquit" do
         expect(described_class).to receive(:stop)
         expect(process).to receive(:on_sigquit).and_yield
       end
     end
 
-    context 'when sigterm is received' do
+    context "when sigterm is received" do
       before do
         allow(process).to receive(:supervise)
         allow(process).to receive(:on_sigint)
         allow(process).to receive(:on_sigquit)
       end
 
-      it 'defines a proper action for sigterm' do
+      it "defines a proper action for sigterm" do
         expect(described_class).to receive(:stop)
         expect(process).to receive(:on_sigterm).and_yield
       end
     end
   end
 
-  describe '#run without after' do
-    context 'when server cli options are not valid' do
+  describe "#run without after" do
+    context "when server cli options are not valid" do
       let(:expected_error) { Karafka::Errors::InvalidConfigurationError }
 
       before do
@@ -97,28 +97,28 @@ RSpec.describe_current do
           .internal
           .routing
           .activity_manager
-          .include(:topics, 'na')
+          .include(:topics, "na")
       end
 
-      it 'expect to raise proper exception' do
+      it "expect to raise proper exception" do
         expect { server_class.run }.to raise_error(expected_error)
       end
     end
   end
 
-  describe '#start' do
+  describe "#start" do
     before do
       allow(runner).to receive(:call)
 
       server_class.start
     end
 
-    it 'expect to run' do
+    it "expect to run" do
       expect(runner).to have_received(:call)
     end
   end
 
-  describe '#stop' do
+  describe "#stop" do
     before do
       Karafka::App.config.internal.status.run!
       Karafka::App.config.shutdown_timeout = timeout_ms
@@ -133,7 +133,7 @@ RSpec.describe_current do
       Karafka::App.initialize!
     end
 
-    context 'when shutdown time is more then 1' do
+    context "when shutdown time is more then 1" do
       let(:timeout_s) { 15 }
       let(:timeout_ms) { timeout_s * 1_000 }
 
@@ -147,17 +147,17 @@ RSpec.describe_current do
         allow(Kernel).to receive(:exit!)
       end
 
-      context 'when there are no active threads (all shutdown ok)' do
+      context "when there are no active threads (all shutdown ok)" do
         before { server_class.stop }
 
-        it 'expect stop without exit or sleep' do
+        it "expect stop without exit or sleep" do
           expect(Karafka::App).to have_received(:stop!)
           expect(described_class).not_to have_received(:sleep)
           expect(Kernel).not_to have_received(:exit!)
         end
       end
 
-      context 'when there are active consuming threads (consuming does not want to stop)' do
+      context "when there are active consuming threads (consuming does not want to stop)" do
         let(:active_thread) do
           instance_double(
             Karafka::Connection::Listener,
@@ -177,14 +177,14 @@ RSpec.describe_current do
           server_class.stop
         end
 
-        it 'expect stop and exit with sleep' do
+        it "expect stop and exit with sleep" do
           expect(Karafka::App).to have_received(:stop!)
           expect(described_class).to have_received(:sleep).with(0.1).exactly(timeout_s * 10).times
           expect(Kernel).to have_received(:exit!).with(2)
         end
       end
 
-      context 'when there are active consuming threads but not supervised' do
+      context "when there are active consuming threads but not supervised" do
         let(:active_thread) do
           instance_double(
             Karafka::Connection::Listener,
@@ -206,14 +206,14 @@ RSpec.describe_current do
           server_class.stop
         end
 
-        it 'expect stop and exit with sleep' do
+        it "expect stop and exit with sleep" do
           expect(Karafka::App).to have_received(:stop!)
           expect(described_class).to have_received(:sleep).with(0.1).exactly(timeout_s * 10).times
           expect(Kernel).not_to have_received(:exit!)
         end
       end
 
-      context 'when there are active processing workers (processing does not want to stop)' do
+      context "when there are active processing workers (processing does not want to stop)" do
         let(:active_thread) do
           instance_double(
             Karafka::Connection::Listener,
@@ -231,7 +231,7 @@ RSpec.describe_current do
           described_class.workers.clear
         end
 
-        it 'expect stop and exit with sleep' do
+        it "expect stop and exit with sleep" do
           expect(Karafka::App).to have_received(:stop!)
           expect(described_class).to have_received(:sleep).with(0.1).exactly(timeout_s * 10).times
           expect(Kernel).to have_received(:exit!).with(2)
@@ -240,7 +240,7 @@ RSpec.describe_current do
     end
   end
 
-  describe '#quiet' do
+  describe "#quiet" do
     before do
       Karafka::App.public_send(new_status)
       allow(Karafka::App).to receive(:quiet!)
@@ -248,7 +248,7 @@ RSpec.describe_current do
 
     after { Karafka::App.initialized! }
 
-    context 'when stopping' do
+    context "when stopping" do
       let(:new_status) { :stop! }
 
       before { allow(Karafka::App).to receive(:stopped?).and_return(false) }
@@ -260,7 +260,7 @@ RSpec.describe_current do
       end
     end
 
-    context 'when running' do
+    context "when running" do
       let(:new_status) { :run! }
 
       before do
@@ -278,7 +278,7 @@ RSpec.describe_current do
       end
     end
 
-    context 'when stopped' do
+    context "when stopped" do
       let(:new_status) { :stopped! }
 
       it do

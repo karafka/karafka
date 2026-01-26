@@ -29,20 +29,20 @@ module Karafka
           return unless @client_name == client_name
 
           monitor.instrument(
-            'error.occurred',
+            "error.occurred",
             caller: self,
             subscription_group_id: @subscription_group_id,
             consumer_group_id: @consumer_group_id,
-            type: 'librdkafka.error',
+            type: "librdkafka.error",
             error: error
           )
-        rescue StandardError => e
+        rescue => e
           monitor.instrument(
-            'error.occurred',
+            "error.occurred",
             caller: self,
             subscription_group_id: @subscription_group_id,
             consumer_group_id: @consumer_group_id,
-            type: 'callbacks.error.error',
+            type: "callbacks.error.error",
             error: e
           )
         end

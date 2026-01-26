@@ -47,7 +47,7 @@ class Consumer < Karafka::BaseConsumer
 end
 
 class EventFilter < Karafka::Pro::Processing::Filters::Base
-  TARGET_EVENT = 'order_created'
+  TARGET_EVENT = "order_created"
 
   def apply!(messages)
     initialize_filter_state
@@ -69,7 +69,7 @@ class EventFilter < Karafka::Pro::Processing::Filters::Base
   end
 
   def should_filter_message?(message)
-    event_name = message.payload.dig('event', 'name')
+    event_name = message.payload.dig("event", "name")
     return false if event_name == TARGET_EVENT
 
     @applied = true
@@ -122,9 +122,9 @@ end
 elements = Array.new(100) do |i|
   batch_num = i / 10
   if batch_num.even?
-    { event: { name: 'user_updated', id: i } }.to_json
+    { event: { name: "user_updated", id: i } }.to_json
   else
-    { event: { name: 'order_created', id: i } }.to_json
+    { event: { name: "order_created", id: i } }.to_json
   end
 end
 
@@ -146,8 +146,8 @@ expected_processed = [10...20, 30...40, 50...60, 70...80, 90...100].flat_map(&:t
 assert_equal expected_processed, DT[:processed].sort
 
 # Verify we had alternating batch types
-assert DT[:all_filtered_batches].size >= 5, 'Should have multiple all-filtered batches'
-assert DT[:processable_batches].size >= 5, 'Should have multiple processable batches'
+assert DT[:all_filtered_batches].size >= 5, "Should have multiple all-filtered batches"
+assert DT[:processable_batches].size >= 5, "Should have multiple processable batches"
 
 # Verify the all-filtered batches start at the right offsets (0, 20, 40, 60, 80)
 expected_all_filtered = [0, 20, 40, 60, 80]
@@ -162,4 +162,4 @@ expected_marks = [19, 39, 59, 79, 99]
 assert_equal expected_marks, DT[:marked].sort
 
 # Verify offset advanced correctly through all batches
-assert_equal 100, fetch_next_offset(DT.topic), 'Offset should advance through all batches'
+assert_equal 100, fetch_next_offset(DT.topic), "Offset should advance through all batches"

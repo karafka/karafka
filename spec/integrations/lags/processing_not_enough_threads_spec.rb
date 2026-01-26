@@ -7,11 +7,11 @@
 setup_karafka do |config|
   config.max_messages = 10
   config.concurrency = 1
-  config.kafka[:'fetch.message.max.bytes'] = 1
+  config.kafka[:"fetch.message.max.bytes"] = 1
   config.max_wait_time = 5_000
 end
 
-Karafka.monitor.subscribe('connection.listener.fetch_loop.received') do |event|
+Karafka.monitor.subscribe("connection.listener.fetch_loop.received") do |event|
   total = 0
 
   event[:messages_buffer].each do |_topic, _partition, _messages|

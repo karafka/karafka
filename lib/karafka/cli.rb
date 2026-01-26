@@ -12,7 +12,7 @@ module Karafka
         # Command we want to run, like install, server, etc
         command_name = ARGV[0]
         # Action for action-based commands like topics migrate
-        action = ARGV[1].to_s.start_with?('-') ? false : ARGV[1]
+        action = ARGV[1].to_s.start_with?("-") ? false : ARGV[1]
 
         command = commands.find { |cmd| cmd.names.include?(command_name) }
 
@@ -51,7 +51,7 @@ end
 #
 # We skip this because this should exist and be only valid in the console
 # :nocov:
-if ENV['KARAFKA_CONSOLE']
+if ENV["KARAFKA_CONSOLE"]
   # Reloads Karafka irb console session
   def reload!
     Karafka.logger.info "Reloading...\n"

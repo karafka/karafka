@@ -10,13 +10,13 @@ failed = false
 begin
   draw_routes(create_topics: false) do
     consumer_group :test do
-      subscription_group 'namespace_collision' do
+      subscription_group "namespace_collision" do
         topic :test do
           consumer Class.new
         end
       end
 
-      subscription_group 'namespace_collision2' do
+      subscription_group "namespace_collision2" do
         topic :test do
           consumer Class.new
         end

@@ -26,7 +26,7 @@ RSpec.describe_current do
   let(:max) { 2 }
   let(:min) { 1 }
 
-  describe '#multiplexing and multiplexing?' do
+  describe "#multiplexing and multiplexing?" do
     before do
       sg.topics.first.subscription_group_details.merge!(
         multiplexing_max: max,
@@ -38,7 +38,7 @@ RSpec.describe_current do
     it { expect(sg.multiplexing.active?).to be(true) }
     it { expect(sg.multiplexing.dynamic?).to be(true) }
 
-    context 'when max is 1' do
+    context "when max is 1" do
       let(:max) { 1 }
 
       it { expect(sg.multiplexing?).to be(false) }
@@ -46,7 +46,7 @@ RSpec.describe_current do
       it { expect(sg.multiplexing.dynamic?).to be(false) }
     end
 
-    context 'when min and max are the same' do
+    context "when min and max are the same" do
       let(:min) { 3 }
       let(:max) { 3 }
 

@@ -58,7 +58,7 @@ class Merger
       # Since we always need users, there's no issue in just storing it
       when :users
         messages.payloads.each do |payload|
-          @users[payload['id']] = payload
+          @users[payload["id"]] = payload
         end
       when :actions
         messages.payloads.each do |payload|
@@ -98,12 +98,12 @@ class Merger
 
   def dispatch_if_merge_possible
     mergeable = @incoming_actions.all? do |action|
-      @users.key?(action['user_id'])
+      @users.key?(action["user_id"])
     end
 
     if mergeable
       @incoming_actions.each do |action|
-        user = @users.fetch(action['user_id'])
+        user = @users.fetch(action["user_id"])
 
         Karafka.producer.produce_async(
           topic: DT.topics[2],
@@ -203,5 +203,5 @@ start_karafka_and_wait_until do
 end
 
 DT[:merged].each do |event|
-  assert event['time'] > event['user']['time']
+  assert event["time"] > event["user"]["time"]
 end

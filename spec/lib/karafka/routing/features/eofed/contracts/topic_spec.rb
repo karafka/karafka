@@ -9,29 +9,29 @@ RSpec.describe_current do
         active: true
       },
       kafka: {
-        'enable.partition.eof': true
+        "enable.partition.eof": true
       }
     }
   end
 
-  context 'when config is valid' do
+  context "when config is valid" do
     it { expect(check).to be_success }
   end
 
-  context 'when active flag is not boolean' do
+  context "when active flag is not boolean" do
     before { config[:eofed][:active] = rand }
 
     it { expect(check).not_to be_success }
   end
 
-  context 'when eofed is enabled without enable.partition.eof' do
+  context "when eofed is enabled without enable.partition.eof" do
     let(:config) do
       {
         eofed: {
           active: true
         },
         kafka: {
-          'enable.partition.eof': false
+          "enable.partition.eof": false
         }
       }
     end

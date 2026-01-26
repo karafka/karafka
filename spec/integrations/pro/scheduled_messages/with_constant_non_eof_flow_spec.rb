@@ -65,5 +65,5 @@ start_karafka_and_wait_until do
 
   next false unless last
 
-  last.payload[:state] == 'loaded'
+  last.payload[:state] == "loaded"
 end

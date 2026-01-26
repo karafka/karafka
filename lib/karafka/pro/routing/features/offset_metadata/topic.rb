@@ -32,7 +32,7 @@ module Karafka
         #   unless requested, it is always enabled.
         class OffsetMetadata < Base
           # Empty string not to create it on each deserialization
-          EMPTY_STRING = ''
+          EMPTY_STRING = ""
 
           # Default deserializer just ensures we always get a string as without metadata by
           # default it would be nil

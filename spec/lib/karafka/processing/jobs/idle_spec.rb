@@ -16,17 +16,17 @@ RSpec.describe_current do
   it { expect(job.group_id).to eq(executor.group_id) }
   it { expect(job.non_blocking?).to be(false) }
 
-  it 'expect to run idle on the executor' do
+  it "expect to run idle on the executor" do
     expect(executor).to have_received(:idle)
   end
 
-  describe '#before_schedule' do
+  describe "#before_schedule" do
     before do
       allow(executor).to receive(:before_schedule_idle)
       job.before_schedule
     end
 
-    it 'expect to run before_schedule_idle on the executor' do
+    it "expect to run before_schedule_idle on the executor" do
       expect(executor).to have_received(:before_schedule_idle)
     end
   end

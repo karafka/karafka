@@ -26,7 +26,7 @@
 setup_karafka(
   allow_errors: %w[consumer.consume.error consumer.after_consume.error]
 ) do |config|
-  config.kafka[:'transactional.id'] = SecureRandom.uuid
+  config.kafka[:"transactional.id"] = SecureRandom.uuid
 end
 
 module Patch
@@ -60,8 +60,8 @@ draw_routes do
   end
 end
 
-Karafka.monitor.subscribe('error.occurred') do |event|
-  next unless event[:type] == 'consumer.consume.error'
+Karafka.monitor.subscribe("error.occurred") do |event|
+  next unless event[:type] == "consumer.consume.error"
 
   DT[:errors] << 1
 end

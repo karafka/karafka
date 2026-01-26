@@ -23,7 +23,7 @@
 # We should be able to maintain eof status when ticking
 
 setup_karafka do |config|
-  config.kafka[:'enable.partition.eof'] = true
+  config.kafka[:"enable.partition.eof"] = true
   config.max_messages = 10
 end
 

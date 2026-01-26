@@ -58,11 +58,11 @@ start_karafka_and_wait_until do
 end
 
 dlq_traces = Karafka::Admin
-             .read_topic(DT.topics[1], 0, 5)
-             .map { |message| message.headers['source_trace_id'] }
+  .read_topic(DT.topics[1], 0, 5)
+  .map { |message| message.headers["source_trace_id"] }
 
 error_traces = Karafka::Admin
-               .read_topic(Karafka::Web.config.topics.errors.name, 0, 5)
-               .map { |message| message.payload[:details].fetch(:trace_id) }
+  .read_topic(Karafka::Web.config.topics.errors.name, 0, 5)
+  .map { |message| message.payload[:details].fetch(:trace_id) }
 
 assert_equal dlq_traces, error_traces

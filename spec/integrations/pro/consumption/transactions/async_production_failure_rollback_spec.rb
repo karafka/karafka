@@ -29,7 +29,7 @@
 # Note: This spec works correctly regardless of how Kafka batches messages for delivery.
 
 setup_karafka(allow_errors: true) do |config|
-  config.kafka[:'transactional.id'] = SecureRandom.uuid
+  config.kafka[:"transactional.id"] = SecureRandom.uuid
   config.max_messages = 5
 end
 
@@ -57,7 +57,7 @@ class Consumer < Karafka::BaseConsumer
           )
 
           if DT[:attempts] == 1 && index == 1
-            raise StandardError, 'Simulated production failure'
+            raise StandardError, "Simulated production failure"
           end
 
           producer.produce_async(
@@ -70,7 +70,7 @@ class Consumer < Karafka::BaseConsumer
       end
 
       DT[:success] = true
-    rescue StandardError => e
+    rescue => e
       DT[:errors] << e.message
       raise
     end

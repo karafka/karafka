@@ -31,10 +31,10 @@ draw_routes do
   end
 end
 
-Karafka::Pro::RecurringTasks.define('1.0.0') do
+Karafka::Pro::RecurringTasks.define("1.0.0") do
   # This should never run. Alongside of this case, we also check that the command matching
   # works correctly and does not trigger this one
-  schedule(id: 'crash', cron: '* * * * *', previous_time: Time.now - 600_000) do
+  schedule(id: "crash", cron: "* * * * *", previous_time: Time.now - 600_000) do
     if DT.key?(:rerun)
       raise
     else
@@ -45,7 +45,7 @@ end
 
 start_karafka_and_wait_until(reset_status: true) do
   if DT.key?(:run)
-    Karafka::Pro::RecurringTasks.disable('crash')
+    Karafka::Pro::RecurringTasks.disable("crash")
     sleep(1)
     DT[:done] = true
   end

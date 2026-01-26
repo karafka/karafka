@@ -25,10 +25,10 @@
 # assignment lost error
 
 setup_karafka(allow_errors: true) do |config|
-  config.kafka[:'transactional.id'] = SecureRandom.uuid
+  config.kafka[:"transactional.id"] = SecureRandom.uuid
   config.max_messages = 2
-  config.kafka[:'max.poll.interval.ms'] = 10_000
-  config.kafka[:'session.timeout.ms'] = 10_000
+  config.kafka[:"max.poll.interval.ms"] = 10_000
+  config.kafka[:"session.timeout.ms"] = 10_000
 end
 
 class Consumer < Karafka::BaseConsumer
@@ -41,7 +41,7 @@ class Consumer < Karafka::BaseConsumer
       transaction do
         mark_as_consumed(messages.last)
         sleep(0.1) until revoked?
-        produce_async(topic: DT.topics[1], payload: '1')
+        produce_async(topic: DT.topics[1], payload: "1")
       end
     rescue Karafka::Errors::AssignmentLostError
       DT[:error] = true

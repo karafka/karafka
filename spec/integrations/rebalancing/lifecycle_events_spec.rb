@@ -10,7 +10,8 @@ setup_karafka do |config|
 end
 
 class Consumer < Karafka::BaseConsumer
-  def consume; end
+  def consume
+  end
 end
 
 draw_routes do
@@ -69,7 +70,7 @@ REBALANCE_EVENTS.each do |event_name|
   group_b = []
 
   DT[event_name].each do |event|
-    if event[0].include?('unique_name_a')
+    if event[0].include?("unique_name_a")
       group_a << event
     else
       group_b << event

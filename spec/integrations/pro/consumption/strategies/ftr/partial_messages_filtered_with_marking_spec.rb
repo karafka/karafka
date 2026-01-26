@@ -52,7 +52,7 @@ class PartialFilter < Karafka::Pro::Processing::Filters::Base
   def apply!(messages)
     # Filter messages based on payload: filter if payload starts with 'skip_'
     messages.delete_if do |message|
-      should_filter = message.raw_payload.start_with?('skip_')
+      should_filter = message.raw_payload.start_with?("skip_")
       DT[:filtered] << message.offset if should_filter
       should_filter
     end
@@ -111,8 +111,8 @@ expected_processed = (0...50).select(&:odd?)
 assert_equal expected_processed, DT[:processed].sort
 
 # Verify that we marked the last processed message
-assert DT[:marked].any?, 'Should have marked at least one message'
-assert_equal 49, DT[:marked].last, 'Last marked message should be offset 49'
+assert DT[:marked].any?, "Should have marked at least one message"
+assert_equal 49, DT[:marked].last, "Last marked message should be offset 49"
 
 # Verify offset was stored correctly at the last processed message
-assert_equal 50, fetch_next_offset(DT.topic), 'Offset should be stored after the last message'
+assert_equal 50, fetch_next_offset(DT.topic), "Offset should be stored after the last message"

@@ -3,15 +3,15 @@
 # User should be able to use WaterDrop connection pool with transactional direct api
 # Each producer in the pool should have a unique transactional.id
 
-require 'karafka'
-require 'connection_pool'
-require 'securerandom'
+require "karafka"
+require "connection_pool"
+require "securerandom"
 
 # Setup WaterDrop global connection pool with transactional producers
 WaterDrop::ConnectionPool.setup(size: 3, timeout: 5) do |config, index|
   config.kafka = {
-    'bootstrap.servers': '127.0.0.1:9092',
-    'transactional.id': "karafka-test-tx-#{index}"
+    "bootstrap.servers": "127.0.0.1:9092",
+    "transactional.id": "karafka-test-tx-#{index}"
   }
 end
 
@@ -26,7 +26,7 @@ class TransactionalConsumer < Karafka::BaseConsumer
         DT[:pool_usage] << producer.object_id
 
         # Extract transactional ID to verify uniqueness
-        tx_id = producer.config.kafka[:'transactional.id']
+        tx_id = producer.config.kafka[:"transactional.id"]
         DT[:transaction_ids] << tx_id
 
         # Use transaction to produce response message

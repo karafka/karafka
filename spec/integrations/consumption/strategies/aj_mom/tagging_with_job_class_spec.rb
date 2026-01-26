@@ -9,7 +9,7 @@ draw_routes do
   active_job_topic DT.topic
 end
 
-Karafka.monitor.subscribe('consumer.consumed') do |event|
+Karafka.monitor.subscribe("consumer.consumed") do |event|
   DT[:tags] << event[:caller].tags.to_a.first
 end
 

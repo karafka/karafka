@@ -37,7 +37,7 @@ module Karafka
         #   are independent. It is not to replace the Web UI tracking but to just log failed
         #   executions in the same way as successful but just with the failure as an outcome.
         def on_error_occurred(event)
-          return unless event[:type] == 'recurring_tasks.task.execute.error'
+          return unless event[:type] == "recurring_tasks.task.execute.error"
 
           Dispatcher.log(event)
         end

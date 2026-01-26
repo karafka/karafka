@@ -25,7 +25,7 @@
 
 setup_karafka do |config|
   config.max_messages = 1_000
-  config.kafka[:'transactional.id'] = SecureRandom.uuid
+  config.kafka[:"transactional.id"] = SecureRandom.uuid
 end
 
 DT[:all] = {}

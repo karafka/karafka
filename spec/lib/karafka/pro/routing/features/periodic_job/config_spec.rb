@@ -26,12 +26,12 @@ RSpec.describe_current do
   let(:active) { true }
   let(:interval) { 1_000 }
 
-  describe '#active?' do
-    context 'when active' do
+  describe "#active?" do
+    context "when active" do
       it { expect(config.active?).to be(true) }
     end
 
-    context 'when not active' do
+    context "when not active" do
       let(:active) { false }
 
       it { expect(config.active?).to be(false) }

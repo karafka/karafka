@@ -3,8 +3,8 @@
 # Karafka should publish the max.poll.interval.ms violations into the errors pipeline
 
 setup_karafka(allow_errors: true) do |config|
-  config.kafka[:'max.poll.interval.ms'] = 10_000
-  config.kafka[:'session.timeout.ms'] = 10_000
+  config.kafka[:"max.poll.interval.ms"] = 10_000
+  config.kafka[:"session.timeout.ms"] = 10_000
 end
 
 class Consumer < Karafka::BaseConsumer
@@ -19,9 +19,9 @@ end
 
 draw_routes(Consumer)
 
-produce(DT.topic, '1')
+produce(DT.topic, "1")
 
-Karafka::App.monitor.subscribe('error.occurred') do |event|
+Karafka::App.monitor.subscribe("error.occurred") do |event|
   DT[:errors] << event[:error]
 end
 

@@ -49,17 +49,17 @@ Karafka::Admin.seek_consumer_group(segment2, { DT.topic => { 0 => 5, 1 => 2 } })
 # Set offsets for the origin consumer group (needed for distribute part of reset)
 Karafka::Admin.seek_consumer_group(DT.consumer_group, { DT.topic => { 0 => 5, 1 => 2 } })
 
-ARGV[0] = 'parallel_segments'
-ARGV[1] = 'reset'
-ARGV[2] = '--force' # Use force to bypass validation
+ARGV[0] = "parallel_segments"
+ARGV[1] = "reset"
+ARGV[2] = "--force" # Use force to bypass validation
 
 results = capture_stdout do
   Karafka::Cli.start
 end
 
-assert results.include?('Collapse completed')
-assert results.include?('Distribution completed')
-assert results.include?('successfully')
+assert results.include?("Collapse completed")
+assert results.include?("Distribution completed")
+assert results.include?("successfully")
 
 # Verify the origin consumer group received the offsets
 origin_offsets = Karafka::Admin.read_lags_with_offsets({ DT.consumer_group => [DT.topic] })

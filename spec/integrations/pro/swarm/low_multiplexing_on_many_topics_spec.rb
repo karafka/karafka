@@ -24,9 +24,9 @@
 
 setup_karafka do |config|
   config.swarm.nodes = 5
-  config.kafka[:'group.id'] = SecureRandom.uuid
-  config.kafka[:'group.instance.id'] = SecureRandom.uuid
-  config.kafka[:'partition.assignment.strategy'] = 'cooperative-sticky'
+  config.kafka[:"group.id"] = SecureRandom.uuid
+  config.kafka[:"group.instance.id"] = SecureRandom.uuid
+  config.kafka[:"partition.assignment.strategy"] = "cooperative-sticky"
 end
 
 READER, WRITER = IO.pipe

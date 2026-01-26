@@ -35,12 +35,12 @@ module Karafka
           # Supporting versions allows us to be able to rotate private and public keys in case
           # we would need this. We can increase the version, rotate and Karafka when decrypting
           # will figure out proper private key based on the version
-          setting(:version, default: '1')
+          setting(:version, default: "1")
 
           # We always support one public key for producing messages
           # Public key needs to be always present even if we do not plan to produce messages from
           # a Karafka process. This is because of the web-ui and potentially other cases like this
-          setting(:public_key, default: '')
+          setting(:public_key, default: "")
 
           # Private keys in pem format, where the key is the version and value is the key.
           # This allows us to support key rotation

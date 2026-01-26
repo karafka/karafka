@@ -5,42 +5,42 @@ RSpec.describe_current do
 
   let(:topic) { build(:routing_topic) }
 
-  context 'when no features enabled' do
+  context "when no features enabled" do
     it { expect(selected_strategy).to eq(Karafka::Processing::Strategies::Default) }
   end
 
-  context 'when manual offset management is on' do
+  context "when manual offset management is on" do
     before { topic.manual_offset_management(true) }
 
     it { expect(selected_strategy).to eq(Karafka::Processing::Strategies::Mom) }
   end
 
-  context 'when dead letter queue is on' do
-    before { topic.dead_letter_queue(topic: 'dead') }
+  context "when dead letter queue is on" do
+    before { topic.dead_letter_queue(topic: "dead") }
 
     it { expect(selected_strategy).to eq(Karafka::Processing::Strategies::Dlq) }
   end
 
-  context 'when dead letter queue is on with mom' do
+  context "when dead letter queue is on with mom" do
     before do
-      topic.dead_letter_queue(topic: 'dead')
+      topic.dead_letter_queue(topic: "dead")
       topic.manual_offset_management(true)
     end
 
     it { expect(selected_strategy).to eq(Karafka::Processing::Strategies::DlqMom) }
   end
 
-  context 'when dead letter queue is on with mom and aj' do
+  context "when dead letter queue is on with mom and aj" do
     before do
       topic.active_job(true)
-      topic.dead_letter_queue(topic: 'dead')
+      topic.dead_letter_queue(topic: "dead")
       topic.manual_offset_management(true)
     end
 
     it { expect(selected_strategy).to eq(Karafka::Processing::Strategies::AjDlqMom) }
   end
 
-  context 'when mom is on with aj' do
+  context "when mom is on with aj" do
     before do
       topic.active_job(true)
       topic.manual_offset_management(true)
@@ -54,7 +54,7 @@ RSpec.describe_current do
   # usable with it or that a given combination is one of the not supported or not needed
   #
   # We also need to prevent a case where a given combination would be defined twice by mistake, etc
-  describe 'strategies presence vs. features combinations' do
+  describe "strategies presence vs. features combinations" do
     subject(:selector) { described_class.new }
 
     # Combinations that for any reason are not supported
@@ -81,7 +81,7 @@ RSpec.describe_current do
       combinations
     end
 
-    it 'expect each features combination to be supported expect the explicitly ignored' do
+    it "expect each features combination to be supported expect the explicitly ignored" do
       combinations.each do |combination|
         matching_strategies = selector.strategies.select do |strategy|
           strategy::FEATURES.sort == combination

@@ -45,8 +45,8 @@ custom_group_id = SecureRandom.uuid
 
 # Settings with custom group.id
 settings = {
-  'group.id': custom_group_id,
-  'auto.offset.reset': 'beginning'
+  "group.id": custom_group_id,
+  "auto.offset.reset": "beginning"
 }
 
 # Topic with partition => true means resume from last committed offset
@@ -75,7 +75,7 @@ assert_equal 10, offset
 # (proving the iterator didn't use it)
 routing_results = Karafka::Admin.read_lags_with_offsets({ DT.consumer_group => [DT.topic] })
 routing_offset = routing_results.fetch(DT.consumer_group).fetch(DT.topic)[0][:offset]
-assert_equal(-1, routing_offset, 'Iterator should not use routing-defined consumer group')
+assert_equal(-1, routing_offset, "Iterator should not use routing-defined consumer group")
 
 # Second iteration: resume from where we left off using the same custom group ID
 iterator = Karafka::Pro::Iterator.new(topics, settings: settings)

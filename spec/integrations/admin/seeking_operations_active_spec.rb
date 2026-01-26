@@ -11,7 +11,7 @@ class SeekingOperationsConsumer < Karafka::BaseConsumer
       message_data = JSON.parse(message.raw_payload)
 
       DT[:consumed] << {
-        message_id: message_data['id'],
+        message_id: message_data["id"],
         offset: message.metadata.offset,
         partition: message.metadata.partition,
         processed_at: Time.now.to_f
@@ -27,7 +27,7 @@ initial_messages = []
 10.times do |i|
   initial_messages << {
     id: "initial_#{i}",
-    content: 'seeking_test_message',
+    content: "seeking_test_message",
     sequence: i
   }.to_json
 end
@@ -51,20 +51,20 @@ begin
   )
 
   DT[:admin_operations] << {
-    operation: 'seek_to_beginning',
+    operation: "seek_to_beginning",
     success: true,
     result: seek_result,
     target_offset: 0
   }
-rescue StandardError => e
+rescue => e
   DT[:admin_operations] << {
-    operation: 'seek_to_beginning',
+    operation: "seek_to_beginning",
     success: false,
     error_class: e.class.name,
     error_message: e.message,
-    expected_restriction: e.message.downcase.include?('active') ||
-                          e.message.downcase.include?('member') ||
-                          e.message.downcase.include?('coordinator')
+    expected_restriction: e.message.downcase.include?("active") ||
+      e.message.downcase.include?("member") ||
+      e.message.downcase.include?("coordinator")
   }
 end
 
@@ -77,20 +77,20 @@ begin
   )
 
   DT[:admin_operations] << {
-    operation: 'seek_to_specific',
+    operation: "seek_to_specific",
     success: true,
     result: seek_specific_result,
     target_offset: 2
   }
-rescue StandardError => e
+rescue => e
   DT[:admin_operations] << {
-    operation: 'seek_to_specific',
+    operation: "seek_to_specific",
     success: false,
     error_class: e.class.name,
     error_message: e.message,
-    expected_restriction: e.message.downcase.include?('active') ||
-                          e.message.downcase.include?('member') ||
-                          e.message.downcase.include?('coordinator')
+    expected_restriction: e.message.downcase.include?("active") ||
+      e.message.downcase.include?("member") ||
+      e.message.downcase.include?("coordinator")
   }
 end
 
@@ -106,21 +106,21 @@ begin
   )
 
   DT[:admin_operations] << {
-    operation: 'seek_to_end',
+    operation: "seek_to_end",
     success: true,
     result: seek_end_result,
     target_offset: high_watermark,
     high_watermark: high_watermark
   }
-rescue StandardError => e
+rescue => e
   DT[:admin_operations] << {
-    operation: 'seek_to_end',
+    operation: "seek_to_end",
     success: false,
     error_class: e.class.name,
     error_message: e.message,
-    expected_restriction: e.message.downcase.include?('active') ||
-                          e.message.downcase.include?('member') ||
-                          e.message.downcase.include?('coordinator')
+    expected_restriction: e.message.downcase.include?("active") ||
+      e.message.downcase.include?("member") ||
+      e.message.downcase.include?("coordinator")
   }
 end
 
@@ -129,40 +129,40 @@ end
 # Verify we performed seek operations
 assert(
   DT[:admin_operations].any?,
-  'Should have attempted seeking operations'
+  "Should have attempted seeking operations"
 )
 
 # Verify seek operation results
 DT[:admin_operations].each do |op|
   assert(
     op.key?(:success),
-    'Seek operation should have success flag'
+    "Seek operation should have success flag"
   )
 
   assert(
     !op[:operation].nil?,
-    'Seek operation should specify operation type'
+    "Seek operation should specify operation type"
   )
 
   if op[:success]
     assert(
       !op[:result].nil?,
-      'Successful seek should have result'
+      "Successful seek should have result"
     )
 
     assert(
       op.key?(:target_offset),
-      'Successful seek should specify target offset'
+      "Successful seek should specify target offset"
     )
   else
     assert(
       op.key?(:error_class),
-      'Failed seek should have error class'
+      "Failed seek should have error class"
     )
 
     assert(
       op.key?(:expected_restriction),
-      'Failed seek should indicate if restriction was expected'
+      "Failed seek should indicate if restriction was expected"
     )
   end
 end
@@ -170,22 +170,22 @@ end
 # Verify message processing continued
 assert(
   !DT[:consumed].empty?,
-  'Should have processed messages despite seeking operations'
+  "Should have processed messages despite seeking operations"
 )
 
 # Verify message order and offsets
 consumed_offsets = DT[:consumed].map { |msg| msg[:offset] }.sort
 assert(
   consumed_offsets.uniq.size == consumed_offsets.size,
-  'Should not have duplicate message offsets'
+  "Should not have duplicate message offsets"
 )
 
 # Check if seeking had any effect on message processing
-initial_consumed = DT[:consumed].select { |msg| msg[:message_id].start_with?('initial_') }
+initial_consumed = DT[:consumed].select { |msg| msg[:message_id].start_with?("initial_") }
 
 assert(
   initial_consumed.any?,
-  'Should have consumed some initial messages'
+  "Should have consumed some initial messages"
 )
 
 # Verify seeking operations behavior
@@ -194,10 +194,10 @@ seek_operations_count = DT[:admin_operations].size
 # The key success criteria: seeking operations handled appropriately during active consumption
 assert(
   seek_operations_count >= 3,
-  'Should have attempted multiple seeking operations'
+  "Should have attempted multiple seeking operations"
 )
 
 assert(
   seek_operations_count > 0,
-  'Should have attempted seeking operations'
+  "Should have attempted seeking operations"
 )

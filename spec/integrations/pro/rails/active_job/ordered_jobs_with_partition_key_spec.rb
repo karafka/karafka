@@ -25,7 +25,7 @@
 # proper results when using `:partition_key`.
 
 setup_karafka do |config|
-  config.initial_offset = 'latest'
+  config.initial_offset = "latest"
 end
 
 setup_active_job
@@ -54,7 +54,7 @@ counts = 0
 
 # First loop kicks in before initialization of the connection and we want to publish after, that
 # is why we don't run it on the first run
-Karafka::App.monitor.subscribe('connection.listener.fetch_loop') do
+Karafka::App.monitor.subscribe("connection.listener.fetch_loop") do
   counts += 1
 
   if counts == 20

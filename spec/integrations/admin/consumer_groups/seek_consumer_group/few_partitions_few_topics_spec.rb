@@ -26,8 +26,8 @@ end
 
 10.times do
   3.times do |partition|
-    produce(DT.topics[0], '', partition: partition)
-    produce(DT.topics[1], '', partition: partition)
+    produce(DT.topics[0], "", partition: partition)
+    produce(DT.topics[1], "", partition: partition)
   end
 end
 

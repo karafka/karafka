@@ -5,7 +5,7 @@ RSpec.describe_current do
 
   specify { expect(described_class).to be < Karafka::Cli::Base }
 
-  describe '#call' do
+  describe "#call" do
     before do
       described_class::INSTALL_DIRS.each do |dir|
         allow(FileUtils)
@@ -20,7 +20,7 @@ RSpec.describe_current do
 
         allow(Bundler)
           .to receive(:read_file)
-          .and_return('')
+          .and_return("")
 
         allow(File)
           .to receive(:write)
@@ -28,30 +28,30 @@ RSpec.describe_current do
       end
     end
 
-    it 'expect to create proper dirs and copy template files' do
+    it "expect to create proper dirs and copy template files" do
       expect { install_cli.call }.not_to raise_error
     end
   end
 
-  describe '#rails?' do
+  describe "#rails?" do
     subject(:is_rails) { described_class.new.rails? }
 
     before { allow(Bundler).to receive(:read_file).and_return(gemfile) }
 
-    context 'when rails is not in the gemfile' do
-      let(:gemfile) { '' }
+    context "when rails is not in the gemfile" do
+      let(:gemfile) { "" }
 
       it { expect(is_rails).to be(false) }
     end
 
-    context 'when rails is in the gemfile' do
+    context "when rails is in the gemfile" do
       let(:gemfile) { "DEPENDENCIES\n  rails" }
 
       it { expect(is_rails).to be(true) }
     end
   end
 
-  describe '#names' do
+  describe "#names" do
     it { expect(install_cli.class.names).to eq %w[install] }
   end
 end

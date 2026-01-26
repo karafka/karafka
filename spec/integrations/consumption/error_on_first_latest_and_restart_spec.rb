@@ -4,7 +4,7 @@
 # as the first one, thus if restarted, it will against start from "latest".
 
 setup_karafka(allow_errors: %w[consumer.consume.error]) do |config|
-  config.initial_offset = 'latest'
+  config.initial_offset = "latest"
 end
 
 class Consumer < Karafka::BaseConsumer
@@ -22,7 +22,7 @@ start_karafka_and_wait_until do
 
   unless @sent
     @sent = true
-    produce(DT.topic, '')
+    produce(DT.topic, "")
   end
 
   DT.key?(:done)

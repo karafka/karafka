@@ -23,11 +23,11 @@ class EnvelopedJobDeserializer < Karafka::ActiveJob::Deserializer
     envelope = ::ActiveSupport::JSON.decode(message.raw_payload)
 
     # Validate envelope structure
-    raise 'Invalid envelope: missing schema_id' unless envelope['schema_id']
-    raise 'Invalid envelope: missing data' unless envelope['data']
+    raise "Invalid envelope: missing schema_id" unless envelope["schema_id"]
+    raise "Invalid envelope: missing data" unless envelope["data"]
 
     # Extract and return the actual job data
-    envelope['data']
+    envelope["data"]
   end
 end
 
@@ -61,7 +61,7 @@ end
 
 VALUE1 = rand
 VALUE2 = rand
-METADATA_VALUE = 'envelope_test'
+METADATA_VALUE = "envelope_test"
 
 # Dispatch the job - it will be wrapped in a custom envelope
 EnvelopedJob.perform_later(VALUE1, VALUE2, METADATA_VALUE)

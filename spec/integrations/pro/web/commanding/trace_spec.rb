@@ -40,7 +40,7 @@ Thread.new do
   sleep(0.1) until DT.key?(:is)
 
   Karafka::Web::Pro::Commanding::Dispatcher.request(
-    'consumers.trace', Karafka::Web.config.tracking.consumers.sampler.process_id
+    "consumers.trace", Karafka::Web.config.tracking.consumers.sampler.process_id
   )
 
   loop do
@@ -50,7 +50,7 @@ Thread.new do
       1
     ).first
 
-    if result && result.payload[:type] == 'result'
+    if result && result.payload[:type] == "result"
       DT[:ready] = true
 
       break

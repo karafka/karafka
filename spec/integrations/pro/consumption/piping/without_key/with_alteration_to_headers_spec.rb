@@ -38,8 +38,8 @@ class Consumer1 < Karafka::BaseConsumer
   private
 
   def enhance_pipe_message(pipe_message_hash, message)
-    pipe_message_hash[:headers]['extra_data'] = '1'
-    pipe_message_hash[:headers]['extra_test'] = message.raw_payload
+    pipe_message_hash[:headers]["extra_data"] = "1"
+    pipe_message_hash[:headers]["extra_test"] = message.raw_payload
   end
 end
 
@@ -83,13 +83,13 @@ EXPECTED_KEYS = %w[0 1].freeze
 DT[:piped].each do |message|
   headers = message.headers
 
-  source_partition = headers['source_partition'].to_i
+  source_partition = headers["source_partition"].to_i
 
   assert SETS[source_partition].include?(message.raw_payload)
   assert EXPECTED_PARTITIONS.include?(source_partition)
   assert EXPECTED_KEYS.include?(message.key)
-  assert_equal headers['source_topic'], DT.topics.first
-  assert_equal headers['source_topic'], DT.topics.first
-  assert_equal headers['extra_data'], '1'
-  assert_equal message.raw_payload, headers['extra_test']
+  assert_equal headers["source_topic"], DT.topics.first
+  assert_equal headers["source_topic"], DT.topics.first
+  assert_equal headers["extra_data"], "1"
+  assert_equal message.raw_payload, headers["extra_test"]
 end

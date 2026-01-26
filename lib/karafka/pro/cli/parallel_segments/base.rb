@@ -47,9 +47,9 @@ module Karafka
             requested_groups = options[:groups].dup || []
 
             workable_groups = Karafka::App
-                              .routes
-                              .select(&:parallel_segments?)
-                              .group_by(&:segment_origin)
+              .routes
+              .select(&:parallel_segments?)
+              .group_by(&:segment_origin)
 
             # Use all if none provided
             return workable_groups if requested_groups.empty?
@@ -85,7 +85,7 @@ module Karafka
             consumer_groups = [segment_origin, segments.map(&:name)].flatten
 
             consumer_groups_with_topics = consumer_groups
-                                          .to_h { |name| [name, topics_names] }
+              .to_h { |name| [name, topics_names] }
 
             lags_with_offsets = Karafka::Admin.read_lags_with_offsets(
               consumer_groups_with_topics

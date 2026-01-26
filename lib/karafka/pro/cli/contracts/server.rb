@@ -30,8 +30,8 @@ module Karafka
         class Server < Karafka::Cli::Contracts::Server
           configure do |config|
             config.error_messages = YAML.safe_load_file(
-              File.join(Karafka.gem_root, 'config', 'locales', 'errors.yml')
-            ).fetch('en').fetch('validations').fetch('cli').fetch('server')
+              File.join(Karafka.gem_root, "config", "locales", "errors.yml")
+            ).fetch("en").fetch("validations").fetch("cli").fetch("server")
           end
 
           %i[
@@ -66,10 +66,10 @@ module Karafka
               next if value.empty?
 
               subscription_groups = Karafka::App
-                                    .consumer_groups
-                                    .map(&:subscription_groups)
-                                    .flatten
-                                    .map(&:name)
+                .consumer_groups
+                .map(&:subscription_groups)
+                .flatten
+                .map(&:name)
 
               next if (value - subscription_groups).empty?
 
@@ -87,12 +87,12 @@ module Karafka
               next if value.empty?
 
               topics = Karafka::App
-                       .consumer_groups
-                       .map(&:subscription_groups)
-                       .flatten
-                       .map(&:topics)
-                       .map { |gtopics| gtopics.map(&:name) }
-                       .flatten
+                .consumer_groups
+                .map(&:subscription_groups)
+                .flatten
+                .map(&:topics)
+                .map { |gtopics| gtopics.map(&:name) }
+                .flatten
 
               next if (value - topics).empty?
 

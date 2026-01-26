@@ -38,7 +38,7 @@ distant_future = Array.new(50) do |i|
   message = {
     topic: DT.topics[1],
     key: "key#{i}",
-    headers: { 'b' => i.to_s },
+    headers: { "b" => i.to_s },
     payload: "payload#{i}"
   }
 
@@ -53,7 +53,7 @@ close_future = Array.new(2) do |i|
   message = {
     topic: DT.topics[1],
     key: "key#{i + 100}",
-    headers: { 'b' => (i + 100).to_s },
+    headers: { "b" => (i + 100).to_s },
     payload: "payload#{i + 100}"
   }
 
@@ -76,13 +76,13 @@ start_karafka_and_wait_until(sleep: 1) do
 
   next if dispatched.size < 2 || state.nil?
   next false unless state.payload[:daily].size >= 2
-  next false if state.payload[:state] == 'loading'
+  next false if state.payload[:state] == "loading"
 
   true
 end
 
 tomorrow_date = Date.today + 1
-tomorrow_date_str = tomorrow_date.strftime('%Y-%m-%d')
+tomorrow_date_str = tomorrow_date.strftime("%Y-%m-%d")
 
 # This spec is time based, so we cannot check all direct references
 assert state.payload[:daily].key?(tomorrow_date_str.to_sym), state.payload

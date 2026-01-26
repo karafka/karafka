@@ -54,10 +54,10 @@ module Karafka
         # @note It also produces needed tombstone event as well as an audit log message
         def <<(message)
           target_headers = message.raw_headers.merge(
-            'schedule_source_topic' => @topic,
-            'schedule_source_partition' => @partition.to_s,
-            'schedule_source_offset' => message.offset.to_s,
-            'schedule_source_key' => message.key
+            "schedule_source_topic" => @topic,
+            "schedule_source_partition" => @partition.to_s,
+            "schedule_source_offset" => message.offset.to_s,
+            "schedule_source_key" => message.key
           ).compact
 
           target = {
@@ -90,7 +90,7 @@ module Karafka
             # We use the state as a key, so we always have one state transition data available
             key: "#{tracker.state}_state",
             partition: @partition,
-            headers: { 'zlib' => 'true' }
+            headers: { "zlib" => "true" }
           )
         end
 

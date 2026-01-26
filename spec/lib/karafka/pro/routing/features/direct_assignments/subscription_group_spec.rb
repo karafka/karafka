@@ -31,7 +31,7 @@ RSpec.describe_current do
         Karafka::Pro::Routing::Features::DirectAssignments::Config,
         active?: false
       ),
-      subscription_name: 'active_topic'
+      subscription_name: "active_topic"
     )
   end
 
@@ -46,7 +46,7 @@ RSpec.describe_current do
         active?: true,
         partitions: [1, 2, 3]
       ),
-      subscription_name: 'direct_topic'
+      subscription_name: "direct_topic"
     )
   end
 
@@ -54,23 +54,23 @@ RSpec.describe_current do
 
   before { allow(subscription_group).to receive(:topics).and_return(topics) }
 
-  describe '#subscriptions' do
-    context 'when there are active topics without direct assignments' do
-      it 'returns an array of subscription names' do
-        expect(subscription_group.subscriptions).to eq(['active_topic'])
+  describe "#subscriptions" do
+    context "when there are active topics without direct assignments" do
+      it "returns an array of subscription names" do
+        expect(subscription_group.subscriptions).to eq(["active_topic"])
       end
     end
 
-    context 'when all active topics have direct assignments' do
+    context "when all active topics have direct assignments" do
       let(:topics) { [direct_assignment_active_topic] }
 
-      it 'returns false indicating no subscriptions' do
+      it "returns false indicating no subscriptions" do
         expect(subscription_group.subscriptions).to be false
       end
     end
   end
 
-  describe '#assignments' do
+  describe "#assignments" do
     let(:consumer) { instance_spy(Karafka::Connection::Proxy) }
     let(:iterator_expander) { instance_spy(Karafka::Pro::Iterator::Expander) }
     let(:tpl_builder) { instance_spy(Karafka::Pro::Iterator::TplBuilder) }
@@ -83,16 +83,16 @@ RSpec.describe_current do
       allow(tpl_builder).to receive(:call).and_return(topic_partition_list)
     end
 
-    context 'when there are active topics with direct assignments' do
-      it 'returns a topic partition list for assignments' do
+    context "when there are active topics with direct assignments" do
+      it "returns a topic partition list for assignments" do
         expect(subscription_group.assignments(consumer)).to eq(topic_partition_list)
       end
     end
 
-    context 'when there are no active topics with direct assignments' do
+    context "when there are no active topics with direct assignments" do
       let(:topics) { [active_topic, inactive_topic] } # No topics with active direct assignments
 
-      it 'returns false indicating no assignments' do
+      it "returns false indicating no assignments" do
         expect(subscription_group.assignments(consumer)).to be false
       end
     end

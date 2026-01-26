@@ -37,13 +37,13 @@ end
 module ExternalEachPatchSimulationVp
   def each(&)
     caller_location = caller_locations(1, 10).find do |loc|
-      loc.path.include?('karafka') && !loc.path.include?('spec')
+      loc.path.include?("karafka") && !loc.path.include?("spec")
     end
 
     DT[:each_calls] << {
       caller: caller_location&.label,
       path: caller_location&.path,
-      from_vp_strategy: caller_location&.path&.include?('strategies/vp')
+      from_vp_strategy: caller_location&.path&.include?("strategies/vp")
     }
 
     super
@@ -76,7 +76,7 @@ start_karafka_and_wait_until do
   DT[:consumed].size >= 20
 end
 
-assert_equal 20, DT[:consumed].uniq.size, 'All messages should be consumed'
+assert_equal 20, DT[:consumed].uniq.size, "All messages should be consumed"
 
 # Verify that #each was NOT called from VP strategy code
 vp_strategy_calls = DT[:each_calls].select { |call| call[:from_vp_strategy] }
@@ -92,4 +92,4 @@ MSG
 
 # Verify that #each WAS called from user code
 user_calls = DT[:each_calls].reject { |call| call[:from_vp_strategy] }
-assert user_calls.any?, 'User code should trigger the patched #each method'
+assert user_calls.any?, "User code should trigger the patched #each method"

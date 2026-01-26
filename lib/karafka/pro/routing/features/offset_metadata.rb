@@ -31,7 +31,7 @@ module Karafka
             #
             # @param _config [Karafka::Core::Configurable::Node] app config
             def post_setup(_config)
-              Karafka::App.monitor.subscribe('app.running') do
+              Karafka::App.monitor.subscribe("app.running") do
                 # Initialize the tracker prior to becoming multi-threaded
                 Karafka::Processing::InlineInsights::Tracker.instance
 

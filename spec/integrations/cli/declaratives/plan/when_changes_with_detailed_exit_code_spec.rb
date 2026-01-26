@@ -11,8 +11,8 @@ draw_routes(create_topics: false) do
     active false
     config(
       partitions: 2,
-      'max.compaction.lag.ms': '9223372036854',
-      'max.message.bytes': '100000'
+      "max.compaction.lag.ms": "9223372036854",
+      "max.message.bytes": "100000"
     )
   end
 
@@ -20,9 +20,9 @@ draw_routes(create_topics: false) do
     active false
     config(
       partitions: 6,
-      'message.timestamp.after.max.ms': '9223372036854775802',
-      'test.introduced': 'introduced',
-      'retention.bytes': '1000000'
+      "message.timestamp.after.max.ms": "9223372036854775802",
+      "test.introduced": "introduced",
+      "retention.bytes": "1000000"
     )
   end
 
@@ -32,8 +32,8 @@ draw_routes(create_topics: false) do
   end
 end
 
-ARGV[0] = 'topics'
-ARGV[1] = 'plan'
-ARGV[2] = '--detailed-exitcode'
+ARGV[0] = "topics"
+ARGV[1] = "plan"
+ARGV[2] = "--detailed-exitcode"
 
 Karafka::Cli.start

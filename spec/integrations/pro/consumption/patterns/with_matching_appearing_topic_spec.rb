@@ -23,7 +23,7 @@
 # Karafka should be able to match non-existing topic when it appears later on.
 
 setup_karafka do |config|
-  config.kafka[:'topic.metadata.refresh.interval.ms'] = 2_000
+  config.kafka[:"topic.metadata.refresh.interval.ms"] = 2_000
 end
 
 class Consumer < Karafka::BaseConsumer

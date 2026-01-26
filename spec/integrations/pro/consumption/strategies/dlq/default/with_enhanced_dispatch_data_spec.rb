@@ -32,7 +32,7 @@ class Consumer < Karafka::BaseConsumer
   private
 
   def enhance_dlq_message(dlq_message, _skippable_message)
-    dlq_message[:headers]['error_class'] = errors_tracker.last.class.to_s
+    dlq_message[:headers]["error_class"] = errors_tracker.last.class.to_s
   end
 end
 
@@ -43,7 +43,7 @@ draw_routes do
   end
 end
 
-Karafka.monitor.subscribe('dead_letter_queue.dispatched') do |event|
+Karafka.monitor.subscribe("dead_letter_queue.dispatched") do |event|
   assert !event[:message].nil?
   DT[:events] << 1
 end
@@ -57,6 +57,6 @@ start_karafka_and_wait_until do
 end
 
 assert_equal(
-  Karafka::Admin.read_topic(DT.topics[1], 0, 1).last.headers['error_class'],
-  'StandardError'
+  Karafka::Admin.read_topic(DT.topics[1], 0, 1).last.headers["error_class"],
+  "StandardError"
 )

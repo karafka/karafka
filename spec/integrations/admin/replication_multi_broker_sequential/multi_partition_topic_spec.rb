@@ -2,15 +2,16 @@
 
 # Karafka should increase replication factor for multi-partition topics
 
-docker_available = system('docker --version > /dev/null 2>&1')
-kafka_container_running = docker_available && system('docker exec kafka1 true > /dev/null 2>&1')
+docker_available = system("docker --version > /dev/null 2>&1")
+kafka_container_running = docker_available && system("docker exec kafka1 true > /dev/null 2>&1")
 
 exit 0 unless docker_available && kafka_container_running
 
 setup_karafka
 
 class Consumer < Karafka::BaseConsumer
-  def consume; end
+  def consume
+  end
 end
 
 draw_routes(Consumer)
@@ -65,7 +66,7 @@ plan.partitions_assignment.each do |_partition_id, broker_ids|
   assert_equal broker_ids.uniq.size, broker_ids.size
 end
 
-temp_file = Tempfile.new(['multi_partition', '.json'])
+temp_file = Tempfile.new(["multi_partition", ".json"])
 
 begin
   plan.export_to_file(temp_file.path)
@@ -74,19 +75,19 @@ begin
   `docker cp #{temp_file.path} kafka1:#{container_path} 2>&1`
   `docker exec kafka1 chmod 644 #{container_path} 2>/dev/null`
 
-  `docker exec kafka1 kafka-reassign-partitions \
+  %x(docker exec kafka1 kafka-reassign-partitions \
     --bootstrap-server kafka1:29092 \
     --reassignment-json-file #{container_path} \
-    --execute 2>&1`
+    --execute 2>&1)
 
   Timeout.timeout(300) do
     loop do
-      verify_output = `docker exec kafka1 kafka-reassign-partitions \
+      verify_output = %x(docker exec kafka1 kafka-reassign-partitions \
         --bootstrap-server kafka1:29092 \
         --reassignment-json-file #{container_path} \
-        --verify 2>&1`
+        --verify 2>&1)
 
-      break if verify_output.include?('completed') && !verify_output.include?('still in progress')
+      break if verify_output.include?("completed") && !verify_output.include?("still in progress")
 
       sleep(5)
     end
@@ -116,6 +117,6 @@ end
 
 begin
   Karafka::Admin.delete_topic(test_topic)
-rescue StandardError
+rescue
   nil
 end

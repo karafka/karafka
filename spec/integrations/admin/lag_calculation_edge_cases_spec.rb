@@ -11,14 +11,14 @@ class LagCalculationConsumer < Karafka::BaseConsumer
       message_data = JSON.parse(message.raw_payload)
 
       DT[:consumed] << {
-        message_id: message_data['id'],
+        message_id: message_data["id"],
         offset: message.metadata.offset,
         partition: message.metadata.partition,
         processed_at: Time.now.to_f
       }
 
       # Simulate slow processing for some messages to create lag
-      sleep(0.01) if message_data['slow_processing']
+      sleep(0.01) if message_data["slow_processing"]
     end
   end
 end
@@ -32,7 +32,7 @@ lag_test_messages = []
 5.times do |i|
   lag_test_messages << {
     id: "normal_#{i}",
-    content: 'normal_message',
+    content: "normal_message",
     slow_processing: false
   }.to_json
 end
@@ -41,7 +41,7 @@ end
 3.times do |i|
   lag_test_messages << {
     id: "slow_#{i}",
-    content: 'slow_processing_message',
+    content: "slow_processing_message",
     slow_processing: true
   }.to_json
 end
@@ -50,7 +50,7 @@ end
 5.times do |i|
   lag_test_messages << {
     id: "final_#{i}",
-    content: 'final_message',
+    content: "final_message",
     slow_processing: false
   }.to_json
 end
@@ -69,14 +69,14 @@ begin
   )
 
   DT[:lag_operations] << {
-    operation: 'pre_consumption_lags',
+    operation: "pre_consumption_lags",
     success: true,
     lags_count: pre_consumption_lags.size,
     total_lag: pre_consumption_lags.values.sum { |partition_data| partition_data[:lag] }
   }
-rescue StandardError => e
+rescue => e
   DT[:lag_operations] << {
-    operation: 'pre_consumption_lags',
+    operation: "pre_consumption_lags",
     success: false,
     error_class: e.class.name,
     error_message: e.message
@@ -96,14 +96,14 @@ begin
   )
 
   DT[:lag_operations] << {
-    operation: 'post_consumption_lags',
+    operation: "post_consumption_lags",
     success: true,
     lags_count: post_consumption_lags.size,
     total_lag: post_consumption_lags.values.sum { |partition_data| partition_data[:lag] }
   }
-rescue StandardError => e
+rescue => e
   DT[:lag_operations] << {
-    operation: 'post_consumption_lags',
+    operation: "post_consumption_lags",
     success: false,
     error_class: e.class.name,
     error_message: e.message
@@ -119,15 +119,15 @@ begin
   )
 
   DT[:lag_operations] << {
-    operation: 'partition_specific_lags',
+    operation: "partition_specific_lags",
     success: true,
     lags_count: partition_specific_lags.size,
     partition_specified: true,
     total_lag: partition_specific_lags.values.sum { |partition_data| partition_data[:lag] }
   }
-rescue StandardError => e
+rescue => e
   DT[:lag_operations] << {
-    operation: 'partition_specific_lags',
+    operation: "partition_specific_lags",
     success: false,
     error_class: e.class.name,
     error_message: e.message,
@@ -144,15 +144,15 @@ begin
   )
 
   DT[:lag_operations] << {
-    operation: 'nonexistent_group_lags',
+    operation: "nonexistent_group_lags",
     success: true,
     lags_count: nonexistent_group_lags.size,
     consumer_group: nonexistent_group,
     total_lag: nonexistent_group_lags.values.sum { |partition_data| partition_data[:lag] }
   }
-rescue StandardError => e
+rescue => e
   DT[:lag_operations] << {
-    operation: 'nonexistent_group_lags',
+    operation: "nonexistent_group_lags",
     success: false,
     error_class: e.class.name,
     error_message: e.message,
@@ -163,88 +163,88 @@ end
 # Verify all messages were processed
 assert_equal(
   lag_test_messages.size, DT[:consumed].size,
-  'Should process all messages for lag calculation testing'
+  "Should process all messages for lag calculation testing"
 )
 
 # Verify lag operations were performed
 assert(
   DT[:lag_operations].any?,
-  'Should have performed lag calculation operations'
+  "Should have performed lag calculation operations"
 )
 
 # Verify pre-consumption lag calculation
-pre_consumption_ops = DT[:lag_operations].select { |op| op[:operation] == 'pre_consumption_lags' }
+pre_consumption_ops = DT[:lag_operations].select { |op| op[:operation] == "pre_consumption_lags" }
 pre_consumption_ops.each do |op|
   assert(
     op.key?(:success),
-    'Pre-consumption lag calculation should have success flag'
+    "Pre-consumption lag calculation should have success flag"
   )
 
   next unless op[:success]
 
   assert(
     op[:lags_count] >= 0,
-    'Pre-consumption should return non-negative lag count'
+    "Pre-consumption should return non-negative lag count"
   )
 
   assert(
     op[:total_lag] >= 0,
-    'Pre-consumption total lag should be non-negative'
+    "Pre-consumption total lag should be non-negative"
   )
 end
 
 # Active consumption lag calculation was removed for simplicity
 
 # Verify post-consumption lag calculation
-post_ops = DT[:lag_operations].select { |op| op[:operation] == 'post_consumption_lags' }
+post_ops = DT[:lag_operations].select { |op| op[:operation] == "post_consumption_lags" }
 post_ops.each do |op|
   next unless op[:success]
 
   assert(
     op[:lags_count] >= 0,
-    'Post-consumption should return non-negative lag count'
+    "Post-consumption should return non-negative lag count"
   )
 
   assert(
     op[:total_lag] >= 0,
-    'Post-consumption total lag should be non-negative'
+    "Post-consumption total lag should be non-negative"
   )
 
   # After full consumption, lag should be minimal (0 or very small)
   assert(
     op[:total_lag] <= 1,
-    'Post-consumption total lag should be minimal after processing all messages'
+    "Post-consumption total lag should be minimal after processing all messages"
   )
 end
 
 # Verify partition-specific lag calculation
-partition_ops = DT[:lag_operations].select { |op| op[:operation] == 'partition_specific_lags' }
+partition_ops = DT[:lag_operations].select { |op| op[:operation] == "partition_specific_lags" }
 partition_ops.each do |op|
   assert(
     op.key?(:partition_specified),
-    'Partition-specific operation should indicate partition was specified'
+    "Partition-specific operation should indicate partition was specified"
   )
 
   next unless op[:success]
 
   assert(
     op[:lags_count] >= 0,
-    'Partition-specific should return non-negative lag count'
+    "Partition-specific should return non-negative lag count"
   )
 end
 
 # Verify non-existent consumer group lag calculation
-nonexistent_ops = DT[:lag_operations].select { |op| op[:operation] == 'nonexistent_group_lags' }
+nonexistent_ops = DT[:lag_operations].select { |op| op[:operation] == "nonexistent_group_lags" }
 nonexistent_ops.each do |op|
   assert(
     op.key?(:consumer_group),
-    'Non-existent group operation should specify consumer group'
+    "Non-existent group operation should specify consumer group"
   )
 
   # This might succeed with default lag values or fail - both are acceptable
   assert(
     op.key?(:success),
-    'Non-existent group operation should have success flag'
+    "Non-existent group operation should have success flag"
   )
 end
 
@@ -254,10 +254,10 @@ successful_operations = DT[:lag_operations].count { |op| op[:success] }
 
 assert(
   lag_operations_count >= 4,
-  'Should perform multiple lag calculation operations'
+  "Should perform multiple lag calculation operations"
 )
 
 assert(
   successful_operations >= 0,
-  'Should handle lag calculations in various scenarios'
+  "Should handle lag calculations in various scenarios"
 )

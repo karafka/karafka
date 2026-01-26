@@ -26,19 +26,19 @@ RSpec.describe_current do
   let(:ttl) { 1 }
   let(:active) { true }
 
-  describe '#active?' do
-    context 'when active' do
+  describe "#active?" do
+    context "when active" do
       it { expect(config.active?).to be(true) }
     end
 
-    context 'when not active' do
+    context "when not active" do
       let(:active) { false }
 
       it { expect(config.active?).to be(false) }
     end
   end
 
-  describe '#to_h' do
+  describe "#to_h" do
     it { expect(config.to_h[:ttl]).to eq(ttl) }
     it { expect(config.to_h[:active]).to be(true) }
   end

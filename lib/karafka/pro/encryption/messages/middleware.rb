@@ -41,12 +41,12 @@ module Karafka
             payload = message[:payload]
 
             message[:headers] ||= {}
-            message[:headers]['encryption'] = version
+            message[:headers]["encryption"] = version
             message[:payload] = cipher.encrypt(payload)
 
             return message unless fingerprinter
 
-            message[:headers]['encryption_fingerprint'] = fingerprinter.hexdigest(payload)
+            message[:headers]["encryption_fingerprint"] = fingerprinter.hexdigest(payload)
 
             message
           end

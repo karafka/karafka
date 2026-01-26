@@ -4,8 +4,8 @@
 # This error type was previously not explicitly handled and would have raised UnsupportedCaseError
 # We use a dummy client that will intercept calls that should go to DataDog
 # This test triggers a rebalance by exceeding the poll interval, which causes partition revocation
-require 'karafka/instrumentation/vendors/datadog/logger_listener'
-require Karafka.gem_root.join('spec/support/vendors/datadog/logger_dummy_client')
+require "karafka/instrumentation/vendors/datadog/logger_listener"
+require Karafka.gem_root.join("spec/support/vendors/datadog/logger_dummy_client")
 
 strio = StringIO.new
 
@@ -20,8 +20,8 @@ setup_karafka(allow_errors: %w[connection.client.poll.error consumer.revoked.err
   config.logger = Logger.new(strio)
   config.max_messages = 5
   # Set short poll interval to trigger revocation quickly
-  config.kafka[:'max.poll.interval.ms'] = 10_000
-  config.kafka[:'session.timeout.ms'] = 10_000
+  config.kafka[:"max.poll.interval.ms"] = 10_000
+  config.kafka[:"session.timeout.ms"] = 10_000
   config.concurrency = 1
   config.shutdown_timeout = 60_000
 end
@@ -50,7 +50,7 @@ client = Vendors::Datadog::LoggerDummyClient.new
 
 listener = Karafka::Instrumentation::Vendors::Datadog::LoggerListener.new do |config|
   config.client = client
-  config.service_name = 'myservice-karafka'
+  config.service_name = "myservice-karafka"
 end
 
 Karafka.monitor.subscribe(listener)
@@ -64,14 +64,14 @@ start_karafka_and_wait_until do
   DT[:done].size >= 2
 end
 
-assert client.buffer.include?(['karafka.consumer', 'myservice-karafka']), client.buffer
+assert client.buffer.include?(["karafka.consumer", "myservice-karafka"]), client.buffer
 assert client.errors.any?(StandardError), client.errors
 assert client.errors.all?(StandardError), client.errors
 
 $stdout = proper_stdout
 $stderr = proper_stderr
 
-assert strio.string.include?('Consume job for Consumer on')
-assert strio.string.include?('Consumer on revoked failed due to an error')
+assert strio.string.include?("Consume job for Consumer on")
+assert strio.string.include?("Consumer on revoked failed due to an error")
 # Verify DD listener handled the error type without raising UnsupportedCaseError
-assert !strio.string.include?('UnsupportedCaseError'), strio.string
+assert !strio.string.include?("UnsupportedCaseError"), strio.string

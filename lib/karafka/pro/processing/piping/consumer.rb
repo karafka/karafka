@@ -107,20 +107,20 @@ module Karafka
               topic: topic,
               payload: message.raw_payload,
               headers: message.raw_headers.merge(
-                'source_topic' => message.topic,
-                'source_partition' => message.partition.to_s,
-                'source_offset' => message.offset.to_s,
-                'source_consumer_group' => self.topic.consumer_group.id
+                "source_topic" => message.topic,
+                "source_partition" => message.partition.to_s,
+                "source_offset" => message.offset.to_s,
+                "source_consumer_group" => self.topic.consumer_group.id
               )
             }
 
             # Use a key only if key was provided
-            if message.raw_key
-              pipe_message[:key] = message.raw_key
+            pipe_message[:key] = if message.raw_key
+              message.raw_key
             # Otherwise pipe creating a key that will assign it based on the source partition
             # number
             else
-              pipe_message[:key] = message.partition.to_s
+              message.partition.to_s
             end
 
             # Optional method user can define in consumer to enhance the dlq message hash with

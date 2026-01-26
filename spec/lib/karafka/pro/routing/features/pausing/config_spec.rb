@@ -35,44 +35,44 @@ RSpec.describe_current do
   let(:max_timeout) { 5_000 }
   let(:with_exponential_backoff) { true }
 
-  describe '#active?' do
-    context 'when active is true' do
+  describe "#active?" do
+    context "when active is true" do
       let(:active) { true }
 
       it { expect(config.active?).to be(true) }
     end
 
-    context 'when active is false' do
+    context "when active is false" do
       let(:active) { false }
 
       it { expect(config.active?).to be(false) }
     end
   end
 
-  describe '#with_exponential_backoff?' do
-    context 'when with_exponential_backoff is true' do
+  describe "#with_exponential_backoff?" do
+    context "when with_exponential_backoff is true" do
       let(:with_exponential_backoff) { true }
 
       it { expect(config.with_exponential_backoff?).to be(true) }
     end
 
-    context 'when with_exponential_backoff is false' do
+    context "when with_exponential_backoff is false" do
       let(:with_exponential_backoff) { false }
 
       it { expect(config.with_exponential_backoff?).to be(false) }
     end
   end
 
-  describe '#timeout' do
+  describe "#timeout" do
     it { expect(config.timeout).to eq(timeout) }
   end
 
-  describe '#max_timeout' do
+  describe "#max_timeout" do
     it { expect(config.max_timeout).to eq(max_timeout) }
   end
 
-  describe '#to_h' do
-    it 'returns a hash with all config attributes' do
+  describe "#to_h" do
+    it "returns a hash with all config attributes" do
       hash = config.to_h
       expect(hash[:active]).to eq(active)
       expect(hash[:timeout]).to eq(timeout)

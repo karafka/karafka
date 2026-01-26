@@ -22,7 +22,7 @@ end
 
 statistics_events = {}
 
-Karafka::App.monitor.subscribe('statistics.emitted') do |event|
+Karafka::App.monitor.subscribe("statistics.emitted") do |event|
   statistics_events[event[:subscription_group_id]] ||= []
   statistics_events[event[:subscription_group_id]] << event
 end
@@ -35,7 +35,7 @@ end
 
 # Within a single group, all events should come from the same client
 statistics_events.each_value do |stats|
-  names = stats.map { |event| event[:statistics]['name'] }.uniq
+  names = stats.map { |event| event[:statistics]["name"] }.uniq
   assert_equal 1, names.uniq.size
 end
 

@@ -5,7 +5,8 @@
 setup_karafka
 
 class ReplicationManualConsumer < Karafka::BaseConsumer
-  def consume; end
+  def consume
+  end
 end
 
 draw_routes(ReplicationManualConsumer)
@@ -44,9 +45,9 @@ if broker_ids.size >= 3
   # Validate plan uses manual assignment
   assert(
     plan.partitions_assignment == manual_assignment,
-    'Plan should use provided manual assignment'
+    "Plan should use provided manual assignment"
   )
-  assert plan.target_replication_factor == 3, 'Should have target RF of 3'
+  assert plan.target_replication_factor == 3, "Should have target RF of 3"
 
   # Test validation: missing partitions
   begin
@@ -64,11 +65,11 @@ if broker_ids.size >= 3
 
   assert(
     DT[:missing_partitions_error],
-    'Should raise error when partitions are missing'
+    "Should raise error when partitions are missing"
   )
   assert(
-    DT[:missing_partitions_message].include?('missing partitions'),
-    'Error should mention missing partitions'
+    DT[:missing_partitions_message].include?("missing partitions"),
+    "Error should mention missing partitions"
   )
 
   # Test validation: wrong broker count
@@ -90,11 +91,11 @@ if broker_ids.size >= 3
 
   assert(
     DT[:wrong_count_error],
-    'Should raise error when broker count does not match target RF'
+    "Should raise error when broker count does not match target RF"
   )
   assert(
-    DT[:wrong_count_message].include?('does not match target replication factor'),
-    'Error should mention broker count mismatch'
+    DT[:wrong_count_message].include?("does not match target replication factor"),
+    "Error should mention broker count mismatch"
   )
 
   # Test validation: duplicate brokers
@@ -114,13 +115,13 @@ if broker_ids.size >= 3
     DT[:duplicate_message] = e.message
   end
 
-  assert DT[:duplicate_error], 'Should raise error for duplicate brokers'
+  assert DT[:duplicate_error], "Should raise error for duplicate brokers"
   assert(
-    DT[:duplicate_message].include?('duplicate brokers'),
-    'Error should mention duplicate brokers'
+    DT[:duplicate_message].include?("duplicate brokers"),
+    "Error should mention duplicate brokers"
   )
 else
   # Skip manual assignment tests for single/dual broker setups
   DT[:manual_skipped] = true
-  assert true, 'Manual assignment tests skipped (insufficient brokers)'
+  assert true, "Manual assignment tests skipped (insufficient brokers)"
 end

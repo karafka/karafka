@@ -34,7 +34,7 @@ end
 class DlqConsumer < Karafka::BaseConsumer
   def consume
     messages.each do |message|
-      DT[0] << [message.key, message.headers['source_partition']]
+      DT[0] << [message.key, message.headers["source_partition"]]
     end
   end
 end

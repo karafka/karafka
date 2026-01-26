@@ -27,11 +27,11 @@ end
 thread = Thread.new do
   consumer = Rdkafka::Config.new(
     Karafka::Setup::AttributesMap.consumer(
-      'bootstrap.servers': Karafka::App.config.kafka[:'bootstrap.servers'],
-      'group.id': Karafka::App.consumer_groups.first.id,
-      'group.protocol': 'consumer',
-      'auto.offset.reset': 'earliest',
-      'enable.auto.offset.store': false
+      "bootstrap.servers": Karafka::App.config.kafka[:"bootstrap.servers"],
+      "group.id": Karafka::App.consumer_groups.first.id,
+      "group.protocol": "consumer",
+      "auto.offset.reset": "earliest",
+      "enable.auto.offset.store": false
     )
   ).consumer
 

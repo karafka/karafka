@@ -22,15 +22,16 @@
 
 # Here we subscribe to our listener and make sure nothing breaks during the notifications
 # Majority of appsignal is tested in OSS so here we focus only on ticking that is a Pro feature
-require 'karafka/instrumentation/vendors/appsignal/metrics_listener'
-require 'karafka/instrumentation/vendors/appsignal/errors_listener'
-require Karafka.gem_root.join('spec/support/vendors/appsignal/dummy_client')
+require "karafka/instrumentation/vendors/appsignal/metrics_listener"
+require "karafka/instrumentation/vendors/appsignal/errors_listener"
+require Karafka.gem_root.join("spec/support/vendors/appsignal/dummy_client")
 
 # We allow errors to raise one to make sure things are published as expected
 setup_karafka(allow_errors: true)
 
 class Consumer < Karafka::BaseConsumer
-  def consume; end
+  def consume
+  end
 
   def tick
     unless @raised
@@ -76,7 +77,7 @@ transactions_started = appsignal_dummy.buffer[:start_transaction].keys.uniq.sort
 assert_equal transactions_started, %w[Consumer#consume Consumer#tick Consumer#shutdown].sort
 
 # Error from ticking should be tracked
-count_key = 'karafka_consumer_errors'
+count_key = "karafka_consumer_errors"
 assert_equal true, appsignal_dummy.buffer[:count].key?(count_key), "#{count_key} missing"
 
 assert_equal 1, appsignal_dummy.buffer[:errors].size

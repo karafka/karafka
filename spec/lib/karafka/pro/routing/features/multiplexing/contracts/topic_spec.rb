@@ -39,36 +39,36 @@ RSpec.describe_current do
   let(:boot) { 1 }
   let(:scale_delay) { 60_000 }
 
-  context 'when config is valid' do
+  context "when config is valid" do
     it { expect(check).to be_success }
   end
 
-  context 'when min is below 1' do
+  context "when min is below 1" do
     let(:min) { 0 }
 
     it { expect(check).not_to be_success }
   end
 
-  context 'when max is below 1' do
+  context "when max is below 1" do
     let(:max) { 0 }
 
     it { expect(check).not_to be_success }
   end
 
-  context 'when min is more than max' do
+  context "when min is more than max" do
     let(:max) { 1 }
     let(:min) { 2 }
 
     it { expect(check).not_to be_success }
   end
 
-  context 'when boot is below 1' do
+  context "when boot is below 1" do
     let(:boot) { 0 }
 
     it { expect(check).not_to be_success }
   end
 
-  context 'when boot is less than min' do
+  context "when boot is less than min" do
     let(:max) { 10 }
     let(:min) { 7 }
     let(:boot) { 2 }
@@ -76,7 +76,7 @@ RSpec.describe_current do
     it { expect(check).not_to be_success }
   end
 
-  context 'when boot is more than max' do
+  context "when boot is more than max" do
     let(:max) { 10 }
     let(:min) { 7 }
     let(:boot) { 22 }
@@ -84,7 +84,7 @@ RSpec.describe_current do
     it { expect(check).not_to be_success }
   end
 
-  context 'when not in dynamic mode, boot should not be different than min and max' do
+  context "when not in dynamic mode, boot should not be different than min and max" do
     let(:max) { 5 }
     let(:min) { 5 }
     let(:boot) { 2 }
@@ -92,21 +92,21 @@ RSpec.describe_current do
     it { expect(check).not_to be_success }
   end
 
-  context 'when both min and max are set to 1, which does not make sense' do
+  context "when both min and max are set to 1, which does not make sense" do
     let(:max) { 1 }
     let(:min) { 1 }
 
     it { expect(check).not_to be_success }
   end
 
-  context 'when scale delay is below 1 second' do
+  context "when scale delay is below 1 second" do
     let(:scale_delay) { 999 }
 
     it { expect(check).not_to be_success }
   end
 
-  context 'when scale delay is not a number' do
-    let(:scale_delay) { 'test' }
+  context "when scale delay is not a number" do
+    let(:scale_delay) { "test" }
 
     it { expect(check).not_to be_success }
   end

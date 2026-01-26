@@ -8,13 +8,14 @@
 #
 # We ignore it because here we check if the whole process does not crash due to librdkafka issue
 setup_karafka(allow_errors: true) do |config|
-  config.kafka[:'partition.assignment.strategy'] = 'cooperative-sticky'
+  config.kafka[:"partition.assignment.strategy"] = "cooperative-sticky"
   # Increased to compensate for potential wait on long wait
   config.shutdown_timeout = 120_000
 end
 
 class Consumer < Karafka::BaseConsumer
-  def consume; end
+  def consume
+  end
 end
 
 draw_routes do

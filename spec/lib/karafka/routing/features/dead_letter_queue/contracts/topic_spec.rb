@@ -7,7 +7,7 @@ RSpec.describe_current do
     {
       dead_letter_queue: {
         active: true,
-        topic: 'deads',
+        topic: "deads",
         max_retries: 5,
         independent: false,
         transactional: true,
@@ -18,83 +18,83 @@ RSpec.describe_current do
     }
   end
 
-  context 'when config is valid' do
+  context "when config is valid" do
     it { expect(check).to be_success }
   end
 
-  context 'when active flag is not boolean' do
+  context "when active flag is not boolean" do
     before { config[:dead_letter_queue][:active] = rand }
 
     it { expect(check).not_to be_success }
   end
 
-  context 'when independent flag is not boolean' do
+  context "when independent flag is not boolean" do
     before { config[:dead_letter_queue][:independent] = rand }
 
     it { expect(check).not_to be_success }
   end
 
-  context 'when transactional flag is not boolean' do
+  context "when transactional flag is not boolean" do
     before { config[:dead_letter_queue][:transactional] = rand }
 
     it { expect(check).not_to be_success }
   end
 
-  context 'when topic is in an invalid format' do
+  context "when topic is in an invalid format" do
     before { config[:dead_letter_queue][:topic] = '#$%^&*(' }
 
     it { expect(check).not_to be_success }
   end
 
-  context 'when topic is not a string' do
+  context "when topic is not a string" do
     before { config[:dead_letter_queue][:topic] = 0 }
 
     it { expect(check).not_to be_success }
   end
 
-  context 'when topic is a false' do
+  context "when topic is a false" do
     before { config[:dead_letter_queue][:topic] = false }
 
     it { expect(check).to be_success }
   end
 
-  context 'when dispatch_method is not any of methods' do
+  context "when dispatch_method is not any of methods" do
     before { config[:dead_letter_queue][:dispatch_method] = false }
 
     it { expect(check).not_to be_success }
   end
 
-  context 'when marking_method is not any of methods' do
+  context "when marking_method is not any of methods" do
     before { config[:dead_letter_queue][:marking_method] = false }
 
     it { expect(check).not_to be_success }
   end
 
-  context 'when mark_after_dispatch is not any of expected' do
+  context "when mark_after_dispatch is not any of expected" do
     before { config[:dead_letter_queue][:mark_after_dispatch] = rand }
 
     it { expect(check).not_to be_success }
   end
 
-  context 'when max_retries is not an integer' do
-    before { config[:dead_letter_queue][:max_retries] = 'invalid' }
+  context "when max_retries is not an integer" do
+    before { config[:dead_letter_queue][:max_retries] = "invalid" }
 
     it { expect(check).not_to be_success }
   end
 
-  context 'when max_retries is less than zero' do
+  context "when max_retries is less than zero" do
     before { config[:dead_letter_queue][:max_retries] = -1 }
 
     it { expect(check).not_to be_success }
   end
 
-  context 'when max_retries is zero' do
+  context "when max_retries is zero" do
     before { config[:dead_letter_queue][:max_retries] = 0 }
 
     it { expect(check).to be_success }
   end
 
-  context 'when topic is nil and not active' do
+  context "when topic is nil and not active" do
     before do
       config[:dead_letter_queue][:topic] = nil
       config[:dead_letter_queue][:active] = false

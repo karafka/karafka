@@ -4,10 +4,10 @@
 # should re-create the topic and move on.
 
 setup_karafka(allow_errors: true) do |config|
-  config.kafka[:'allow.auto.create.topics'] = true
+  config.kafka[:"allow.auto.create.topics"] = true
 end
 
-Karafka.monitor.subscribe('error.occurred') do |event|
+Karafka.monitor.subscribe("error.occurred") do |event|
   DT[:errors] << event[:error]
 end
 
@@ -15,7 +15,7 @@ class Consumer < Karafka::BaseConsumer
   def consume
     DT[:thread] = Thread.new do
       Karafka::Admin.delete_topic(DT.topic)
-    rescue StandardError
+    rescue
       nil
     end
 

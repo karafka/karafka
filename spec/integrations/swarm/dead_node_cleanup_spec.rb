@@ -6,13 +6,13 @@ setup_karafka do |config|
   config.internal.swarm.node_restart_timeout = 1_000
   config.internal.swarm.supervision_interval = 1_000
   # Enhance rebalance time on dead nodes
-  config.kafka[:'max.poll.interval.ms'] = 10_000
-  config.kafka[:'session.timeout.ms'] = 10_000
+  config.kafka[:"max.poll.interval.ms"] = 10_000
+  config.kafka[:"session.timeout.ms"] = 10_000
 end
 
 pids = []
 
-Karafka::App.monitor.subscribe('swarm.manager.after_fork') do |event|
+Karafka::App.monitor.subscribe("swarm.manager.after_fork") do |event|
   pids << event[:node].pid
   DT[:execution_mode] = Karafka::Server.execution_mode.to_sym
 end
@@ -21,7 +21,7 @@ READER, WRITER = IO.pipe
 
 class Consumer < Karafka::BaseConsumer
   def consume
-    WRITER.puts('1')
+    WRITER.puts("1")
     WRITER.flush
     exit!
   end
@@ -38,10 +38,10 @@ start_karafka_and_wait_until(mode: :swarm) do
 end
 
 def zombie_process?(pid)
-  if RUBY_PLATFORM.include?('linux')
+  if RUBY_PLATFORM.include?("linux")
     # Linux-specific check using /proc filesystem
     status = File.read("/proc/#{pid}/status")
-    status.include?('(zombie)')
+    status.include?("(zombie)")
   else
     # On macOS/BSD, check if process exists and can be signaled
     # A zombie would exist but not respond to signal 0

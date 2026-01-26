@@ -37,7 +37,7 @@ class Consumer < Karafka::BaseConsumer
 
       DT[:raised] << true
 
-      raise StandardError, 'failure'
+      raise StandardError, "failure"
     end
   end
 end

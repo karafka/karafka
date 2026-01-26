@@ -6,8 +6,8 @@
 
 setup_karafka(allow_errors: true, consumer_group_protocol: true) do |config|
   # Remove session timeout and set very short max poll interval for faster testing
-  config.kafka.delete(:'session.timeout.ms')
-  config.kafka[:'max.poll.interval.ms'] = 5_000
+  config.kafka.delete(:"session.timeout.ms")
+  config.kafka[:"max.poll.interval.ms"] = 5_000
   config.max_messages = 1
 end
 
@@ -32,7 +32,7 @@ end
 
 draw_routes(Consumer)
 
-produce(DT.topic, 'test1', partition: 0)
+produce(DT.topic, "test1", partition: 0)
 
 start_karafka_and_wait_until do
   DT.key?(:revoked_detected)

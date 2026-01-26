@@ -34,8 +34,8 @@ draw_routes do
   end
 end
 
-Karafka::Pro::RecurringTasks.define('1.0.0') do
-  schedule(id: 'stop', cron: '* * * * *') do
+Karafka::Pro::RecurringTasks.define("1.0.0") do
+  schedule(id: "stop", cron: "* * * * *") do
     DT[:done] = true
   end
 end

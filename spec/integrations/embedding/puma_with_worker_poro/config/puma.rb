@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
-require 'karafka'
-require 'securerandom'
+require "karafka"
+require "securerandom"
 
 TOPIC = "it-#{SecureRandom.hex(6)}".freeze
 PID = Process.pid
@@ -13,12 +13,12 @@ preload_app!
 
 class ShutdownConsumer < Karafka::BaseConsumer
   def consume
-    ::Process.kill('TERM', PID)
+    ::Process.kill("TERM", PID)
   end
 end
 
 Karafka::App.setup do |config|
-  config.kafka = { 'bootstrap.servers': '127.0.0.1:9092' }
+  config.kafka = { "bootstrap.servers": "127.0.0.1:9092" }
   config.client_id = SecureRandom.hex(6)
 end
 
@@ -29,7 +29,7 @@ Karafka::App.routes.draw do
 end
 
 on_worker_boot do
-  Karafka.producer.produce_sync(topic: TOPIC, payload: 'bye bye')
+  Karafka.producer.produce_sync(topic: TOPIC, payload: "bye bye")
 
   Karafka::Embedded.start
 end

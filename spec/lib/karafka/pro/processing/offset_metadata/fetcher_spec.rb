@@ -31,31 +31,31 @@ RSpec.describe_current do
     fetcher.register(client)
   end
 
-  describe '#find' do
-    context 'when looking for a topic that is no longer ours and not cached' do
+  describe "#find" do
+    context "when looking for a topic that is no longer ours and not cached" do
       before { allow(client).to receive(:assignment).and_return({}) }
 
       it { expect(fetcher.find(topic, 0)).to be(false) }
     end
 
-    context 'when looking for a topic partition that is no longer ours and not cached' do
+    context "when looking for a topic partition that is no longer ours and not cached" do
       before { allow(client).to receive(:assignment).and_return({ topic.name => [] }) }
 
       it { expect(fetcher.find(topic, 0)).to be(false) }
     end
 
-    context 'when looking for a topic partition that is ours' do
+    context "when looking for a topic partition that is ours" do
       before do
         allow(client).to receive_messages(
           assignment: { topic.name => [Rdkafka::Consumer::Partition.new(0, 0)] },
-          committed: { topic.name => [Rdkafka::Consumer::Partition.new(0, 0, 0, 'test')] }
+          committed: { topic.name => [Rdkafka::Consumer::Partition.new(0, 0, 0, "test")] }
         )
       end
 
-      it { expect(fetcher.find(topic, 0)).to eq('test') }
+      it { expect(fetcher.find(topic, 0)).to eq("test") }
     end
 
-    context 'when we received data, cached and cleared' do
+    context "when we received data, cached and cleared" do
       before do
         allow(client)
           .to receive(:assignment)
@@ -66,11 +66,11 @@ RSpec.describe_current do
 
         allow(client)
           .to receive(:committed)
-          .and_return(topic.name => [Rdkafka::Consumer::Partition.new(0, 0, 0, 'test')])
+          .and_return(topic.name => [Rdkafka::Consumer::Partition.new(0, 0, 0, "test")])
       end
 
       it do
-        expect(fetcher.find(topic, 0)).to eq('test')
+        expect(fetcher.find(topic, 0)).to eq("test")
         fetcher.clear(topic.subscription_group)
         expect(fetcher.find(topic, 0)).to be(false)
       end

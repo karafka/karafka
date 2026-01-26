@@ -25,7 +25,7 @@ end
   sleep(0.1)
 
   3.times do |partition|
-    produce(DT.topic, '', partition: partition)
+    produce(DT.topic, "", partition: partition)
   end
 end
 

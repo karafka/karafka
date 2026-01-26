@@ -110,9 +110,9 @@ batch1_assignments = {}
 batch2_assignments = {}
 
 DT[:assignments].each do |key, segment_id, payload|
-  if payload.start_with?('batch1')
+  if payload.start_with?("batch1")
     batch1_assignments[key] = segment_id
-  elsif payload.start_with?('batch2')
+  elsif payload.start_with?("batch2")
     batch2_assignments[key] = segment_id
   end
 end
@@ -122,7 +122,7 @@ inconsistent_keys = []
 
 unique_keys.each do |key|
   if batch1_assignments[key] && batch2_assignments[key] &&
-     batch1_assignments[key] != batch2_assignments[key]
+      batch1_assignments[key] != batch2_assignments[key]
     inconsistent_keys << key
   end
 end
@@ -140,20 +140,20 @@ batch1_segment1 = batch1_assignments.values.count(1)
 batch2_segment0 = batch2_assignments.values.count(0)
 batch2_segment1 = batch2_assignments.values.count(1)
 
-assert batch1_segment0 > 0, 'Segment 0 should have received messages in batch 1'
-assert batch1_segment1 > 0, 'Segment 1 should have received messages in batch 1'
-assert batch2_segment0 > 0, 'Segment 0 should have received messages in batch 2'
-assert batch2_segment1 > 0, 'Segment 1 should have received messages in batch 2'
+assert batch1_segment0 > 0, "Segment 0 should have received messages in batch 1"
+assert batch1_segment1 > 0, "Segment 1 should have received messages in batch 1"
+assert batch2_segment0 > 0, "Segment 0 should have received messages in batch 2"
+assert batch2_segment1 > 0, "Segment 1 should have received messages in batch 2"
 
 # The distribution should be the same in both batches
 assert_equal(
   batch1_segment0,
   batch2_segment0,
-  'Segment 0 should have received the same number of messages in both batches'
+  "Segment 0 should have received the same number of messages in both batches"
 )
 
 assert_equal(
   batch1_segment1,
   batch2_segment1,
-  'Segment 1 should have received the same number of messages in both batches'
+  "Segment 1 should have received the same number of messages in both batches"
 )

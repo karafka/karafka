@@ -4,7 +4,7 @@
 # should commit the offset in rebalance
 
 setup_karafka do |config|
-  config.kafka[:'enable.auto.commit'] = false
+  config.kafka[:"enable.auto.commit"] = false
 end
 
 class Consumer < Karafka::BaseConsumer
@@ -27,8 +27,8 @@ end
 Thread.new do
   loop do
     begin
-      produce(DT.topic, '0', partition: 0)
-      produce(DT.topic, '1', partition: 1)
+      produce(DT.topic, "0", partition: 0)
+      produce(DT.topic, "1", partition: 1)
     rescue WaterDrop::Errors::ProducerClosedError
       break
     end

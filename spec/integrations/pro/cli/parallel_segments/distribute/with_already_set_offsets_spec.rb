@@ -45,8 +45,8 @@ produce_many(DT.topic, DT.uuids(10))
 # Set some offsets on the first segment to simulate already distributed
 Karafka::Admin.seek_consumer_group(segment1, { DT.topic => { 0 => 5, 1 => 3 } })
 
-ARGV[0] = 'parallel_segments'
-ARGV[1] = 'distribute'
+ARGV[0] = "parallel_segments"
+ARGV[1] = "distribute"
 
 failed = false
 begin

@@ -10,4 +10,4 @@ producer = Karafka::App.config.producer
 
 assert producer.is_a?(WaterDrop::Producer)
 # Should have inherited kafka settings from config
-assert_equal '127.0.0.1:9092', producer.config.kafka[:'bootstrap.servers']
+assert_equal "127.0.0.1:9092", producer.config.kafka[:"bootstrap.servers"]

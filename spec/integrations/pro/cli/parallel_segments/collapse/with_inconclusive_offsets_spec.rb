@@ -45,8 +45,8 @@ produce_many(DT.topic, DT.uuids(10))
 Karafka::Admin.seek_consumer_group(segment1, { DT.topic => { 0 => 5, 1 => 2 } })
 Karafka::Admin.seek_consumer_group(segment2, { DT.topic => { 0 => 3, 1 => 8 } })
 
-ARGV[0] = 'parallel_segments'
-ARGV[1] = 'collapse'
+ARGV[0] = "parallel_segments"
+ARGV[1] = "collapse"
 
 # The command should fail due to inconclusive offsets
 

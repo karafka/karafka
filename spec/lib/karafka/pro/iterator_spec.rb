@@ -28,14 +28,14 @@ RSpec.describe_current do
 
   before { Karafka::Admin.create_topic(topic, 2, 1) }
 
-  it 'expect to start and stop iterator' do
-    iterator.each { nil }
+  it "expect to start and stop iterator" do
+    iterator.each {}
   end
 
-  context 'when there is some data in the topic' do
+  context "when there is some data in the topic" do
     before { PRODUCERS.regular.produce_sync(topic: topic, payload: {}.to_json) }
 
-    it 'expect start, stop and get data' do
+    it "expect start, stop and get data" do
       existing = nil
 
       iterator.each do |message|
@@ -46,7 +46,7 @@ RSpec.describe_current do
     end
   end
 
-  context 'when there are only aborted transactions in the topic' do
+  context "when there are only aborted transactions in the topic" do
     before do
       wait_if_needed
 
@@ -57,7 +57,7 @@ RSpec.describe_current do
       end
     end
 
-    it 'expect start, stop and get no data' do
+    it "expect start, stop and get no data" do
       existing = nil
 
       iterator.each do |message|
@@ -68,7 +68,7 @@ RSpec.describe_current do
     end
   end
 
-  context 'when there are committed transactions in the topic' do
+  context "when there are committed transactions in the topic" do
     before do
       wait_if_needed
 
@@ -77,7 +77,7 @@ RSpec.describe_current do
       end
     end
 
-    it 'expect start, stop and get no data' do
+    it "expect start, stop and get no data" do
       existing = nil
 
       iterator.each do |message|
@@ -88,7 +88,7 @@ RSpec.describe_current do
     end
   end
 
-  context 'when we have committed data but way behind failed transactions' do
+  context "when we have committed data but way behind failed transactions" do
     subject(:iterator) { described_class.new({ topic => -20 }) }
 
     before do
@@ -113,7 +113,7 @@ RSpec.describe_current do
       wait_if_needed
     end
 
-    it 'expect start, stop and get no data' do
+    it "expect start, stop and get no data" do
       existing = nil
 
       iterator.each do |message|

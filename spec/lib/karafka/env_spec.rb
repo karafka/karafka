@@ -3,47 +3,47 @@
 RSpec.describe_current do
   subject(:karafka_env) { described_class.new }
 
-  describe '#initialize' do
-    context 'when we dont have any ENVs that we can use' do
+  describe "#initialize" do
+    context "when we dont have any ENVs that we can use" do
       before { allow(ENV).to receive(:fetch).and_return(nil) }
 
-      it 'expect to use default' do
-        expect(karafka_env).to eq 'development'
+      it "expect to use default" do
+        expect(karafka_env).to eq "development"
       end
     end
   end
 
-  describe '#respond_to? with missing' do
-    context 'when we check for regular existing methods' do
+  describe "#respond_to? with missing" do
+    context "when we check for regular existing methods" do
       %w[
         chop
         upcase!
       ].each do |method_name|
-        it 'expect not to respond to those' do
+        it "expect not to respond to those" do
           expect(karafka_env.respond_to?(method_name)).to be(true)
         end
       end
     end
 
-    context 'when we check for regular named non-existing methods' do
+    context "when we check for regular named non-existing methods" do
       %w[
         supermethod
         extra_other
       ].each do |method_name|
-        it 'expect not to respond to those' do
+        it "expect not to respond to those" do
           expect(karafka_env.respond_to?(method_name)).to be(false)
         end
       end
     end
 
-    context 'when we check for questionmark environmentable methods' do
+    context "when we check for questionmark environmentable methods" do
       %w[
         test?
         production?
         development?
         unknown?
       ].each do |method_name|
-        it 'expect not to respond to those' do
+        it "expect not to respond to those" do
           expect(karafka_env.respond_to?(method_name)).to be(true)
         end
       end

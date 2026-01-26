@@ -56,16 +56,16 @@ module Karafka
             # user flow but should mitigate damages by not virtualizing
             begin
               groupings = vps.distributor.call(messages)
-            rescue StandardError => e
+            rescue => e
               # This should not happen. If you are seeing this it means your partitioner code
               # failed and raised an error. We highly recommend mitigating partitioner level errors
               # on the user side because this type of collapse should be considered a last resort
               Karafka.monitor.instrument(
-                'error.occurred',
+                "error.occurred",
                 caller: self,
                 error: e,
                 messages: messages,
-                type: 'virtual_partitions.partitioner.error'
+                type: "virtual_partitions.partitioner.error"
               )
 
               groupings = { 0 => messages }

@@ -32,7 +32,7 @@ setup_karafka
 
 statistics_events = []
 
-Karafka::App.monitor.subscribe('statistics.emitted') do |event|
+Karafka::App.monitor.subscribe("statistics.emitted") do |event|
   statistics_events << event.payload
 end
 
@@ -63,7 +63,7 @@ end
 lags = Set.new
 
 statistics_events.each do |event|
-  lag = event[:statistics].dig('topics', DT.topic, 'partitions', '0', 'consumer_lag_stored')
+  lag = event[:statistics].dig("topics", DT.topic, "partitions", "0", "consumer_lag_stored")
 
   # Lag may not be present when first reporting happens before data processing
   next unless lag

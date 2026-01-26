@@ -36,7 +36,7 @@ Karafka::App
   .internal
   .routing
   .activity_manager
-  .include(:topics, 'something-else')
+  .include(:topics, "something-else")
 
 guarded = []
 

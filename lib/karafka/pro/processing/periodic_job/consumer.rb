@@ -40,12 +40,13 @@ module Karafka
               #
               # We need to check both cases (public and private) since user is not expected to
               # have this method public
-              return if consumer_singleton_class.instance_methods.include?(:tick)
+              return if consumer_singleton_class.method_defined?(:tick)
               return if consumer_singleton_class.private_instance_methods.include?(:tick)
 
               # Create empty ticking method
               consumer_singleton_class.class_eval do
-                def tick; end
+                def tick
+                end
               end
             end
           end
@@ -61,12 +62,12 @@ module Karafka
           # @private
           def on_tick
             handle_tick
-          rescue StandardError => e
+          rescue => e
             Karafka.monitor.instrument(
-              'error.occurred',
+              "error.occurred",
               error: e,
               caller: self,
-              type: 'consumer.tick.error'
+              type: "consumer.tick.error"
             )
           end
         end

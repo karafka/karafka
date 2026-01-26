@@ -7,8 +7,8 @@
 become_pro!
 
 setup_karafka do |config|
-  config.kafka[:'auto.offset.reset'] = 'latest'
-  config.concurrency = ENV.fetch('THREADS', 5).to_i
+  config.kafka[:"auto.offset.reset"] = "latest"
+  config.concurrency = ENV.fetch("THREADS", 5).to_i
   config.license.token = pro_license_token
 end
 
@@ -22,7 +22,7 @@ Process.fork_supervised do
   # Dispatch 1000 messages to each partition
   1_000.times do
     PARTITIONS_COUNT.times do |i|
-      Karafka.producer.buffer(topic: 'benchmarks_01_05', payload: rand.to_s, partition: i)
+      Karafka.producer.buffer(topic: "benchmarks_01_05", payload: rand.to_s, partition: i)
     end
   end
 
@@ -57,7 +57,7 @@ end
 
 Karafka::App.routes.draw do
   consumer_group DT.consumer_group do
-    topic 'benchmarks_01_05' do
+    topic "benchmarks_01_05" do
       max_messages 1_000
       max_wait_time 1_000
       consumer Consumer

@@ -36,7 +36,7 @@ Karafka::App
   .internal
   .routing
   .activity_manager
-  .include(:topics, 'karafka-pattern-43a35a030')
+  .include(:topics, "karafka-pattern-43a35a030")
 
 start_karafka_and_wait_until do
   true

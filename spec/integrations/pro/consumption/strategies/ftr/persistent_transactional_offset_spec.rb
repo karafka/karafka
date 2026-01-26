@@ -54,9 +54,9 @@ end
 setup_karafka(allow_errors: true) do |config|
   config.max_messages = 10
   # We can use short time to force rebalance
-  config.kafka[:'max.poll.interval.ms'] = 10_000
-  config.kafka[:'session.timeout.ms'] = 10_000
-  config.kafka[:'auto.commit.interval.ms'] = 500
+  config.kafka[:"max.poll.interval.ms"] = 10_000
+  config.kafka[:"session.timeout.ms"] = 10_000
+  config.kafka[:"auto.commit.interval.ms"] = 500
   config.concurrency = 1
 end
 

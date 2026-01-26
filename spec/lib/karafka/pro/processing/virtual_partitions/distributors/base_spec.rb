@@ -29,8 +29,8 @@ RSpec.describe_current do
 
   subject(:distributor) { described_class.new(config) }
 
-  describe '#initialize' do
-    it 'expect to store config' do
+  describe "#initialize" do
+    it "expect to store config" do
       expect(distributor.send(:config)).to eq(config)
     end
   end

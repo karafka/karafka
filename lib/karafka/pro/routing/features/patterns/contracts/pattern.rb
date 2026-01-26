@@ -31,13 +31,13 @@ module Karafka
             class Pattern < Karafka::Contracts::Base
               configure do |config|
                 config.error_messages = YAML.safe_load_file(
-                  File.join(Karafka.gem_root, 'config', 'locales', 'pro_errors.yml')
-                ).fetch('en').fetch('validations').fetch('pattern')
+                  File.join(Karafka.gem_root, "config", "locales", "pro_errors.yml")
+                ).fetch("en").fetch("validations").fetch("pattern")
 
                 required(:regexp) { |val| val.is_a?(Regexp) }
 
                 required(:regexp_string) do |val|
-                  val.is_a?(String) && val.start_with?('^') && val.size >= 2
+                  val.is_a?(String) && val.start_with?("^") && val.size >= 2
                 end
 
                 required(:name) do |val|

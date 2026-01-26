@@ -22,22 +22,22 @@ end
 
 draw_routes(Consumer)
 
-produce(DT.topic, '1')
+produce(DT.topic, "1")
 
 Thread.new do
   sleep(0.1) until DT[:consume].size.positive?
 
-  Process.kill('TSTP', Process.pid)
+  Process.kill("TSTP", Process.pid)
 
   # Give it some time to silence and run shutdowns
   sleep(0.1) until DT[:shutdown].size.positive?
 
   # Dispatch some more work to make sure it's not picked up
-  produce(DT.topic, '1')
+  produce(DT.topic, "1")
 
   sleep(1)
 
-  Process.kill('QUIT', Process.pid)
+  Process.kill("QUIT", Process.pid)
 end
 
 start_karafka_and_wait_until { false }

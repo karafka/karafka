@@ -34,7 +34,7 @@ producer = WaterDrop::Producer.new do |producer_config|
   producer_config.kafka = Karafka::Setup::AttributesMap.producer(Karafka::App.config.kafka)
 end
 
-producer.produce_async(topic: DT.topics[0], payload: '{}')
+producer.produce_async(topic: DT.topics[0], payload: "{}")
 
 assert_equal 1, fetch_next_offset
 

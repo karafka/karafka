@@ -25,11 +25,11 @@ RSpec.describe_current do
 
   before { allow(Time).to receive(:now).and_return(time_now) }
 
-  describe '#dispatch' do
-    context 'when we dispatch without any changes to the defaults' do
+  describe "#dispatch" do
+    context "when we dispatch without any changes to the defaults" do
       before { allow(Karafka.producer).to receive(:produce_async) }
 
-      it 'expect to use proper encoder and async producer to dispatch the job' do
+      it "expect to use proper encoder and async producer to dispatch the job" do
         dispatcher.dispatch(job)
 
         expect(Karafka.producer).to have_received(:produce_async).with(
@@ -39,13 +39,13 @@ RSpec.describe_current do
       end
     end
 
-    context 'when we want to dispatch sync' do
+    context "when we want to dispatch sync" do
       before do
         job_class.karafka_options(dispatch_method: :produce_sync)
         allow(Karafka.producer).to receive(:produce_sync)
       end
 
-      it 'expect to use proper encoder and sync producer to dispatch the job' do
+      it "expect to use proper encoder and sync producer to dispatch the job" do
         dispatcher.dispatch(job)
 
         expect(Karafka.producer).to have_received(:produce_sync).with(
@@ -56,7 +56,7 @@ RSpec.describe_current do
     end
   end
 
-  describe '#dispatch_many' do
+  describe "#dispatch_many" do
     let(:jobs) { [job_class.new, job_class.new] }
     let(:jobs_messages) do
       [
@@ -71,30 +71,30 @@ RSpec.describe_current do
       ]
     end
 
-    context 'when we dispatch without any changes to the defaults' do
+    context "when we dispatch without any changes to the defaults" do
       before { allow(Karafka.producer).to receive(:produce_many_async) }
 
-      it 'expect to use proper encoder and async producer to dispatch the jobs' do
+      it "expect to use proper encoder and async producer to dispatch the jobs" do
         dispatcher.dispatch_many(jobs)
 
         expect(Karafka.producer).to have_received(:produce_many_async).with(jobs_messages)
       end
     end
 
-    context 'when we want to dispatch sync' do
+    context "when we want to dispatch sync" do
       before do
         job_class.karafka_options(dispatch_many_method: :produce_many_sync)
         allow(Karafka.producer).to receive(:produce_many_sync)
       end
 
-      it 'expect to use proper encoder and sync producer to dispatch the jobs' do
+      it "expect to use proper encoder and sync producer to dispatch the jobs" do
         dispatcher.dispatch_many(jobs)
 
         expect(Karafka.producer).to have_received(:produce_many_sync).with(jobs_messages)
       end
     end
 
-    context 'when jobs have different dispatch many methods' do
+    context "when jobs have different dispatch many methods" do
       let(:jobs) { [job_class.new, job_class2.new] }
       let(:jobs_messages) do
         [
@@ -114,7 +114,7 @@ RSpec.describe_current do
         allow(Karafka.producer).to receive(:produce_many_sync)
       end
 
-      it 'expect to dispatch them with correct dispatching methods' do
+      it "expect to dispatch them with correct dispatching methods" do
         dispatcher.dispatch_many(jobs)
 
         expect(Karafka.producer).to have_received(:produce_many_async).with([jobs_messages[0]])
@@ -123,12 +123,12 @@ RSpec.describe_current do
     end
   end
 
-  describe '#dispatch_at' do
-    it 'expect to raise an error as future is not supported in the OSS version' do
+  describe "#dispatch_at" do
+    it "expect to raise an error as future is not supported in the OSS version" do
       expect { dispatcher.dispatch_at(job, time_now + 10) }.to raise_error(NotImplementedError)
     end
 
-    it 'expect not to raise an error on current time dispatches' do
+    it "expect not to raise an error on current time dispatches" do
       expect { dispatcher.dispatch_at(job, time_now) }.not_to raise_error
     end
   end

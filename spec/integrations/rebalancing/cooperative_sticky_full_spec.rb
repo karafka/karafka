@@ -8,7 +8,7 @@
 #   rebalance happens. This is how `librdkafka` works
 
 setup_karafka(allow_errors: true) do |config|
-  config.kafka[:'partition.assignment.strategy'] = 'cooperative-sticky'
+  config.kafka[:"partition.assignment.strategy"] = "cooperative-sticky"
 end
 
 class Consumer < Karafka::BaseConsumer
@@ -31,11 +31,11 @@ end
 Thread.new do
   loop do
     begin
-      produce(DT.topic, '1', partition: 0)
-      produce(DT.topic, '2', partition: 1)
-      produce(DT.topic, '3', partition: 2)
-      produce(DT.topic, '4', partition: 3)
-      produce(DT.topic, '5', partition: 4)
+      produce(DT.topic, "1", partition: 0)
+      produce(DT.topic, "2", partition: 1)
+      produce(DT.topic, "3", partition: 2)
+      produce(DT.topic, "4", partition: 3)
+      produce(DT.topic, "5", partition: 4)
     rescue WaterDrop::Errors::ProducerClosedError
       break
     end
@@ -49,7 +49,7 @@ end
 other = Thread.new do
   2.times do
     consumer = setup_rdkafka_consumer(
-      'partition.assignment.strategy': 'cooperative-sticky'
+      "partition.assignment.strategy": "cooperative-sticky"
     )
 
     sleep(10)

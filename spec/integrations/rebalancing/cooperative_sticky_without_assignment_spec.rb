@@ -4,7 +4,7 @@
 # the assignment but an event should propagate from the rebalance nonetheless
 
 setup_karafka do |config|
-  config.kafka[:'partition.assignment.strategy'] = 'cooperative-sticky'
+  config.kafka[:"partition.assignment.strategy"] = "cooperative-sticky"
 end
 
 class Consumer < Karafka::BaseConsumer
@@ -14,14 +14,14 @@ class Consumer < Karafka::BaseConsumer
 end
 
 draw_routes(Consumer)
-produce(DT.topic, '1')
+produce(DT.topic, "1")
 
-Karafka.monitor.subscribe('rebalance.partitions_assigned') do
+Karafka.monitor.subscribe("rebalance.partitions_assigned") do
   DT[:stop] = true
 end
 
 consumer = setup_rdkafka_consumer(
-  'partition.assignment.strategy': 'cooperative-sticky'
+  "partition.assignment.strategy": "cooperative-sticky"
 )
 
 other = Thread.new do

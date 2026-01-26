@@ -30,7 +30,7 @@ Karafka::App
   .internal
   .routing
   .activity_manager
-  .include(:topics, 'x')
+  .include(:topics, "x")
 
 draw_routes(create_topics: false) do
   pattern(/.*/) do

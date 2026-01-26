@@ -153,9 +153,9 @@ assert(
 # Verify each partition contributed messages to both segments
 3.times do |partition|
   partition_segments = DT[:assignments]
-                       .select { |_, _, p| p == partition }
-                       .map { |_, s, _| s }
-                       .uniq
+    .select { |_, _, p| p == partition }
+    .map { |_, s, _| s }
+    .uniq
 
   assert_equal(
     2,

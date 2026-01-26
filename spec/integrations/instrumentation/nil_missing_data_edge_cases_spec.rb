@@ -31,11 +31,11 @@ draw_routes do
 end
 
 # Use existing instrumentation events instead of custom ones
-Karafka.monitor.subscribe('consumer.consumed') do |_event|
+Karafka.monitor.subscribe("consumer.consumed") do |_event|
   DT[:consumer_events] << 1
 end
 
-Karafka.monitor.subscribe('consumer.initialized') do |_event|
+Karafka.monitor.subscribe("consumer.initialized") do |_event|
   DT[:initialized_events] << 1
 end
 

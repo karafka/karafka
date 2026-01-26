@@ -32,18 +32,18 @@ draw_routes do
   end
 end
 
-Karafka::Pro::RecurringTasks.define('1.0.0') do
-  schedule(id: 'run', cron: '* * * * *', enabled: false) do
+Karafka::Pro::RecurringTasks.define("1.0.0") do
+  schedule(id: "run", cron: "* * * * *", enabled: false) do
     DT[:attempts] << true
   end
 end
 
 start_karafka_and_wait_until(reset_status: true) do
-  Karafka::Pro::RecurringTasks.disable('run')
+  Karafka::Pro::RecurringTasks.disable("run")
   sleep(1)
-  Karafka::Pro::RecurringTasks.enable('run')
+  Karafka::Pro::RecurringTasks.enable("run")
   sleep(1)
-  Karafka::Pro::RecurringTasks.trigger('run')
+  Karafka::Pro::RecurringTasks.trigger("run")
   sleep(1)
 
   DT[:attempts].size >= 10
@@ -52,14 +52,14 @@ end
 previous = nil
 
 keys = Karafka::Admin
-       .read_topic(Karafka::App.config.recurring_tasks.topics.schedules.name, 0, 21)
-       .map(&:key)
+  .read_topic(Karafka::App.config.recurring_tasks.topics.schedules.name, 0, 21)
+  .map(&:key)
 
-assert keys.count('state:schedule') >= 10
+assert keys.count("state:schedule") >= 10
 
 # This is time sensitive and due to "every 500ms" and the other thread disable/enable it could
 # happen that it is published twice next to each other creating randomness
-keys.delete_if { |action| action == 'state:schedule' }
+keys.delete_if { |action| action == "state:schedule" }
 
 keys.each do |event|
   assert previous != event, keys
