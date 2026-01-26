@@ -212,6 +212,12 @@ Style/RedundantCondition:
 Style/UnlessLogicalOperators:
   Enabled: false
 
+Style/CollectionCompact:
+  Enabled: false
+
+Style/MutableConstant:
+  Enabled: false
+
 # Security
 Security/Open:
   Exclude:
