@@ -8,10 +8,10 @@ RSpec.describe_current do
 
   let(:event) { Karafka::Core::Monitoring::Event.new(rand.to_s, payload) }
   let(:error) { StandardError.new("test error") }
-  let(:active_span) { instance_double(Datadog::Tracing::SpanOperation) }
+  let(:active_span) { instance_double("Datadog::Tracing::SpanOperation") }
   let(:dd_client) do
     instance_double(
-      Datadog::Tracing,
+      "Datadog::Tracing",
       active_span: active_span,
       log_correlation: "dd.trace_id=123"
     )
