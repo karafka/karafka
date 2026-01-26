@@ -89,7 +89,7 @@ Metrics/AbcSize:
 
 # Layout
 Layout/LineLength:
-  Max: 99
+  Max: 100
 
 Layout/SpaceInsideHashLiteralBraces:
   EnforcedStyle: space
