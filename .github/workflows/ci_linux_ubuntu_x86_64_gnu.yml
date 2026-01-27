@@ -73,6 +73,22 @@ jobs:
       - name: Run yard-lint
         run: bundle exec yard-lint lib/
 
+  lostconf:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    strategy:
+      fail-fast: false
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          fetch-depth: 0
+      - name: Set up Node.js
+        uses: actions/setup-node@39370e3970a6d050c480ffad4ff0ed4d3fdee5af # v4.1.0
+        with:
+          node-version: '20'
+      - name: Run lostconf
+        run: npx lostconf --fail-on-stale
+
   # We do not split RSpec specs to OSS and Pro like integrations because they do not overload
   # Kafka heavily, compute total coverage for specs and are fast enough
   specs:
@@ -270,6 +286,7 @@ jobs:
       - karafka-checksum
       - rubocop
       - yard-lint
+      - lostconf
       - specs
       - integrations_oss
       - integrations_pro
