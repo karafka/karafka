@@ -7,6 +7,7 @@
   "includePaths": [
     "Gemfile",
     "Gemfile.lint",
+    "package.json",
     ".github/workflows/**"
   ],
   "ignorePaths": [
