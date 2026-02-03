@@ -78,8 +78,6 @@ module Karafka
       # Fallback to traditional require if safe method fails
       # @return [Boolean] true if successful, false otherwise
       def fallback_require_license
-        return false if const_defined?("::Karafka::License")
-
         require("karafka-license")
         true
       rescue LoadError
