@@ -8,7 +8,9 @@ RSpec.describe_current do
   context "when there is no license token" do
     before do
       # Ensure License constant is not defined from previous tests
+      # rubocop:disable RSpec/RemoveConst
       Karafka.send(:remove_const, :License) if Karafka.const_defined?(:License)
+      # rubocop:enable RSpec/RemoveConst
       license_config.token = false
     end
 
@@ -144,7 +146,9 @@ RSpec.describe_current do
     context "when License module is not defined" do
       before do
         # Ensure License constant is not defined
+        # rubocop:disable RSpec/RemoveConst
         Karafka.send(:remove_const, :License) if Karafka.const_defined?(:License)
+        # rubocop:enable RSpec/RemoveConst
       end
 
       context "when karafka-license gem is not available" do
@@ -217,7 +221,11 @@ RSpec.describe_current do
 
       it "attempts to load the license" do
         expect(described_class).to receive(:safe_load_license).and_call_original
-        described_class.detect { true } rescue nil
+        begin
+          described_class.detect { true }
+        rescue
+          nil
+        end
       end
     end
   end
