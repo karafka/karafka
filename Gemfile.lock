@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    karafka (2.5.5)
+    karafka (2.5.6)
       karafka-core (>= 2.5.6, < 2.6.0)
       karafka-rdkafka (>= 0.23.1)
       waterdrop (>= 2.8.14, < 3.0.0)
@@ -204,7 +204,7 @@ CHECKSUMS
   i18n (1.14.8) sha256=285778639134865c5e0f6269e0b818256017e8cde89993fdfcbfb64d088824a5
   io-console (0.8.2) sha256=d6e3ae7a7cc7574f4b8893b4fca2162e57a825b223a177b7afa236c5ef9814cc
   json (2.18.0) sha256=b10506aee4183f5cf49e0efc48073d7b75843ce3782c68dbeb763351c08fd505
-  karafka (2.5.5)
+  karafka (2.5.6)
   karafka-core (2.5.8) sha256=3b056abe55cede3f189a3b68c444012f9fb70ec49afd8689c99702ab72837041
   karafka-rdkafka (0.23.1) sha256=b248150477f672d047de44da24c89cf71a0bf5bd475f12a6214cc5fddeb65297
   karafka-rdkafka (0.23.1-aarch64-linux-gnu) sha256=ce73057b9dee87155fc49328749c222a8780a54ed571ed2c0417970a70cfea37

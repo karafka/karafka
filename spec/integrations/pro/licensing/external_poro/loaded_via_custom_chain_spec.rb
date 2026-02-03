@@ -29,6 +29,10 @@ module Karafka
       def token
         ENV.fetch("KARAFKA_PRO_LICENSE_TOKEN")
       end
+
+      def version
+        ENV.fetch("KARAFKA_PRO_VERSION", "")
+      end
     end
   end
 end

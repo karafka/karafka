@@ -1,5 +1,8 @@
 # Karafka Framework Changelog
 
+## 2.5.6 (Unreleased)
+- [Enhancement] Optimize license loading process by reading license files directly from the gem directory instead of requiring the entire gem, reducing initialization overhead and adding support for user-defined License modules.
+
 ## 2.5.5 (2026-01-24)
 - [Feature] Add multi-cluster Admin support via `Karafka::Admin.new(kafka: { ... })` allowing operations against different Kafka clusters while maintaining backward compatibility with existing class-method API.
 
