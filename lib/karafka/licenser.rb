@@ -11,8 +11,15 @@ module Karafka
     class << self
       # Tries to load the license and yields if successful
       def detect
-        # If required, do not require again
-        require("karafka-license") unless const_defined?("::Karafka::License")
+        # If license module is already fully defined, don't touch it
+        # This allows users to define their own License module for testing/custom setups
+        unless license_fully_defined?
+          # Try safe approach first (no code execution)
+          loaded = safe_load_license || fallback_require_license
+
+          # If neither method succeeded, return false
+          return false unless loaded
+        end
 
         yield
 
@@ -33,6 +40,51 @@ module Karafka
       end
 
       private
+
+      # Check if License module and required methods are already defined
+      # @return [Boolean]
+      def license_fully_defined?
+        return false unless const_defined?("::Karafka::License")
+
+        # Check if the required methods exist
+        ::Karafka::License.respond_to?(:token) &&
+          ::Karafka::License.respond_to?(:version)
+      end
+
+      # Attempt to safely load license without executing gem code
+      # @return [Boolean] true if successful, false otherwise
+      def safe_load_license
+        return false if const_defined?("::Karafka::License")
+
+        spec = Gem::Specification.find_by_name("karafka-license")
+        license_path = File.join(spec.gem_dir, "lib", "license.txt")
+        version_path = File.join(spec.gem_dir, "lib", "version.txt")
+
+        return false unless File.exist?(license_path)
+
+        # Manually construct the module without executing code
+        license_token = File.read(license_path)
+        version_content = File.read(version_path)
+
+        ::Karafka.const_set(:License, Module.new)
+        ::Karafka::License.define_singleton_method(:token) { license_token }
+        ::Karafka::License.define_singleton_method(:version) { version_content }
+
+        true
+      rescue Gem::MissingSpecError, Errno::ENOENT
+        false
+      end
+
+      # Fallback to traditional require if safe method fails
+      # @return [Boolean] true if successful, false otherwise
+      def fallback_require_license
+        return false if const_defined?("::Karafka::License")
+
+        require("karafka-license")
+        true
+      rescue LoadError
+        false
+      end
 
       # @param license_config [Karafka::Core::Configurable::Node] config related to the licensing
       def prepare(license_config)
