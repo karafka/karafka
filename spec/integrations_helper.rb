@@ -231,6 +231,10 @@ def become_pro!
     def self.token
       ENV.fetch("KARAFKA_PRO_LICENSE_TOKEN")
     end
+
+    def self.version
+      "1.0.0"
+    end
   end
 
   Karafka.const_set(:License, mod) unless Karafka.const_defined?(:License)
