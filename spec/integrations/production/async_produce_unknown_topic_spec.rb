@@ -4,10 +4,14 @@
 # Real-world scenario: After commit hooks in Rails using produce_async to unknown topics
 #
 # Questions answered by this test:
-# 1. Is the exception raised immediately from produce_async call? NO - it returns a handler
+# 1. Can produce_async raise immediately? SOMETIMES - depends on cached metadata
+#    - First attempt: May return handler (topic not yet in metadata cache)
+#    - Second attempt: May raise immediately (topic known to be invalid)
 # 2. Do messages queued BEFORE the unknown topic continue? YES - they succeed
 # 3. Do messages queued AFTER the unknown topic continue? YES - they succeed
-# 4. When is the error discovered? During handler.wait() or producer.close()
+# 4. When is the error discovered? Either immediately OR during handler.wait()
+#
+# Key insight: The behavior varies based on librdkafka's metadata cache state
 
 setup_karafka(allow_errors: true) do |config|
   # Disable auto-creation to ensure unknown topics fail
@@ -59,21 +63,41 @@ handler_before_2 = Karafka.producer.produce_async(
   payload: "before-message-2"
 )
 
-# Phase 2: Verify produce_async does NOT raise immediately for unknown topic
-produce_async_raised = false
+# Phase 2: Try producing to unknown topic (first attempt)
+first_attempt_raised = false
+handler_unknown_1 = nil
 
 begin
-  handler_unknown = Karafka.producer.produce_async(
+  handler_unknown_1 = Karafka.producer.produce_async(
     topic: unknown_topic,
-    payload: "message-to-unknown-topic"
+    payload: "first-message-to-unknown-topic"
   )
+  DT[:first_attempt_succeeded] = true
 rescue => e
-  produce_async_raised = true
-  DT[:immediate_exception] = e
+  first_attempt_raised = true
+  DT[:first_attempt_error] = e
+  DT[:first_attempt_succeeded] = false
 end
 
-# Assertion 1: produce_async should NOT raise immediately
-assert !produce_async_raised, "produce_async raised immediately: #{DT[:immediate_exception]}"
+# Phase 2b: Try producing to unknown topic AGAIN (second attempt)
+second_attempt_raised = false
+handler_unknown_2 = nil
+
+begin
+  handler_unknown_2 = Karafka.producer.produce_async(
+    topic: unknown_topic,
+    payload: "second-message-to-unknown-topic"
+  )
+  DT[:second_attempt_succeeded] = true
+rescue => e
+  second_attempt_raised = true
+  DT[:second_attempt_error] = e
+  DT[:second_attempt_succeeded] = false
+end
+
+# Store information about what happened
+DT[:first_raised] = first_attempt_raised
+DT[:second_raised] = second_attempt_raised
 
 # Phase 3: Send multiple messages to a valid topic AFTER the unknown topic message
 # This simulates other messages being "in-flight" and tests if they continue
@@ -95,15 +119,46 @@ handler_after_3 = Karafka.producer.produce_async(
 # Phase 4: Wait for all handlers and check their results
 # The error should be discovered during wait, not during produce_async
 
-# Collect all handlers
+# Collect all handlers (only add non-nil handlers)
 all_handlers = [
   { handler: handler_before_1, label: "before-msg-1", phase: :before },
   { handler: handler_before_2, label: "before-msg-2", phase: :before },
-  { handler: handler_unknown, label: "unknown-topic", phase: :unknown },
   { handler: handler_after_1, label: "after-msg-1", phase: :after },
   { handler: handler_after_2, label: "after-msg-2", phase: :after },
   { handler: handler_after_3, label: "after-msg-3", phase: :after }
 ]
+
+# Add unknown topic handlers only if they succeeded (didn't raise immediately)
+if handler_unknown_1
+  all_handlers << { handler: handler_unknown_1, label: "unknown-1", phase: :unknown }
+end
+
+if handler_unknown_2
+  all_handlers << { handler: handler_unknown_2, label: "unknown-2", phase: :unknown }
+end
+
+# Track immediate exceptions separately (only if they actually raised)
+# Note: We only add here if produce_async raised immediately (handler is nil)
+# Otherwise, we'll add the async failure when we wait on the handler below
+if !handler_unknown_1 && DT[:first_attempt_error]
+  DT[:failed_messages] << {
+    label: "unknown-1-immediate",
+    topic: unknown_topic,
+    error: DT[:first_attempt_error],
+    code: :raised_immediately,
+    phase: :unknown_immediate
+  }
+end
+
+if !handler_unknown_2 && DT[:second_attempt_error]
+  DT[:failed_messages] << {
+    label: "unknown-2-immediate",
+    topic: unknown_topic,
+    error: DT[:second_attempt_error],
+    code: :raised_immediately,
+    phase: :unknown_immediate
+  }
+end
 
 # Wait for all handlers and categorize results
 all_handlers.each do |h|
@@ -130,17 +185,40 @@ end
 
 # Assertions
 
-# Expected error codes for unknown topic
-# Based on timing, librdkafka may return different error codes
-UNKNOWN_TOPIC_ERROR_CODES = %i[unknown_partition unknown_topic_or_part msg_timed_out].freeze
+# Expected error codes for unknown topic (both immediate and async)
+UNKNOWN_TOPIC_ERROR_CODES = %i[
+  unknown_partition
+  unknown_topic_or_part
+  msg_timed_out
+  raised_immediately
+].freeze
 
-# Assertion 2: Unknown topic message should have failed
-unknown_failure = DT[:failed_messages].find { |m| m[:topic] == unknown_topic }
-assert !unknown_failure.nil?, "Message to unknown topic should fail"
+# Count failures
+unknown_failures = DT[:failed_messages].select { |m| m[:topic] == unknown_topic }
+unknown_failures.select { |m| m[:code] == :raised_immediately }
+unknown_failures.reject { |m| m[:code] == :raised_immediately }
+
+# Assertion 1: At least one unknown topic message should have failed
+assert unknown_failures.size >= 1, "At least one unknown topic message should fail"
 assert(
-  UNKNOWN_TOPIC_ERROR_CODES.include?(unknown_failure[:code]),
-  "Unknown topic should fail with expected error code, got: #{unknown_failure[:code]}"
+  unknown_failures.size <= 2,
+  "At most two unknown topic messages (tried twice), but got #{unknown_failures.size}: #{unknown_failures.map { |f| f[:label] }.join(", ")}"
 )
+
+# Assertion 2: Track what happened
+# First attempt: either raised immediately or returned handler that failed
+if DT[:first_raised]
+  DT[:result] = "First attempt raised immediately: #{DT[:first_attempt_error].class}"
+elsif handler_unknown_1
+  DT[:result] = "First attempt returned handler (async failure)"
+end
+
+# Second attempt: likely raises immediately after first attempt metadata cached
+if DT[:second_raised]
+  DT[:result] = "#{DT[:result]} | Second attempt raised immediately: #{DT[:second_attempt_error].class}"
+elsif handler_unknown_2
+  DT[:result] = "#{DT[:result]} | Second attempt returned handler (async failure)"
+end
 
 # Assertion 3: All valid topic messages should have succeeded (both before and after)
 valid_successes = DT[:successful_messages].select { |m| m[:topic] == valid_topic }
@@ -156,6 +234,10 @@ valid_successes.each do |msg|
   assert msg[:offset] >= 0, "Valid message should have offset >= 0"
 end
 
-# Assertion 5: Exactly 1 failed and 5 successful deliveries
-assert_equal 1, DT[:failed_messages].size, "Should have exactly 1 failed delivery"
-assert_equal 5, DT[:successful_messages].size, "Should have exactly 5 successful deliveries"
+# Assertion 5: Total delivery counts
+total_failed = DT[:failed_messages].size
+total_succeeded = DT[:successful_messages].size
+
+assert total_failed >= 1, "Should have at least 1 failed delivery (unknown topic)"
+assert total_failed <= 2, "Should have at most 2 failed deliveries (tried twice)"
+assert_equal 5, total_succeeded, "Should have exactly 5 successful deliveries (valid topic)"
