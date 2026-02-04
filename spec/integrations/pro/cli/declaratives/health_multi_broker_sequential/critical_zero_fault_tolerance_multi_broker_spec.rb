@@ -22,7 +22,6 @@
 
 # Integration test for topics health command detecting RF <= min.insync (zero fault tolerance)
 
-
 setup_karafka
 
 draw_routes do

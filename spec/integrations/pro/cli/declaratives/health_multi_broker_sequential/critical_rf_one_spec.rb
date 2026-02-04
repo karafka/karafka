@@ -22,7 +22,6 @@
 
 # Integration test for topics health command detecting RF=1 (no redundancy)
 
-
 setup_karafka
 
 draw_routes do

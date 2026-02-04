@@ -22,7 +22,6 @@
 
 # Integration test for topics health command with --detailed-exitcode when issues are found
 
-
 setup_karafka
 
 draw_routes do

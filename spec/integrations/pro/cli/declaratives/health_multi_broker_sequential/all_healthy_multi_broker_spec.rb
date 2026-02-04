@@ -22,7 +22,6 @@
 
 # Integration test for topics health command when all topics are healthy
 
-
 setup_karafka
 
 draw_routes do
