@@ -20,11 +20,8 @@ on:
   pull_request:
     branches: [master]
     paths:
-      - 'lib/karafka/admin/replication.rb'
-      - 'lib/karafka/admin/contracts/replication.rb'
-      - 'lib/karafka/pro/cli/topics/health.rb'
-      - 'spec/integrations/admin/replication_multi_broker_sequential/**'
-      - 'spec/integrations/pro/cli/declaratives/health/**'
+      - 'spec/integrations/**/*multi_broker*/**'
+      - 'spec/integrations/**/*multi_broker*.rb'
       - 'docker-compose.multi-broker.yml'
 
   schedule:
@@ -97,9 +94,7 @@ jobs:
       - name: Run multi-broker integration tests
         env:
           KARAFKA_PRO_LICENSE_TOKEN: ${{ secrets.KARAFKA_PRO_LICENSE_TOKEN }}
-        run: |
-          bin/integrations '/replication_multi_broker_sequential'
-          bin/integrations '/pro/cli/declaratives/health'
+        run: bin/integrations 'multi_broker'
 
       - name: Show Kafka logs on failure
         if: failure()
