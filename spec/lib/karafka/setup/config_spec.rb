@@ -3,6 +3,15 @@
 RSpec.describe_current do
   subject(:config_class) { described_class }
 
+  # Ensure License constant is removed before each test to prevent test pollution
+  # This is critical because other tests (like licenser_spec) may define License constants
+  # and with random test order, those constants may leak into these tests
+  before do
+    # rubocop:disable RSpec/RemoveConst
+    Karafka.send(:remove_const, :License) if Karafka.const_defined?(:License)
+    # rubocop:enable RSpec/RemoveConst
+  end
+
   describe "#setup" do
     it { expect { |block| config_class.setup(&block) }.to yield_with_args }
   end

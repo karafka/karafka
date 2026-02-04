@@ -54,17 +54,21 @@ module Karafka
       # Attempt to safely load license without executing gem code
       # @return [Boolean] true if successful, false otherwise
       def safe_load_license
-        return false if const_defined?("::Karafka::License")
-
+        # First verify the gem exists and files are accessible
         spec = Gem::Specification.find_by_name("karafka-license")
         license_path = File.join(spec.gem_dir, "lib", "license.txt")
         version_path = File.join(spec.gem_dir, "lib", "version.txt")
 
         return false unless File.exist?(license_path)
 
-        # Manually construct the module without executing code
+        # Read license data to ensure we can successfully load before removing any constants
         license_token = File.read(license_path)
         version_content = File.read(version_path)
+
+        # Only after confirming we have valid data, remove and replace the License constant
+        # This ensures we always use the actual license from the gem, overwriting any stale
+        # or incomplete License module that may have been defined elsewhere
+        ::Karafka.send(:remove_const, :License) if const_defined?("::Karafka::License")
 
         ::Karafka.const_set(:License, Module.new)
         ::Karafka::License.define_singleton_method(:token) { license_token }
@@ -72,12 +76,24 @@ module Karafka
 
         true
       rescue Gem::MissingSpecError, Errno::ENOENT
+        # Gem not found or files don't exist - don't touch existing License constant
         false
       end
 
       # Fallback to traditional require if safe method fails
       # @return [Boolean] true if successful, false otherwise
       def fallback_require_license
+        # First check if we can actually load the gem before removing any constants
+        # Try to find the gem spec to see if it exists
+        begin
+          Gem::Specification.find_by_name("karafka-license")
+        rescue Gem::MissingSpecError
+          return false
+        end
+
+        # Gem exists, so we can safely remove and reload the License constant
+        ::Karafka.send(:remove_const, :License) if const_defined?("::Karafka::License")
+
         require("karafka-license")
         true
       rescue LoadError
