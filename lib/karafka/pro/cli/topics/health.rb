@@ -33,94 +33,146 @@ module Karafka
           # Executes the health check across all topics in the cluster
           # @return [Boolean] true if issues were found, false if all topics are healthy
           def call
-            issues = []
+            issues = supervised("Checking topics health") { collect_issues }
+            display_results(issues)
+            issues.any?
+          end
 
-            supervised("Checking topics health") do
-              existing_topics.each do |topic|
-                topic_name = topic[:topic_name]
+          private
 
-                # Skip internal Kafka topics
-                next if topic_name.start_with?("__")
+          # Collects health issues from all non-internal topics
+          # @return [Array<Hash>] array of issue hashes with topic details
+          def collect_issues
+            existing_topics.each_with_object([]) do |topic, issues|
+              # Skip internal Kafka topics
+              next if topic[:topic_name].start_with?("__")
 
-                # Get replication factor from first partition
-                rf = topic[:partitions].first&.fetch(:replica_count) || 0
-
-                # Fetch topic configuration
-                configs = Admin::Configs.describe(
-                  Admin::Configs::Resource.new(type: :topic, name: topic_name)
-                ).first.configs
-
-                # Extract min.insync.replicas setting
-                min_isr = configs.find { |c| c.name == "min.insync.replicas" }&.value&.to_i || 1
-
-                # Check for issues
-                if rf == 1
-                  issues << {
-                    topic: topic_name,
-                    rf: rf,
-                    min_isr: min_isr,
-                    severity: :critical,
-                    message: "RF=#{rf} (no redundancy)"
-                  }
-                elsif rf <= min_isr
-                  issues << {
-                    topic: topic_name,
-                    rf: rf,
-                    min_isr: min_isr,
-                    severity: :critical,
-                    message: "RF=#{rf}, min.insync=#{min_isr} (zero fault tolerance)"
-                  }
-                elsif min_isr == 1
-                  issues << {
-                    topic: topic_name,
-                    rf: rf,
-                    min_isr: min_isr,
-                    severity: :warning,
-                    message: "RF=#{rf}, min.insync=#{min_isr} (low durability)"
-                  }
-                end
-              end
+              issue = analyze_topic(topic)
+              issues << issue if issue
             end
+          end
 
-            # Display results
+          # Analyzes a single topic for replication and durability issues
+          # @param topic [Hash] topic metadata from cluster info
+          # @return [Hash, nil] issue hash if problems found, nil if healthy
+          def analyze_topic(topic)
+            topic_name = topic[:topic_name]
+            rf = topic[:partitions].first&.fetch(:replica_count) || 0
+            min_isr = fetch_min_insync_replicas(topic_name)
+
+            check_replication_issue(topic_name, rf, min_isr)
+          end
+
+          # Fetches min.insync.replicas configuration for a topic
+          # @param topic_name [String] name of the topic
+          # @return [Integer] min.insync.replicas value, defaults to 1
+          def fetch_min_insync_replicas(topic_name)
+            configs = Admin::Configs.describe(
+              Admin::Configs::Resource.new(type: :topic, name: topic_name)
+            ).first.configs
+
+            configs.find { |c| c.name == "min.insync.replicas" }&.value&.to_i || 1
+          end
+
+          # Checks for replication and durability issues
+          # @param topic_name [String] name of the topic
+          # @param rf [Integer] replication factor
+          # @param min_isr [Integer] min.insync.replicas setting
+          # @return [Hash, nil] issue hash if problems found, nil if healthy
+          def check_replication_issue(topic_name, rf, min_isr)
+            if rf == 1
+              build_issue(topic_name, rf, min_isr, :critical, "RF=#{rf} (no redundancy)")
+            elsif rf <= min_isr
+              build_issue(
+                topic_name,
+                rf,
+                min_isr,
+                :critical,
+                "RF=#{rf}, min.insync=#{min_isr} (zero fault tolerance)"
+              )
+            elsif min_isr == 1
+              build_issue(
+                topic_name,
+                rf,
+                min_isr,
+                :warning,
+                "RF=#{rf}, min.insync=#{min_isr} (low durability)"
+              )
+            end
+          end
+
+          # Builds an issue hash with consistent structure
+          # @param topic [String] topic name
+          # @param rf [Integer] replication factor
+          # @param min_isr [Integer] min.insync.replicas
+          # @param severity [Symbol] :critical or :warning
+          # @param message [String] human-readable issue description
+          # @return [Hash] issue details
+          def build_issue(topic, rf, min_isr, severity, message)
+            {
+              topic: topic,
+              rf: rf,
+              min_isr: min_isr,
+              severity: severity,
+              message: message
+            }
+          end
+
+          # Displays health check results with color-coded output
+          # @param issues [Array<Hash>] collected issues
+          def display_results(issues)
             puts
 
             if issues.any?
-              puts "#{red("Issues found")}:"
-              puts
-
-              # Group by severity
-              critical_issues = issues.select { |i| i[:severity] == :critical }
-              warning_issues = issues.select { |i| i[:severity] == :warning }
-
-              if critical_issues.any?
-                puts "#{red("Critical")}:"
-                critical_issues.each do |issue|
-                  puts "  #{red("\u2022")} #{issue[:topic]}: #{issue[:message]}"
-                end
-                puts if warning_issues.any?
-              end
-
-              if warning_issues.any?
-                puts "#{yellow("Warnings")}:"
-                warning_issues.each do |issue|
-                  puts "  #{yellow("\u2022")} #{issue[:topic]}: #{issue[:message]}"
-                end
-              end
-
-              puts
-              puts "#{grey("Recommendations")}:"
-              puts "  #{grey("\u2022")} Ensure RF >= 3 for production topics"
-              puts "  #{grey("\u2022")} Set min.insync.replicas to at least 2"
-              puts "  #{grey("\u2022")} Maintain RF > min.insync.replicas for fault tolerance"
+              display_issues(issues)
             else
               puts "#{green("\u2713")} All topics are healthy"
             end
 
             puts
+          end
 
-            # Return true if issues found (for exit code handling)
-            issues.any?
+          # Displays issues grouped by severity
+          # @param issues [Array<Hash>] collected issues
+          def display_issues(issues)
+            puts "#{red("Issues found")}:"
+            puts
+
+            critical_issues = issues.select { |i| i[:severity] == :critical }
+            warning_issues = issues.select { |i| i[:severity] == :warning }
+
+            display_critical_issues(critical_issues) if critical_issues.any?
+            puts if critical_issues.any? && warning_issues.any?
+            display_warning_issues(warning_issues) if warning_issues.any?
+
+            puts
+            display_recommendations
+          end
+
+          # Displays critical issues
+          # @param issues [Array<Hash>] critical issues
+          def display_critical_issues(issues)
+            puts "#{red("Critical")}:"
+            issues.each do |issue|
+              puts "  #{red("\u2022")} #{issue[:topic]}: #{issue[:message]}"
+            end
+          end
+
+          # Displays warning issues
+          # @param issues [Array<Hash>] warning issues
+          def display_warning_issues(issues)
+            puts "#{yellow("Warnings")}:"
+            issues.each do |issue|
+              puts "  #{yellow("\u2022")} #{issue[:topic]}: #{issue[:message]}"
+            end
+          end
+
+          # Displays recommendations for addressing issues
+          def display_recommendations
+            puts "#{grey("Recommendations")}:"
+            puts "  #{grey("\u2022")} Ensure RF >= 3 for production topics"
+            puts "  #{grey("\u2022")} Set min.insync.replicas to at least 2"
+            puts "  #{grey("\u2022")} Maintain RF > min.insync.replicas for fault tolerance"
           end
         end
       end
