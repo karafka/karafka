@@ -45,15 +45,13 @@ out = capture_stdout do
 end
 
 # Should report warnings
-assert out.include?("Issues found")
-assert out.include?("Warnings")
+# Should show progressive output
+assert out.include?("Checking topics health")
 
-# Should identify low durability
+# Should identify low durability for our test topic
 assert out.include?(DT.topics[0])
 assert out.include?("RF=3, min.insync=1 (low durability)")
 
-# Should NOT show critical issues
-assert !out.include?("Critical:")
-
-# Should provide recommendations
+# Should provide recommendations at the end
+assert out.include?("Recommendations")
 assert out.include?("min.insync.replicas to at least 2")

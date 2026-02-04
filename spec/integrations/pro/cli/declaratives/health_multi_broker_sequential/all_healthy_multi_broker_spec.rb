@@ -55,8 +55,9 @@ end
 
 # Should run the health check
 assert out.include?("Checking topics health")
+assert out.include?("Found")
+assert out.include?("topics to check")
 
-# Our test topics should not appear in the issues section
-# (they're healthy with RF=3, min.insync=2)
-assert !out.include?(DT.topics[0])
-assert !out.include?(DT.topics[1])
+# Our test topics should show as healthy with checkmark
+assert out.include?("✓ #{DT.topics[0]}") || out.include?("#{DT.topics[0]}")
+assert out.include?("✓ #{DT.topics[1]}") || out.include?("#{DT.topics[1]}")

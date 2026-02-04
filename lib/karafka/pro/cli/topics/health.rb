@@ -33,24 +33,36 @@ module Karafka
           # Executes the health check across all topics in the cluster
           # @return [Boolean] true if issues were found, false if all topics are healthy
           def call
-            issues = supervised("Checking topics health") { collect_issues }
-            display_results(issues)
-            !issues.empty?
+            issues_found = false
+
+            supervised("Checking topics health") do
+              topics = existing_topics
+              puts "Found #{topics.count} topics to check..."
+              puts
+
+              topics.each do |topic|
+                # Skip internal Kafka topics
+                next if topic[:topic_name].start_with?("__")
+
+                issue = analyze_topic(topic)
+
+                if issue
+                  display_issue(issue)
+                  issues_found = true
+                else
+                  puts "#{green("✓")} #{topic[:topic_name]}"
+                end
+              end
+            end
+
+            puts
+            display_summary(issues_found)
+            puts
+
+            issues_found
           end
 
           private
-
-          # Collects health issues from all non-internal topics
-          # @return [Array<Hash>] array of issue hashes with topic details
-          def collect_issues
-            existing_topics.each_with_object([]) do |topic, issues|
-              # Skip internal Kafka topics
-              next if topic[:topic_name].start_with?("__")
-
-              issue = analyze_topic(topic)
-              issues << issue if issue
-            end
-          end
 
           # Analyzes a single topic for replication and durability issues
           # @param topic [Hash] topic metadata from cluster info
@@ -122,61 +134,26 @@ module Karafka
             }
           end
 
-          # Displays health check results with color-coded output
-          # @param issues [Array<Hash>] collected issues
-          def display_results(issues)
-            puts
+          # Displays a single issue immediately as it's found
+          # @param issue [Hash] issue details
+          def display_issue(issue)
+            color_method = issue[:severity] == :critical ? :red : :yellow
+            symbol = issue[:severity] == :critical ? "\u2717" : "\u26A0"
+            puts "#{send(color_method, symbol)} #{issue[:topic]}: #{issue[:message]}"
+          end
 
-            if issues.empty?
-              puts "#{green("\u2713")} All topics are healthy"
+          # Displays final summary and recommendations
+          # @param issues_found [Boolean] whether any issues were found
+          def display_summary(issues_found)
+            if issues_found
+              puts
+              puts "#{grey("Recommendations")}:"
+              puts "  #{grey("\u2022")} Ensure RF >= 3 for production topics"
+              puts "  #{grey("\u2022")} Set min.insync.replicas to at least 2"
+              puts "  #{grey("\u2022")} Maintain RF > min.insync.replicas for fault tolerance"
             else
-              display_issues(issues)
+              puts "#{green("\u2713")} All topics are healthy"
             end
-
-            puts
-          end
-
-          # Displays issues grouped by severity
-          # @param issues [Array<Hash>] collected issues
-          def display_issues(issues)
-            puts "#{red("Issues found")}:"
-            puts
-
-            critical_issues = issues.select { |i| i[:severity] == :critical }
-            warning_issues = issues.select { |i| i[:severity] == :warning }
-
-            display_critical_issues(critical_issues) unless critical_issues.empty?
-            puts unless critical_issues.empty? || warning_issues.empty?
-            display_warning_issues(warning_issues) unless warning_issues.empty?
-
-            puts
-            display_recommendations
-          end
-
-          # Displays critical issues
-          # @param issues [Array<Hash>] critical issues
-          def display_critical_issues(issues)
-            puts "#{red("Critical")}:"
-            issues.each do |issue|
-              puts "  #{red("\u2022")} #{issue[:topic]}: #{issue[:message]}"
-            end
-          end
-
-          # Displays warning issues
-          # @param issues [Array<Hash>] warning issues
-          def display_warning_issues(issues)
-            puts "#{yellow("Warnings")}:"
-            issues.each do |issue|
-              puts "  #{yellow("\u2022")} #{issue[:topic]}: #{issue[:message]}"
-            end
-          end
-
-          # Displays recommendations for addressing issues
-          def display_recommendations
-            puts "#{grey("Recommendations")}:"
-            puts "  #{grey("\u2022")} Ensure RF >= 3 for production topics"
-            puts "  #{grey("\u2022")} Set min.insync.replicas to at least 2"
-            puts "  #{grey("\u2022")} Maintain RF > min.insync.replicas for fault tolerance"
           end
         end
       end

@@ -74,10 +74,9 @@ out = capture_stdout do
   Karafka::Cli.start
 end
 
-# Should report both critical and warnings
-assert out.include?("Issues found")
-assert out.include?("Critical")
-assert out.include?("Warnings")
+# Should show progressive output
+assert out.include?("Checking topics health")
+assert out.include?("Found")
 
 # Should list all problematic topics
 assert out.include?(DT.topics[0])
