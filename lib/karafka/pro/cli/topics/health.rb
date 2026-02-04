@@ -82,15 +82,13 @@ module Karafka
           def check_replication_issue(topic_name, rf, min_isr)
             return build_issue(topic_name, rf, min_isr, :critical, "RF=#{rf} (no redundancy)") if rf == 1
 
-            if rf <= min_isr
-              return build_issue(
-                topic_name,
-                rf,
-                min_isr,
-                :critical,
-                "RF=#{rf}, min.insync=#{min_isr} (zero fault tolerance)"
-              )
-            end
+            return build_issue(
+              topic_name,
+              rf,
+              min_isr,
+              :critical,
+              "RF=#{rf}, min.insync=#{min_isr} (zero fault tolerance)"
+            ) if rf <= min_isr
 
             return build_issue(
               topic_name,
