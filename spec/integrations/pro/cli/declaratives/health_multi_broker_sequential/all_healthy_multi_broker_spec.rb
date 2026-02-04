@@ -59,6 +59,6 @@ assert out.include?("All topics are healthy")
 assert out.include?("Checking topics health")
 
 # Should not show any issues
-assert_not out.include?("Issues found")
-assert_not out.include?("Critical")
-assert_not out.include?("Warnings")
+assert !out.include?("Issues found")
+assert !out.include?("Critical")
+assert !out.include?("Warnings")

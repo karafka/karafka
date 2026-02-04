@@ -30,9 +30,17 @@ module Karafka
         module Extension
           # @param action [String] action we want to take
           def call(action = "help")
-            return Pro::Cli::Topics::Health.new.call if action == "health"
+            if action == "health"
+              detailed_exit_code = options.fetch(:detailed_exitcode, false)
+              issues_found = Pro::Cli::Topics::Health.new.call
 
-            super
+              return unless detailed_exit_code
+
+              # Exit with code 2 if issues found, code 0 if all healthy
+              issues_found ? exit(2) : exit(0)
+            else
+              super
+            end
           end
         end
       end

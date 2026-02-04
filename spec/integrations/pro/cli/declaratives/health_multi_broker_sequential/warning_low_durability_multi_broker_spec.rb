@@ -54,7 +54,7 @@ assert out.include?(DT.topics[0])
 assert out.include?("RF=3, min.insync=1 (low durability)")
 
 # Should NOT show critical issues
-assert_not out.include?("Critical:")
+assert !out.include?("Critical:")
 
 # Should provide recommendations
 assert out.include?("min.insync.replicas to at least 2")

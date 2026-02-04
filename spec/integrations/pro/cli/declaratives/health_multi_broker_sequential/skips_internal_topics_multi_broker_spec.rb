@@ -46,8 +46,8 @@ out = capture_stdout do
 end
 
 # Should not report issues about internal topics
-assert_not out.include?("__consumer_offsets")
-assert_not out.include?("__transaction_state")
+assert !out.include?("__consumer_offsets")
+assert !out.include?("__transaction_state")
 
 # Should only check user topics
 assert out.include?("Checking topics health")
