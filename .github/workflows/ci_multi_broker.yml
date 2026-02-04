@@ -1,4 +1,4 @@
-name: CI Multi-Broker Replication Tests
+name: CI Multi-Broker Tests
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -94,7 +94,7 @@ jobs:
             exit 1 unless broker_count >= 3
           "
 
-      - name: Run multi-broker replication integration tests
+      - name: Run multi-broker integration tests
         env:
           KARAFKA_PRO_LICENSE_TOKEN: ${{ secrets.KARAFKA_PRO_LICENSE_TOKEN }}
         run: |
@@ -118,7 +118,7 @@ jobs:
         run: docker compose -f docker-compose.multi-broker.yml down -v
 
   ci-success-multi-broker:
-    name: CI Multi-Broker Replication Success
+    name: CI Multi-Broker Success
     runs-on: ubuntu-latest
     if: always()
     needs:
@@ -129,4 +129,4 @@ jobs:
           contains(needs.*.result, 'failure') ||
           contains(needs.*.result, 'cancelled')
         run: exit 1
-      - run: echo "All Multi-Broker Replication CI checks passed!"
+      - run: echo "All Multi-Broker CI checks passed!"
