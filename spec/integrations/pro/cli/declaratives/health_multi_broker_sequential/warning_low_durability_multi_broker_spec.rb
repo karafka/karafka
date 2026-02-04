@@ -22,7 +22,6 @@
 
 # Integration test for topics health command detecting min.insync=1 (low durability warning)
 
-require "integrations_helper"
 
 setup_karafka
 

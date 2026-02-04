@@ -22,7 +22,6 @@
 
 # Integration test for topics health command with mixed critical and warning issues
 
-require "integrations_helper"
 
 setup_karafka
 

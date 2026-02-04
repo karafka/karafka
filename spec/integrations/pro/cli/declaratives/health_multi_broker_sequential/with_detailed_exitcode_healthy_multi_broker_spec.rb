@@ -22,7 +22,6 @@
 
 # Integration test for topics health command with --detailed-exitcode when all topics are healthy
 
-require "integrations_helper"
 
 setup_karafka
 

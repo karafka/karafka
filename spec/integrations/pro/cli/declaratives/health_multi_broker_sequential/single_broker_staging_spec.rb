@@ -23,7 +23,6 @@
 # Integration test for topics health command in single-broker cluster (common staging setup)
 # This test expects to detect RF=1 as a critical issue, which is typical in single-broker setups
 
-require "integrations_helper"
 
 setup_karafka
 

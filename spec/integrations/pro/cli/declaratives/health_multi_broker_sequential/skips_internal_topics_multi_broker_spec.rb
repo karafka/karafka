@@ -22,7 +22,6 @@
 
 # Integration test verifying that health command skips internal Kafka topics (starting with __)
 
-require "integrations_helper"
 
 setup_karafka
 
