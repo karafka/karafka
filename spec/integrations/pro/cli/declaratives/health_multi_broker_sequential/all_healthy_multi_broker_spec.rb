@@ -54,6 +54,8 @@ out = capture_stdout do
 end
 
 # Should indicate all topics are healthy
+puts "DEBUG: Output is: #{out.inspect}"
+puts "DEBUG: Output length: #{out.length}"
 assert out.include?("All topics are healthy")
 assert out.include?("Checking topics health")
 
