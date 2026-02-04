@@ -20,16 +20,12 @@
 # License: https://karafka.io/docs/Pro-License-Comm/
 # Contact: contact@karafka.io
 
-# Integration test for topics health command detecting min.insync=1 (low durability warning)
+# Integration test verifying that health command skips internal Kafka topics (starting with __)
 
 require "integrations_helper"
 
 setup_karafka
 
-# This test requires at least 3 brokers for RF=3
-cluster_info = Karafka::Admin.cluster_info
-broker_count = cluster_info.brokers.size
-exit 0 unless broker_count >= 3
 
 draw_routes do
   topic DT.topics[0] do
@@ -37,7 +33,7 @@ draw_routes do
     config(
       partitions: 2,
       replication_factor: 3,
-      "min.insync.replicas": 1
+      "min.insync.replicas": 2
     )
   end
 end
@@ -51,16 +47,16 @@ out = capture_stdout do
   Karafka::Cli.start
 end
 
-# Should report warnings
-assert out.include?("Issues found")
-assert out.include?("Warnings")
+# Should not report issues about internal topics
+assert_not out.include?("__consumer_offsets")
+assert_not out.include?("__transaction_state")
 
-# Should identify low durability
-assert out.include?(DT.topics[0])
-assert out.include?("RF=3, min.insync=1 (low durability)")
+# Should only check user topics
+assert out.include?("Checking topics health")
 
-# Should NOT show critical issues
-assert_not out.include?("Critical:")
-
-# Should provide recommendations
-assert out.include?("min.insync.replicas to at least 2")
+# If test topic is healthy, should report all healthy
+# (assumes internal topics might have RF=1 which is normal)
+if out.include?("Issues found")
+  # If there are issues, they should only be about our test topics
+  assert out.include?(DT.topics[0]) if out.include?("Issues found") && out.include?(DT.topics[0])
+end

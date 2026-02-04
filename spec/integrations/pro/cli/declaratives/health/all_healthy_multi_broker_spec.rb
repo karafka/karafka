@@ -26,10 +26,6 @@ require "integrations_helper"
 
 setup_karafka
 
-# This test requires at least 3 brokers for RF=3
-cluster_info = Karafka::Admin.cluster_info
-broker_count = cluster_info.brokers.size
-exit 0 unless broker_count >= 3
 
 draw_routes do
   topic DT.topics[0] do

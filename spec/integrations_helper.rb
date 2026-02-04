@@ -65,6 +65,21 @@ def setup_karafka(
   log_messages: true,
   consumer_group_protocol: false
 )
+  # Auto-skip multi-broker tests when running on single-broker setup
+  # Tests/directories with "multi_broker" in the name require multiple brokers
+  caller_path = caller_locations(1..1).first.path
+  if caller_path.include?("multi_broker")
+    require_relative "../lib/karafka"
+    Karafka::App.setup do |config|
+      config.kafka = { "bootstrap.servers": ENV.fetch("KAFKA_BOOTSTRAP_SERVERS", "127.0.0.1:9092") }
+    end
+    cluster_info = Karafka::Admin.cluster_info
+    broker_count = cluster_info.brokers.size
+    # Determine required broker count from directory name if present
+    required_brokers = caller_path[/multi_broker_(\d+)/, 1]&.to_i || 2
+    exit 0 unless broker_count >= required_brokers
+  end
+
   # If the spec  is in pro, run in pro mode
   become_pro! if pro
 

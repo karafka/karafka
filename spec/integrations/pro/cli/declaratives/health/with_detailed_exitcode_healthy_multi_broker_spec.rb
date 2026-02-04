@@ -20,23 +20,19 @@
 # License: https://karafka.io/docs/Pro-License-Comm/
 # Contact: contact@karafka.io
 
-# Integration test for topics health command detecting RF <= min.insync (zero fault tolerance)
+# Integration test for topics health command with --detailed-exitcode when all topics are healthy
 
 require "integrations_helper"
 
 setup_karafka
 
-# This test requires at least 2 brokers for RF=2
-cluster_info = Karafka::Admin.cluster_info
-broker_count = cluster_info.brokers.size
-exit 0 unless broker_count >= 2
 
 draw_routes do
   topic DT.topics[0] do
     consumer Class.new
     config(
       partitions: 2,
-      replication_factor: 2,
+      replication_factor: 3,
       "min.insync.replicas": 2
     )
   end
@@ -46,19 +42,18 @@ create_routes_topics
 
 ARGV[0] = "topics"
 ARGV[1] = "health"
+ARGV[2] = "--detailed-exitcode"
+
+exit_code = nil
 
 out = capture_stdout do
+  # Should exit with 0 (no issues)
   Karafka::Cli.start
+  exit_code = 0
+rescue SystemExit => e
+  exit_code = e.status
 end
 
-# Should report critical issues
-assert out.include?("Issues found")
-assert out.include?("Critical")
+assert_equal 0, exit_code
 
-# Should identify zero fault tolerance
-assert out.include?(DT.topics[0])
-assert out.include?("RF=2, min.insync=2 (zero fault tolerance)")
-
-# Should provide recommendations
-assert out.include?("Recommendations")
-assert out.include?("RF > min.insync.replicas")
+assert out.include?("All topics are healthy")
