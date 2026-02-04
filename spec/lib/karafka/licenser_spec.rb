@@ -208,6 +208,23 @@ RSpec.describe_current do
           expect(described_class).not_to receive(:require)
           described_class.detect { true }
         end
+
+        it "overwrites existing stale License constant with gem data" do
+          # First define a stale License module
+          stale_license = Module.new do
+            def self.token
+              "stale-token"
+            end
+          end
+          stub_const("Karafka::License", stale_license)
+
+          # Should overwrite with actual gem data
+          described_class.detect { true }
+
+          expect(Karafka::License.token).to eq(license_content)
+          expect(Karafka::License.token).not_to eq("stale-token")
+          expect(Karafka::License.version).to eq(version_content)
+        end
       end
     end
 

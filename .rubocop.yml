@@ -160,6 +160,10 @@ Lint/NonLocalExitFromIterator:
 Lint/StructNewOverride:
   Enabled: false
 
+Lint/ConstantDefinitionInBlock:
+  Exclude:
+    - lib/karafka/licenser.rb
+
 # Style
 Style/AccessModifierDeclarations:
   Exclude:
