@@ -26,7 +26,6 @@ require "integrations_helper"
 
 setup_karafka
 
-
 draw_routes do
   topic DT.topics[0] do
     consumer Class.new

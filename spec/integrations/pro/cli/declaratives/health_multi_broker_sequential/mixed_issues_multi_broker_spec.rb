@@ -26,7 +26,6 @@ require "integrations_helper"
 
 setup_karafka
 
-
 draw_routes do
   # Critical: RF=1
   topic DT.topics[0] do
