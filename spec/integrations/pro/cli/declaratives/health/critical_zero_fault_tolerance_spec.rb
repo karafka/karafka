@@ -26,6 +26,11 @@ require "integrations_helper"
 
 setup_karafka
 
+# This test requires at least 2 brokers for RF=2
+cluster_info = Karafka::Admin.cluster_info
+broker_count = cluster_info.brokers.size
+exit 0 unless broker_count >= 2
+
 draw_routes do
   topic DT.topics[0] do
     consumer Class.new
