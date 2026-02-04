@@ -35,7 +35,7 @@ module Karafka
           def call
             issues = supervised("Checking topics health") { collect_issues }
             display_results(issues)
-            issues.any?
+            !issues.empty?
           end
 
           private
@@ -65,13 +65,13 @@ module Karafka
 
           # Fetches min.insync.replicas configuration for a topic
           # @param topic_name [String] name of the topic
-          # @return [Integer] min.insync.replicas value, defaults to 1
+          # @return [Integer] min.insync.replicas value
           def fetch_min_insync_replicas(topic_name)
             configs = Admin::Configs.describe(
               Admin::Configs::Resource.new(type: :topic, name: topic_name)
             ).first.configs
 
-            configs.find { |c| c.name == "min.insync.replicas" }&.value&.to_i || 1
+            configs.find { |c| c.name == "min.insync.replicas" }.value.to_i
           end
 
           # Checks for replication and durability issues
@@ -80,25 +80,27 @@ module Karafka
           # @param min_isr [Integer] min.insync.replicas setting
           # @return [Hash, nil] issue hash if problems found, nil if healthy
           def check_replication_issue(topic_name, rf, min_isr)
-            if rf == 1
-              build_issue(topic_name, rf, min_isr, :critical, "RF=#{rf} (no redundancy)")
-            elsif rf <= min_isr
-              build_issue(
+            return build_issue(topic_name, rf, min_isr, :critical, "RF=#{rf} (no redundancy)") if rf == 1
+
+            if rf <= min_isr
+              return build_issue(
                 topic_name,
                 rf,
                 min_isr,
                 :critical,
                 "RF=#{rf}, min.insync=#{min_isr} (zero fault tolerance)"
               )
-            elsif min_isr == 1
-              build_issue(
-                topic_name,
-                rf,
-                min_isr,
-                :warning,
-                "RF=#{rf}, min.insync=#{min_isr} (low durability)"
-              )
             end
+
+            return build_issue(
+              topic_name,
+              rf,
+              min_isr,
+              :warning,
+              "RF=#{rf}, min.insync=#{min_isr} (low durability)"
+            ) if min_isr == 1
+
+            nil
           end
 
           # Builds an issue hash with consistent structure
@@ -123,10 +125,10 @@ module Karafka
           def display_results(issues)
             puts
 
-            if issues.any?
-              display_issues(issues)
-            else
+            if issues.empty?
               puts "#{green("\u2713")} All topics are healthy"
+            else
+              display_issues(issues)
             end
 
             puts
@@ -141,9 +143,9 @@ module Karafka
             critical_issues = issues.select { |i| i[:severity] == :critical }
             warning_issues = issues.select { |i| i[:severity] == :warning }
 
-            display_critical_issues(critical_issues) if critical_issues.any?
-            puts if critical_issues.any? && warning_issues.any?
-            display_warning_issues(warning_issues) if warning_issues.any?
+            display_critical_issues(critical_issues) unless critical_issues.empty?
+            puts unless critical_issues.empty? || warning_issues.empty?
+            display_warning_issues(warning_issues) unless warning_issues.empty?
 
             puts
             display_recommendations
