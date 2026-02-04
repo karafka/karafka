@@ -1,6 +1,7 @@
 # Karafka Framework Changelog
 
 ## 2.5.6 (Unreleased)
+- **[Feature]** Add `karafka topics health` command to check Kafka topics for replication and durability issues, detecting no redundancy (RF=1), zero fault tolerance (RF≤min.insync), and low durability (min.insync=1) configurations with color-coded severity grouping and actionable recommendations (Pro).
 - [Enhancement] Optimize license loading process by reading license files directly from the gem directory instead of requiring the entire gem, reducing initialization overhead and adding support for user-defined License modules.
 
 ## 2.5.5 (2026-01-24)

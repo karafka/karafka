@@ -37,6 +37,7 @@ module Karafka
         encryption/setup/config
         encryption/contracts/config
         encryption/messages/parser
+        cli/topics
       ].freeze
 
       # Zeitwerk pro loader

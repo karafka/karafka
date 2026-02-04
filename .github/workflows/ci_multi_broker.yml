@@ -1,4 +1,4 @@
-name: CI Multi-Broker Replication Tests
+name: CI Multi-Broker Tests
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -19,11 +19,6 @@ on:
 
   pull_request:
     branches: [master]
-    paths:
-      - 'lib/karafka/admin/replication.rb'
-      - 'lib/karafka/admin/contracts/replication.rb'
-      - 'spec/integrations/admin/replication_multi_broker_sequential/**'
-      - 'docker-compose.multi-broker.yml'
 
   schedule:
     - cron: '0 3 * * *' # Daily at 3 AM UTC (after main CI at 1 AM)
@@ -92,10 +87,10 @@ jobs:
             exit 1 unless broker_count >= 3
           "
 
-      - name: Run multi-broker replication integration tests
+      - name: Run multi-broker integration tests
         env:
           KARAFKA_PRO_LICENSE_TOKEN: ${{ secrets.KARAFKA_PRO_LICENSE_TOKEN }}
-        run: bin/integrations '/replication_multi_broker_sequential'
+        run: bin/integrations 'multi_broker'
 
       - name: Show Kafka logs on failure
         if: failure()
@@ -114,7 +109,7 @@ jobs:
         run: docker compose -f docker-compose.multi-broker.yml down -v
 
   ci-success-multi-broker:
-    name: CI Multi-Broker Replication Success
+    name: CI Multi-Broker Success
     runs-on: ubuntu-latest
     if: always()
     needs:
@@ -125,4 +120,4 @@ jobs:
           contains(needs.*.result, 'failure') ||
           contains(needs.*.result, 'cancelled')
         run: exit 1
-      - run: echo "All Multi-Broker Replication CI checks passed!"
+      - run: echo "All Multi-Broker CI checks passed!"
