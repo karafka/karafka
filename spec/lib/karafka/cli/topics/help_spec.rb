@@ -20,6 +20,7 @@ RSpec.describe_current do
         "align        # Aligns configuration of all declarative topics based on definitions",
         "create       # Creates topics with appropriate settings",
         "delete       # Deletes all topics defined in the routes",
+        "health       # Checks topics health and replication settings (Pro only)",
         "help         # Describes available topics management commands",
         "migrate      # Creates missing topics, repartitions existing and aligns configuration",
         "plan         # Plans migration process and prints changes to be applied",
@@ -49,7 +50,8 @@ RSpec.describe_current do
         "karafka topics create",
         "karafka topics plan --detailed-exitcode",
         "karafka topics migrate",
-        "karafka topics align"
+        "karafka topics align",
+        "karafka topics health"
       ]
 
       expected_examples.each do |example|
