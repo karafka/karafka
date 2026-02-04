@@ -88,8 +88,8 @@ assert out.include?("RF=1 (no redundancy)")
 assert out.include?("RF=2, min.insync=2 (zero fault tolerance)")
 assert out.include?("RF=3, min.insync=1 (low durability)")
 
-# Healthy topic should not be listed
-assert !out.include?(DT.topics[3])
+# Healthy topic should show with checkmark
+assert out.include?("✓ #{DT.topics[3]}")
 
 # Should provide recommendations
 assert out.include?("Recommendations")

@@ -44,9 +44,8 @@ out = capture_stdout do
   Karafka::Cli.start
 end
 
-# Should report critical issues
-assert out.include?("Issues found")
-assert out.include?("Critical")
+# Should show progressive output
+assert out.include?("Checking topics health")
 
 # Should identify zero fault tolerance
 assert out.include?(DT.topics[0])

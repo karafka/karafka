@@ -53,9 +53,10 @@ out = capture_stdout do
   Karafka::Cli.start
 end
 
+# Should show progressive output
+assert out.include?("Checking topics health")
+
 # Should detect RF=1 issues on both topics
-assert out.include?("Issues found")
-assert out.include?("Critical")
 assert out.include?(DT.topics[0])
 assert out.include?(DT.topics[1])
 assert out.include?("RF=1 (no redundancy)")

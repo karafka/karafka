@@ -59,5 +59,5 @@ assert out.include?("Found")
 assert out.include?("topics to check")
 
 # Our test topics should show as healthy with checkmark
-assert out.include?("✓ #{DT.topics[0]}") || out.include?("#{DT.topics[0]}")
-assert out.include?("✓ #{DT.topics[1]}") || out.include?("#{DT.topics[1]}")
+assert out.include?("✓ #{DT.topics[0]}") || out.include?(DT.topics[0].to_s)
+assert out.include?("✓ #{DT.topics[1]}") || out.include?(DT.topics[1].to_s)

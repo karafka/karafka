@@ -51,5 +51,5 @@ rescue SystemExit => e
 end
 
 assert_equal 2, exit_code
-assert out.include?("Issues found")
+assert out.include?("Checking topics health")
 assert out.include?(DT.topics[0])
