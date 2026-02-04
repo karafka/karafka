@@ -40,7 +40,7 @@ module Karafka
                 topic_name = topic[:topic_name]
 
                 # Skip internal Kafka topics
-                next if topic_name.start_with?('__')
+                next if topic_name.start_with?("__")
 
                 # Get replication factor from first partition
                 rf = topic[:partitions].first&.fetch(:replica_count) || 0
@@ -51,7 +51,7 @@ module Karafka
                 ).first.configs
 
                 # Extract min.insync.replicas setting
-                min_isr = configs.find { |c| c.name == 'min.insync.replicas' }&.value&.to_i || 1
+                min_isr = configs.find { |c| c.name == "min.insync.replicas" }&.value&.to_i || 1
 
                 # Check for issues
                 if rf == 1
@@ -83,8 +83,9 @@ module Karafka
             end
 
             # Display results
+            puts
+
             if issues.any?
-              puts
               puts "#{red("Issues found")}:"
               puts
 
@@ -112,12 +113,11 @@ module Karafka
               puts "  #{grey("\u2022")} Ensure RF >= 3 for production topics"
               puts "  #{grey("\u2022")} Set min.insync.replicas to at least 2"
               puts "  #{grey("\u2022")} Maintain RF > min.insync.replicas for fault tolerance"
-              puts
             else
-              puts
               puts "#{green("\u2713")} All topics are healthy"
-              puts
             end
+
+            puts
 
             # Return true if issues found (for exit code handling)
             issues.any?

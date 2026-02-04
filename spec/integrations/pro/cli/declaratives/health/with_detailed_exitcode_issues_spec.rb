@@ -26,12 +26,10 @@ exit_code = nil
 
 out = capture_stdout do
   # Should exit with 2 (issues found)
-  begin
-    Karafka::Cli.start
-    exit_code = 0
-  rescue SystemExit => e
-    exit_code = e.status
-  end
+  Karafka::Cli.start
+  exit_code = 0
+rescue SystemExit => e
+  exit_code = e.status
 end
 
 assert_equal 2, exit_code

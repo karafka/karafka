@@ -23,16 +23,16 @@ ARGV[0] = "topics"
 ARGV[1] = "health"
 ARGV[2] = "--detailed-exitcode"
 
+exit_code = nil
+
 out = capture_stdout do
   # Should exit with 0 (no issues)
-  begin
-    Karafka::Cli.start
-    exit_code = 0
-  rescue SystemExit => e
-    exit_code = e.status
-  end
-
-  assert_equal 0, exit_code
+  Karafka::Cli.start
+  exit_code = 0
+rescue SystemExit => e
+  exit_code = e.status
 end
+
+assert_equal 0, exit_code
 
 assert out.include?("All topics are healthy")
