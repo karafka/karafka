@@ -5,8 +5,9 @@
 #
 # Questions answered by this test:
 # 1. Is the exception raised immediately from produce_async call? NO - it returns a handler
-# 2. Do other in-flight messages continue to be published after an unknown topic error? YES
-# 3. When is the error discovered? During handler.wait() or producer.close()
+# 2. Do messages queued BEFORE the unknown topic continue? YES - they succeed
+# 3. Do messages queued AFTER the unknown topic continue? YES - they succeed
+# 4. When is the error discovered? During handler.wait() or producer.close()
 
 setup_karafka(allow_errors: true) do |config|
   # Disable auto-creation to ensure unknown topics fail
@@ -46,7 +47,19 @@ unknown_topic = "non-existent-topic-#{SecureRandom.uuid}"
 # Valid topic (exists because draw_routes creates it)
 valid_topic = DT.topics[0]
 
-# Phase 1: Verify produce_async does NOT raise immediately for unknown topic
+# Phase 1: Send messages to valid topic BEFORE the unknown topic message
+# This simulates messages already queued before encountering the error
+handler_before_1 = Karafka.producer.produce_async(
+  topic: valid_topic,
+  payload: "before-message-1"
+)
+
+handler_before_2 = Karafka.producer.produce_async(
+  topic: valid_topic,
+  payload: "before-message-2"
+)
+
+# Phase 2: Verify produce_async does NOT raise immediately for unknown topic
 produce_async_raised = false
 
 begin
@@ -62,64 +75,55 @@ end
 # Assertion 1: produce_async should NOT raise immediately
 assert !produce_async_raised, "produce_async raised immediately: #{DT[:immediate_exception]}"
 
-# Phase 2: Send multiple messages to a valid topic AFTER the unknown topic message
+# Phase 3: Send multiple messages to a valid topic AFTER the unknown topic message
 # This simulates other messages being "in-flight" and tests if they continue
-handler_valid_1 = Karafka.producer.produce_async(
+handler_after_1 = Karafka.producer.produce_async(
   topic: valid_topic,
-  payload: "valid-message-1"
+  payload: "after-message-1"
 )
 
-handler_valid_2 = Karafka.producer.produce_async(
+handler_after_2 = Karafka.producer.produce_async(
   topic: valid_topic,
-  payload: "valid-message-2"
+  payload: "after-message-2"
 )
 
-handler_valid_3 = Karafka.producer.produce_async(
+handler_after_3 = Karafka.producer.produce_async(
   topic: valid_topic,
-  payload: "valid-message-3"
+  payload: "after-message-3"
 )
 
-# Phase 3: Wait for all handlers and check their results
+# Phase 4: Wait for all handlers and check their results
 # The error should be discovered during wait, not during produce_async
 
-# Check unknown topic message (should fail)
-unknown_result = handler_unknown.wait(raise_response_error: false)
+# Collect all handlers
+all_handlers = [
+  { handler: handler_before_1, label: "before-msg-1", phase: :before },
+  { handler: handler_before_2, label: "before-msg-2", phase: :before },
+  { handler: handler_unknown, label: "unknown-topic", phase: :unknown },
+  { handler: handler_after_1, label: "after-msg-1", phase: :after },
+  { handler: handler_after_2, label: "after-msg-2", phase: :after },
+  { handler: handler_after_3, label: "after-msg-3", phase: :after }
+]
 
-if unknown_result.error
-  DT[:failed_messages] << {
-    topic: unknown_topic,
-    error: unknown_result.error,
-    code: unknown_result.error.code
-  }
-else
-  DT[:successful_messages] << {
-    topic: unknown_topic,
-    partition: unknown_result.partition,
-    offset: unknown_result.offset
-  }
-end
-
-# Check valid topic messages (should succeed)
-[
-  { handler: handler_valid_1, label: "valid-msg-1" },
-  { handler: handler_valid_2, label: "valid-msg-2" },
-  { handler: handler_valid_3, label: "valid-msg-3" }
-].each do |h|
+# Wait for all handlers and categorize results
+all_handlers.each do |h|
   result = h[:handler].wait(raise_response_error: false)
 
   if result.error
     DT[:failed_messages] << {
       label: h[:label],
-      topic: valid_topic,
+      topic: ((h[:phase] == :unknown) ? unknown_topic : valid_topic),
       error: result.error,
-      code: result.error.code
+      code: result.error.code,
+      phase: h[:phase]
     }
   else
     DT[:successful_messages] << {
       label: h[:label],
-      topic: valid_topic,
+      topic: ((h[:phase] == :unknown) ? unknown_topic : valid_topic),
       partition: result.partition,
-      offset: result.offset
+      offset: result.offset,
+      phase: h[:phase]
     }
   end
 end
@@ -138,15 +142,20 @@ assert(
   "Unknown topic should fail with expected error code, got: #{unknown_failure[:code]}"
 )
 
-# Assertion 3: All valid topic messages should have succeeded
+# Assertion 3: All valid topic messages should have succeeded (both before and after)
 valid_successes = DT[:successful_messages].select { |m| m[:topic] == valid_topic }
-assert_equal 3, valid_successes.size, "All 3 valid messages should succeed"
+before_successes = valid_successes.select { |m| m[:phase] == :before }
+after_successes = valid_successes.select { |m| m[:phase] == :after }
+
+assert_equal 2, before_successes.size, "Messages queued BEFORE unknown topic should succeed"
+assert_equal 3, after_successes.size, "Messages queued AFTER unknown topic should succeed"
+assert_equal 5, valid_successes.size, "All 5 valid messages should succeed"
 
 # Assertion 4: Valid messages should have valid offsets
 valid_successes.each do |msg|
   assert msg[:offset] >= 0, "Valid message should have offset >= 0"
 end
 
-# Assertion 5: Exactly 1 failed and 3 successful deliveries
+# Assertion 5: Exactly 1 failed and 5 successful deliveries
 assert_equal 1, DT[:failed_messages].size, "Should have exactly 1 failed delivery"
-assert_equal 3, DT[:successful_messages].size, "Should have exactly 3 successful deliveries"
+assert_equal 5, DT[:successful_messages].size, "Should have exactly 5 successful deliveries"
