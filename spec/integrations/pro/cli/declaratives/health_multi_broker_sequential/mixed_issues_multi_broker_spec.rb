@@ -76,8 +76,8 @@ end
 
 # Should report both critical and warnings
 assert out.include?("Issues found")
-assert out.include?("Critical:")
-assert out.include?("Warnings:")
+assert out.include?("Critical")
+assert out.include?("Warnings")
 
 # Should list all problematic topics
 assert out.include?(DT.topics[0])

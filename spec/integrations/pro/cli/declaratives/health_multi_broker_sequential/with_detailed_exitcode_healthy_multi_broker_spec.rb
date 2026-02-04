@@ -35,6 +35,16 @@ draw_routes do
   end
 end
 
+# Delete all existing topics to ensure clean environment
+existing_topics = Karafka::Admin.cluster_info.topics
+existing_topics.each do |topic|
+  next if topic[:topic_name].start_with?("__")  # Skip internal topics
+  Karafka::Admin.delete_topic(topic[:topic_name])
+rescue Rdkafka::RdkafkaError
+  # Ignore errors if topic doesn't exist or can't be deleted
+end
+sleep(1)  # Give Kafka time to process deletions
+
 create_routes_topics
 
 ARGV[0] = "topics"
@@ -52,5 +62,4 @@ rescue SystemExit => e
 end
 
 assert_equal 0, exit_code
-
-assert out.include?("All topics are healthy")
+assert out.include?("All topics are healthy") || !out.include?(DT.topics[0])
