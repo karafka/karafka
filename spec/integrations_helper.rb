@@ -70,12 +70,9 @@ def setup_karafka(
   # Pattern: *_multi_broker_sequential* for tests requiring 2+ brokers to run sequentially
   caller_path = caller_locations(1..1).first.path
   if caller_path.include?("multi_broker")
-    require_relative "../lib/karafka"
-    Karafka::App.setup do |config|
-      config.kafka = { "bootstrap.servers": ENV.fetch("KAFKA_BOOTSTRAP_SERVERS", "127.0.0.1:9092") }
-    end
-    cluster_info = Karafka::Admin.cluster_info
-    broker_count = cluster_info.brokers.size
+    # Check broker count from environment variable to avoid double Karafka setup
+    bootstrap_servers = ENV.fetch("KAFKA_BOOTSTRAP_SERVERS", "127.0.0.1:9092")
+    broker_count = bootstrap_servers.split(",").size
     # Extract required broker count from path (e.g., multi_broker_3 requires 3 brokers)
     # Defaults to 2 if no number specified
     required_brokers = caller_path[/multi_broker_(\d+)/, 1]&.to_i || 2
