@@ -137,8 +137,8 @@ module Karafka
           # Displays a single issue immediately as it's found
           # @param issue [Hash] issue details
           def display_issue(issue)
-            color_method = issue[:severity] == :critical ? :red : :yellow
-            symbol = issue[:severity] == :critical ? "\u2717" : "\u26A0"
+            color_method = (issue[:severity] == :critical) ? :red : :yellow
+            symbol = (issue[:severity] == :critical) ? "\u2717" : "\u26A0"
             puts "#{send(color_method, symbol)} #{issue[:topic]}: #{issue[:message]}"
           end
 
