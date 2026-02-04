@@ -19,10 +19,6 @@ on:
 
   pull_request:
     branches: [master]
-    paths:
-      - 'spec/integrations/**/*multi_broker*/**'
-      - 'spec/integrations/**/*multi_broker*.rb'
-      - 'docker-compose.multi-broker.yml'
 
   schedule:
     - cron: '0 3 * * *' # Daily at 3 AM UTC (after main CI at 1 AM)
