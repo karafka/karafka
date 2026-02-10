@@ -59,7 +59,7 @@ GEM
     i18n (1.14.8)
       concurrent-ruby (~> 1.0)
     io-console (0.8.2)
-    json (2.18.0)
+    json (2.18.1)
     karafka-core (2.5.8)
       karafka-rdkafka (>= 0.20.0)
       logger (>= 1.6.0)
@@ -96,7 +96,7 @@ GEM
     karafka-testing (2.5.5)
       karafka (>= 2.5.0, < 2.6.0)
       waterdrop (>= 2.8.0)
-    karafka-web (0.11.5)
+    karafka-web (0.11.6)
       erubi (~> 1.4)
       karafka (>= 2.5.2, < 2.6.0)
       karafka-core (>= 2.5.0, < 2.6.0)
@@ -203,7 +203,7 @@ CHECKSUMS
   globalid (1.3.0) sha256=05c639ad6eb4594522a0b07983022f04aa7254626ab69445a0e493aa3786ff11
   i18n (1.14.8) sha256=285778639134865c5e0f6269e0b818256017e8cde89993fdfcbfb64d088824a5
   io-console (0.8.2) sha256=d6e3ae7a7cc7574f4b8893b4fca2162e57a825b223a177b7afa236c5ef9814cc
-  json (2.18.0) sha256=b10506aee4183f5cf49e0efc48073d7b75843ce3782c68dbeb763351c08fd505
+  json (2.18.1) sha256=fe112755501b8d0466b5ada6cf50c8c3f41e897fa128ac5d263ec09eedc9f986
   karafka (2.5.6)
   karafka-core (2.5.8) sha256=3b056abe55cede3f189a3b68c444012f9fb70ec49afd8689c99702ab72837041
   karafka-rdkafka (0.23.1) sha256=b248150477f672d047de44da24c89cf71a0bf5bd475f12a6214cc5fddeb65297
@@ -212,7 +212,7 @@ CHECKSUMS
   karafka-rdkafka (0.23.1-x86_64-linux-gnu) sha256=1e70456f94b6c0decec2bfecf250322830bef4d67fafe44384751b44093da415
   karafka-rdkafka (0.23.1-x86_64-linux-musl) sha256=ba060677f5036b53c0bb4245f1472bbec87518d81d6d6054ffa23eb8ac2a7357
   karafka-testing (2.5.5) sha256=fa7ca34b0760ea76a392113813a122f07ffbade300e145c2190555db4619d338
-  karafka-web (0.11.5) sha256=10f18bd617f92f51c2ab4184bd7d600baf23c98357b9deeafeda96a66bc28ee2
+  karafka-web (0.11.6) sha256=a257d631d544dfe7dedbb3cfd0c8312228d60147b69016a6876c386ec229785a
   logger (1.7.0) sha256=196edec7cc44b66cfb40f9755ce11b392f21f7967696af15d274dde7edff0203
   mini_portile2 (2.8.9) sha256=0cd7c7f824e010c072e33f68bc02d85a00aeb6fce05bb4819c03dfd3c140c289
   minitest (6.0.1) sha256=7854c74f48e2e975969062833adc4013f249a4b212f5e7b9d5c040bf838d54bb

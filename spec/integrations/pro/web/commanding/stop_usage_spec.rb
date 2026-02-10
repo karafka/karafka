@@ -40,7 +40,9 @@ Thread.new do
   sleep(0.1) until DT.key?(:is)
 
   Karafka::Web::Pro::Commanding::Dispatcher.request(
-    "consumers.stop", Karafka::Web.config.tracking.consumers.sampler.process_id
+    "consumers.stop",
+    {},
+    matchers: { process_id: Karafka::Web.config.tracking.consumers.sampler.process_id }
   )
 end
 
