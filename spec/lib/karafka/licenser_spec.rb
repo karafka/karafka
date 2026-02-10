@@ -107,6 +107,54 @@ RSpec.describe_current do
         expect(license_config.token).to be(false)
       end
     end
+
+    context "when token has been expired/revoked" do
+      let(:encrypted_token) { rsa_key.private_encrypt(token_data.to_json) }
+      let(:base64_token) { [encrypted_token].pack("m") }
+      let(:formatted_token) { base64_token.strip.delete("\n").delete(" ") }
+      let(:expired_checksum) { Digest::SHA256.hexdigest(formatted_token) }
+
+      before do
+        allow(license_module).to receive(:token).and_return(base64_token)
+        allow(File).to receive(:readlines)
+          .with(Karafka::Licenser::EXPIRED_CHECKSUMS_LOCATION)
+          .and_return(["# Comment line\n", "#{expired_checksum}\n", "\n"])
+      end
+
+      it "raises ExpiredLicenseTokenError" do
+        expect { prepare_and_verify }.to raise_error(Karafka::Errors::ExpiredLicenseTokenError)
+      end
+
+      it "sets token to false" do
+        begin
+          prepare_and_verify
+        rescue Karafka::Errors::ExpiredLicenseTokenError
+          nil
+        end
+        expect(license_config.token).to be(false)
+      end
+    end
+
+    context "when token is valid and not in expired list" do
+      let(:encrypted_token) { rsa_key.private_encrypt(token_data.to_json) }
+      let(:base64_token) { [encrypted_token].pack("m") }
+
+      before do
+        allow(license_module).to receive(:token).and_return(base64_token)
+        allow(File).to receive(:readlines)
+          .with(Karafka::Licenser::EXPIRED_CHECKSUMS_LOCATION)
+          .and_return(["# Only comments\n", "different_checksum\n"])
+      end
+
+      it "validates the token successfully" do
+        expect { prepare_and_verify }.not_to raise_error
+      end
+
+      it "sets the entity correctly" do
+        prepare_and_verify
+        expect(license_config.entity).to eq(entity_name)
+      end
+    end
   end
 
   describe ".detect" do
@@ -243,6 +291,74 @@ RSpec.describe_current do
         rescue
           nil
         end
+      end
+    end
+  end
+
+  describe ".expired?" do
+    let(:token) { "test-token-content" }
+    let(:token_checksum) { Digest::SHA256.hexdigest(token) }
+
+    context "when token checksum is in the expired list" do
+      before do
+        allow(File).to receive(:readlines)
+          .with(Karafka::Licenser::EXPIRED_CHECKSUMS_LOCATION)
+          .and_return(["#{token_checksum}\n"])
+      end
+
+      it "returns true" do
+        expect(described_class.send(:expired?, token)).to be(true)
+      end
+    end
+
+    context "when token checksum is not in the expired list" do
+      before do
+        allow(File).to receive(:readlines)
+          .with(Karafka::Licenser::EXPIRED_CHECKSUMS_LOCATION)
+          .and_return(["different_checksum\n"])
+      end
+
+      it "returns false" do
+        expect(described_class.send(:expired?, token)).to be(false)
+      end
+    end
+  end
+
+  describe ".expired_checksums" do
+    context "with valid checksums" do
+      before do
+        allow(File).to receive(:readlines)
+          .with(Karafka::Licenser::EXPIRED_CHECKSUMS_LOCATION)
+          .and_return(["checksum1\n", "checksum2\n"])
+      end
+
+      it "returns a set of checksums" do
+        result = described_class.send(:expired_checksums)
+        expect(result).to be_a(Set)
+        expect(result).to include("checksum1", "checksum2")
+      end
+    end
+
+    context "with comments and empty lines" do
+      before do
+        allow(File).to receive(:readlines)
+          .with(Karafka::Licenser::EXPIRED_CHECKSUMS_LOCATION)
+          .and_return([
+            "# This is a comment\n",
+            "\n",
+            "checksum1\n",
+            "  \n",
+            "# Another comment\n",
+            "checksum2\n"
+          ])
+      end
+
+      it "ignores comments and empty lines" do
+        result = described_class.send(:expired_checksums)
+        expect(result.size).to eq(2)
+        expect(result).to include("checksum1", "checksum2")
+        expect(result).not_to include("# This is a comment")
+        expect(result).not_to include("")
       end
     end
   end

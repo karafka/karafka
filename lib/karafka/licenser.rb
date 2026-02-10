@@ -6,6 +6,9 @@ module Karafka
     # Location in the gem where we store the public key
     PUBLIC_KEY_LOCATION = File.join(Karafka.gem_root, "certs", "karafka-pro.pem")
 
+    # Location of file containing expired/revoked license checksums
+    EXPIRED_CHECKSUMS_LOCATION = File.join(Karafka.gem_root, "certs", "expired.txt")
+
     private_constant :PUBLIC_KEY_LOCATION
 
     class << self
@@ -112,6 +115,10 @@ module Karafka
 
         # We gsub and strip in case someone copy-pasted it as a multi line string
         formatted_token = license_config.token.strip.delete("\n").delete(" ")
+
+        # Check if the license has been revoked/expired before attempting decryption
+        raise_expired_license_token(license_config) if expired?(formatted_token)
+
         decoded_token = formatted_token.unpack1("m") # decode from base64
 
         begin
@@ -125,6 +132,25 @@ module Karafka
         license_config.entity = details.fetch("entity")
       end
 
+      # Checks if the license token has been expired/revoked
+      # @param formatted_token [String] formatted license token
+      # @return [Boolean] true if the license is in the expired list
+      def expired?(formatted_token)
+        token_checksum = Digest::SHA256.hexdigest(formatted_token)
+
+        expired_checksums.include?(token_checksum)
+      end
+
+      # Loads the list of expired license checksums
+      # @return [Set<String>] set of expired license checksums
+      def expired_checksums
+        File
+          .readlines(EXPIRED_CHECKSUMS_LOCATION)
+          .map(&:strip)
+          .reject { |line| line.empty? || line.start_with?("#") }
+          .to_set
+      end
+
       # Raises an error with info, that used token is invalid
       # @param license_config [Karafka::Core::Configurable::Node]
       def raise_invalid_license_token(license_config)
@@ -135,6 +161,21 @@ module Karafka
           Errors::InvalidLicenseTokenError,
           <<~MSG.tr("\n", " ")
             License key you provided is invalid.
+            Please reach us at contact@karafka.io or visit https://karafka.io to obtain a valid one.
+          MSG
+        )
+      end
+
+      # Raises an error with info, that used token has expired or been revoked
+      # @param license_config [Karafka::Core::Configurable::Node]
+      def raise_expired_license_token(license_config)
+        # We set it to false so `Karafka.pro?` method behaves as expected
+        license_config.token = false
+
+        raise(
+          Errors::ExpiredLicenseTokenError,
+          <<~MSG.tr("\n", " ")
+            License key you provided has expired or been revoked.
             Please reach us at contact@karafka.io or visit https://karafka.io to obtain a valid one.
           MSG
         )
