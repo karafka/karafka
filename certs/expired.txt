@@ -1,0 +1,2 @@
+# Expired/revoked license checksums (SHA256 of license token)
+# One checksum per line, lines starting with # are comments

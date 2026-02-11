@@ -71,6 +71,9 @@ module Karafka
     # Raised when the license token is not valid
     InvalidLicenseTokenError = Class.new(BaseError)
 
+    # Raised when the license token has expired or been revoked
+    ExpiredLicenseTokenError = Class.new(BaseError)
+
     # Raised on attempt to deserializer a cleared message
     MessageClearedError = Class.new(BaseError)
 
