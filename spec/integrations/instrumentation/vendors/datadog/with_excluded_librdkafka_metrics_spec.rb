@@ -110,7 +110,7 @@ end
 
 # Network latency p95 should be present (NOT excluded)
 assert_equal true, statsd_dummy.buffer[:gauge].key?("karafka.network.latency.p95"),
-             "network.latency.p95 should be present (not excluded)"
+  "network.latency.p95 should be present (not excluded)"
 
 # Excluded network latency metrics should NOT be present
 %w[
@@ -118,7 +118,7 @@ assert_equal true, statsd_dummy.buffer[:gauge].key?("karafka.network.latency.p95
   karafka.network.latency.p99
 ].each do |gauge_key|
   assert_equal false, statsd_dummy.buffer[:gauge].key?(gauge_key),
-               "#{gauge_key} should be excluded"
+    "#{gauge_key} should be excluded"
 end
 
 # Excluded connection metrics should NOT be present
@@ -127,7 +127,7 @@ end
   karafka.connection.disconnects
 ].each do |count_key|
   assert_equal false, statsd_dummy.buffer[:count].key?(count_key),
-               "#{count_key} should be excluded"
+    "#{count_key} should be excluded"
 end
 
 # Non-excluded broker-level error metrics should still be present
