@@ -5,8 +5,10 @@
   ],
   "minimumReleaseAge": "7 days",
   "includePaths": [
+    ".ruby-version",
     "Gemfile",
     "Gemfile.lint",
+    "karafka.gemspec",
     "package.json",
     ".github/workflows/**"
   ],
