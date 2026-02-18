@@ -59,21 +59,15 @@ tiny_queue_producer.close
 # Assertions
 
 # We should have queued some messages successfully before the queue filled
-assert DT[:queued_successfully].size >= 1,
-       "Should have queued at least 1 message before queue filled"
+assert DT[:queued_successfully].size >= 1, "Should queue at least 1 message before queue filled"
 
 # produce_async should raise immediately when queue is full
-assert DT[:immediate_errors].any?,
-       "produce_async should raise immediately when queue is full"
+assert DT[:immediate_errors].any?, "produce_async should raise immediately when queue is full"
 
 queue_full_error = DT[:immediate_errors].first[:error]
 
-assert !queue_full_error.nil?,
-       "Should have captured the queue full error"
+assert !queue_full_error.nil?, "Should have captured the queue full error"
 
 # The error should mention queue full
 error_message = queue_full_error.message.downcase
-assert(
-  error_message.include?("queue") || error_message.include?("full"),
-  "Error should mention queue or full, got: #{queue_full_error.message}"
-)
+assert error_message.include?("queue") || error_message.include?("full"), "Error should mention queue"
