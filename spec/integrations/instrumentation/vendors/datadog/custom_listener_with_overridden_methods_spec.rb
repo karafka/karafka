@@ -27,7 +27,8 @@ end
 
 # Custom listener that mimics the user's MinimalDatadogListener pattern
 # Overrides several methods to suppress metrics we don't care about
-# but does NOT override on_statistics_emitted
+# and overrides on_statistics_emitted only to add tracking for test verification,
+# while delegating to the parent implementation via `super`.
 class MinimalDatadogListener < Karafka::Instrumentation::Vendors::Datadog::MetricsListener
   # Track that on_statistics_emitted was actually called (for verification)
   def on_statistics_emitted(event)
