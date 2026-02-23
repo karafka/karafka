@@ -139,6 +139,13 @@ end
 end
 
 %w[
+  karafka.consumer.offset
+].each do |gauge_key|
+  assert_equal true, statsd_dummy.buffer[:gauge].key?(gauge_key),
+    "#{gauge_key} should be present - on_consumer_consumed doesn't depend on rd_kafka_metrics"
+end
+
+%w[
   karafka.consumer.consumed.time_taken
   karafka.consumer.batch_size
   karafka.consumer.processing_lag
