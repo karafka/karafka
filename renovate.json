@@ -10,7 +10,8 @@
     "Gemfile.lint",
     "karafka.gemspec",
     "package.json",
-    ".github/workflows/**"
+    ".github/workflows/**",
+    "docker-compose*.yml"
   ],
   "ignorePaths": [
     "spec/integrations"
