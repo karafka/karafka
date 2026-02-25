@@ -20,4 +20,4 @@
 # License: https://karafka.io/docs/Pro-License-Comm/
 # Contact: contact@karafka.io
 
-# Placeholder for Coditsu. Checked in integrations.
+# Checked in integrations.
