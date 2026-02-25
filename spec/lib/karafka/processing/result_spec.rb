@@ -7,7 +7,7 @@ RSpec.describe_current do
 
   it { expect(result).to be_success }
 
-  context 'when we succeed' do
+  context "when we succeed" do
     before { result.success! }
 
     it { expect(result).to be_success }
@@ -16,7 +16,7 @@ RSpec.describe_current do
     it { expect(result.failure?).to be(false) }
   end
 
-  context 'when we fail' do
+  context "when we fail" do
     before { result.failure!(cause) }
 
     it { expect(result).not_to be_success }
@@ -25,7 +25,7 @@ RSpec.describe_current do
     it { expect(result.failure?).to be(true) }
   end
 
-  context 'when we fail and succeed' do
+  context "when we fail and succeed" do
     before do
       result.failure!(cause)
       result.success!

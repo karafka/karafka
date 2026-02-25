@@ -7,7 +7,7 @@ RSpec.describe_current do
     end
   end
 
-  context 'when we define job options' do
+  context "when we define job options" do
     subject(:option_setup) { job_class.karafka_options(args) }
 
     let(:args) { { 1 => 2 } }
@@ -18,7 +18,7 @@ RSpec.describe_current do
         .with(args, scope: %w[active_job])
     end
 
-    it 'expect to run the contract and assing' do
+    it "expect to run the contract and assing" do
       expect(option_setup).to eq(args)
     end
   end

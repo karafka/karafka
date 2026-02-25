@@ -78,8 +78,8 @@ assert DT[:errors].size == 2
 assert_equal 1, DT[1].uniq.size
 assert_equal 1, DT[3].uniq.size
 assert_equal StandardError, DT[:errors].first[:error].class
-assert_equal 'consumer.consume.error', DT[:errors].first[:type]
-assert_equal 'error.occurred', DT[:errors].first.id
+assert_equal "consumer.consume.error", DT[:errors].first[:type]
+assert_equal "error.occurred", DT[:errors].first.id
 assert_equal 10, DT[0].uniq.size
 assert_equal 10, DT[2].uniq.size
 # Same worker from the same thread should process both

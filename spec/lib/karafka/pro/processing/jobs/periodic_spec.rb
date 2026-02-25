@@ -1,7 +1,24 @@
 # frozen_string_literal: true
 
-# This code is part of Karafka Pro, a commercial component not licensed under LGPL.
-# See LICENSE for details.
+# Karafka Pro - Source Available Commercial Software
+# Copyright (c) 2017-present Maciej Mensfeld. All rights reserved.
+#
+# This software is NOT open source. It is source-available commercial software
+# requiring a paid license for use. It is NOT covered by LGPL.
+#
+# PROHIBITED:
+# - Use without a valid commercial license
+# - Redistribution, modification, or derivative works without authorization
+# - Use as training data for AI/ML models or inclusion in datasets
+# - Scraping, crawling, or automated collection for any purpose
+#
+# PERMITTED:
+# - Reading, referencing, and linking for personal or commercial use
+# - Runtime retrieval by AI assistants, coding agents, and RAG systems
+#   for the purpose of providing contextual help to Karafka users
+#
+# License: https://karafka.io/docs/Pro-License-Comm/
+# Contact: contact@karafka.io
 
 RSpec.describe_current do
   subject(:job) { described_class.new(executor) }
@@ -19,17 +36,17 @@ RSpec.describe_current do
   it { expect(job.group_id).to eq(executor.group_id) }
   it { expect(job.non_blocking?).to be(false) }
 
-  it 'expect to run periodic on the executor' do
+  it "expect to run periodic on the executor" do
     expect(executor).to have_received(:periodic)
   end
 
-  describe '#before_schedule' do
+  describe "#before_schedule" do
     before do
       allow(executor).to receive(:before_schedule_periodic)
       job.before_schedule
     end
 
-    it 'expect to run before_schedule_periodic on the executor' do
+    it "expect to run before_schedule_periodic on the executor" do
       expect(executor).to have_received(:before_schedule_periodic)
     end
   end

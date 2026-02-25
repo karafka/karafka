@@ -7,8 +7,8 @@ setup_karafka
 class SharedStateConsumer < Karafka::BaseConsumer
   # Shared class-level state to test thread safety
   @shared_counter = 0
-  @shared_data = {}
-  @access_log = []
+  @shared_data = {}.freeze
+  @access_log = [].freeze
   @mutex = Mutex.new
 
   class << self
@@ -26,18 +26,18 @@ class SharedStateConsumer < Karafka::BaseConsumer
       message_data = JSON.parse(message.raw_payload)
 
       # Test concurrent counter increments
-      increment_shared_counter(thread_id, message_data['increment'])
+      increment_shared_counter(thread_id, message_data["increment"])
 
       # Test concurrent hash modifications
-      update_shared_data(thread_id, message_data['key'], message_data['value'])
+      update_shared_data(thread_id, message_data["key"], message_data["value"])
 
       # Log access for verification
-      log_access(thread_id, message_data['message_id'])
+      log_access(thread_id, message_data["message_id"])
 
       # Store results for verification
       DT[:consumed] << {
         thread_id: thread_id,
-        message_id: message_data['message_id'],
+        message_id: message_data["message_id"],
         counter_after: self.class.shared_counter,
         data_snapshot: self.class.shared_data.dup,
         processed_at: Time.now.to_f
@@ -121,7 +121,7 @@ end
 # Verify all messages were processed
 assert_equal(
   concurrent_messages.size, DT[:consumed].size,
-  'Should process all messages despite concurrent access'
+  "Should process all messages despite concurrent access"
 )
 
 # Verify shared counter integrity
@@ -129,11 +129,11 @@ expected_total_increment = (1..20).sum { |i| (i % 10) + 1 }
 actual_final_counter = DT[:consumed].last[:counter_after]
 assert_equal(
   expected_total_increment, actual_final_counter,
-  'Shared counter should reflect all increments atomically'
+  "Shared counter should reflect all increments atomically"
 )
 
 # Verify no race condition errors occurred
-assert DT[:errors].empty?, "Race condition errors detected: #{DT[:errors].join(', ')}"
+assert DT[:errors].empty?, "Race condition errors detected: #{DT[:errors].join(", ")}"
 
 # Verify shared data was updated correctly
 final_data_snapshot = DT[:consumed].last[:data_snapshot]
@@ -148,7 +148,7 @@ end
 access_log = SharedStateConsumer.access_logs
 assert_equal(
   concurrent_messages.size, access_log.size,
-  'Should log all concurrent accesses'
+  "Should log all concurrent accesses"
 )
 
 # Verify thread safety - check for proper ordering within critical sections
@@ -165,5 +165,5 @@ end
 # The key success criteria: concurrent shared state access handled safely
 assert_equal(
   concurrent_messages.size, DT[:consumed].size,
-  'Should handle concurrent shared state access without data corruption'
+  "Should handle concurrent shared state access without data corruption"
 )

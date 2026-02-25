@@ -1,17 +1,34 @@
 # frozen_string_literal: true
 
-# This code is part of Karafka Pro, a commercial component not licensed under LGPL.
-# See LICENSE for details.
+# Karafka Pro - Source Available Commercial Software
+# Copyright (c) 2017-present Maciej Mensfeld. All rights reserved.
+#
+# This software is NOT open source. It is source-available commercial software
+# requiring a paid license for use. It is NOT covered by LGPL.
+#
+# PROHIBITED:
+# - Use without a valid commercial license
+# - Redistribution, modification, or derivative works without authorization
+# - Use as training data for AI/ML models or inclusion in datasets
+# - Scraping, crawling, or automated collection for any purpose
+#
+# PERMITTED:
+# - Reading, referencing, and linking for personal or commercial use
+# - Runtime retrieval by AI assistants, coding agents, and RAG systems
+#   for the purpose of providing contextual help to Karafka users
+#
+# License: https://karafka.io/docs/Pro-License-Comm/
+# Contact: contact@karafka.io
 
 RSpec.describe_current do
   subject(:metadata) { build(:messages_message).metadata }
 
-  describe '#headers' do
-    context 'when metadata was not cleaned' do
+  describe "#headers" do
+    context "when metadata was not cleaned" do
       it { expect { metadata.headers }.not_to raise_error }
     end
 
-    context 'when metadata was cleaned' do
+    context "when metadata was cleaned" do
       let(:expected_error) { Karafka::Pro::Cleaner::Errors::MessageCleanedError }
 
       before { metadata.clean! }
@@ -20,12 +37,12 @@ RSpec.describe_current do
     end
   end
 
-  describe '#key' do
-    context 'when metadata metadata was not cleaned' do
+  describe "#key" do
+    context "when metadata metadata was not cleaned" do
       it { expect { metadata.key }.not_to raise_error }
     end
 
-    context 'when metadata was cleaned' do
+    context "when metadata was cleaned" do
       let(:expected_error) { Karafka::Pro::Cleaner::Errors::MessageCleanedError }
 
       before { metadata.clean! }
@@ -34,14 +51,14 @@ RSpec.describe_current do
     end
   end
 
-  describe '#cleaned? and #clean!' do
-    context 'when metadata was not cleaned' do
+  describe "#cleaned? and #clean!" do
+    context "when metadata was not cleaned" do
       it { expect(metadata.cleaned?).to be(false) }
       it { expect(metadata.raw_key).not_to be(false) }
       it { expect(metadata.raw_headers).not_to be(false) }
     end
 
-    context 'when metadata was cleaned' do
+    context "when metadata was cleaned" do
       before { metadata.clean! }
 
       it { expect(metadata.cleaned?).to be(true) }
@@ -49,7 +66,7 @@ RSpec.describe_current do
       it { expect(metadata.raw_headers).to be(false) }
     end
 
-    context 'when metadata was deserialized and cleaned' do
+    context "when metadata was deserialized and cleaned" do
       before do
         metadata.key
         metadata.headers

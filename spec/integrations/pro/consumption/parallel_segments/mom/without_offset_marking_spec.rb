@@ -1,7 +1,24 @@
 # frozen_string_literal: true
 
-# This code is part of Karafka Pro, a commercial component not licensed under LGPL.
-# See LICENSE for details.
+# Karafka Pro - Source Available Commercial Software
+# Copyright (c) 2017-present Maciej Mensfeld. All rights reserved.
+#
+# This software is NOT open source. It is source-available commercial software
+# requiring a paid license for use. It is NOT covered by LGPL.
+#
+# PROHIBITED:
+# - Use without a valid commercial license
+# - Redistribution, modification, or derivative works without authorization
+# - Use as training data for AI/ML models or inclusion in datasets
+# - Scraping, crawling, or automated collection for any purpose
+#
+# PERMITTED:
+# - Reading, referencing, and linking for personal or commercial use
+# - Runtime retrieval by AI assistants, coding agents, and RAG systems
+#   for the purpose of providing contextual help to Karafka users
+#
+# License: https://karafka.io/docs/Pro-License-Comm/
+# Contact: contact@karafka.io
 
 # With manual offset management, no offsets should be automatically marked even when all messages
 # are filtered
@@ -123,10 +140,10 @@ end
 
   # Get the current offset for this segment
   current_offset = case segment_id
-                   when 0 then segment0_offset
-                   when 1 then segment1_offset
-                   when 2 then segment2_offset
-                   end
+  when 0 then segment0_offset
+  when 1 then segment1_offset
+  when 2 then segment2_offset
+  end
 
   # The current offset should be exactly max_consumed_offset + 1
   # This verifies only messages explicitly marked were committed
@@ -161,8 +178,8 @@ filtered_messages.each do |segment_id, messages|
   all_messages_with_offsets = Karafka::Admin.read_topic(DT.topic, 0, 100)
 
   filtered_offsets[segment_id] = all_messages_with_offsets
-                                 .select { |msg| filtered_keys.include?(msg.key) }
-                                 .map(&:offset)
+    .select { |msg| filtered_keys.include?(msg.key) }
+    .map(&:offset)
 end
 
 # 7. Verify that for each segment, filtered messages did not have their offsets marked
@@ -172,10 +189,10 @@ end
 
   # Get current offset for this segment
   current_offset = case segment_id
-                   when 0 then segment0_offset
-                   when 1 then segment1_offset
-                   when 2 then segment2_offset
-                   end
+  when 0 then segment0_offset
+  when 1 then segment1_offset
+  when 2 then segment2_offset
+  end
 
   # If manual offset management is working correctly, current_offset should never
   # include the offsets of messages that were filtered for this segment

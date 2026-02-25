@@ -22,11 +22,11 @@ draw_routes(MessageContentConsumer)
 
 # Test different message content types
 test_messages = [
-  { name: 'single_space', payload: ' ', expected_size: 1 },
-  { name: 'null_bytes', payload: "Hello\x00World\x00Test", expected_size: 16 },
-  { name: 'long_key', payload: 'payload_with_long_key', key: 'k' * 500, expected_size: 21 },
-  { name: 'utf8_issues', payload: "Valid text\xFF\xFE\x80Invalid UTF-8", expected_size: 26 },
-  { name: 'binary_pattern', payload: "\x00\x01\x02\xFF\xFE\xFD" * 50, expected_size: 300 }
+  { name: "single_space", payload: " ", expected_size: 1 },
+  { name: "null_bytes", payload: "Hello\x00World\x00Test", expected_size: 16 },
+  { name: "long_key", payload: "payload_with_long_key", key: "k" * 500, expected_size: 21 },
+  { name: "utf8_issues", payload: "Valid text\xFF\xFE\x80Invalid UTF-8", expected_size: 26 },
+  { name: "binary_pattern", payload: "\x00\x01\x02\xFF\xFE\xFD" * 50, expected_size: 300 }
 ]
 
 test_messages.each do |test_msg|
@@ -57,27 +57,27 @@ consumed_sizes = DT[:consumed].map { |msg| msg[:size] }.sort
 # (exact sizes may vary due to encoding conversions)
 assert(
   consumed_sizes.include?(1),
-  'Should process small message'
+  "Should process small message"
 )
 
 assert(
   consumed_sizes.any? { |size| size > 15 && size < 20 },
-  'Should process null byte message'
+  "Should process null byte message"
 )
 
 assert(
   consumed_sizes.any? { |size| size > 20 && size < 30 },
-  'Should process UTF-8 edge case message'
+  "Should process UTF-8 edge case message"
 )
 
 assert(
   consumed_sizes.any? { |size| size > 250 },
-  'Should process binary content message'
+  "Should process binary content message"
 )
 
 # Test that message keys are preserved when present
 messages_with_keys = DT[:consumed].select { |msg| msg[:key] && !msg[:key].empty? }
-assert messages_with_keys.size >= 1, 'Should preserve message keys when present'
+assert messages_with_keys.size >= 1, "Should preserve message keys when present"
 
 # The test demonstrates that various edge case messages are handled gracefully
-assert true, 'Edge case message handling completed successfully'
+assert true, "Edge case message handling completed successfully"

@@ -18,7 +18,7 @@ KafkaFetchedMessage = Struct.new(
 )
 
 FactoryBot.define do
-  factory :kafka_fetched_message, class: 'KafkaFetchedMessage' do
+  factory :kafka_fetched_message, class: "KafkaFetchedMessage" do
     payload { rand.to_s }
     key { nil }
     offset { 0 }

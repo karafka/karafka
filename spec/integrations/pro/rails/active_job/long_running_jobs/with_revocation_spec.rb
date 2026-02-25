@@ -1,7 +1,24 @@
 # frozen_string_literal: true
 
-# This code is part of Karafka Pro, a commercial component not licensed under LGPL.
-# See LICENSE for details.
+# Karafka Pro - Source Available Commercial Software
+# Copyright (c) 2017-present Maciej Mensfeld. All rights reserved.
+#
+# This software is NOT open source. It is source-available commercial software
+# requiring a paid license for use. It is NOT covered by LGPL.
+#
+# PROHIBITED:
+# - Use without a valid commercial license
+# - Redistribution, modification, or derivative works without authorization
+# - Use as training data for AI/ML models or inclusion in datasets
+# - Scraping, crawling, or automated collection for any purpose
+#
+# PERMITTED:
+# - Reading, referencing, and linking for personal or commercial use
+# - Runtime retrieval by AI assistants, coding agents, and RAG systems
+#   for the purpose of providing contextual help to Karafka users
+#
+# License: https://karafka.io/docs/Pro-License-Comm/
+# Contact: contact@karafka.io
 
 # When we have a batch of ActiveJobs jobs and we loose our partition assignment, jobs that
 # did not start prior to the revocation should not start at all.
@@ -49,8 +66,8 @@ consumer = setup_rdkafka_consumer
 # the partition we have regained (then shutdown)
 # 1 and 4 are picked because they will dispatch messages to 0 and 1 partition
 10.times do
-  Job.perform_later('1')
-  Job.perform_later('4')
+  Job.perform_later("1")
+  Job.perform_later("4")
 end
 
 revoked = false

@@ -1,17 +1,34 @@
 # frozen_string_literal: true
 
-# This code is part of Karafka Pro, a commercial component not licensed under LGPL.
-# See LICENSE for details.
+# Karafka Pro - Source Available Commercial Software
+# Copyright (c) 2017-present Maciej Mensfeld. All rights reserved.
+#
+# This software is NOT open source. It is source-available commercial software
+# requiring a paid license for use. It is NOT covered by LGPL.
+#
+# PROHIBITED:
+# - Use without a valid commercial license
+# - Redistribution, modification, or derivative works without authorization
+# - Use as training data for AI/ML models or inclusion in datasets
+# - Scraping, crawling, or automated collection for any purpose
+#
+# PERMITTED:
+# - Reading, referencing, and linking for personal or commercial use
+# - Runtime retrieval by AI assistants, coding agents, and RAG systems
+#   for the purpose of providing contextual help to Karafka users
+#
+# License: https://karafka.io/docs/Pro-License-Comm/
+# Contact: contact@karafka.io
 
 # Karafka process when stopped and started and configured with static membership should pick up
 # the assigned work. It should not be reassigned to a different process.
 # Karafka should maintain all the ordering and should not have duplicated.
 
-require 'securerandom'
+require "securerandom"
 
 setup_karafka do |config|
-  config.initial_offset = 'latest'
-  config.kafka[:'group.instance.id'] = SecureRandom.hex(6)
+  config.initial_offset = "latest"
+  config.kafka[:"group.instance.id"] = SecureRandom.hex(6)
 end
 
 class Consumer < Karafka::BaseConsumer
@@ -66,8 +83,8 @@ sleep(2)
 # one partition assigned, so we don't have to worry about figuring out which partition it got
 other = Thread.new do
   consumer = setup_rdkafka_consumer(
-    'group.instance.id': SecureRandom.hex(6),
-    'auto.offset.reset': 'latest'
+    "group.instance.id": SecureRandom.hex(6),
+    "auto.offset.reset": "latest"
   )
 
   consumer.subscribe(DT.topic)
@@ -136,9 +153,9 @@ end
 # consuming
 after = DT[:process2].index(:stop)
 post_rebalance_messages = DT
-                          .data[:process2]
-                          .select
-                          .with_index { |_, index| index > after }
-                          .select { |message| message.is_a?(Array) }
+  .data[:process2]
+  .select
+  .with_index { |_, index| index > after }
+  .select { |message| message.is_a?(Array) }
 
 assert !DT[:process1].intersect?(post_rebalance_messages)

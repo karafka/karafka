@@ -35,11 +35,11 @@ Karafka::App.config.producer = WaterDrop::Producer.new do |p_config|
   p_config.monitor = WaterdropTracingMonitor.new
 end
 
-Karafka.producer.monitor.subscribe('message.produced_sync') do |event|
+Karafka.producer.monitor.subscribe("message.produced_sync") do |event|
   DT[:triggered] << event
 end
 
-Karafka.producer.produce_sync(topic: DT.topic, payload: '')
+Karafka.producer.produce_sync(topic: DT.topic, payload: "")
 
 assert DT.key?(:triggered)
 assert DT.key?(:intercepted)

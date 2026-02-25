@@ -14,15 +14,15 @@ RSpec.describe_current do
   let(:coordinator) { build(:processing_coordinator, seek_offset: 0) }
   let(:message1) { build(:messages_message, raw_payload: payload1.to_json) }
   let(:message2) { build(:messages_message, raw_payload: payload2.to_json) }
-  let(:payload1) { { '1' => '2' } }
-  let(:payload2) { { '3' => '4' } }
+  let(:payload1) { { "1" => "2" } }
+  let(:payload2) { { "3" => "4" } }
 
   before do
     allow(Karafka::App).to receive(:stopping?).and_return(false)
     allow(client).to receive(:assignment_lost?).and_return(false)
   end
 
-  context 'when messages are available to the consumer' do
+  context "when messages are available to the consumer" do
     before do
       consumer.messages = messages
 
@@ -35,14 +35,14 @@ RSpec.describe_current do
       allow(ActiveJob::Base).to receive(:execute).with(payload2)
     end
 
-    it 'expect to decode them and run active job executor' do
+    it "expect to decode them and run active job executor" do
       consumer.consume
 
       expect(ActiveJob::Base).to have_received(:execute).with(payload1)
       expect(ActiveJob::Base).to have_received(:execute).with(payload2)
     end
 
-    it 'expect to mark as consumed on each message' do
+    it "expect to mark as consumed on each message" do
       consumer.consume
 
       expect(client).to have_received(:mark_as_consumed).with(messages.first)

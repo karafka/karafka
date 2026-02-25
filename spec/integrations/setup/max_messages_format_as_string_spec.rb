@@ -3,8 +3,8 @@
 # When max messages format is not as expected, we should fail
 
 Karafka::App.setup do |config|
-  config.kafka = { 'bootstrap.servers': 'host:9092' }
-  config.max_messages = '100'
+  config.kafka = { "bootstrap.servers": "host:9092" }
+  config.max_messages = "100"
 end
 
 failed = false

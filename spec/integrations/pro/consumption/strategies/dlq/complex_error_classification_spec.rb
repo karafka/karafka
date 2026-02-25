@@ -1,7 +1,24 @@
 # frozen_string_literal: true
 
-# This code is part of Karafka Pro, a commercial component not licensed under LGPL.
-# See LICENSE for details.
+# Karafka Pro - Source Available Commercial Software
+# Copyright (c) 2017-present Maciej Mensfeld. All rights reserved.
+#
+# This software is NOT open source. It is source-available commercial software
+# requiring a paid license for use. It is NOT covered by LGPL.
+#
+# PROHIBITED:
+# - Use without a valid commercial license
+# - Redistribution, modification, or derivative works without authorization
+# - Use as training data for AI/ML models or inclusion in datasets
+# - Scraping, crawling, or automated collection for any purpose
+#
+# PERMITTED:
+# - Reading, referencing, and linking for personal or commercial use
+# - Runtime retrieval by AI assistants, coding agents, and RAG systems
+#   for the purpose of providing contextual help to Karafka users
+#
+# License: https://karafka.io/docs/Pro-License-Comm/
+# Contact: contact@karafka.io
 
 # DLQ should handle complex error classification scenarios including error chaining,
 # nested errors, timeout-based errors, and custom error hierarchies.
@@ -34,10 +51,10 @@ class ComplexDlqStrategy
       :skip
     # Business errors in general should be retried a few times
     when BusinessError
-      attempt > 3 ? :dispatch : :retry
+      (attempt > 3) ? :dispatch : :retry
     else
       # Default behavior
-      attempt > 5 ? :dispatch : :retry
+      (attempt > 5) ? :dispatch : :retry
     end
   end
 end
@@ -50,12 +67,12 @@ class Consumer < Karafka::BaseConsumer
       DT[:processing_attempts] << [error_type, attempt]
 
       case error_type
-      when 'validation'
-        raise ValidationError, 'Invalid data format'
-      when 'business'
-        raise BusinessError, 'Business rule violation'
+      when "validation"
+        raise ValidationError, "Invalid data format"
+      when "business"
+        raise BusinessError, "Business rule violation"
       else
-        raise StandardError, 'Unknown error'
+        raise StandardError, "Unknown error"
       end
     end
   end
@@ -88,9 +105,9 @@ start_karafka_and_wait_until do
 end
 
 # Analyze processing patterns for each error type
-validation_attempts = DT[:processing_attempts].select { |type, _| type == 'validation' }
-business_attempts = DT[:processing_attempts].select { |type, _| type == 'business' }
-unknown_attempts = DT[:processing_attempts].select { |type, _| type == 'unknown' }
+validation_attempts = DT[:processing_attempts].select { |type, _| type == "validation" }
+business_attempts = DT[:processing_attempts].select { |type, _| type == "business" }
+unknown_attempts = DT[:processing_attempts].select { |type, _| type == "unknown" }
 
 # Validation errors should be skipped immediately (only 1 attempt)
 assert_equal [1], validation_attempts.map(&:last).uniq

@@ -1,7 +1,24 @@
 # frozen_string_literal: true
 
-# This code is part of Karafka Pro, a commercial component not licensed under LGPL.
-# See LICENSE for details.
+# Karafka Pro - Source Available Commercial Software
+# Copyright (c) 2017-present Maciej Mensfeld. All rights reserved.
+#
+# This software is NOT open source. It is source-available commercial software
+# requiring a paid license for use. It is NOT covered by LGPL.
+#
+# PROHIBITED:
+# - Use without a valid commercial license
+# - Redistribution, modification, or derivative works without authorization
+# - Use as training data for AI/ML models or inclusion in datasets
+# - Scraping, crawling, or automated collection for any purpose
+#
+# PERMITTED:
+# - Reading, referencing, and linking for personal or commercial use
+# - Runtime retrieval by AI assistants, coding agents, and RAG systems
+#   for the purpose of providing contextual help to Karafka users
+#
+# License: https://karafka.io/docs/Pro-License-Comm/
+# Contact: contact@karafka.io
 
 # Errors in reducer should be properly handled and should not crash the consumer
 
@@ -11,7 +28,7 @@ setup_karafka(allow_errors: true)
 class ErroringReducer
   def call(parallel_key)
     # For special "error" keys, raise an error to test error handling
-    if parallel_key.to_s.include?('error')
+    if parallel_key.to_s.include?("error")
       raise StandardError, "Simulated reducer error for key: #{parallel_key}"
     end
 
@@ -141,8 +158,8 @@ error_messages.each do |message|
 end
 
 # Subscribe to errors to verify reducer errors are caught
-Karafka.monitor.subscribe('error.occurred') do |event|
-  next unless event[:error].message.include?('Simulated reducer error')
+Karafka.monitor.subscribe("error.occurred") do |event|
+  next unless event[:error].message.include?("Simulated reducer error")
 
   DT[:reducer_errors] << {
     error: event[:error].message,
@@ -158,7 +175,7 @@ end
 # 1. Verify that reducer errors were captured
 assert(
   !DT[:reducer_errors].empty?,
-  'Expected reducer errors to be captured, but none were found'
+  "Expected reducer errors to be captured, but none were found"
 )
 
 # 2. Verify normal messages went to the correct segments
@@ -203,5 +220,5 @@ assert(
 # 5. Verify the consumer didn't crash (processed many messages)
 assert(
   DT[:consumed_messages].size >= 15,
-  'Not enough messages processed, consumer may have crashed'
+  "Not enough messages processed, consumer may have crashed"
 )

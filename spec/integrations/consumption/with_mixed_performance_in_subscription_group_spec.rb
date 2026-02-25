@@ -4,7 +4,7 @@
 # should not experience any rebalance problems as the shutdown should happen after all the work
 # is done.
 
-require 'stringio'
+require "stringio"
 
 strio = StringIO.new
 
@@ -45,7 +45,7 @@ draw_routes do
 end
 
 messages = DT.topics.first(10).map do |topic_name|
-  { topic: topic_name, payload: '1' }
+  { topic: topic_name, payload: "1" }
 end
 
 Karafka.producer.produce_many_sync(messages)
@@ -57,4 +57,4 @@ end
 $stdout = proper_stdout
 $stderr = proper_stderr
 
-assert_equal false, strio.string.include?('Timed out'), strio.string
+assert_equal false, strio.string.include?("Timed out"), strio.string

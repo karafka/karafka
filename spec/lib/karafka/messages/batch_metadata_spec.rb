@@ -5,82 +5,82 @@ RSpec.describe_current do
 
   let(:rand_value) { rand }
 
-  describe '#topic' do
-    before { metadata['topic'] = rand_value }
+  describe "#topic" do
+    before { metadata["topic"] = rand_value }
 
     it { expect(metadata.topic).to eq rand_value }
   end
 
-  describe '#size' do
-    before { metadata['size'] = rand_value }
+  describe "#size" do
+    before { metadata["size"] = rand_value }
 
     it { expect(metadata.size).to eq rand_value }
   end
 
-  describe '#partition' do
-    before { metadata['partition'] = rand_value }
+  describe "#partition" do
+    before { metadata["partition"] = rand_value }
 
     it { expect(metadata.partition).to eq rand_value }
   end
 
-  describe '#last_offset' do
-    before { metadata['last_offset'] = rand_value }
+  describe "#last_offset" do
+    before { metadata["last_offset"] = rand_value }
 
     it { expect(metadata.last_offset).to eq rand_value }
   end
 
-  describe '#deserializers' do
-    before { metadata['deserializers'] = rand_value }
+  describe "#deserializers" do
+    before { metadata["deserializers"] = rand_value }
 
     it { expect(metadata.deserializers).to eq rand_value }
   end
 
-  describe '#first_offset' do
-    before { metadata['first_offset'] = rand_value }
+  describe "#first_offset" do
+    before { metadata["first_offset"] = rand_value }
 
     it { expect(metadata.first_offset).to eq rand_value }
   end
 
-  describe '#scheduled_at' do
-    before { metadata['scheduled_at'] = rand_value }
+  describe "#scheduled_at" do
+    before { metadata["scheduled_at"] = rand_value }
 
     it { expect(metadata.scheduled_at).to eq rand_value }
   end
 
-  describe '#consumption_lag' do
+  describe "#consumption_lag" do
     let(:created_at) { 2.days.ago }
     let(:processed_at) { 1.days.ago }
 
     before do
-      metadata['created_at'] = created_at
-      metadata['processed_at'] = processed_at
+      metadata["created_at"] = created_at
+      metadata["processed_at"] = processed_at
     end
 
-    it 'expect to calculate it as a distance in between message creation time and processing' do
+    it "expect to calculate it as a distance in between message creation time and processing" do
       expect(metadata.consumption_lag).to eq(((processed_at - created_at) * 1_000).round)
     end
 
-    context 'when processed_at is not set' do
+    context "when processed_at is not set" do
       let(:processed_at) { nil }
 
       it { expect(metadata.consumption_lag).to eq(-1) }
     end
   end
 
-  describe '#processing_lag' do
+  describe "#processing_lag" do
     let(:scheduled_at) { 2.days.ago }
     let(:processed_at) { 1.days.ago }
 
     before do
-      metadata['scheduled_at'] = scheduled_at
-      metadata['processed_at'] = processed_at
+      metadata["scheduled_at"] = scheduled_at
+      metadata["processed_at"] = processed_at
     end
 
-    it 'expect to calculate it as a distance in between message schedule time and processing' do
+    it "expect to calculate it as a distance in between message schedule time and processing" do
       expect(metadata.processing_lag).to eq(((processed_at - scheduled_at) * 1_000).round)
     end
 
-    context 'when processed_at is not set' do
+    context "when processed_at is not set" do
       let(:processed_at) { nil }
 
       it { expect(metadata.processing_lag).to eq(-1) }

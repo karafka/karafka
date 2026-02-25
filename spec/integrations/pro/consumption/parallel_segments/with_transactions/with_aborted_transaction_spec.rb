@@ -1,7 +1,24 @@
 # frozen_string_literal: true
 
-# This code is part of Karafka Pro, a commercial component not licensed under LGPL.
-# See LICENSE for details.
+# Karafka Pro - Source Available Commercial Software
+# Copyright (c) 2017-present Maciej Mensfeld. All rights reserved.
+#
+# This software is NOT open source. It is source-available commercial software
+# requiring a paid license for use. It is NOT covered by LGPL.
+#
+# PROHIBITED:
+# - Use without a valid commercial license
+# - Redistribution, modification, or derivative works without authorization
+# - Use as training data for AI/ML models or inclusion in datasets
+# - Scraping, crawling, or automated collection for any purpose
+#
+# PERMITTED:
+# - Reading, referencing, and linking for personal or commercial use
+# - Runtime retrieval by AI assistants, coding agents, and RAG systems
+#   for the purpose of providing contextual help to Karafka users
+#
+# License: https://karafka.io/docs/Pro-License-Comm/
+# Contact: contact@karafka.io
 
 # When a transaction is aborted, the parallel segments should handle this properly without marking
 # offsets
@@ -9,7 +26,7 @@
 setup_karafka do |config|
   config.concurrency = 5
   config.max_messages = 10
-  config.kafka[:'transactional.id'] = SecureRandom.uuid
+  config.kafka[:"transactional.id"] = SecureRandom.uuid
 end
 
 class Consumer < Karafka::BaseConsumer
@@ -17,7 +34,7 @@ class Consumer < Karafka::BaseConsumer
     segment_id = topic.consumer_group.segment_id
 
     # Detect if this batch contains an abort trigger
-    contains_abort = messages.any? { |m| m.raw_payload.include?('abort-trigger') }
+    contains_abort = messages.any? { |m| m.raw_payload.include?("abort-trigger") }
 
     # Store what we received before any processing
     messages.each do |message|
@@ -41,7 +58,7 @@ class Consumer < Karafka::BaseConsumer
             payload: "processed-#{message.raw_payload}"
           )
 
-          next unless message.raw_payload.include?('abort-trigger')
+          next unless message.raw_payload.include?("abort-trigger")
 
           DT[:aborted] << {
             key: message.key,
@@ -130,14 +147,14 @@ end
 end
 
 # Create a message with abort trigger for segment 0
-abort_key = 'abort-key'
+abort_key = "abort-key"
 # Ensure it maps to segment 0
 abort_key = "#{abort_key}-fixed" unless abort_key.to_s.sum.even?
 
 segment0_abort << {
   topic: DT.topics[0],
   key: abort_key,
-  payload: 'abort-trigger'
+  payload: "abort-trigger"
 }
 
 Karafka::App.producer.produce_many_sync(segment0_normal + segment1_normal)
@@ -165,18 +182,18 @@ abort_received = abort_payloads.all? { |p| received_payloads.include?(p) }
 
 assert(
   normal_received,
-  'Not all normal messages were received'
+  "Not all normal messages were received"
 )
 
 assert(
   abort_received,
-  'Not all abort messages were received'
+  "Not all abort messages were received"
 )
 
 # 2. Verify we detected an abort
 assert(
   !DT[:aborted].empty?,
-  'Expected to detect at least one aborted transaction'
+  "Expected to detect at least one aborted transaction"
 )
 
 # 3. Get messages from the target topic using Karafka::Admin
@@ -208,7 +225,7 @@ abort_keys_in_target = abort_keys & produced_keys
 assert_equal(
   [],
   abort_keys_in_target,
-  'Messages from aborted transactions should not appear in target topic'
+  "Messages from aborted transactions should not appear in target topic"
 )
 
 # 5. Verify at least some normal messages were produced
@@ -217,7 +234,7 @@ normal_keys_in_target = normal_keys & produced_keys
 
 assert(
   !normal_keys_in_target.empty?,
-  'Expected normal messages to be produced to target topic, but found none. ' \
+  "Expected normal messages to be produced to target topic, but found none. " \
   "Received: #{DT[:received].size}, Aborted: #{DT[:aborted].size}, " \
   "Normal processed: #{DT[:normal_processed].size}, " \
   "Produced messages: #{produced_data.size}"
@@ -231,5 +248,5 @@ segment0_offset = fetch_next_offset(DT.topics[0], consumer_group_id: segment0_gr
 segment1_offset = fetch_next_offset(DT.topics[0], consumer_group_id: segment1_group_id)
 
 # Both segments should have committed some offsets from successful transactions
-assert(segment0_offset > 0, 'Segment 0 did not commit any offsets')
-assert(segment1_offset > 0, 'Segment 1 did not commit any offsets')
+assert(segment0_offset > 0, "Segment 0 did not commit any offsets")
+assert(segment1_offset > 0, "Segment 1 did not commit any offsets")

@@ -1,7 +1,24 @@
 # frozen_string_literal: true
 
-# This code is part of Karafka Pro, a commercial component not licensed under LGPL.
-# See LICENSE for details.
+# Karafka Pro - Source Available Commercial Software
+# Copyright (c) 2017-present Maciej Mensfeld. All rights reserved.
+#
+# This software is NOT open source. It is source-available commercial software
+# requiring a paid license for use. It is NOT covered by LGPL.
+#
+# PROHIBITED:
+# - Use without a valid commercial license
+# - Redistribution, modification, or derivative works without authorization
+# - Use as training data for AI/ML models or inclusion in datasets
+# - Scraping, crawling, or automated collection for any purpose
+#
+# PERMITTED:
+# - Reading, referencing, and linking for personal or commercial use
+# - Runtime retrieval by AI assistants, coding agents, and RAG systems
+#   for the purpose of providing contextual help to Karafka users
+#
+# License: https://karafka.io/docs/Pro-License-Comm/
+# Contact: contact@karafka.io
 
 module Karafka
   module Pro
@@ -25,8 +42,8 @@ module Karafka
           @mutex = Mutex.new
           @changes = Hash.new do |h, k|
             h[k] = {
-              state: '',
-              join_state: '',
+              state: "",
+              join_state: "",
               state_age: 0,
               changed_at: monotonic_now
             }
@@ -69,9 +86,9 @@ module Karafka
           times = []
           # stateage is in microseconds
           # We monitor broker changes to make sure we do not introduce extra friction
-          times << (statistics['brokers'].values.map { |stats| stats['stateage'] }.min / 1_000)
-          times << statistics['cgrp']['rebalance_age']
-          times << statistics['cgrp']['stateage']
+          times << (statistics["brokers"].values.map { |stats| stats["stateage"] }.min / 1_000)
+          times << statistics["cgrp"]["rebalance_age"]
+          times << statistics["cgrp"]["stateage"]
 
           # Keep the previous change age for changes that were triggered by us
           previous_changed_at = @changes[subscription_group_id][:changed_at]
@@ -79,8 +96,8 @@ module Karafka
           @changes[subscription_group_id].merge!(
             state_age: times.min,
             changed_at: previous_changed_at,
-            join_state: statistics['cgrp']['join_state'],
-            state: statistics['cgrp']['state']
+            join_state: statistics["cgrp"]["join_state"],
+            state: statistics["cgrp"]["state"]
           )
         end
 
@@ -181,11 +198,11 @@ module Karafka
         # partitions assigned in sgs that can be scaled. If that is the case, we scale up.
         def scale_up
           multi_part_sgs_families = Karafka::App
-                                    .assignments
-                                    .select { |_, partitions| partitions.size > 1 }
-                                    .keys
-                                    .map { |sg| sg.subscription_group.name }
-                                    .uniq
+            .assignments
+            .select { |_, partitions| partitions.size > 1 }
+            .keys
+            .map { |sg| sg.subscription_group.name }
+            .uniq
 
           # Select connections for scaling up
           in_sg_families do |first_subscription_group, sg_listeners|
@@ -239,8 +256,8 @@ module Karafka
 
             state[:state_age] >= @scale_delay &&
               (monotonic_now - state[:changed_at]) >= @scale_delay &&
-              state[:state] == 'up' &&
-              state[:join_state] == 'steady'
+              state[:state] == "up" &&
+              state[:join_state] == "steady"
           end
         end
 

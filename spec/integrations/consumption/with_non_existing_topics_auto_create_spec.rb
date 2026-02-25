@@ -4,7 +4,7 @@
 # raise an error about it
 
 setup_karafka do |config|
-  config.kafka[:'allow.auto.create.topics'] = true
+  config.kafka[:"allow.auto.create.topics"] = true
 end
 
 class Consumer < Karafka::BaseConsumer

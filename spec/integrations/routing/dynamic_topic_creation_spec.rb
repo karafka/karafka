@@ -28,7 +28,7 @@ topics_to_create = [
 Karafka::App.routes.clear
 
 draw_routes do
-  subscription_group 'dynamic_group' do
+  subscription_group "dynamic_group" do
     topics_to_create.each do |topic_name|
       topic topic_name do
         consumer DynamicConsumer
@@ -90,7 +90,7 @@ additional_topics = [
 ]
 
 draw_routes(create_topics: false) do
-  subscription_group 'runtime_group' do
+  subscription_group "runtime_group" do
     additional_topics.each do |topic_name|
       topic topic_name do
         consumer DynamicConsumer
@@ -126,7 +126,7 @@ feature_flags = {
 }
 
 draw_routes(create_topics: false) do
-  subscription_group 'conditional_group' do
+  subscription_group "conditional_group" do
     if feature_flags[:enable_feature_a]
       topic "#{DT.topic}_feature_a" do
         consumer DynamicConsumer
@@ -160,27 +160,27 @@ end
 
 assert(
   conditional_route_topics.include?("#{DT.topic}_feature_a"),
-  'Should include feature_a topic when enabled'
+  "Should include feature_a topic when enabled"
 )
 
 assert(
   !conditional_route_topics.include?("#{DT.topic}_feature_b"),
-  'Should not include feature_b topic when disabled'
+  "Should not include feature_b topic when disabled"
 )
 
 assert(
   conditional_route_topics.include?("#{DT.topic}_feature_c"),
-  'Should include feature_c topic when enabled'
+  "Should include feature_c topic when enabled"
 )
 
 assert_equal(
   2,
   conditional_route_topics.size,
-  'Should create exactly 2 topics based on feature flags'
+  "Should create exactly 2 topics based on feature flags"
 )
 
 # The key success criteria: dynamic routing works correctly
 assert_equal(
   test_data.size, DT[:consumed].size,
-  'Should handle dynamic topic creation and message consumption'
+  "Should handle dynamic topic creation and message consumption"
 )

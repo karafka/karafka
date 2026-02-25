@@ -4,7 +4,7 @@
 # `#eofed` per each partition and topic independently
 
 setup_karafka do |config|
-  config.kafka[:'enable.partition.eof'] = true
+  config.kafka[:"enable.partition.eof"] = true
 end
 
 class Consumer < Karafka::BaseConsumer

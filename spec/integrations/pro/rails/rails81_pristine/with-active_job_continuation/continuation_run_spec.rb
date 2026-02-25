@@ -1,40 +1,61 @@
 # frozen_string_literal: true
 
-# This code is part of Karafka Pro, a commercial component not licensed under LGPL.
-# See LICENSE for details.
+# Karafka Pro - Source Available Commercial Software
+# Copyright (c) 2017-present Maciej Mensfeld. All rights reserved.
+#
+# This software is NOT open source. It is source-available commercial software
+# requiring a paid license for use. It is NOT covered by LGPL.
+#
+# PROHIBITED:
+# - Use without a valid commercial license
+# - Redistribution, modification, or derivative works without authorization
+# - Use as training data for AI/ML models or inclusion in datasets
+# - Scraping, crawling, or automated collection for any purpose
+#
+# PERMITTED:
+# - Reading, referencing, and linking for personal or commercial use
+# - Runtime retrieval by AI assistants, coding agents, and RAG systems
+#   for the purpose of providing contextual help to Karafka users
+#
+# License: https://karafka.io/docs/Pro-License-Comm/
+# Contact: contact@karafka.io
 
 # Karafka Pro should work with Rails 8.1 ActiveJob Continuation feature
 # This tests that jobs can be interrupted and resumed using the continuation API with Pro features
 
 # Load all the Railtie stuff like when `rails server`
-ENV['KARAFKA_CLI'] = 'true'
+ENV["KARAFKA_CLI"] = "true"
 
 Bundler.require(:default)
 
-require 'tempfile'
-require 'action_controller'
-require 'active_job'
-require 'active_job/karafka'
+require "tempfile"
+require "action_controller"
+require "active_job"
+require "active_job/karafka"
 
 ActiveJob::Base.extend Karafka::ActiveJob::JobExtensions
 ActiveJob::Base.queue_adapter = :karafka
 
 class ExampleApp < Rails::Application
-  config.eager_load = 'test'
+  config.eager_load = "test"
 end
 
 dummy_boot_file = "#{Tempfile.new.path}.rb"
 FileUtils.touch(dummy_boot_file)
-ENV['KARAFKA_BOOT_FILE'] = dummy_boot_file
+ENV["KARAFKA_BOOT_FILE"] = dummy_boot_file
 
 mod = Module.new do
   def self.token
-    ENV.fetch('KARAFKA_PRO_LICENSE_TOKEN')
+    ENV.fetch("KARAFKA_PRO_LICENSE_TOKEN")
+  end
+
+  def self.version
+    "1.0.0"
   end
 end
 
 Karafka.const_set(:License, mod)
-require 'karafka/pro/loader'
+require "karafka/pro/loader"
 
 Karafka::Pro::Loader.require_all
 
@@ -115,8 +136,8 @@ DT[:completed] = []
 DT[:stopping_status] = []
 
 # Enqueue continuable jobs with different partition keys
-ContinuableJobWithPartitioning.perform_later('key_a', 3)
-ContinuableJobWithPartitioning.perform_later('key_b', 3)
+ContinuableJobWithPartitioning.perform_later("key_a", 3)
+ContinuableJobWithPartitioning.perform_later("key_b", 3)
 
 # Enqueue a job that checks the stopping status
 StoppingCheckJob.perform_later
@@ -126,30 +147,30 @@ start_karafka_and_wait_until do
 end
 
 # Verify both jobs completed successfully
-assert_equal 2, DT[:started].size, 'Both jobs should have started'
-assert_equal 2, DT[:completed].size, 'Both jobs should have completed'
+assert_equal 2, DT[:started].size, "Both jobs should have started"
+assert_equal 2, DT[:completed].size, "Both jobs should have completed"
 
 # Verify partition keys were tracked
-assert_equal %w[key_a key_b].sort, DT[:partition_keys].sort, 'Partition keys should be tracked'
+assert_equal %w[key_a key_b].sort, DT[:partition_keys].sort, "Partition keys should be tracked"
 
 # Verify all steps were executed for both jobs
-assert_equal 4, DT[:steps].size, 'All steps for both jobs should execute'
-assert DT[:steps].include?('key_a:initialize'), 'Job A should initialize'
-assert DT[:steps].include?('key_a:finalize'), 'Job A should finalize'
-assert DT[:steps].include?('key_b:initialize'), 'Job B should initialize'
-assert DT[:steps].include?('key_b:finalize'), 'Job B should finalize'
+assert_equal 4, DT[:steps].size, "All steps for both jobs should execute"
+assert DT[:steps].include?("key_a:initialize"), "Job A should initialize"
+assert DT[:steps].include?("key_a:finalize"), "Job A should finalize"
+assert DT[:steps].include?("key_b:initialize"), "Job B should initialize"
+assert DT[:steps].include?("key_b:finalize"), "Job B should finalize"
 
 # Verify all items were processed for both jobs
-processed_a = DT[:processed].select { |p| p.start_with?('key_a:') }
-processed_b = DT[:processed].select { |p| p.start_with?('key_b:') }
-assert_equal ['key_a:0', 'key_a:1', 'key_a:2'], processed_a, 'All items for key_a processed'
-assert_equal ['key_b:0', 'key_b:1', 'key_b:2'], processed_b, 'All items for key_b processed'
+processed_a = DT[:processed].select { |p| p.start_with?("key_a:") }
+processed_b = DT[:processed].select { |p| p.start_with?("key_b:") }
+assert_equal ["key_a:0", "key_a:1", "key_a:2"], processed_a, "All items for key_a processed"
+assert_equal ["key_b:0", "key_b:1", "key_b:2"], processed_b, "All items for key_b processed"
 
 # Verify resumptions counter (should be 0 since we didn't actually interrupt)
-assert DT[:resumptions].all?(0), 'Resumptions should be 0 when not interrupted'
+assert DT[:resumptions].all?(0), "Resumptions should be 0 when not interrupted"
 
 # Verify the adapter reports stopping status correctly
-assert_equal [false], DT[:stopping_status], 'Adapter should not be stopping during normal run'
+assert_equal [false], DT[:stopping_status], "Adapter should not be stopping during normal run"
 
 # Verify we're using Karafka Pro
 assert Karafka.pro?

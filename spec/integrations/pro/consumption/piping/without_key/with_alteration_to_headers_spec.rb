@@ -1,7 +1,24 @@
 # frozen_string_literal: true
 
-# This code is part of Karafka Pro, a commercial component not licensed under LGPL.
-# See LICENSE for details.
+# Karafka Pro - Source Available Commercial Software
+# Copyright (c) 2017-present Maciej Mensfeld. All rights reserved.
+#
+# This software is NOT open source. It is source-available commercial software
+# requiring a paid license for use. It is NOT covered by LGPL.
+#
+# PROHIBITED:
+# - Use without a valid commercial license
+# - Redistribution, modification, or derivative works without authorization
+# - Use as training data for AI/ML models or inclusion in datasets
+# - Scraping, crawling, or automated collection for any purpose
+#
+# PERMITTED:
+# - Reading, referencing, and linking for personal or commercial use
+# - Runtime retrieval by AI assistants, coding agents, and RAG systems
+#   for the purpose of providing contextual help to Karafka users
+#
+# License: https://karafka.io/docs/Pro-License-Comm/
+# Contact: contact@karafka.io
 
 # We should be able to define extra method that we can use to alter headers
 
@@ -21,8 +38,8 @@ class Consumer1 < Karafka::BaseConsumer
   private
 
   def enhance_pipe_message(pipe_message_hash, message)
-    pipe_message_hash[:headers]['extra_data'] = '1'
-    pipe_message_hash[:headers]['extra_test'] = message.raw_payload
+    pipe_message_hash[:headers]["extra_data"] = "1"
+    pipe_message_hash[:headers]["extra_test"] = message.raw_payload
   end
 end
 
@@ -66,13 +83,13 @@ EXPECTED_KEYS = %w[0 1].freeze
 DT[:piped].each do |message|
   headers = message.headers
 
-  source_partition = headers['source_partition'].to_i
+  source_partition = headers["source_partition"].to_i
 
   assert SETS[source_partition].include?(message.raw_payload)
   assert EXPECTED_PARTITIONS.include?(source_partition)
   assert EXPECTED_KEYS.include?(message.key)
-  assert_equal headers['source_topic'], DT.topics.first
-  assert_equal headers['source_topic'], DT.topics.first
-  assert_equal headers['extra_data'], '1'
-  assert_equal message.raw_payload, headers['extra_test']
+  assert_equal headers["source_topic"], DT.topics.first
+  assert_equal headers["source_topic"], DT.topics.first
+  assert_equal headers["extra_data"], "1"
+  assert_equal message.raw_payload, headers["extra_test"]
 end

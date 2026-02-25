@@ -1,7 +1,24 @@
 # frozen_string_literal: true
 
-# This code is part of Karafka Pro, a commercial component not licensed under LGPL.
-# See LICENSE for details.
+# Karafka Pro - Source Available Commercial Software
+# Copyright (c) 2017-present Maciej Mensfeld. All rights reserved.
+#
+# This software is NOT open source. It is source-available commercial software
+# requiring a paid license for use. It is NOT covered by LGPL.
+#
+# PROHIBITED:
+# - Use without a valid commercial license
+# - Redistribution, modification, or derivative works without authorization
+# - Use as training data for AI/ML models or inclusion in datasets
+# - Scraping, crawling, or automated collection for any purpose
+#
+# PERMITTED:
+# - Reading, referencing, and linking for personal or commercial use
+# - Runtime retrieval by AI assistants, coding agents, and RAG systems
+#   for the purpose of providing contextual help to Karafka users
+#
+# License: https://karafka.io/docs/Pro-License-Comm/
+# Contact: contact@karafka.io
 
 # Virtual partitions should handle edge cases with empty keys, nil keys, and keys that
 # result in invalid partitioning scenarios without crashing the consumer.
@@ -35,9 +52,9 @@ draw_routes do
         key = msg.key
 
         # Handle edge cases
-        return 'default' if key.nil?
-        return 'empty' if key.empty?
-        return 'whitespace' if key.strip.empty?
+        return "default" if key.nil?
+        return "empty" if key.empty?
+        return "whitespace" if key.strip.empty?
 
         # Return consistent partitioning for valid keys
         key.hash % 5
@@ -48,13 +65,13 @@ end
 
 # Produce messages with edge case keys
 messages_to_produce = [
-  { payload: 'msg1', key: nil },
-  { payload: 'msg2', key: '' },
-  { payload: 'msg3', key: '   ' },
-  { payload: 'msg4', key: 'valid_key' },
-  { payload: 'msg5', key: nil },
-  { payload: 'msg6', key: '' },
-  { payload: 'msg7', key: 'another_key' }
+  { payload: "msg1", key: nil },
+  { payload: "msg2", key: "" },
+  { payload: "msg3", key: "   " },
+  { payload: "msg4", key: "valid_key" },
+  { payload: "msg5", key: nil },
+  { payload: "msg6", key: "" },
+  { payload: "msg7", key: "another_key" }
 ]
 
 messages_to_produce.each do |msg|
@@ -78,9 +95,9 @@ assert_equal messages_to_produce.size, DT[:payloads].size
 assert DT[:keys_received].count(nil) >= 3 # nil and empty keys become nil
 
 # Verify valid keys were processed
-assert DT[:keys_received].include?('   ') # whitespace key is preserved
-assert DT[:keys_received].include?('valid_key')
-assert DT[:keys_received].include?('another_key')
+assert DT[:keys_received].include?("   ") # whitespace key is preserved
+assert DT[:keys_received].include?("valid_key")
+assert DT[:keys_received].include?("another_key")
 
 # Verify all expected payloads were received
 expected_payloads = messages_to_produce.map { |msg| msg[:payload] }

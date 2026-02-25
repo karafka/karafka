@@ -1,7 +1,24 @@
 # frozen_string_literal: true
 
-# This code is part of Karafka Pro, a commercial component not licensed under LGPL.
-# See LICENSE for details.
+# Karafka Pro - Source Available Commercial Software
+# Copyright (c) 2017-present Maciej Mensfeld. All rights reserved.
+#
+# This software is NOT open source. It is source-available commercial software
+# requiring a paid license for use. It is NOT covered by LGPL.
+#
+# PROHIBITED:
+# - Use without a valid commercial license
+# - Redistribution, modification, or derivative works without authorization
+# - Use as training data for AI/ML models or inclusion in datasets
+# - Scraping, crawling, or automated collection for any purpose
+#
+# PERMITTED:
+# - Reading, referencing, and linking for personal or commercial use
+# - Runtime retrieval by AI assistants, coding agents, and RAG systems
+#   for the purpose of providing contextual help to Karafka users
+#
+# License: https://karafka.io/docs/Pro-License-Comm/
+# Contact: contact@karafka.io
 
 # When there are messages for dispatch but they were already dispatched (tombstone exists),
 # we should not dispatch them again. We should only dispatch the once that were not
@@ -20,7 +37,7 @@ def build_message(id)
   {
     topic: DT.topics[1],
     key: "key-#{id}",
-    headers: { 'id' => id },
+    headers: { "id" => id },
     payload: "payload-#{id}",
     partition: 0
   }
@@ -32,8 +49,8 @@ def build_tombstone(id)
     key: "key-#{id}",
     payload: nil,
     headers: {
-      'schedule_source_type' => 'tombstone',
-      'schedule_schema_version' => '1.0.0'
+      "schedule_source_type" => "tombstone",
+      "schedule_schema_version" => "1.0.0"
     }
   }
 end
@@ -42,7 +59,7 @@ old_messages = Array.new(10) do |i|
   build_message(i.to_s)
 end
 
-new_messages = [build_message('101')]
+new_messages = [build_message("101")]
 
 tombstones = Array.new(10) do |i|
   build_tombstone(i.to_s)
@@ -72,7 +89,7 @@ end
 
 # We force dispatch to past to simulate old messages
 old_proxies.each do |proxy|
-  proxy[:headers]['schedule_target_epoch'] = (Time.now.to_i - 600).to_s
+  proxy[:headers]["schedule_target_epoch"] = (Time.now.to_i - 600).to_s
 end
 
 Karafka.producer.produce_many_sync(old_proxies)
@@ -86,17 +103,17 @@ start_karafka_and_wait_until(sleep: 1) do
 end
 
 # Only this message should be available
-assert_equal dispatched.raw_key, 'key-101'
-assert_equal dispatched.raw_payload, 'payload-101'
+assert_equal dispatched.raw_key, "key-101"
+assert_equal dispatched.raw_payload, "payload-101"
 assert_equal dispatched.partition, 0
 
 headers = dispatched.raw_headers
 
-assert_equal headers['id'], '101'
-assert_equal headers['schedule_schema_version'], '1.0.0'
-assert headers.key?('schedule_target_epoch')
-assert_equal headers['schedule_source_type'], 'schedule'
-assert_equal headers['schedule_target_topic'], DT.topics[1]
-assert_equal headers['schedule_target_partition'], '0'
-assert_equal headers['schedule_target_key'], 'key-101'
-assert_equal headers['schedule_source_topic'], DT.topic
+assert_equal headers["id"], "101"
+assert_equal headers["schedule_schema_version"], "1.0.0"
+assert headers.key?("schedule_target_epoch")
+assert_equal headers["schedule_source_type"], "schedule"
+assert_equal headers["schedule_target_topic"], DT.topics[1]
+assert_equal headers["schedule_target_partition"], "0"
+assert_equal headers["schedule_target_key"], "key-101"
+assert_equal headers["schedule_source_topic"], DT.topic

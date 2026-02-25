@@ -13,42 +13,42 @@ RSpec.describe_current do
   let(:active) { true }
   let(:transactional) { true }
 
-  describe '#active?' do
-    context 'when active' do
+  describe "#active?" do
+    context "when active" do
       let(:active) { true }
 
       it { expect(config.active?).to be(true) }
     end
 
-    context 'when not active' do
+    context "when not active" do
       let(:active) { false }
 
       it { expect(config.active?).to be(false) }
     end
   end
 
-  describe '#independent?' do
-    context 'when independent' do
+  describe "#independent?" do
+    context "when independent" do
       let(:independent) { true }
 
       it { expect(config.independent?).to be(true) }
     end
 
-    context 'when not independent' do
+    context "when not independent" do
       let(:independent) { false }
 
       it { expect(config.independent?).to be(false) }
     end
   end
 
-  describe '#transactional?' do
-    context 'when independent' do
+  describe "#transactional?" do
+    context "when independent" do
       let(:transactional) { true }
 
       it { expect(config.transactional?).to be(true) }
     end
 
-    context 'when not transactional' do
+    context "when not transactional" do
       let(:transactional) { false }
 
       it { expect(config.transactional?).to be(false) }

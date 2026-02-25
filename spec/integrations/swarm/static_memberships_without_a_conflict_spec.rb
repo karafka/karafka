@@ -8,7 +8,7 @@
 
 setup_karafka do |config|
   config.swarm.nodes = 2
-  config.kafka[:'group.instance.id'] = SecureRandom.uuid
+  config.kafka[:"group.instance.id"] = SecureRandom.uuid
 end
 
 READER, WRITER = IO.pipe
@@ -35,7 +35,7 @@ results = {}
 # No specs needed because if fenced, will fail
 start_karafka_and_wait_until(mode: :swarm) do
   loop do
-    partition_id, pid = READER.gets.strip.split('-')
+    partition_id, pid = READER.gets.strip.split("-")
     results[pid] ||= Set.new
     results[pid] << partition_id
 

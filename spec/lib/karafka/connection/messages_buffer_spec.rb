@@ -9,18 +9,18 @@ RSpec.describe_current do
   let(:raw_message1) { build(:kafka_fetched_message, topic: topic_name) }
   let(:raw_message2) { build(:kafka_fetched_message, topic: topic_name) }
 
-  describe '#size, #empty?, #each and #present?' do
-    context 'when there are no messages' do
+  describe "#size, #empty?, #each and #present?" do
+    context "when there are no messages" do
       it { expect(buffer.size).to eq(0) }
       it { expect(buffer.empty?).to be(true) }
       it { expect(buffer.present?(topic_name, 0)).to be(false) }
 
-      it 'expect not to yield anything' do
+      it "expect not to yield anything" do
         expect { |block| buffer.each(&block) }.not_to yield_control
       end
     end
 
-    context 'when there are messages in the buffer' do
+    context "when there are messages in the buffer" do
       let(:buffer_messages) do
         raw_messages_buffer << raw_message1
         raw_messages_buffer << raw_message2
@@ -45,19 +45,19 @@ RSpec.describe_current do
     end
   end
 
-  describe '#remap' do
-    context 'when buffer was empty' do
+  describe "#remap" do
+    context "when buffer was empty" do
       before do
         raw_messages_buffer << raw_message1
         raw_messages_buffer << raw_message2
       end
 
-      it 'expect to add data to the buffer' do
+      it "expect to add data to the buffer" do
         expect { buffer.remap(raw_messages_buffer) }.to change(buffer, :size).from(0).to(2)
       end
     end
 
-    context 'when buffer was not empty' do
+    context "when buffer was not empty" do
       let(:buffer_messages) do
         raw_messages_buffer << raw_message1
 
@@ -75,7 +75,7 @@ RSpec.describe_current do
 
       before { buffer_messages }
 
-      it 'expect to remove previous content before another remap' do
+      it "expect to remove previous content before another remap" do
         expect { buffer.remap(raw_messages_buffer) }.not_to change(buffer, :size)
       end
 

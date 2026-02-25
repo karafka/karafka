@@ -4,8 +4,8 @@
 # Additionally when we use the Kubernetes Liveness Probing, it should not activate itself as
 # Karafka does not start the liveness probing until it boots and it should NOT boot in the console
 
-require 'net/http'
-require 'open3'
+require "net/http"
+require "open3"
 
 InvalidExitCode = Class.new(StandardError)
 
@@ -34,11 +34,11 @@ system! <<~CMD
     app
 CMD
 
-system!('cp Gemfile ./app/')
-system!('cd app && bundle install')
-system!('cd app && bundle exec karafka install')
+system!("cp Gemfile ./app/")
+system!("cd app && bundle install")
+system!("cd app && bundle exec karafka install")
 
-File.open('karafka.rb', 'a') do |file|
+File.open("karafka.rb", "a") do |file|
   file.puts <<~LISTENER
     require 'karafka/instrumentation/vendors/kubernetes/liveness_listener'
 
@@ -52,7 +52,7 @@ Thread.abort_on_exception = true
 
 thread = Thread.new do
   # Make sure Rails console can start
-  timeout = 'timeout --preserve-status --verbose 10'
+  timeout = "timeout --preserve-status --verbose 10"
 
   system!("cd app && #{timeout} bundle exec rails console")
   system!("cd app && #{timeout} bundle exec karafka console")
@@ -63,8 +63,8 @@ sleep(2)
 not_available = false
 
 begin
-  req = Net::HTTP::Get.new('/')
-  client = Net::HTTP.new('127.0.0.1', 9015)
+  req = Net::HTTP::Get.new("/")
+  client = Net::HTTP.new("127.0.0.1", 9015)
   client.request(req)
 rescue Errno::ECONNREFUSED
   not_available = true

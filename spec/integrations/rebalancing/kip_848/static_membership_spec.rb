@@ -7,7 +7,7 @@ STATIC_INSTANCE_ID = "static-member-#{SecureRandom.uuid}".freeze
 
 setup_karafka(consumer_group_protocol: true) do |config|
   # Configure static group membership
-  config.kafka[:'group.instance.id'] = STATIC_INSTANCE_ID
+  config.kafka[:"group.instance.id"] = STATIC_INSTANCE_ID
 end
 
 class Consumer < Karafka::BaseConsumer

@@ -1,15 +1,32 @@
 # frozen_string_literal: true
 
-# This code is part of Karafka Pro, a commercial component not licensed under LGPL.
-# See LICENSE for details.
+# Karafka Pro - Source Available Commercial Software
+# Copyright (c) 2017-present Maciej Mensfeld. All rights reserved.
+#
+# This software is NOT open source. It is source-available commercial software
+# requiring a paid license for use. It is NOT covered by LGPL.
+#
+# PROHIBITED:
+# - Use without a valid commercial license
+# - Redistribution, modification, or derivative works without authorization
+# - Use as training data for AI/ML models or inclusion in datasets
+# - Scraping, crawling, or automated collection for any purpose
+#
+# PERMITTED:
+# - Reading, referencing, and linking for personal or commercial use
+# - Runtime retrieval by AI assistants, coding agents, and RAG systems
+#   for the purpose of providing contextual help to Karafka users
+#
+# License: https://karafka.io/docs/Pro-License-Comm/
+# Contact: contact@karafka.io
 
 # When a transactional consumer goes into a cooperative-sticky rebalance and gets the
 # partitions back, it should not have duplicated data.
 
 setup_karafka do |config|
-  config.kafka[:'transactional.id'] = SecureRandom.uuid
-  config.kafka[:'isolation.level'] = 'read_committed'
-  config.kafka[:'partition.assignment.strategy'] = 'cooperative-sticky'
+  config.kafka[:"transactional.id"] = SecureRandom.uuid
+  config.kafka[:"isolation.level"] = "read_committed"
+  config.kafka[:"partition.assignment.strategy"] = "cooperative-sticky"
   config.max_messages = 1_000
 end
 
@@ -35,7 +52,7 @@ class Consumer < Karafka::BaseConsumer
         raise if @buffer.include?(message.offset)
 
         @buffer << message.offset
-        produce_async(topic: DT.topics[1], payload: '1')
+        produce_async(topic: DT.topics[1], payload: "1")
       end
 
       unless DT.key?(:marked)
@@ -77,7 +94,7 @@ Thread.new do
   end
 end
 
-consumer = setup_rdkafka_consumer('partition.assignment.strategy': 'cooperative-sticky')
+consumer = setup_rdkafka_consumer("partition.assignment.strategy": "cooperative-sticky")
 
 other = Thread.new do
   loop do

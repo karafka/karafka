@@ -11,15 +11,15 @@ module Karafka
           class Topic < Karafka::Contracts::Base
             configure do |config|
               config.error_messages = YAML.safe_load_file(
-                File.join(Karafka.gem_root, 'config', 'locales', 'errors.yml')
-              ).fetch('en').fetch('validations').fetch('routing').fetch('topic')
+                File.join(Karafka.gem_root, "config", "locales", "errors.yml")
+              ).fetch("en").fetch("validations").fetch("routing").fetch("topic")
             end
 
             virtual do |data, errors|
               next unless errors.empty?
               next unless data[:active_job][:active]
               # One should not define active job jobs without ActiveJob being available for usage
-              next if Object.const_defined?('ActiveJob::Base')
+              next if Object.const_defined?("ActiveJob::Base")
 
               [[%i[consumer], :active_job_missing]]
             end

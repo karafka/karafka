@@ -33,7 +33,7 @@ Thread.new do
   end
 end
 
-Karafka::App.monitor.subscribe('consumer.consume') do |event|
+Karafka::App.monitor.subscribe("consumer.consume") do |event|
   DT[:caller] << event[:caller]
 end
 

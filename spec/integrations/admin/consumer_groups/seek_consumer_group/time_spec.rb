@@ -12,7 +12,7 @@ time_ref = nil
 10.times do |i|
   time_ref = Time.now if i == 4
   sleep(0.1)
-  produce(DT.topic, '')
+  produce(DT.topic, "")
 end
 
 Karafka::Admin.seek_consumer_group(

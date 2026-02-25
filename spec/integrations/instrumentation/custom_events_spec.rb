@@ -5,10 +5,10 @@
 
 setup_karafka
 
-Karafka.monitor.notifications_bus.register_event('app.custom.event')
+Karafka.monitor.notifications_bus.register_event("app.custom.event")
 
 # via block
-Karafka.monitor.subscribe('app.custom.event') do |event|
+Karafka.monitor.subscribe("app.custom.event") do |event|
   DT[:block_sub] = event
 end
 
@@ -23,7 +23,7 @@ Karafka.monitor.subscribe(AppListener.new)
 
 class Consumer < Karafka::BaseConsumer
   def consume
-    Karafka.monitor.instrument('app.custom.event') do
+    Karafka.monitor.instrument("app.custom.event") do
       sleep(0.2)
       DT[0] << true
     end

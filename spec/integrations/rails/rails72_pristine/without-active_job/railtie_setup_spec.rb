@@ -4,20 +4,20 @@
 # just ignore the ActiveJob components
 
 # Load all the Railtie stuff like when `rails server`
-ENV['KARAFKA_CLI'] = 'true'
+ENV["KARAFKA_CLI"] = "true"
 
 Bundler.require(:default)
 
-require 'action_controller'
-require 'tempfile'
+require "action_controller"
+require "tempfile"
 
 class ExampleApp < Rails::Application
-  config.eager_load = 'test'
+  config.eager_load = "test"
 end
 
 dummy_boot_file = "#{Tempfile.new.path}.rb"
 FileUtils.touch(dummy_boot_file)
-ENV['KARAFKA_BOOT_FILE'] = dummy_boot_file
+ENV["KARAFKA_BOOT_FILE"] = dummy_boot_file
 
 ExampleApp.initialize!
 
@@ -30,11 +30,11 @@ class Consumer < Karafka::BaseConsumer
 end
 
 draw_routes(Consumer)
-produce(DT.topic, '1')
+produce(DT.topic, "1")
 
 start_karafka_and_wait_until do
   DT.key?(0)
 end
 
 assert_equal 1, DT.data.size
-assert Rails.version.starts_with?('7.2.')
+assert Rails.version.starts_with?("7.2.")

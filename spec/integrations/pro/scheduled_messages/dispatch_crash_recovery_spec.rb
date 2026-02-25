@@ -1,7 +1,24 @@
 # frozen_string_literal: true
 
-# This code is part of Karafka Pro, a commercial component not licensed under LGPL.
-# See LICENSE for details.
+# Karafka Pro - Source Available Commercial Software
+# Copyright (c) 2017-present Maciej Mensfeld. All rights reserved.
+#
+# This software is NOT open source. It is source-available commercial software
+# requiring a paid license for use. It is NOT covered by LGPL.
+#
+# PROHIBITED:
+# - Use without a valid commercial license
+# - Redistribution, modification, or derivative works without authorization
+# - Use as training data for AI/ML models or inclusion in datasets
+# - Scraping, crawling, or automated collection for any purpose
+#
+# PERMITTED:
+# - Reading, referencing, and linking for personal or commercial use
+# - Runtime retrieval by AI assistants, coding agents, and RAG systems
+#   for the purpose of providing contextual help to Karafka users
+#
+# License: https://karafka.io/docs/Pro-License-Comm/
+# Contact: contact@karafka.io
 
 # When dispatch of a given batch / message crashes, we should retry the same
 # This gives us at-least once in case of non-transactional consumer and exactly-once in case of
@@ -29,7 +46,7 @@ proxies = Array.new(10) do |i|
   message = {
     topic: DT.topics[1],
     key: i.to_s,
-    payload: 'payload'
+    payload: "payload"
   }
 
   Karafka::Pro::ScheduledMessages.schedule(
@@ -46,7 +63,7 @@ Karafka.producer.produce_many_sync(proxies)
 class Crasher
   def call(message)
     # Don't crash on async state reporting, just proxy dispatches
-    return message if message[:key].end_with?('_state')
+    return message if message[:key].end_with?("_state")
 
     DT[:totals] << 1
 

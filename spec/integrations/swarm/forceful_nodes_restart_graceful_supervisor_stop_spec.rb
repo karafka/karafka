@@ -3,15 +3,18 @@
 # When supervisor restarts nodes that are hanging it should emit a status and when nodes are
 # no longer hanging it should gracefully stop
 
+# macOS ARM64 needs more generous timeouts due to slower process startup
+MACOS = RUBY_PLATFORM.include?("darwin")
+
 setup_karafka(allow_errors: true) do |config|
   config.shutdown_timeout = 5_000
   config.swarm.nodes = 1
-  config.internal.swarm.node_restart_timeout = 1_000
-  config.internal.swarm.supervision_interval = 1_000
-  config.internal.swarm.node_report_timeout = 2_000
+  config.internal.swarm.node_restart_timeout = MACOS ? 2_000 : 1_000
+  config.internal.swarm.supervision_interval = MACOS ? 2_000 : 1_000
+  config.internal.swarm.node_report_timeout = MACOS ? 5_000 : 2_000
 end
 
-Karafka::App.monitor.subscribe('swarm.manager.before_fork') do
+Karafka::App.monitor.subscribe("swarm.manager.before_fork") do
   DT[:forks] << true
 
   # Give them a bit more time if they are suppose to be legit
@@ -39,17 +42,18 @@ module Karafka
 end
 
 stoppings = []
-Karafka::App.monitor.subscribe('swarm.manager.stopping') do |event|
+Karafka::App.monitor.subscribe("swarm.manager.stopping") do |event|
   stoppings << event[:status]
 end
 
 terminations = []
-Karafka::App.monitor.subscribe('swarm.manager.terminating') do
+Karafka::App.monitor.subscribe("swarm.manager.terminating") do
   terminations << true
 end
 
 class Consumer < Karafka::BaseConsumer
-  def consume; end
+  def consume
+  end
 end
 
 draw_routes(Consumer)
@@ -61,10 +65,11 @@ start_karafka_and_wait_until(mode: :swarm) do
     false
   else
     Karafka::App.config.shutdown_timeout = 100_000
+    # Sleep is needed on macOS to allow node to start and be responsive enough for shutdown
+    sleep(2) if MACOS
 
     true
   end
-  # Sleep is needed to allow node to start and to be responsive enough for shutdown
 end
 
 def process_exists?(pid)

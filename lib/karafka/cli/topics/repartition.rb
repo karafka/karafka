@@ -26,12 +26,12 @@ module Karafka
               end
 
               change = desired_count - existing_count
-              puts "#{green('Created')} #{change} additional partitions on topic #{name}."
+              puts "#{green("Created")} #{change} additional partitions on topic #{name}."
               any_repartitioned = true
             elsif existing_count
-              puts "#{yellow('Skipping')} because topic #{name} has #{existing_count} partitions."
+              puts "#{yellow("Skipping")} because topic #{name} has #{existing_count} partitions."
             else
-              puts "#{yellow('Skipping')} because topic #{name} does not exist."
+              puts "#{yellow("Skipping")} because topic #{name} does not exist."
             end
           end
 

@@ -8,12 +8,12 @@ errors = []
 
 begin
   setup_karafka do |config|
-    config.kafka = { 'message.max.bytes': 0, 'message.copy.max.bytes': -1 }
+    config.kafka = { "message.max.bytes": 0, "message.copy.max.bytes": -1 }
   end
 
   draw_routes do
-    consumer_group 'usual' do
-      topic 'regular' do
+    consumer_group "usual" do
+      topic "regular" do
         consumer Class.new
       end
     end
@@ -25,13 +25,13 @@ end
 
 begin
   setup_karafka do |config|
-    config.kafka = { 'message.max.bytes' => 0, 'message.copy.max.bytes' => -1 }
+    config.kafka = { "message.max.bytes" => 0, "message.copy.max.bytes" => -1 }
   end
 rescue Karafka::Errors::InvalidConfigurationError => e
   errors << e
   guarded << true
 end
 
-assert errors.first.message.include?('routes.usual.regular.kafka')
-assert errors.last.message.include?('config.kafka.message.max.bytes')
+assert errors.first.message.include?("routes.usual.regular.kafka")
+assert errors.last.message.include?("config.kafka.message.max.bytes")
 assert_equal [true, true], guarded

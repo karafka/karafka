@@ -115,7 +115,7 @@ module Karafka
 
         timeout = backoff_factor * @timeout
 
-        @max_timeout && timeout > @max_timeout ? @max_timeout : timeout
+        (@max_timeout && timeout > @max_timeout) ? @max_timeout : timeout
       end
     end
   end

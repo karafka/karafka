@@ -4,23 +4,23 @@
 # `Current` never leaks in between them and that `Current` is always current to the local
 # thread in which given consumer operates
 
-ENV['KARAFKA_CLI'] = 'true'
+ENV["KARAFKA_CLI"] = "true"
 
 Bundler.require(:default)
 
-require 'action_controller'
-require 'tempfile'
-require 'active_job'
-require 'active_job/karafka'
-require 'karafka/active_job/current_attributes'
+require "action_controller"
+require "tempfile"
+require "active_job"
+require "active_job/karafka"
+require "karafka/active_job/current_attributes"
 
 class ExampleApp < Rails::Application
-  config.eager_load = 'test'
+  config.eager_load = "test"
 end
 
 dummy_boot_file = "#{Tempfile.new.path}.rb"
 FileUtils.touch(dummy_boot_file)
-ENV['KARAFKA_BOOT_FILE'] = dummy_boot_file
+ENV["KARAFKA_BOOT_FILE"] = dummy_boot_file
 
 ExampleApp.initialize!
 
@@ -30,7 +30,7 @@ setup_karafka do |config|
   config.max_wait_time = 500
   # Fetch one message a a time from partition (or something like that)
   # to make sure we have a chance to operate in parallel
-  config.kafka[:'fetch.message.max.bytes'] = 1
+  config.kafka[:"fetch.message.max.bytes"] = 1
 end
 
 class Current < ActiveSupport::CurrentAttributes

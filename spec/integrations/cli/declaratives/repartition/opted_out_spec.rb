@@ -23,8 +23,8 @@ draw_routes(create_topics: false) do
   end
 end
 
-ARGV[0] = 'topics'
-ARGV[1] = 'repartition'
+ARGV[0] = "topics"
+ARGV[1] = "repartition"
 
 Karafka::Cli.start
 

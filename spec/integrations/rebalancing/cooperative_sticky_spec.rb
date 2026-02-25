@@ -3,11 +3,12 @@
 # Karafka should support a cooperative-sticky rebalance strategy without any problems
 
 setup_karafka do |config|
-  config.kafka[:'partition.assignment.strategy'] = 'cooperative-sticky'
+  config.kafka[:"partition.assignment.strategy"] = "cooperative-sticky"
 end
 
 class Consumer < Karafka::BaseConsumer
-  def consume; end
+  def consume
+  end
 
   def on_revoked
     DT[:revoked] << messages.metadata.partition
@@ -37,7 +38,7 @@ Thread.new do
 end
 
 consumer = setup_rdkafka_consumer(
-  'partition.assignment.strategy': 'cooperative-sticky'
+  "partition.assignment.strategy": "cooperative-sticky"
 )
 
 other = Thread.new do

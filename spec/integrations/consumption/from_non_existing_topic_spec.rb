@@ -11,7 +11,8 @@ class Consumer < Karafka::BaseConsumer
 end
 
 class Consumer2 < Karafka::BaseConsumer
-  def consume; end
+  def consume
+  end
 end
 
 Karafka::Admin.create_topic(DT.topics[1], 1, 1)
@@ -30,7 +31,7 @@ end
 
 Thread.new do
   sleep 10
-  produce(DT.topic, '1')
+  produce(DT.topic, "1")
 end
 
 start_karafka_and_wait_until do

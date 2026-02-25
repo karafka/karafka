@@ -4,6 +4,15 @@
     "config:recommended"
   ],
   "minimumReleaseAge": "7 days",
+  "includePaths": [
+    ".ruby-version",
+    "Gemfile",
+    "Gemfile.lint",
+    "karafka.gemspec",
+    "package.json",
+    ".github/workflows/**",
+    "docker-compose*.yml"
+  ],
   "ignorePaths": [
     "spec/integrations"
   ],
@@ -11,5 +20,17 @@
     "enabled": true,
     "pinDigests": true
   },
-  "packageRules": []
+  "packageRules": [
+    {
+      "description": "Group ruby/setup-ruby action with ruby version updates",
+      "matchPackageNames": [
+        "ruby/setup-ruby",
+        "ruby"
+      ],
+      "groupName": "ruby setup"
+    }
+  ],
+  "labels": [
+    "dependencies"
+  ]
 }

@@ -20,8 +20,8 @@ draw_routes do
 end
 
 10.times do
-  produce(DT.topic, '', partition: 0)
-  produce(DT.topic, '', partition: 1)
+  produce(DT.topic, "", partition: 0)
+  produce(DT.topic, "", partition: 1)
 end
 
 start_karafka_and_wait_until do

@@ -28,7 +28,7 @@ draw_routes do
   end
 end
 
-Karafka.monitor.subscribe('consumer.consumed') do |_event|
+Karafka.monitor.subscribe("consumer.consumed") do |_event|
   DT[:consumer_events] << 1
 end
 

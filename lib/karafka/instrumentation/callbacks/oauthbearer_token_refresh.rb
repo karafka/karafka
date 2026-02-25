@@ -22,15 +22,15 @@ module Karafka
           return unless @bearer.name == bearer_name
 
           monitor.instrument(
-            'oauthbearer.token_refresh',
+            "oauthbearer.token_refresh",
             bearer: @bearer,
             caller: self
           )
-        rescue StandardError => e
+        rescue => e
           monitor.instrument(
-            'error.occurred',
+            "error.occurred",
             caller: self,
-            type: 'callbacks.oauthbearer_token_refresh.error',
+            type: "callbacks.oauthbearer_token_refresh.error",
             error: e
           )
         end

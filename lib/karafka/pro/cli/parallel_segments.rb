@@ -1,7 +1,24 @@
 # frozen_string_literal: true
 
-# This code is part of Karafka Pro, a commercial component not licensed under LGPL.
-# See LICENSE for details.
+# Karafka Pro - Source Available Commercial Software
+# Copyright (c) 2017-present Maciej Mensfeld. All rights reserved.
+#
+# This software is NOT open source. It is source-available commercial software
+# requiring a paid license for use. It is NOT covered by LGPL.
+#
+# PROHIBITED:
+# - Use without a valid commercial license
+# - Redistribution, modification, or derivative works without authorization
+# - Use as training data for AI/ML models or inclusion in datasets
+# - Scraping, crawling, or automated collection for any purpose
+#
+# PERMITTED:
+# - Reading, referencing, and linking for personal or commercial use
+# - Runtime retrieval by AI assistants, coding agents, and RAG systems
+#   for the purpose of providing contextual help to Karafka users
+#
+# License: https://karafka.io/docs/Pro-License-Comm/
+# Contact: contact@karafka.io
 
 module Karafka
   module Pro
@@ -14,11 +31,11 @@ module Karafka
           kafka_config: %i[kafka]
         )
 
-        desc 'Allows for parallel segments management'
+        desc "Allows for parallel segments management"
 
         option(
           :groups,
-          'Names of consumer groups on which we want to run the command. All if not provided',
+          "Names of consumer groups on which we want to run the command. All if not provided",
           Array,
           %w[
             --groups
@@ -33,7 +50,7 @@ module Karafka
         # their existing distributed offsets to be reset.
         option(
           :force,
-          'Should an operation on the parallel segments consumer group be forced',
+          "Should an operation on the parallel segments consumer group be forced",
           TrueClass,
           %w[
             --force
@@ -41,13 +58,13 @@ module Karafka
         )
 
         # @param action [String] action we want to take
-        def call(action = 'distribute')
+        def call(action = "distribute")
           case action
-          when 'distribute'
+          when "distribute"
             Distribute.new(options).call
-          when 'collapse'
+          when "collapse"
             Collapse.new(options).call
-          when 'reset'
+          when "reset"
             Collapse.new(options).call
             Distribute.new(options).call
           else

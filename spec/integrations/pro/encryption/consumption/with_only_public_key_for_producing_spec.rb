@@ -1,12 +1,29 @@
 # frozen_string_literal: true
 
-# This code is part of Karafka Pro, a commercial component not licensed under LGPL.
-# See LICENSE for details.
+# Karafka Pro - Source Available Commercial Software
+# Copyright (c) 2017-present Maciej Mensfeld. All rights reserved.
+#
+# This software is NOT open source. It is source-available commercial software
+# requiring a paid license for use. It is NOT covered by LGPL.
+#
+# PROHIBITED:
+# - Use without a valid commercial license
+# - Redistribution, modification, or derivative works without authorization
+# - Use as training data for AI/ML models or inclusion in datasets
+# - Scraping, crawling, or automated collection for any purpose
+#
+# PERMITTED:
+# - Reading, referencing, and linking for personal or commercial use
+# - Runtime retrieval by AI assistants, coding agents, and RAG systems
+#   for the purpose of providing contextual help to Karafka users
+#
+# License: https://karafka.io/docs/Pro-License-Comm/
+# Contact: contact@karafka.io
 
 # Karafka should work correctly when we configure it only to have public key and for messages
 # producing only. Decryption will not be possible.
 
-PUBLIC_KEY = fixture_file('rsa/public_key_1.pem')
+PUBLIC_KEY = fixture_file("rsa/public_key_1.pem")
 
 setup_karafka do |config|
   config.encryption.active = true
@@ -17,7 +34,7 @@ class Consumer < Karafka::BaseConsumer
   def consume
     messages.each do |message|
       DT[message.metadata.partition] << message.raw_payload
-      DT[:encryption] << message.headers['encryption']
+      DT[:encryption] << message.headers["encryption"]
     end
   end
 end
@@ -36,7 +53,7 @@ start_karafka_and_wait_until do
 end
 
 # There should be no raw info available
-chunk = elements.first.split('-').first
+chunk = elements.first.split("-").first
 assert(DT[0].none? { |payload| payload.include?(chunk) })
 
 # Correct encryption version headers should be present

@@ -1,7 +1,24 @@
 # frozen_string_literal: true
 
-# This code is part of Karafka Pro, a commercial component not licensed under LGPL.
-# See LICENSE for details.
+# Karafka Pro - Source Available Commercial Software
+# Copyright (c) 2017-present Maciej Mensfeld. All rights reserved.
+#
+# This software is NOT open source. It is source-available commercial software
+# requiring a paid license for use. It is NOT covered by LGPL.
+#
+# PROHIBITED:
+# - Use without a valid commercial license
+# - Redistribution, modification, or derivative works without authorization
+# - Use as training data for AI/ML models or inclusion in datasets
+# - Scraping, crawling, or automated collection for any purpose
+#
+# PERMITTED:
+# - Reading, referencing, and linking for personal or commercial use
+# - Runtime retrieval by AI assistants, coding agents, and RAG systems
+#   for the purpose of providing contextual help to Karafka users
+#
+# License: https://karafka.io/docs/Pro-License-Comm/
+# Contact: contact@karafka.io
 
 # This spec tests a real-world event filtering scenario where all messages match
 # the target event type (none are filtered out). In this case:
@@ -30,7 +47,7 @@ class Consumer < Karafka::BaseConsumer
 end
 
 class EventFilter < Karafka::Pro::Processing::Filters::Base
-  TARGET_EVENT = 'order_created'
+  TARGET_EVENT = "order_created"
 
   def apply!(messages)
     initialize_filter_state
@@ -51,7 +68,7 @@ class EventFilter < Karafka::Pro::Processing::Filters::Base
   end
 
   def should_filter_message?(message)
-    event_name = message.payload.dig('event', 'name')
+    event_name = message.payload.dig("event", "name")
     return false if event_name == TARGET_EVENT
 
     @applied = true
@@ -94,7 +111,7 @@ end
 
 # Produce 100 messages, all with the target event type
 elements = Array.new(100) do |i|
-  { event: { name: 'order_created', id: i } }.to_json
+  { event: { name: "order_created", id: i } }.to_json
 end
 
 produce_many(DT.topic, elements)
@@ -111,14 +128,14 @@ assert_equal 100, DT[:processed].size
 assert_equal (0...100).to_a, DT[:processed].sort
 
 # Verify we had no filtering in any batch
-assert DT[:no_filtering_batches].size >= 10, 'All batches should have no filtering'
+assert DT[:no_filtering_batches].size >= 10, "All batches should have no filtering"
 
 # Verify no batches were marked as all_filtered
 assert_equal 0, DT[:all_filtered_batches].size
 
 # Verify last message was marked
-assert DT[:marked].any?, 'Should have marked messages'
-assert_equal 99, DT[:marked].last, 'Last marked should be offset 99'
+assert DT[:marked].any?, "Should have marked messages"
+assert_equal 99, DT[:marked].last, "Last marked should be offset 99"
 
 # Verify offset advanced correctly
-assert_equal 100, fetch_next_offset(DT.topic), 'Offset should be at the end'
+assert_equal 100, fetch_next_offset(DT.topic), "Offset should be at the end"

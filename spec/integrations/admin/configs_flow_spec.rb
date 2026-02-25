@@ -17,7 +17,7 @@ draw_routes do
 end
 
 # Lets read broker settings
-broker = Karafka::Admin::Configs::Resource.new(type: :broker, name: '1')
+broker = Karafka::Admin::Configs::Resource.new(type: :broker, name: "1")
 
 Karafka::Admin::Configs.describe(broker).each do |fetched_broker|
   fetched_broker.type
@@ -36,9 +36,9 @@ end
 topic1 = Karafka::Admin::Configs::Resource.new(type: :topic, name: DT.topics[0])
 topic2 = Karafka::Admin::Configs::Resource.new(type: :topic, name: DT.topics[1])
 
-topic1.set('delete.retention.ms', 86_800_123)
-topic1.set('cleanup.policy', 'compact')
-topic2.delete('delete.retention.ms')
+topic1.set("delete.retention.ms", 86_800_123)
+topic1.set("cleanup.policy", "compact")
+topic2.delete("delete.retention.ms")
 
 Karafka::Admin::Configs.alter(topic1, topic2)
 
@@ -55,20 +55,20 @@ assert_equal rtopic2.name, DT.topics[1]
 assert_equal rtopic2.type, :topic
 
 rtopic1.configs.each do |config|
-  if config.name == 'delete.retention.ms'
-    assert_equal config.name, 'delete.retention.ms'
-    assert_equal config.value, '86800123'
+  if config.name == "delete.retention.ms"
+    assert_equal config.name, "delete.retention.ms"
+    assert_equal config.value, "86800123"
   end
 
-  if config.name == 'cleanup.policy'
-    assert_equal config.name, 'cleanup.policy'
-    assert_equal config.value, 'compact'
+  if config.name == "cleanup.policy"
+    assert_equal config.name, "cleanup.policy"
+    assert_equal config.value, "compact"
   end
 end
 
 rtopic2.configs.each do |config|
-  if config.name == 'delete.retention.ms'
-    assert_equal config.name, 'delete.retention.ms'
-    assert_equal config.value, '86400000'
+  if config.name == "delete.retention.ms"
+    assert_equal config.name, "delete.retention.ms"
+    assert_equal config.value, "86400000"
   end
 end

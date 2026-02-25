@@ -35,8 +35,8 @@ module Karafka
         # @note It runs in the listener loop. Should **not** be used for anything heavy or
         #   with any potential errors. Mostly for initialization of states, etc.
         def handle_initialized
-          monitor.instrument('consumer.initialize', caller: self)
-          monitor.instrument('consumer.initialized', caller: self) do
+          monitor.instrument("consumer.initialize", caller: self)
+          monitor.instrument("consumer.initialized", caller: self) do
             initialized
           end
         end
@@ -125,22 +125,22 @@ module Karafka
         # @param action [Symbol]
         # @param block [Proc]
         def handle_wrap(action, &block)
-          monitor.instrument('consumer.wrap', caller: self)
-          monitor.instrument('consumer.wrapped', caller: self) do
+          monitor.instrument("consumer.wrap", caller: self)
+          monitor.instrument("consumer.wrapped", caller: self) do
             wrap(action, &block)
           end
         end
 
         # Run the user consumption code
         def handle_consume
-          monitor.instrument('consumer.consume', caller: self)
-          monitor.instrument('consumer.consumed', caller: self) do
+          monitor.instrument("consumer.consume", caller: self)
+          monitor.instrument("consumer.consumed", caller: self) do
             consume
           end
 
           # Mark job as successful
           coordinator.success!(self)
-        rescue StandardError => e
+        rescue => e
           coordinator.failure!(self, e)
 
           # Re-raise so reported in the consumer
@@ -180,8 +180,8 @@ module Karafka
 
         # Runs the consumer `#eofed` method with reporting
         def handle_eofed
-          monitor.instrument('consumer.eof', caller: self)
-          monitor.instrument('consumer.eofed', caller: self) do
+          monitor.instrument("consumer.eof", caller: self)
+          monitor.instrument("consumer.eofed", caller: self) do
             eofed
           end
         ensure
@@ -196,8 +196,8 @@ module Karafka
 
           coordinator.revoke
 
-          monitor.instrument('consumer.revoke', caller: self)
-          monitor.instrument('consumer.revoked', caller: self) do
+          monitor.instrument("consumer.revoke", caller: self)
+          monitor.instrument("consumer.revoked", caller: self) do
             revoked
           end
         ensure
@@ -206,8 +206,8 @@ module Karafka
 
         # Runs the shutdown code
         def handle_shutdown
-          monitor.instrument('consumer.shutting_down', caller: self)
-          monitor.instrument('consumer.shutdown', caller: self) do
+          monitor.instrument("consumer.shutting_down", caller: self)
+          monitor.instrument("consumer.shutdown", caller: self) do
             shutdown
           end
         ensure

@@ -17,7 +17,7 @@ module Karafka
         # @return [Boolean] true if there were any changes applied, otherwise false
         def call
           if candidate_topics.empty?
-            puts "#{yellow('Skipping')} because no declarative topics exist."
+            puts "#{yellow("Skipping")} because no declarative topics exist."
 
             return false
           end
@@ -25,7 +25,7 @@ module Karafka
           resources_to_migrate = build_resources_to_migrate
 
           if resources_to_migrate.empty?
-            puts "#{yellow('Skipping')} because there are no configurations to align."
+            puts "#{yellow("Skipping")} because there are no configurations to align."
 
             return false
           end
@@ -35,7 +35,7 @@ module Karafka
               Karafka::Admin::Configs.alter(resource)
             end
 
-            puts "#{green('Updated')} topic #{resource.name} configuration."
+            puts "#{green("Updated")} topic #{resource.name} configuration."
           end
 
           true
@@ -54,7 +54,7 @@ module Karafka
           # First lets only operate on topics that do exist
           declaratives_routing_topics.each do |topic|
             unless existing_topics_names.include?(topic.name)
-              puts "#{yellow('Skipping')} because topic #{topic.name} does not exist."
+              puts "#{yellow("Skipping")} because topic #{topic.name} does not exist."
               next
             end
 

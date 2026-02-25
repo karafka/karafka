@@ -21,10 +21,10 @@ module Karafka
         end
 
         # Revocation, shutdown and idle jobs can also run in fifo by default
-        alias on_schedule_revocation on_schedule_consumption
-        alias on_schedule_shutdown on_schedule_consumption
-        alias on_schedule_idle on_schedule_consumption
-        alias on_schedule_eofed on_schedule_consumption
+        alias_method :on_schedule_revocation, :on_schedule_consumption
+        alias_method :on_schedule_shutdown, :on_schedule_consumption
+        alias_method :on_schedule_idle, :on_schedule_consumption
+        alias_method :on_schedule_eofed, :on_schedule_consumption
 
         # This scheduler does not have anything to manage as it is a pass through and has no state
         def on_manage

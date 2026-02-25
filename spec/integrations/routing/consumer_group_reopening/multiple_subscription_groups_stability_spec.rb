@@ -6,7 +6,7 @@
 # multiple subscription groups per consumer group.
 
 setup_karafka do |config|
-  config.kafka[:'group.instance.id'] = 'multi-sg-test'
+  config.kafka[:"group.instance.id"] = "multi-sg-test"
 end
 
 Consumer1 = Class.new(Karafka::BaseConsumer)
@@ -27,7 +27,7 @@ assert_equal 1, cg0.subscription_groups.size
 
 sg_default = cg0.subscription_groups.first
 sg_default_position = sg_default.position
-sg_default_instance_id = sg_default.kafka[:'group.instance.id']
+sg_default_instance_id = sg_default.kafka[:"group.instance.id"]
 
 assert_equal 0, sg_default_position
 
@@ -48,10 +48,10 @@ sg_custom = cg0.subscription_groups.find { |sg| sg.topics.map(&:name).include?(D
 
 assert_equal 0, sg_default.position
 assert_equal 1, sg_custom.position
-assert_equal sg_default_instance_id, sg_default.kafka[:'group.instance.id']
+assert_equal sg_default_instance_id, sg_default.kafka[:"group.instance.id"]
 
 sg_custom_position = sg_custom.position
-sg_custom_instance_id = sg_custom.kafka[:'group.instance.id']
+sg_custom_instance_id = sg_custom.kafka[:"group.instance.id"]
 
 # Add another topic to the default settings subscription group
 draw_routes(create_topics: false) do
@@ -71,7 +71,7 @@ assert_equal 2, sg_default.topics.size
 assert_equal [DT.topics[0], DT.topics[2]].sort, sg_default.topics.map(&:name).sort
 assert_equal sg_default_position, sg_default.position
 assert_equal sg_custom_position, sg_custom.position
-assert_equal sg_custom_instance_id, sg_custom.kafka[:'group.instance.id']
+assert_equal sg_custom_instance_id, sg_custom.kafka[:"group.instance.id"]
 
 # Add another topic to the custom settings subscription group
 draw_routes(create_topics: false) do
@@ -123,7 +123,7 @@ assert_equal [0, 1, 2, 3], all_positions
 
 # Verify all instance IDs are unique
 all_instance_ids = Karafka::App.consumer_groups.flat_map do |cg|
-  cg.subscription_groups.map { |sg| sg.kafka[:'group.instance.id'] }
+  cg.subscription_groups.map { |sg| sg.kafka[:"group.instance.id"] }
 end
 
 assert_equal 4, all_instance_ids.uniq.size
@@ -144,6 +144,6 @@ assert_equal [2, 3], cg1.subscription_groups.map(&:position).sort
 Karafka::App.consumer_groups.each do |cg|
   cg.subscription_groups.each do |sg|
     expected_suffix = "_#{sg.position}"
-    assert sg.kafka[:'group.instance.id'].end_with?(expected_suffix)
+    assert sg.kafka[:"group.instance.id"].end_with?(expected_suffix)
   end
 end

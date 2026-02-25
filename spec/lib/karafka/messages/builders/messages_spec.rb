@@ -8,7 +8,7 @@ RSpec.describe_current do
   let(:partition) { rand(10) }
   let(:received_at) { Time.new }
 
-  describe '#call' do
+  describe "#call" do
     subject(:result) do
       described_class.call(kafka_messages, routing_topic, partition, received_at)
     end

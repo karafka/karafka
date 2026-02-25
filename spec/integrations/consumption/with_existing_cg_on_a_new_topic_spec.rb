@@ -22,11 +22,11 @@ draw_routes do
   # This topic we will slow down by postponing the client connection
   topic DT.topics[1] do
     consumer Consumer
-    initial_offset 'latest'
+    initial_offset "latest"
   end
 end
 
-Karafka.monitor.subscribe('connection.listener.before_fetch_loop') do |event|
+Karafka.monitor.subscribe("connection.listener.before_fetch_loop") do |event|
   next if event[:subscription_group].topics.map(&:name).include?(DT.topics[0])
 
   # Wait on the second SG until first topic stores offset

@@ -11,14 +11,14 @@ module Karafka
     ].freeze
 
     # Default fallback env
-    DEFAULT_ENV = 'development'
+    DEFAULT_ENV = "development"
 
     private_constant :LOOKUP_ENV_KEYS, :DEFAULT_ENV
 
     # @return [Karafka::Env] env object
     # @note Will load appropriate environment automatically
     def initialize
-      super('')
+      super("")
 
       LOOKUP_ENV_KEYS
         .filter_map { |key| ENV.fetch(key, nil) }
@@ -31,7 +31,7 @@ module Karafka
     # @param include_private [Boolean] should we include private methods as well
     # @return [Boolean] true if we respond to a given missing method, otherwise false
     def respond_to_missing?(method_name, include_private = false)
-      (method_name[-1] == '?') || super
+      (method_name[-1] == "?") || super
     end
 
     # Reacts to missing methods, from which some might be the env checks.
@@ -39,7 +39,7 @@ module Karafka
     # @param method_name [String] method name for missing or env name with question mark
     # @param arguments [Array] any arguments that we pass to the method
     def method_missing(method_name, *arguments)
-      method_name[-1] == '?' ? self == method_name[0..-2] : super
+      (method_name[-1] == "?") ? self == method_name[0..-2] : super
     end
   end
 end

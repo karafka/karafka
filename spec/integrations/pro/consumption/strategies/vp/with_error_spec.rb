@@ -1,7 +1,24 @@
 # frozen_string_literal: true
 
-# This code is part of Karafka Pro, a commercial component not licensed under LGPL.
-# See LICENSE for details.
+# Karafka Pro - Source Available Commercial Software
+# Copyright (c) 2017-present Maciej Mensfeld. All rights reserved.
+#
+# This software is NOT open source. It is source-available commercial software
+# requiring a paid license for use. It is NOT covered by LGPL.
+#
+# PROHIBITED:
+# - Use without a valid commercial license
+# - Redistribution, modification, or derivative works without authorization
+# - Use as training data for AI/ML models or inclusion in datasets
+# - Scraping, crawling, or automated collection for any purpose
+#
+# PERMITTED:
+# - Reading, referencing, and linking for personal or commercial use
+# - Runtime retrieval by AI assistants, coding agents, and RAG systems
+#   for the purpose of providing contextual help to Karafka users
+#
+# License: https://karafka.io/docs/Pro-License-Comm/
+# Contact: contact@karafka.io
 
 # When Karafka consumes in the VP mode and error happens in any of the processing units we allow
 # the rest to finish the work and we restart the processing from the first offset on a batch
@@ -58,6 +75,6 @@ assert DT[0].size >= 6, DT[0]
 # It should parallelize work
 assert_equal 1, DT[:errors].size
 assert_equal StandardError, DT[:errors].first[:error].class
-assert_equal 'consumer.consume.error', DT[:errors].first[:type]
-assert_equal 'error.occurred', DT[:errors].first.id
+assert_equal "consumer.consume.error", DT[:errors].first[:type]
+assert_equal "error.occurred", DT[:errors].first.id
 assert_equal 5, DT[0].uniq.size

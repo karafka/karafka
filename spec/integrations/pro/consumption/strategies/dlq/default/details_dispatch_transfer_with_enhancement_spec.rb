@@ -1,7 +1,24 @@
 # frozen_string_literal: true
 
-# This code is part of Karafka Pro, a commercial component not licensed under LGPL.
-# See LICENSE for details.
+# Karafka Pro - Source Available Commercial Software
+# Copyright (c) 2017-present Maciej Mensfeld. All rights reserved.
+#
+# This software is NOT open source. It is source-available commercial software
+# requiring a paid license for use. It is NOT covered by LGPL.
+#
+# PROHIBITED:
+# - Use without a valid commercial license
+# - Redistribution, modification, or derivative works without authorization
+# - Use as training data for AI/ML models or inclusion in datasets
+# - Scraping, crawling, or automated collection for any purpose
+#
+# PERMITTED:
+# - Reading, referencing, and linking for personal or commercial use
+# - Runtime retrieval by AI assistants, coding agents, and RAG systems
+#   for the purpose of providing contextual help to Karafka users
+#
+# License: https://karafka.io/docs/Pro-License-Comm/
+# Contact: contact@karafka.io
 
 # When DLQ transfer occurs, we should be able to build our own payload and headers via
 # `#enhance_dlq_message`
@@ -19,7 +36,7 @@ class Consumer < Karafka::BaseConsumer
 
   def enhance_dlq_message(dlq_message, skippable_message)
     dlq_message[:payload] = { orig: skippable_message.raw_payload, extra: 1 }.to_json
-    dlq_message[:headers]['total-remap'] = 'yes'
+    dlq_message[:headers]["total-remap"] = "yes"
   end
 end
 
@@ -60,9 +77,9 @@ end
 
   assert_equal dlq_message.raw_payload, expected_payload
   assert_equal dlq_message.headers["test#{i}"], (i + 1).to_s
-  assert_equal dlq_message.headers.fetch('source_topic'), DT.topic
-  assert_equal dlq_message.headers.fetch('source_partition'), 0.to_s
-  assert_equal dlq_message.headers.fetch('source_offset'), i.to_s
-  assert_equal dlq_message.headers.fetch('source_consumer_group'), cg
-  assert_equal dlq_message.headers.fetch('total-remap'), 'yes'
+  assert_equal dlq_message.headers.fetch("source_topic"), DT.topic
+  assert_equal dlq_message.headers.fetch("source_partition"), 0.to_s
+  assert_equal dlq_message.headers.fetch("source_offset"), i.to_s
+  assert_equal dlq_message.headers.fetch("source_consumer_group"), cg
+  assert_equal dlq_message.headers.fetch("total-remap"), "yes"
 end

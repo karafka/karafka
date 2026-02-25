@@ -8,22 +8,22 @@ setup_karafka
 draw_routes(create_topics: false) do
   # Use default setup settings for Kafka, etc
   consumer_group :test1 do
-    topic 'topic1' do
-      kafka('bootstrap.servers': 'cluster1:9092')
+    topic "topic1" do
+      kafka("bootstrap.servers": "cluster1:9092")
 
       consumer Class.new
     end
   end
 
   consumer_group :test2 do
-    topic 'topic1' do
-      kafka('bootstrap.servers': 'cluster2:9092')
+    topic "topic1" do
+      kafka("bootstrap.servers": "cluster2:9092")
 
       consumer Class.new
     end
 
-    topic 'topic2' do
-      kafka('bootstrap.servers': 'cluster2:9092')
+    topic "topic2" do
+      kafka("bootstrap.servers": "cluster2:9092")
 
       consumer Class.new
     end
@@ -36,9 +36,9 @@ assert_equal 2, Karafka::App.routes.size
 assert_equal 2, Karafka::App.consumer_groups.size
 assert_equal 2, subscription_groups.size
 assert_equal 1, Karafka::App.consumer_groups.first.topics.size
-assert_equal 'topic1', Karafka::App.consumer_groups.first.topics.first.name
-assert_equal 'topic1', Karafka::App.consumer_groups.last.topics[0].name
-assert_equal 'topic2', Karafka::App.consumer_groups.last.topics[1].name
+assert_equal "topic1", Karafka::App.consumer_groups.first.topics.first.name
+assert_equal "topic1", Karafka::App.consumer_groups.last.topics[0].name
+assert_equal "topic2", Karafka::App.consumer_groups.last.topics[1].name
 
 t1 = Karafka::App.consumer_groups.first.topics.first.kafka
 t2 = Karafka::App.consumer_groups.last.topics.first.kafka

@@ -18,7 +18,7 @@
 # 5. Verify all 6 messages are consumed with continuous offsets (0-5)
 
 setup_karafka do |config|
-  config.kafka[:'enable.partition.eof'] = true
+  config.kafka[:"enable.partition.eof"] = true
   config.max_messages = 10
 end
 
@@ -43,7 +43,7 @@ class Consumer < Karafka::BaseConsumer
       # Use send to access the private method for testing
       DT[:position_after_eof] = client.send(:topic_partition_position, topic.name, partition)
 
-      produce_many(topic.name, ['after_eof'])
+      produce_many(topic.name, ["after_eof"])
     end
   end
 end
@@ -73,7 +73,7 @@ end
 assert_equal 5, DT[:position_after_eof]
 
 # Verify all messages were consumed
-all_expected = initial_messages + ['after_eof']
+all_expected = initial_messages + ["after_eof"]
 assert_equal all_expected, DT[:payloads]
 
 # Verify offsets are continuous (0, 1, 2, 3, 4, 5)

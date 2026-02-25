@@ -8,7 +8,7 @@ DT[:revoked] = []
 DT[:pre] = Set.new
 DT[:post] = Set.new
 
-Karafka::App.monitor.subscribe('consumer.before_schedule_revoked') do
+Karafka::App.monitor.subscribe("consumer.before_schedule_revoked") do
   DT[:revoked] << Time.now.to_f
 end
 
@@ -43,7 +43,7 @@ elements.each { |data| produce(DT.topic, data, partition: rand(0..2)) }
 
 consumer = setup_rdkafka_consumer
 
-other =  Thread.new do
+other = Thread.new do
   sleep(10)
 
   consumer.subscribe(DT.topic)

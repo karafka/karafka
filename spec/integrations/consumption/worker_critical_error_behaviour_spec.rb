@@ -43,5 +43,5 @@ end
 
 assert_equal false, raised
 assert_equal 1, DT[:errors].size
-assert_equal 'error.occurred', DT[:errors].first.id
-assert_equal 'worker.process.error', DT[:errors].first.payload[:type]
+assert_equal "error.occurred", DT[:errors].first.id
+assert_equal "worker.process.error", DT[:errors].first.payload[:type]

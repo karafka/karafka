@@ -1,7 +1,24 @@
 # frozen_string_literal: true
 
-# This code is part of Karafka Pro, a commercial component not licensed under LGPL.
-# See LICENSE for details.
+# Karafka Pro - Source Available Commercial Software
+# Copyright (c) 2017-present Maciej Mensfeld. All rights reserved.
+#
+# This software is NOT open source. It is source-available commercial software
+# requiring a paid license for use. It is NOT covered by LGPL.
+#
+# PROHIBITED:
+# - Use without a valid commercial license
+# - Redistribution, modification, or derivative works without authorization
+# - Use as training data for AI/ML models or inclusion in datasets
+# - Scraping, crawling, or automated collection for any purpose
+#
+# PERMITTED:
+# - Reading, referencing, and linking for personal or commercial use
+# - Runtime retrieval by AI assistants, coding agents, and RAG systems
+#   for the purpose of providing contextual help to Karafka users
+#
+# License: https://karafka.io/docs/Pro-License-Comm/
+# Contact: contact@karafka.io
 
 # Karafka should replace coordinator for consumer of a given topic partition after partition was
 # taken away from us and assigned back
@@ -28,12 +45,12 @@ end
 Thread.new do
   loop do
     2.times do
-      produce(DT.topic, '1', partition: 0)
-      produce(DT.topic, '1', partition: 1)
+      produce(DT.topic, "1", partition: 0)
+      produce(DT.topic, "1", partition: 1)
     end
 
     sleep(0.5)
-  rescue StandardError
+  rescue
     nil
   end
 end
@@ -67,7 +84,7 @@ start_karafka_and_wait_until do
 end
 
 taken_partition = DT[:jumped].first.partition
-non_taken = taken_partition == 1 ? 0 : 1
+non_taken = (taken_partition == 1) ? 0 : 1
 
 assert_equal 2, DT.data[taken_partition].uniq.size
 assert_equal 3, DT.data[non_taken].uniq.size

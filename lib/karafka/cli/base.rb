@@ -18,7 +18,7 @@ module Karafka
 
       # This method should implement proper cli action
       def call
-        raise NotImplementedError, 'Implement this in a subclass'
+        raise NotImplementedError, "Implement this in a subclass"
       end
 
       private
@@ -29,11 +29,11 @@ module Karafka
 
         if Karafka.pro?
           Karafka.logger.info(
-            green('Thank you for using Karafka Pro!')
+            green("Thank you for using Karafka Pro!")
           )
         else
           Karafka.logger.info(
-            red('Upgrade to Karafka Pro for more features and support: https://karafka.io')
+            red("Upgrade to Karafka Pro for more features and support: https://karafka.io")
           )
         end
       end
@@ -41,14 +41,14 @@ module Karafka
       class << self
         # Loads proper environment with what is needed to run the CLI
         def load
-          rails_env_rb = File.join(Dir.pwd, 'config/environment.rb')
+          rails_env_rb = File.join(Dir.pwd, "config/environment.rb")
           is_rails = Kernel.const_defined?(:Rails) && File.exist?(rails_env_rb)
 
           # If the boot file is disabled and this is a Rails app, we assume that user moved the
           # karafka app configuration to initializers or other Rails loading related place.
           # It is not recommended but some users tend to do this. In such cases we just try to load
           # the Rails stuff hoping that it will also load Karafka stuff
-          if Karafka.boot_file.to_s == 'false' && is_rails
+          if Karafka.boot_file.to_s == "false" && is_rails
             require rails_env_rb
 
             return
@@ -104,7 +104,7 @@ module Karafka
           OptionParser.new do |opts|
             (@options || []).each do |option|
               # Creates aliases for backwards compatibility
-              names = option[3].flat_map { |name| [name, name.tr('_', '-')] }
+              names = option[3].flat_map { |name| [name, name.tr("_", "-")] }
               names.map! { |name| "#{name} value1,value2,valueN" } if option[2] == Array
               names.uniq!
 
@@ -122,7 +122,7 @@ module Karafka
           ObjectSpace
             .each_object(Class)
             .select { |klass| klass.superclass == Karafka::Cli::Base }
-            .reject { |klass| klass.to_s.end_with?('::Base') }
+            .reject { |klass| klass.to_s.end_with?("::Base") }
             .sort_by(&:name)
         end
 
@@ -134,7 +134,7 @@ module Karafka
         #   name => 'test_me'
         def name
           to_s
-            .split('::')
+            .split("::")
             .last
             .gsub(/([a-z\d])([A-Z])/, '\1_\2')
             .downcase

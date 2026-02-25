@@ -1,7 +1,24 @@
 # frozen_string_literal: true
 
-# This code is part of Karafka Pro, a commercial component not licensed under LGPL.
-# See LICENSE for details.
+# Karafka Pro - Source Available Commercial Software
+# Copyright (c) 2017-present Maciej Mensfeld. All rights reserved.
+#
+# This software is NOT open source. It is source-available commercial software
+# requiring a paid license for use. It is NOT covered by LGPL.
+#
+# PROHIBITED:
+# - Use without a valid commercial license
+# - Redistribution, modification, or derivative works without authorization
+# - Use as training data for AI/ML models or inclusion in datasets
+# - Scraping, crawling, or automated collection for any purpose
+#
+# PERMITTED:
+# - Reading, referencing, and linking for personal or commercial use
+# - Runtime retrieval by AI assistants, coding agents, and RAG systems
+#   for the purpose of providing contextual help to Karafka users
+#
+# License: https://karafka.io/docs/Pro-License-Comm/
+# Contact: contact@karafka.io
 
 # When using transactions with multiple produce_async calls and manual offset management,
 # we need to ensure that:
@@ -13,7 +30,7 @@
 # and could lead to skipped message processing if later productions fail.
 
 setup_karafka do |config|
-  config.kafka[:'transactional.id'] = SecureRandom.uuid
+  config.kafka[:"transactional.id"] = SecureRandom.uuid
 end
 
 class Consumer < Karafka::BaseConsumer
@@ -98,8 +115,8 @@ end
 DT[:handlers].each do |handler|
   report = handler.wait
   assert report.error.nil?, "Handler should not have error: #{report.error}"
-  assert report.offset >= 0, 'Handler should have valid offset'
-  assert report.partition >= 0, 'Handler should have valid partition'
+  assert report.offset >= 0, "Handler should have valid offset"
+  assert report.partition >= 0, "Handler should have valid partition"
 end
 
 # Verify all messages were produced to all target topics
@@ -112,7 +129,7 @@ assert_equal 10, fetch_next_offset
 
 # Verify message content integrity
 10.times do
-  assert(DT[:target1].any? { |payload| payload.start_with?('target1_') })
-  assert(DT[:target2].any? { |payload| payload.start_with?('target2_') })
-  assert(DT[:target3].any? { |payload| payload.start_with?('target3_') })
+  assert(DT[:target1].any? { |payload| payload.start_with?("target1_") })
+  assert(DT[:target2].any? { |payload| payload.start_with?("target2_") })
+  assert(DT[:target3].any? { |payload| payload.start_with?("target3_") })
 end

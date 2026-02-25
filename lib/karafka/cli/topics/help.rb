@@ -7,11 +7,12 @@ module Karafka
       class Help < Base
         # Displays help information for all available topics management commands
         def call
-          puts <<~HELP
+          help_text = <<~HELP
             Karafka topics commands:
               align        # Aligns configuration of all declarative topics based on definitions
               create       # Creates topics with appropriate settings
               delete       # Deletes all topics defined in the routes
+              health       # Checks topics health and replication settings (Pro only)
               help         # Describes available topics management commands
               migrate      # Creates missing topics, repartitions existing and aligns configuration
               plan         # Plans migration process and prints changes to be applied
@@ -26,9 +27,12 @@ module Karafka
               karafka topics plan --detailed-exitcode
               karafka topics migrate
               karafka topics align
+              karafka topics health
 
             Note: All admin operations run on the default cluster only.
           HELP
+
+          puts help_text
 
           # We return false to indicate with exit code 0 that no changes were applied
           false

@@ -6,7 +6,7 @@ RSpec.describe_current do
   let(:client) { instance_double(Karafka::Connection::Client) }
   let(:group_id) { SecureRandom.hex(6) }
   let(:coordinator) { build(:processing_coordinator) }
-  let(:topic_name) { 'topic_name1' }
+  let(:topic_name) { "topic_name1" }
   let(:partition_id) { 0 }
   let(:parallel_key) { 0 }
   let(:subscription_group) { consumer_groups.first.subscription_groups.first }
@@ -25,16 +25,16 @@ RSpec.describe_current do
     end
   end
 
-  describe '#find_or_create' do
-    context 'when the executor is not in the buffer' do
+  describe "#find_or_create" do
+    context "when the executor is not in the buffer" do
       it { expect(fetched_executor.group_id).to eq(subscription_group.id) }
 
-      it 'expect to create a new one' do
+      it "expect to create a new one" do
         expect(fetched_executor).to be_a(Karafka::Processing::Executor)
       end
     end
 
-    context 'when executor is in a buffer' do
+    context "when executor is in a buffer" do
       let(:existing_executor) do
         buffer.find_or_create(topic_name, partition_id, parallel_key, coordinator)
       end
@@ -43,71 +43,71 @@ RSpec.describe_current do
 
       it { expect(fetched_executor.group_id).to eq(subscription_group.id) }
 
-      it 'expect to re-use existing one' do
+      it "expect to re-use existing one" do
         expect(fetched_executor).to eq(existing_executor)
       end
     end
   end
 
-  describe '#each' do
-    context 'when there are no executors' do
-      it 'expect not to yield anything' do
+  describe "#each" do
+    context "when there are no executors" do
+      it "expect not to yield anything" do
         expect { |block| buffer.each(&block) }.not_to yield_control
       end
     end
 
-    context 'when there are executors' do
+    context "when there are executors" do
       before { fetched_executor }
 
-      it 'expect to yield with executor from this topic partition' do
+      it "expect to yield with executor from this topic partition" do
         expect { |block| buffer.each(&block) }.to yield_with_args(fetched_executor)
       end
     end
   end
 
-  describe '#find_all' do
-    context 'when no executors present' do
+  describe "#find_all" do
+    context "when no executors present" do
       it { expect(buffer.find_all(topic_name, partition_id)).to eq([]) }
     end
 
-    context 'when executors are present' do
+    context "when executors are present" do
       before { fetched_executor }
 
       it { expect(buffer.find_all(topic_name, partition_id)).to eq([fetched_executor]) }
     end
   end
 
-  describe '#find_all_or_create' do
+  describe "#find_all_or_create" do
     let(:found) { buffer.find_all_or_create(topic_name, partition_id, coordinator) }
 
-    context 'when executors are present' do
+    context "when executors are present" do
       before { fetched_executor }
 
       it { expect(found).to eq([fetched_executor]) }
     end
 
-    context 'when no executors were present' do
+    context "when no executors were present" do
       let(:fetched_executor) { nil }
 
       it { expect(found.size).to eq(1) }
 
-      it 'expect to build a new one' do
+      it "expect to build a new one" do
         expect(found.first).to be_a(Karafka::Processing::Executor)
       end
     end
   end
 
-  describe '#revoke' do
+  describe "#revoke" do
     before { fetched_executor }
 
-    it 'expect to remove all executors from a given topic partition' do
+    it "expect to remove all executors from a given topic partition" do
       buffer.revoke(topic_name, partition_id)
       executor = buffer.find_or_create(topic_name, partition_id, parallel_key, coordinator)
       expect(executor).not_to eq(fetched_executor)
     end
   end
 
-  describe '#clear' do
+  describe "#clear" do
     let(:pre_cleaned_executor) do
       buffer.find_or_create(topic_name, partition_id, parallel_key, coordinator)
     end
@@ -117,7 +117,7 @@ RSpec.describe_current do
       buffer.clear
     end
 
-    it 'expect to rebuild after clearing as clearing should empty the buffer' do
+    it "expect to rebuild after clearing as clearing should empty the buffer" do
       expect(fetched_executor).not_to eq(pre_cleaned_executor)
     end
   end

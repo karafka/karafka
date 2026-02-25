@@ -23,12 +23,12 @@ SPECIAL_SPECS = %w[
 
 not_prefixed = []
 
-specs_location = File.join(Karafka.gem_root, 'spec', 'integrations', '**/**')
+specs_location = File.join(Karafka.gem_root, "spec", "integrations", "**/**")
 
 Dir[specs_location].each do |path|
   next if SPECIAL_SPECS.any? { |spec| path.include?(spec) }
   next unless File.file?(path)
-  next if path.end_with?('_spec.rb')
+  next if path.end_with?("_spec.rb")
 
   basename = File.basename(path)
 

@@ -16,7 +16,7 @@ class Consumer < Karafka::BaseConsumer
     messages.each do |message|
       # Simulate something went wrong on a per message basis
       raise StandardError
-    rescue StandardError
+    rescue
       dispatch_to_dlq(message)
     end
 

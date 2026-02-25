@@ -95,7 +95,7 @@ module Karafka
       else
         raise(
           ArgumentError,
-          "Invalid execution mode: #{new_mode}. Valid modes: #{MODES.join(', ')}"
+          "Invalid execution mode: #{new_mode}. Valid modes: #{MODES.join(", ")}"
         )
       end
     end

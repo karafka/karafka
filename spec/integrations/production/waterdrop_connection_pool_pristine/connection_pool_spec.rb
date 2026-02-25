@@ -3,12 +3,12 @@
 # User should be able to use WaterDrop default connection pool from within consumers
 # This allows for producer pooling and reuse across different consumers
 
-require 'karafka'
-require 'connection_pool'
-require 'securerandom'
+require "karafka"
+require "connection_pool"
+require "securerandom"
 
 WaterDrop::ConnectionPool.setup(size: 3, timeout: 5) do |config|
-  config.kafka = { 'bootstrap.servers': '127.0.0.1:9092' }
+  config.kafka = { "bootstrap.servers": "127.0.0.1:9092" }
 end
 
 class PoolConsumer < Karafka::BaseConsumer

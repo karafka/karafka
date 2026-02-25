@@ -5,25 +5,25 @@ RSpec.describe_current do
 
   let(:name) { rand.to_s }
 
-  describe 'after initialize' do
-    it 'expect not to have any topics yet' do
+  describe "after initialize" do
+    it "expect not to have any topics yet" do
       expect(consumer_group.topics).to be_empty
     end
   end
 
-  describe '#id' do
-    it 'expect not to namespace id with application client_id' do
+  describe "#id" do
+    it "expect not to namespace id with application client_id" do
       old_client_id = Karafka::App.config.client_id
-      Karafka::App.config.client_id = 'example_client'
+      Karafka::App.config.client_id = "example_client"
 
-      consumer_group = described_class.new('consumers')
-      expect(consumer_group.id).to eq('consumers')
+      consumer_group = described_class.new("consumers")
+      expect(consumer_group.id).to eq("consumers")
 
       Karafka::App.config.client_id = old_client_id
     end
   end
 
-  describe '#topic=' do
+  describe "#topic=" do
     let(:built_topic) do
       # assigning block to a "=" method does not work normally
       consumer_group.public_send(:topic=, :topic_name) do
@@ -37,12 +37,12 @@ RSpec.describe_current do
     it { expect(built_topic.name).to eq :topic_name.to_s }
   end
 
-  describe '#subscription_groups' do
-    context 'when there are not topics defined' do
+  describe "#subscription_groups" do
+    context "when there are not topics defined" do
       it { expect(consumer_group.subscription_groups).to eq([]) }
     end
 
-    context 'when there are some topics defined' do
+    context "when there are some topics defined" do
       let(:subscription_group) { consumer_group.subscription_groups.first }
       let(:built_topic) do
         consumer_group.public_send(:topic=, :topic_name) do
@@ -56,12 +56,12 @@ RSpec.describe_current do
     end
   end
 
-  describe '#active?' do
-    context 'when there are no topics in the consumer group' do
+  describe "#active?" do
+    context "when there are no topics in the consumer group" do
       it { expect(consumer_group.active?).to be(true) }
     end
 
-    context 'when our consumer group name is in server consumer groups' do
+    context "when our consumer group name is in server consumer groups" do
       before do
         Karafka::App
           .config
@@ -74,27 +74,27 @@ RSpec.describe_current do
       it { expect(consumer_group.active?).to be(true) }
     end
 
-    context 'when our consumer group name is not in server consumer groups' do
+    context "when our consumer group name is not in server consumer groups" do
       before do
         Karafka::App
           .config
           .internal
           .routing
           .activity_manager
-          .include(:consumer_groups, 'na')
+          .include(:consumer_groups, "na")
       end
 
       it { expect(consumer_group.active?).to be(false) }
     end
   end
 
-  describe '#to_h' do
+  describe "#to_h" do
     let(:casted_consumer_group) { consumer_group.to_h }
 
     it { expect(casted_consumer_group.keys).to include(:topics) }
     it { expect(casted_consumer_group.keys).to include(:id) }
 
-    context 'when there are topics inside' do
+    context "when there are topics inside" do
       let(:built_topic) do
         consumer_group.public_send(:topic=, :topic_name) do
           consumer Class.new(Karafka::BaseConsumer)
@@ -103,7 +103,7 @@ RSpec.describe_current do
 
       before { built_topic }
 
-      it 'expect to have them casted to hash as well' do
+      it "expect to have them casted to hash as well" do
         expect(casted_consumer_group[:topics].first).to eq built_topic.to_h
       end
     end

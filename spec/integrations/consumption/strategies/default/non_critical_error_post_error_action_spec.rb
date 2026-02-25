@@ -33,7 +33,7 @@ end
 draw_routes(Consumer)
 
 # Cleanup after this error occurs from a block
-Karafka.monitor.subscribe 'error.occurred' do |event|
+Karafka.monitor.subscribe "error.occurred" do |event|
   next unless event[:error].is_a?(Test::Error)
 
   Test.clean!
@@ -50,7 +50,7 @@ end
 # Cleanup from instance
 Karafka.monitor.subscribe(Cleaner.new)
 
-produce(DT.topic, '0')
+produce(DT.topic, "0")
 
 start_karafka_and_wait_until do
   DT[:threads].size >= 2

@@ -3,9 +3,9 @@
 RSpec.describe_current do
   subject(:create_topics) { described_class.new }
 
-  describe '#call' do
+  describe "#call" do
     let(:declaratives_routing_topics) { [double, double] }
-    let(:existing_topics_names) { ['existing_topic'] }
+    let(:existing_topics_names) { ["existing_topic"] }
 
     before do
       allow(create_topics).to receive_messages(
@@ -32,25 +32,25 @@ RSpec.describe_current do
       allow(Karafka::Admin).to receive(:create_topic)
     end
 
-    context 'when all topics already exist' do
+    context "when all topics already exist" do
       before do
         allow(create_topics)
           .to receive(:existing_topics_names)
           .and_return(%w[topic_0 topic_1])
       end
 
-      it 'does not create any topics and returns false' do
+      it "does not create any topics and returns false" do
         expect(create_topics.call).to be_falsey
         expect(Karafka::Admin).not_to have_received(:create_topic)
       end
     end
 
-    context 'when some topics do not exist' do
-      it 'creates only the non-existing topics and returns true' do
+    context "when some topics do not exist" do
+      it "creates only the non-existing topics and returns true" do
         expect(create_topics.call).to be_truthy
 
         expect(Karafka::Admin).to have_received(:create_topic).with(
-          'topic_1',
+          "topic_1",
           anything,
           anything,
           anything
@@ -58,10 +58,10 @@ RSpec.describe_current do
       end
     end
 
-    context 'when no topics exist' do
+    context "when no topics exist" do
       let(:existing_topics_names) { [] }
 
-      it 'creates all topics and returns true' do
+      it "creates all topics and returns true" do
         expect(create_topics.call).to be_truthy
 
         expect(Karafka::Admin).to have_received(:create_topic).twice

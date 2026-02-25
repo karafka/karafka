@@ -66,20 +66,20 @@ class SharedMutableObjectsConsumer < Karafka::BaseConsumer
       thread_id = Thread.current.object_id
       message_data = JSON.parse(message.raw_payload)
 
-      case message_data['operation']
-      when 'increment'
-        self.class.shared_store.increment_counter(message_data['key'], message_data['amount'])
+      case message_data["operation"]
+      when "increment"
+        self.class.shared_store.increment_counter(message_data["key"], message_data["amount"])
 
-      when 'append'
-        self.class.shared_store.append_to_list(message_data['key'], message_data['value'])
+      when "append"
+        self.class.shared_store.append_to_list(message_data["key"], message_data["value"])
 
-      when 'mixed'
+      when "mixed"
         # Perform multiple operations to test compound thread safety
         # Extract counter key from mixed_0, mixed_1, mixed_2 to counter_0, counter_1, counter_2
-        counter_key = message_data['key'].sub('mixed_', 'counter_')
+        counter_key = message_data["key"].sub("mixed_", "counter_")
         self.class.shared_store.increment_counter(counter_key, 1)
         self.class.shared_store.append_to_list(
-          "#{message_data['key']}_list", message_data['value']
+          "#{message_data["key"]}_list", message_data["value"]
         )
       end
 
@@ -88,8 +88,8 @@ class SharedMutableObjectsConsumer < Karafka::BaseConsumer
 
       DT[:consumed] << {
         thread_id: thread_id,
-        message_id: message_data['id'],
-        operation: message_data['operation'],
+        message_id: message_data["id"],
+        operation: message_data["operation"],
         data_snapshot: snapshot[:data].dup,
         access_count: snapshot[:access_count],
         operations_count: snapshot[:operations].size
@@ -120,7 +120,7 @@ test_messages = []
 10.times do |i|
   test_messages << {
     id: i + 1,
-    operation: 'increment',
+    operation: "increment",
     key: "counter_#{i % 3}",
     amount: i + 1
   }.to_json
@@ -130,7 +130,7 @@ end
 10.times do |i|
   test_messages << {
     id: i + 11,
-    operation: 'append',
+    operation: "append",
     key: "list_#{i % 3}",
     value: "item_#{i}"
   }.to_json
@@ -140,7 +140,7 @@ end
 10.times do |i|
   test_messages << {
     id: i + 21,
-    operation: 'mixed',
+    operation: "mixed",
     key: "mixed_#{i % 3}",
     value: "mixed_item_#{i}"
   }.to_json
@@ -156,7 +156,7 @@ end
 # Verify all messages were processed
 assert_equal(
   test_messages.size, DT[:consumed].size,
-  'Should process all messages despite concurrent mutable object access'
+  "Should process all messages despite concurrent mutable object access"
 )
 
 # Get final state
@@ -171,16 +171,16 @@ expected_counter_1 = [2, 5, 8].sum + 3 # +3 from mixed operations
 expected_counter_2 = [3, 6, 9].sum + 3 # +3 from mixed operations
 
 assert_equal(
-  expected_counter_0, final_snapshot[:data]['counter_0'],
-  'Counter 0 should reflect all concurrent increments'
+  expected_counter_0, final_snapshot[:data]["counter_0"],
+  "Counter 0 should reflect all concurrent increments"
 )
 assert_equal(
-  expected_counter_1, final_snapshot[:data]['counter_1'],
-  'Counter 1 should reflect all concurrent increments'
+  expected_counter_1, final_snapshot[:data]["counter_1"],
+  "Counter 1 should reflect all concurrent increments"
 )
 assert_equal(
-  expected_counter_2, final_snapshot[:data]['counter_2'],
-  'Counter 2 should reflect all concurrent increments'
+  expected_counter_2, final_snapshot[:data]["counter_2"],
+  "Counter 2 should reflect all concurrent increments"
 )
 
 # Verify append operations worked correctly
@@ -218,13 +218,13 @@ end
 expected_total_operations = 40
 assert_equal(
   expected_total_operations, final_snapshot[:access_count],
-  'Access count should reflect all concurrent operations'
+  "Access count should reflect all concurrent operations"
 )
 
 # Verify no data corruption occurred by checking operation count
 assert_equal(
   expected_total_operations, final_snapshot[:operations].size,
-  'All operations should be recorded atomically'
+  "All operations should be recorded atomically"
 )
 
 # Verify concurrent access patterns
@@ -232,11 +232,11 @@ access_counts_by_message = DT[:consumed].map { |entry| entry[:access_count] }
 # Access counts should be monotonically increasing
 assert(
   access_counts_by_message.each_cons(2).all? { |a, b| a <= b },
-  'Access counts should be monotonically increasing due to synchronization'
+  "Access counts should be monotonically increasing due to synchronization"
 )
 
 # The key success criteria: shared mutable objects handled safely
 assert_equal(
   test_messages.size, DT[:consumed].size,
-  'Should handle concurrent access to shared mutable objects without corruption'
+  "Should handle concurrent access to shared mutable objects without corruption"
 )

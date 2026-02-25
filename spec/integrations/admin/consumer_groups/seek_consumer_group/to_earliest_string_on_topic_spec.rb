@@ -17,7 +17,7 @@ draw_routes(Consumer)
 
 10.times do
   sleep(0.1)
-  produce(DT.topic, '')
+  produce(DT.topic, "")
 end
 
 start_karafka_and_wait_until do
@@ -26,7 +26,7 @@ end
 
 Karafka::Admin.seek_consumer_group(
   DT.consumer_group,
-  { DT.topic => 'earliest' }
+  { DT.topic => "earliest" }
 )
 
 assert_equal 0, fetch_next_offset

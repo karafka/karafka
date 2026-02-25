@@ -10,7 +10,7 @@ setup_karafka do |config|
   # processing and we would fail.
   config.concurrency = 1
   config.max_messages = 10
-  config.initial_offset = 'latest'
+  config.initial_offset = "latest"
 end
 
 class Consumer < Karafka::BaseConsumer

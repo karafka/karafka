@@ -179,7 +179,7 @@ module Karafka
             principal: nil,
             operation: :any,
             permission_type: :any,
-            host: '*'
+            host: "*"
           )
         )
       end
@@ -235,7 +235,7 @@ module Karafka
         resource_name: nil,
         resource_pattern_type: nil,
         principal: nil,
-        host: '*',
+        host: "*",
         operation: nil,
         permission_type: nil
       )

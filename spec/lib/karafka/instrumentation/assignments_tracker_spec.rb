@@ -22,25 +22,25 @@ RSpec.describe_current do
     }
   end
 
-  describe 'events naming' do
-    it 'expect to match correct methods' do
+  describe "events naming" do
+    it "expect to match correct methods" do
       expect(NotificationsChecker.valid?(tracker)).to be(true)
     end
   end
 
-  context 'when we receive an assignment' do
+  context "when we receive an assignment" do
     before { tracker.on_rebalance_partitions_assigned(assign_event) }
 
     it { expect(tracker.current).to be_frozen }
     it { expect(tracker.current[topic1]).to eq([0, 1, 2]) }
 
-    context 'when we clear' do
+    context "when we clear" do
       before { tracker.clear }
 
       it { expect(tracker.current).to eq({}) }
     end
 
-    context 'when we reset given subscription group' do
+    context "when we reset given subscription group" do
       before do
         assign_event2 = assign_event.dup
         assign_event2[:subscription_group] = subscription_group2
@@ -53,7 +53,7 @@ RSpec.describe_current do
     end
   end
 
-  context 'when we got and lost assignment' do
+  context "when we got and lost assignment" do
     before do
       tracker.on_rebalance_partitions_assigned(assign_event)
       tracker.on_rebalance_partitions_revoked(assign_event)
@@ -62,7 +62,7 @@ RSpec.describe_current do
     it { expect(tracker.current).to eq({}) }
   end
 
-  context 'when we got assignment and lost part of it' do
+  context "when we got assignment and lost part of it" do
     before do
       tracker.on_rebalance_partitions_assigned(assign_event)
       assign_event[:tpl].to_h.values.first.pop
@@ -72,7 +72,7 @@ RSpec.describe_current do
     it { expect(tracker.current.values.first).to eq([2]) }
   end
 
-  describe '#on_client_events_poll' do
+  describe "#on_client_events_poll" do
     let(:client) { instance_double(Karafka::Connection::Client, assignment_lost?: false) }
     let(:events_poll_event) do
       {
@@ -81,32 +81,32 @@ RSpec.describe_current do
       }
     end
 
-    context 'when assignment was not lost' do
+    context "when assignment was not lost" do
       before do
         tracker.on_rebalance_partitions_assigned(assign_event)
         tracker.on_client_events_poll(events_poll_event)
       end
 
-      it 'expect not to clear any assignments' do
+      it "expect not to clear any assignments" do
         expect(tracker.current[topic1]).to eq([0, 1, 2])
       end
     end
 
-    context 'when assignment was lost' do
+    context "when assignment was lost" do
       before do
         allow(client).to receive(:assignment_lost?).and_return(true)
         tracker.on_rebalance_partitions_assigned(assign_event)
       end
 
-      context 'with single subscription group' do
+      context "with single subscription group" do
         before { tracker.on_client_events_poll(events_poll_event) }
 
-        it 'expect to clear assignments for the subscription group' do
+        it "expect to clear assignments for the subscription group" do
           expect(tracker.current).to eq({})
         end
       end
 
-      context 'with multiple subscription groups' do
+      context "with multiple subscription groups" do
         let(:client2) { instance_double(Karafka::Connection::Client, assignment_lost?: false) }
         let(:events_poll_event2) do
           {
@@ -125,7 +125,7 @@ RSpec.describe_current do
           tracker.on_client_events_poll(events_poll_event)
         end
 
-        it 'expect to only clear assignments for the affected subscription group' do
+        it "expect to only clear assignments for the affected subscription group" do
           expect(tracker.current.key?(topic1)).to be(false)
           expect(tracker.current.key?(topic2)).to be(true)
           expect(tracker.current[topic2]).to eq([0, 1, 2])
@@ -133,19 +133,19 @@ RSpec.describe_current do
       end
     end
 
-    context 'when called multiple times with no assignment loss' do
+    context "when called multiple times with no assignment loss" do
       before do
         tracker.on_rebalance_partitions_assigned(assign_event)
       end
 
-      it 'expect to be safe to call repeatedly without side effects' do
+      it "expect to be safe to call repeatedly without side effects" do
         10.times { tracker.on_client_events_poll(events_poll_event) }
         expect(tracker.current[topic1]).to eq([0, 1, 2])
       end
     end
   end
 
-  describe '#inspect' do
+  describe "#inspect" do
     let(:subscription_group) { build(:routing_subscription_group) }
     let(:topic) { subscription_group.topics.first }
 
@@ -155,38 +155,38 @@ RSpec.describe_current do
       { subscription_group: subscription_group, tpl: tpl }
     end
 
-    context 'when tracker has no assignments' do
-      it 'expect to show empty assignments' do
-        expect(tracker.inspect).to include('assignments={}')
+    context "when tracker has no assignments" do
+      it "expect to show empty assignments" do
+        expect(tracker.inspect).to include("assignments={}")
       end
     end
 
-    context 'when tracker has assignments' do
+    context "when tracker has assignments" do
       before { tracker.on_rebalance_partitions_assigned(assign_event) }
 
-      it 'expect to show current assignments with topic names' do
+      it "expect to show current assignments with topic names" do
         result = tracker.inspect
 
-        expect(result).to include('assignments=')
+        expect(result).to include("assignments=")
         expect(result).to include(topic.name)
-        expect(result).to include('[0, 1, 2]')
+        expect(result).to include("[0, 1, 2]")
       end
     end
 
-    context 'when mutex is locked' do
-      it 'expect to show busy status without blocking' do
+    context "when mutex is locked" do
+      it "expect to show busy status without blocking" do
         tracker.instance_variable_get(:@mutex).lock
 
         begin
-          expect(tracker.inspect).to include('busy')
+          expect(tracker.inspect).to include("busy")
         ensure
           tracker.instance_variable_get(:@mutex).unlock
         end
       end
     end
 
-    context 'with concurrent access' do
-      it 'expect to handle concurrent inspect and assignment changes safely' do
+    context "with concurrent access" do
+      it "expect to handle concurrent inspect and assignment changes safely" do
         errors = []
         inspecting = true
 
@@ -195,14 +195,14 @@ RSpec.describe_current do
             tracker.on_rebalance_partitions_assigned(assign_event)
             tracker.clear
           end
-        rescue StandardError => e
+        rescue => e
           errors << e
         end
 
         inspector = Thread.new do
           1_000_000.times { tracker.inspect }
           inspecting = false
-        rescue StandardError => e
+        rescue => e
           errors << e
         end
 

@@ -1,21 +1,21 @@
 # frozen_string_literal: true
 
-require 'karafka-core'
-require 'delegate'
-require 'English'
-require 'rdkafka'
-require 'waterdrop'
-require 'json'
-require 'forwardable'
-require 'fileutils'
-require 'openssl'
-require 'optparse'
-require 'socket'
-require 'date'
-require 'singleton'
-require 'digest'
-require 'zeitwerk'
-require 'logger'
+require "karafka-core"
+require "delegate"
+require "English"
+require "rdkafka"
+require "waterdrop"
+require "json"
+require "forwardable"
+require "fileutils"
+require "openssl"
+require "optparse"
+require "socket"
+require "date"
+require "singleton"
+require "digest"
+require "zeitwerk"
+require "logger"
 
 # Karafka framework main namespace
 module Karafka
@@ -50,7 +50,7 @@ module Karafka
 
     # @return [Pathname] root path of this gem
     def gem_root
-      Pathname.new(File.expand_path('..', __dir__))
+      Pathname.new(File.expand_path("..", __dir__))
     end
 
     # @return [Pathname] Karafka app root path (user application path)
@@ -58,26 +58,26 @@ module Karafka
       return @root if @root
 
       # If user points to a different root explicitly, use it
-      if ENV['KARAFKA_ROOT_DIR']
-        @root = Pathname.new(ENV['KARAFKA_ROOT_DIR'])
+      if ENV["KARAFKA_ROOT_DIR"]
+        @root = Pathname.new(ENV["KARAFKA_ROOT_DIR"])
 
         return @root
       end
 
-      if defined?(::Bundler)
+      @root = if defined?(::Bundler)
         # By default we infer the project root from bundler.
         # We cannot use the BUNDLE_GEMFILE env directly because it may be altered by things like
         # ruby-lsp. Instead we always fallback to the most outer Gemfile. In most of the cases, it
         # won't matter but in case of some automatic setup alterations like ruby-lsp, the location
         # from which the project starts may not match the original Gemfile.
-        @root = Pathname.new(
+        Pathname.new(
           File.dirname(
             Bundler.with_unbundled_env { Bundler.default_gemfile }
           )
         )
       else
         # Fallback when Bundler is not available: use current directory
-        @root = Pathname.new(Dir.pwd)
+        Pathname.new(Dir.pwd)
       end
 
       @root
@@ -85,7 +85,7 @@ module Karafka
 
     # @return [Pathname] path to Karafka gem root core
     def core_root
-      Pathname.new(File.expand_path('karafka', __dir__))
+      Pathname.new(File.expand_path("karafka", __dir__))
     end
 
     # @return [Boolean] true if there is a valid pro token present
@@ -102,16 +102,16 @@ module Karafka
     def rails?
       return @rails if instance_variable_defined?(:@rails)
 
-      @rails = Object.const_defined?('Rails::Railtie')
+      @rails = Object.const_defined?("Rails::Railtie")
 
       # If Rails exists we set it immediately based on its presence and return
       return @rails if @rails
 
       # If rails is not present and user wants us not to force-load it, we return
-      return @rails if ENV['KARAFKA_REQUIRE_RAILS'] == 'false'
+      return @rails if ENV["KARAFKA_REQUIRE_RAILS"] == "false"
 
       # If we should try to require it, we try and if no error, it means its there
-      require('rails')
+      require("rails")
 
       @rails = true
     rescue LoadError
@@ -128,10 +128,10 @@ module Karafka
     #   KARAFKA_BOOT_FILE='/home/app_path/app.rb'
     #   Karafka.boot_file #=> '/home/app_path/app.rb'
     def boot_file
-      boot_file = Pathname.new(ENV['KARAFKA_BOOT_FILE'] || File.join(Karafka.root, 'karafka.rb'))
+      boot_file = Pathname.new(ENV["KARAFKA_BOOT_FILE"] || File.join(Karafka.root, "karafka.rb"))
 
       return boot_file if boot_file.absolute?
-      return boot_file if boot_file.to_s == 'false'
+      return boot_file if boot_file.to_s == "false"
 
       Pathname.new(
         File.expand_path(
@@ -158,19 +158,19 @@ end
 
 loader = Zeitwerk::Loader.for_gem
 # Do not load Rails extensions by default, this will be handled by Railtie if they are needed
-loader.ignore(Karafka.gem_root.join('lib/active_job'))
+loader.ignore(Karafka.gem_root.join("lib/active_job"))
 # Do not load CurrentAttributes components as they will be loaded if needed
 # @note We have to exclude both the .rb file as well as the whole directory so users can require
 # current attributes only when needed
-loader.ignore(Karafka.gem_root.join('lib/karafka/active_job/current_attributes'))
-loader.ignore(Karafka.gem_root.join('lib/karafka/active_job/current_attributes.rb'))
+loader.ignore(Karafka.gem_root.join("lib/karafka/active_job/current_attributes"))
+loader.ignore(Karafka.gem_root.join("lib/karafka/active_job/current_attributes.rb"))
 # Do not load Railtie. It will load if after everything is ready, so we don't have to load any
 # Karafka components when we require this railtie. Railtie needs to be loaded last.
-loader.ignore(Karafka.gem_root.join('lib/karafka/railtie'))
+loader.ignore(Karafka.gem_root.join("lib/karafka/railtie"))
 # Do not load pro components as they will be loaded if needed and allowed
-loader.ignore(Karafka.core_root.join('pro/'))
+loader.ignore(Karafka.core_root.join("pro/"))
 # Do not load vendors instrumentation components. Those need to be required manually if needed
-loader.ignore(Karafka.core_root.join('instrumentation/vendors'))
+loader.ignore(Karafka.core_root.join("instrumentation/vendors"))
 loader.setup
 loader.eager_load
 
@@ -182,12 +182,12 @@ Karafka::Routing::Features::Base.load_all
 # to make pro components available in case anyone wants to use them as a base to their own
 # custom components. Otherwise inheritance would not work.
 Karafka::Licenser.detect do
-  require 'karafka/pro/loader'
+  require "karafka/pro/loader"
 
   Karafka::Pro::Loader.require_all
 end
 
 # Load railtie after everything else is ready so we know we can rely on it.
-require 'karafka/railtie'
+require "karafka/railtie"
 
 Karafka::Constraints.verify!

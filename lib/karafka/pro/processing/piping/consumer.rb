@@ -1,7 +1,24 @@
 # frozen_string_literal: true
 
-# This code is part of Karafka Pro, a commercial component not licensed under LGPL.
-# See LICENSE for details.
+# Karafka Pro - Source Available Commercial Software
+# Copyright (c) 2017-present Maciej Mensfeld. All rights reserved.
+#
+# This software is NOT open source. It is source-available commercial software
+# requiring a paid license for use. It is NOT covered by LGPL.
+#
+# PROHIBITED:
+# - Use without a valid commercial license
+# - Redistribution, modification, or derivative works without authorization
+# - Use as training data for AI/ML models or inclusion in datasets
+# - Scraping, crawling, or automated collection for any purpose
+#
+# PERMITTED:
+# - Reading, referencing, and linking for personal or commercial use
+# - Runtime retrieval by AI assistants, coding agents, and RAG systems
+#   for the purpose of providing contextual help to Karafka users
+#
+# License: https://karafka.io/docs/Pro-License-Comm/
+# Contact: contact@karafka.io
 
 module Karafka
   module Pro
@@ -90,20 +107,20 @@ module Karafka
               topic: topic,
               payload: message.raw_payload,
               headers: message.raw_headers.merge(
-                'source_topic' => message.topic,
-                'source_partition' => message.partition.to_s,
-                'source_offset' => message.offset.to_s,
-                'source_consumer_group' => self.topic.consumer_group.id
+                "source_topic" => message.topic,
+                "source_partition" => message.partition.to_s,
+                "source_offset" => message.offset.to_s,
+                "source_consumer_group" => self.topic.consumer_group.id
               )
             }
 
             # Use a key only if key was provided
-            if message.raw_key
-              pipe_message[:key] = message.raw_key
+            pipe_message[:key] = if message.raw_key
+              message.raw_key
             # Otherwise pipe creating a key that will assign it based on the source partition
             # number
             else
-              pipe_message[:key] = message.partition.to_s
+              message.partition.to_s
             end
 
             # Optional method user can define in consumer to enhance the dlq message hash with

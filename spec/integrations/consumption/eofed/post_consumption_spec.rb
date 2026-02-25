@@ -5,7 +5,7 @@
 # when this would happen as it should not be frequent
 
 setup_karafka do |config|
-  config.kafka[:'enable.partition.eof'] = true
+  config.kafka[:"enable.partition.eof"] = true
   config.max_messages = 100
   config.max_wait_time = 30_000
   config.shutdown_timeout = 60_000

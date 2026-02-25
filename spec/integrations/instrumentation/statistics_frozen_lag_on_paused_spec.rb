@@ -6,7 +6,7 @@
 
 setup_karafka do |config|
   config.max_messages = 1
-  config.kafka[:'statistics.interval.ms'] = 500
+  config.kafka[:"statistics.interval.ms"] = 500
 end
 
 class Consumer < Karafka::BaseConsumer
@@ -21,12 +21,12 @@ class Consumer < Karafka::BaseConsumer
   end
 end
 
-Karafka::App.monitor.subscribe('statistics.emitted') do |event|
-  event.payload[:statistics]['topics'].each do |_, topic_values|
-    topic_values['partitions'].each do |partition_name, partition_values|
-      next if partition_name == '-1'
+Karafka::App.monitor.subscribe("statistics.emitted") do |event|
+  event.payload[:statistics]["topics"].each do |_, topic_values|
+    topic_values["partitions"].each do |partition_name, partition_values|
+      next if partition_name == "-1"
 
-      DT[:lags] << partition_values['consumer_lag']
+      DT[:lags] << partition_values["consumer_lag"]
     end
   end
 end

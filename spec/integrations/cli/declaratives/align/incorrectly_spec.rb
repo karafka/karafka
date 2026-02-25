@@ -15,13 +15,13 @@ draw_routes(create_topics: false) do
     active(false)
     config(
       partitions: 1,
-      'retention.ms': '-100',
-      'cleanup.policy': 'delete'
+      "retention.ms": "-100",
+      "cleanup.policy": "delete"
     )
   end
 end
 
-ARGV[0] = 'topics'
-ARGV[1] = 'align'
+ARGV[0] = "topics"
+ARGV[1] = "align"
 
 Karafka::Cli.start

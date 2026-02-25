@@ -7,8 +7,8 @@ module Karafka
       class Topic < Karafka::Contracts::Base
         configure do |config|
           config.error_messages = YAML.safe_load_file(
-            File.join(Karafka.gem_root, 'config', 'locales', 'errors.yml')
-          ).fetch('en').fetch('validations').fetch('routing').fetch('topic')
+            File.join(Karafka.gem_root, "config", "locales", "errors.yml")
+          ).fetch("en").fetch("validations").fetch("routing").fetch("topic")
         end
 
         required(:deserializing) { |val| !val.nil? }
@@ -59,7 +59,7 @@ module Karafka
 
           kafka = data.fetch(:kafka)
 
-          next if kafka.key?(:'bootstrap.servers')
+          next if kafka.key?(:"bootstrap.servers")
 
           [[%w[kafka bootstrap.servers], :missing]]
         end
@@ -69,7 +69,7 @@ module Karafka
           next unless Karafka::App.config.strict_topics_namespacing
 
           value = data.fetch(:name)
-          namespace_chars = ['.', '_'].freeze
+          namespace_chars = [".", "_"].freeze
           namespacing_chars_count = value.chars.find_all do |c|
             namespace_chars.include?(c)
           end.uniq.size

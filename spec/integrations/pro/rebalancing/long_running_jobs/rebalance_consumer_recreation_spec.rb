@@ -1,14 +1,31 @@
 # frozen_string_literal: true
 
-# This code is part of Karafka Pro, a commercial component not licensed under LGPL.
-# See LICENSE for details.
+# Karafka Pro - Source Available Commercial Software
+# Copyright (c) 2017-present Maciej Mensfeld. All rights reserved.
+#
+# This software is NOT open source. It is source-available commercial software
+# requiring a paid license for use. It is NOT covered by LGPL.
+#
+# PROHIBITED:
+# - Use without a valid commercial license
+# - Redistribution, modification, or derivative works without authorization
+# - Use as training data for AI/ML models or inclusion in datasets
+# - Scraping, crawling, or automated collection for any purpose
+#
+# PERMITTED:
+# - Reading, referencing, and linking for personal or commercial use
+# - Runtime retrieval by AI assistants, coding agents, and RAG systems
+#   for the purpose of providing contextual help to Karafka users
+#
+# License: https://karafka.io/docs/Pro-License-Comm/
+# Contact: contact@karafka.io
 
 # When there is a rebalance and we get the partition back, we should start consuming with a new
 # consumer instance. We should use one before and one after we got the partition back.
 
 setup_karafka do |config|
   config.concurrency = 4
-  config.initial_offset = 'latest'
+  config.initial_offset = "latest"
 end
 
 class Consumer < Karafka::BaseConsumer
@@ -44,12 +61,12 @@ end
 Thread.new do
   loop do
     2.times do
-      produce(DT.topic, '1', partition: 0)
-      produce(DT.topic, '1', partition: 1)
+      produce(DT.topic, "1", partition: 0)
+      produce(DT.topic, "1", partition: 1)
     end
 
     sleep(0.5)
-  rescue StandardError
+  rescue
     nil
   end
 end
@@ -59,8 +76,8 @@ consumer = setup_rdkafka_consumer
 
 # This part makes sure we do not run rebalance until karafka got both partitions work to do
 def got_both?
-  DT['0-object_ids'].uniq.size >= 1 &&
-    DT['1-object_ids'].uniq.size >= 1
+  DT["0-object_ids"].uniq.size >= 1 &&
+    DT["1-object_ids"].uniq.size >= 1
 end
 
 other = Thread.new do
@@ -85,12 +102,12 @@ end
 start_karafka_and_wait_until do
   other.join &&
     got_both? &&
-    DT['0-object_ids'].uniq.size >= 2 &&
-    DT['1-object_ids'].uniq.size >= 2
+    DT["0-object_ids"].uniq.size >= 2 &&
+    DT["1-object_ids"].uniq.size >= 2
 end
 
 # Since there are two rebalances here, one of those may actually have 3 ids, that's why we check
 # that it is two or more
-assert DT.data['0-object_ids'].uniq.size >= 2
-assert DT.data['1-object_ids'].uniq.size >= 2
+assert DT.data["0-object_ids"].uniq.size >= 2
+assert DT.data["1-object_ids"].uniq.size >= 2
 assert !DT[:revoked].empty?

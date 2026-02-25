@@ -42,18 +42,18 @@ draw_routes do
   end
 end
 
-produce(DT.topics[0], 'm1', headers: { 'test' => '1' }, key: 'x1')
-produce(DT.topics[1], 'm2', headers: { 'test' => '2' }, key: 'x2')
+produce(DT.topics[0], "m1", headers: { "test" => "1" }, key: "x1")
+produce(DT.topics[1], "m2", headers: { "test" => "2" }, key: "x2")
 
 start_karafka_and_wait_until do
   DT[DT.topics[0]].size >= 1 &&
     DT[DT.topics[1]].size >= 1
 end
 
-assert_equal DT[DT.topics[0]][0], 'm11'
-assert_equal DT[DT.topics[0]][1], 'x11'
-assert_equal DT[DT.topics[0]][2][:nested1], { 'test' => '1' }
+assert_equal DT[DT.topics[0]][0], "m11"
+assert_equal DT[DT.topics[0]][1], "x11"
+assert_equal DT[DT.topics[0]][2][:nested1], { "test" => "1" }
 
-assert_equal DT[DT.topics[1]][0], 'm22'
-assert_equal DT[DT.topics[1]][1], 'x22'
-assert_equal DT[DT.topics[1]][2][:nested2], { 'test' => '2' }
+assert_equal DT[DT.topics[1]][0], "m22"
+assert_equal DT[DT.topics[1]][1], "x22"
+assert_equal DT[DT.topics[1]][2][:nested2], { "test" => "2" }

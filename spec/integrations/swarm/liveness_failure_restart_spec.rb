@@ -13,7 +13,7 @@ READER, WRITER = IO.pipe
 class Consumer < Karafka::BaseConsumer
   def consume
     unless DT.key?(:reported)
-      WRITER.puts('1')
+      WRITER.puts("1")
       WRITER.flush
       Karafka::App.config.swarm.node.unhealthy
       DT[:reported] = true

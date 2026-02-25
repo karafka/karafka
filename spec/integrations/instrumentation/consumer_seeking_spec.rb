@@ -14,7 +14,7 @@ end
 
 draw_routes(Consumer)
 
-Karafka::App.monitor.subscribe('consumer.consuming.seek') do |event|
+Karafka::App.monitor.subscribe("consumer.consuming.seek") do |event|
   DT[:seeks] << event
 end
 

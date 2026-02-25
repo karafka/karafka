@@ -57,7 +57,7 @@ end
 
 # We needed a new producer since Karafka closed the regular one when it stopped
 producer = WaterDrop::Producer.new do |config|
-  config.kafka = { 'bootstrap.servers': '127.0.0.1:9092' }
+  config.kafka = { "bootstrap.servers": "127.0.0.1:9092" }
 end
 
 # We publish again and we will check that only one topic got consumed afterwards

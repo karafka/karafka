@@ -13,7 +13,7 @@ Karafka.producer
 post_producer = WaterDrop::Producer.new
 
 Karafka::App.setup do |config|
-  config.kafka = { 'bootstrap.servers': 'host:9092' }
+  config.kafka = { "bootstrap.servers": "host:9092" }
   config.logger = post_logger
   config.monitor = post_monitor
   config.producer = post_producer

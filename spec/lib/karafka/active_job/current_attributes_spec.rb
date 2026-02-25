@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require 'karafka/active_job/current_attributes'
+require "karafka/active_job/current_attributes"
 
 module Karafka
   class CurrentAttrTest < ActiveSupport::CurrentAttributes # :nodoc:
@@ -9,14 +9,14 @@ module Karafka
 end
 
 RSpec.describe_current do
-  before { described_class.persist('Karafka::CurrentAttrTest') }
+  before { described_class.persist("Karafka::CurrentAttrTest") }
 
   after do
     Karafka::ActiveJob::Dispatcher._cattr_klasses.clear
     Karafka::ActiveJob::Consumer._cattr_klasses.clear
   end
 
-  context 'when dispatching jobs' do
+  context "when dispatching jobs" do
     subject(:dispatcher) { Karafka::ActiveJob::Dispatcher.new }
 
     let(:job_class) do
@@ -25,12 +25,12 @@ RSpec.describe_current do
       end
     end
 
-    describe '#dispatch' do
+    describe "#dispatch" do
       before { allow(Karafka.producer).to receive(:produce_async) }
 
       let(:job) { job_class.new }
 
-      it 'expect to serialize current attributes as part of the job' do
+      it "expect to serialize current attributes as part of the job" do
         with_context(:user_id, 1) do
           dispatcher.dispatch(job)
         end
@@ -41,7 +41,7 @@ RSpec.describe_current do
       end
     end
 
-    describe '#dispatch_many' do
+    describe "#dispatch_many" do
       before { allow(Karafka.producer).to receive(:produce_many_async) }
 
       let(:jobs) { [job_class.new, job_class.new] }
@@ -52,7 +52,7 @@ RSpec.describe_current do
         ]
       end
 
-      it 'expect to serialize current attributes as part of the jobs' do
+      it "expect to serialize current attributes as part of the jobs" do
         with_context(:user_id, 1) do
           jobs_messages
           dispatcher.dispatch_many(jobs)
@@ -63,7 +63,7 @@ RSpec.describe_current do
     end
   end
 
-  context 'when consuming jobs' do
+  context "when consuming jobs" do
     subject(:consumer) do
       consumer = Karafka::ActiveJob::Consumer.new
       consumer.client = client
@@ -75,9 +75,9 @@ RSpec.describe_current do
     let(:client) { instance_double(Karafka::Connection::Client, pause: true) }
     let(:coordinator) { build(:processing_coordinator, seek_offset: 0) }
     let(:message) do
-      build(:messages_message, raw_payload: payload.merge('cattr_0' => { 'user_id' => 1 }).to_json)
+      build(:messages_message, raw_payload: payload.merge("cattr_0" => { "user_id" => 1 }).to_json)
     end
-    let(:payload) { { 'foo' => 'bar' } }
+    let(:payload) { { "foo" => "bar" } }
 
     before do
       allow(Karafka::App).to receive(:stopping?).and_return(false)
@@ -90,7 +90,7 @@ RSpec.describe_current do
       consumer.messages = [message]
     end
 
-    it 'expect to set current attributes before running the job' do
+    it "expect to set current attributes before running the job" do
       consumer.consume
 
       expect(Karafka::CurrentAttrTest).to have_received(:user_id=).with(1)

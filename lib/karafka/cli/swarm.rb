@@ -5,7 +5,7 @@ module Karafka
   class Cli
     # Starts swarm of consumers forked from the supervisor
     class Swarm < Base
-      desc 'Starts swarm of Karafka consumers with a supervisor'
+      desc "Starts swarm of Karafka consumers with a supervisor"
 
       aliases :swarm
 

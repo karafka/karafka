@@ -36,8 +36,8 @@ end
 Thread.new do
   loop do
     2.times do |i|
-      produce(DT.topics[i], '1', partition: 0)
-      produce(DT.topics[i], '2', partition: 1)
+      produce(DT.topics[i], "1", partition: 0)
+      produce(DT.topics[i], "2", partition: 1)
     end
 
     sleep(1)

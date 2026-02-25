@@ -2,8 +2,8 @@
 
 # Here we ensure that our error tracker works as expected
 
-require 'karafka/instrumentation/vendors/appsignal/errors_listener'
-require Karafka.gem_root.join('spec/support/vendors/appsignal/dummy_client')
+require "karafka/instrumentation/vendors/appsignal/errors_listener"
+require Karafka.gem_root.join("spec/support/vendors/appsignal/dummy_client")
 
 setup_karafka(allow_errors: true)
 

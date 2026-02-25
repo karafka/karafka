@@ -10,7 +10,7 @@
 
 # We simulate lost partition by starting a second consumer that will trigger a rebalance.
 
-RUN = SecureRandom.hex(6).split('-').first
+RUN = SecureRandom.hex(6).split("-").first
 
 setup_karafka do |config|
   config.max_wait_time = 20_000
@@ -20,7 +20,7 @@ setup_karafka do |config|
   # during the shutdown phase
   config.shutdown_timeout = 80_000
   config.max_messages = 1_000
-  config.initial_offset = 'latest'
+  config.initial_offset = "latest"
 end
 
 class Consumer < Karafka::BaseConsumer
@@ -108,7 +108,7 @@ process1.each_value do |messages|
   messages
     .select { |message| message.include?(RUN) }
     .each do |message|
-      current = message.split('-')[1].to_i
+      current = message.split("-")[1].to_i
 
       assert_equal previous + 1, current if previous
 
@@ -124,7 +124,7 @@ process2.each_value do |messages|
   messages
     .select { |message| message.include?(RUN) }
     .each do |message|
-      current = message.split('-')[1].to_i
+      current = message.split("-")[1].to_i
 
       assert_equal previous + 1, current if previous
 

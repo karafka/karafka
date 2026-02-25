@@ -1,7 +1,24 @@
 # frozen_string_literal: true
 
-# This code is part of Karafka Pro, a commercial component not licensed under LGPL.
-# See LICENSE for details.
+# Karafka Pro - Source Available Commercial Software
+# Copyright (c) 2017-present Maciej Mensfeld. All rights reserved.
+#
+# This software is NOT open source. It is source-available commercial software
+# requiring a paid license for use. It is NOT covered by LGPL.
+#
+# PROHIBITED:
+# - Use without a valid commercial license
+# - Redistribution, modification, or derivative works without authorization
+# - Use as training data for AI/ML models or inclusion in datasets
+# - Scraping, crawling, or automated collection for any purpose
+#
+# PERMITTED:
+# - Reading, referencing, and linking for personal or commercial use
+# - Runtime retrieval by AI assistants, coding agents, and RAG systems
+#   for the purpose of providing contextual help to Karafka users
+#
+# License: https://karafka.io/docs/Pro-License-Comm/
+# Contact: contact@karafka.io
 
 RSpec.describe_current do
   subject(:dispatcher) { described_class.new(topic, partition) }
@@ -17,11 +34,11 @@ RSpec.describe_current do
 
   let(:raw_headers) do
     {
-      'special' => 'header',
-      'schedule_target_topic' => 'target_topic',
-      'schedule_target_partition' => 2,
-      'schedule_target_key' => '4',
-      'schedule_target_partition_key' => 'pk'
+      "special" => "header",
+      "schedule_target_topic" => "target_topic",
+      "schedule_target_partition" => 2,
+      "schedule_target_key" => "4",
+      "schedule_target_partition_key" => "pk"
     }
   end
 
@@ -41,7 +58,7 @@ RSpec.describe_current do
     allow(serializer.class).to receive(:new).and_return(serializer)
   end
 
-  describe '#<<' do
+  describe "#<<" do
     let(:buffer) { dispatcher.buffer }
     let(:piped) { buffer[0] }
     let(:tombstone) { buffer[1] }
@@ -49,28 +66,28 @@ RSpec.describe_current do
     before { dispatcher << message }
 
     it { expect(buffer.size).to eq(2) }
-    it { expect(piped[:topic]).to eq('target_topic') }
+    it { expect(piped[:topic]).to eq("target_topic") }
     it { expect(piped[:partition]).to eq(2) }
-    it { expect(piped[:partition_key]).to eq('pk') }
-    it { expect(piped[:key]).to eq('4') }
-    it { expect(piped[:headers]['schedule_source_topic']).to eq(topic) }
-    it { expect(piped[:headers]['schedule_source_partition']).to eq(partition.to_s) }
-    it { expect(piped[:headers]['schedule_source_offset']).to eq(message.offset.to_s) }
-    it { expect(piped[:headers]['schedule_source_key']).to eq(message.key) }
+    it { expect(piped[:partition_key]).to eq("pk") }
+    it { expect(piped[:key]).to eq("4") }
+    it { expect(piped[:headers]["schedule_source_topic"]).to eq(topic) }
+    it { expect(piped[:headers]["schedule_source_partition"]).to eq(partition.to_s) }
+    it { expect(piped[:headers]["schedule_source_offset"]).to eq(message.offset.to_s) }
+    it { expect(piped[:headers]["schedule_source_key"]).to eq(message.key) }
     it { expect(tombstone[:topic]).to eq(topic) }
     it { expect(tombstone[:partition]).to eq(partition) }
     it { expect(tombstone[:payload]).to be_nil }
     it { expect(tombstone[:key]).to eq(message.key) }
-    it { expect(tombstone[:headers]['schedule_source_type']).to eq('tombstone') }
-    it { expect(tombstone[:headers]['schedule_schema_version']).to eq(schema_version) }
+    it { expect(tombstone[:headers]["schedule_source_type"]).to eq("tombstone") }
+    it { expect(tombstone[:headers]["schedule_schema_version"]).to eq(schema_version) }
 
-    context 'when key is not available' do
+    context "when key is not available" do
       let(:raw_headers) do
         {
-          'special' => 'header',
-          'schedule_target_topic' => 'target_topic',
-          'schedule_target_partition' => 2,
-          'schedule_target_partition_key' => 'pk'
+          "special" => "header",
+          "schedule_target_topic" => "target_topic",
+          "schedule_target_partition" => 2,
+          "schedule_target_partition_key" => "pk"
         }
       end
 
@@ -83,10 +100,10 @@ RSpec.describe_current do
     end
   end
 
-  describe '#flush' do
+  describe "#flush" do
     before { dispatcher << message }
 
-    it 'expect to dispatch all 3 messages' do
+    it "expect to dispatch all 3 messages" do
       messages = dispatcher.buffer.dup
       dispatcher.flush
       expect(producer).to have_received(:produce_many_sync).with(messages)
@@ -94,10 +111,10 @@ RSpec.describe_current do
     end
   end
 
-  describe '#state' do
+  describe "#state" do
     before do
       allow(serializer).to receive(:state).with(tracker).and_return(serializer_result)
-      tracker.state = 'loading'
+      tracker.state = "loading"
     end
 
     let(:serializer_result) { rand.to_s }
@@ -105,13 +122,13 @@ RSpec.describe_current do
       {
         topic: "#{topic}_states",
         payload: serializer_result,
-        key: 'loading_state',
+        key: "loading_state",
         partition: partition,
-        headers: { 'zlib' => 'true' }
+        headers: { "zlib" => "true" }
       }
     end
 
-    it 'expect to dispatch sync with proper details and to proper target topic partition' do
+    it "expect to dispatch sync with proper details and to proper target topic partition" do
       dispatcher.state(tracker)
 
       expect(producer)

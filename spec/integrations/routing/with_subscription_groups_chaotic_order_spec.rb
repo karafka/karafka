@@ -6,23 +6,23 @@
 setup_karafka
 
 draw_routes(create_topics: false) do
-  topic 'topic0' do
+  topic "topic0" do
     consumer Class.new
   end
 
-  subscription_group 'group1' do
-    topic 'topic1' do
+  subscription_group "group1" do
+    topic "topic1" do
       consumer Class.new
     end
   end
 
-  consumer_group 'test' do
-    topic 'topic1' do
+  consumer_group "test" do
+    topic "topic1" do
       consumer Class.new
     end
   end
 
-  topic 'topic2' do
+  topic "topic2" do
     consumer Class.new
   end
 end

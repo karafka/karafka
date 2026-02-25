@@ -3,8 +3,8 @@
 # Karafka should crash if we try to run CLI or Rails console when no boot file is defined and
 # no initializer
 
-require 'net/http'
-require 'open3'
+require "net/http"
+require "open3"
 
 InvalidExitCode = Class.new(StandardError)
 
@@ -33,13 +33,13 @@ system! <<~CMD
     app
 CMD
 
-system!('cp Gemfile ./app/')
-system!('cd app && bundle install')
-system!('cd app && bundle exec karafka install')
+system!("cp Gemfile ./app/")
+system!("cd app && bundle install")
+system!("cd app && bundle exec karafka install")
 
-FileUtils.rm('./app/karafka.rb')
+FileUtils.rm("./app/karafka.rb")
 
-timeout = 'timeout --preserve-status --verbose 10'
+timeout = "timeout --preserve-status --verbose 10"
 
 failed1 = false
 failed2 = false

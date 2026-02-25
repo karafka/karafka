@@ -1,7 +1,24 @@
 # frozen_string_literal: true
 
-# This code is part of Karafka Pro, a commercial component not licensed under LGPL.
-# See LICENSE for details.
+# Karafka Pro - Source Available Commercial Software
+# Copyright (c) 2017-present Maciej Mensfeld. All rights reserved.
+#
+# This software is NOT open source. It is source-available commercial software
+# requiring a paid license for use. It is NOT covered by LGPL.
+#
+# PROHIBITED:
+# - Use without a valid commercial license
+# - Redistribution, modification, or derivative works without authorization
+# - Use as training data for AI/ML models or inclusion in datasets
+# - Scraping, crawling, or automated collection for any purpose
+#
+# PERMITTED:
+# - Reading, referencing, and linking for personal or commercial use
+# - Runtime retrieval by AI assistants, coding agents, and RAG systems
+#   for the purpose of providing contextual help to Karafka users
+#
+# License: https://karafka.io/docs/Pro-License-Comm/
+# Contact: contact@karafka.io
 
 # This test simulates a realistic batch processing scenario where messages from one topic
 # are transformed and dispatched to multiple target topics asynchronously within a transaction.
@@ -16,7 +33,7 @@
 # Note: This spec works correctly regardless of how Kafka batches messages for delivery.
 
 setup_karafka do |config|
-  config.kafka[:'transactional.id'] = SecureRandom.uuid
+  config.kafka[:"transactional.id"] = SecureRandom.uuid
   config.max_wait_time = 100
   config.max_messages = 20
 end
@@ -138,10 +155,10 @@ assert_equal 20, DT[:audit].size
 assert_equal 20, DT[:archival].size
 
 # Verify message prefixes
-DT[:analytics].each { |msg| assert msg.start_with?('analytics_') }
-DT[:notifications].each { |msg| assert msg.start_with?('notifications_') }
-DT[:audit].each { |msg| assert msg.start_with?('audit_') }
-DT[:archival].each { |msg| assert msg.start_with?('archival_') }
+DT[:analytics].each { |msg| assert msg.start_with?("analytics_") }
+DT[:notifications].each { |msg| assert msg.start_with?("notifications_") }
+DT[:audit].each { |msg| assert msg.start_with?("audit_") }
+DT[:archival].each { |msg| assert msg.start_with?("archival_") }
 
 # Verify offset committed
 assert_equal 20, fetch_next_offset

@@ -29,5 +29,5 @@ start_karafka_and_wait_until do
   DT[0].size >= 100
 end
 
-assert_equal DT['prep-0'], DT[0]
+assert_equal DT["prep-0"], DT[0]
 assert_equal 2, DT.data.size

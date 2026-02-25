@@ -1,7 +1,24 @@
 # frozen_string_literal: true
 
-# This code is part of Karafka Pro, a commercial component not licensed under LGPL.
-# See LICENSE for details.
+# Karafka Pro - Source Available Commercial Software
+# Copyright (c) 2017-present Maciej Mensfeld. All rights reserved.
+#
+# This software is NOT open source. It is source-available commercial software
+# requiring a paid license for use. It is NOT covered by LGPL.
+#
+# PROHIBITED:
+# - Use without a valid commercial license
+# - Redistribution, modification, or derivative works without authorization
+# - Use as training data for AI/ML models or inclusion in datasets
+# - Scraping, crawling, or automated collection for any purpose
+#
+# PERMITTED:
+# - Reading, referencing, and linking for personal or commercial use
+# - Runtime retrieval by AI assistants, coding agents, and RAG systems
+#   for the purpose of providing contextual help to Karafka users
+#
+# License: https://karafka.io/docs/Pro-License-Comm/
+# Contact: contact@karafka.io
 
 # This integration test demonstrates how to override the default LJF (Longest Job First)
 # scheduling algorithm to implement custom logic that identifies and prioritizes Virtual
@@ -29,7 +46,7 @@ class ExpensiveFirstScheduler < Karafka::Pro::Processing::Schedulers::Base
       # Check if this VP contains any expensive messages
       # We identify expensive messages by a special header
       has_expensive = job.messages.any? do |message|
-        message.headers['expensive'] == 'true'
+        message.headers["expensive"] == "true"
       end
 
       if has_expensive
@@ -45,14 +62,14 @@ class ExpensiveFirstScheduler < Karafka::Pro::Processing::Schedulers::Base
     # Schedule expensive jobs first to ensure they start processing immediately
     # This allows them to run in parallel with other jobs
     expensive_jobs.each do |job|
-      DT[:scheduling_order] << { type: 'expensive', messages_count: job.messages.size }
+      DT[:scheduling_order] << { type: "expensive", messages_count: job.messages.size }
       @queue << job
     end
 
     # Then schedule normal jobs using LJF ordering for optimal throughput
     ordered_normal = order_by_ljf(normal_jobs)
     ordered_normal.each do |job|
-      DT[:scheduling_order] << { type: 'normal', messages_count: job.messages.size }
+      DT[:scheduling_order] << { type: "normal", messages_count: job.messages.size }
       @queue << job
     end
   end
@@ -102,7 +119,7 @@ class ExpensiveMessageConsumer < Karafka::BaseConsumer
       start_time = Time.now.to_f
 
       # Check if this is an expensive message
-      if message.headers['expensive'] == 'true'
+      if message.headers["expensive"] == "true"
         DT[:expensive_vps] ||= []
         DT[:expensive_vps] << vp_id
         DT[:expensive_start] ||= []
@@ -129,7 +146,7 @@ class ExpensiveMessageConsumer < Karafka::BaseConsumer
       DT[:processed] << {
         vp_id: vp_id,
         message_id: message.raw_payload,
-        expensive: message.headers['expensive'] == 'true',
+        expensive: message.headers["expensive"] == "true",
         start_time: start_time,
         end_time: end_time,
         duration: end_time - start_time,
@@ -138,10 +155,10 @@ class ExpensiveMessageConsumer < Karafka::BaseConsumer
 
       # Track messages processed concurrently with expensive message
       next unless DT[:expensive_started_at] &&
-                  !DT[:expensive_started_at].is_a?(Array) &&
-                  start_time > DT[:expensive_started_at] &&
-                  start_time < (DT[:expensive_started_at] + 3) &&
-                  message.headers['expensive'] != 'true'
+        !DT[:expensive_started_at].is_a?(Array) &&
+        start_time > DT[:expensive_started_at] &&
+        start_time < (DT[:expensive_started_at] + 3) &&
+        message.headers["expensive"] != "true"
 
       DT[:concurrent_with_expensive] ||= []
       DT[:concurrent_with_expensive] << message.raw_payload
@@ -175,14 +192,14 @@ end
 messages = []
 
 # Create 1 expensive message (will go to VP 12 based on ID % 15)
-expensive_msg_id = '42'
-messages << [expensive_msg_id, { 'expensive' => 'true' }]
+expensive_msg_id = "42"
+messages << [expensive_msg_id, { "expensive" => "true" }]
 
 # Create 119 normal messages distributed across VPs
 (1..120).each do |i|
   next if i == 42 # Skip the expensive message ID
 
-  messages << [i.to_s, { 'expensive' => 'false' }]
+  messages << [i.to_s, { "expensive" => "false" }]
 end
 
 # Produce messages with headers
@@ -205,12 +222,12 @@ end
 # Assertions
 
 # 1. Verify all messages were processed
-assert_equal 120, DT[:processed].size, 'Should process all 120 messages'
+assert_equal 120, DT[:processed].size, "Should process all 120 messages"
 
 # 2. Verify expensive VP was scheduled first
 # Check the scheduling order - expensive jobs should be at the beginning
-expensive_scheduled_first = DT[:scheduling_order].first(5).any? { |job| job[:type] == 'expensive' }
-assert expensive_scheduled_first, 'Expensive job should be among the first scheduled'
+expensive_scheduled_first = DT[:scheduling_order].first(5).any? { |job| job[:type] == "expensive" }
+assert expensive_scheduled_first, "Expensive job should be among the first scheduled"
 
 # 3. Verify expensive VP was prioritized
 # The expensive VP should be scheduled early, though exact position may vary due to timing
@@ -230,7 +247,7 @@ assert(
 unless DT[:concurrent_with_expensive].empty?
   assert(
     DT[:concurrent_with_expensive].size >= 5,
-    'Expected at least 5 messages to process concurrently with expensive message'
+    "Expected at least 5 messages to process concurrently with expensive message"
   )
 end
 
@@ -243,8 +260,8 @@ assert(
 
 # 6. Verify expensive message was correctly identified
 expensive_messages = DT[:processed].select { |p| p[:expensive] }
-assert_equal 1, expensive_messages.size, 'Should have exactly one expensive message'
-assert_equal '42', expensive_messages.first[:message_id], 'Expensive message should have ID 42'
+assert_equal 1, expensive_messages.size, "Should have exactly one expensive message"
+assert_equal "42", expensive_messages.first[:message_id], "Expensive message should have ID 42"
 
 # 7. Verify processing times
 expensive_msg = expensive_messages.first
@@ -263,8 +280,8 @@ end
 
 # 8. Verify thread utilization
 thread_usage = DT[:processed].map { |p| p[:thread_id] }.uniq
-assert thread_usage.size <= 5, 'Should use at most 5 threads (configured concurrency)'
-assert thread_usage.size >= 3, 'Should utilize multiple threads for parallel processing'
+assert thread_usage.size <= 5, "Should use at most 5 threads (configured concurrency)"
+assert thread_usage.size >= 3, "Should utilize multiple threads for parallel processing"
 
 # 9. Verify total processing time is optimized
 # With custom scheduler, expensive message runs in parallel, so total time should be around 3-4s

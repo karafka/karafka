@@ -3,7 +3,7 @@
 RSpec.describe_current do
   subject(:runner) { described_class.new }
 
-  describe '#call' do
+  describe "#call" do
     # We need to set it to 0 as otherwise the listener would always wait for workers threads that
     # would never stop without shutting down whole framework
     before { Karafka::App.config.concurrency = 0 }
@@ -12,7 +12,7 @@ RSpec.describe_current do
 
     let(:subscription_group) { create(:routing_subscription_group) }
 
-    context 'when everything is ok' do
+    context "when everything is ok" do
       let(:listeners) { [listener] }
       let(:async_scope) { listener }
       let(:listener) do
@@ -43,16 +43,16 @@ RSpec.describe_current do
           .and_return(true)
       end
 
-      it 'starts asynchronously consumption for each listener' do
+      it "starts asynchronously consumption for each listener" do
         runner.call
       end
     end
 
-    context 'when something goes wrong internaly' do
+    context "when something goes wrong internaly" do
       let(:error) { StandardError }
 
       let(:instrument_args) do
-        ['error.occurred', { caller: runner, error: error, type: 'runner.call.error' }]
+        ["error.occurred", { caller: runner, error: error, type: "runner.call.error" }]
       end
 
       before do
@@ -61,7 +61,7 @@ RSpec.describe_current do
         allow(Karafka.monitor).to receive(:instrument)
       end
 
-      it 'stops the app and reraise' do
+      it "stops the app and reraise" do
         expect { runner.call }.to raise_error(error)
         expect(Karafka.monitor).to have_received(:instrument).with(*instrument_args)
         expect(Karafka::App).to have_received(:stop!).with(no_args)

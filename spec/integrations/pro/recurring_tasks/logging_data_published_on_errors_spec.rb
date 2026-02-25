@@ -1,7 +1,24 @@
 # frozen_string_literal: true
 
-# This code is part of Karafka Pro, a commercial component not licensed under LGPL.
-# See LICENSE for details.
+# Karafka Pro - Source Available Commercial Software
+# Copyright (c) 2017-present Maciej Mensfeld. All rights reserved.
+#
+# This software is NOT open source. It is source-available commercial software
+# requiring a paid license for use. It is NOT covered by LGPL.
+#
+# PROHIBITED:
+# - Use without a valid commercial license
+# - Redistribution, modification, or derivative works without authorization
+# - Use as training data for AI/ML models or inclusion in datasets
+# - Scraping, crawling, or automated collection for any purpose
+#
+# PERMITTED:
+# - Reading, referencing, and linking for personal or commercial use
+# - Runtime retrieval by AI assistants, coding agents, and RAG systems
+#   for the purpose of providing contextual help to Karafka users
+#
+# License: https://karafka.io/docs/Pro-License-Comm/
+# Contact: contact@karafka.io
 
 # When tasks are triggered, by default it should publish events to the logs topic even if those
 # executions fail
@@ -29,20 +46,20 @@ draw_routes do
   end
 end
 
-Karafka::Pro::RecurringTasks.define('1.0.0') do
-  schedule(id: 'a', cron: '0 12 31 12 *', enabled: false) do
+Karafka::Pro::RecurringTasks.define("1.0.0") do
+  schedule(id: "a", cron: "0 12 31 12 *", enabled: false) do
     DT[:a] = true
 
     raise
   end
 
-  schedule(id: 'b', cron: '0 12 31 12 *', enabled: false) do
+  schedule(id: "b", cron: "0 12 31 12 *", enabled: false) do
     DT[:b] = true
 
     raise
   end
 
-  schedule(id: 'c', cron: '0 12 31 12 *', previous_time: Time.now - 120_000) do
+  schedule(id: "c", cron: "0 12 31 12 *", previous_time: Time.now - 120_000) do
     DT[:c] = true
 
     raise
@@ -51,7 +68,7 @@ end
 
 start_karafka_and_wait_until do
   unless @dispatched
-    Karafka::Pro::RecurringTasks.trigger('*')
+    Karafka::Pro::RecurringTasks.trigger("*")
     @dispatched = true
   end
 
@@ -59,9 +76,9 @@ start_karafka_and_wait_until do
 end
 
 DT[:messages].each_with_index do |payload, i|
-  assert_equal payload[:schema_version], '1.0'
-  assert_equal payload[:schedule_version], '1.0.0'
-  assert_equal payload[:type], 'log'
+  assert_equal payload[:schema_version], "1.0"
+  assert_equal payload[:schedule_version], "1.0.0"
+  assert_equal payload[:type], "log"
   assert payload[:dispatched_at].is_a?(Float)
 
   task = payload[:task]
@@ -69,5 +86,5 @@ DT[:messages].each_with_index do |payload, i|
   # Assertions for the task
   assert_equal task[:id], TASK_IDS[i]
   assert_equal task[:time_taken], -1
-  assert_equal task[:result], 'failure'
+  assert_equal task[:result], "failure"
 end

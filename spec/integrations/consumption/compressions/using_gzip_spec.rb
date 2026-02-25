@@ -3,8 +3,8 @@
 # Karafka should be able to produce and consume messages compressed with gzip codec
 
 setup_karafka do |config|
-  config.kafka[:'compression.codec'] = 'gzip'
-  config.kafka[:'compression.level'] = '12'
+  config.kafka[:"compression.codec"] = "gzip"
+  config.kafka[:"compression.level"] = "12"
 end
 
 class Consumer < Karafka::BaseConsumer

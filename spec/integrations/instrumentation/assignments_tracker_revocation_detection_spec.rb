@@ -4,8 +4,8 @@
 # to helper classes without explicit arguments, enabling them to check assignment status.
 
 setup_karafka(allow_errors: true) do |config|
-  config.kafka[:'max.poll.interval.ms'] = 10_000
-  config.kafka[:'session.timeout.ms'] = 10_000
+  config.kafka[:"max.poll.interval.ms"] = 10_000
+  config.kafka[:"session.timeout.ms"] = 10_000
 end
 
 # Simulates expensive computation that checks assignment ownership
@@ -53,7 +53,7 @@ end
 
 draw_routes(Consumer)
 
-produce(DT.topic, '1')
+produce(DT.topic, "1")
 
 start_karafka_and_wait_until do
   DT.key?(:revoked)

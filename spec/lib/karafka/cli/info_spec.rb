@@ -5,8 +5,8 @@ RSpec.describe_current do
 
   specify { expect(described_class).to be < Karafka::Cli::Base }
 
-  describe '#call' do
-    context 'when running info on lgpl' do
+  describe "#call" do
+    context "when running info on lgpl" do
       let(:info) do
         [
           "Karafka version: #{Karafka::VERSION}",
@@ -18,7 +18,7 @@ RSpec.describe_current do
           "Instance client id: #{Karafka::App.config.client_id}",
           "Boot file: #{Karafka.boot_file}",
           "Environment: #{Karafka.env}",
-          'License: LGPL-3.0'
+          "License: LGPL-3.0"
         ].join("\n")
       end
 
@@ -27,14 +27,14 @@ RSpec.describe_current do
         allow(Karafka.logger).to receive(:info)
       end
 
-      it 'expect to print details of this Karafka app instance' do
+      it "expect to print details of this Karafka app instance" do
         info_cli.call
         expect(Karafka.logger).to have_received(:info).with(described_class::BANNER)
         expect(Karafka.logger).to have_received(:info).with(info)
       end
     end
 
-    context 'when running info on pro' do
+    context "when running info on pro" do
       let(:info) do
         [
           "Karafka version: #{Karafka::VERSION} + Pro",
@@ -46,7 +46,7 @@ RSpec.describe_current do
           "Instance client id: #{Karafka::App.config.client_id}",
           "Boot file: #{Karafka.boot_file}",
           "Environment: #{Karafka.env}",
-          'License: Commercial',
+          "License: Commercial",
           "License entity: #{Karafka::App.config.license.entity}"
         ].join("\n")
       end
@@ -60,10 +60,10 @@ RSpec.describe_current do
 
       after do
         Karafka::App.config.license.token = false
-        Karafka::App.config.license.entity = ''
+        Karafka::App.config.license.entity = ""
       end
 
-      it 'expect to print details of this Karafka app instance' do
+      it "expect to print details of this Karafka app instance" do
         info_cli.call
         expect(Karafka.logger).to have_received(:info).with(described_class::BANNER)
         expect(Karafka.logger).to have_received(:info).with(info)
@@ -71,7 +71,7 @@ RSpec.describe_current do
     end
   end
 
-  describe '#names' do
+  describe "#names" do
     it { expect(info_cli.class.names).to eq %w[info] }
   end
 end

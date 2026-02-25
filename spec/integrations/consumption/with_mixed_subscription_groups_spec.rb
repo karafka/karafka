@@ -28,7 +28,7 @@ draw_routes do
 end
 
 messages = DT.topics.first(10).map do |topic_name|
-  { topic: topic_name, payload: '1' }
+  { topic: topic_name, payload: "1" }
 end
 
 Karafka.producer.produce_many_sync(messages)

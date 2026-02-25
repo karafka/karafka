@@ -8,7 +8,7 @@
 # - Mixed scenarios with static group membership
 
 setup_karafka do |config|
-  config.kafka[:'group.instance.id'] = 'test-instance'
+  config.kafka[:"group.instance.id"] = "test-instance"
 end
 
 Consumer1 = Class.new(Karafka::BaseConsumer)
@@ -33,7 +33,7 @@ assert_equal 1, cg0.subscription_groups.size
 sg0 = cg0.subscription_groups.first
 original_sg_id = sg0.id
 original_position = sg0.position
-original_instance_id = sg0.kafka[:'group.instance.id']
+original_instance_id = sg0.kafka[:"group.instance.id"]
 
 assert_equal 0, original_position
 
@@ -44,7 +44,7 @@ end
 
 assert_equal original_sg_id, cg0.subscription_groups.first.id
 assert_equal original_position, cg0.subscription_groups.first.position
-assert_equal original_instance_id, cg0.subscription_groups.first.kafka[:'group.instance.id']
+assert_equal original_instance_id, cg0.subscription_groups.first.kafka[:"group.instance.id"]
 
 # Reopen consumer group and add a topic
 draw_routes(create_topics: false) do
@@ -58,7 +58,7 @@ end
 assert_equal 2, cg0.topics.size
 assert_equal 1, cg0.subscription_groups.size
 assert_equal 0, cg0.subscription_groups.first.position
-assert_equal original_instance_id, cg0.subscription_groups.first.kafka[:'group.instance.id']
+assert_equal original_instance_id, cg0.subscription_groups.first.kafka[:"group.instance.id"]
 
 # Add a second consumer group
 draw_routes(create_topics: false) do
@@ -130,7 +130,7 @@ assert_equal [0, 1, 2], all_positions
 
 # Verify all instance IDs are unique
 all_instance_ids = Karafka::App.consumer_groups.flat_map do |cg|
-  cg.subscription_groups.map { |sg| sg.kafka[:'group.instance.id'] }
+  cg.subscription_groups.map { |sg| sg.kafka[:"group.instance.id"] }
 end
 
 assert_equal all_instance_ids.size, all_instance_ids.uniq.size

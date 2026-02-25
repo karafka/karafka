@@ -1,7 +1,24 @@
 # frozen_string_literal: true
 
-# This code is part of Karafka Pro, a commercial component not licensed under LGPL.
-# See LICENSE for details.
+# Karafka Pro - Source Available Commercial Software
+# Copyright (c) 2017-present Maciej Mensfeld. All rights reserved.
+#
+# This software is NOT open source. It is source-available commercial software
+# requiring a paid license for use. It is NOT covered by LGPL.
+#
+# PROHIBITED:
+# - Use without a valid commercial license
+# - Redistribution, modification, or derivative works without authorization
+# - Use as training data for AI/ML models or inclusion in datasets
+# - Scraping, crawling, or automated collection for any purpose
+#
+# PERMITTED:
+# - Reading, referencing, and linking for personal or commercial use
+# - Runtime retrieval by AI assistants, coding agents, and RAG systems
+#   for the purpose of providing contextual help to Karafka users
+#
+# License: https://karafka.io/docs/Pro-License-Comm/
+# Contact: contact@karafka.io
 
 RSpec.describe_current do
   let(:consumer_class) do
@@ -10,14 +27,14 @@ RSpec.describe_current do
     end
   end
 
-  context 'when the consumer class does not define a #tick method' do
-    it 'defines an empty #tick method upon inclusion of the module' do
+  context "when the consumer class does not define a #tick method" do
+    it "defines an empty #tick method upon inclusion of the module" do
       consumer_instance = consumer_class.new
       expect { consumer_instance.tick }.not_to raise_error
     end
   end
 
-  context 'when the consumer class already defines a #tick method' do
+  context "when the consumer class already defines a #tick method" do
     let(:consumer_class_with_tick) do
       klass = Class.new(Karafka::BaseConsumer) do
         def tick
@@ -30,14 +47,14 @@ RSpec.describe_current do
       klass
     end
 
-    it 'does not override the existing #tick method' do
+    it "does not override the existing #tick method" do
       consumer_instance = consumer_class_with_tick.new
       expect(consumer_instance.tick).to eq(:existing_tick)
     end
   end
 
-  describe '#on_before_schedule_tick' do
-    it 'calls handle_before_schedule_tick' do
+  describe "#on_before_schedule_tick" do
+    it "calls handle_before_schedule_tick" do
       consumer_instance = consumer_class.new
       allow(consumer_instance).to receive(:handle_before_schedule_tick)
 
@@ -47,10 +64,10 @@ RSpec.describe_current do
     end
   end
 
-  describe '#on_tick' do
-    let(:error) { StandardError.new('tick error') }
+  describe "#on_tick" do
+    let(:error) { StandardError.new("tick error") }
 
-    it 'calls handle_tick' do
+    it "calls handle_tick" do
       consumer_instance = consumer_class.new
       allow(consumer_instance).to receive(:handle_tick)
 
@@ -59,17 +76,17 @@ RSpec.describe_current do
       expect(consumer_instance).to have_received(:handle_tick)
     end
 
-    it 'rescues from StandardError and instruments error' do
+    it "rescues from StandardError and instruments error" do
       consumer_instance = consumer_class.new
       allow(consumer_instance).to receive(:handle_tick).and_raise(error)
       allow(Karafka.monitor).to receive(:instrument)
 
       expect { consumer_instance.on_tick }.not_to raise_error
       expect(Karafka.monitor).to have_received(:instrument).with(
-        'error.occurred',
+        "error.occurred",
         error: error,
         caller: consumer_instance,
-        type: 'consumer.tick.error'
+        type: "consumer.tick.error"
       )
     end
   end

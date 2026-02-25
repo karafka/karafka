@@ -13,15 +13,15 @@ RSpec.describe_current do
     end
   end
 
-  describe '.find_by' do
-    context 'when we look for non existing topic by name' do
+  describe ".find_by" do
+    context "when we look for non existing topic by name" do
       let(:name) { rand.to_s }
       let(:expected_error) { Karafka::Errors::NonMatchingRouteError }
 
       it { expect(router.find_by(name: name)).to be_nil }
     end
 
-    context 'when we look for existing topic' do
+    context "when we look for existing topic" do
       let(:topic) { Karafka::App.config.internal.routing.builder.last.topics.last }
       let(:name) { topic.name }
 
@@ -29,22 +29,22 @@ RSpec.describe_current do
     end
   end
 
-  describe '.find_or_initialize_by_name' do
+  describe ".find_or_initialize_by_name" do
     subject(:found_topic) { router.find_or_initialize_by_name(name) }
 
-    context 'when we look for non existing topic' do
+    context "when we look for non existing topic" do
       let(:name) { rand.to_s }
 
-      it 'expect to create it with consumer group reference' do
+      it "expect to create it with consumer group reference" do
         expect(found_topic.consumer_group).not_to be_nil
       end
 
-      it 'expect to match the name' do
+      it "expect to match the name" do
         expect(found_topic.name).to eq(name)
       end
     end
 
-    context 'when we look for existing topic' do
+    context "when we look for existing topic" do
       let(:topic) { Karafka::App.config.internal.routing.builder.last.topics.last }
       let(:name) { topic.name }
 

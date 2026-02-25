@@ -1,7 +1,24 @@
 # frozen_string_literal: true
 
-# This code is part of Karafka Pro, a commercial component not licensed under LGPL.
-# See LICENSE for details.
+# Karafka Pro - Source Available Commercial Software
+# Copyright (c) 2017-present Maciej Mensfeld. All rights reserved.
+#
+# This software is NOT open source. It is source-available commercial software
+# requiring a paid license for use. It is NOT covered by LGPL.
+#
+# PROHIBITED:
+# - Use without a valid commercial license
+# - Redistribution, modification, or derivative works without authorization
+# - Use as training data for AI/ML models or inclusion in datasets
+# - Scraping, crawling, or automated collection for any purpose
+#
+# PERMITTED:
+# - Reading, referencing, and linking for personal or commercial use
+# - Runtime retrieval by AI assistants, coding agents, and RAG systems
+#   for the purpose of providing contextual help to Karafka users
+#
+# License: https://karafka.io/docs/Pro-License-Comm/
+# Contact: contact@karafka.io
 
 module Karafka
   module Pro
@@ -14,8 +31,8 @@ module Karafka
         class Message < Karafka::Contracts::Base
           configure do |config|
             config.error_messages = YAML.safe_load_file(
-              File.join(Karafka.gem_root, 'config', 'locales', 'pro_errors.yml')
-            ).fetch('en').fetch('validations').fetch('scheduled_messages_message')
+              File.join(Karafka.gem_root, "config", "locales", "pro_errors.yml")
+            ).fetch("en").fetch("validations").fetch("scheduled_messages_message")
           end
 
           # Headers we expect in each message of type "schedule" that goes to our scheduled
@@ -39,7 +56,7 @@ module Karafka
           required(:headers) do |val|
             next false unless val.is_a?(Hash)
 
-            if val['schedule_source_type'] == 'message'
+            if val["schedule_source_type"] == "message"
               (val.keys & EXPECTED_SCHEDULE_HEADERS).size >= 4
             else
               (val.keys & EXPECTED_CANCEL_HEADERS).size >= 2
@@ -53,9 +70,9 @@ module Karafka
             next unless errors.empty?
 
             # Validate epoch only for schedules
-            next unless data[:headers]['schedule_source_type'] == 'schedule'
+            next unless data[:headers]["schedule_source_type"] == "schedule"
 
-            epoch_time = data[:headers].fetch('schedule_target_epoch').to_i
+            epoch_time = data[:headers].fetch("schedule_target_epoch").to_i
 
             # We allow for small lag as those will be dispatched but we should prevent dispatching
             # in the past in general as often it is a source of errors
@@ -69,11 +86,11 @@ module Karafka
             next unless errors.empty?
 
             scheduled_topics = Karafka::App
-                               .routes
-                               .flat_map(&:topics)
-                               .flat_map(&:to_a)
-                               .select(&:scheduled_messages?)
-                               .map(&:name)
+              .routes
+              .flat_map(&:topics)
+              .flat_map(&:to_a)
+              .select(&:scheduled_messages?)
+              .map(&:name)
 
             next if scheduled_topics.include?(data[:topic].to_s)
 

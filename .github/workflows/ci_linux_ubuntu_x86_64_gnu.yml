@@ -24,7 +24,7 @@ jobs:
     strategy:
       fail-fast: false
     steps:
-      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           fetch-depth: 0
       - name: Run Karafka license checksum verification
@@ -35,55 +35,68 @@ jobs:
           KARAFKA_PRO_LICENSE_CHECKSUM: ${{ secrets.KARAFKA_PRO_LICENSE_CHECKSUM }}
         run: bin/verify_license_integrity
 
-  coditsu:
+  rubocop:
     runs-on: ubuntu-latest
     timeout-minutes: 5
     strategy:
       fail-fast: false
+    env:
+      BUNDLE_GEMFILE: Gemfile.lint
     steps:
-      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           fetch-depth: 0
-      - name: Download Coditsu script
-        run: |
-          curl -sSL https://api.coditsu.io/run/ci -o coditsu_script.sh
-          chmod +x coditsu_script.sh
-      - name: Verify Coditsu script checksum
-        run: |
-          EXPECTED_SHA256="7dc7f736b81ad79cfa065ceb87506908dfcd1ec1202f384426d72342396f7377"
-
-          ACTUAL_SHA256=$(sha256sum coditsu_script.sh | awk '{ print $1 }')
-          if [ "$ACTUAL_SHA256" != "$EXPECTED_SHA256" ]; then
-            echo "::error::Checksum verification failed. Expected $EXPECTED_SHA256 but got $ACTUAL_SHA256."
-            exit 1
-          fi
-      - name: Run Coditsu
-        run: ./coditsu_script.sh
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@09a7688d3b55cf0e976497ff046b70949eeaccfd # v1.288.0
+        with:
+          ruby-version: '4.0.1'
+          bundler-cache: true
+      - name: Run RuboCop
+        run: bundle exec rubocop
 
   yard-lint:
     runs-on: ubuntu-latest
     timeout-minutes: 5
     strategy:
       fail-fast: false
+    env:
+      BUNDLE_GEMFILE: Gemfile.lint
     steps:
-      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           fetch-depth: 0
       - name: Set up Ruby
-        uses: ruby/setup-ruby@ae195bbe749a7cef685ac729197124a48305c1cb # v1.276.0
+        uses: ruby/setup-ruby@09a7688d3b55cf0e976497ff046b70949eeaccfd # v1.288.0
         with:
-          ruby-version: '3.4.8'
+          ruby-version: '4.0.1'
           bundler-cache: true
       - name: Run yard-lint
         run: bundle exec yard-lint lib/
+
+  lostconf:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    strategy:
+      fail-fast: false
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          fetch-depth: 0
+      - name: Set up Node.js
+        uses: actions/setup-node@6044e13b5dc448c55e2357c09f80417699197238 # v6.2.0
+        with:
+          node-version: '20'
+          cache: 'npm'
+      - name: Install dependencies
+        run: npm ci
+      - name: Run lostconf
+        run: npx lostconf --fail-on-stale
 
   # We do not split RSpec specs to OSS and Pro like integrations because they do not overload
   # Kafka heavily, compute total coverage for specs and are fast enough
   specs:
     timeout-minutes: 15
     runs-on: ubuntu-latest
-    env:
-      BUNDLE_FORCE_RUBY_PLATFORM: ${{ matrix.force_ruby_platform }}
     strategy:
       fail-fast: false
       matrix:
@@ -92,14 +105,11 @@ jobs:
           - '3.4'
           - '3.3'
           - '3.2'
-        force_ruby_platform:
-          - true
-          - false
         include:
           - ruby: '3.4'
             coverage: 'true'
     steps:
-      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
       - name: Install package dependencies
         run: "[ -e $APT_DEPS ] || sudo apt-get install -y --no-install-recommends $APT_DEPS"
 
@@ -112,7 +122,7 @@ jobs:
         run: rm -f Gemfile.lock
 
       - name: Set up Ruby
-        uses: ruby/setup-ruby@ae195bbe749a7cef685ac729197124a48305c1cb # v1.276.0
+        uses: ruby/setup-ruby@09a7688d3b55cf0e976497ff046b70949eeaccfd # v1.288.0
         with:
           ruby-version: ${{matrix.ruby}}
           bundler-cache: true
@@ -136,8 +146,6 @@ jobs:
   integrations_oss:
     timeout-minutes: 30
     runs-on: ubuntu-latest
-    env:
-      BUNDLE_FORCE_RUBY_PLATFORM: ${{ matrix.force_ruby_platform }}
     strategy:
       fail-fast: false
       matrix:
@@ -146,14 +154,11 @@ jobs:
           - '3.4'
           - '3.3'
           - '3.2'
-        force_ruby_platform:
-          - true
-          - false
         parallel_group:
           - '0'
           - '1'
     steps:
-      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
       - name: Install package dependencies
         run: "[ -e $APT_DEPS ] || sudo apt-get install -y --no-install-recommends $APT_DEPS"
 
@@ -165,7 +170,7 @@ jobs:
           docker compose up -d || (sleep 5 && docker compose up -d)
 
       - name: Set up Ruby
-        uses: ruby/setup-ruby@ae195bbe749a7cef685ac729197124a48305c1cb # v1.276.0
+        uses: ruby/setup-ruby@09a7688d3b55cf0e976497ff046b70949eeaccfd # v1.288.0
         with:
           # Do not use cache here as we run bundle install also later in some of the integration
           # tests and we need to be able to run it without cache
@@ -213,8 +218,6 @@ jobs:
   integrations_pro:
     timeout-minutes: 45
     runs-on: ubuntu-latest
-    env:
-      BUNDLE_FORCE_RUBY_PLATFORM: ${{ matrix.force_ruby_platform }}
     strategy:
       fail-fast: false
       matrix:
@@ -223,14 +226,11 @@ jobs:
           - '3.4'
           - '3.3'
           - '3.2'
-        force_ruby_platform:
-          - true
-          - false
         parallel_group:
           - '0'
           - '1'
     steps:
-      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
       - name: Install package dependencies
         run: "[ -e $APT_DEPS ] || sudo apt-get install -y --no-install-recommends $APT_DEPS"
 
@@ -239,7 +239,7 @@ jobs:
           docker compose up -d || (sleep 5 && docker compose up -d)
 
       - name: Set up Ruby
-        uses: ruby/setup-ruby@ae195bbe749a7cef685ac729197124a48305c1cb # v1.276.0
+        uses: ruby/setup-ruby@09a7688d3b55cf0e976497ff046b70949eeaccfd # v1.288.0
         with:
           ruby-version: ${{matrix.ruby}}
           bundler: 'latest'
@@ -287,8 +287,9 @@ jobs:
     if: always()
     needs:
       - karafka-checksum
-      - coditsu
+      - rubocop
       - yard-lint
+      - lostconf
       - specs
       - integrations_oss
       - integrations_pro

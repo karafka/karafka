@@ -9,34 +9,34 @@ RSpec.describe_current do
     end
   end
 
-  describe '#green' do
+  describe "#green" do
     let(:string) { rand.to_s }
 
-    it 'expect to colorize given string' do
+    it "expect to colorize given string" do
       expect(colorized.green(string)).to eq("\033[0;32m#{string}\033[0m")
     end
   end
 
-  describe '#red' do
+  describe "#red" do
     let(:string) { rand.to_s }
 
-    it 'expect to colorize given string' do
+    it "expect to colorize given string" do
       expect(colorized.red(string)).to eq("\033[0;31m#{string}\033[0m")
     end
   end
 
-  describe '#yellow' do
+  describe "#yellow" do
     let(:string) { rand.to_s }
 
-    it 'expect to colorize given string' do
+    it "expect to colorize given string" do
       expect(colorized.yellow(string)).to eq("\033[1;33m#{string}\033[0m")
     end
   end
 
-  describe '#grey' do
+  describe "#grey" do
     let(:string) { rand.to_s }
 
-    it 'expect to colorize given string' do
+    it "expect to colorize given string" do
       expect(colorized.grey(string)).to eq("\e[38;5;244m#{string}\e[0m")
     end
   end

@@ -38,19 +38,21 @@ module Karafka
         # When redefined can run any code prior to the job being scheduled
         # @note This will run in the listener thread and not in the worker
         def before_schedule
-          raise NotImplementedError, 'Please implement in a subclass'
+          raise NotImplementedError, "Please implement in a subclass"
         end
 
         # When redefined can run any code that should run before executing the proper code
-        def before_call; end
+        def before_call
+        end
 
         # The main entry-point of a job
         def call
-          raise NotImplementedError, 'Please implement in a subclass'
+          raise NotImplementedError, "Please implement in a subclass"
         end
 
         # When redefined can run any code that should run after executing the proper code
-        def after_call; end
+        def after_call
+        end
 
         # @return [Boolean] is this a non-blocking job
         #

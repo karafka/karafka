@@ -4,7 +4,7 @@
 # Only if eof return works, will it finish fast enough
 setup_karafka do |config|
   # Early exit
-  config.kafka[:'enable.partition.eof'] = true
+  config.kafka[:"enable.partition.eof"] = true
   config.max_wait_time = 1_000_000
   config.max_messages = 100_000
   config.shutdown_timeout = 1_000_001

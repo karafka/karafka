@@ -10,8 +10,8 @@ setup_karafka do |config|
   config.max_messages = 2
   config.concurrency = 2
   # We set those values high so only the first topic is consumed as long as it lags
-  config.kafka[:'fetch.message.max.bytes'] = 262_144 * 100
-  config.kafka[:'queued.max.messages.kbytes'] = 2_097_151
+  config.kafka[:"fetch.message.max.bytes"] = 262_144 * 100
+  config.kafka[:"queued.max.messages.kbytes"] = 2_097_151
 end
 
 class Consumer < Karafka::BaseConsumer
@@ -23,15 +23,15 @@ class Consumer < Karafka::BaseConsumer
   end
 end
 
-produce_many(DT.topics[0], Array.new(20) { '1' })
-produce_many(DT.topics[1], Array.new(10) { '1' })
+produce_many(DT.topics[0], Array.new(20) { "1" })
+produce_many(DT.topics[1], Array.new(10) { "1" })
 
-Karafka::App.monitor.subscribe('statistics.emitted') do |event|
-  event.payload[:statistics]['topics'].each do |topic_name, topic_values|
-    topic_values['partitions'].each do |partition_name, partition_values|
-      next if partition_name == '-1'
+Karafka::App.monitor.subscribe("statistics.emitted") do |event|
+  event.payload[:statistics]["topics"].each do |topic_name, topic_values|
+    topic_values["partitions"].each do |partition_name, partition_values|
+      next if partition_name == "-1"
 
-      lag = partition_values['consumer_lag']
+      lag = partition_values["consumer_lag"]
 
       next if lag == -1
 
@@ -42,13 +42,13 @@ Karafka::App.monitor.subscribe('statistics.emitted') do |event|
 end
 
 draw_routes(create_topics: false) do
-  subscription_group '1' do
+  subscription_group "1" do
     topic DT.topics[0] do
       consumer Consumer
     end
   end
 
-  subscription_group '2' do
+  subscription_group "2" do
     topic DT.topics[1] do
       consumer Consumer
     end
@@ -74,7 +74,7 @@ at_least_one_non_order = false
 # We check here, that we actually consume and publish metrics from both topics and that each of
 # them can put their data independently and in its own order (one does not block the other)
 DT[:overall].each do |point|
-  topic, _lag = point.split('/')
+  topic, _lag = point.split("/")
 
   unless previous
     previous = topic

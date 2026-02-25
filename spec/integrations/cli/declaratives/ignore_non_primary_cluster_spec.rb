@@ -11,13 +11,13 @@ draw_routes(create_topics: false) do
   topic DT.topics[0] do
     # We set those settings differently as any deviation in bootstrap.servers should cause
     # karafka to consider this as a different cluster
-    kafka('bootstrap.servers': '127.0.0.1:9091')
+    kafka("bootstrap.servers": "127.0.0.1:9091")
     consumer Consumer
   end
 end
 
-ARGV[0] = 'topics'
-ARGV[1] = 'create'
+ARGV[0] = "topics"
+ARGV[1] = "create"
 
 Karafka::Cli.start
 

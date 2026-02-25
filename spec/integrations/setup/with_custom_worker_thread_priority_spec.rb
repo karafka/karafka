@@ -8,7 +8,7 @@ setup_karafka do |config|
   config.internal.connection.listener_thread_priority = -2
 end
 
-Karafka::App.monitor.subscribe('connection.listener.fetch_loop') do
+Karafka::App.monitor.subscribe("connection.listener.fetch_loop") do
   DT[:listener_thread_priority] = Thread.current.priority
 end
 

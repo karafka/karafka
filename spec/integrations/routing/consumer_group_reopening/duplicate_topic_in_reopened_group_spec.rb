@@ -14,7 +14,7 @@ draw_routes(create_topics: false) do
   consumer_group DT.consumer_groups[0] do
     topic DT.topics[0] do
       consumer Consumer1
-      initial_offset 'earliest'
+      initial_offset "earliest"
     end
   end
 end
@@ -25,7 +25,7 @@ assert_equal 1, group.topics.size
 topic_first = group.topics.to_a.first
 assert_equal DT.topics[0], topic_first.name
 assert_equal Consumer1, topic_first.consumer
-assert_equal 'earliest', topic_first.initial_offset
+assert_equal "earliest", topic_first.initial_offset
 
 # Second draw - try to define the same topic again with different settings
 # This should raise an error because duplicate topic names are not allowed
@@ -37,7 +37,7 @@ begin
     consumer_group DT.consumer_groups[0] do
       topic DT.topics[0] do
         consumer Consumer2
-        initial_offset 'latest'
+        initial_offset "latest"
       end
     end
   end
@@ -47,9 +47,9 @@ rescue Karafka::Errors::InvalidConfigurationError => e
 end
 
 # Verify that duplicate topic definition was rejected
-raise 'Should raise InvalidConfigurationError for duplicate topic' unless error_raised
+raise "Should raise InvalidConfigurationError for duplicate topic" unless error_raised
 
-unless error_message.include?('topic names within a single consumer group must be unique')
+unless error_message.include?("topic names within a single consumer group must be unique")
   raise "Error message should mention unique topic names, got: #{error_message}"
 end
 
@@ -60,9 +60,9 @@ group = Karafka::App.routes.first
 
 # The behavior is: topic gets added, then validation catches the duplicate
 # So we should have 2 topics after the failed draw
-expected_message = 'Should have two topics after failed validation (added before validation)'
+expected_message = "Should have two topics after failed validation (added before validation)"
 assert_equal 2, group.topics.size, expected_message
 
 # Both topics exist but the configuration is invalid
 topics = group.topics.to_a
-raise 'Should have duplicate topics' unless topics.any? { |t| t.name == DT.topics[0] }
+raise "Should have duplicate topics" unless topics.any? { |t| t.name == DT.topics[0] }

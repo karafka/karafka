@@ -42,12 +42,12 @@ module Karafka
     # @private
     def on_initialized
       handle_initialized
-    rescue StandardError => e
+    rescue => e
       monitor.instrument(
-        'error.occurred',
+        "error.occurred",
         error: e,
         caller: self,
-        type: 'consumer.initialized.error'
+        type: "consumer.initialized.error"
       )
     end
 
@@ -84,12 +84,12 @@ module Karafka
     # @param action [Symbol]
     def on_wrap(action, &)
       handle_wrap(action, &)
-    rescue StandardError => e
+    rescue => e
       monitor.instrument(
-        'error.occurred',
+        "error.occurred",
         error: e,
         caller: self,
-        type: 'consumer.wrap.error'
+        type: "consumer.wrap.error"
       )
     end
 
@@ -104,13 +104,13 @@ module Karafka
     #   message.
     def on_consume
       handle_consume
-    rescue StandardError => e
+    rescue => e
       monitor.instrument(
-        'error.occurred',
+        "error.occurred",
         error: e,
         caller: self,
         seek_offset: seek_offset,
-        type: 'consumer.consume.error'
+        type: "consumer.consume.error"
       )
     end
 
@@ -124,13 +124,13 @@ module Karafka
     #   flows do not interact with external systems and their errors are expected to bubble up
     def on_after_consume
       handle_after_consume
-    rescue StandardError => e
+    rescue => e
       monitor.instrument(
-        'error.occurred',
+        "error.occurred",
         error: e,
         caller: self,
         seek_offset: seek_offset,
-        type: 'consumer.after_consume.error'
+        type: "consumer.after_consume.error"
       )
 
       retry_after_pause
@@ -144,13 +144,13 @@ module Karafka
     # Trigger method for running on eof without messages
     def on_eofed
       handle_eofed
-    rescue StandardError => e
+    rescue => e
       monitor.instrument(
-        'error.occurred',
+        "error.occurred",
         error: e,
         caller: self,
         seek_offset: seek_offset,
-        type: 'consumer.eofed.error'
+        type: "consumer.eofed.error"
       )
     end
 
@@ -180,12 +180,12 @@ module Karafka
     # @private
     def on_revoked
       handle_revoked
-    rescue StandardError => e
+    rescue => e
       monitor.instrument(
-        'error.occurred',
+        "error.occurred",
         error: e,
         caller: self,
-        type: 'consumer.revoked.error'
+        type: "consumer.revoked.error"
       )
     end
 
@@ -201,12 +201,12 @@ module Karafka
     # @private
     def on_shutdown
       handle_shutdown
-    rescue StandardError => e
+    rescue => e
       monitor.instrument(
-        'error.occurred',
+        "error.occurred",
         error: e,
         caller: self,
-        type: 'consumer.shutdown.error'
+        type: "consumer.shutdown.error"
       )
     end
 
@@ -229,7 +229,7 @@ module Karafka
         "revoked=#{coordinator&.revoked?}"
       ]
 
-      "#<#{self.class.name}:#{format('%#x', object_id)} #{parts.join(' ')}>"
+      "#<#{self.class.name}:#{format("%#x", object_id)} #{parts.join(" ")}>"
     end
 
     private
@@ -241,14 +241,15 @@ module Karafka
     #
     # @note Please keep in mind that it will run many times when persistence is off. Basically once
     #   each batch.
-    def initialized; end
+    def initialized
+    end
 
     # Method that will perform business logic and on data received from Kafka (it will consume
     #   the data)
     # @note This method needs to be implemented in a subclass. We stub it here as a failover if
     #   someone forgets about it or makes on with typo
     def consume
-      raise NotImplementedError, 'Implement this in a subclass'
+      raise NotImplementedError, "Implement this in a subclass"
     end
 
     # This method can be redefined to build a wrapping API around user code + karafka flow control
@@ -287,15 +288,18 @@ module Karafka
 
     # Method that will be executed when a given topic partition reaches eof without any new
     # incoming messages alongside
-    def eofed; end
+    def eofed
+    end
 
     # Method that will be executed when a given topic partition is revoked. You can use it for
     # some teardown procedures (closing file handler, etc).
-    def revoked; end
+    def revoked
+    end
 
     # Method that will be executed when the process is shutting down. You can use it for
     # some teardown procedures (closing file handler, etc).
-    def shutdown; end
+    def shutdown
+    end
 
     # @return [Boolean] was this consumer in active use. Active use means running `#consume` at
     #   least once. Consumer may have to run `#revoked` or `#shutdown` despite not running
@@ -337,7 +341,7 @@ module Karafka
       coordinator.manual_pause if manual_pause
 
       monitor.instrument(
-        'consumer.consuming.pause',
+        "consumer.consuming.pause",
         caller: self,
         manual: manual_pause,
         topic: topic.name,
@@ -385,7 +389,7 @@ module Karafka
       )
 
       monitor.instrument(
-        'consumer.consuming.seek',
+        "consumer.consuming.seek",
         caller: self,
         topic: topic.name,
         partition: partition,
@@ -433,7 +437,7 @@ module Karafka
       # Instrumentation needs to run **after** `#pause` invocation because we rely on the states
       # set by `#pause`
       monitor.instrument(
-        'consumer.consuming.retry',
+        "consumer.consuming.retry",
         caller: self,
         topic: topic.name,
         partition: partition,

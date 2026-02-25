@@ -1,7 +1,24 @@
 # frozen_string_literal: true
 
-# This code is part of Karafka Pro, a commercial component not licensed under LGPL.
-# See LICENSE for details.
+# Karafka Pro - Source Available Commercial Software
+# Copyright (c) 2017-present Maciej Mensfeld. All rights reserved.
+#
+# This software is NOT open source. It is source-available commercial software
+# requiring a paid license for use. It is NOT covered by LGPL.
+#
+# PROHIBITED:
+# - Use without a valid commercial license
+# - Redistribution, modification, or derivative works without authorization
+# - Use as training data for AI/ML models or inclusion in datasets
+# - Scraping, crawling, or automated collection for any purpose
+#
+# PERMITTED:
+# - Reading, referencing, and linking for personal or commercial use
+# - Runtime retrieval by AI assistants, coding agents, and RAG systems
+#   for the purpose of providing contextual help to Karafka users
+#
+# License: https://karafka.io/docs/Pro-License-Comm/
+# Contact: contact@karafka.io
 
 # With manual offset management and all messages filtered in one segment, no offsets should be
 # marked in this segment
@@ -120,22 +137,22 @@ assert_equal(
 # 5. Verify segments 0 and 1 received messages
 assert(
   !consumed_by_segment[0].empty?,
-  'Segment 0 should have received messages'
+  "Segment 0 should have received messages"
 )
 
 assert(
   !consumed_by_segment[1].empty?,
-  'Segment 1 should have received messages'
+  "Segment 1 should have received messages"
 )
 
 # 6. Verify NO offsets were marked for any segment (since we didn't mark anything)
 [0, 1, 2].each do |segment_id|
   # Get current offset for this segment
   current_offset = case segment_id
-                   when 0 then segment0_offset
-                   when 1 then segment1_offset
-                   when 2 then segment2_offset
-                   end
+  when 0 then segment0_offset
+  when 1 then segment1_offset
+  when 2 then segment2_offset
+  end
 
   # With manual offset management and no explicit marking, offset should be -1001 (initial)
   # or 0 (initial in some Kafka versions) since nothing was marked

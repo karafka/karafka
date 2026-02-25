@@ -16,7 +16,7 @@ draw_routes(Consumer)
 
 10.times do
   sleep(0.1)
-  produce(DT.topic, '')
+  produce(DT.topic, "")
 end
 
 start_karafka_and_wait_until do

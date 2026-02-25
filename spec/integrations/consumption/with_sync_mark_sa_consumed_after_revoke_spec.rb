@@ -4,8 +4,8 @@
 # gracefully while running `mark_as_consumed!`.
 
 setup_karafka(allow_errors: %w[connection.client.poll.error]) do |config|
-  config.kafka[:'max.poll.interval.ms'] = 10_000
-  config.kafka[:'session.timeout.ms'] = 10_000
+  config.kafka[:"max.poll.interval.ms"] = 10_000
+  config.kafka[:"session.timeout.ms"] = 10_000
   config.max_messages = 20
 end
 

@@ -6,14 +6,14 @@
 # For any reason, especially affected is MSK during rolling updates.
 
 setup_karafka(allow_errors: true) do |config|
-  config.kafka[:'allow.auto.create.topics'] = false
+  config.kafka[:"allow.auto.create.topics"] = false
 end
 
-Karafka.monitor.subscribe('error.occurred') do |event|
+Karafka.monitor.subscribe("error.occurred") do |event|
   next unless event[:error].is_a?(Rdkafka::RdkafkaError)
   next unless event[:error].code == :unknown_partition
 
-  Process.kill('TERM', Process.pid)
+  Process.kill("TERM", Process.pid)
 end
 
 class Consumer < Karafka::BaseConsumer

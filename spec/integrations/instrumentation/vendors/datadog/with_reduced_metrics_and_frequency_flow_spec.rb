@@ -2,8 +2,8 @@
 
 # We should be able to sub-class and limit the operational cost of DD listener if needed
 
-require 'karafka/instrumentation/vendors/datadog/metrics_listener'
-require Karafka.gem_root.join('spec/support/vendors/datadog/statsd_dummy_client')
+require "karafka/instrumentation/vendors/datadog/metrics_listener"
+require Karafka.gem_root.join("spec/support/vendors/datadog/statsd_dummy_client")
 
 # We allow errors to raise one to make sure things are published as expected
 setup_karafka(allow_errors: true)
@@ -47,10 +47,10 @@ listener = OptimizedDatadogListener.new do |config|
   ref = OptimizedDatadogListener
 
   config.rd_kafka_metrics = [
-    ref::RdKafkaMetric.new(:count, :root, 'messages.consumed', 'rxmsgs_d'),
-    ref::RdKafkaMetric.new(:count, :root, 'messages.consumed.bytes', 'rxmsg_bytes'),
-    ref::RdKafkaMetric.new(:gauge, :topics, 'consumer.lags', 'consumer_lag_stored'),
-    ref::RdKafkaMetric.new(:gauge, :topics, 'consumer.lags_delta', 'consumer_lag_stored_d')
+    ref::RdKafkaMetric.new(:count, :root, "messages.consumed", "rxmsgs_d"),
+    ref::RdKafkaMetric.new(:count, :root, "messages.consumed.bytes", "rxmsg_bytes"),
+    ref::RdKafkaMetric.new(:gauge, :topics, "consumer.lags", "consumer_lag_stored"),
+    ref::RdKafkaMetric.new(:gauge, :topics, "consumer.lags_delta", "consumer_lag_stored_d")
   ]
 end
 
@@ -76,12 +76,12 @@ end
   assert_equal true, statsd_dummy.buffer[:count].key?(count_key), "#{count_key} missing"
 end
 
-error_tracks = statsd_dummy.buffer[:count]['karafka.error_occurred']
+error_tracks = statsd_dummy.buffer[:count]["karafka.error_occurred"]
 
 # Expect to have one error report from te consumption
 assert_equal 1, error_tracks.size
 assert_equal 1, error_tracks[0][0]
-assert_equal true, error_tracks[0][1][:tags].include?('type:consumer.consume.error')
+assert_equal true, error_tracks[0][1][:tags].include?("type:consumer.consume.error")
 
 %w[
   karafka.consumer.lags

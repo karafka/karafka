@@ -26,7 +26,7 @@ long_name_failed = false
 
 begin
   # Kafka topic names have a limit (249 characters)
-  very_long_topic_name = 'a' * 300
+  very_long_topic_name = "a" * 300
 
   draw_routes(create_topics: false) do
     subscription_group do
@@ -47,7 +47,7 @@ begin
   draw_routes(create_topics: false) do
     subscription_group do
       # Topic names with characters not allowed in Kafka
-      topic 'topic with spaces' do
+      topic "topic with spaces" do
         consumer Class.new
       end
     end
@@ -63,7 +63,7 @@ empty_name_failed = false
 begin
   draw_routes(create_topics: false) do
     subscription_group do
-      topic '' do # Empty topic name
+      topic "" do # Empty topic name
         consumer Class.new
       end
     end
@@ -75,5 +75,5 @@ end
 # We expect at least some of these edge cases to fail
 assert(
   malformed_failed || long_name_failed || invalid_chars_failed || empty_name_failed,
-  'At least one invalid topic name should have failed validation'
+  "At least one invalid topic name should have failed validation"
 )

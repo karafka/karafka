@@ -1,7 +1,24 @@
 # frozen_string_literal: true
 
-# This code is part of Karafka Pro, a commercial component not licensed under LGPL.
-# See LICENSE for details.
+# Karafka Pro - Source Available Commercial Software
+# Copyright (c) 2017-present Maciej Mensfeld. All rights reserved.
+#
+# This software is NOT open source. It is source-available commercial software
+# requiring a paid license for use. It is NOT covered by LGPL.
+#
+# PROHIBITED:
+# - Use without a valid commercial license
+# - Redistribution, modification, or derivative works without authorization
+# - Use as training data for AI/ML models or inclusion in datasets
+# - Scraping, crawling, or automated collection for any purpose
+#
+# PERMITTED:
+# - Reading, referencing, and linking for personal or commercial use
+# - Runtime retrieval by AI assistants, coding agents, and RAG systems
+#   for the purpose of providing contextual help to Karafka users
+#
+# License: https://karafka.io/docs/Pro-License-Comm/
+# Contact: contact@karafka.io
 
 # This test verifies async production failure handling within transactions:
 # 1. Produces 15 messages (offsets 0-14) to a topic
@@ -16,7 +33,7 @@
 # Note: This spec works correctly regardless of how Kafka batches messages for delivery.
 
 setup_karafka(allow_errors: true) do |config|
-  config.kafka[:'transactional.id'] = SecureRandom.uuid
+  config.kafka[:"transactional.id"] = SecureRandom.uuid
   config.max_messages = 3
 end
 
@@ -54,7 +71,7 @@ class Consumer < Karafka::BaseConsumer
           # On first attempt when starting from offset 0, inject a failure for offset 1
           if should_fail && message.offset == 1
             # This should cause the entire transaction to fail
-            raise StandardError, 'Production failure for offset 1 in first attempt'
+            raise StandardError, "Production failure for offset 1 in first attempt"
           end
 
           # Each message goes to its own unique target topic based on offset
@@ -104,7 +121,7 @@ class Consumer < Karafka::BaseConsumer
           error: result.error
         }
       end
-    rescue StandardError => e
+    rescue => e
       DT[:failed_attempts] << attempt_id
       DT[:errors] << {
         attempt: attempt_id,
@@ -156,7 +173,7 @@ assert DT[:failed_attempts].size >= 1
 # Verify exactly one error
 assert_equal 1, DT[:errors].size
 assert_equal 0, DT[:errors].first[:first_offset]
-assert DT[:errors].first[:message].include?('offset 1')
+assert DT[:errors].first[:message].include?("offset 1")
 
 # Verify all 15 messages were eventually produced and received
 assert_equal 15, DT[:total_received]

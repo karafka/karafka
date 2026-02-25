@@ -1,7 +1,24 @@
 # frozen_string_literal: true
 
-# This code is part of Karafka Pro, a commercial component not licensed under LGPL.
-# See LICENSE for details.
+# Karafka Pro - Source Available Commercial Software
+# Copyright (c) 2017-present Maciej Mensfeld. All rights reserved.
+#
+# This software is NOT open source. It is source-available commercial software
+# requiring a paid license for use. It is NOT covered by LGPL.
+#
+# PROHIBITED:
+# - Use without a valid commercial license
+# - Redistribution, modification, or derivative works without authorization
+# - Use as training data for AI/ML models or inclusion in datasets
+# - Scraping, crawling, or automated collection for any purpose
+#
+# PERMITTED:
+# - Reading, referencing, and linking for personal or commercial use
+# - Runtime retrieval by AI assistants, coding agents, and RAG systems
+#   for the purpose of providing contextual help to Karafka users
+#
+# License: https://karafka.io/docs/Pro-License-Comm/
+# Contact: contact@karafka.io
 
 module Karafka
   module Pro
@@ -22,7 +39,7 @@ module Karafka
               return unless topic_name
 
               # Load zlib only if user enables scheduled messages
-              require 'zlib'
+              require "zlib"
 
               # We set it to 5 so we have enough space to handle more events. All related topics
               # should have same partition count.
@@ -55,8 +72,8 @@ module Karafka
 
                   # This needs to be enabled for the eof to work correctly
                   kafka(
-                    'enable.partition.eof': true,
-                    'auto.offset.reset': 'earliest',
+                    "enable.partition.eof": true,
+                    "auto.offset.reset": "earliest",
                     inherit: true
                   )
                   eofed(true)
@@ -74,13 +91,13 @@ module Karafka
                     partitions: default_partitions,
                     # Will ensure, that after tombstone is present, given scheduled message, that
                     # has been dispatched is removed by Kafka
-                    'cleanup.policy': 'compact',
+                    "cleanup.policy": "compact",
                     # When 10% or more dispatches are done, compact data
-                    'min.cleanable.dirty.ratio': 0.1,
+                    "min.cleanable.dirty.ratio": 0.1,
                     # Frequent segment rotation to support intense compaction
-                    'segment.ms': 3_600_000,
-                    'delete.retention.ms': 3_600_000,
-                    'segment.bytes': 52_428_800
+                    "segment.ms": 3_600_000,
+                    "delete.retention.ms": 3_600_000,
+                    "segment.bytes": 52_428_800
                   )
 
                   # This is the core of execution. Since we dispatch data in time intervals, we
@@ -105,11 +122,11 @@ module Karafka
                   target.scheduled_messages(true)
                   config(
                     partitions: default_partitions,
-                    'cleanup.policy': 'compact',
-                    'min.cleanable.dirty.ratio': 0.1,
-                    'segment.ms': 3_600_000,
-                    'delete.retention.ms': 3_600_000,
-                    'segment.bytes': 52_428_800
+                    "cleanup.policy": "compact",
+                    "min.cleanable.dirty.ratio": 0.1,
+                    "segment.ms": 3_600_000,
+                    "delete.retention.ms": 3_600_000,
+                    "segment.bytes": 52_428_800
                   )
                   deserializers(
                     payload: msg_cfg.deserializers.payload

@@ -1,7 +1,24 @@
 # frozen_string_literal: true
 
-# This code is part of Karafka Pro, a commercial component not licensed under LGPL.
-# See LICENSE for details.
+# Karafka Pro - Source Available Commercial Software
+# Copyright (c) 2017-present Maciej Mensfeld. All rights reserved.
+#
+# This software is NOT open source. It is source-available commercial software
+# requiring a paid license for use. It is NOT covered by LGPL.
+#
+# PROHIBITED:
+# - Use without a valid commercial license
+# - Redistribution, modification, or derivative works without authorization
+# - Use as training data for AI/ML models or inclusion in datasets
+# - Scraping, crawling, or automated collection for any purpose
+#
+# PERMITTED:
+# - Reading, referencing, and linking for personal or commercial use
+# - Runtime retrieval by AI assistants, coding agents, and RAG systems
+#   for the purpose of providing contextual help to Karafka users
+#
+# License: https://karafka.io/docs/Pro-License-Comm/
+# Contact: contact@karafka.io
 
 # This spec verifies that VP strategy works correctly when external libraries monkey-patch
 # the Messages#each method (e.g., for tracing/instrumentation purposes).
@@ -20,13 +37,13 @@ end
 module ExternalEachPatchSimulationVp
   def each(&)
     caller_location = caller_locations(1, 10).find do |loc|
-      loc.path.include?('karafka') && !loc.path.include?('spec')
+      loc.path.include?("karafka") && !loc.path.include?("spec")
     end
 
     DT[:each_calls] << {
       caller: caller_location&.label,
       path: caller_location&.path,
-      from_vp_strategy: caller_location&.path&.include?('strategies/vp')
+      from_vp_strategy: caller_location&.path&.include?("strategies/vp")
     }
 
     super
@@ -59,7 +76,7 @@ start_karafka_and_wait_until do
   DT[:consumed].size >= 20
 end
 
-assert_equal 20, DT[:consumed].uniq.size, 'All messages should be consumed'
+assert_equal 20, DT[:consumed].uniq.size, "All messages should be consumed"
 
 # Verify that #each was NOT called from VP strategy code
 vp_strategy_calls = DT[:each_calls].select { |call| call[:from_vp_strategy] }
@@ -75,4 +92,4 @@ MSG
 
 # Verify that #each WAS called from user code
 user_calls = DT[:each_calls].reject { |call| call[:from_vp_strategy] }
-assert user_calls.any?, 'User code should trigger the patched #each method'
+assert user_calls.any?, "User code should trigger the patched #each method"

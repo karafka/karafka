@@ -12,7 +12,8 @@ end
 class Job < ActiveJob::Base
   queue_as DT.topic
 
-  def perform; end
+  def perform
+  end
 end
 
 failed = false

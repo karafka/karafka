@@ -10,18 +10,19 @@ draw_routes do
   active_job_topic DT.topic
 end
 
-Karafka::App.monitor.subscribe('active_job.consume') do |event|
+Karafka::App.monitor.subscribe("active_job.consume") do |event|
   DT[:consume] << event
 end
 
-Karafka::App.monitor.subscribe('active_job.consumed') do |event|
+Karafka::App.monitor.subscribe("active_job.consumed") do |event|
   DT[:consumed] << event
 end
 
 class Job < ActiveJob::Base
   queue_as DT.topic
 
-  def perform(_number); end
+  def perform(_number)
+  end
 end
 
 2.times { |nr| Job.perform_later(nr) }
@@ -31,16 +32,16 @@ start_karafka_and_wait_until do
 end
 
 DT[:consume].each_with_index do |event, index|
-  assert_equal DT.topic, event[:job]['queue_name']
-  assert_equal [index], event[:job]['arguments']
+  assert_equal DT.topic, event[:job]["queue_name"]
+  assert_equal [index], event[:job]["arguments"]
   assert event[:message].is_a?(Karafka::Messages::Message)
   assert event[:caller].is_a?(Karafka::BaseConsumer)
   assert !event.payload.key?(:time)
 end
 
 DT[:consumed].each_with_index do |event, index|
-  assert_equal DT.topic, event[:job]['queue_name']
-  assert_equal [index], event[:job]['arguments']
+  assert_equal DT.topic, event[:job]["queue_name"]
+  assert_equal [index], event[:job]["arguments"]
   assert event[:message].is_a?(Karafka::Messages::Message)
   assert event[:caller].is_a?(Karafka::BaseConsumer)
   assert event.payload.key?(:time)

@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 FactoryBot.define do
-  factory :messages_metadata, class: 'Karafka::Messages::Metadata' do
+  factory :messages_metadata, class: "Karafka::Messages::Metadata" do
     skip_create
 
     sequence(:topic) { |nr| "topic-from-meta#{nr}" }

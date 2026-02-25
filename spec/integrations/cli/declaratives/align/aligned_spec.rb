@@ -19,8 +19,8 @@ draw_routes(create_topics: false) do
   end
 end
 
-ARGV[0] = 'topics'
-ARGV[1] = 'align'
+ARGV[0] = "topics"
+ARGV[1] = "align"
 
 Karafka::Cli.start
 
@@ -33,18 +33,18 @@ tr1, tr2 = Karafka::Admin::Configs.describe(resources)
 
 tr1.configs.each do |config|
   case config.name
-  when 'retention.ms'
-    assert_equal config.value, '604800000'
-  when 'cleanup.policy'
-    assert_equal config.value, 'delete'
+  when "retention.ms"
+    assert_equal config.value, "604800000"
+  when "cleanup.policy"
+    assert_equal config.value, "delete"
   end
 end
 
 tr2.configs.each do |config|
   case config.name
-  when 'retention.ms'
-    assert_equal config.value, '604800000'
-  when 'cleanup.policy'
-    assert_equal config.value, 'delete'
+  when "retention.ms"
+    assert_equal config.value, "604800000"
+  when "cleanup.policy"
+    assert_equal config.value, "delete"
   end
 end

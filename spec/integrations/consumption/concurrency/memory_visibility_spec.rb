@@ -91,38 +91,38 @@ class MemoryVisibilityConsumer < Karafka::BaseConsumer
       thread_id = Thread.current.object_id
       message_data = JSON.parse(message.raw_payload)
 
-      case message_data['operation']
-      when 'write'
+      case message_data["operation"]
+      when "write"
         # Write data that other threads should be able to see
-        key = message_data['key']
-        value = "#{message_data['value']}_thread_#{thread_id}_time_#{Time.now.to_f}"
+        key = message_data["key"]
+        value = "#{message_data["value"]}_thread_#{thread_id}_time_#{Time.now.to_f}"
         self.class.memory_store.write_data(thread_id, key, value)
 
         # Small delay to allow other threads to potentially read
         sleep(0.001)
 
-      when 'read'
+      when "read"
         # Read data that was written by other threads
-        key = message_data['key']
+        key = message_data["key"]
         read_value = self.class.memory_store.read_data(thread_id, key)
 
         # Verify we can see data written by other threads
-        if read_value && read_value.include?('thread_') &&
-           !read_value.include?("thread_#{thread_id}")
+        if read_value && read_value.include?("thread_") &&
+            !read_value.include?("thread_#{thread_id}")
           DT[:cross_thread_reads] << {
             reader_thread: thread_id,
             read_value: read_value,
-            message_id: message_data['id']
+            message_id: message_data["id"]
           }
         end
 
-      when 'read_all'
+      when "read_all"
         # Read all shared data to test bulk memory visibility
         all_data = self.class.memory_store.read_all_data(thread_id)
 
         # Count how many values were written by different threads
         other_thread_data = all_data.values.select do |val|
-          val.is_a?(String) && val.include?('thread_') && !val.include?("thread_#{thread_id}")
+          val.is_a?(String) && val.include?("thread_") && !val.include?("thread_#{thread_id}")
         end
 
         if other_thread_data.any?
@@ -130,14 +130,14 @@ class MemoryVisibilityConsumer < Karafka::BaseConsumer
             reader_thread: thread_id,
             other_thread_count: other_thread_data.size,
             total_data_count: all_data.size,
-            message_id: message_data['id']
+            message_id: message_data["id"]
           }
         end
 
-      when 'write_read'
+      when "write_read"
         # Combined operation: write then immediately read to test write-read coherence
-        key = message_data['key']
-        write_value = "combined_#{message_data['id']}_#{thread_id}"
+        key = message_data["key"]
+        write_value = "combined_#{message_data["id"]}_#{thread_id}"
 
         self.class.memory_store.write_data(thread_id, key, write_value)
         read_value = self.class.memory_store.read_data(thread_id, key)
@@ -147,7 +147,7 @@ class MemoryVisibilityConsumer < Karafka::BaseConsumer
           DT[:write_read_coherence] << {
             thread_id: thread_id,
             key: key,
-            message_id: message_data['id'],
+            message_id: message_data["id"],
             coherent: true
           }
         else
@@ -158,8 +158,8 @@ class MemoryVisibilityConsumer < Karafka::BaseConsumer
 
       DT[:consumed] << {
         thread_id: thread_id,
-        message_id: message_data['id'],
-        operation: message_data['operation'],
+        message_id: message_data["id"],
+        operation: message_data["operation"],
         processed_at: Time.now.to_f
       }
     end
@@ -186,7 +186,7 @@ memory_visibility_messages = []
 5.times do |i|
   memory_visibility_messages << {
     id: i + 1,
-    operation: 'write',
+    operation: "write",
     key: "shared_key_#{i % 3}",
     value: "initial_value_#{i}"
   }.to_json
@@ -196,7 +196,7 @@ end
 5.times do |i|
   memory_visibility_messages << {
     id: i + 6,
-    operation: 'read',
+    operation: "read",
     key: "shared_key_#{i % 3}"
   }.to_json
 end
@@ -205,7 +205,7 @@ end
 5.times do |i|
   memory_visibility_messages << {
     id: i + 11,
-    operation: 'write_read',
+    operation: "write_read",
     key: "coherence_key_#{i}"
   }.to_json
 end
@@ -214,7 +214,7 @@ end
 5.times do |i|
   memory_visibility_messages << {
     id: i + 16,
-    operation: 'read_all'
+    operation: "read_all"
   }.to_json
 end
 
@@ -222,7 +222,7 @@ end
 5.times do |i|
   memory_visibility_messages << {
     id: i + 21,
-    operation: 'write',
+    operation: "write",
     key: "late_key_#{i}",
     value: "late_value_#{i}"
   }.to_json
@@ -232,7 +232,7 @@ end
 5.times do |i|
   memory_visibility_messages << {
     id: i + 26,
-    operation: 'read',
+    operation: "read",
     key: "late_key_#{i}"
   }.to_json
 end
@@ -247,29 +247,29 @@ end
 # Verify all messages were processed
 assert_equal(
   memory_visibility_messages.size, DT[:consumed].size,
-  'Should process all memory visibility test messages'
+  "Should process all memory visibility test messages"
 )
 
 # Verify no memory coherence errors occurred
-assert DT[:errors].empty?, "Memory coherence errors detected: #{DT[:errors].join(', ')}"
+assert DT[:errors].empty?, "Memory coherence errors detected: #{DT[:errors].join(", ")}"
 
 # Get final memory logs for analysis
 memory_logs = MemoryVisibilityConsumer.memory_logs
 
 # Verify write operations were logged
 writes = memory_logs[:writes]
-assert writes.size >= 10, 'Should have logged write operations'
+assert writes.size >= 10, "Should have logged write operations"
 
 # Verify read operations were logged
 reads = memory_logs[:reads]
-assert reads.size >= 15, 'Should have logged read operations'
+assert reads.size >= 15, "Should have logged read operations"
 
 # Verify write-read coherence
 write_read_coherence = DT[:write_read_coherence] || []
-assert write_read_coherence.size >= 5, 'Should have coherent write-read operations'
+assert write_read_coherence.size >= 5, "Should have coherent write-read operations"
 assert(
   write_read_coherence.all? { |entry| entry[:coherent] },
-  'All write-read operations should be coherent'
+  "All write-read operations should be coherent"
 )
 
 # Verify cross-thread visibility (if multiple threads were used)
@@ -282,7 +282,7 @@ if unique_threads.size > 1
   if bulk_visibility.any?
     assert(
       bulk_visibility.all? { |entry| entry[:other_thread_count] > 0 },
-      'Bulk readers should see data from other threads'
+      "Bulk readers should see data from other threads"
     )
   end
 end
@@ -311,21 +311,21 @@ end
 
 # Verify data integrity in final state
 final_state = memory_logs[:current_state]
-assert final_state.keys.size >= 5, 'Should have accumulated shared data'
+assert final_state.keys.size >= 5, "Should have accumulated shared data"
 
 # Verify all written data maintained integrity
 final_state.each do |key, value|
   assert value.is_a?(String), "All stored values should be strings, got #{value.class} for #{key}"
 
   # Different key types have different value formats
-  if key.start_with?('shared_key_', 'late_key_')
+  if key.start_with?("shared_key_", "late_key_")
     assert(
-      value.include?('thread_'),
+      value.include?("thread_"),
       "Shared/late key values should contain thread info, got '#{value}' for #{key}"
     )
-  elsif key.start_with?('coherence_key_')
+  elsif key.start_with?("coherence_key_")
     assert(
-      value.include?('combined_'),
+      value.include?("combined_"),
       "Coherence key values should contain 'combined_', got '#{value}' for #{key}"
     )
   end
@@ -334,5 +334,5 @@ end
 # The key success criteria: memory visibility handled correctly between threads
 assert_equal(
   memory_visibility_messages.size, DT[:consumed].size,
-  'Should handle memory visibility between processing threads without corruption'
+  "Should handle memory visibility between processing threads without corruption"
 )

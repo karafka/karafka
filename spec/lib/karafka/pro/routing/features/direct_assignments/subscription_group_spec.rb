@@ -1,7 +1,24 @@
 # frozen_string_literal: true
 
-# This code is part of Karafka Pro, a commercial component not licensed under LGPL.
-# See LICENSE for details.
+# Karafka Pro - Source Available Commercial Software
+# Copyright (c) 2017-present Maciej Mensfeld. All rights reserved.
+#
+# This software is NOT open source. It is source-available commercial software
+# requiring a paid license for use. It is NOT covered by LGPL.
+#
+# PROHIBITED:
+# - Use without a valid commercial license
+# - Redistribution, modification, or derivative works without authorization
+# - Use as training data for AI/ML models or inclusion in datasets
+# - Scraping, crawling, or automated collection for any purpose
+#
+# PERMITTED:
+# - Reading, referencing, and linking for personal or commercial use
+# - Runtime retrieval by AI assistants, coding agents, and RAG systems
+#   for the purpose of providing contextual help to Karafka users
+#
+# License: https://karafka.io/docs/Pro-License-Comm/
+# Contact: contact@karafka.io
 
 RSpec.describe_current do
   subject(:subscription_group) { build(:routing_subscription_group) }
@@ -14,7 +31,7 @@ RSpec.describe_current do
         Karafka::Pro::Routing::Features::DirectAssignments::Config,
         active?: false
       ),
-      subscription_name: 'active_topic'
+      subscription_name: "active_topic"
     )
   end
 
@@ -29,7 +46,7 @@ RSpec.describe_current do
         active?: true,
         partitions: [1, 2, 3]
       ),
-      subscription_name: 'direct_topic'
+      subscription_name: "direct_topic"
     )
   end
 
@@ -37,23 +54,23 @@ RSpec.describe_current do
 
   before { allow(subscription_group).to receive(:topics).and_return(topics) }
 
-  describe '#subscriptions' do
-    context 'when there are active topics without direct assignments' do
-      it 'returns an array of subscription names' do
-        expect(subscription_group.subscriptions).to eq(['active_topic'])
+  describe "#subscriptions" do
+    context "when there are active topics without direct assignments" do
+      it "returns an array of subscription names" do
+        expect(subscription_group.subscriptions).to eq(["active_topic"])
       end
     end
 
-    context 'when all active topics have direct assignments' do
+    context "when all active topics have direct assignments" do
       let(:topics) { [direct_assignment_active_topic] }
 
-      it 'returns false indicating no subscriptions' do
+      it "returns false indicating no subscriptions" do
         expect(subscription_group.subscriptions).to be false
       end
     end
   end
 
-  describe '#assignments' do
+  describe "#assignments" do
     let(:consumer) { instance_spy(Karafka::Connection::Proxy) }
     let(:iterator_expander) { instance_spy(Karafka::Pro::Iterator::Expander) }
     let(:tpl_builder) { instance_spy(Karafka::Pro::Iterator::TplBuilder) }
@@ -66,16 +83,16 @@ RSpec.describe_current do
       allow(tpl_builder).to receive(:call).and_return(topic_partition_list)
     end
 
-    context 'when there are active topics with direct assignments' do
-      it 'returns a topic partition list for assignments' do
+    context "when there are active topics with direct assignments" do
+      it "returns a topic partition list for assignments" do
         expect(subscription_group.assignments(consumer)).to eq(topic_partition_list)
       end
     end
 
-    context 'when there are no active topics with direct assignments' do
+    context "when there are no active topics with direct assignments" do
       let(:topics) { [active_topic, inactive_topic] } # No topics with active direct assignments
 
-      it 'returns false indicating no assignments' do
+      it "returns false indicating no assignments" do
         expect(subscription_group.assignments(consumer)).to be false
       end
     end

@@ -1,12 +1,29 @@
 # frozen_string_literal: true
 
-# This code is part of Karafka Pro, a commercial component not licensed under LGPL.
-# See LICENSE for details.
+# Karafka Pro - Source Available Commercial Software
+# Copyright (c) 2017-present Maciej Mensfeld. All rights reserved.
+#
+# This software is NOT open source. It is source-available commercial software
+# requiring a paid license for use. It is NOT covered by LGPL.
+#
+# PROHIBITED:
+# - Use without a valid commercial license
+# - Redistribution, modification, or derivative works without authorization
+# - Use as training data for AI/ML models or inclusion in datasets
+# - Scraping, crawling, or automated collection for any purpose
+#
+# PERMITTED:
+# - Reading, referencing, and linking for personal or commercial use
+# - Runtime retrieval by AI assistants, coding agents, and RAG systems
+#   for the purpose of providing contextual help to Karafka users
+#
+# License: https://karafka.io/docs/Pro-License-Comm/
+# Contact: contact@karafka.io
 
 # Parallel segments should work correctly with dynamically matched topics from patterns
 
 setup_karafka do |config|
-  config.kafka[:'topic.metadata.refresh.interval.ms'] = 2_000
+  config.kafka[:"topic.metadata.refresh.interval.ms"] = 2_000
   config.concurrency = 5
 end
 
@@ -111,13 +128,13 @@ start_karafka_and_wait_until do
 end
 
 # Verify that each segment received messages
-assert !DT[0].empty?, 'Segment 0 should have received messages'
-assert !DT[1].empty?, 'Segment 1 should have received messages'
+assert !DT[0].empty?, "Segment 0 should have received messages"
+assert !DT[1].empty?, "Segment 1 should have received messages"
 
 # Verify that both topics were matched and consumed
 topics = Karafka::App.consumer_groups.first.topics.map(&:name)
-assert topics.include?(@topic1), 'First topic should be matched and added to routing'
-assert topics.include?(@topic2), 'Second topic should be matched and added to routing'
+assert topics.include?(@topic1), "First topic should be matched and added to routing"
+assert topics.include?(@topic2), "Second topic should be matched and added to routing"
 
 # Extract assignments by topic and key
 topic1_assignments = {}
@@ -152,23 +169,23 @@ segment1_topic2 = DT[:assignments].count { |_, segment, topic| segment == 1 && t
 assert_equal(
   topic1_group0_keys.size,
   segment0_topic1,
-  'Segment 0 received wrong number of messages for topic 1'
+  "Segment 0 received wrong number of messages for topic 1"
 )
 
 assert_equal(
   topic1_group1_keys.size,
   segment1_topic1,
-  'Segment 1 received wrong number of messages for topic 1'
+  "Segment 1 received wrong number of messages for topic 1"
 )
 
 assert_equal(
   topic2_group0_keys.size,
   segment0_topic2,
-  'Segment 0 received wrong number of messages for topic 2'
+  "Segment 0 received wrong number of messages for topic 2"
 )
 
 assert_equal(
   topic2_group1_keys.size,
   segment1_topic2,
-  'Segment 1 received wrong number of messages for topic 2'
+  "Segment 1 received wrong number of messages for topic 2"
 )

@@ -1,7 +1,24 @@
 # frozen_string_literal: true
 
-# This code is part of Karafka Pro, a commercial component not licensed under LGPL.
-# See LICENSE for details.
+# Karafka Pro - Source Available Commercial Software
+# Copyright (c) 2017-present Maciej Mensfeld. All rights reserved.
+#
+# This software is NOT open source. It is source-available commercial software
+# requiring a paid license for use. It is NOT covered by LGPL.
+#
+# PROHIBITED:
+# - Use without a valid commercial license
+# - Redistribution, modification, or derivative works without authorization
+# - Use as training data for AI/ML models or inclusion in datasets
+# - Scraping, crawling, or automated collection for any purpose
+#
+# PERMITTED:
+# - Reading, referencing, and linking for personal or commercial use
+# - Runtime retrieval by AI assistants, coding agents, and RAG systems
+#   for the purpose of providing contextual help to Karafka users
+#
+# License: https://karafka.io/docs/Pro-License-Comm/
+# Contact: contact@karafka.io
 
 # After errors, consumers should be able to recover and continue processing in their assigned
 # groups without receiving messages from other groups
@@ -19,9 +36,9 @@ class Consumer < Karafka::BaseConsumer
     messages.each do |message|
       DT[:processed] << [message.key, segment_id, message.raw_payload]
 
-      if segment_id == 0 && message.raw_payload == 'error-trigger' && DT[:error_triggered].empty?
+      if segment_id == 0 && message.raw_payload == "error-trigger" && DT[:error_triggered].empty?
         DT[:error_triggered] << true
-        raise StandardError, 'Simulated error for testing recovery'
+        raise StandardError, "Simulated error for testing recovery"
       end
 
       DT[segment_id] << message.raw_payload
@@ -29,8 +46,8 @@ class Consumer < Karafka::BaseConsumer
   end
 end
 
-Karafka.monitor.subscribe('error.occurred') do |event|
-  next unless event[:type] == 'consumer.consume.error'
+Karafka.monitor.subscribe("error.occurred") do |event|
+  next unless event[:type] == "consumer.consume.error"
 
   DT[:errors] << event[:error]
 end
@@ -79,7 +96,7 @@ error_key = segment0_keys.first
 first_batch << {
   topic: DT.topic,
   key: error_key,
-  payload: 'error-trigger'
+  payload: "error-trigger"
 }
 
 # Add other messages for all segments
@@ -153,15 +170,15 @@ start_karafka_and_wait_until do
   next false unless DT[:errors].any? || DT[:processed].size >= 25
   next false unless DT.key?(:post_trigger)
   next false unless DT[:processed].any? do |_key, segment, payload|
-    segment == 0 && payload.start_with?('second-batch')
+    segment == 0 && payload.start_with?("second-batch")
   end
 
   true
 end
 
 # Verify error occurred
-assert DT[:errors].any?, 'Error should have occurred'
-assert_equal 'Simulated error for testing recovery', DT[:errors].first.message
+assert DT[:errors].any?, "Error should have occurred"
+assert_equal "Simulated error for testing recovery", DT[:errors].first.message
 
 # Group processed messages by segment
 by_segment = Hash.new { |h, k| h[k] = [] }
@@ -198,32 +215,32 @@ end
 
 # Verify segment 0 recovered after error and processed its second batch
 segment0_second_batch = DT[:processed].select do |_key, segment, payload|
-  segment == 0 && payload.start_with?('second-batch')
+  segment == 0 && payload.start_with?("second-batch")
 end
 
 assert(
   !segment0_second_batch.empty?,
-  'Segment 0 should process messages after recovery'
+  "Segment 0 should process messages after recovery"
 )
 
 # Verify other segments processed their messages from both batches
 segment1_first_batch = DT[:processed].select do |_key, segment, payload|
-  segment == 1 && payload.start_with?('first-batch')
+  segment == 1 && payload.start_with?("first-batch")
 end
 
 segment1_second_batch = DT[:processed].select do |_key, segment, payload|
-  segment == 1 && payload.start_with?('second-batch')
+  segment == 1 && payload.start_with?("second-batch")
 end
 
 segment2_first_batch = DT[:processed].select do |_key, segment, payload|
-  segment == 2 && payload.start_with?('first-batch')
+  segment == 2 && payload.start_with?("first-batch")
 end
 
 segment2_second_batch = DT[:processed].select do |_key, segment, payload|
-  segment == 2 && payload.start_with?('second-batch')
+  segment == 2 && payload.start_with?("second-batch")
 end
 
-assert !segment1_first_batch.empty?, 'Segment 1 should process first batch'
-assert !segment1_second_batch.empty?, 'Segment 1 should process second batch'
-assert !segment2_first_batch.empty?, 'Segment 2 should process first batch'
-assert !segment2_second_batch.empty?, 'Segment 2 should process second batch'
+assert !segment1_first_batch.empty?, "Segment 1 should process first batch"
+assert !segment1_second_batch.empty?, "Segment 1 should process second batch"
+assert !segment2_first_batch.empty?, "Segment 2 should process first batch"
+assert !segment2_second_batch.empty?, "Segment 2 should process second batch"

@@ -11,24 +11,24 @@ def names(stats_events)
   stats_events
     .map(&:payload)
     .map { |payload| payload[:statistics] }
-    .map { |statistics| statistics.fetch('name') }
+    .map { |statistics| statistics.fetch("name") }
     .uniq
     .freeze
 end
 
 SuperException = Class.new(Exception)
 
-Karafka::App.monitor.subscribe('connection.listener.before_fetch_loop') do
+Karafka::App.monitor.subscribe("connection.listener.before_fetch_loop") do
   # We sleep to make sure events from clients have time to be published
   sleep 1
 end
 
 # This will force listener to reload client (hacky, but works)
-Karafka::App.monitor.subscribe('connection.listener.fetch_loop.received') do
+Karafka::App.monitor.subscribe("connection.listener.fetch_loop.received") do
   raise SuperException
 end
 
-Karafka::App.monitor.subscribe('statistics.emitted') do |event|
+Karafka::App.monitor.subscribe("statistics.emitted") do |event|
   DT[:stats_events] << event
 end
 
@@ -40,7 +40,7 @@ client_id = Karafka::App.config.client_id
 
 previous_index = 0
 names(DT[:stats_events]).each do |name|
-  current_index = name.split('-').last.to_i
+  current_index = name.split("-").last.to_i
   assert previous_index < current_index
   assert name.start_with?(client_id)
   previous_index = current_index

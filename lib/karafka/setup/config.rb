@@ -26,12 +26,12 @@ module Karafka
         #   terms and conditions
         setting :token, default: false
         # option entity [String] for whom we did issue the license
-        setting :entity, default: ''
+        setting :entity, default: ""
       end
 
       # option client_id [String] kafka client_id - used to uniquely identify given client instance
       #   Used only for logging.
-      setting :client_id, default: 'karafka'
+      setting :client_id, default: "karafka"
       # option logger [Instance] logger that we want to use
       setting :logger, default: Karafka::Instrumentation::Logger.new
       # option monitor [Instance] monitor that we will to use (defaults to Karafka::Monitor)
@@ -41,7 +41,7 @@ module Karafka
       setting :consumer_persistence, default: true
       # option [String] should we start with the earliest possible offset or latest
       # This will set the `auto.offset.reset` value unless present in the kafka scope
-      setting :initial_offset, default: 'earliest'
+      setting :initial_offset, default: "earliest"
       # options max_messages [Integer] how many messages do we want to fetch from Kafka in one go
       setting :max_messages, default: 100
       # option [Integer] number of milliseconds we can wait while fetching data
@@ -71,7 +71,7 @@ module Karafka
       # and/or we work with existing systems where we cannot change topics names.
       setting :strict_topics_namespacing, default: true
       # option [String] default consumer group name for implicit routing
-      setting :group_id, default: 'app'
+      setting :group_id, default: "app"
       # option [Boolean] when set to true, it will validate as part of the routing validation, that
       # all topics and DLQ topics (even not active) have the declarative topics definitions.
       # Really useful when you want to ensure that all topics in routing are managed via
@@ -137,22 +137,22 @@ module Karafka
         # option [Hash] extra changes to the default root kafka settings
         setting :kafka, default: {
           # We want to know when there is no more data not to end up with an endless loop
-          'enable.partition.eof': true,
+          "enable.partition.eof": true,
           # Do not publish statistics from admin as they are not relevant
-          'statistics.interval.ms': 0,
+          "statistics.interval.ms": 0,
           # Fetch at most 5 MBs when using admin
-          'fetch.message.max.bytes': 5 * 1_048_576,
+          "fetch.message.max.bytes": 5 * 1_048_576,
           # Do not commit offset automatically, this prevents offset tracking for operations
           # involving a consumer instance
-          'enable.auto.commit': false,
+          "enable.auto.commit": false,
           # Make sure that topic metadata lookups do not create topics accidentally
-          'allow.auto.create.topics': false,
+          "allow.auto.create.topics": false,
           # Do not store offsets automatically in admin in any way
-          'enable.auto.offset.store': false
+          "enable.auto.offset.store": false
         }
 
         # option [String] default name for the admin consumer group.
-        setting :group_id, default: 'karafka_admin'
+        setting :group_id, default: "karafka_admin"
 
         # option max_wait_time [Integer] We wait only for this amount of time before raising error
         # as we intercept this error and retry after checking that the operation was finished or

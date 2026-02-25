@@ -1,7 +1,24 @@
 # frozen_string_literal: true
 
-# This code is part of Karafka Pro, a commercial component not licensed under LGPL.
-# See LICENSE for details.
+# Karafka Pro - Source Available Commercial Software
+# Copyright (c) 2017-present Maciej Mensfeld. All rights reserved.
+#
+# This software is NOT open source. It is source-available commercial software
+# requiring a paid license for use. It is NOT covered by LGPL.
+#
+# PROHIBITED:
+# - Use without a valid commercial license
+# - Redistribution, modification, or derivative works without authorization
+# - Use as training data for AI/ML models or inclusion in datasets
+# - Scraping, crawling, or automated collection for any purpose
+#
+# PERMITTED:
+# - Reading, referencing, and linking for personal or commercial use
+# - Runtime retrieval by AI assistants, coding agents, and RAG systems
+#   for the purpose of providing contextual help to Karafka users
+#
+# License: https://karafka.io/docs/Pro-License-Comm/
+# Contact: contact@karafka.io
 
 # With automatic offset management, offsets should be marked even when all messages are filtered
 
@@ -89,7 +106,7 @@ segment2_offset = fetch_next_offset(DT.topic, consumer_group_id: segment2_group_
 consumed_by_segment0 = DT[:consumed_messages].select { |m| m[:segment_id] == 0 }
 assert(
   !consumed_by_segment0.empty?,
-  'Segment 0 should have received and processed messages'
+  "Segment 0 should have received and processed messages"
 )
 
 # 4. Verify segments 1 and 2 didn't receive any messages (all filtered)

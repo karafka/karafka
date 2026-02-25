@@ -15,8 +15,8 @@ draw_routes(create_topics: false) do
     active(false)
     config(
       partitions: 1,
-      'retention.ms': 86_500_000,
-      'cleanup.policy': 'delete'
+      "retention.ms": 86_500_000,
+      "cleanup.policy": "delete"
     )
   end
 
@@ -25,14 +25,14 @@ draw_routes(create_topics: false) do
 
     config(
       partitions: 1,
-      'retention.ms': 76_500_000,
-      'cleanup.policy': 'compact,delete'
+      "retention.ms": 76_500_000,
+      "cleanup.policy": "compact,delete"
     )
   end
 end
 
-ARGV[0] = 'topics'
-ARGV[1] = 'align'
+ARGV[0] = "topics"
+ARGV[1] = "align"
 
 Karafka::Cli.start
 
@@ -49,18 +49,18 @@ tr1, tr2 = Karafka::Admin::Configs.describe(resources)
 
 tr1.configs.each do |config|
   case config.name
-  when 'retention.ms'
+  when "retention.ms"
     assert_equal config.value, 86_500_000.to_s
-  when 'cleanup.policy'
-    assert_equal config.value, 'delete'
+  when "cleanup.policy"
+    assert_equal config.value, "delete"
   end
 end
 
 tr2.configs.each do |config|
   case config.name
-  when 'retention.ms'
+  when "retention.ms"
     assert_equal config.value, 76_500_000.to_s
-  when 'cleanup.policy'
-    assert_equal config.value, 'compact,delete'
+  when "cleanup.policy"
+    assert_equal config.value, "compact,delete"
   end
 end

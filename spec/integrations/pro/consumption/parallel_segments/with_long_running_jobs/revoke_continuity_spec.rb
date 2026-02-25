@@ -1,7 +1,24 @@
 # frozen_string_literal: true
 
-# This code is part of Karafka Pro, a commercial component not licensed under LGPL.
-# See LICENSE for details.
+# Karafka Pro - Source Available Commercial Software
+# Copyright (c) 2017-present Maciej Mensfeld. All rights reserved.
+#
+# This software is NOT open source. It is source-available commercial software
+# requiring a paid license for use. It is NOT covered by LGPL.
+#
+# PROHIBITED:
+# - Use without a valid commercial license
+# - Redistribution, modification, or derivative works without authorization
+# - Use as training data for AI/ML models or inclusion in datasets
+# - Scraping, crawling, or automated collection for any purpose
+#
+# PERMITTED:
+# - Reading, referencing, and linking for personal or commercial use
+# - Runtime retrieval by AI assistants, coding agents, and RAG systems
+#   for the purpose of providing contextual help to Karafka users
+#
+# License: https://karafka.io/docs/Pro-License-Comm/
+# Contact: contact@karafka.io
 
 # After partition revocation, reacquired partitions should resume with consistent parallel segment
 # assignment
@@ -9,12 +26,12 @@
 setup_karafka do |config|
   config.concurrency = 5
   config.max_messages = 1
-  config.kafka[:'max.poll.interval.ms'] = 10_000
-  config.kafka[:'session.timeout.ms'] = 10_000
+  config.kafka[:"max.poll.interval.ms"] = 10_000
+  config.kafka[:"session.timeout.ms"] = 10_000
 end
 
 # Subscribe to the revocation notification event
-Karafka.monitor.subscribe('consumer.revoked') do |event|
+Karafka.monitor.subscribe("consumer.revoked") do |event|
   DT[:revoked_events] << event
 end
 
@@ -200,7 +217,7 @@ revocation_detected = !DT[:revoked_called].empty? || !DT[:revoked_events].empty?
 # The logs show revocation happening, so this should pass with either method
 assert(
   revocation_detected,
-  'Revocation was not detected during the test. ' \
+  "Revocation was not detected during the test. " \
   "Revoked called: #{DT[:revoked_called].inspect}, Revoked events: #{DT[:revoked_events].inspect}"
 )
 

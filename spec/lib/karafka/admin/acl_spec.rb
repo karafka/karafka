@@ -4,8 +4,8 @@ RSpec.describe_current do
   let(:resource_type) { :topic }
   let(:resource_name) { "it-#{SecureRandom.uuid}" }
   let(:resource_pattern_type) { :literal }
-  let(:principal) { 'User:*' }
-  let(:host) { '*' }
+  let(:principal) { "User:*" }
+  let(:host) { "*" }
   let(:operation) { :all }
   let(:permission_type) { :any }
   let(:acl) { described_class.new(**defaults) }
@@ -21,26 +21,26 @@ RSpec.describe_current do
     }
   end
 
-  describe '#new' do
-    context 'when trying to create with attribute that cannot be mapped' do
+  describe "#new" do
+    context "when trying to create with attribute that cannot be mapped" do
       let(:resource_type) { :nothing_useful }
 
       it { expect { acl }.to raise_error(Karafka::Errors::UnsupportedCaseError) }
     end
   end
 
-  describe '#create' do
+  describe "#create" do
     subject(:creation) do
       ref = described_class.create(acl)
       sleep(0.3)
       ref
     end
 
-    context 'when creating with invalid arguments' do
+    context "when creating with invalid arguments" do
       it { expect { creation }.to raise_error(Rdkafka::Config::ConfigError, /Invalid/) }
     end
 
-    context 'when creating with valid arguments on topic' do
+    context "when creating with valid arguments on topic" do
       let(:permission_type) { :allow }
 
       it { expect { creation }.not_to raise_error }
@@ -49,7 +49,7 @@ RSpec.describe_current do
       it { expect(creation.last.resource_type).to eq(resource_type) }
     end
 
-    context 'when creating with valid arguments on consumer group' do
+    context "when creating with valid arguments on consumer group" do
       let(:resource_type) { :consumer_group }
       let(:permission_type) { :allow }
 
@@ -59,7 +59,7 @@ RSpec.describe_current do
       it { expect(creation.last.resource_type).to eq(resource_type) }
     end
 
-    context 'when creating with valid arguments on transactional id' do
+    context "when creating with valid arguments on transactional id" do
       let(:resource_type) { :transactional_id }
       let(:permission_type) { :allow }
 
@@ -70,7 +70,7 @@ RSpec.describe_current do
     end
   end
 
-  describe '#delete' do
+  describe "#delete" do
     subject(:deletion) do
       ref = described_class.delete(acl)
       # This is needed as those operations are async
@@ -78,11 +78,11 @@ RSpec.describe_current do
       ref
     end
 
-    context 'when deleting with invalid arguments' do
+    context "when deleting with invalid arguments" do
       it { expect { deletion }.not_to raise_error }
     end
 
-    context 'when deleting with valid acl created on a topic' do
+    context "when deleting with valid acl created on a topic" do
       let(:permission_type) { :allow }
 
       before { described_class.create(acl) }
@@ -94,7 +94,7 @@ RSpec.describe_current do
       it { expect(deletion.size).to eq(1) }
     end
 
-    context 'when deleting with valid acl created on a consumer group' do
+    context "when deleting with valid acl created on a consumer group" do
       let(:resource_type) { :consumer_group }
       let(:permission_type) { :allow }
 
@@ -107,7 +107,7 @@ RSpec.describe_current do
       it { expect(deletion.size).to eq(1) }
     end
 
-    context 'when deleting with valid acl with multiple topic acls existing' do
+    context "when deleting with valid acl with multiple topic acls existing" do
       let(:permission_type) { :any }
 
       let(:acl1) do
@@ -134,7 +134,7 @@ RSpec.describe_current do
       it { expect(deletion.size).to eq(2) }
     end
 
-    context 'when deleting with valid acl created on a transactional id' do
+    context "when deleting with valid acl created on a transactional id" do
       let(:resource_type) { :transactional_id }
       let(:permission_type) { :allow }
 
@@ -147,7 +147,7 @@ RSpec.describe_current do
       it { expect(deletion.size).to eq(1) }
     end
 
-    context 'when deleting with valid acl with multiple transactional id acls existing' do
+    context "when deleting with valid acl with multiple transactional id acls existing" do
       let(:resource_type) { :transactional_id }
       let(:permission_type) { :any }
 
@@ -178,7 +178,7 @@ RSpec.describe_current do
     end
   end
 
-  describe '#describe' do
+  describe "#describe" do
     let(:describing) do
       # We wait before describing because in most of the specs we setup some ACLs and their
       # propagation can take a bit of time
@@ -201,17 +201,17 @@ RSpec.describe_current do
       described_class.new(**config)
     end
 
-    context 'when trying to describe an acl that does not match' do
+    context "when trying to describe an acl that does not match" do
       it { expect(describing).to eq([]) }
     end
 
-    context 'when trying to describe an acl that matches one' do
+    context "when trying to describe an acl that matches one" do
       before { described_class.create(acl1) }
 
       it { expect(describing.size).to eq(1) }
     end
 
-    context 'when trying to describe an acl that matches many' do
+    context "when trying to describe an acl that matches many" do
       before do
         described_class.create(acl1)
         described_class.create(acl2)
@@ -220,7 +220,7 @@ RSpec.describe_current do
       it { expect(describing.size).to eq(2) }
     end
 
-    context 'when trying to describe transactional id acl that matches one' do
+    context "when trying to describe transactional id acl that matches one" do
       let(:resource_type) { :transactional_id }
       let(:acl1) do
         config = defaults.dup
@@ -239,7 +239,7 @@ RSpec.describe_current do
       it { expect(describing.first.resource_name).to eq(resource_name) }
     end
 
-    context 'when trying to describe transactional id acl that matches many' do
+    context "when trying to describe transactional id acl that matches many" do
       let(:resource_type) { :transactional_id }
       let(:acl1) do
         config = defaults.dup
@@ -267,7 +267,7 @@ RSpec.describe_current do
     end
   end
 
-  describe '#all' do
+  describe "#all" do
     subject(:all) do
       # On slow CI first fetch after ACL sync may not be immediately propagated
       # We give it a bit of time to ensure we can sync up most recent full state
@@ -283,7 +283,7 @@ RSpec.describe_current do
     it { expect(all).not_to be_empty }
     it { expect(all.map(&:resource_name)).to include(acl.resource_name) }
 
-    context 'when listing all acls including transactional id' do
+    context "when listing all acls including transactional id" do
       let(:resource_type) { :transactional_id }
       let(:permission_type) { :allow }
 

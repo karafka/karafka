@@ -6,15 +6,15 @@ setup_karafka do |config|
   config.internal.swarm.node_restart_timeout = 1_000
   config.internal.swarm.supervision_interval = 1_000
   # Enhance rebalance time on dead nodes
-  config.kafka[:'max.poll.interval.ms'] = 10_000
-  config.kafka[:'session.timeout.ms'] = 10_000
+  config.kafka[:"max.poll.interval.ms"] = 10_000
+  config.kafka[:"session.timeout.ms"] = 10_000
 end
 
 READER, WRITER = IO.pipe
 
 class Consumer < Karafka::BaseConsumer
   def consume
-    WRITER.puts('1')
+    WRITER.puts("1")
     WRITER.flush
     exit!
   end

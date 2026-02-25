@@ -1,7 +1,24 @@
 # frozen_string_literal: true
 
-# This code is part of Karafka Pro, a commercial component not licensed under LGPL.
-# See LICENSE for details.
+# Karafka Pro - Source Available Commercial Software
+# Copyright (c) 2017-present Maciej Mensfeld. All rights reserved.
+#
+# This software is NOT open source. It is source-available commercial software
+# requiring a paid license for use. It is NOT covered by LGPL.
+#
+# PROHIBITED:
+# - Use without a valid commercial license
+# - Redistribution, modification, or derivative works without authorization
+# - Use as training data for AI/ML models or inclusion in datasets
+# - Scraping, crawling, or automated collection for any purpose
+#
+# PERMITTED:
+# - Reading, referencing, and linking for personal or commercial use
+# - Runtime retrieval by AI assistants, coding agents, and RAG systems
+#   for the purpose of providing contextual help to Karafka users
+#
+# License: https://karafka.io/docs/Pro-License-Comm/
+# Contact: contact@karafka.io
 
 # This spec tests a real-world event filtering scenario where some messages match
 # the target event type and others don't. When batches contain mixed messages:
@@ -30,7 +47,7 @@ class Consumer < Karafka::BaseConsumer
 end
 
 class EventFilter < Karafka::Pro::Processing::Filters::Base
-  TARGET_EVENT = 'order_created'
+  TARGET_EVENT = "order_created"
 
   def apply!(messages)
     initialize_filter_state
@@ -51,7 +68,7 @@ class EventFilter < Karafka::Pro::Processing::Filters::Base
   end
 
   def should_filter_message?(message)
-    event_name = message.payload.dig('event', 'name')
+    event_name = message.payload.dig("event", "name")
     return false if event_name == TARGET_EVENT
 
     @applied = true
@@ -95,9 +112,9 @@ end
 # Produce 100 messages, alternating between target event and other events
 elements = Array.new(100) do |i|
   if i.even?
-    { event: { name: 'user_updated', id: i } }.to_json
+    { event: { name: "user_updated", id: i } }.to_json
   else
-    { event: { name: 'order_created', id: i } }.to_json
+    { event: { name: "order_created", id: i } }.to_json
   end
 end
 
@@ -118,11 +135,11 @@ expected_processed = (0...100).select(&:odd?)
 assert_equal expected_processed, DT[:processed].sort
 
 # Verify we had mixed batches (not all filtered)
-assert !DT[:mixed_batches].empty?, 'Should have batches with mixed messages'
+assert !DT[:mixed_batches].empty?, "Should have batches with mixed messages"
 
 # Verify last message was marked
-assert DT[:marked].any?, 'Should have marked messages'
-assert_equal 99, DT[:marked].last, 'Last marked should be offset 99'
+assert DT[:marked].any?, "Should have marked messages"
+assert_equal 99, DT[:marked].last, "Last marked should be offset 99"
 
 # Verify offset advanced correctly
-assert_equal 100, fetch_next_offset(DT.topic), 'Offset should be at the end'
+assert_equal 100, fetch_next_offset(DT.topic), "Offset should be at the end"

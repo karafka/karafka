@@ -14,14 +14,14 @@ class SafeJsonDeserializer
 
     begin
       parsed = JSON.parse(message.raw_payload)
-      result[:status] = 'valid_json'
+      result[:status] = "valid_json"
       result[:parsed] = parsed
     rescue JSON::ParserError => e
-      result[:status] = 'malformed_json'
+      result[:status] = "malformed_json"
       result[:error_type] = e.class.name
       result[:error_message] = e.message
-    rescue StandardError => e
-      result[:status] = 'other_error'
+    rescue => e
+      result[:status] = "other_error"
       result[:error_type] = e.class.name
     end
 
@@ -62,7 +62,7 @@ malformed_messages = [
   # Unescaped quote
   '{"unescaped": "quote"inside"}',
   # Trailing comma in array
-  '[1,2,3,]',
+  "[1,2,3,]",
   # Missing value
   '{"key": }',
   # Unquoted key
@@ -70,13 +70,13 @@ malformed_messages = [
   # Nested malformed JSON
   '{"nested": {"broken": }',
   # Plain text
-  'not json at all',
+  "not json at all",
   # Empty string
-  '',
+  "",
   # Just opening brace
-  '{',
+  "{",
   # Just closing brace
-  '}',
+  "}",
   # Missing comma
   '{"key": "value" "another": "value"}',
   # Incomplete deep nesting
@@ -97,22 +97,22 @@ end
 assert_equal malformed_messages.size, DT[:consumed].size
 
 # Count different status types
-valid_messages = DT[:consumed].select { |msg| msg[:status] == 'valid_json' }
-malformed_messages_count = DT[:consumed].select { |msg| msg[:status] == 'malformed_json' }
+valid_messages = DT[:consumed].select { |msg| msg[:status] == "valid_json" }
+malformed_messages_count = DT[:consumed].select { |msg| msg[:status] == "malformed_json" }
 
 # Verify at least one message was valid JSON
-assert valid_messages.size >= 1, 'Should process valid JSON successfully'
+assert valid_messages.size >= 1, "Should process valid JSON successfully"
 
 # Verify malformed JSON was detected and handled
-assert malformed_messages_count.size >= 10, 'Should detect multiple malformed JSON messages'
+assert malformed_messages_count.size >= 10, "Should detect multiple malformed JSON messages"
 
 # Verify error details were captured
 error_messages = DT[:consumed].select { |msg| msg[:error_message] }
-assert error_messages.size >= 5, 'Should capture error details for malformed JSON'
+assert error_messages.size >= 5, "Should capture error details for malformed JSON"
 
 # Verify specific error types were caught
 error_types = DT[:consumed].filter_map { |msg| msg[:error_type] }.uniq
-assert error_types.include?('JSON::ParserError'), 'Should catch JSON parsing errors'
+assert error_types.include?("JSON::ParserError"), "Should catch JSON parsing errors"
 
 # The key success criteria: all malformed JSON handled without consumer crashes
 assert_equal malformed_messages.size, DT[:consumed].size
@@ -120,5 +120,5 @@ assert_equal malformed_messages.size, DT[:consumed].size
 # Verify raw payloads are always preserved
 assert(
   DT[:consumed].all? { |msg| msg[:raw].is_a?(String) },
-  'Raw payloads should always be available regardless of JSON validity'
+  "Raw payloads should always be available regardless of JSON validity"
 )

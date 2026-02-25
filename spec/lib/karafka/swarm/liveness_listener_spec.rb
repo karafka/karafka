@@ -14,8 +14,8 @@ RSpec.describe_current do
 
   after { Karafka::App.config.swarm.node = false }
 
-  context 'when statistics are emitted too often' do
-    context 'when node becomes orphaned' do
+  context "when statistics are emitted too often" do
+    context "when node becomes orphaned" do
       let(:orphaned) { [false, true] }
 
       before do
@@ -23,27 +23,27 @@ RSpec.describe_current do
         allow(Kernel).to receive(:exit!)
       end
 
-      it 'expect to do nothing as too often' do
+      it "expect to do nothing as too often" do
         listener.on_statistics_emitted(nil)
         expect(Kernel).not_to have_received(:exit!)
       end
     end
   end
 
-  context 'when statistics are emitted not too often' do
+  context "when statistics are emitted not too often" do
     before { allow(node).to receive(:write) }
 
-    it 'expect to write ok status to the node' do
+    it "expect to write ok status to the node" do
       listener.on_statistics_emitted(nil)
-      expect(node).to have_received(:write).with('0')
+      expect(node).to have_received(:write).with("0")
     end
 
-    context 'when node becomes orphaned' do
+    context "when node becomes orphaned" do
       let(:orphaned) { [true] }
 
       before { allow(Kernel).to receive(:exit!) }
 
-      it 'expect to exit!' do
+      it "expect to exit!" do
         listener.on_statistics_emitted(nil)
         expect(Kernel).to have_received(:exit!).with(3)
       end

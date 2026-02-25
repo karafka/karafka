@@ -28,7 +28,7 @@ module Karafka
         # Creates an alias `to` for the `new` method to enable nice chaining API
         # @return [MultiDelegator] new instance of the multi delegator
         # @see #delegate
-        alias to new
+        alias_method :to, :new
       end
     end
   end

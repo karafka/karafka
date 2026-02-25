@@ -1,7 +1,24 @@
 # frozen_string_literal: true
 
-# This code is part of Karafka Pro, a commercial component not licensed under LGPL.
-# See LICENSE for details.
+# Karafka Pro - Source Available Commercial Software
+# Copyright (c) 2017-present Maciej Mensfeld. All rights reserved.
+#
+# This software is NOT open source. It is source-available commercial software
+# requiring a paid license for use. It is NOT covered by LGPL.
+#
+# PROHIBITED:
+# - Use without a valid commercial license
+# - Redistribution, modification, or derivative works without authorization
+# - Use as training data for AI/ML models or inclusion in datasets
+# - Scraping, crawling, or automated collection for any purpose
+#
+# PERMITTED:
+# - Reading, referencing, and linking for personal or commercial use
+# - Runtime retrieval by AI assistants, coding agents, and RAG systems
+#   for the purpose of providing contextual help to Karafka users
+#
+# License: https://karafka.io/docs/Pro-License-Comm/
+# Contact: contact@karafka.io
 
 module Karafka
   module Pro
@@ -20,12 +37,12 @@ module Karafka
         class Collapse < Base
           # Runs the collapse operation
           def call
-            puts 'Starting parallel segments collapse...'
+            puts "Starting parallel segments collapse..."
 
             segments_count = applicable_groups.size
 
             if segments_count.zero?
-              puts "#{red('No')} consumer groups with parallel segments configuration found"
+              puts "#{red("No")} consumer groups with parallel segments configuration found"
 
               return
             end
@@ -57,7 +74,7 @@ module Karafka
             end
 
             puts
-            puts "Collapse completed #{green('successfully')}!"
+            puts "Collapse completed #{green("successfully")}!"
           end
 
           private
@@ -124,7 +141,7 @@ module Karafka
 
                 puts(
                   "  Inconclusive offsets for #{red(topic_name)}##{red(partition_id)}: " \
-                  "#{parallel_offsets.to_a.join(', ')}"
+                  "#{parallel_offsets.to_a.join(", ")}"
                 )
               end
             end
@@ -133,7 +150,7 @@ module Karafka
 
             raise(
               Karafka::Errors::CommandValidationError,
-              "Parallel segments for #{red(segment_origin)} have #{red('inconclusive')} offsets"
+              "Parallel segments for #{red(segment_origin)} have #{red("inconclusive")} offsets"
             )
           end
 

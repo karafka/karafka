@@ -1,7 +1,24 @@
 # frozen_string_literal: true
 
-# This code is part of Karafka Pro, a commercial component not licensed under LGPL.
-# See LICENSE for details.
+# Karafka Pro - Source Available Commercial Software
+# Copyright (c) 2017-present Maciej Mensfeld. All rights reserved.
+#
+# This software is NOT open source. It is source-available commercial software
+# requiring a paid license for use. It is NOT covered by LGPL.
+#
+# PROHIBITED:
+# - Use without a valid commercial license
+# - Redistribution, modification, or derivative works without authorization
+# - Use as training data for AI/ML models or inclusion in datasets
+# - Scraping, crawling, or automated collection for any purpose
+#
+# PERMITTED:
+# - Reading, referencing, and linking for personal or commercial use
+# - Runtime retrieval by AI assistants, coding agents, and RAG systems
+#   for the purpose of providing contextual help to Karafka users
+#
+# License: https://karafka.io/docs/Pro-License-Comm/
+# Contact: contact@karafka.io
 
 module Karafka
   module Pro
@@ -164,7 +181,7 @@ module Karafka
 
         # @return [Integer] RSS in MB for the current process
         def rss_mb
-          RUBY_PLATFORM.include?('linux') ? rss_mb_linux : rss_mb_macos
+          RUBY_PLATFORM.include?("linux") ? rss_mb_linux : rss_mb_macos
         end
 
         # @return [Integer] RSS in MB for the current process on Linux
@@ -172,7 +189,7 @@ module Karafka
           kb_rss = 0
 
           File.readlines("/proc/#{node.pid}/status").each do |line|
-            next unless line.start_with?('VmRSS:')
+            next unless line.start_with?("VmRSS:")
 
             kb_rss = line.split[1].to_i
             break

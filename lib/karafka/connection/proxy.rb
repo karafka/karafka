@@ -32,7 +32,7 @@ module Karafka
 
       attr_accessor :wrapped
 
-      alias __getobj__ wrapped
+      alias_method :__getobj__, :wrapped
 
       # @param obj [Rdkafka::Consumer, Proxy] rdkafka consumer or consumer wrapped with proxy
       def initialize(obj)

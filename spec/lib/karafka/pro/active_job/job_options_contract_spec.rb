@@ -1,7 +1,24 @@
 # frozen_string_literal: true
 
-# This code is part of Karafka Pro, a commercial component not licensed under LGPL.
-# See LICENSE for details.
+# Karafka Pro - Source Available Commercial Software
+# Copyright (c) 2017-present Maciej Mensfeld. All rights reserved.
+#
+# This software is NOT open source. It is source-available commercial software
+# requiring a paid license for use. It is NOT covered by LGPL.
+#
+# PROHIBITED:
+# - Use without a valid commercial license
+# - Redistribution, modification, or derivative works without authorization
+# - Use as training data for AI/ML models or inclusion in datasets
+# - Scraping, crawling, or automated collection for any purpose
+#
+# PERMITTED:
+# - Reading, referencing, and linking for personal or commercial use
+# - Runtime retrieval by AI assistants, coding agents, and RAG systems
+#   for the purpose of providing contextual help to Karafka users
+#
+# License: https://karafka.io/docs/Pro-License-Comm/
+# Contact: contact@karafka.io
 
 RSpec.describe_current do
   subject(:contract) { described_class.new }
@@ -14,77 +31,77 @@ RSpec.describe_current do
     }
   end
 
-  context 'when config is valid' do
+  context "when config is valid" do
     it { expect(contract.call(config)).to be_success }
   end
 
-  context 'when there is no dispath method' do
+  context "when there is no dispath method" do
     before { config.delete(:dispatch_method) }
 
     it { expect(contract.call(config)).to be_success }
   end
 
-  context 'when there is no producer' do
+  context "when there is no producer" do
     before { config.delete(:producer) }
 
     it { expect(contract.call(config)).to be_success }
   end
 
-  context 'when producer does not respond to callable' do
+  context "when producer does not respond to callable" do
     before { config[:producer] = 1 }
 
     it { expect(contract.call(config)).not_to be_success }
   end
 
-  context 'when there is no partition key type' do
+  context "when there is no partition key type" do
     before { config.delete(:partition_key_type) }
 
     it { expect(contract.call(config)).to be_success }
   end
 
-  context 'when partition key type is :partition itself' do
+  context "when partition key type is :partition itself" do
     before { config[:partition_key_type] = :partition }
 
     it { expect(contract.call(config)).to be_success }
   end
 
-  context 'when partition key type is something unexpected' do
+  context "when partition key type is something unexpected" do
     before { config[:partition_key_type] = rand.to_s }
 
     it { expect(contract.call(config)).not_to be_success }
   end
 
-  context 'when dispatch method is not valid' do
+  context "when dispatch method is not valid" do
     before { config[:dispatch_method] = rand.to_s }
 
     it { expect(contract.call(config)).not_to be_success }
   end
 
-  context 'when there is no dispath many method' do
+  context "when there is no dispath many method" do
     before { config.delete(:dispatch_many_method) }
 
     it { expect(contract.call(config)).to be_success }
   end
 
-  context 'when dispatch many method is not valid' do
+  context "when dispatch many method is not valid" do
     before { config[:dispatch_many_method] = rand.to_s }
 
     it { expect(contract.call(config)).not_to be_success }
   end
 
-  context 'when partitioner is not callable' do
+  context "when partitioner is not callable" do
     before { config[:partitioner] = 1 }
 
     it { expect(contract.call(config)).not_to be_success }
   end
 
-  context 'when partitioner is a proc' do
-    before { config[:partitioner] = -> { '1' } }
+  context "when partitioner is a proc" do
+    before { config[:partitioner] = -> { "1" } }
 
     it { expect(contract.call(config)).to be_success }
   end
 
-  context 'when partitioner is a callable instance' do
+  context "when partitioner is a callable instance" do
     let(:callable) { klass.new }
 
     let(:klass) do
@@ -100,8 +117,8 @@ RSpec.describe_current do
     it { expect(contract.call(config)).to be_success }
   end
 
-  context 'when scheduled_messages_topic is present but invalid' do
-    before { config[:scheduled_messages_topic] = '$%^&*()' }
+  context "when scheduled_messages_topic is present but invalid" do
+    before { config[:scheduled_messages_topic] = "$%^&*()" }
 
     it { expect(contract.call(config)).not_to be_success }
   end

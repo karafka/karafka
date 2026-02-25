@@ -24,11 +24,11 @@ draw_routes(Consumer)
 pause_events = []
 retry_events = []
 
-Karafka::App.monitor.subscribe('consumer.consuming.pause') do |event|
+Karafka::App.monitor.subscribe("consumer.consuming.pause") do |event|
   pause_events << event
 end
 
-Karafka::App.monitor.subscribe('consumer.consuming.retry') do |event|
+Karafka::App.monitor.subscribe("consumer.consuming.retry") do |event|
   retry_events << event
 end
 

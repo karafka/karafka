@@ -12,7 +12,8 @@ class Consumer < Karafka::BaseConsumer
     DT[:messages] = messages
   end
 
-  def consume; end
+  def consume
+  end
 end
 
 draw_routes(Consumer)

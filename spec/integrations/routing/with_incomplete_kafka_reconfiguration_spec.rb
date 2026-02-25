@@ -8,10 +8,10 @@ failed = false
 
 begin
   draw_routes(create_topics: false) do
-    topic 'name1' do
+    topic "name1" do
       active(false)
       # Reconfiguration without inherit like this should fail
-      kafka('enable.partition.eof': true)
+      kafka("enable.partition.eof": true)
     end
   end
 rescue Karafka::Errors::InvalidConfigurationError
@@ -23,9 +23,9 @@ assert failed
 Karafka::App.routes.clear
 
 draw_routes(create_topics: false) do
-  topic 'name2' do
+  topic "name2" do
     active(false)
     # Reconfiguration with inherit like this should not fail
-    kafka('enable.partition.eof': true, inherit: true)
+    kafka("enable.partition.eof": true, inherit: true)
   end
 end

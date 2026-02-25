@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require 'erb'
+require "erb"
 
 module Karafka
   # Karafka framework Cli
@@ -9,7 +9,7 @@ module Karafka
     class Install < Base
       include Helpers::Colorize
 
-      desc 'Installs all required things for Karafka application in current directory'
+      desc "Installs all required things for Karafka application in current directory"
 
       # Directories created by default
       INSTALL_DIRS = %w[
@@ -19,9 +19,9 @@ module Karafka
 
       # Where should we map proper files from templates
       INSTALL_FILES_MAP = {
-        'karafka.rb.erb' => Karafka.boot_file,
-        'application_consumer.rb.erb' => 'app/consumers/application_consumer.rb',
-        'example_consumer.rb.erb' => 'app/consumers/example_consumer.rb'
+        "karafka.rb.erb" => Karafka.boot_file,
+        "application_consumer.rb.erb" => "app/consumers/application_consumer.rb",
+        "example_consumer.rb.erb" => "app/consumers/example_consumer.rb"
       }.freeze
 
       # Initializes the install command
@@ -34,7 +34,7 @@ module Karafka
           )
         ).dependencies
 
-        @rails = dependencies.key?('railties') || dependencies.key?('rails')
+        @rails = dependencies.key?("railties") || dependencies.key?("rails")
       end
 
       # Install all required things for Karafka application in current directory
@@ -44,8 +44,8 @@ module Karafka
         end
 
         puts
-        puts 'Installing Karafka framework...'
-        puts 'Ruby on Rails detected...' if rails?
+        puts "Installing Karafka framework..."
+        puts "Ruby on Rails detected..." if rails?
         puts
 
         INSTALL_FILES_MAP.each do |source, target|
@@ -53,15 +53,15 @@ module Karafka
           FileUtils.mkdir_p File.dirname(pathed_target)
 
           template = File.read(Karafka.core_root.join("templates/#{source}"))
-          render = ERB.new(template, trim_mode: '-').result(binding)
+          render = ERB.new(template, trim_mode: "-").result(binding)
 
           File.write(pathed_target, render)
 
-          puts "#{green('Created')} #{target}"
+          puts "#{green("Created")} #{target}"
         end
 
         puts
-        puts("Installation #{green('completed')}. Have fun!")
+        puts("Installation #{green("completed")}. Have fun!")
         puts
       end
 

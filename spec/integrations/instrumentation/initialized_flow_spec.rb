@@ -10,7 +10,8 @@ class OkConsumer < Karafka::BaseConsumer
     DT[:ok] = true
   end
 
-  def consume; end
+  def consume
+  end
 end
 
 class NotOkConsumer < Karafka::BaseConsumer
@@ -20,18 +21,19 @@ class NotOkConsumer < Karafka::BaseConsumer
     raise
   end
 
-  def consume; end
+  def consume
+  end
 end
 
-Karafka::App.monitor.subscribe('consumer.initialize') do |event|
+Karafka::App.monitor.subscribe("consumer.initialize") do |event|
   DT[:pre] << event[:caller].class
 end
 
-Karafka::App.monitor.subscribe('consumer.initialized') do |event|
+Karafka::App.monitor.subscribe("consumer.initialized") do |event|
   DT[:post] << event[:caller].class
 end
 
-Karafka::App.monitor.subscribe('error.occurred') do |event|
+Karafka::App.monitor.subscribe("error.occurred") do |event|
   DT[:errors] << event[:type]
 end
 

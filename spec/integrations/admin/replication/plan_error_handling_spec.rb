@@ -5,7 +5,8 @@
 setup_karafka
 
 class ReplicationErrorConsumer < Karafka::BaseConsumer
-  def consume; end
+  def consume
+  end
 end
 
 draw_routes(ReplicationErrorConsumer)
@@ -39,10 +40,10 @@ rescue Karafka::Errors::InvalidConfigurationError => e
   DT[:same_rf_message] = e.message
 end
 
-assert DT[:same_rf_error], 'Should raise error when target RF equals current RF'
+assert DT[:same_rf_error], "Should raise error when target RF equals current RF"
 assert(
-  DT[:same_rf_message].include?('must be higher than current'),
-  'Error message should explain the issue'
+  DT[:same_rf_message].include?("must be higher than current"),
+  "Error message should explain the issue"
 )
 
 # Test 2: RF exceeding broker count should fail
@@ -60,26 +61,26 @@ end
 
 assert(
   DT[:exceeds_brokers_error],
-  'Should raise error when target RF exceeds available brokers'
+  "Should raise error when target RF exceeds available brokers"
 )
 assert(
-  DT[:exceeds_brokers_message].include?('exceed available broker count'),
-  'Error message should explain broker limitation'
+  DT[:exceeds_brokers_message].include?("exceed available broker count"),
+  "Error message should explain broker limitation"
 )
 
 # Test 3: Invalid topic name format (empty string)
 begin
   result = Karafka::Admin::Contracts::Replication.new.call(
-    topic: '',
+    topic: "",
     to: 2
   )
 
   DT[:invalid_topic_error] = !result.success?
-rescue StandardError
+rescue
   DT[:invalid_topic_error] = true
 end
 
-assert DT[:invalid_topic_error], 'Should raise error for empty topic name'
+assert DT[:invalid_topic_error], "Should raise error for empty topic name"
 
 # Test 4: Invalid RF value (zero)
 begin
@@ -89,8 +90,8 @@ begin
   )
 
   DT[:invalid_rf_error] = !result.success?
-rescue StandardError
+rescue
   DT[:invalid_rf_error] = true
 end
 
-assert DT[:invalid_rf_error], 'Should raise error for RF less than 1'
+assert DT[:invalid_rf_error], "Should raise error for RF less than 1"

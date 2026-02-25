@@ -1,7 +1,24 @@
 # frozen_string_literal: true
 
-# This code is part of Karafka Pro, a commercial component not licensed under LGPL.
-# See LICENSE for details.
+# Karafka Pro - Source Available Commercial Software
+# Copyright (c) 2017-present Maciej Mensfeld. All rights reserved.
+#
+# This software is NOT open source. It is source-available commercial software
+# requiring a paid license for use. It is NOT covered by LGPL.
+#
+# PROHIBITED:
+# - Use without a valid commercial license
+# - Redistribution, modification, or derivative works without authorization
+# - Use as training data for AI/ML models or inclusion in datasets
+# - Scraping, crawling, or automated collection for any purpose
+#
+# PERMITTED:
+# - Reading, referencing, and linking for personal or commercial use
+# - Runtime retrieval by AI assistants, coding agents, and RAG systems
+#   for the purpose of providing contextual help to Karafka users
+#
+# License: https://karafka.io/docs/Pro-License-Comm/
+# Contact: contact@karafka.io
 
 # When using Virtual Partitions with balanced distribution, we should ensure that:
 # 1. Messages with the same key are processed together
@@ -54,18 +71,18 @@ end
 2.times do
   Karafka.producer.produce_many_sync(
     [
-      { topic: DT.topic, payload: '1', key: 'a' },
-      { topic: DT.topic, payload: '2', key: 'a' },
-      { topic: DT.topic, payload: '3', key: 'a' },
-      { topic: DT.topic, payload: '4', key: 'a' },
-      { topic: DT.topic, payload: '5', key: 'b' },
-      { topic: DT.topic, payload: '6', key: 'b' },
-      { topic: DT.topic, payload: '7', key: 'b' },
-      { topic: DT.topic, payload: '8', key: 'c' },
-      { topic: DT.topic, payload: '9', key: 'c' },
-      { topic: DT.topic, payload: '10', key: 'd' },
-      { topic: DT.topic, payload: '11', key: 'e' },
-      { topic: DT.topic, payload: '12', key: 'a' }
+      { topic: DT.topic, payload: "1", key: "a" },
+      { topic: DT.topic, payload: "2", key: "a" },
+      { topic: DT.topic, payload: "3", key: "a" },
+      { topic: DT.topic, payload: "4", key: "a" },
+      { topic: DT.topic, payload: "5", key: "b" },
+      { topic: DT.topic, payload: "6", key: "b" },
+      { topic: DT.topic, payload: "7", key: "b" },
+      { topic: DT.topic, payload: "8", key: "c" },
+      { topic: DT.topic, payload: "9", key: "c" },
+      { topic: DT.topic, payload: "10", key: "d" },
+      { topic: DT.topic, payload: "11", key: "e" },
+      { topic: DT.topic, payload: "12", key: "a" }
     ]
   )
 end

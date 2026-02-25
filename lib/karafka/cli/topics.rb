@@ -9,11 +9,11 @@ module Karafka
         kafka_config: %i[kafka]
       )
 
-      desc 'Allows for the topics management'
+      desc "Allows for the topics management"
 
       option(
         :detailed_exitcode,
-        'Exists with 0 when no changes, 1 when error and 2 when changes present or applied',
+        "Exists with 0 when no changes, 1 when error and 2 when changes present or applied",
         TrueClass,
         %w[
           --detailed_exitcode
@@ -33,29 +33,29 @@ module Karafka
       private_constant :NO_CHANGES_EXIT_CODE, :CHANGES_EXIT_CODE, :ERROR_EXIT_CODE
 
       # @param action [String] action we want to take
-      def call(action = 'help')
+      def call(action = "help")
         detailed_exit_code = options.fetch(:detailed_exitcode, false)
 
         command = case action
-                  when 'create'
-                    Topics::Create
-                  when 'delete'
-                    Topics::Delete
-                  when 'reset'
-                    Topics::Reset
-                  when 'repartition'
-                    Topics::Repartition
-                  when 'migrate'
-                    Topics::Migrate
-                  when 'align'
-                    Topics::Align
-                  when 'plan'
-                    Topics::Plan
-                  when 'help'
-                    Topics::Help
-                  else
-                    raise Errors::UnrecognizedCommandError, "Unrecognized topics action: #{action}"
-                  end
+        when "create"
+          Topics::Create
+        when "delete"
+          Topics::Delete
+        when "reset"
+          Topics::Reset
+        when "repartition"
+          Topics::Repartition
+        when "migrate"
+          Topics::Migrate
+        when "align"
+          Topics::Align
+        when "plan"
+          Topics::Plan
+        when "help"
+          Topics::Help
+        else
+          raise Errors::UnrecognizedCommandError, "Unrecognized topics action: #{action}"
+        end
 
         changes = command.new.call
 

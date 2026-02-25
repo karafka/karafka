@@ -1,7 +1,24 @@
 # frozen_string_literal: true
 
-# This code is part of Karafka Pro, a commercial component not licensed under LGPL.
-# See LICENSE for details.
+# Karafka Pro - Source Available Commercial Software
+# Copyright (c) 2017-present Maciej Mensfeld. All rights reserved.
+#
+# This software is NOT open source. It is source-available commercial software
+# requiring a paid license for use. It is NOT covered by LGPL.
+#
+# PROHIBITED:
+# - Use without a valid commercial license
+# - Redistribution, modification, or derivative works without authorization
+# - Use as training data for AI/ML models or inclusion in datasets
+# - Scraping, crawling, or automated collection for any purpose
+#
+# PERMITTED:
+# - Reading, referencing, and linking for personal or commercial use
+# - Runtime retrieval by AI assistants, coding agents, and RAG systems
+#   for the purpose of providing contextual help to Karafka users
+#
+# License: https://karafka.io/docs/Pro-License-Comm/
+# Contact: contact@karafka.io
 
 module Karafka
   module Pro
@@ -39,16 +56,16 @@ module Karafka
             # user flow but should mitigate damages by not virtualizing
             begin
               groupings = vps.distributor.call(messages)
-            rescue StandardError => e
+            rescue => e
               # This should not happen. If you are seeing this it means your partitioner code
               # failed and raised an error. We highly recommend mitigating partitioner level errors
               # on the user side because this type of collapse should be considered a last resort
               Karafka.monitor.instrument(
-                'error.occurred',
+                "error.occurred",
                 caller: self,
                 error: e,
                 messages: messages,
-                type: 'virtual_partitions.partitioner.error'
+                type: "virtual_partitions.partitioner.error"
               )
 
               groupings = { 0 => messages }

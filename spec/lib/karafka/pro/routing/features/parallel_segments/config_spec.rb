@@ -1,7 +1,24 @@
 # frozen_string_literal: true
 
-# This code is part of Karafka Pro, a commercial component not licensed under LGPL.
-# See LICENSE for details.
+# Karafka Pro - Source Available Commercial Software
+# Copyright (c) 2017-present Maciej Mensfeld. All rights reserved.
+#
+# This software is NOT open source. It is source-available commercial software
+# requiring a paid license for use. It is NOT covered by LGPL.
+#
+# PROHIBITED:
+# - Use without a valid commercial license
+# - Redistribution, modification, or derivative works without authorization
+# - Use as training data for AI/ML models or inclusion in datasets
+# - Scraping, crawling, or automated collection for any purpose
+#
+# PERMITTED:
+# - Reading, referencing, and linking for personal or commercial use
+# - Runtime retrieval by AI assistants, coding agents, and RAG systems
+#   for the purpose of providing contextual help to Karafka users
+#
+# License: https://karafka.io/docs/Pro-License-Comm/
+# Contact: contact@karafka.io
 
 RSpec.describe_current do
   subject(:config) do
@@ -18,35 +35,35 @@ RSpec.describe_current do
   let(:count) { 5 }
   let(:partitioner) { ->(message) { message.key } }
   let(:reducer) { ->(messages) { messages.last } }
-  let(:merge_key) { 'user_id' }
+  let(:merge_key) { "user_id" }
 
-  describe '#active?' do
-    context 'when active' do
+  describe "#active?" do
+    context "when active" do
       it { expect(config.active?).to be(true) }
     end
 
-    context 'when not active' do
+    context "when not active" do
       let(:active) { false }
 
       it { expect(config.active?).to be(false) }
     end
   end
 
-  describe 'struct attributes' do
-    describe '#count' do
+  describe "struct attributes" do
+    describe "#count" do
       it { expect(config.count).to eq(5) }
     end
 
-    describe '#partitioner' do
+    describe "#partitioner" do
       it { expect(config.partitioner).to be_a(Proc) }
     end
 
-    describe '#reducer' do
+    describe "#reducer" do
       it { expect(config.reducer).to be_a(Proc) }
     end
 
-    describe '#merge_key' do
-      it { expect(config.merge_key).to eq('user_id') }
+    describe "#merge_key" do
+      it { expect(config.merge_key).to eq("user_id") }
     end
   end
 end

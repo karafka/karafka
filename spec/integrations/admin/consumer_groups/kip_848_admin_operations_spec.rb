@@ -28,5 +28,5 @@ assert_equal 10, DT[:consumed].size
 # Verify Admin API read operations work with KIP-848 consumer groups
 lags = Karafka::Admin.read_lags_with_offsets({ DT.consumer_group => [DT.topic] })
 
-assert lags.key?(DT.consumer_group), 'Should be able to read lags for KIP-848 consumer group'
-assert lags[DT.consumer_group].key?(DT.topic), 'Should have topic info in lags'
+assert lags.key?(DT.consumer_group), "Should be able to read lags for KIP-848 consumer group"
+assert lags[DT.consumer_group].key?(DT.topic), "Should have topic info in lags"

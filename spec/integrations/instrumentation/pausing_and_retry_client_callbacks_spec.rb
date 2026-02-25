@@ -18,11 +18,11 @@ draw_routes(Consumer)
 pause_events = []
 resume_events = []
 
-Karafka::App.monitor.subscribe('client.pause') do |event|
+Karafka::App.monitor.subscribe("client.pause") do |event|
   pause_events << event
 end
 
-Karafka::App.monitor.subscribe('client.resume') do |event|
+Karafka::App.monitor.subscribe("client.resume") do |event|
   resume_events << event
 end
 

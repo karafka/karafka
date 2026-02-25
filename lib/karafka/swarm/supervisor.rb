@@ -66,7 +66,7 @@ module Karafka
         process.on_sigquit { stop }
         process.on_sigterm { stop }
         process.on_sigtstp { quiet }
-        process.on_sigttin { signal('TTIN') }
+        process.on_sigttin { signal("TTIN") }
         # Needed to be registered as we want to unlock on child changes
         process.on_sigchld { nil }
         process.on_any_active { unlock }
@@ -87,13 +87,13 @@ module Karafka
       # If anything went wrong during supervision, signal this and die
       # Supervisor is meant to be thin and not cause any issues. If you encounter this case
       # please report it as it should be considered critical
-      rescue StandardError => e
+      rescue => e
         monitor.instrument(
-          'error.occurred',
+          "error.occurred",
           caller: self,
           error: e,
           manager: manager,
-          type: 'swarm.supervisor.error'
+          type: "swarm.supervisor.error"
         )
 
         manager.terminate
@@ -148,11 +148,11 @@ module Karafka
         raise Errors::ForcefulShutdownError
       rescue Errors::ForcefulShutdownError => e
         monitor.instrument(
-          'error.occurred',
+          "error.occurred",
           caller: self,
           error: e,
           manager: manager,
-          type: 'app.stopping.error'
+          type: "app.stopping.error"
         )
 
         # Run forceful kill

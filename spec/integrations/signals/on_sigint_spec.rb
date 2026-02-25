@@ -6,17 +6,18 @@ setup_karafka
 
 class Consumer < Karafka::BaseConsumer
   # Do nothing
-  def consume; end
+  def consume
+  end
 end
 
 draw_routes(Consumer)
 
-produce(DT.topic, '1')
+produce(DT.topic, "1")
 
 Thread.new do
   sleep(5)
 
-  Process.kill('INT', Process.pid)
+  Process.kill("INT", Process.pid)
 end
 
 start_karafka_and_wait_until { false }

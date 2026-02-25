@@ -66,7 +66,7 @@ module Karafka
         else
           raise(
             ArgumentError,
-            "Invalid connection mode: #{new_mode}. Valid modes: #{MODES.join(', ')}"
+            "Invalid connection mode: #{new_mode}. Valid modes: #{MODES.join(", ")}"
           )
         end
       end

@@ -11,8 +11,8 @@ setup_karafka do |config|
   config.max_messages = 2
   config.concurrency = 2
   # We set those values high so only the first topic is consumed as long as it lags
-  config.kafka[:'fetch.message.max.bytes'] = 262_144 * 100
-  config.kafka[:'queued.max.messages.kbytes'] = 2_097_151
+  config.kafka[:"fetch.message.max.bytes"] = 262_144 * 100
+  config.kafka[:"queued.max.messages.kbytes"] = 2_097_151
 end
 
 class Consumer < Karafka::BaseConsumer
@@ -24,15 +24,15 @@ class Consumer < Karafka::BaseConsumer
   end
 end
 
-produce_many(DT.topics[0], Array.new(20) { '1' })
-produce_many(DT.topics[1], Array.new(10) { '1' })
+produce_many(DT.topics[0], Array.new(20) { "1" })
+produce_many(DT.topics[1], Array.new(10) { "1" })
 
-Karafka::App.monitor.subscribe('statistics.emitted') do |event|
-  event.payload[:statistics]['topics'].each do |topic_name, topic_values|
-    topic_values['partitions'].each do |partition_name, partition_values|
-      next if partition_name == '-1'
+Karafka::App.monitor.subscribe("statistics.emitted") do |event|
+  event.payload[:statistics]["topics"].each do |topic_name, topic_values|
+    topic_values["partitions"].each do |partition_name, partition_values|
+      next if partition_name == "-1"
 
-      lag = partition_values['consumer_lag']
+      lag = partition_values["consumer_lag"]
 
       next if lag == -1
 
@@ -43,7 +43,7 @@ Karafka::App.monitor.subscribe('statistics.emitted') do |event|
 end
 
 draw_routes(create_topics: false) do
-  subscription_group '1' do
+  subscription_group "1" do
     topic DT.topics[0] do
       consumer Consumer
     end
@@ -73,7 +73,7 @@ continuous = true
 # We check here, that we actually consume only one topic data and the moment we encounter the
 # second one, the first one should be already done.
 DT[:overall].each do |point|
-  topic, lag = point.split('/')
+  topic, lag = point.split("/")
 
   unless previous
     previous = topic

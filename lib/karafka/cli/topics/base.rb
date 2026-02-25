@@ -23,7 +23,7 @@ module Karafka
 
           yield
         rescue Rdkafka::RdkafkaError => e
-          puts "#{operation_message} #{red('failed')}:"
+          puts "#{operation_message} #{red("failed")}:"
           puts e
 
           raise Errors::CommandValidationError, cause: e
@@ -37,14 +37,14 @@ module Karafka
           return @declaratives_routing_topics if @declaratives_routing_topics
 
           collected_topics = {}
-          default_servers = kafka_config[:'bootstrap.servers']
+          default_servers = kafka_config[:"bootstrap.servers"]
 
           App.consumer_groups.each do |consumer_group|
             consumer_group.topics.each do |topic|
               # Skip topics that were explicitly disabled from management
               next unless topic.declaratives.active?
               # If bootstrap servers are different, consider this a different cluster
-              next unless default_servers == topic.kafka[:'bootstrap.servers']
+              next unless default_servers == topic.kafka[:"bootstrap.servers"]
 
               collected_topics[topic.name] ||= topic
             end
@@ -68,11 +68,11 @@ module Karafka
         # for Kafka to actually propagate new topics knowledge across the cluster. We give it that
         # bit of time just in case.
         def wait
-          print 'Waiting for the topics to synchronize in the cluster'
+          print "Waiting for the topics to synchronize in the cluster"
 
           5.times do
             sleep(1)
-            print '.'
+            print "."
           end
 
           puts

@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-source 'https://rubygems.org'
+source "https://rubygems.org"
 
 gemspec
 
@@ -8,22 +8,21 @@ gemspec
 # They are added here because they are part of the integration suite
 # Since some of those are only needed for some specs, they should never be required automatically
 group :integrations, :test do
-  gem 'fugit', require: false
-  gem 'rspec', require: false
-  gem 'stringio'
-  gem 'warning'
+  gem "fugit", require: false
+  gem "rspec", require: false
+  gem "stringio"
+  gem "warning"
 end
 
 group :integrations do
-  gem 'activejob', require: false
-  gem 'karafka-testing', '>= 2.5.0', require: false
-  gem 'karafka-web', '>= 0.11.1', require: false
+  gem "activejob", require: false
+  gem "karafka-testing", ">= 2.5.0", require: false
+  gem "karafka-web", ">= 0.11.1", require: false
 end
 
 group :test do
-  gem 'byebug'
-  gem 'factory_bot'
-  gem 'ostruct'
-  gem 'simplecov'
-  gem 'yard-lint', '>= 1.3.0'
+  gem "byebug"
+  gem "factory_bot"
+  gem "ostruct"
+  gem "simplecov"
 end

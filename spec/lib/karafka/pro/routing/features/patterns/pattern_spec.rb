@@ -1,50 +1,67 @@
 # frozen_string_literal: true
 
-# This code is part of Karafka Pro, a commercial component not licensed under LGPL.
-# See LICENSE for details.
+# Karafka Pro - Source Available Commercial Software
+# Copyright (c) 2017-present Maciej Mensfeld. All rights reserved.
+#
+# This software is NOT open source. It is source-available commercial software
+# requiring a paid license for use. It is NOT covered by LGPL.
+#
+# PROHIBITED:
+# - Use without a valid commercial license
+# - Redistribution, modification, or derivative works without authorization
+# - Use as training data for AI/ML models or inclusion in datasets
+# - Scraping, crawling, or automated collection for any purpose
+#
+# PERMITTED:
+# - Reading, referencing, and linking for personal or commercial use
+# - Runtime retrieval by AI assistants, coding agents, and RAG systems
+#   for the purpose of providing contextual help to Karafka users
+#
+# License: https://karafka.io/docs/Pro-License-Comm/
+# Contact: contact@karafka.io
 
 RSpec.describe_current do
   subject(:pattern) { described_class.new(name, regexp, config) }
 
   let(:name) { nil }
   let(:regexp) { /test_/ }
-  let(:config) { proc { 'some_configuration' } }
+  let(:config) { proc { "some_configuration" } }
 
-  describe '#initialize' do
-    it 'expect to assign the provided regexp' do
+  describe "#initialize" do
+    it "expect to assign the provided regexp" do
       expect(pattern.regexp).to eq(regexp)
     end
 
-    it 'expect to generate a name' do
-      expect(pattern.name).to start_with('karafka-pattern-')
+    it "expect to generate a name" do
+      expect(pattern.name).to start_with("karafka-pattern-")
     end
 
-    it 'expect to generate a unique name each time for different regexp' do
+    it "expect to generate a unique name each time for different regexp" do
       another_pattern = described_class.new(nil, /test/, config)
       expect(pattern.name).not_to eq(another_pattern.name)
     end
 
-    context 'when initialized with a selected name' do
+    context "when initialized with a selected name" do
       let(:name) { SecureRandom.uuid }
 
-      it 'expect to use it and not to generate one' do
+      it "expect to use it and not to generate one" do
         expect(pattern.name).to eq(name)
       end
     end
   end
 
-  describe '#to_h' do
-    it 'expect to return a hash representation of the pattern' do
+  describe "#to_h" do
+    it "expect to return a hash representation of the pattern" do
       expect(pattern.to_h).to eq(
         {
           regexp: regexp,
           name: pattern.name,
-          regexp_string: '^test_'
+          regexp_string: "^test_"
         }
       )
     end
 
-    it 'expect to return a frozen hash' do
+    it "expect to return a frozen hash" do
       expect(pattern.to_h).to be_frozen
     end
   end

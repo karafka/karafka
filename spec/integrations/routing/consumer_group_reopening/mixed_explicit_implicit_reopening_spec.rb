@@ -50,13 +50,13 @@ named_group = Karafka::App.routes.find { |cg| cg.name == DT.consumer_groups[1] }
 default_group = Karafka::App.routes.find { |cg| cg.name != DT.consumer_groups[1] }
 
 # Verify default implicit group exists
-raise 'default implicit group should exist' if default_group.nil?
+raise "default implicit group should exist" if default_group.nil?
 
 assert_equal 2, default_group.topics.size
 assert_equal [DT.topics[0], DT.topics[2]].sort, default_group.topics.map(&:name).sort
 
 # Verify named group exists
-raise 'named_group should exist' if named_group.nil?
+raise "named_group should exist" if named_group.nil?
 
 assert_equal 2, named_group.topics.size
 assert_equal [DT.topics[1], DT.topics[3]].sort, named_group.topics.map(&:name).sort

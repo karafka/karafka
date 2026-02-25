@@ -4,15 +4,25 @@ module Karafka
   # Checks the license presence for pro and loads pro components when needed (if any)
   class Licenser
     # Location in the gem where we store the public key
-    PUBLIC_KEY_LOCATION = File.join(Karafka.gem_root, 'certs', 'karafka-pro.pem')
+    PUBLIC_KEY_LOCATION = File.join(Karafka.gem_root, "certs", "karafka-pro.pem")
+
+    # Location of file containing expired/revoked license checksums
+    EXPIRED_CHECKSUMS_LOCATION = File.join(Karafka.gem_root, "certs", "expired.txt")
 
     private_constant :PUBLIC_KEY_LOCATION
 
     class << self
       # Tries to load the license and yields if successful
       def detect
-        # If required, do not require again
-        require('karafka-license') unless const_defined?('::Karafka::License')
+        # If license module is already fully defined, don't touch it
+        # This allows users to define their own License module for testing/custom setups
+        unless license_fully_defined?
+          # Try safe approach first (no code execution)
+          loaded = safe_load_license || fallback_require_license
+
+          # If neither method succeeded, return false
+          return false unless loaded
+        end
 
         yield
 
@@ -26,13 +36,72 @@ module Karafka
       # @param license_config [Karafka::Core::Configurable::Node] config related to the licensing
       def prepare_and_verify(license_config)
         # If license is not loaded, nothing to do
-        return unless const_defined?('::Karafka::License')
+        return unless const_defined?("::Karafka::License")
 
         prepare(license_config)
         verify(license_config)
       end
 
       private
+
+      # Check if License module and required methods are already defined
+      # @return [Boolean]
+      def license_fully_defined?
+        return false unless const_defined?("::Karafka::License")
+
+        # Check if the required methods exist
+        ::Karafka::License.respond_to?(:token) &&
+          ::Karafka::License.respond_to?(:version)
+      end
+
+      # Attempt to safely load license without executing gem code
+      # @return [Boolean] true if successful, false otherwise
+      def safe_load_license
+        # First verify the gem exists and files are accessible
+        spec = Gem::Specification.find_by_name("karafka-license")
+        license_path = File.join(spec.gem_dir, "lib", "license.txt")
+        version_path = File.join(spec.gem_dir, "lib", "version.txt")
+
+        return false unless File.exist?(license_path)
+
+        # Read license data to ensure we can successfully load before removing any constants
+        license_token = File.read(license_path)
+        version_content = File.read(version_path)
+
+        # Only after confirming we have valid data, remove and replace the License constant
+        # This ensures we always use the actual license from the gem, overwriting any stale
+        # or incomplete License module that may have been defined elsewhere
+        ::Karafka.send(:remove_const, :License) if const_defined?("::Karafka::License")
+
+        ::Karafka.const_set(:License, Module.new)
+        ::Karafka::License.define_singleton_method(:token) { license_token }
+        ::Karafka::License.define_singleton_method(:version) { version_content }
+
+        true
+      rescue Gem::MissingSpecError, Errno::ENOENT
+        # Gem not found or files don't exist - don't touch existing License constant
+        false
+      end
+
+      # Fallback to traditional require if safe method fails
+      # @return [Boolean] true if successful, false otherwise
+      def fallback_require_license
+        # First check if we can actually load the gem before removing any constants
+        # Try to find the gem spec to see if it exists
+        begin
+          Gem::Specification.find_by_name("karafka-license")
+        rescue Gem::MissingSpecError
+          return false
+        end
+
+        # Gem exists, so we can safely remove and reload the License constant
+        ::Karafka.send(:remove_const, :License) if const_defined?("::Karafka::License")
+
+        require("karafka-license")
+        true
+      rescue LoadError
+        false
+      end
 
       # @param license_config [Karafka::Core::Configurable::Node] config related to the licensing
       def prepare(license_config)
@@ -45,8 +114,12 @@ module Karafka
         public_key = OpenSSL::PKey::RSA.new(File.read(PUBLIC_KEY_LOCATION))
 
         # We gsub and strip in case someone copy-pasted it as a multi line string
-        formatted_token = license_config.token.strip.delete("\n").delete(' ')
-        decoded_token = formatted_token.unpack1('m') # decode from base64
+        formatted_token = license_config.token.strip.delete("\n").delete(" ")
+
+        # Check if the license has been revoked/expired before attempting decryption
+        raise_expired_license_token(license_config) if expired?(formatted_token)
+
+        decoded_token = formatted_token.unpack1("m") # decode from base64
 
         begin
           data = public_key.public_decrypt(decoded_token)
@@ -56,7 +129,26 @@ module Karafka
 
         details = data ? JSON.parse(data) : raise_invalid_license_token(license_config)
 
-        license_config.entity = details.fetch('entity')
+        license_config.entity = details.fetch("entity")
+      end
+
+      # Checks if the license token has been expired/revoked
+      # @param formatted_token [String] formatted license token
+      # @return [Boolean] true if the license is in the expired list
+      def expired?(formatted_token)
+        token_checksum = Digest::SHA256.hexdigest(formatted_token)
+
+        expired_checksums.include?(token_checksum)
+      end
+
+      # Loads the list of expired license checksums
+      # @return [Set<String>] set of expired license checksums
+      def expired_checksums
+        File
+          .readlines(EXPIRED_CHECKSUMS_LOCATION)
+          .map(&:strip)
+          .reject { |line| line.empty? || line.start_with?("#") }
+          .to_set
       end
 
       # Raises an error with info, that used token is invalid
@@ -67,8 +159,23 @@ module Karafka
 
         raise(
           Errors::InvalidLicenseTokenError,
-          <<~MSG.tr("\n", ' ')
+          <<~MSG.tr("\n", " ")
             License key you provided is invalid.
+            Please reach us at contact@karafka.io or visit https://karafka.io to obtain a valid one.
+          MSG
+        )
+      end
+
+      # Raises an error with info, that used token has expired or been revoked
+      # @param license_config [Karafka::Core::Configurable::Node]
+      def raise_expired_license_token(license_config)
+        # We set it to false so `Karafka.pro?` method behaves as expected
+        license_config.token = false
+
+        raise(
+          Errors::ExpiredLicenseTokenError,
+          <<~MSG.tr("\n", " ")
+            License key you provided has expired or been revoked.
             Please reach us at contact@karafka.io or visit https://karafka.io to obtain a valid one.
           MSG
         )

@@ -3,7 +3,7 @@
 # We use the same initialization and control flow for benchmarks as for specs, that's why we
 # require it that way
 
-require_relative 'integrations_helper'
+require_relative "integrations_helper"
 
 # We set stdout to sync so all the messages from the benchmarks are visible immediately
 $stdout.sync = true
@@ -12,9 +12,9 @@ $stdout.sync = true
 def setup_karafka
   Karafka::App.setup do |config|
     # Use some decent defaults
-    caller_id = [caller_locations(1..1).first.path.split('/').last, SecureRandom.hex(6)].join('-')
+    caller_id = [caller_locations(1..1).first.path.split("/").last, SecureRandom.hex(6)].join("-")
 
-    config.kafka = { 'bootstrap.servers': '127.0.0.1:9092' }
+    config.kafka = { "bootstrap.servers": "127.0.0.1:9092" }
     config.client_id = caller_id
     config.pause_timeout = 1
     config.pause_max_timeout = 1
@@ -50,7 +50,7 @@ end
 
 # @return [String] valid pro license token that we use in the integration tests
 def pro_license_token
-  ENV.fetch('KARAFKA_PRO_LICENSE_TOKEN')
+  ENV.fetch("KARAFKA_PRO_LICENSE_TOKEN")
 end
 
 # Time extensions

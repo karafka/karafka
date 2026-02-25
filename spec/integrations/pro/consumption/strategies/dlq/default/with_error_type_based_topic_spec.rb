@@ -1,7 +1,24 @@
 # frozen_string_literal: true
 
-# This code is part of Karafka Pro, a commercial component not licensed under LGPL.
-# See LICENSE for details.
+# Karafka Pro - Source Available Commercial Software
+# Copyright (c) 2017-present Maciej Mensfeld. All rights reserved.
+#
+# This software is NOT open source. It is source-available commercial software
+# requiring a paid license for use. It is NOT covered by LGPL.
+#
+# PROHIBITED:
+# - Use without a valid commercial license
+# - Redistribution, modification, or derivative works without authorization
+# - Use as training data for AI/ML models or inclusion in datasets
+# - Scraping, crawling, or automated collection for any purpose
+#
+# PERMITTED:
+# - Reading, referencing, and linking for personal or commercial use
+# - Runtime retrieval by AI assistants, coding agents, and RAG systems
+#   for the purpose of providing contextual help to Karafka users
+#
+# License: https://karafka.io/docs/Pro-License-Comm/
+# Contact: contact@karafka.io
 
 # When using a complex dispatch strategy based on error type, it should operate as expected.
 # Please keep in mind, this spec does not care about the fact, that during recovery different
@@ -41,10 +58,10 @@ class DqlErrorStrategy
       :skip
     # On this specific recoverable retry at most 2 times
     when RecoverableError
-      attempt > 2 ? [:dispatch, DT.topics[2]] : :retry
+      (attempt > 2) ? [:dispatch, DT.topics[2]] : :retry
     else
       # And for any other errors, retry 5 times
-      attempt > 5 ? [:dispatch, DT.topics[3]] : :retry
+      (attempt > 5) ? [:dispatch, DT.topics[3]] : :retry
     end
   end
 end
@@ -95,7 +112,7 @@ end
 
 start_karafka_and_wait_until do
   4.times do |i|
-    produce(DT.topic, '', partition: i)
+    produce(DT.topic, "", partition: i)
   end
 
   sleep(0.1)

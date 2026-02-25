@@ -96,7 +96,7 @@ module Karafka
         @messages_array
       end
 
-      alias count size
+      alias_method :count, :size
     end
   end
 end

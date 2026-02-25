@@ -23,7 +23,7 @@ class Consumer < Karafka::BaseConsumer
       [
         Karafka.producer.config.max_payload_size.to_s,
         Karafka.producer.id
-      ].join('/')
+      ].join("/")
     )
   end
 end
@@ -33,11 +33,11 @@ draw_routes(Consumer)
 produce_many(DT.topic, DT.uuids(1))
 
 start_karafka_and_wait_until(mode: :swarm) do
-  max_payload_size, producer_id = READER.gets.strip.split('/')
+  max_payload_size, producer_id = READER.gets.strip.split("/")
 
   DT[:max_payload_size] = max_payload_size
   DT[:producer_id] = producer_id
 end
 
-assert_equal DT[:max_payload_size], '10999'
+assert_equal DT[:max_payload_size], "10999"
 assert PRODUCER.id != DT[:producer_id]

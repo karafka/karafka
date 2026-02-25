@@ -5,9 +5,9 @@ RSpec.describe_current do
 
   specify { expect(described_class).to be < Karafka::Cli::Base }
 
-  describe '#call' do
+  describe "#call" do
     let(:helps) do
-      <<~HELP.split("\n").flat_map { |str| str.split('#') }.map(&:strip)
+      <<~HELP.split("\n").flat_map { |str| str.split("#") }.map(&:strip)
         Karafka commands:
           console    # Starts the Karafka console (short-cut alias: "c")
           help       # Describes available commands
@@ -20,7 +20,7 @@ RSpec.describe_current do
 
     let(:tmp_stdout) { StringIO.new }
 
-    it 'expect to print details of this Karafka app instance' do
+    it "expect to print details of this Karafka app instance" do
       original_stdout = $stdout
       $stdout = tmp_stdout
       help_cli.call
@@ -30,7 +30,7 @@ RSpec.describe_current do
     end
   end
 
-  describe '#names' do
+  describe "#names" do
     it { expect(help_cli.class.names).to eq %w[help] }
   end
 end

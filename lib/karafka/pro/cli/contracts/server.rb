@@ -1,7 +1,24 @@
 # frozen_string_literal: true
 
-# This code is part of Karafka Pro, a commercial component not licensed under LGPL.
-# See LICENSE for details.
+# Karafka Pro - Source Available Commercial Software
+# Copyright (c) 2017-present Maciej Mensfeld. All rights reserved.
+#
+# This software is NOT open source. It is source-available commercial software
+# requiring a paid license for use. It is NOT covered by LGPL.
+#
+# PROHIBITED:
+# - Use without a valid commercial license
+# - Redistribution, modification, or derivative works without authorization
+# - Use as training data for AI/ML models or inclusion in datasets
+# - Scraping, crawling, or automated collection for any purpose
+#
+# PERMITTED:
+# - Reading, referencing, and linking for personal or commercial use
+# - Runtime retrieval by AI assistants, coding agents, and RAG systems
+#   for the purpose of providing contextual help to Karafka users
+#
+# License: https://karafka.io/docs/Pro-License-Comm/
+# Contact: contact@karafka.io
 
 module Karafka
   module Pro
@@ -13,8 +30,8 @@ module Karafka
         class Server < Karafka::Cli::Contracts::Server
           configure do |config|
             config.error_messages = YAML.safe_load_file(
-              File.join(Karafka.gem_root, 'config', 'locales', 'errors.yml')
-            ).fetch('en').fetch('validations').fetch('cli').fetch('server')
+              File.join(Karafka.gem_root, "config", "locales", "errors.yml")
+            ).fetch("en").fetch("validations").fetch("cli").fetch("server")
           end
 
           %i[
@@ -49,10 +66,10 @@ module Karafka
               next if value.empty?
 
               subscription_groups = Karafka::App
-                                    .consumer_groups
-                                    .map(&:subscription_groups)
-                                    .flatten
-                                    .map(&:name)
+                .consumer_groups
+                .map(&:subscription_groups)
+                .flatten
+                .map(&:name)
 
               next if (value - subscription_groups).empty?
 
@@ -70,12 +87,12 @@ module Karafka
               next if value.empty?
 
               topics = Karafka::App
-                       .consumer_groups
-                       .map(&:subscription_groups)
-                       .flatten
-                       .map(&:topics)
-                       .map { |gtopics| gtopics.map(&:name) }
-                       .flatten
+                .consumer_groups
+                .map(&:subscription_groups)
+                .flatten
+                .map(&:topics)
+                .map { |gtopics| gtopics.map(&:name) }
+                .flatten
 
               next if (value - topics).empty?
 

@@ -11,7 +11,7 @@ module Karafka
         def call
           # If no changes at all, just print and stop
           if topics_to_create.empty? && topics_to_repartition.empty? && topics_to_alter.empty?
-            puts "Karafka will #{yellow('not')} perform any actions. No changes needed."
+            puts "Karafka will #{yellow("not")} perform any actions. No changes needed."
 
             return false
           end
@@ -20,15 +20,15 @@ module Karafka
 
           unless topics_to_create.empty?
             changes = true
-            puts 'Following topics will be created:'
+            puts "Following topics will be created:"
             puts
 
             topics_to_create.each do |topic|
-              puts "  #{green('+')} #{topic.name}:"
-              puts "    #{green('+')} partitions: \"#{topic.declaratives.partitions}\""
+              puts "  #{green("+")} #{topic.name}:"
+              puts "    #{green("+")} partitions: \"#{topic.declaratives.partitions}\""
 
               topic.declaratives.details.each do |name, value|
-                puts "    #{green('+')} #{name}: \"#{value}\""
+                puts "    #{green("+")} #{name}: \"#{value}\""
               end
 
               puts
@@ -52,22 +52,22 @@ module Karafka
 
             unless upscale.empty?
               changes = true
-              puts 'Following topics will be repartitioned:'
+              puts "Following topics will be repartitioned:"
               puts
 
               upscale.each do |topic, partitions|
                 from = partitions
                 to = topic.declaratives.partitions
-                y = yellow('~')
+                y = yellow("~")
                 puts "  #{y} #{topic.name}:"
-                puts "    #{y} partitions: \"#{red(from)}\" #{grey('=>')} \"#{green(to)}\""
+                puts "    #{y} partitions: \"#{red(from)}\" #{grey("=>")} \"#{green(to)}\""
                 puts
               end
             end
 
             unless downscale.empty?
               puts(
-                'Following topics repartitioning will be ignored as downscaling is not supported:'
+                "Following topics repartitioning will be ignored as downscaling is not supported:"
               )
               puts
 
@@ -75,8 +75,8 @@ module Karafka
                 from = partitions
                 to = topic.declaratives.partitions
 
-                puts "  #{grey('~')} #{topic.name}:"
-                puts "    #{grey('~')} partitions: \"#{grey(from)}\" #{grey('=>')} \"#{grey(to)}\""
+                puts "  #{grey("~")} #{topic.name}:"
+                puts "    #{grey("~")} partitions: \"#{grey(from)}\" #{grey("=>")} \"#{grey(to)}\""
                 puts
               end
             end
@@ -84,18 +84,18 @@ module Karafka
 
           unless topics_to_alter.empty?
             changes = true
-            puts 'Following topics will have configuration changes:'
+            puts "Following topics will have configuration changes:"
             puts
 
             topics_to_alter.each do |topic, configs|
-              puts "  #{yellow('~')} #{topic.name}:"
+              puts "  #{yellow("~")} #{topic.name}:"
 
               configs.each do |name, changes|
                 from = changes.fetch(:from)
                 to = changes.fetch(:to)
                 action = changes.fetch(:action)
-                type = action == :change ? yellow('~') : green('+')
-                puts "    #{type} #{name}: \"#{red(from)}\" #{grey('=>')} \"#{green(to)}\""
+                type = (action == :change) ? yellow("~") : green("+")
+                puts "    #{type} #{name}: \"#{red(from)}\" #{grey("=>")} \"#{green(to)}\""
               end
 
               puts
@@ -174,7 +174,7 @@ module Karafka
               @topics_to_alter[declarative] ||= {}
 
               @topics_to_alter[declarative][declarative_name] ||= {
-                from: '',
+                from: "",
                 to: declarative_value,
                 action: :add
               }

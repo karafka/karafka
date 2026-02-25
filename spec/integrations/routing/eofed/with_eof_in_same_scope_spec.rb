@@ -12,8 +12,8 @@ begin
       consumer Class.new
       eofed true
       kafka(
-        'bootstrap.servers': '127.0.0.1:9092',
-        'enable.partition.eof': true
+        "bootstrap.servers": "127.0.0.1:9092",
+        "enable.partition.eof": true
       )
     end
   end

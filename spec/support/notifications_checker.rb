@@ -5,13 +5,13 @@ module NotificationsChecker
   class << self
     # @return [Array<String>] map of events to methods
     def events_methods
-      Karafka::Instrumentation::Notifications::EVENTS.map { |event| "on_#{event.tr('.', '_')}" }
+      Karafka::Instrumentation::Notifications::EVENTS.map { |event| "on_#{event.tr(".", "_")}" }
     end
 
     # @param object [Object] object that should have `on_*` methods for notifications listening
     # @return [Array<String>] methods that match notifications format
     def object_events_methods(object)
-      object.methods.map(&:to_s).select { |met| met.start_with?('on_') }
+      object.methods.map(&:to_s).select { |met| met.start_with?("on_") }
     end
 
     # @param object [Object] object we want to test

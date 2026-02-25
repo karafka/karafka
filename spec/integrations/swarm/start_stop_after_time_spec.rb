@@ -9,7 +9,7 @@ READER, WRITER = IO.pipe
 
 class Consumer < Karafka::BaseConsumer
   def consume
-    WRITER.puts('1')
+    WRITER.puts("1")
   end
 end
 

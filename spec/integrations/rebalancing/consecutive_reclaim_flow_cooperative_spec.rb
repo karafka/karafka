@@ -6,7 +6,7 @@
 
 setup_karafka do |config|
   config.max_messages = 1_000
-  config.kafka[:'partition.assignment.strategy'] = 'cooperative-sticky'
+  config.kafka[:"partition.assignment.strategy"] = "cooperative-sticky"
 end
 
 DT[:all] = {}
@@ -60,7 +60,7 @@ Thread.new do
   end
 end
 
-consumer = setup_rdkafka_consumer('partition.assignment.strategy': 'cooperative-sticky')
+consumer = setup_rdkafka_consumer("partition.assignment.strategy": "cooperative-sticky")
 
 other = Thread.new do
   loop do

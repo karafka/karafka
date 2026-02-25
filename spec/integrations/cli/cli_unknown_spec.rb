@@ -4,7 +4,7 @@
 
 failed = false
 
-ARGV[0] = 'unknown'
+ARGV[0] = "unknown"
 
 begin
   Karafka::Cli.start

@@ -2,15 +2,16 @@
 
 # Karafka should raise errors for invalid replication factor values
 
-docker_available = system('docker --version > /dev/null 2>&1')
-kafka_container_running = docker_available && system('docker exec kafka1 true > /dev/null 2>&1')
+docker_available = system("docker --version > /dev/null 2>&1")
+kafka_container_running = docker_available && system("docker exec kafka1 true > /dev/null 2>&1")
 
 exit 0 unless docker_available && kafka_container_running
 
 setup_karafka
 
 class Consumer < Karafka::BaseConsumer
-  def consume; end
+  def consume
+  end
 end
 
 draw_routes(Consumer)
@@ -42,12 +43,12 @@ rescue Karafka::Errors::InvalidConfigurationError => e
 end
 
 assert error_raised
-assert error_message.include?('broker') || error_message.include?('exceed')
+assert error_message.include?("broker") || error_message.include?("exceed")
 
 # Test: RF equal to current
 current_topic_info = Karafka::Admin::Topics.info(test_topic)
 current_rf = current_topic_info[:partitions].first[:replica_count] ||
-             current_topic_info[:partitions].first[:replicas]&.size
+  current_topic_info[:partitions].first[:replicas]&.size
 
 error_raised_same_rf = false
 

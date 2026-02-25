@@ -17,8 +17,8 @@ RSpec.describe_current do
     queue.register(job2.group_id)
   end
 
-  describe '#<<' do
-    context 'when queue is closed' do
+  describe "#<<" do
+    context "when queue is closed" do
       before do
         queue.close
         queue << job1
@@ -27,13 +27,13 @@ RSpec.describe_current do
       it { expect(queue.statistics).to eq(enqueued: 0, busy: 0) }
     end
 
-    context 'when the queue is not closed' do
+    context "when the queue is not closed" do
       before { queue << job1 }
 
       it { expect(queue.statistics).to eq(busy: 1, enqueued: 0) }
     end
 
-    context 'when we want to add a job from a group that is in processing' do
+    context "when we want to add a job from a group that is in processing" do
       let(:expected_error) { Karafka::Errors::JobsQueueSynchronizationError }
 
       before { queue << job1 }
@@ -41,13 +41,13 @@ RSpec.describe_current do
       it { expect { queue << job1 }.to raise_error(expected_error) }
     end
 
-    context 'when we want to add a job from a group that is not in processing' do
+    context "when we want to add a job from a group that is not in processing" do
       before { queue << job1 }
 
       it { expect { queue << job2 }.not_to raise_error }
       it { expect(queue.statistics).to eq(busy: 1, enqueued: 0) }
 
-      context 'when all workers are busy' do
+      context "when all workers are busy" do
         before { 10.times { queue << job_n.call } }
 
         it { expect(queue.statistics).to eq(busy: 5, enqueued: 6) }
@@ -55,26 +55,26 @@ RSpec.describe_current do
     end
   end
 
-  describe '#pop' do
+  describe "#pop" do
     before { queue << job1 }
 
     it { expect(queue.pop).to eq(job1) }
     it { expect(queue.statistics).to eq(busy: 1, enqueued: 0) }
   end
 
-  describe '#complete' do
+  describe "#complete" do
     before do
       queue << job1
       queue << job2
     end
 
-    context 'when there is a job in the queue and we mark it as completed' do
+    context "when there is a job in the queue and we mark it as completed" do
       before { queue.complete(queue.pop) }
 
       it { expect(queue.statistics).to eq(busy: 1, enqueued: 0) }
     end
 
-    context 'when there are more jobs than concurrency and we complete' do
+    context "when there are more jobs than concurrency and we complete" do
       before do
         8.times { queue << job_n.call }
 
@@ -85,34 +85,34 @@ RSpec.describe_current do
     end
   end
 
-  describe '#clear' do
+  describe "#clear" do
     before do
       queue << job1
       queue << job2
     end
 
-    it 'expect to clear a given group only' do
+    it "expect to clear a given group only" do
       expect { queue.clear(job1.group_id) }.not_to change(queue, :statistics)
     end
   end
 
-  describe '#close' do
-    context 'when queues are closed already' do
+  describe "#close" do
+    context "when queues are closed already" do
       before { internal_queue.close }
 
       it { expect { queue.close }.not_to raise_error }
 
-      it 'expect not to close internal queue again' do
+      it "expect not to close internal queue again" do
         allow(internal_queue).to receive(:close)
         queue.close
         expect(internal_queue).not_to have_received(:close)
       end
     end
 
-    context 'when queue is not yet closed' do
+    context "when queue is not yet closed" do
       it { expect { queue.close }.not_to raise_error }
 
-      it 'expect close internal queue' do
+      it "expect close internal queue" do
         allow(internal_queue).to receive(:close)
         queue.close
         expect(internal_queue).to have_received(:close)
@@ -122,14 +122,14 @@ RSpec.describe_current do
 
   # Each of those specs would hang forever if something would be wrong, that's why we can easily
   # just run and see if finished. No need for assertions.
-  describe '#wait' do
-    context 'when we do not have to wait' do
-      it 'expect not to pass on the thread execution' do
+  describe "#wait" do
+    context "when we do not have to wait" do
+      it "expect not to pass on the thread execution" do
         queue.wait(job1.group_id)
       end
     end
 
-    context 'when we have to wait for a job' do
+    context "when we have to wait for a job" do
       let(:thread) do
         Thread.new do
           sleep(0.01)
@@ -144,12 +144,12 @@ RSpec.describe_current do
 
       after { thread.join }
 
-      it 'expect to pass until no longer needing to wait' do
+      it "expect to pass until no longer needing to wait" do
         queue.wait(job1.group_id)
       end
     end
 
-    context 'when we have to wait and tick runs' do
+    context "when we have to wait and tick runs" do
       let(:thread1) do
         Thread.new do
           sleep(0.1)
@@ -177,30 +177,30 @@ RSpec.describe_current do
       end
 
       # tick should not allow for wait skipping, it should just trigger a re-check
-      it 'expect not to pass until the queue is actually closed' do
+      it "expect not to pass until the queue is actually closed" do
         before = Time.now.to_f
         queue.wait(job1.group_id)
         expect(Time.now.to_f - before).to be >= 1
       end
     end
 
-    context 'when we have non blocking jobs in the queue only' do
+    context "when we have non blocking jobs in the queue only" do
       before { queue << OpenStruct.new(group_id: 1, id: 1, call: true, non_blocking?: true) }
 
-      it 'expect not to block' do
+      it "expect not to block" do
         queue.wait(job1.group_id)
       end
     end
 
-    context 'when Karafka is stopping and the queue is empty' do
+    context "when Karafka is stopping and the queue is empty" do
       before { allow(Karafka::App).to receive(:stopping?).and_return(true) }
 
-      it 'expect not to wait' do
+      it "expect not to wait" do
         queue.wait(job1.group_id)
       end
     end
 
-    context 'when Karafka is stopping and the queue is not empty' do
+    context "when Karafka is stopping and the queue is not empty" do
       let(:thread) do
         Thread.new do
           sleep(0.01)
@@ -218,34 +218,34 @@ RSpec.describe_current do
         thread.join
       end
 
-      it 'expect to wait' do
+      it "expect to wait" do
         queue.wait(job1.group_id)
       end
     end
 
-    context 'when queue is closed' do
+    context "when queue is closed" do
       before { queue.close }
 
-      it 'expect not to wait' do
+      it "expect not to wait" do
         queue.wait(job1.group_id)
       end
     end
 
-    context 'when there are no jobs of a given group' do
+    context "when there are no jobs of a given group" do
       let(:group_id) { SecureRandom.hex(6) }
 
-      it 'expect not to wait' do
+      it "expect not to wait" do
         queue.wait(group_id)
       end
     end
   end
 
-  describe '#statistics' do
-    context 'when there are no jobs' do
+  describe "#statistics" do
+    context "when there are no jobs" do
       it { expect(queue.statistics).to eq(busy: 0, enqueued: 0) }
     end
 
-    context 'when there are jobs from one group' do
+    context "when there are jobs from one group" do
       let(:job1) { OpenStruct.new(group_id: 1, id: 1, call: true) }
       let(:job2) { OpenStruct.new(group_id: 1, id: 2, call: true) }
 
@@ -257,7 +257,7 @@ RSpec.describe_current do
       it { expect(queue.statistics).to eq(busy: 2, enqueued: 0) }
     end
 
-    context 'when there are jobs from multiple groups' do
+    context "when there are jobs from multiple groups" do
       before do
         queue << job1
         queue << job2
@@ -267,20 +267,20 @@ RSpec.describe_current do
     end
   end
 
-  describe '#empty?' do
+  describe "#empty?" do
     let(:job) { OpenStruct.new(group_id: 1, id: 1, call: true) }
 
-    context 'when there are no jobs at all' do
+    context "when there are no jobs at all" do
       it { expect(queue.empty?(1)).to be(true) }
     end
 
-    context 'when there are jobs from a different subscription group' do
+    context "when there are jobs from a different subscription group" do
       before { queue << job }
 
       it { expect(queue.empty?(2)).to be(true) }
     end
 
-    context 'when there are jobs from our subscription group' do
+    context "when there are jobs from our subscription group" do
       before { queue << job }
 
       it { expect(queue.empty?(job.group_id)).to be(false) }
