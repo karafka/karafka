@@ -16,9 +16,7 @@ Any code change should be submitted as a pull request. The description should ex
 
 ### Code review process
 
-Each pull request must pass all the rspec specs and meet our quality requirements.
-
-To check if everything is as it should be, we use [Coditsu](https://coditsu.io) that combines multiple linters and code analyzers for both code and documentation. Once you're done with your changes, submit a pull request.
+Each pull request must pass all the rspec specs and meet our quality requirements. Once you're done with your changes, submit a pull request.
 
 ### Contributing to Pro components
 
