@@ -3,6 +3,8 @@
 ## 2.5.6 (Unreleased)
 - **[Feature]** Add `karafka topics health` command to check Kafka topics for replication and durability issues, detecting no redundancy (RF=1), zero fault tolerance (RF≤min.insync), and low durability (min.insync=1) configurations with color-coded severity grouping and actionable recommendations (Pro).
 - [Enhancement] Optimize license loading process by reading license files directly from the gem directory instead of requiring the entire gem, reducing initialization overhead and adding support for user-defined License modules.
+- [Change] Migrate Admin `AbstractHandle#wait` calls from deprecated `max_wait_timeout` (seconds) to `max_wait_timeout_ms` (milliseconds) to align with `karafka-rdkafka` `0.24.0`.
+- [Change] Require `karafka-rdkafka` `>=` `0.24.0` to support the new `max_wait_timeout_ms` API.
 
 ## 2.5.5 (2026-01-24)
 - [Feature] Add multi-cluster Admin support via `Karafka::Admin.new(kafka: { ... })` allowing operations against different Kafka clusters while maintaining backward compatibility with existing class-method API.

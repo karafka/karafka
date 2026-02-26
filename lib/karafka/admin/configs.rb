@@ -109,7 +109,7 @@ module Karafka
       # Makes sure that admin is closed afterwards.
       def with_admin_wait
         with_admin do |admin|
-          yield(admin).wait(max_wait_timeout: self.class.max_wait_time)
+          yield(admin).wait(max_wait_timeout_ms: self.class.max_wait_time)
         end
       end
     end
