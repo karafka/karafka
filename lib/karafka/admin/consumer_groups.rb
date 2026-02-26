@@ -276,7 +276,7 @@ module Karafka
       def delete(consumer_group_id)
         with_admin do |admin|
           handler = admin.delete_group(consumer_group_id)
-          handler.wait(max_wait_timeout: max_wait_time_seconds)
+          handler.wait(max_wait_timeout_ms: max_wait_time_ms)
         end
       end
 

@@ -400,10 +400,9 @@ module Karafka
 
     private
 
-    # @return [Integer] number of seconds to wait. `rdkafka` requires this value
-    #   (`max_wait_time`) to be provided in seconds while we define it in ms hence the conversion
-    def max_wait_time_seconds
-      self.class.max_wait_time / 1_000.0
+    # @return [Integer] max wait time in ms
+    def max_wait_time_ms
+      self.class.max_wait_time
     end
 
     # Adds a new callback for given rdkafka instance for oauth token refresh (if needed)
