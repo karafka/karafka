@@ -53,6 +53,16 @@ module Karafka
               super(&)
             end
           end
+
+          # Cleans all messages in the batch
+          #
+          # @param metadata [Boolean] should we also clean metadata alongside the payload for
+          #   each message. `true` by default.
+          #
+          # @note This is a convenience method that calls `clean!` on each message in the batch.
+          def clean!(metadata: true)
+            each { |message| message.clean!(metadata: metadata) }
+          end
         end
       end
     end
