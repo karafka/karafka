@@ -51,6 +51,11 @@ module Karafka
 
                   if coordinator.filtered? && !revoked?
                     handle_post_filtering
+
+                    # handle_post_filtering may pause (throttle) or seek+resume on its own,
+                    # but when the filter action is :skip, the LRJ pause is still active and
+                    # must be lifted explicitly to avoid a permanent partition freeze.
+                    resume if coordinator.filter.action == :skip
                   elsif !revoked? && !coordinator.manual_seek?
                     seek(last_group_message.offset + 1, false, reset_offset: false)
                     resume

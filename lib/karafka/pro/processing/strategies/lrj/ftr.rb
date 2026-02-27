@@ -54,6 +54,11 @@ module Karafka
                   # If still not revoked and was throttled, we need to apply throttling logic
                   if coordinator.filtered? && !revoked?
                     handle_post_filtering
+
+                    # handle_post_filtering may pause (throttle) or seek+resume on its own,
+                    # but when the filter action is :skip, the LRJ pause is still active and
+                    # must be lifted explicitly to avoid a permanent partition freeze.
+                    resume if coordinator.filter.action == :skip
                   elsif !revoked? && !coordinator.manual_seek?
                     # If not revoked and not throttled, we move to where we were suppose to and
                     # resume
