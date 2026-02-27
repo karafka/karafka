@@ -190,7 +190,7 @@ RSpec.describe_current do
       before { coordinator.start(messages) }
 
       it "returns true" do
-        expect(coordinator.active_within?(105)).to be(true)
+        expect(coordinator.active_within?(1_000)).to be(true)
       end
     end
   end

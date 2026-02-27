@@ -51,12 +51,15 @@ module Karafka
 
                   if coordinator.filtered? && !revoked?
                     handle_post_filtering
+
+                    # :seek and :pause are fully handled by handle_post_filtering
+                    # For :skip we still need to resume the LRJ MAX_PAUSE_TIME pause
+                    return unless coordinator.filter.action == :skip
                   elsif !revoked? && !coordinator.manual_seek?
                     seek(last_group_message.offset + 1, false, reset_offset: false)
-                    resume
-                  else
-                    resume
                   end
+
+                  resume
                 else
                   apply_dlq_flow do
                     return resume if revoked?
