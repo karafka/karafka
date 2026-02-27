@@ -52,14 +52,17 @@ module Karafka
                   # If still not revoked and was throttled, we need to apply filtering logic
                   if coordinator.filtered? && !revoked?
                     handle_post_filtering
+
+                    # :seek and :pause are fully handled by handle_post_filtering
+                    # For :skip we still need to resume the LRJ MAX_PAUSE_TIME pause
+                    return unless coordinator.filter.action == :skip
                   elsif !revoked? && !coordinator.manual_seek?
                     # If not revoked and not throttled, we move to where we were suppose to and
                     # resume
                     seek(last_group_message.offset + 1, false, reset_offset: false)
-                    resume
-                  else
-                    resume
                   end
+
+                  resume
                 else
                   # If processing failed, we need to pause
                   # For long running job this will overwrite the default never-ending pause and
