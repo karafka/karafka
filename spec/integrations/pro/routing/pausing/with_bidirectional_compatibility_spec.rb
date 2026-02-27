@@ -51,7 +51,6 @@ end
 
 topics = Karafka::App.routes.first.topics
 
-# ========== Test Topic A: pause() method ==========
 topic_a = topics[0]
 
 # Verify new API works
@@ -66,7 +65,6 @@ assert_equal 1_500, topic_a.pause_timeout
 assert_equal 6_000, topic_a.pause_max_timeout
 assert_equal true, topic_a.pause_with_exponential_backoff
 
-# ========== Test Topic B: old setters ==========
 topic_b = topics[1]
 
 # Verify old accessors work
@@ -83,7 +81,6 @@ assert_equal false, topic_b.pausing.with_exponential_backoff?
 # With old setters, pausing is not explicitly active
 assert_equal false, topic_b.pausing.active?
 
-# ========== Test Topic C: defaults ==========
 topic_c = topics[2]
 
 # Verify defaults through old API
@@ -98,14 +95,12 @@ assert_equal false, topic_c.pausing.with_exponential_backoff
 assert_equal false, topic_c.pausing.with_exponential_backoff?
 assert_equal false, topic_c.pausing.active?
 
-# ========== Test bidirectional updates (Topic A) ==========
 # Calling pause() again should update values and old accessors should reflect it
 topic_a.pause(timeout: 2_000)
 
 assert_equal 2_000, topic_a.pausing.timeout
 assert_equal 2_000, topic_a.pause_timeout # old accessor reflects new value
 
-# ========== Test serialization includes both formats ==========
 topic_a_hash = topic_a.to_h
 
 # Old format (backwards compatibility)

@@ -10,17 +10,14 @@ setup_karafka do |config|
   config.pause.with_exponential_backoff = true
 end
 
-# ========== Test new API returns correct values ==========
 assert_equal 1_500, Karafka::App.config.pause.timeout
 assert_equal 6_000, Karafka::App.config.pause.max_timeout
 assert_equal true, Karafka::App.config.pause.with_exponential_backoff
 
-# ========== Test backwards compatibility - old accessors reflect new config ==========
 assert_equal 1_500, Karafka::App.config.pause_timeout
 assert_equal 6_000, Karafka::App.config.pause_max_timeout
 assert_equal true, Karafka::App.config.pause_with_exponential_backoff
 
-# ========== Test both APIs return the same values ==========
 assert_equal Karafka::App.config.pause.timeout, Karafka::App.config.pause_timeout
 assert_equal Karafka::App.config.pause.max_timeout, Karafka::App.config.pause_max_timeout
 assert_equal(
@@ -28,7 +25,6 @@ assert_equal(
   Karafka::App.config.pause_with_exponential_backoff
 )
 
-# ========== Test updating via old API updates new API ==========
 Karafka::App.config.pause_timeout = 2_000
 assert_equal 2_000, Karafka::App.config.pause.timeout
 assert_equal 2_000, Karafka::App.config.pause_timeout
@@ -41,7 +37,6 @@ Karafka::App.config.pause_with_exponential_backoff = false
 assert_equal false, Karafka::App.config.pause.with_exponential_backoff
 assert_equal false, Karafka::App.config.pause_with_exponential_backoff
 
-# ========== Test updating via new API updates old API ==========
 Karafka::App.config.pause.timeout = 3_000
 assert_equal 3_000, Karafka::App.config.pause_timeout
 assert_equal 3_000, Karafka::App.config.pause.timeout
