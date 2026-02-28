@@ -71,4 +71,4 @@ start_karafka_and_wait_until do
 end
 
 assert_equal DT[:metadata].uniq, %w[test-metadata]
-assert_equal fetch_next_offset, 1
+assert_equal 1, fetch_next_offset

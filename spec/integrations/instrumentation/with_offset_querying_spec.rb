@@ -23,4 +23,4 @@ start_karafka_and_wait_until do
   DT[:offsets].any? { |offsets| offsets.last >= 10 }
 end
 
-assert_equal DT[:offsets].map(&:first).uniq, [0]
+assert_equal [0], DT[:offsets].map(&:first).uniq

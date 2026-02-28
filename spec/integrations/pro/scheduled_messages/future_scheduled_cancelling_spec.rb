@@ -67,4 +67,4 @@ start_karafka_and_wait_until(sleep: 1) do
 end
 
 # Nothing should have been dispatched
-assert_equal Karafka::Admin.read_topic(DT.topics[1], 0, 1), []
+assert_equal [], Karafka::Admin.read_topic(DT.topics[1], 0, 1)

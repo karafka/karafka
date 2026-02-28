@@ -30,4 +30,4 @@ start_karafka_and_wait_until do
   DT.key?(:done)
 end
 
-assert_equal DT[:results].uniq, [true]
+assert_equal [true], DT[:results].uniq

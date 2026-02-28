@@ -32,6 +32,6 @@ start_karafka_and_wait_until do
   DT[0].size >= 1
 end
 
-assert_equal DT[0][0][0], 0
-assert_equal DT[0][0][1], 1
-assert_equal DT[0][0][2], 2
+assert_equal 0, DT[0][0][0]
+assert_equal 1, DT[0][0][1]
+assert_equal 2, DT[0][0][2]

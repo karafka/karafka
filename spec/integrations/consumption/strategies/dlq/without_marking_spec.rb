@@ -40,4 +40,4 @@ start_karafka_and_wait_until do
   DT[:broken].size >= 3
 end
 
-assert_equal fetch_next_offset, 0
+assert_equal 0, fetch_next_offset

@@ -49,10 +49,10 @@ t2 = Karafka::App.consumer_groups.first.topics.last
 
 assert_equal t1.subscription_group, t2.subscription_group
 
-assert_equal t1.pause_timeout, 100
-assert_equal t1.pause_max_timeout, 1_000
-assert_equal t1.pause_with_exponential_backoff, true
+assert_equal 100, t1.pause_timeout
+assert_equal 1_000, t1.pause_max_timeout
+assert_equal true, t1.pause_with_exponential_backoff
 
-assert_equal t2.pause_timeout, 200
-assert_equal t2.pause_max_timeout, 2_000
-assert_equal t2.pause_with_exponential_backoff, false
+assert_equal 200, t2.pause_timeout
+assert_equal 2_000, t2.pause_max_timeout
+assert_equal false, t2.pause_with_exponential_backoff

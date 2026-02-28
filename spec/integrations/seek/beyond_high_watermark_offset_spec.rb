@@ -24,4 +24,4 @@ start_karafka_and_wait_until do
   DT[:runs].size >= 5
 end
 
-assert_equal DT[:runs].uniq, [0]
+assert_equal [0], DT[:runs].uniq

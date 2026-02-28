@@ -84,15 +84,15 @@ assert !results.include?("#{DT.consumer_group}_2")
 # Verify only the first consumer group was distributed
 offsets1_1 = Karafka::Admin.read_lags_with_offsets({ segment1_1 => [DT.topic] })
 offsets1_2 = Karafka::Admin.read_lags_with_offsets({ segment1_2 => [DT.topic] })
-assert_equal offsets1_1[segment1_1][DT.topic][0][:offset], 3
-assert_equal offsets1_1[segment1_1][DT.topic][1][:offset], 5
-assert_equal offsets1_2[segment1_2][DT.topic][0][:offset], 3
-assert_equal offsets1_2[segment1_2][DT.topic][1][:offset], 5
+assert_equal 3, offsets1_1[segment1_1][DT.topic][0][:offset]
+assert_equal 5, offsets1_1[segment1_1][DT.topic][1][:offset]
+assert_equal 3, offsets1_2[segment1_2][DT.topic][0][:offset]
+assert_equal 5, offsets1_2[segment1_2][DT.topic][1][:offset]
 
 # The second group segments should not have any offsets
 offsets2_1 = Karafka::Admin.read_lags_with_offsets({ segment2_1 => ["#{DT.topic}_2"] })
 offsets2_2 = Karafka::Admin.read_lags_with_offsets({ segment2_2 => ["#{DT.topic}_2"] })
-assert_equal offsets2_1[segment2_1]["#{DT.topic}_2"][0][:offset], -1
-assert_equal offsets2_1[segment2_1]["#{DT.topic}_2"][1][:offset], -1
-assert_equal offsets2_2[segment2_2]["#{DT.topic}_2"][0][:offset], -1
-assert_equal offsets2_2[segment2_2]["#{DT.topic}_2"][1][:offset], -1
+assert_equal(-1, offsets2_1[segment2_1]["#{DT.topic}_2"][0][:offset])
+assert_equal(-1, offsets2_1[segment2_1]["#{DT.topic}_2"][1][:offset])
+assert_equal(-1, offsets2_2[segment2_2]["#{DT.topic}_2"][0][:offset])
+assert_equal(-1, offsets2_2[segment2_2]["#{DT.topic}_2"][1][:offset])

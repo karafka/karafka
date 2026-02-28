@@ -61,7 +61,7 @@ iterator.each do |message, internal_iterator|
   partitioned_data[message.topic] << message
 end
 
-assert_equal partitioned_data.size, 2
+assert_equal 2, partitioned_data.size
 
 # All data should be in order for the rest
 partitioned_data.each do |partition, messages|

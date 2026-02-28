@@ -72,5 +72,5 @@ start_karafka_and_wait_until do
   DT[:done].uniq.size >= 10
 end
 
-assert_equal DT[:metadata].last, "second"
-assert_equal fetch_next_offset, 10
+assert_equal "second", DT[:metadata].last
+assert_equal 10, fetch_next_offset

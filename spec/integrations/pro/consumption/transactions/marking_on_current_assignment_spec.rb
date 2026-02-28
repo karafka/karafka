@@ -43,4 +43,4 @@ start_karafka_and_wait_until do
   DT.key?(:marking_result)
 end
 
-assert_equal DT[:marking_result], true
+assert_equal true, DT[:marking_result]

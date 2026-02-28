@@ -49,4 +49,4 @@ start_karafka_and_wait_until do
   DT[:ticks].size >= 3
 end
 
-assert_equal DT[:ticks].uniq, [true]
+assert_equal [true], DT[:ticks].uniq

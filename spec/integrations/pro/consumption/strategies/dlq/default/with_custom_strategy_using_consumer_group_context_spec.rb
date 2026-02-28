@@ -90,4 +90,4 @@ start_karafka_and_wait_until do
   DT[:dlq_topics].size >= 2
 end
 
-assert_equal DT[:dlq_topics].sort, [DT.topics[1], DT.topics[2]].sort
+assert_equal [DT.topics[1], DT.topics[2]].sort, DT[:dlq_topics].sort

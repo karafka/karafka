@@ -67,4 +67,4 @@ start_karafka_and_wait_until do
   DT[0].size >= 24 && DT[1].size >= 5
 end
 
-assert_equal DT[1][0..4], [0, 1, 2, 3, 4]
+assert_equal [0, 1, 2, 3, 4], DT[1][0..4]

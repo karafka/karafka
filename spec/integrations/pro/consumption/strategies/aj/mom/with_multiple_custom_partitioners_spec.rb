@@ -55,10 +55,10 @@ class JobC < JobA
   )
 end
 
-assert_equal Default.karafka_options[:dispatch_method], nil
-assert_equal JobA.karafka_options[:dispatch_method], :produce_sync
-assert_equal JobB.karafka_options[:dispatch_method], :produce_sync
-assert_equal JobC.karafka_options[:dispatch_method], :produce_async
+assert_equal nil, Default.karafka_options[:dispatch_method]
+assert_equal :produce_sync, JobA.karafka_options[:dispatch_method]
+assert_equal :produce_sync, JobB.karafka_options[:dispatch_method]
+assert_equal :produce_async, JobC.karafka_options[:dispatch_method]
 
 assert Default.karafka_options != JobA
 assert Default.karafka_options != JobB

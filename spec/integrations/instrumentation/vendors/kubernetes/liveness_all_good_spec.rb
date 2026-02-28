@@ -58,8 +58,8 @@ assert !DT[:probing].include?("500")
 
 responses = raw_flows.split("\n").select { |line| line.start_with?("->") }
 
-assert_equal responses[0], '-> "HTTP/1.1 200 OK\r\n"', responses[0]
-assert_equal responses[1], '-> "Content-Type: application/json\r\n"', responses[1]
+assert_equal '-> "HTTP/1.1 200 OK\r\n"', responses[0], responses[0]
+assert_equal '-> "Content-Type: application/json\r\n"', responses[1], responses[1]
 
 last = JSON.parse(DT[:bodies].last)
 

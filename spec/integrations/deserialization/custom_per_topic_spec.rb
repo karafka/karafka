@@ -50,10 +50,10 @@ start_karafka_and_wait_until do
     DT[DT.topics[1]].size >= 1
 end
 
-assert_equal DT[DT.topics[0]][0], "m11"
-assert_equal DT[DT.topics[0]][1], "x11"
-assert_equal DT[DT.topics[0]][2][:nested1], { "test" => "1" }
+assert_equal "m11", DT[DT.topics[0]][0]
+assert_equal "x11", DT[DT.topics[0]][1]
+assert_equal({ "test" => "1" }, DT[DT.topics[0]][2][:nested1])
 
-assert_equal DT[DT.topics[1]][0], "m22"
-assert_equal DT[DT.topics[1]][1], "x22"
-assert_equal DT[DT.topics[1]][2][:nested2], { "test" => "2" }
+assert_equal "m22", DT[DT.topics[1]][0]
+assert_equal "x22", DT[DT.topics[1]][1]
+assert_equal({ "test" => "2" }, DT[DT.topics[1]][2][:nested2])

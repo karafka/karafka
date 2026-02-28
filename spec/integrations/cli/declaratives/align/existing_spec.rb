@@ -50,17 +50,17 @@ tr1, tr2 = Karafka::Admin::Configs.describe(resources)
 tr1.configs.each do |config|
   case config.name
   when "retention.ms"
-    assert_equal config.value, 86_500_000.to_s
+    assert_equal 86_500_000.to_s, config.value
   when "cleanup.policy"
-    assert_equal config.value, "delete"
+    assert_equal "delete", config.value
   end
 end
 
 tr2.configs.each do |config|
   case config.name
   when "retention.ms"
-    assert_equal config.value, 76_500_000.to_s
+    assert_equal 76_500_000.to_s, config.value
   when "cleanup.policy"
-    assert_equal config.value, "compact,delete"
+    assert_equal "compact,delete", config.value
   end
 end
