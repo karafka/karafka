@@ -20,8 +20,8 @@
 # License: https://karafka.io/docs/Pro-License-Comm/
 # Contact: contact@karafka.io
 
-# After VP collapses due to errors and then successfully processes, the error tracker should
-# be empty on the next non-collapsed batch, indicating a clean recovery.
+# When VP encounters an error, it collapses and retries in collapsed mode. The errors_tracker
+# should start empty on the initial VP batch and contain errors during collapsed processing.
 
 setup_karafka(allow_errors: %w[consumer.consume.error]) do |config|
   config.concurrency = 10
@@ -69,7 +69,7 @@ start_karafka_and_wait_until do
   DT[:errors_in_collapsed].size >= 1 && DT[:errors_in_vp].size >= 2
 end
 
-# The first VP batch should have had empty errors_tracker
+# The initial VP batch should have had an empty errors_tracker before any error occurred
 assert DT[:errors_in_vp].first.empty?
 # Collapsed batches should contain errors
 assert DT[:errors_in_collapsed].any? { |errors| !errors.empty? }

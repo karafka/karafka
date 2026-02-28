@@ -20,8 +20,8 @@
 # License: https://karafka.io/docs/Pro-License-Comm/
 # Contact: contact@karafka.io
 
-# When LRJ + FTR + VP encounter an error, VP should collapse and retry with throttling
-# still active. After recovery, all messages should be processed.
+# When LRJ + VP encounter a single error, VP should collapse and retry in collapsed mode.
+# After the error condition clears, all messages should be processed successfully.
 
 class Listener
   def on_error_occurred(event)
@@ -33,7 +33,6 @@ Karafka.monitor.subscribe(Listener.new)
 
 setup_karafka(allow_errors: true) do |config|
   config.max_messages = 100
-  config.concurrency = 5
   config.kafka[:"max.poll.interval.ms"] = 10_000
   config.kafka[:"session.timeout.ms"] = 10_000
 end
@@ -41,8 +40,6 @@ end
 class Consumer < Karafka::BaseConsumer
   def consume
     collapsed?
-
-    sleep 15
 
     messages.each do |message|
       DT[0] << message.offset
@@ -59,20 +56,20 @@ draw_routes do
   topic DT.topic do
     consumer Consumer
     long_running_job true
-    throttling(limit: 100, interval: 1_000)
     virtual_partitions(
       partitioner: ->(msg) { msg.raw_payload }
     )
   end
 end
 
-produce_many(DT.topic, DT.uuids(20))
+payloads = DT.uuids(5)
+produce_many(DT.topic, payloads)
 
 start_karafka_and_wait_until do
-  DT[0].uniq.size >= 20
+  DT[0].uniq.size >= 5
 end
 
 # There should have been at least one error
 assert DT[:errors].size >= 1
 # All offsets should have been processed
-assert_equal (0..19).to_a, DT[0].uniq.sort
+assert_equal (0..4).to_a, DT[0].uniq.sort

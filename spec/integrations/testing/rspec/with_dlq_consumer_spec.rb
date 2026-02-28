@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 # We should be able to use the testing library with DLQ-configured topics
-# and verify consumer behavior including error handling with DLQ routing.
+# and verify that normal consumer processing works with DLQ routing configured.
 
 setup_karafka
 setup_testing(:rspec)
@@ -30,7 +30,7 @@ end
 RSpec.describe DlqTestConsumer do
   subject(:consumer) { karafka.consumer_for(DT.topic) }
 
-  it "processes valid messages and raises on invalid ones" do
+  it "processes valid messages with DLQ routing configured" do
     karafka.produce({ id: 1, value: "good" }.to_json)
     karafka.produce({ id: 2, value: "also good" }.to_json)
 

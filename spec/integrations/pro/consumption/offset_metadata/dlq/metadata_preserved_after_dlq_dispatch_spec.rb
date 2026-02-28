@@ -71,3 +71,9 @@ end
 assert_equal 0, DT[:dlq].first
 # Metadata should have been collected across retries and recovery
 assert DT[:metadata].size >= 5
+# First metadata read should be empty (nothing stored yet for this partition)
+assert_equal "", DT[:metadata].first
+# After storing metadata for offset 0, subsequent reads should find it
+assert DT[:metadata].include?("0")
+# The last metadata value should not be empty, confirming continuity across DLQ skip
+assert !DT[:metadata].last.empty?
