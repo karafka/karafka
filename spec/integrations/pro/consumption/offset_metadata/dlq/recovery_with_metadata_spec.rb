@@ -54,4 +54,4 @@ start_karafka_and_wait_until do
   DT[:metadata].size >= 10
 end
 
-assert_equal DT[:metadata][0..9], ["", "", "", 0, 0, 0, 1, 1, 1, 2].map(&:to_s)
+assert_equal ["", "", "", 0, 0, 0, 1, 1, 1, 2].map(&:to_s), DT[:metadata][0..9]

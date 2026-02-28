@@ -56,7 +56,7 @@ assert results.include?("successfully")
 offsets1 = Karafka::Admin.read_lags_with_offsets({ segment1 => [DT.topic] })
 offsets2 = Karafka::Admin.read_lags_with_offsets({ segment2 => [DT.topic] })
 
-assert_equal offsets1[segment1][DT.topic][0][:offset], -1
-assert_equal offsets1[segment1][DT.topic][1][:offset], -1
-assert_equal offsets2[segment2][DT.topic][0][:offset], -1
-assert_equal offsets2[segment2][DT.topic][1][:offset], -1
+assert_equal(-1, offsets1[segment1][DT.topic][0][:offset])
+assert_equal(-1, offsets1[segment1][DT.topic][1][:offset])
+assert_equal(-1, offsets2[segment2][DT.topic][0][:offset])
+assert_equal(-1, offsets2[segment2][DT.topic][1][:offset])

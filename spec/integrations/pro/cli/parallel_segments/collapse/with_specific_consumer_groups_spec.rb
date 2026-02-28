@@ -81,10 +81,10 @@ assert !results.include?("#{DT.consumer_group}_2")
 
 # Verify only the first consumer group was collapsed
 offsets1 = Karafka::Admin.read_lags_with_offsets({ DT.consumer_group => [DT.topic] })
-assert_equal offsets1[DT.consumer_group][DT.topic][0][:offset], 3
-assert_equal offsets1[DT.consumer_group][DT.topic][1][:offset], 5
+assert_equal 3, offsets1[DT.consumer_group][DT.topic][0][:offset]
+assert_equal 5, offsets1[DT.consumer_group][DT.topic][1][:offset]
 
 # The second group should have no offsets in the origin consumer group
 offsets2 = Karafka::Admin.read_lags_with_offsets({ "#{DT.consumer_group}_2" => ["#{DT.topic}_2"] })
-assert_equal offsets2["#{DT.consumer_group}_2"]["#{DT.topic}_2"][0][:offset], -1
-assert_equal offsets2["#{DT.consumer_group}_2"]["#{DT.topic}_2"][1][:offset], -1
+assert_equal(-1, offsets2["#{DT.consumer_group}_2"]["#{DT.topic}_2"][0][:offset])
+assert_equal(-1, offsets2["#{DT.consumer_group}_2"]["#{DT.topic}_2"][1][:offset])

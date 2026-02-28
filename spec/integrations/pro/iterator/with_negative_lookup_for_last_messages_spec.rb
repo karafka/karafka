@@ -49,4 +49,4 @@ iterator.each do |message|
   i += 1
 end
 
-assert_equal i, 20
+assert_equal 20, i

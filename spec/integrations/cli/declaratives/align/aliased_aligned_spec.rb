@@ -40,17 +40,17 @@ tr1, tr2 = Karafka::Admin::Configs.describe(resources)
 tr1.configs.each do |config|
   case config.name
   when "retention.bytes"
-    assert_equal config.value, "-1"
+    assert_equal "-1", config.value
   when "cleanup.policy"
-    assert_equal config.value, "delete"
+    assert_equal "delete", config.value
   end
 end
 
 tr2.configs.each do |config|
   case config.name
   when "retention.bytes"
-    assert_equal config.value, "-1"
+    assert_equal "-1", config.value
   when "cleanup.policy"
-    assert_equal config.value, "delete"
+    assert_equal "delete", config.value
   end
 end

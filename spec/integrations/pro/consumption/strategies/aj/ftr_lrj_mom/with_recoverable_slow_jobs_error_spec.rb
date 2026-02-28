@@ -52,4 +52,4 @@ start_karafka_and_wait_until do
   DT[0].uniq.size >= 50
 end
 
-assert_equal DT[0], [0, 0, 0, 0, 0] + (1..49).to_a
+assert_equal [0, 0, 0, 0, 0] + (1..49).to_a, DT[0]

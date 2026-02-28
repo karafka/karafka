@@ -42,6 +42,6 @@ start_karafka_and_wait_until do
   DT.key?(:post)
 end
 
-assert_equal errors.first.code, :max_poll_exceeded
+assert_equal :max_poll_exceeded, errors.first.code
 assert DT.key?(:post)
 assert DT[:post].first - DT[:pre].first >= 15

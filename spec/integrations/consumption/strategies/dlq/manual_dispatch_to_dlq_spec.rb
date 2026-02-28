@@ -42,5 +42,5 @@ start_karafka_and_wait_until do
   DT.key?(:broken)
 end
 
-assert_equal DT[:broken].size, 1, DT.data
+assert_equal 1, DT[:broken].size, DT.data
 assert_equal elements[0], DT[:broken].first, DT.data

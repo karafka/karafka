@@ -50,4 +50,4 @@ start_karafka_and_wait_until do
   DT[:used].size >= 5
 end
 
-assert_equal DT[:used].uniq, [false]
+assert_equal [false], DT[:used].uniq

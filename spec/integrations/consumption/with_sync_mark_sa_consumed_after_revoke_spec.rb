@@ -45,5 +45,5 @@ end
 
 other_consumer.join
 
-assert_equal DT[:post_closed_mark], false
-assert_equal DT[:pre_closed_mark], true
+assert_equal false, DT[:post_closed_mark]
+assert_equal true, DT[:pre_closed_mark]

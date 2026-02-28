@@ -56,6 +56,6 @@ start_karafka_and_wait_until do
   DT.key?(0)
 end
 
-assert_equal DT[0].payload, 1
-assert_equal DT[0].key, 2
-assert_equal DT[0].headers, { "test" => 3 }
+assert_equal 1, DT[0].payload
+assert_equal 2, DT[0].key
+assert_equal({ "test" => 3 }, DT[0].headers)

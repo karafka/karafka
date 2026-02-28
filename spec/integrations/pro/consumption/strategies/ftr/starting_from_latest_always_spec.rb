@@ -81,4 +81,4 @@ start_karafka_and_wait_until do
   DT[:offsets].size >= 2
 end
 
-assert_equal DT[:offsets], [99, 100]
+assert_equal [99, 100], DT[:offsets]

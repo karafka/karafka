@@ -60,6 +60,6 @@ start_karafka_and_wait_until do
   DT[0].size >= 100
 end
 
-assert_equal DT[:state][0], false
-assert_equal DT[:post_state][0], false
-assert_equal DT[:state].last, true
+assert_equal false, DT[:state][0]
+assert_equal false, DT[:post_state][0]
+assert_equal true, DT[:state].last

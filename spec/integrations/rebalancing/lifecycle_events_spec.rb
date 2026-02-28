@@ -78,5 +78,5 @@ REBALANCE_EVENTS.each do |event_name|
   end
 
   assert group_a.size > group_b.size
-  assert_equal group_b.size, 1
+  assert_equal 1, group_b.size
 end

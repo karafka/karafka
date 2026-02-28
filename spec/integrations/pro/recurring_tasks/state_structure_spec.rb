@@ -52,31 +52,31 @@ topic_name = Karafka::App.config.recurring_tasks.topics.schedules.name
 state_message = Karafka::Admin.read_topic(topic_name, 0, 1).last
 payload = state_message.payload
 
-assert_equal state_message.key, "state:schedule"
-assert_equal payload[:schema_version], "1.0"
-assert_equal payload[:schedule_version], "1.0.1"
-assert_equal payload[:type], "schedule"
+assert_equal "state:schedule", state_message.key
+assert_equal "1.0", payload[:schema_version]
+assert_equal "1.0.1", payload[:schedule_version]
+assert_equal "schedule", payload[:type]
 assert payload[:dispatched_at].is_a?(Float)
 
 tasks = payload[:tasks]
 
 # Assertions for task a
-assert_equal tasks[:a][:id], "a"
-assert_equal tasks[:a][:cron], "0 12 31 12 *"
-assert_equal tasks[:a][:previous_time], 0
+assert_equal "a", tasks[:a][:id]
+assert_equal "0 12 31 12 *", tasks[:a][:cron]
+assert_equal 0, tasks[:a][:previous_time]
 assert tasks[:a][:next_time].is_a?(Integer)
-assert_equal tasks[:a][:enabled], false
+assert_equal false, tasks[:a][:enabled]
 
 # Assertions for task b
-assert_equal tasks[:b][:id], "b"
-assert_equal tasks[:b][:cron], "0 12 30 11 *"
-assert_equal tasks[:b][:previous_time], 0
+assert_equal "b", tasks[:b][:id]
+assert_equal "0 12 30 11 *", tasks[:b][:cron]
+assert_equal 0, tasks[:b][:previous_time]
 assert tasks[:b][:next_time].is_a?(Integer)
-assert_equal tasks[:b][:enabled], false
+assert_equal false, tasks[:b][:enabled]
 
 # Assertions for task c
-assert_equal tasks[:c][:id], "c"
-assert_equal tasks[:c][:cron], "* * * * *"
+assert_equal "c", tasks[:c][:id]
+assert_equal "* * * * *", tasks[:c][:cron]
 assert tasks[:c][:next_time].is_a?(Integer)
 assert tasks[:c][:previous_time].is_a?(Integer)
-assert_equal tasks[:c][:enabled], true
+assert_equal true, tasks[:c][:enabled]

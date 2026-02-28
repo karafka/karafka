@@ -36,8 +36,8 @@ end
 
 today = Date.today.strftime("%Y-%m-%d")
 
-assert_equal state.headers, { "zlib" => "true" }
-assert_equal state.payload[:schema_version], "1.0.0"
-assert_equal state.payload[:state], "loaded"
-assert_equal state.payload[:daily], { today.to_sym => 0 }
+assert_equal({ "zlib" => "true" }, state.headers)
+assert_equal "1.0.0", state.payload[:schema_version]
+assert_equal "loaded", state.payload[:state]
+assert_equal({ today.to_sym => 0 }, state.payload[:daily])
 assert state.payload[:dispatched_at] > Time.now.to_f - 100

@@ -148,7 +148,7 @@ count = DT[:consecutive_messages].count do |key, _, _|
   key == DT[:contested_message].first.payload["key"]
 end
 
-assert_equal(count, 2)
+assert_equal(2, count)
 
 # The only failed commit should be that of the contested message
 assert_equal 1, DT[:failed_commits].size

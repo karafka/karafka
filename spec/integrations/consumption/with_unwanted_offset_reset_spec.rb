@@ -27,4 +27,4 @@ end
 
 # No data should be consumed
 assert DT[:messages].empty?
-assert_equal DT[:error].code, :auto_offset_reset
+assert_equal :auto_offset_reset, DT[:error].code

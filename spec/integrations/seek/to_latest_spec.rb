@@ -39,4 +39,4 @@ start_karafka_and_wait_until do
   DT[0].include?("test")
 end
 
-assert_equal DT[0].last, "test"
+assert_equal "test", DT[0].last

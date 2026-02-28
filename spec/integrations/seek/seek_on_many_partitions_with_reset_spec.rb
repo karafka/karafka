@@ -49,7 +49,7 @@ cg = Karafka::App.consumer_groups.first.id
 part_results = results.fetch(cg).fetch(DT.topic)
 
 PARTITIONS.each do |i|
-  assert_equal DT[i], 19 - i
-  assert_equal part_results[i][:offset], 20 - i
+  assert_equal 19 - i, DT[i]
+  assert_equal 20 - i, part_results[i][:offset]
   assert_equal part_results[i][:lag], i
 end

@@ -55,10 +55,10 @@ assert DT[:probing].include?("500")
 
 responses = raw_flows.split("\n").select { |line| line.start_with?("->") }
 
-assert_equal responses[0], '-> "HTTP/1.1 500 Internal Server Error\r\n"', responses[0]
-assert_equal responses[1], '-> "Content-Type: application/json\r\n"', responses[1]
+assert_equal '-> "HTTP/1.1 500 Internal Server Error\r\n"', responses[0], responses[0]
+assert_equal '-> "Content-Type: application/json\r\n"', responses[1], responses[1]
 assert responses[2].include?("Content-Length: "), responses[2]
-assert_equal responses[3], '-> "\r\n"', responses[3]
+assert_equal '-> "\r\n"', responses[3], responses[3]
 
 last = JSON.parse(DT[:bodies].last)
 

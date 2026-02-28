@@ -49,4 +49,4 @@ start_karafka_and_wait_until do
   DT.key?(0)
 end
 
-assert_equal DT[:tags], [Job.to_s]
+assert_equal [Job.to_s], DT[:tags]

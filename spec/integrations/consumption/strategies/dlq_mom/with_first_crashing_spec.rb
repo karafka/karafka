@@ -42,4 +42,4 @@ start_karafka_and_wait_until do
   DT[:offsets].uniq.size > 1
 end
 
-assert_equal DT[:offsets].uniq, [0, 1]
+assert_equal [0, 1], DT[:offsets].uniq

@@ -66,5 +66,5 @@ end
 
 assert_equal 1, DT[:broken].size
 # This message will get new offset (first)
-assert_equal DT[:broken][0][0], 0
+assert_equal 0, DT[:broken][0][0]
 assert_equal DT[:broken][0][1], elements[0]
