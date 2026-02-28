@@ -12,7 +12,7 @@ RSpec.describe_current do
     let(:metadata) do
       Karafka::Messages::Metadata.new.tap do |metadata|
         metadata["raw_key"] = raw_key
-        metadata["deserializers"] = Karafka::Routing::Features::Deserializers::Config.new(
+        metadata["deserializers"] = Karafka::Routing::Features::Deserializing::Config.new(
           payload: deserializer
         )
       end

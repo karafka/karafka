@@ -30,6 +30,15 @@ RSpec.describe_current do
       oauth: {
         token_provider_listener: false
       },
+      deserializing: {
+        parallel: {
+          active: false,
+          concurrency: 4,
+          batch_threshold: 100,
+          total_payload_threshold: 50 * 1024,
+          batch_size: 50
+        }
+      },
       admin: {
         kafka: {},
         group_id: "karafka_admin",
@@ -889,5 +898,87 @@ RSpec.describe_current do
     before { config[:oauth][:token_provider_listener] = listener.new }
 
     it { expect(contract.call(config)).to be_success }
+  end
+
+  context 'when validating deserializing.parallel settings' do
+    let(:parallel_config) { config[:deserializing][:parallel] }
+
+    context 'when active is not a boolean' do
+      before { parallel_config[:active] = 'invalid' }
+
+      it { expect(contract.call(config)).not_to be_success }
+    end
+
+    context 'when concurrency is not an integer' do
+      before { parallel_config[:concurrency] = 'invalid' }
+
+      it { expect(contract.call(config)).not_to be_success }
+    end
+
+    context 'when concurrency is zero' do
+      before { parallel_config[:concurrency] = 0 }
+
+      it { expect(contract.call(config)).not_to be_success }
+    end
+
+    context 'when concurrency is negative' do
+      before { parallel_config[:concurrency] = -1 }
+
+      it { expect(contract.call(config)).not_to be_success }
+    end
+
+    context 'when batch_threshold is not an integer' do
+      before { parallel_config[:batch_threshold] = 'invalid' }
+
+      it { expect(contract.call(config)).not_to be_success }
+    end
+
+    context 'when batch_threshold is zero' do
+      before { parallel_config[:batch_threshold] = 0 }
+
+      it { expect(contract.call(config)).not_to be_success }
+    end
+
+    context 'when total_payload_threshold is not an integer' do
+      before { parallel_config[:total_payload_threshold] = 'invalid' }
+
+      it { expect(contract.call(config)).not_to be_success }
+    end
+
+    context 'when total_payload_threshold is negative' do
+      before { parallel_config[:total_payload_threshold] = -1 }
+
+      it { expect(contract.call(config)).not_to be_success }
+    end
+
+    context 'when total_payload_threshold is zero' do
+      before { parallel_config[:total_payload_threshold] = 0 }
+
+      it { expect(contract.call(config)).to be_success }
+    end
+
+    context 'when batch_size is not an integer' do
+      before { parallel_config[:batch_size] = 'invalid' }
+
+      it { expect(contract.call(config)).not_to be_success }
+    end
+
+    context 'when batch_size is zero' do
+      before { parallel_config[:batch_size] = 0 }
+
+      it { expect(contract.call(config)).not_to be_success }
+    end
+
+    context 'when batch_size is negative' do
+      before { parallel_config[:batch_size] = -1 }
+
+      it { expect(contract.call(config)).not_to be_success }
+    end
+
+    context 'when batch_size is a positive integer' do
+      before { parallel_config[:batch_size] = 100 }
+
+      it { expect(contract.call(config)).to be_success }
+    end
   end
 end
