@@ -408,10 +408,9 @@ module Karafka
               job_class = job.class.name.split("::").last
               topic_name = job.executor.topic.name
               partition = job.executor.partition
-              blocking = job.non_blocking? ? "non-blocking" : "blocking"
 
               error "In processing: #{job_class} job for #{topic_name}/#{partition} " \
-                    "(group: #{group_id}, #{blocking})"
+                    "(group: #{group_id})"
             end
           end
         when "app.forceful_stopping.error"
