@@ -4,15 +4,18 @@
 # should include details about what was blocking: active listeners, alive workers, and jobs
 # still in processing.
 
-setup_karafka(allow_errors: true) { |config| config.shutdown_timeout = 1_000 }
+setup_karafka(allow_errors: true) do |config|
+  config.shutdown_timeout = 1_000
+  config.max_wait_time = 500
+end
 
 produce(DT.topic, "1")
 
 class Consumer < Karafka::BaseConsumer
   def consume
     DT[0] << true
-    # This will "fake" a hanging job
-    sleep(100)
+    # This will "fake" a hanging job just long enough to exceed the short shutdown timeout
+    sleep(5)
   end
 end
 
