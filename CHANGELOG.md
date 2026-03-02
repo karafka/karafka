@@ -1,5 +1,9 @@
 # Karafka Framework Changelog
 
+## 2.5.7 (Unreleased)
+- [Enhancement] Report detailed blocking information (active listeners, alive workers, and in-processing jobs) during forceful shutdown instead of only aggregate counts.
+- [Enhancement] Improve `ForcefulShutdownError` description to clearly explain when and why it is raised.
+
 ## 2.5.6 (2026-02-28)
 - **[Feature]** Add `karafka topics health` command to check Kafka topics for replication and durability issues, detecting no redundancy (RF=1), zero fault tolerance (RF≤min.insync), and low durability (min.insync=1) configurations with color-coded severity grouping and actionable recommendations (Pro).
 - [Enhancement] Optimize license loading process by reading license files directly from the gem directory instead of requiring the entire gem, reducing initialization overhead and adding support for user-defined License modules.
