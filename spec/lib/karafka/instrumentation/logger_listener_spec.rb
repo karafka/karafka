@@ -544,7 +544,14 @@ RSpec.describe_current do
       let(:type) { "app.stopping.error" }
 
       let(:payload) do
-        { type: type, error: Karafka::Errors::ForcefulShutdownError.new, caller: nil }
+        {
+          type: type,
+          error: Karafka::Errors::ForcefulShutdownError.new,
+          caller: nil,
+          active_listeners: [],
+          alive_workers: [],
+          in_processing: {}
+        }
       end
 
       let(:message) do

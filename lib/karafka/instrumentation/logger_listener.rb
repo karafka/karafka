@@ -385,21 +385,35 @@ module Karafka
           fatal "Runner crashed due to an error: #{details}"
           fatal backtrace
         when "app.stopping.error"
-          # Counts number of workers and listeners that were still active when forcing the
-          # shutdown. Please note, that unless all listeners are closed, workers will not finalize
-          # their operations as well.
-          # We need to check if listeners and workers are assigned as during super early stages of
-          # boot they are not.
-          listeners = Server.listeners ? Server.listeners.count(&:active?) : 0
-          workers = Server.workers ? Server.workers.count(&:alive?) : 0
+          active_listeners = event.payload[:active_listeners] || []
+          alive_workers = event.payload[:alive_workers] || []
+          in_processing = event.payload[:in_processing] || {}
 
           message = <<~MSG.tr("\n", " ").strip!
             Forceful Karafka server stop with:
-            #{workers} active workers and
-            #{listeners} active listeners
+            #{alive_workers.size} active workers and
+            #{active_listeners.size} active listeners
           MSG
 
           error message
+
+          active_listeners.each do |listener|
+            error "Listener #{listener.id} for #{listener.subscription_group.name} still active"
+          end
+
+          in_processing.each do |group_id, jobs|
+            next if jobs.empty?
+
+            jobs.each do |job|
+              job_class = job.class.name.split("::").last
+              topic_name = job.executor.topic.name
+              partition = job.executor.partition
+              blocking = job.non_blocking? ? "non-blocking" : "blocking"
+
+              error "In processing: #{job_class} job for #{topic_name}/#{partition} " \
+                    "(group: #{group_id}, #{blocking})"
+            end
+          end
         when "app.forceful_stopping.error"
           error "Forceful shutdown error occurred: #{details}"
           error backtrace

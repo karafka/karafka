@@ -135,7 +135,20 @@ RSpec.describe_current do
 
     context "when it is an app.stopping.error" do
       let(:type) { "app.stopping.error" }
-      let(:message) { "Forceful Karafka server stop" }
+
+      let(:payload) do
+        {
+          type: type,
+          error: error,
+          caller: nil,
+          active_listeners: [],
+          alive_workers: []
+        }
+      end
+
+      let(:message) do
+        "Forceful Karafka server stop with: 0 active workers and 0 active listeners"
+      end
 
       it { expect(Karafka.logger).to have_received(:error).with(message) }
     end
