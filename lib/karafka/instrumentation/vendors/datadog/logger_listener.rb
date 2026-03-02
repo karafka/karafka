@@ -117,8 +117,8 @@ module Karafka
             when "runner.call.error"
               fatal "Runner crashed due to an error: #{error}"
             when "app.stopping.error"
-              active_listeners = event.payload[:active_listeners] || []
-              alive_workers = event.payload[:alive_workers] || []
+              active_listeners = event.payload[:active_listeners]
+              alive_workers = event.payload[:alive_workers]
 
               error "Forceful Karafka server stop with: " \
                     "#{alive_workers.size} active workers and " \

@@ -385,9 +385,9 @@ module Karafka
           fatal "Runner crashed due to an error: #{details}"
           fatal backtrace
         when "app.stopping.error"
-          active_listeners = event.payload[:active_listeners] || []
-          alive_workers = event.payload[:alive_workers] || []
-          in_processing = event.payload[:in_processing] || {}
+          active_listeners = event.payload[:active_listeners]
+          alive_workers = event.payload[:alive_workers]
+          in_processing = event.payload[:in_processing]
 
           message = <<~MSG.tr("\n", " ").strip!
             Forceful Karafka server stop with:

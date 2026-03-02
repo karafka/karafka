@@ -183,7 +183,7 @@ module Karafka
       # Returns a snapshot of all jobs currently in processing per group.
       # Useful for diagnostics during forceful shutdown to understand what is blocking.
       #
-      # @return [Hash<String, Array<Jobs::Base>>] hash mapping group ids to arrays of jobs
+      # @return [Hash{String => Array<Jobs::Base>}] hash mapping group ids to arrays of jobs
       def in_processing
         @mutex.synchronize do
           @in_processing.transform_values(&:dup).freeze
