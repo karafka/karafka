@@ -181,7 +181,7 @@ module Karafka
           private
 
           # Recomputes the biggest possible real offset we can have.
-          # It picks the the biggest offset that has uninterrupted stream of virtually marked as
+          # It picks the biggest offset that has uninterrupted stream of virtually marked as
           # consumed because this will be the collective offset.
           def materialize_real_offset
             @marked.keys.sort.each do |offset|
