@@ -6,6 +6,7 @@
 - [Enhancement] Cache `messages.last` in `BatchMetadata` builder to avoid duplicate array traversal.
 - [Enhancement] Optimize `VirtualOffsetManager#mark` to use a single array scan instead of separate `include?` and `index` calls (Pro).
 - [Enhancement] Optimize `VirtualOffsetManager#materialize_real_offset` to use `keys.sort` instead of `to_a.sort_by` with tuple destructuring (Pro).
+- [Enhancement] Optimize `IntervalRunner#call` to use a single `monotonic_now` call instead of two per invocation.
 
 ## 2.5.6 (2026-02-28)
 - **[Feature]** Add `karafka topics health` command to check Kafka topics for replication and durability issues, detecting no redundancy (RF=1), zero fault tolerance (RF≤min.insync), and low durability (min.insync=1) configurations with color-coded severity grouping and actionable recommendations (Pro).
