@@ -26,9 +26,11 @@ module Karafka
 
       # Runs the requested code if it was not executed previously recently
       def call
-        return if monotonic_now - @last_called_at < @interval
+        now = monotonic_now
 
-        @last_called_at = monotonic_now
+        return if now - @last_called_at < @interval
+
+        @last_called_at = now
 
         @block.call
       end
