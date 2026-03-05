@@ -5,11 +5,12 @@ RSpec.describe_current do
 
   let(:config) do
     {
-      deserializers: {
+      deserializing: {
         active: true,
         payload: payload_deserializer,
         headers: headers_deserializer,
-        key: key_deserializer
+        key: key_deserializer,
+        parallel: false
       }
     }
   end
@@ -23,25 +24,25 @@ RSpec.describe_current do
   end
 
   context "when active is not true" do
-    before { config[:deserializers][:active] = false }
+    before { config[:deserializing][:active] = false }
 
     it { expect(validation).not_to be_success }
   end
 
   context "when payload deserializer does not respond to call" do
-    before { config[:deserializers][:payload] = "not_a_proc" }
+    before { config[:deserializing][:payload] = "not_a_proc" }
 
     it { expect(validation).not_to be_success }
   end
 
   context "when headers deserializer does not respond to call" do
-    before { config[:deserializers][:headers] = "not_a_proc" }
+    before { config[:deserializing][:headers] = "not_a_proc" }
 
     it { expect(validation).not_to be_success }
   end
 
   context "when key deserializer does not respond to call" do
-    before { config[:deserializers][:key] = "not_a_proc" }
+    before { config[:deserializing][:key] = "not_a_proc" }
 
     it { expect(validation).not_to be_success }
   end
