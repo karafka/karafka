@@ -122,7 +122,7 @@ def setup_karafka(
       producer_config.max_wait_timeout = 120_000 # 2 minutes
       # We set this randomly as a way of covering both cases in the integrations before we fully
       # retire the thread backend
-      config.polling.mode = %i[thread fd].sample
+      producer_config.polling.mode = %i[thread fd].sample
     end
 
     # This will ensure, that the recurring tasks data does not leak in between tests (if needed)
