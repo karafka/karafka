@@ -36,6 +36,7 @@ module Karafka
         logger
         oauth
         polling
+        fd
       ].freeze
 
       private_constant :SKIPPABLE_NEW_PRODUCER_ATTRIBUTES
@@ -90,7 +91,13 @@ module Karafka
             end
 
             old_producer_config.polling.to_h.each do |key, value|
+              next if SKIPPABLE_NEW_PRODUCER_ATTRIBUTES.include?(key)
+
               p_config.polling.public_send("#{key}=", value)
+            end
+
+            old_producer_config.polling.fd.to_h.each do |key, value|
+              p_config.polling.fd.public_send("#{key}=", value)
             end
           end
 
