@@ -35,6 +35,7 @@ module Karafka
         kafka
         logger
         oauth
+        polling
       ].freeze
 
       private_constant :SKIPPABLE_NEW_PRODUCER_ATTRIBUTES
@@ -86,6 +87,10 @@ module Karafka
             # Namespaced attributes need to be migrated directly on their config node
             old_producer_config.oauth.to_h.each do |key, value|
               p_config.oauth.public_send("#{key}=", value)
+            end
+
+            old_producer_config.polling.to_h.each do |key, value|
+              p_config.polling.public_send("#{key}=", value)
             end
           end
 

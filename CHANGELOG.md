@@ -7,6 +7,7 @@
 - [Enhancement] Optimize `VirtualOffsetManager#mark` to use a single array scan instead of separate `include?` and `index` calls (Pro).
 - [Enhancement] Optimize `VirtualOffsetManager#materialize_real_offset` to use `keys.sort` instead of `to_a.sort_by` with tuple destructuring (Pro).
 - [Enhancement] Optimize `IntervalRunner#call` to use a single `monotonic_now` call instead of two per invocation.
+- [Enhancement] Support WaterDrop `:fd` mode in Swarm.
 - [Maintenance] Use both `:fd` and `:thread` producer backends in CI.
 
 ## 2.5.6 (2026-02-28)
