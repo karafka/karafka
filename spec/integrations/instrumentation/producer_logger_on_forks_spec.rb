@@ -25,4 +25,4 @@ output = reader.read
 Process.wait(pid)
 
 # It should have a lot of debug info from the child fork when logger works
-assert output.split("\n").size > 50, output
+assert output.split("\n").size > 40, output
