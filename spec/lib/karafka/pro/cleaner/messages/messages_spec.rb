@@ -150,4 +150,34 @@ RSpec.describe_current do
       end
     end
   end
+
+  describe "#clean!" do
+    context "when called with default metadata: true" do
+      before { messages.clean! }
+
+      it "expect to have all messages cleaned" do
+        expect(message1.cleaned?).to be(true)
+        expect(message2.cleaned?).to be(true)
+      end
+
+      it "expect to have all messages metadata cleaned" do
+        expect(message1.metadata.cleaned?).to be(true)
+        expect(message2.metadata.cleaned?).to be(true)
+      end
+    end
+
+    context "when called with metadata: false" do
+      before { messages.clean!(metadata: false) }
+
+      it "expect to have all messages cleaned" do
+        expect(message1.cleaned?).to be(true)
+        expect(message2.cleaned?).to be(true)
+      end
+
+      it "expect not to have messages metadata cleaned" do
+        expect(message1.metadata.cleaned?).to be(false)
+        expect(message2.metadata.cleaned?).to be(false)
+      end
+    end
+  end
 end

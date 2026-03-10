@@ -55,7 +55,7 @@ iterator.each do |message, internal_iterator|
 end
 
 # Zero should not be included
-assert_equal partitioned_data.size, 9, partitioned_data.size
+assert_equal 9, partitioned_data.size, partitioned_data.size
 
 # All data should be in order for the rest
 partitioned_data.each do |partition, messages|

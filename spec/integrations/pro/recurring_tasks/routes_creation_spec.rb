@@ -35,7 +35,7 @@ schedules = Karafka::Admin.read_topic(
   1
 )
 
-assert_equal schedules, []
+assert_equal [], schedules
 
 # Should not fail as the topic should exist
 logs = Karafka::Admin.read_topic(
@@ -44,4 +44,4 @@ logs = Karafka::Admin.read_topic(
   1
 )
 
-assert_equal logs, []
+assert_equal [], logs

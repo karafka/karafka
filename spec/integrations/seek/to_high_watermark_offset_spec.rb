@@ -24,4 +24,4 @@ start_karafka_and_wait_until do
   DT.key?(:runs) && sleep(3)
 end
 
-assert_equal DT[:runs].size, 1
+assert_equal 1, DT[:runs].size

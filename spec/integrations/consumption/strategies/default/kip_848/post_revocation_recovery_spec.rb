@@ -38,4 +38,4 @@ start_karafka_and_wait_until do
   DT.key?(:done)
 end
 
-assert_equal DT[:offsets], [0, 0, 1]
+assert_equal [0, 0, 1], DT[:offsets]

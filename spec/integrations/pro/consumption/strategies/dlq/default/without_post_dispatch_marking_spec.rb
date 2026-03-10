@@ -57,4 +57,4 @@ start_karafka_and_wait_until do
   DT[:offsets].size >= 10
 end
 
-assert_equal fetch_next_offset, 1
+assert_equal 1, fetch_next_offset

@@ -66,7 +66,7 @@ assert results.include?("Collapse completed")
 assert results.include?("successfully")
 
 offsets = Karafka::Admin.read_lags_with_offsets({ DT.consumer_group => [DT.topic] })
-assert_equal offsets[DT.consumer_group][DT.topic][0][:offset], 5
-assert_equal offsets[DT.consumer_group][DT.topic][1][:offset], 7
-assert_equal offsets[DT.consumer_group][DT.topic][2][:offset], 3
-assert_equal offsets[DT.consumer_group][DT.topic][3][:offset], 9
+assert_equal 5, offsets[DT.consumer_group][DT.topic][0][:offset]
+assert_equal 7, offsets[DT.consumer_group][DT.topic][1][:offset]
+assert_equal 3, offsets[DT.consumer_group][DT.topic][2][:offset]
+assert_equal 9, offsets[DT.consumer_group][DT.topic][3][:offset]

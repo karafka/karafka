@@ -76,15 +76,15 @@ start_karafka_and_wait_until do
 end
 
 DT[:messages].each_with_index do |payload, i|
-  assert_equal payload[:schema_version], "1.0"
-  assert_equal payload[:schedule_version], "1.0.0"
-  assert_equal payload[:type], "log"
+  assert_equal "1.0", payload[:schema_version]
+  assert_equal "1.0.0", payload[:schedule_version]
+  assert_equal "log", payload[:type]
   assert payload[:dispatched_at].is_a?(Float)
 
   task = payload[:task]
 
   # Assertions for the task
   assert_equal task[:id], TASK_IDS[i]
-  assert_equal task[:time_taken], -1
-  assert_equal task[:result], "failure"
+  assert_equal(-1, task[:time_taken])
+  assert_equal "failure", task[:result]
 end

@@ -21,5 +21,5 @@ start_karafka_and_wait_until do
 end
 
 DT[0].each_with_index do |aggro, index|
-  assert_equal aggro, [index.positive?, index + 1]
+  assert_equal [index.positive?, index + 1], aggro
 end

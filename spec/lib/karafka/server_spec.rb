@@ -163,7 +163,8 @@ RSpec.describe_current do
             Karafka::Connection::Listener,
             stopped?: true,
             terminate: true,
-            shutdown: true
+            shutdown: true,
+            active?: true
           )
         end
 
@@ -172,6 +173,7 @@ RSpec.describe_current do
             Karafka::Connection::ListenersBatch,
             active: [active_thread],
             all?: false,
+            select: [active_thread],
             each: nil
           )
           server_class.stop
@@ -190,7 +192,8 @@ RSpec.describe_current do
             Karafka::Connection::Listener,
             stopped?: false,
             terminate: true,
-            shutdown: true
+            shutdown: true,
+            active?: true
           )
         end
 
@@ -199,6 +202,7 @@ RSpec.describe_current do
             Karafka::Connection::ListenersBatch,
             active: [active_thread],
             all?: false,
+            select: [active_thread],
             each: nil
           )
 

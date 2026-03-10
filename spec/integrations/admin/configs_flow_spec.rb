@@ -50,25 +50,25 @@ sleep(5)
 rtopic1, rtopic2 = Karafka::Admin::Configs.describe(topic1, topic2)
 
 assert_equal rtopic1.name, DT.topics[0]
-assert_equal rtopic1.type, :topic
+assert_equal :topic, rtopic1.type
 assert_equal rtopic2.name, DT.topics[1]
-assert_equal rtopic2.type, :topic
+assert_equal :topic, rtopic2.type
 
 rtopic1.configs.each do |config|
   if config.name == "delete.retention.ms"
-    assert_equal config.name, "delete.retention.ms"
-    assert_equal config.value, "86800123"
+    assert_equal "delete.retention.ms", config.name
+    assert_equal "86800123", config.value
   end
 
   if config.name == "cleanup.policy"
-    assert_equal config.name, "cleanup.policy"
-    assert_equal config.value, "compact"
+    assert_equal "cleanup.policy", config.name
+    assert_equal "compact", config.value
   end
 end
 
 rtopic2.configs.each do |config|
   if config.name == "delete.retention.ms"
-    assert_equal config.name, "delete.retention.ms"
-    assert_equal config.value, "86400000"
+    assert_equal "delete.retention.ms", config.name
+    assert_equal "86400000", config.value
   end
 end

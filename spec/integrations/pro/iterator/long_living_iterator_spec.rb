@@ -57,4 +57,4 @@ iterator.each do |message|
   buffer << message if message
 end
 
-assert_equal buffer.size, 100
+assert_equal 100, buffer.size

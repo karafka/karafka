@@ -62,12 +62,12 @@ start_karafka_and_wait_until do
   DT.key?(:broken)
 end
 
-assert_equal DT[:broken].size, 1, DT.data
+assert_equal 1, DT[:broken].size, DT.data
 
 broken = DT[:broken].first
 
 assert_equal elements[0], broken.raw_payload, DT.data
 assert_equal broken.headers["source_topic"], DT.topic
-assert_equal broken.headers["source_partition"], "0"
-assert_equal broken.headers["source_offset"], "0"
+assert_equal "0", broken.headers["source_partition"]
+assert_equal "0", broken.headers["source_offset"]
 assert_equal broken.headers["source_consumer_group"], Karafka::App.consumer_groups.first.id

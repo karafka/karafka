@@ -33,4 +33,4 @@ start_karafka_and_wait_until do
   DT.key?(:done)
 end
 
-assert_equal DT[:results], [false, false]
+assert_equal [false, false], DT[:results]

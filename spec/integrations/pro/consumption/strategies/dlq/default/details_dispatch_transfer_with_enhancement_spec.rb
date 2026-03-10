@@ -78,8 +78,8 @@ end
   assert_equal dlq_message.raw_payload, expected_payload
   assert_equal dlq_message.headers["test#{i}"], (i + 1).to_s
   assert_equal dlq_message.headers.fetch("source_topic"), DT.topic
-  assert_equal dlq_message.headers.fetch("source_partition"), 0.to_s
+  assert_equal 0.to_s, dlq_message.headers.fetch("source_partition")
   assert_equal dlq_message.headers.fetch("source_offset"), i.to_s
   assert_equal dlq_message.headers.fetch("source_consumer_group"), cg
-  assert_equal dlq_message.headers.fetch("total-remap"), "yes"
+  assert_equal "yes", dlq_message.headers.fetch("total-remap")
 end

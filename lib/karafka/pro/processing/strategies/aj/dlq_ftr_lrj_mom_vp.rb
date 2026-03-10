@@ -58,14 +58,17 @@ module Karafka
 
                   if coordinator.filtered? && !revoked?
                     handle_post_filtering
+
+                    # :seek and :pause are fully handled by handle_post_filtering
+                    # For :skip we still need to resume the LRJ MAX_PAUSE_TIME pause
+                    return unless coordinator.filter.action == :skip
                   elsif !revoked?
                     # no need to check for manual seek because AJ consumer is internal and
                     # fully controlled by us
                     seek(seek_offset, false, reset_offset: false)
-                    resume
-                  else
-                    resume
                   end
+
+                  resume
                 else
                   apply_dlq_flow do
                     skippable_message, = find_skippable_message

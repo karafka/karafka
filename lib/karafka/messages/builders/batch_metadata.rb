@@ -17,16 +17,18 @@ module Karafka
           # @note We do not set `processed_at` as this needs to be assigned when the batch is
           #   picked up for processing.
           def call(messages, topic, partition, scheduled_at)
+            last_message = messages.last
+
             Karafka::Messages::BatchMetadata.new(
               size: messages.size,
               first_offset: messages.first&.offset || -1001,
-              last_offset: messages.last&.offset || -1001,
+              last_offset: last_message&.offset || -1001,
               deserializers: topic.deserializers,
               partition: partition,
               topic: topic.name,
               # We go with the assumption that the creation of the whole batch is the last message
               # creation time
-              created_at: local_created_at(messages.last),
+              created_at: local_created_at(last_message),
               # When this batch was built and scheduled for execution
               scheduled_at: scheduled_at,
               # This needs to be set to a correct value prior to processing starting

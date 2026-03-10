@@ -126,10 +126,19 @@ module Karafka
 
         raise Errors::ForcefulShutdownError
       rescue Errors::ForcefulShutdownError => e
+        active_listeners = listeners.select(&:active?)
+        alive_workers = workers.select(&:alive?)
+
+        # Collect details about subscription groups that still have jobs in processing
+        in_processing = jobs_queue ? jobs_queue.in_processing : {}
+
         Karafka.monitor.instrument(
           "error.occurred",
           caller: self,
           error: e,
+          active_listeners: active_listeners,
+          alive_workers: alive_workers,
+          in_processing: in_processing,
           type: "app.stopping.error"
         )
 

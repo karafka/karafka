@@ -48,4 +48,4 @@ start_karafka_and_wait_until do
   DT[:metadata].size >= 10
 end
 
-assert_equal DT[:metadata].uniq, ["", "cs"]
+assert_equal ["", "cs"], DT[:metadata].uniq

@@ -91,16 +91,26 @@ module Karafka
             @offsets_metadata[offset] = offset_metadata
             @current_offset_metadata = offset_metadata
 
-            group = @groups.find { |reg_group| reg_group.include?(offset) }
+            group = nil
+            position = nil
+
+            @groups.each do |reg_group|
+              pos = reg_group.index(offset)
+
+              if pos
+                group = reg_group
+                position = pos
+                break
+              end
+            end
 
             # This case can happen when someone uses MoM and wants to mark message from a previous
             # batch as consumed. We can add it, since the real offset refresh will point to it
             unless group
               group = [offset]
+              position = 0
               @groups << group
             end
-
-            position = group.index(offset)
 
             # Mark all previous messages from the same group also as virtually consumed
             group[0..position].each do |markable_offset|
@@ -135,7 +145,7 @@ module Karafka
 
           # @return [Array<Integer>] Offsets of messages already marked as consumed virtually
           def marked
-            @marked.select { |_, status| status }.map(&:first).sort
+            @marked.select { |_, status| status }.map { |offset, _| offset }.sort
           end
 
           # Is there a real offset we can mark as consumed
@@ -171,11 +181,11 @@ module Karafka
           private
 
           # Recomputes the biggest possible real offset we can have.
-          # It picks the the biggest offset that has uninterrupted stream of virtually marked as
+          # It picks the biggest offset that has uninterrupted stream of virtually marked as
           # consumed because this will be the collective offset.
           def materialize_real_offset
-            @marked.to_a.sort_by(&:first).each do |offset, marked|
-              break unless marked
+            @marked.keys.sort.each do |offset|
+              break unless @marked[offset]
 
               @real_offset = offset
             end

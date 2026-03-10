@@ -61,5 +61,5 @@ end
 
 error = Karafka::Admin.read_topic(Karafka::Web.config.topics.errors.name, 0, 1).first.payload
 
-assert_equal error[:details][:first_offset], -1001
-assert_equal error[:details][:last_offset], -1001
+assert_equal(-1001, error[:details][:first_offset])
+assert_equal(-1001, error[:details][:last_offset])

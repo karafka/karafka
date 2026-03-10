@@ -103,6 +103,6 @@ start_karafka_and_wait_until do
   DT[0].size >= 2
 end
 
-assert_equal DT[:a], [5, 7]
-assert_equal DT[:b], [10, 8]
+assert_equal [5, 7], DT[:a]
+assert_equal [10, 8], DT[:b]
 assert Karafka.pro?

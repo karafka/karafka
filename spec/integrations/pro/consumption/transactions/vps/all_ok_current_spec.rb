@@ -77,6 +77,6 @@ end
 
 last = DT[:last].last
 
-assert_equal DT[:seek_offset], 100
+assert_equal 100, DT[:seek_offset]
 assert_equal DT[:metadata].last, last
-assert_equal fetch_next_offset, 100
+assert_equal 100, fetch_next_offset

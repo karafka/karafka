@@ -70,4 +70,4 @@ start_karafka_and_wait_until do
   DT[:offsets].size >= 20 && DT.key?(:b1) && DT[:raised].size > 5
 end
 
-assert_equal DT[:consumers].uniq.size, 1
+assert_equal 1, DT[:consumers].uniq.size

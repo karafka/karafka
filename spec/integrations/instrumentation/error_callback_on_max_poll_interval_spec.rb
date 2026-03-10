@@ -29,4 +29,4 @@ start_karafka_and_wait_until do
   DT.key?(:errors)
 end
 
-assert_equal DT[:errors].last.code, :max_poll_exceeded
+assert_equal :max_poll_exceeded, DT[:errors].last.code

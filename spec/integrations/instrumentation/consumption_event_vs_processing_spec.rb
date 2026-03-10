@@ -37,7 +37,7 @@ assert_equal DT[1], DT[2]
 
 # Make sure that we have detected proper assignments
 assert_equal DT[:assignments].keys.first.name, DT.topic
-assert_equal DT[:assignments].values.first, [0]
+assert_equal [0], DT[:assignments].values.first
 
 # Last state after shutdown should indicate no assignments
 assert Karafka::App.assignments.empty?

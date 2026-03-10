@@ -104,6 +104,6 @@ end
 
 dlq_config = Karafka::App.routes.first.topics.first.dead_letter_queue
 
-assert_equal dlq_config.topic, "dead_messages2"
-assert_equal dlq_config.max_retries, 2
-assert_equal dlq_config.independent, false
+assert_equal "dead_messages2", dlq_config.topic
+assert_equal 2, dlq_config.max_retries
+assert_equal false, dlq_config.independent

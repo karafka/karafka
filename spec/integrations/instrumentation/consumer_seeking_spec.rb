@@ -24,9 +24,9 @@ start_karafka_and_wait_until do
   DT[:messages].size >= 5
 end
 
-assert_equal DT[:messages].uniq, [0]
+assert_equal [0], DT[:messages].uniq
 assert DT[:seeks].size >= 4
 
 assert DT[:seeks].first[:caller].is_a?(Consumer)
 assert_equal DT[:seeks].first[:topic], DT.topic
-assert_equal DT[:seeks].first[:message].offset, 0
+assert_equal 0, DT[:seeks].first[:message].offset

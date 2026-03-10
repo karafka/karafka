@@ -28,26 +28,26 @@ end
 
 Karafka::App.debug!
 
-assert_equal Karafka::App.logger.level, 0
-assert_equal Karafka::App.producer.config.logger.level, 0
-assert_equal Karafka::App.config.kafka[:debug], "all"
-assert_equal Karafka::App.producer.config.kafka[:debug], "all"
+assert_equal 0, Karafka::App.logger.level
+assert_equal 0, Karafka::App.producer.config.logger.level
+assert_equal "all", Karafka::App.config.kafka[:debug]
+assert_equal "all", Karafka::App.producer.config.kafka[:debug]
 
 Karafka::App.consumer_groups.each do |consumer_group|
   consumer_group.topics.each do |topic|
-    assert_equal topic.kafka[:debug], "all"
+    assert_equal "all", topic.kafka[:debug]
   end
 end
 
 Karafka::App.debug!("test")
 
-assert_equal Karafka::App.logger.level, 0
-assert_equal Karafka::App.producer.config.logger.level, 0
-assert_equal Karafka::App.config.kafka[:debug], "test"
-assert_equal Karafka::App.producer.config.kafka[:debug], "test"
+assert_equal 0, Karafka::App.logger.level
+assert_equal 0, Karafka::App.producer.config.logger.level
+assert_equal "test", Karafka::App.config.kafka[:debug]
+assert_equal "test", Karafka::App.producer.config.kafka[:debug]
 
 Karafka::App.consumer_groups.each do |consumer_group|
   consumer_group.topics.each do |topic|
-    assert_equal topic.kafka[:debug], "test"
+    assert_equal "test", topic.kafka[:debug]
   end
 end

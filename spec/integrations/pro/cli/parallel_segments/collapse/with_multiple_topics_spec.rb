@@ -72,6 +72,6 @@ assert results.include?("successfully")
 offsets = Karafka::Admin.read_lags_with_offsets({ DT.consumer_group => topics })
 
 topics.each do |topic_name|
-  assert_equal offsets[DT.consumer_group][topic_name][0][:offset], 3
-  assert_equal offsets[DT.consumer_group][topic_name][1][:offset], 2
+  assert_equal 3, offsets[DT.consumer_group][topic_name][0][:offset]
+  assert_equal 2, offsets[DT.consumer_group][topic_name][1][:offset]
 end

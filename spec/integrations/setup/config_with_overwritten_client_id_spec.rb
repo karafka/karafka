@@ -7,4 +7,4 @@ setup_karafka do |config|
   config.kafka[:"client.id"] = "alternative-name"
 end
 
-assert_equal Karafka::App.config.kafka[:"client.id"], "alternative-name"
+assert_equal "alternative-name", Karafka::App.config.kafka[:"client.id"]

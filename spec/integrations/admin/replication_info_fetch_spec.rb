@@ -33,6 +33,6 @@ Karafka::Admin::Configs.describe(resource).each do |topic_config|
   end
 end
 
-assert_equal replica_counts.min, 1
-assert_equal min_insync_replicas_config, 1
-assert_equal in_sync_brokers.min, 1
+assert_equal 1, replica_counts.min
+assert_equal 1, min_insync_replicas_config
+assert_equal 1, in_sync_brokers.min

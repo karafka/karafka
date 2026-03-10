@@ -62,4 +62,4 @@ start_karafka_and_wait_until do
   DT[:errors].size >= 2 && DT[0].size >= 46
 end
 
-assert_equal fetch_next_offset, 26
+assert_equal 26, fetch_next_offset

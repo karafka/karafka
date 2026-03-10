@@ -51,7 +51,9 @@ module Karafka
       end
     end
 
-    # Raised when we've waited enough for shutting down a non-responsive process
+    # Raised when the graceful shutdown timeout has been exceeded and Karafka must forcefully
+    # terminate remaining listeners and workers. This typically happens when consumer processing
+    # or shutdown jobs take longer than the configured `shutdown_timeout`.
     ForcefulShutdownError = Class.new(BaseError)
 
     # Raised when the jobs queue receives a job that should not be received as it would cause

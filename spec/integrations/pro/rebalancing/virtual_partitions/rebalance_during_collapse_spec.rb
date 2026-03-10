@@ -1,0 +1,84 @@
+# frozen_string_literal: true
+
+# Karafka Pro - Source Available Commercial Software
+# Copyright (c) 2017-present Maciej Mensfeld. All rights reserved.
+#
+# This software is NOT open source. It is source-available commercial software
+# requiring a paid license for use. It is NOT covered by LGPL.
+#
+# PROHIBITED:
+# - Use without a valid commercial license
+# - Redistribution, modification, or derivative works without authorization
+# - Use as training data for AI/ML models or inclusion in datasets
+# - Scraping, crawling, or automated collection for any purpose
+#
+# PERMITTED:
+# - Reading, referencing, and linking for personal or commercial use
+# - Runtime retrieval by AI assistants, coding agents, and RAG systems
+#   for the purpose of providing contextual help to Karafka users
+#
+# License: https://karafka.io/docs/Pro-License-Comm/
+# Contact: contact@karafka.io
+
+# When VP is collapsed (retrying after error) and a rebalance triggers partition revocation,
+# Karafka should handle the transition cleanly. After reclaiming the partition, messages
+# should continue to be processed correctly.
+
+setup_karafka(allow_errors: true) do |config|
+  config.max_messages = 5
+  config.concurrency = 5
+end
+
+class Consumer < Karafka::BaseConsumer
+  def consume
+    messages.each do |message|
+      DT[0] << message.raw_payload
+    end
+
+    # Raise on first attempt to force VP collapse
+    if DT[:raised].empty?
+      DT[:raised] << true
+      raise StandardError
+    end
+
+    mark_as_consumed(messages.last)
+  end
+end
+
+draw_routes do
+  topic DT.topic do
+    consumer Consumer
+    virtual_partitions(
+      partitioner: ->(_) { rand }
+    )
+  end
+end
+
+# We need a second consumer to trigger a rebalance
+consumer = setup_rdkafka_consumer
+
+Thread.new do
+  # Wait until VP has collapsed
+  sleep(0.1) until DT[:raised].size >= 1
+
+  sleep(2)
+
+  consumer.subscribe(DT.topic)
+
+  # Just subscribe to trigger rebalance then leave
+  sleep(5)
+
+  consumer.close
+
+  DT[:rebalance_done] = true
+end
+
+payloads = DT.uuids(20)
+produce_many(DT.topic, payloads)
+
+start_karafka_and_wait_until do
+  DT[0].uniq.size >= 20 && DT.key?(:rebalance_done)
+end
+
+# All messages should have been processed
+assert_equal payloads.sort, DT[0].uniq.sort

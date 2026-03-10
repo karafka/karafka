@@ -27,5 +27,5 @@ start_karafka_and_wait_until do
   DT.key?(:done)
 end
 
-assert_equal DT[:worker_thread_priority], 2
-assert_equal DT[:listener_thread_priority], -2
+assert_equal 2, DT[:worker_thread_priority]
+assert_equal(-2, DT[:listener_thread_priority])

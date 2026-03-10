@@ -59,15 +59,15 @@ start_karafka_and_wait_until do
 end
 
 assert DT[:consumed].empty?
-assert_equal DT[:messages].size, 1
+assert_equal 1, DT[:messages].size
 
 messages = DT[:messages].first
 
-assert_equal messages.metadata.first_offset, -1001
-assert_equal messages.metadata.last_offset, -1001
-assert_equal messages.metadata.partition, 0
-assert_equal messages.metadata.size, 0
-assert_equal messages.metadata.processed_at, nil
+assert_equal(-1001, messages.metadata.first_offset)
+assert_equal(-1001, messages.metadata.last_offset)
+assert_equal 0, messages.metadata.partition
+assert_equal 0, messages.metadata.size
+assert_equal nil, messages.metadata.processed_at
 assert !messages.metadata.created_at.nil?
 assert messages.empty?
 assert DT.key?(:before_schedule_idle)

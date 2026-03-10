@@ -59,4 +59,4 @@ start_karafka_and_wait_until do
   DT[:errors].size >= 10
 end
 
-assert_equal DT[0].uniq, [0]
+assert_equal [0], DT[0].uniq

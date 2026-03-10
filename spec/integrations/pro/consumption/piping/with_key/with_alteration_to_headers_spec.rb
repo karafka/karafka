@@ -90,6 +90,6 @@ DT[:piped].each do |message|
   assert EXPECTED_KEYS.include?(message.key)
   assert_equal headers["source_topic"], DT.topics.first
   assert_equal headers["source_topic"], DT.topics.first
-  assert_equal headers["extra_data"], "1"
+  assert_equal "1", headers["extra_data"]
   assert_equal message.raw_payload, headers["extra_test"]
 end

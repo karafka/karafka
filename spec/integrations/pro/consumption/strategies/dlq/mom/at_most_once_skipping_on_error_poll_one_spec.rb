@@ -69,4 +69,4 @@ start_karafka_and_wait_until do
 end
 
 assert_equal (DT[0] + DT[:broken]).sort.uniq, (0..19).to_a
-assert_equal DT[:broken], [1, 3, 5, 7, 9, 11, 13, 15, 17, 19]
+assert_equal [1, 3, 5, 7, 9, 11, 13, 15, 17, 19], DT[:broken]

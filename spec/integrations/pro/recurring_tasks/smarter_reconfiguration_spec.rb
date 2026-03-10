@@ -42,4 +42,4 @@ rescue Karafka::Errors::CommandValidationError => e
   code = e.cause.code
 end
 
-assert_equal code, :invalid_replication_factor
+assert_equal :invalid_replication_factor, code

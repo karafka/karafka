@@ -103,17 +103,17 @@ start_karafka_and_wait_until(sleep: 1) do
 end
 
 # Only this message should be available
-assert_equal dispatched.raw_key, "key-101"
-assert_equal dispatched.raw_payload, "payload-101"
-assert_equal dispatched.partition, 0
+assert_equal "key-101", dispatched.raw_key
+assert_equal "payload-101", dispatched.raw_payload
+assert_equal 0, dispatched.partition
 
 headers = dispatched.raw_headers
 
-assert_equal headers["id"], "101"
-assert_equal headers["schedule_schema_version"], "1.0.0"
+assert_equal "101", headers["id"]
+assert_equal "1.0.0", headers["schedule_schema_version"]
 assert headers.key?("schedule_target_epoch")
-assert_equal headers["schedule_source_type"], "schedule"
+assert_equal "schedule", headers["schedule_source_type"]
 assert_equal headers["schedule_target_topic"], DT.topics[1]
-assert_equal headers["schedule_target_partition"], "0"
-assert_equal headers["schedule_target_key"], "key-101"
+assert_equal "0", headers["schedule_target_partition"]
+assert_equal "key-101", headers["schedule_target_key"]
 assert_equal headers["schedule_source_topic"], DT.topic

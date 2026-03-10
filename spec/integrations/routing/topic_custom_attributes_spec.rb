@@ -53,10 +53,10 @@ end
 t1 = Karafka::App.consumer_groups[0].topics.first
 t2 = Karafka::App.consumer_groups[1].topics.first
 
-assert_equal t1.custom_attributes.mine, 1
-assert_equal t1.custom_attributes.yours, 2
-assert_equal t2.custom_attributes.mine, 3
-assert_equal t2.custom_attributes.yours, 4
+assert_equal 1, t1.custom_attributes.mine
+assert_equal 2, t1.custom_attributes.yours
+assert_equal 3, t2.custom_attributes.mine
+assert_equal 4, t2.custom_attributes.yours
 
 produce(DT.topics[0], "{}")
 

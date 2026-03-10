@@ -39,5 +39,5 @@ start_karafka_and_wait_until(mode: :swarm) do
   DT[:producer_id] = producer_id
 end
 
-assert_equal DT[:max_payload_size], "10999"
+assert_equal "10999", DT[:max_payload_size]
 assert PRODUCER.id != DT[:producer_id]

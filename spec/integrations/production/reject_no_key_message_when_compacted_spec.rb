@@ -22,7 +22,7 @@ rescue WaterDrop::Errors::ProduceError => e
   errors << e
 end
 
-assert_equal errors.last.cause.code, :invalid_record
+assert_equal :invalid_record, errors.last.cause.code
 
 Karafka.producer.produce_sync(topic: DT.topic, payload: "test1", key: "1")
 

@@ -49,7 +49,7 @@ iterator.each do |message|
 end
 
 # All partitions data should be included
-assert_equal partitioned_data.size, 10
+assert_equal 10, partitioned_data.size
 
 # All data should be in order
 partitioned_data.each do |partition, messages|

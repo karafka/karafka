@@ -147,7 +147,7 @@ module Karafka
           handler = admin.create_topic(name, partitions, replication_factor, topic_config)
 
           with_re_wait(
-            -> { handler.wait(max_wait_timeout: max_wait_time_seconds) },
+            -> { handler.wait(max_wait_timeout_ms: max_wait_time_ms) },
             -> { names.include?(name) }
           )
         end
@@ -163,7 +163,7 @@ module Karafka
           handler = admin.delete_topic(name)
 
           with_re_wait(
-            -> { handler.wait(max_wait_timeout: max_wait_time_seconds) },
+            -> { handler.wait(max_wait_timeout_ms: max_wait_time_ms) },
             -> { !names.include?(name) }
           )
         end
@@ -180,7 +180,7 @@ module Karafka
           handler = admin.create_partitions(name, partitions)
 
           with_re_wait(
-            -> { handler.wait(max_wait_timeout: max_wait_time_seconds) },
+            -> { handler.wait(max_wait_timeout_ms: max_wait_time_ms) },
             -> { info(name).fetch(:partition_count) >= partitions }
           )
         end

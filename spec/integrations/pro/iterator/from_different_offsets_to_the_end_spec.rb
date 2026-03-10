@@ -52,7 +52,7 @@ iterator.each do |message|
   partitioned_data[message.partition] << message
 end
 
-assert_equal partitioned_data.size, 2
+assert_equal 2, partitioned_data.size
 
 # for partition 0 we start from beginning
 offset = 0
@@ -63,7 +63,7 @@ partitioned_data[0].each do |message|
   offset += 1
 end
 
-assert_equal partitioned_elements[0].size, 20
+assert_equal 20, partitioned_elements[0].size
 
 # for partition 1 we start from the middle
 offset = 10
@@ -74,4 +74,4 @@ partitioned_data[1].each do |message|
   offset += 1
 end
 
-assert_equal partitioned_data[1].size, 10, partitioned_data[1].size
+assert_equal 10, partitioned_data[1].size, partitioned_data[1].size

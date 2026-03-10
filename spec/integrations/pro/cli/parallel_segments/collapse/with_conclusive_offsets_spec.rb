@@ -59,5 +59,5 @@ assert results.include?("successfully")
 
 # Verify the segment origin group now has the offsets
 offsets = Karafka::Admin.read_lags_with_offsets({ DT.consumer_group => [DT.topic] })
-assert_equal offsets[DT.consumer_group][DT.topic][0][:offset], 1
-assert_equal offsets[DT.consumer_group][DT.topic][1][:offset], 2
+assert_equal 1, offsets[DT.consumer_group][DT.topic][0][:offset]
+assert_equal 2, offsets[DT.consumer_group][DT.topic][1][:offset]

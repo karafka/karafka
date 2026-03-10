@@ -47,4 +47,4 @@ start_karafka_and_wait_until do
   DT[:tracker].size >= 2
 end
 
-assert_equal DT[:tracker].uniq, [0]
+assert_equal [0], DT[:tracker].uniq

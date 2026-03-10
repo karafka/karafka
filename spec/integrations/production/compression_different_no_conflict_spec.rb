@@ -33,5 +33,5 @@ variant2.produce_sync(topic: DT.topic, payload: "test2")
 Karafka.producer.close
 
 messages = Karafka::Admin.read_topic(DT.topic, 0, 2)
-assert_equal messages[0].raw_payload, "test1"
-assert_equal messages[1].raw_payload, "test2"
+assert_equal "test1", messages[0].raw_payload
+assert_equal "test2", messages[1].raw_payload

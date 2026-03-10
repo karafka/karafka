@@ -62,5 +62,5 @@ start_karafka_and_wait_until do
   DT[:errors_collapsed].size >= 2
 end
 
-assert_equal DT[:errors_collapsed].map(&:size).uniq, [10]
-assert_equal DT[:errors_collapsed].map(&:to_a).flatten.map(&:class).uniq.sort_by(&:to_s), [E1, E2]
+assert_equal [10], DT[:errors_collapsed].map(&:size).uniq
+assert_equal [E1, E2], DT[:errors_collapsed].map(&:to_a).flatten.map(&:class).uniq.sort_by(&:to_s)

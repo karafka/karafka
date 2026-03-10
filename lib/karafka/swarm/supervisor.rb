@@ -152,6 +152,9 @@ module Karafka
           caller: self,
           error: e,
           manager: manager,
+          active_listeners: [],
+          alive_workers: [],
+          in_processing: {},
           type: "app.stopping.error"
         )
 
