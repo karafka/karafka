@@ -62,9 +62,12 @@ end
 ARGV[0] = "info"
 ARGV[1] = "--extended"
 
-results = capture_stdout do
-  Karafka::Cli.start
-end
+output = StringIO.new
+Karafka.instance_variable_set(:@logger, ::Logger.new(output).tap { |l| l.level = ::Logger::INFO })
+
+Karafka::Cli.start
+
+results = output.string
 
 # Verify routing section
 assert results.include?("Routing")
