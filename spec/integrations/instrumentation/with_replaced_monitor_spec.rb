@@ -19,7 +19,7 @@ class WrappedMonitor < Karafka::Instrumentation::Monitor
 
     super
   ensure
-    DT[:tags].clear
+    DT[:tags].clear if TRACEABLE_EVENTS.include?(event_id)
   end
 end
 
