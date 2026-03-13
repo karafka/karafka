@@ -10,7 +10,7 @@ module Karafka
     class ProducerReplacer
       # Attributes that should not be directly copied from the old producer config because they
       # are either regenerated fresh (kafka, logger, id) or handled via their own namespaced
-      # migration (oauth, polling, fd).
+      # migration (oauth, polling, polling.fd).
       SKIPPABLE_ATTRIBUTES = %i[
         id
         kafka
