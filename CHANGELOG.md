@@ -9,6 +9,7 @@
 - [Enhancement] Optimize `IntervalRunner#call` to use a single `monotonic_now` call instead of two per invocation.
 - [Enhancement] Support WaterDrop `:fd` mode in Swarm.
 - [Maintenance] Use both `:fd` and `:thread` producer backends in CI.
+- [Fix] Preserve producer-specific kafka settings (e.g., `enable.idempotence`) when recreating the producer in swarm forks.
 
 ## 2.5.6 (2026-02-28)
 - **[Feature]** Add `karafka topics health` command to check Kafka topics for replication and durability issues, detecting no redundancy (RF=1), zero fault tolerance (RF≤min.insync), and low durability (min.insync=1) configurations with color-coded severity grouping and actionable recommendations (Pro).
