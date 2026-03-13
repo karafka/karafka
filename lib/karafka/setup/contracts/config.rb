@@ -57,6 +57,16 @@ module Karafka
           end
         end
 
+        nested(:deserializing) do
+          nested(:parallel) do
+            required(:active) { |val| [true, false].include?(val) }
+            required(:concurrency) { |val| val.is_a?(Integer) && val.positive? }
+            required(:batch_threshold) { |val| val.is_a?(Integer) && val.positive? }
+            required(:total_payload_threshold) { |val| val.is_a?(Integer) && val >= 0 }
+            required(:batch_size) { |val| val.is_a?(Integer) && val.positive? }
+          end
+        end
+
         nested(:admin) do
           # Can be empty because inherits values from the root kafka
           required(:kafka) { |val| val.is_a?(Hash) }

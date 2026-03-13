@@ -3,7 +3,7 @@
 module Karafka
   module Routing
     module Features
-      class Deserializers < Base
+      class Deserializing < Base
         # This feature validation contracts
         module Contracts
           # Basic validation of the Kafka expected config details
@@ -14,12 +14,13 @@ module Karafka
               ).fetch("en").fetch("validations").fetch("routing").fetch("topic")
             end
 
-            nested :deserializers do
+            nested :deserializing do
               # Always enabled
               required(:active) { |val| val == true }
               required(:payload) { |val| val.respond_to?(:call) }
               required(:headers) { |val| val.respond_to?(:call) }
               required(:key) { |val| val.respond_to?(:call) }
+              required(:parallel) { |val| [true, false].include?(val) }
             end
           end
         end
