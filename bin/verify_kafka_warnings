@@ -14,9 +14,15 @@ allowed_patterns=(
    "Topic '__consumer_offsets' already exists"
 )
 
-# Get all warnings
-warnings=$(docker logs --since=0 kafka | grep "] WARN ")
+# Use provided container names or default to "kafka"
+containers=("${@:-kafka}")
+
 exit_code=0
+
+for container in "${containers[@]}"; do
+
+# Get all warnings
+warnings=$(docker logs --since=0 "$container" 2>&1 | grep "] WARN ")
 
 while IFS= read -r line; do
    allowed=0
@@ -28,10 +34,12 @@ while IFS= read -r line; do
    done
 
    if [ $allowed -eq 0 ]; then
-       echo "Unexpected warning found:"
+       echo "Unexpected warning in $container:"
        echo "$line"
        exit_code=1
    fi
 done <<< "$warnings"
+
+done
 
 exit $exit_code
