@@ -12,6 +12,7 @@ allowed_patterns=(
    "Creating new"
    "Unloaded transaction metadata"
    "Topic '__consumer_offsets' already exists"
+   "Node may not be available"
 )
 
 # Use provided container names or default to "kafka"
