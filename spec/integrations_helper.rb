@@ -35,6 +35,7 @@ unless ENV["PRISTINE_MODE"]
   require "byebug"
 end
 
+require "digest"
 require "singleton"
 require "securerandom"
 require "stringio"
