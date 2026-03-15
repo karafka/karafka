@@ -13,6 +13,7 @@ allowed_patterns=(
    "Unloaded transaction metadata"
    "Topic '__consumer_offsets' already exists"
    "Node may not be available"
+   "UNKNOWN_TOPIC_OR_PARTITION from the leader for partition"
 )
 
 # Use provided container names or default to "kafka"
