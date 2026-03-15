@@ -9,6 +9,8 @@
 - [Enhancement] Optimize `IntervalRunner#call` to use a single `monotonic_now` call instead of two per invocation.
 - [Enhancement] Support WaterDrop `:fd` mode in Swarm.
 - [Maintenance] Use both `:fd` and `:thread` producer backends in CI.
+- [Maintenance] Include spec file hash in integration test topic names for easier traceability in Kafka logs (#3056).
+- [Fix] Remove duplicate topic creation in multi-broker health integration specs (#3056).
 - [Fix] Preserve producer-specific kafka settings (e.g., `enable.idempotence`) when recreating the producer in swarm forks.
 
 ## 2.5.6 (2026-02-28)
