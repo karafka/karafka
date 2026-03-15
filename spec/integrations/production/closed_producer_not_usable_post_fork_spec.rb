@@ -11,21 +11,21 @@ setup_karafka
 READER, WRITER = IO.pipe
 
 # Ensure the producer has been used at least once, then close it before forking
-Karafka.producer.produce_sync(topic: DT.topic, payload: 'pre-fork')
+Karafka.producer.produce_sync(topic: DT.topic, payload: "pre-fork")
 Karafka.producer.close
 
 pid = fork do
   error = begin
-    Karafka.producer.produce_sync(topic: DT.topic, payload: 'post-fork')
+    Karafka.producer.produce_sync(topic: DT.topic, payload: "post-fork")
     nil
   rescue WaterDrop::Errors::ProducerClosedError => e
     e
   end
 
   if error
-    WRITER.puts('ProducerClosedError')
+    WRITER.puts("ProducerClosedError")
   else
-    WRITER.puts('no_error')
+    WRITER.puts("no_error")
   end
 
   exit!(0)
@@ -35,4 +35,4 @@ Process.wait(pid)
 
 result = READER.gets&.strip
 
-assert_equal 'ProducerClosedError', result
+assert_equal "ProducerClosedError", result
