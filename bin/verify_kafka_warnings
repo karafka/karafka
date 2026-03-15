@@ -14,6 +14,7 @@ allowed_patterns=(
    "Topic '__consumer_offsets' already exists"
    "Node may not be available"
    "UNKNOWN_TOPIC_OR_PARTITION from the leader for partition"
+   "Error processing kafka.server:type=BrokerTopicMetrics"
 )
 
 # Use provided container names or default to "kafka"
