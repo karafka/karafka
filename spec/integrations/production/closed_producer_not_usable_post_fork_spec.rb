@@ -8,13 +8,15 @@
 
 setup_karafka
 
-READER, WRITER = IO.pipe
+reader, writer = IO.pipe
 
 # Ensure the producer has been used at least once, then close it before forking
 Karafka.producer.produce_sync(topic: DT.topic, payload: "pre-fork")
 Karafka.producer.close
 
 pid = fork do
+  reader.close
+
   error = begin
     Karafka.producer.produce_sync(topic: DT.topic, payload: "post-fork")
     nil
@@ -23,16 +25,19 @@ pid = fork do
   end
 
   if error
-    WRITER.puts("ProducerClosedError")
+    writer.puts("ProducerClosedError")
   else
-    WRITER.puts("no_error")
+    writer.puts("no_error")
   end
 
+  writer.close
   exit!(0)
 end
 
-Process.wait(pid)
+writer.close
+result = reader.gets&.strip
+reader.close
 
-result = READER.gets&.strip
+Process.wait(pid)
 
 assert_equal "ProducerClosedError", result
