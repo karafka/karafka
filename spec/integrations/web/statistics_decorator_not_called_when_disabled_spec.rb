@@ -14,7 +14,7 @@ ORIGINAL_DIFF = Karafka::Core::Monitoring::StatisticsDecorator.instance_method(:
 
 Karafka::Core::Monitoring::StatisticsDecorator.define_method(:diff) do |*args|
   DT[:diff_called] << true
-  ORIGINAL_DIFF.bind(self).call(*args)
+  ORIGINAL_DIFF.bind_call(self, *args)
 end
 
 class Consumer < Karafka::BaseConsumer

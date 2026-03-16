@@ -14,7 +14,7 @@ ORIGINAL_DIFF = Karafka::Core::Monitoring::StatisticsDecorator.instance_method(:
 
 Karafka::Core::Monitoring::StatisticsDecorator.define_method(:diff) do |*args|
   DT[:diff_called] << true
-  ORIGINAL_DIFF.bind(self).call(*args)
+  ORIGINAL_DIFF.bind_call(self, *args)
 end
 
 # Create a custom producer with statistics enabled
@@ -36,7 +36,7 @@ class Consumer < Karafka::BaseConsumer
     end
 
     # Use the custom producer to produce a message, keeping it alive and emitting stats
-    CUSTOM_PRODUCER.produce_sync(topic: DT.topic, payload: 'from-custom-producer')
+    CUSTOM_PRODUCER.produce_sync(topic: DT.topic, payload: "from-custom-producer")
   end
 end
 
