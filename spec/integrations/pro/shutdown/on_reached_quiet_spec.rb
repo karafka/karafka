@@ -24,8 +24,6 @@
 
 setup_karafka
 
-produce(DT.topic, "1")
-
 class Consumer < Karafka::BaseConsumer
   def consume
     DT[SecureRandom.uuid] = true
@@ -33,7 +31,7 @@ class Consumer < Karafka::BaseConsumer
   end
 end
 
-draw_routes(create_topics: false) do
+draw_routes do
   5.times do |i|
     consumer_group "gr#{i}" do
       topic DT.topic do
@@ -42,6 +40,8 @@ draw_routes(create_topics: false) do
     end
   end
 end
+
+produce(DT.topic, "1")
 
 Thread.new do
   sleep(0.1) until DT.data.keys.size >= 5

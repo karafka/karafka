@@ -4,8 +4,6 @@
 
 setup_karafka(allow_errors: true) { |config| config.shutdown_timeout = 1_000 }
 
-produce(DT.topic, "1")
-
 class Consumer < Karafka::BaseConsumer
   def consume
     DT[0] << true
@@ -14,7 +12,9 @@ class Consumer < Karafka::BaseConsumer
   end
 end
 
-draw_routes(Consumer, create_topics: false)
+draw_routes(Consumer)
+
+produce(DT.topic, "1")
 
 start_karafka_and_wait_until do
   if DT[0].empty?

@@ -32,13 +32,13 @@ class Consumer < Karafka::BaseConsumer
   end
 end
 
-produce_many(DT.topic, DT.uuids(10))
-
-draw_routes(create_topics: false) do
+draw_routes do
   topic DT.topic do
     consumer Consumer
   end
 end
+
+produce_many(DT.topic, DT.uuids(10))
 
 start_karafka_and_wait_until do
   DT.key?(:lost)

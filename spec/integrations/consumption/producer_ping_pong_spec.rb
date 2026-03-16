@@ -4,8 +4,6 @@
 
 setup_karafka
 
-produce(DT.topic, 0.to_json)
-
 class Consumer < Karafka::BaseConsumer
   def consume
     messages.each do |message|
@@ -21,7 +19,9 @@ class Consumer < Karafka::BaseConsumer
   end
 end
 
-draw_routes(Consumer, create_topics: false)
+draw_routes(Consumer)
+
+produce(DT.topic, 0.to_json)
 
 start_karafka_and_wait_until do
   DT[0].size > 10

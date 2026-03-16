@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 RSpec.describe_current do
-  let(:name) { "it-#{SecureRandom.uuid}" }
+  let(:name) { generate_topic_name }
   let(:topics) { described_class.cluster_info.topics.map { |tp| tp[:topic_name] } }
 
   describe "#create_topic" do

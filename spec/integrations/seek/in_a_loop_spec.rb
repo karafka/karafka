@@ -6,10 +6,6 @@
 
 setup_karafka
 
-# The last one will act as an indicator that we're done
-elements = DT.uuids(99) << "1"
-produce_many(DT.topic, elements)
-
 class Consumer < Karafka::BaseConsumer
   def consume
     # Process data only after the offset seek has been sent
@@ -22,13 +18,17 @@ class Consumer < Karafka::BaseConsumer
   end
 end
 
-draw_routes(create_topics: false) do
+draw_routes do
   topic DT.topic do
     consumer Consumer
     # Not really needed as we seek back, but still just in case of a crash
     manual_offset_management true
   end
 end
+
+# The last one will act as an indicator that we're done
+elements = DT.uuids(99) << "1"
+produce_many(DT.topic, elements)
 
 start_karafka_and_wait_until do
   # 100 initially and then a loop from 20th 4 times

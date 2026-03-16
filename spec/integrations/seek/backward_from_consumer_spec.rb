@@ -5,8 +5,6 @@
 
 setup_karafka
 
-produce_many(DT.topic, DT.uuids(10))
-
 class Consumer < Karafka::BaseConsumer
   def initialized
     @backwards = false
@@ -30,7 +28,9 @@ class Consumer < Karafka::BaseConsumer
   end
 end
 
-draw_routes(Consumer, create_topics: false)
+draw_routes(Consumer)
+
+produce_many(DT.topic, DT.uuids(10))
 
 start_karafka_and_wait_until do
   DT[0].size >= 10
