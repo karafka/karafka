@@ -15,8 +15,8 @@ class DataCollector
   # We use the relative path from the Karafka gem root so the hash is consistent across
   # environments (local dev vs CI runners with different absolute paths)
   SPEC_HASH = begin
-    gem_root = File.expand_path(File.join(__dir__, '..', '..'))
-    relative_path = $PROGRAM_NAME.sub("#{gem_root}/", '')
+    gem_root = File.expand_path(File.join(__dir__, "..", ".."))
+    relative_path = $PROGRAM_NAME.sub("#{gem_root}/", "")
     Digest::MD5.hexdigest(relative_path)[0, 6]
   end
 
