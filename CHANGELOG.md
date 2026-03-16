@@ -1,6 +1,6 @@
 # Karafka Framework Changelog
 
-## 2.5.7 (Unreleased)
+## 2.5.7 (2026-03-16)
 - [Enhancement] Report detailed blocking information (active listeners, alive workers, and in-processing jobs) during forceful shutdown instead of only aggregate counts.
 - [Enhancement] Improve `ForcefulShutdownError` description to clearly explain when and why it is raised.
 - [Enhancement] Cache `messages.last` in `BatchMetadata` builder to avoid duplicate array traversal.
