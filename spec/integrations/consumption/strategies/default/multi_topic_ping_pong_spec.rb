@@ -6,8 +6,6 @@ setup_karafka do |config|
   config.max_wait_time = 100
 end
 
-produce(DT.topic, 0.to_json)
-
 class Consumer1 < Karafka::BaseConsumer
   def consume
     messages.each do |message|
@@ -43,6 +41,8 @@ draw_routes do
     consumer Consumer2
   end
 end
+
+produce(DT.topic, 0.to_json)
 
 start_karafka_and_wait_until do
   DT[0].size > 50
