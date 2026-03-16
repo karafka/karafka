@@ -24,7 +24,7 @@
 RSpec.describe_current do
   subject(:iterator) { described_class.new(topic) }
 
-  let(:topic) { "it-#{SecureRandom.uuid}" }
+  let(:topic) { generate_topic_name }
 
   before { Karafka::Admin.create_topic(topic, 2, 1) }
 

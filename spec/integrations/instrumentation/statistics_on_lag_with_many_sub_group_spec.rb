@@ -23,9 +23,6 @@ class Consumer < Karafka::BaseConsumer
   end
 end
 
-produce_many(DT.topics[0], Array.new(20) { "1" })
-produce_many(DT.topics[1], Array.new(10) { "1" })
-
 Karafka::App.monitor.subscribe("statistics.emitted") do |event|
   event.payload[:statistics]["topics"].each do |topic_name, topic_values|
     topic_values["partitions"].each do |partition_name, partition_values|
@@ -41,7 +38,7 @@ Karafka::App.monitor.subscribe("statistics.emitted") do |event|
   end
 end
 
-draw_routes(create_topics: false) do
+draw_routes do
   subscription_group "1" do
     topic DT.topics[0] do
       consumer Consumer
@@ -54,6 +51,9 @@ draw_routes(create_topics: false) do
     end
   end
 end
+
+produce_many(DT.topics[0], Array.new(20) { "1" })
+produce_many(DT.topics[1], Array.new(10) { "1" })
 
 bigger = DT.data[DT.topics[0]]
 smaller = DT.data[DT.topics[1]]

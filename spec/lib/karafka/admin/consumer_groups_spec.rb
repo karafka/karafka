@@ -3,8 +3,8 @@
 RSpec.describe Karafka::Admin::ConsumerGroups do
   subject(:admin_consumer_groups) { described_class }
 
-  let(:name) { "it-#{SecureRandom.uuid}" }
-  let(:name2) { "it-#{SecureRandom.uuid}" }
+  let(:name) { generate_topic_name }
+  let(:name2) { generate_topic_name }
 
   describe "#seek" do
     subject(:seeking) { described_class.seek(cg_id, map) }
