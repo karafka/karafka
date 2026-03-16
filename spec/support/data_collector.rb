@@ -16,7 +16,8 @@ class DataCollector
   # environments (local dev vs CI runners with different absolute paths)
   SPEC_HASH = begin
     gem_root = File.expand_path(File.join(__dir__, "..", ".."))
-    relative_path = $PROGRAM_NAME.sub("#{gem_root}/", "")
+    absolute_program = File.expand_path($PROGRAM_NAME)
+    relative_path = absolute_program.sub("#{gem_root}/", "")
     Digest::MD5.hexdigest(relative_path)[0, 6]
   end
 

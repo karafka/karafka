@@ -180,7 +180,7 @@ end
 #
 # @return [String] fingerprinted topic name
 def generate_topic_name
-  spec_file = caller_locations(1, 1).first.path
+  spec_file = File.expand_path(caller_locations(1, 1).first.path)
   relative_path = spec_file.sub("#{Karafka.gem_root}/", "")
   hash = Digest::MD5.hexdigest(relative_path)[0, 6]
   "it-#{hash}-#{SecureRandom.uuid}"
