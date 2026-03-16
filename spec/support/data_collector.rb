@@ -12,7 +12,13 @@ class DataCollector
 
   # Short hash (6 chars) derived from the spec file path for topic name traceability
   # This makes it easy to identify which integration test created a given topic in Kafka logs
-  SPEC_HASH = Digest::MD5.hexdigest($PROGRAM_NAME)[0, 6]
+  # We use the relative path from the Karafka gem root so the hash is consistent across
+  # environments (local dev vs CI runners with different absolute paths)
+  SPEC_HASH = begin
+    gem_root = File.expand_path(File.join(__dir__, '..', '..'))
+    relative_path = $PROGRAM_NAME.sub("#{gem_root}/", '')
+    Digest::MD5.hexdigest(relative_path)[0, 6]
+  end
 
   private_constant :MUTEX, :SPEC_HASH
 

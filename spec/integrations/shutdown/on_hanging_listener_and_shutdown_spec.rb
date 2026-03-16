@@ -5,20 +5,20 @@
 
 setup_karafka(allow_errors: true) { |config| config.shutdown_timeout = 1_000 }
 
-produce(DT.topic, "1")
-
 class Consumer < Karafka::BaseConsumer
   def consume
     DT[0] << true
   end
 end
 
-draw_routes(create_topics: false) do
+draw_routes do
   topic DT.topic do
     max_messages 1
     consumer Consumer
   end
 end
+
+produce(DT.topic, "1")
 
 # This will force Karafka fetcher to hang
 Karafka.monitor.subscribe("connection.listener.fetch_loop.received") do

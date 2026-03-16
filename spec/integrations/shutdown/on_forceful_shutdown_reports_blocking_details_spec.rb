@@ -13,8 +13,6 @@ end
 log_io = StringIO.new
 Karafka.logger.reopen(log_io)
 
-produce(DT.topic, "1")
-
 class Consumer < Karafka::BaseConsumer
   def consume
     DT[0] << true
@@ -23,7 +21,9 @@ class Consumer < Karafka::BaseConsumer
   end
 end
 
-draw_routes(Consumer, create_topics: false)
+draw_routes(Consumer)
+
+produce(DT.topic, "1")
 
 Karafka.monitor.subscribe("error.occurred") do |event|
   next unless event[:type] == "app.stopping.error"
