@@ -10,8 +10,6 @@ setup_karafka do |config|
   config.internal.swarm.node_report_timeout = 200_000_000
 end
 
-2.times { produce(DT.topic, "1") }
-
 Karafka.monitor.subscribe("connection.listener.fetch_loop") do
   DT[:runs] << true
 end
@@ -22,7 +20,9 @@ class Consumer < Karafka::BaseConsumer
   end
 end
 
-draw_routes(Consumer, create_topics: false)
+draw_routes(Consumer)
+
+2.times { produce(DT.topic, "1") }
 
 start_karafka_and_wait_until do
   if DT[0].size >= 2
