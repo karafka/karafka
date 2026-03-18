@@ -42,35 +42,33 @@ DT[:success] = false
 
 class Consumer < Karafka::BaseConsumer
   def consume
-    begin
-      transaction do
-        messages.each do |message|
-          DT[:processing] << message.raw_payload
+    transaction do
+      messages.each do |message|
+        DT[:processing] << message.raw_payload
 
-          producer.produce_async(
-            topic: DT.topics[1],
-            payload: "target1_#{message.raw_payload}"
-          )
+        producer.produce_async(
+          topic: DT.topics[1],
+          payload: "target1_#{message.raw_payload}"
+        )
 
-          if DT[:should_fail]
-            raise StandardError, "Simulated production failure"
-          end
-
-          producer.produce_async(
-            topic: DT.topics[2],
-            payload: "target2_#{message.raw_payload}"
-          )
+        if DT[:should_fail]
+          raise StandardError, "Simulated production failure"
         end
 
-        mark_as_consumed(messages.last)
+        producer.produce_async(
+          topic: DT.topics[2],
+          payload: "target2_#{message.raw_payload}"
+        )
       end
 
-      DT[:success] = true
-    rescue => e
-      DT[:errors] << e.message
-      DT[:should_fail] = false
-      raise
+      mark_as_consumed(messages.last)
     end
+
+    DT[:success] = true
+  rescue => e
+    DT[:errors] << e.message
+    DT[:should_fail] = false
+    raise
   end
 end
 
