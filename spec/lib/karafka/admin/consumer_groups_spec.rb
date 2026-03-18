@@ -125,7 +125,10 @@ RSpec.describe Karafka::Admin::ConsumerGroups do
     end
 
     context "when querying existing topic with a CG that never consumed it" do
-      before { PRODUCERS.regular.produce_sync(topic: name, payload: "1") }
+      before do
+        Karafka::Admin::Topics.create(name, 1, 1)
+        PRODUCERS.regular.produce_sync(topic: name, payload: "1")
+      end
 
       let(:cgs_t) { { "doesnotexist" => [name] } }
 
