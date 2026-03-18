@@ -51,14 +51,12 @@ class Consumer < Karafka::BaseConsumer
           payload: "target1_#{message.raw_payload}"
         )
 
-        if DT[:should_fail]
-          raise StandardError, "Simulated production failure"
-        end
-
         producer.produce_async(
           topic: DT.topics[2],
           payload: "target2_#{message.raw_payload}"
         )
+
+        raise StandardError, "Simulated production failure" if DT[:should_fail]
       end
 
       mark_as_consumed(messages.last)
@@ -105,8 +103,9 @@ start_karafka_and_wait_until do
   DT[:success] == true && DT[:target1].size >= 3 && DT[:target2].size >= 3
 end
 
-# Verify one failure occurred
+# Verify one failure occurred with the expected error message
 assert_equal 1, DT[:errors].size
+assert_equal "Simulated production failure", DT[:errors].first
 
 # Verify messages processed (1 from failed attempt + 3 from successful processing = 4 total)
 assert_equal 4, DT[:processing].size
