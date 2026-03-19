@@ -105,84 +105,6 @@ RSpec.describe_current do
     end
   end
 
-  describe ".migrate_consumer_group" do
-    let(:source_consumer_group_id) { SecureRandom.uuid }
-    let(:target_consumer_group_id) { SecureRandom.uuid }
-
-    context "when source group has no committed offsets" do
-      it "raises OperationError" do
-        expect do
-          recovery.migrate_consumer_group(source_consumer_group_id, target_consumer_group_id)
-        end.to raise_error(
-          described_class::Errors::OperationError,
-          /No committed offsets found/
-        )
-      end
-    end
-
-    context "when source group has committed offsets" do
-      before do
-        Karafka::Admin::ConsumerGroups.seek(
-          source_consumer_group_id,
-          { topic => { 0 => 100, 1 => 200 } }
-        )
-      end
-
-      it "returns the migrated offsets" do
-        result = recovery.migrate_consumer_group(
-          source_consumer_group_id,
-          target_consumer_group_id
-        )
-        expect(result[topic]).to eq({ 0 => 100, 1 => 200 })
-      end
-
-      it "commits offsets to the target consumer group" do
-        recovery.migrate_consumer_group(source_consumer_group_id, target_consumer_group_id)
-        target_offsets = recovery.read_committed_offsets(target_consumer_group_id)
-        expect(target_offsets[topic]).to eq({ 0 => 100, 1 => 200 })
-      end
-    end
-
-    context "when source group has offsets only for some partitions" do
-      before do
-        Karafka::Admin::ConsumerGroups.seek(
-          source_consumer_group_id,
-          { topic => { 1 => 300 } }
-        )
-      end
-
-      it "migrates only the partitions that have committed offsets" do
-        result = recovery.migrate_consumer_group(
-          source_consumer_group_id,
-          target_consumer_group_id
-        )
-        expect(result[topic]).to eq({ 1 => 300 })
-        expect(result[topic].key?(0)).to be(false)
-      end
-    end
-
-    context "when migrating offsets across multiple topics" do
-      let(:topic2) { generate_topic_name }
-
-      before do
-        Karafka::Admin.create_topic(topic2, 1, 1)
-        Karafka::Admin::ConsumerGroups.seek(
-          source_consumer_group_id,
-          { topic => { 0 => 50 }, topic2 => { 0 => 75 } }
-        )
-      end
-
-      it "migrates offsets for all topics" do
-        result = recovery.migrate_consumer_group(
-          source_consumer_group_id,
-          target_consumer_group_id
-        )
-        expect(result[topic]).to eq({ 0 => 50 })
-        expect(result[topic2]).to eq({ 0 => 75 })
-      end
-    end
-  end
-
   describe ".offsets_partition_for" do
     let(:partition_count) { described_class.new.send(:offsets_partition_count) }
 
@@ -273,22 +195,22 @@ RSpec.describe_current do
     end
 
     context "when partition is out of range" do
-      it "raises OperationError for negative partition" do
+      it "raises PartitionOutOfRangeError for negative partition" do
         expect do
           recovery.affected_groups(-1)
         end.to raise_error(
-          described_class::Errors::OperationError,
+          described_class::Errors::PartitionOutOfRangeError,
           /out of range/
         )
       end
 
-      it "raises OperationError for partition >= count" do
+      it "raises PartitionOutOfRangeError for partition >= count" do
         partition_count = described_class.new.send(:offsets_partition_count)
 
         expect do
           recovery.affected_groups(partition_count)
         end.to raise_error(
-          described_class::Errors::OperationError,
+          described_class::Errors::PartitionOutOfRangeError,
           /out of range/
         )
       end

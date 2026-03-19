@@ -73,23 +73,6 @@ module Karafka
             new.read_committed_offsets(consumer_group_id, lookback_ms: lookback_ms)
           end
 
-          # @param source_consumer_group_id [String] the broken/stuck consumer group
-          # @param target_consumer_group_id [String] the new group to create
-          # @param lookback_ms [Integer] how far back to scan for offsets
-          # @return [Hash{String => Hash{Integer => Integer}}] the migrated offsets
-          # @see #migrate_consumer_group
-          def migrate_consumer_group(
-            source_consumer_group_id,
-            target_consumer_group_id,
-            lookback_ms: DEFAULT_LOOKBACK_MS
-          )
-            new.migrate_consumer_group(
-              source_consumer_group_id,
-              target_consumer_group_id,
-              lookback_ms: lookback_ms
-            )
-          end
-
           # @param consumer_group_id [String] consumer group id
           # @return [Integer] __consumer_offsets partition number
           # @see #offsets_partition_for
@@ -195,45 +178,6 @@ module Karafka
           committed
         end
 
-        # Migrates a stuck consumer group to a new group name, preserving exact committed offsets
-        # recovered from the raw __consumer_offsets log. The source group is left in place - it will
-        # clean up naturally once the coordinator recovers or the broker is patched. Safe to call
-        # while the source group coordinator is in a FAILED state.
-        #
-        # @param source_consumer_group_id [String] the broken/stuck consumer group
-        # @param target_consumer_group_id [String] the new group to create
-        # @param lookback_ms [Integer] how far back to scan for offsets
-        # @return [Hash{String => Hash{Integer => Integer}}] the migrated offsets
-        #
-        # @example Migrate to a new group name
-        #   Karafka::Admin::Recovery.migrate_consumer_group('sync', 'sync_v2')
-        #
-        # @example Migrate with a longer lookback window
-        #   Karafka::Admin::Recovery.migrate_consumer_group(
-        #     'sync', 'sync_v2',
-        #     lookback_ms: 4 * 60 * 60 * 1_000
-        #   )
-        def migrate_consumer_group(
-          source_consumer_group_id,
-          target_consumer_group_id,
-          lookback_ms: DEFAULT_LOOKBACK_MS
-        )
-          consumer_groups = Karafka::Admin::ConsumerGroups.new(kafka: @custom_kafka)
-
-          committed = read_committed_offsets(source_consumer_group_id, lookback_ms: lookback_ms)
-
-          if committed.empty?
-            raise(
-              Errors::OperationError,
-              "No committed offsets found for '#{source_consumer_group_id}'"
-            )
-          end
-
-          consumer_groups.seek(target_consumer_group_id, committed)
-
-          committed
-        end
-
         # Determines which __consumer_offsets partition holds data for a given consumer group. Kafka
         # uses Utils.abs(String#hashCode) % numPartitions where hashCode is Java's 32-bit signed
         # hash: s[0]*31^(n-1) + s[1]*31^(n-2) + ... + s[n-1], computed with int32 overflow
@@ -282,7 +226,7 @@ module Karafka
 
           unless offsets_topic
             raise(
-              Errors::OperationError,
+              Errors::MetadataError,
               "Could not retrieve metadata for '#{OFFSETS_TOPIC}'"
             )
           end
@@ -292,7 +236,7 @@ module Karafka
 
           unless partition_info
             raise(
-              Errors::OperationError,
+              Errors::MetadataError,
               "Could not find partition #{target_partition} in '#{OFFSETS_TOPIC}'"
             )
           end
@@ -309,7 +253,7 @@ module Karafka
 
           unless broker
             raise(
-              Errors::OperationError,
+              Errors::MetadataError,
               "Could not find broker #{leader_id} in cluster metadata"
             )
           end
@@ -352,7 +296,7 @@ module Karafka
 
           unless partition >= 0 && partition < count
             raise(
-              Errors::OperationError,
+              Errors::PartitionOutOfRangeError,
               "Partition #{partition} is out of range (0...#{count})"
             )
           end
@@ -397,7 +341,7 @@ module Karafka
 
           unless offsets_topic
             raise(
-              Errors::OperationError,
+              Errors::MetadataError,
               "Could not retrieve metadata for '#{OFFSETS_TOPIC}'"
             )
           end
@@ -475,7 +419,7 @@ module Karafka
         # Returns the partition count of the __consumer_offsets topic.
         #
         # @return [Integer] number of partitions
-        # @raise [Errors::OperationError] when topic metadata cannot be retrieved
+        # @raise [Errors::MetadataError] when topic metadata cannot be retrieved
         def offsets_partition_count
           topic_info = cluster_info.topics.find do |t|
             t[:topic_name] == OFFSETS_TOPIC
@@ -483,7 +427,7 @@ module Karafka
 
           unless topic_info
             raise(
-              Errors::OperationError,
+              Errors::MetadataError,
               "Could not retrieve partition count for '#{OFFSETS_TOPIC}'"
             )
           end

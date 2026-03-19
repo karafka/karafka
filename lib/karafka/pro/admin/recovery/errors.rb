@@ -30,8 +30,12 @@ module Karafka
           # Base for all the recovery errors
           BaseError = Class.new(::Karafka::Errors::BaseError)
 
-          # Raised when a recovery operation fails or cannot proceed
-          OperationError = Class.new(BaseError)
+          # Raised when required cluster metadata cannot be retrieved (topic, partition, or
+          # broker not found)
+          MetadataError = Class.new(BaseError)
+
+          # Raised when a partition number is outside the valid range for __consumer_offsets
+          PartitionOutOfRangeError = Class.new(BaseError)
         end
       end
     end

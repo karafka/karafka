@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
-# When migrating a consumer group via Recovery, the target group should end up
-# with the same committed offsets as the source group.
+# Demonstrates the two-step consumer group migration workflow using Recovery to read offsets
+# and ConsumerGroups.seek to write them to the target group.
 
 setup_karafka
 
@@ -34,17 +34,19 @@ Karafka::Admin.seek_consumer_group(
 
 sleep(2)
 
-# Migrate to the target group
-migrated = Karafka::Admin::Recovery.migrate_consumer_group(
+# Step 1: Read committed offsets from the broken group via Recovery (bypasses coordinator)
+recovered = Karafka::Admin::Recovery.read_committed_offsets(
   SOURCE_GROUP,
-  TARGET_GROUP,
   lookback_ms: 60 * 1_000
 )
 
-assert !migrated.empty?, "Expected migrated offsets"
-assert_equal 7, migrated[DT.topics[0]][0]
-assert_equal 3, migrated[DT.topics[0]][1]
-assert_equal 9, migrated[DT.topics[1]][0]
+assert !recovered.empty?, "Expected recovered offsets"
+assert_equal 7, recovered[DT.topics[0]][0]
+assert_equal 3, recovered[DT.topics[0]][1]
+assert_equal 9, recovered[DT.topics[1]][0]
+
+# Step 2: Write recovered offsets to the target group using standard Admin API
+Karafka::Admin::ConsumerGroups.seek(TARGET_GROUP, recovered)
 
 # Verify the target group actually has the offsets via the normal Admin API
 lags = Karafka::Admin.read_lags_with_offsets(

@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
-# When migrating a consumer group that has committed offsets for only some partitions of a
-# multi-partition topic, the target group should receive only those partitions and not others.
+# Demonstrates the two-step migration workflow when the source group has committed offsets for
+# only some partitions. The target group should receive only those partitions.
 
 setup_karafka
 
@@ -27,17 +27,20 @@ Karafka::Admin.seek_consumer_group(
 
 sleep(2)
 
-migrated = Karafka::Admin::Recovery.migrate_consumer_group(
+# Step 1: Read committed offsets via Recovery (bypasses coordinator)
+recovered = Karafka::Admin::Recovery.read_committed_offsets(
   SOURCE_GROUP,
-  TARGET_GROUP,
   lookback_ms: 60 * 1_000
 )
 
-assert_equal 4, migrated[DT.topic][0]
-assert_equal 7, migrated[DT.topic][2]
-assert !migrated[DT.topic].key?(1), "Partition 1 should not be in migrated offsets"
+assert_equal 4, recovered[DT.topic][0]
+assert_equal 7, recovered[DT.topic][2]
+assert !recovered[DT.topic].key?(1), "Partition 1 should not be in recovered offsets"
 
-# Verify target group has only the migrated partitions
+# Step 2: Write recovered offsets to the target group using standard Admin API
+Karafka::Admin::ConsumerGroups.seek(TARGET_GROUP, recovered)
+
+# Verify target group has only the recovered partitions
 target_offsets = Karafka::Admin::Recovery.read_committed_offsets(
   TARGET_GROUP,
   lookback_ms: 60 * 1_000
