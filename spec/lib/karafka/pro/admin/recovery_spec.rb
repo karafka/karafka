@@ -228,6 +228,267 @@ RSpec.describe_current do
     end
   end
 
+  describe ".coordinator_for" do
+    it "returns a hash with partition, broker_id, and broker_host" do
+      result = recovery.coordinator_for(consumer_group_id)
+      expect(result).to have_key(:partition)
+      expect(result).to have_key(:broker_id)
+      expect(result).to have_key(:broker_host)
+    end
+
+    it "returns the correct partition for the group" do
+      result = recovery.coordinator_for(consumer_group_id)
+      expected_partition = recovery.offsets_partition_for(consumer_group_id)
+      expect(result[:partition]).to eq(expected_partition)
+    end
+
+    it "returns a valid broker_id" do
+      result = recovery.coordinator_for(consumer_group_id)
+      expect(result[:broker_id]).to be_a(Integer)
+    end
+
+    it "returns a broker_host with host:port format" do
+      result = recovery.coordinator_for(consumer_group_id)
+      expect(result[:broker_host]).to match(/\A.+:\d+\z/)
+    end
+  end
+
+  describe ".affected_groups" do
+    context "when partition has consumer groups with committed offsets" do
+      let(:group1) { SecureRandom.uuid }
+      let(:group2) { SecureRandom.uuid }
+
+      before do
+        Karafka::Admin::ConsumerGroups.seek(group1, { topic => { 0 => 10 } })
+        Karafka::Admin::ConsumerGroups.seek(group2, { topic => { 0 => 20 } })
+      end
+
+      it "discovers groups on their respective partition" do
+        partition = recovery.offsets_partition_for(group1)
+        result = recovery.affected_groups(partition)
+        expect(result).to include(group1)
+      end
+    end
+
+    context "when partition is out of range" do
+      it "raises OperationError for negative partition" do
+        expect do
+          recovery.affected_groups(-1)
+        end.to raise_error(
+          described_class::Errors::OperationError,
+          /out of range/
+        )
+      end
+
+      it "raises OperationError for partition >= count" do
+        expect do
+          recovery.affected_groups(50)
+        end.to raise_error(
+          described_class::Errors::OperationError,
+          /out of range/
+        )
+      end
+    end
+
+    it "returns a sorted array" do
+      partition = recovery.offsets_partition_for(consumer_group_id)
+      result = recovery.affected_groups(partition)
+      expect(result).to be_an(Array)
+      expect(result).to eq(result.sort)
+    end
+  end
+
+  describe ".affected_partitions" do
+    it "returns an array of integers" do
+      metadata = Karafka::Admin.cluster_info
+      broker = metadata.brokers.first
+      broker_id = broker.is_a?(Hash) ? (broker[:broker_id] || broker[:node_id]) : broker.node_id
+
+      result = recovery.affected_partitions(broker_id)
+      expect(result).to be_an(Array)
+      expect(result).to all be_a(Integer)
+    end
+
+    it "returns a sorted array" do
+      metadata = Karafka::Admin.cluster_info
+      broker = metadata.brokers.first
+      broker_id = broker.is_a?(Hash) ? (broker[:broker_id] || broker[:node_id]) : broker.node_id
+
+      result = recovery.affected_partitions(broker_id)
+      expect(result).to eq(result.sort)
+    end
+
+    it "returns an empty array for a non-existent broker" do
+      result = recovery.affected_partitions(99999)
+      expect(result).to eq([])
+    end
+  end
+
+  describe ".read_committed_lags" do
+    context "when consumer group has no committed offsets" do
+      it "returns empty hash" do
+        result = recovery.read_committed_lags(consumer_group_id)
+        expect(result).to eq({})
+      end
+    end
+
+    context "when consumer group has committed offsets" do
+      before do
+        10.times { |i| PRODUCERS.regular.produce_sync(topic: topic, payload: i.to_s, partition: 0) }
+        Karafka::Admin::ConsumerGroups.seek(consumer_group_id, { topic => { 0 => 5 } })
+      end
+
+      it "returns offset, lag, and hi_offset for each partition" do
+        result = recovery.read_committed_lags(consumer_group_id)
+        expect(result[topic][0]).to have_key(:offset)
+        expect(result[topic][0]).to have_key(:lag)
+        expect(result[topic][0]).to have_key(:hi_offset)
+      end
+
+      it "computes lag as hi_offset - offset" do
+        result = recovery.read_committed_lags(consumer_group_id)
+        entry = result[topic][0]
+        expect(entry[:lag]).to eq(entry[:hi_offset] - entry[:offset])
+      end
+
+      it "returns non-negative lag" do
+        result = recovery.read_committed_lags(consumer_group_id)
+        expect(result[topic][0][:lag]).to be >= 0
+      end
+    end
+  end
+
+  describe ".migrate_consumer_groups" do
+    let(:source1) { SecureRandom.uuid }
+    let(:source2) { SecureRandom.uuid }
+    let(:target1) { SecureRandom.uuid }
+    let(:target2) { SecureRandom.uuid }
+
+    context "when all source groups have committed offsets" do
+      before do
+        Karafka::Admin::ConsumerGroups.seek(source1, { topic => { 0 => 100 } })
+        Karafka::Admin::ConsumerGroups.seek(source2, { topic => { 1 => 200 } })
+      end
+
+      it "returns offsets keyed by source group" do
+        result = recovery.migrate_consumer_groups(
+          { source1 => target1, source2 => target2 }
+        )
+        expect(result[source1][topic]).to eq({ 0 => 100 })
+        expect(result[source2][topic]).to eq({ 1 => 200 })
+      end
+
+      it "commits offsets to all target groups" do
+        recovery.migrate_consumer_groups(
+          { source1 => target1, source2 => target2 }
+        )
+        t1_offsets = recovery.read_committed_offsets(target1)
+        t2_offsets = recovery.read_committed_offsets(target2)
+        expect(t1_offsets[topic]).to eq({ 0 => 100 })
+        expect(t2_offsets[topic]).to eq({ 1 => 200 })
+      end
+    end
+
+    context "when a source group has no committed offsets" do
+      before do
+        Karafka::Admin::ConsumerGroups.seek(source1, { topic => { 0 => 100 } })
+      end
+
+      it "raises OperationError listing the missing source" do
+        expect do
+          recovery.migrate_consumer_groups(
+            { source1 => target1, source2 => target2 }
+          )
+        end.to raise_error(
+          described_class::Errors::OperationError,
+          /#{source2}/
+        )
+      end
+    end
+  end
+
+  describe ".detect_offset_anomalies" do
+    context "when consumer group has no committed offsets" do
+      it "returns empty hash" do
+        result = recovery.detect_offset_anomalies(consumer_group_id)
+        expect(result).to eq({})
+      end
+    end
+
+    context "when offsets are within valid range" do
+      before do
+        10.times { |i| PRODUCERS.regular.produce_sync(topic: topic, payload: i.to_s, partition: 0) }
+        Karafka::Admin::ConsumerGroups.seek(consumer_group_id, { topic => { 0 => 5 } })
+      end
+
+      it "reports status as :ok" do
+        result = recovery.detect_offset_anomalies(consumer_group_id)
+        expect(result[topic][0][:status]).to eq(:ok)
+      end
+
+      it "includes offset, lo_offset, and hi_offset" do
+        result = recovery.detect_offset_anomalies(consumer_group_id)
+        entry = result[topic][0]
+        expect(entry).to have_key(:offset)
+        expect(entry).to have_key(:lo_offset)
+        expect(entry).to have_key(:hi_offset)
+      end
+    end
+  end
+
+  describe ".verify_migration" do
+    let(:source_group) { SecureRandom.uuid }
+    let(:target_group) { SecureRandom.uuid }
+
+    context "when both groups have matching offsets" do
+      before do
+        Karafka::Admin::ConsumerGroups.seek(source_group, { topic => { 0 => 100 } })
+        Karafka::Admin::ConsumerGroups.seek(target_group, { topic => { 0 => 100 } })
+      end
+
+      it "returns status :ok with empty mismatches" do
+        result = recovery.verify_migration(source_group, target_group)
+        expect(result[:status]).to eq(:ok)
+        expect(result[:mismatches]).to be_empty
+      end
+
+      it "includes source and target offsets" do
+        result = recovery.verify_migration(source_group, target_group)
+        expect(result[:source_offsets][topic]).to eq({ 0 => 100 })
+        expect(result[:target_offsets][topic]).to eq({ 0 => 100 })
+      end
+    end
+
+    context "when groups have mismatched offsets" do
+      before do
+        Karafka::Admin::ConsumerGroups.seek(source_group, { topic => { 0 => 100 } })
+        Karafka::Admin::ConsumerGroups.seek(target_group, { topic => { 0 => 50 } })
+      end
+
+      it "returns status :mismatch with details" do
+        result = recovery.verify_migration(source_group, target_group)
+        expect(result[:status]).to eq(:mismatch)
+        expect(result[:mismatches].size).to eq(1)
+        expect(result[:mismatches].first[:topic]).to eq(topic)
+        expect(result[:mismatches].first[:partition]).to eq(0)
+        expect(result[:mismatches].first[:source_offset]).to eq(100)
+        expect(result[:mismatches].first[:target_offset]).to eq(50)
+      end
+    end
+
+    context "when target group has no offsets for a source partition" do
+      before do
+        Karafka::Admin::ConsumerGroups.seek(source_group, { topic => { 0 => 100 } })
+      end
+
+      it "reports mismatch with nil target_offset" do
+        result = recovery.verify_migration(source_group, target_group)
+        expect(result[:status]).to eq(:mismatch)
+        expect(result[:mismatches].first[:target_offset]).to be_nil
+      end
+    end
+  end
+
   describe "#offsets_partition_count" do
     it "returns the partition count from cluster metadata" do
       count = described_class.new.send(:offsets_partition_count)
