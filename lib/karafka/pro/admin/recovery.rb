@@ -147,6 +147,19 @@ module Karafka
         #     'sync',
         #     lookback_ms: Time.now.to_i * 1_000 - since_ms
         #   )
+        #
+        # @example Migrate a stuck consumer group to a new name (two-step workflow)
+        #   # Step 1: Read committed offsets from the broken group (bypasses coordinator)
+        #   offsets = Karafka::Admin::Recovery.read_committed_offsets('sync')
+        #   #=> { 'events' => { 0 => 1400, 1 => 1402 }, 'orders' => { 0 => 890 } }
+        #
+        #   # Step 2: Inspect the recovered offsets — verify all expected topics and partitions
+        #   # are present and the offset values look reasonable before committing them
+        #
+        #   # Step 3: Write the offsets to the target group using standard Admin APIs
+        #   Karafka::Admin::ConsumerGroups.seek('sync_v2', offsets)
+        #
+        #   # Now reconfigure your consumers to use 'sync_v2' and restart them
         def read_committed_offsets(consumer_group_id, lookback_ms: DEFAULT_LOOKBACK_MS)
           start_time = Time.now - (lookback_ms / 1_000.0)
           committed = Hash.new { |h, k| h[k] = {} }
