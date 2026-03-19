@@ -24,7 +24,7 @@ assert result[:broker_id] >= 0, "Expected non-negative broker_id, got #{result[:
 
 # broker_host should have host:port format
 assert result[:broker_host].match?(/\A.+:\d+\z/),
-       "Expected host:port format, got #{result[:broker_host]}"
+  "Expected host:port format, got #{result[:broker_host]}"
 
 # Verify the broker actually exists in cluster metadata
 metadata = Karafka::Admin.cluster_info
@@ -33,4 +33,4 @@ broker_ids = metadata.brokers.map do |b|
 end
 
 assert broker_ids.include?(result[:broker_id]),
-       "Broker #{result[:broker_id]} not found in cluster"
+  "Broker #{result[:broker_id]} not found in cluster"

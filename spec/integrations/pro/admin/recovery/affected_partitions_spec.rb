@@ -26,12 +26,12 @@ assert_equal result, result.sort
 assert !result.empty?, "Expected at least one partition led by broker #{broker_id}"
 
 # All returned partition numbers should be valid
-offsets_topic = metadata.topics.find { |t| t[:topic_name] == '__consumer_offsets' }
+offsets_topic = metadata.topics.find { |t| t[:topic_name] == "__consumer_offsets" }
 partition_count = offsets_topic[:partition_count]
 
 result.each do |p|
   assert p >= 0 && p < partition_count,
-         "Partition #{p} out of range (0...#{partition_count})"
+    "Partition #{p} out of range (0...#{partition_count})"
 end
 
 # Non-existent broker should return empty array
