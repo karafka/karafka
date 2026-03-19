@@ -315,7 +315,10 @@ module Karafka
           end
 
           start_time = Time.now - (lookback_ms / 1_000.0)
-          groups = Set.new
+
+          # Track offsets per group with last-write-wins so fully tombstoned groups
+          # (all offsets deleted) are excluded from the result
+          committed = Hash.new { |h, k| h[k] = Hash.new { |h2, k2| h2[k2] = {} } }
 
           iterator = Pro::Iterator.new(
             { OFFSETS_TOPIC => { partition => start_time } },
@@ -328,10 +331,17 @@ module Karafka
             parsed = parse_offset_commit(message)
             next unless parsed
 
-            groups << parsed[:group]
+            group = parsed[:group]
+
+            if parsed[:offset].nil?
+              committed[group][parsed[:topic]].delete(parsed[:partition])
+              committed[group].delete(parsed[:topic]) if committed[group][parsed[:topic]].empty?
+            else
+              committed[group][parsed[:topic]][parsed[:partition]] = parsed[:offset]
+            end
           end
 
-          groups.sort
+          committed.select { |_, topics| !topics.empty? }.keys.sort
         end
 
         # Returns all __consumer_offsets partitions led by a given broker. Pure metadata lookup
