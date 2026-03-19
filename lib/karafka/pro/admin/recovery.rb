@@ -181,9 +181,15 @@ module Karafka
             next unless parsed
             next unless parsed[:group] == consumer_group_id
 
-            # Last write wins - scanning forward means we naturally end up with the most recent
-            # commit per partition
-            committed[parsed[:topic]][parsed[:partition]] = parsed[:offset]
+            if parsed[:offset].nil?
+              # Tombstone — offset was deleted, remove from results
+              committed[parsed[:topic]].delete(parsed[:partition])
+              committed.delete(parsed[:topic]) if committed[parsed[:topic]].empty?
+            else
+              # Last write wins — scanning forward means we naturally end up with the most
+              # recent commit per partition
+              committed[parsed[:topic]][parsed[:partition]] = parsed[:offset]
+            end
           end
 
           committed
@@ -404,16 +410,22 @@ module Karafka
 
         private
 
-        # Parses a raw __consumer_offsets message into structured offset commit data
+        # Parses a raw __consumer_offsets message into structured offset commit data.
+        # Handles both v0 and v1 offset commit key formats (both use the same layout for
+        # group/topic/partition). Tombstone records (nil payload) indicate offset deletion and
+        # are returned with offset: nil so callers can remove stale entries.
         #
         # @param message [Karafka::Messages::Message] raw message from __consumer_offsets
-        # @return [Hash, nil] parsed offset commit or nil if not an offset commit record
+        # @return [Hash, nil] parsed offset commit or nil if not an offset commit record.
+        #   When the record is a tombstone (deletion), the :offset value will be nil.
         def parse_offset_commit(message)
           return nil unless message.raw_key
 
           key = message.raw_key.b
-          record_type = key[0, 2].unpack1("n")
-          return nil unless record_type == 1  # only offset commit records
+          key_version = key[0, 2].unpack1("n")
+
+          # Versions 0 and 1 are offset commit records with identical key layout
+          return nil unless key_version <= 1
 
           pos = 2
           gl = key[pos, 2].unpack1("n")
@@ -426,7 +438,10 @@ module Karafka
           pos += tl
           partition = key[pos, 4].unpack1("N")
 
-          return nil unless message.raw_payload  # tombstone = offset deleted
+          # Tombstone (nil payload) means the offset was deleted
+          unless message.raw_payload
+            return { group: group, topic: topic, partition: partition, offset: nil }
+          end
 
           val = message.raw_payload.b
 
@@ -436,16 +451,21 @@ module Karafka
           { group: group, topic: topic, partition: partition, offset: offset }
         end
 
-        # Computes Java's String#hashCode for a given string
+        # Computes Java's String#hashCode for a given string. Java hashes UTF-16 code units
+        # (char values), not raw bytes. For ASCII-only strings this is identical to byte-level
+        # hashing, but non-ASCII characters (accented letters, CJK, emoji) require encoding to
+        # UTF-16 and hashing each 16-bit code unit (including surrogate pairs for characters
+        # above U+FFFF).
         #
         # @param str [String] input string
         # @return [Integer] signed 32-bit hash value matching Java's String#hashCode
         def java_hash_code(str)
           hash = 0
 
-          str.each_byte do |byte|
-            # Emulate Java int32 overflow: multiply, add, then truncate to 32 bits
-            hash = (hash * 31 + byte) & 0xFFFFFFFF
+          # Encode to UTF-16BE to get Java's char sequence, then hash each 16-bit code unit
+          str.encode("UTF-16BE").bytes.each_slice(2) do |hi, lo|
+            code_unit = (hi << 8) | lo
+            hash = (hash * 31 + code_unit) & 0xFFFFFFFF
           end
 
           # Convert unsigned 32-bit to signed 32-bit (Java int semantics)

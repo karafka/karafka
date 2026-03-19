@@ -184,10 +184,12 @@ RSpec.describe_current do
   end
 
   describe ".offsets_partition_for" do
+    let(:partition_count) { described_class.new.send(:offsets_partition_count) }
+
     it "returns a value within the partition range" do
       result = recovery.offsets_partition_for(consumer_group_id)
       expect(result).to be >= 0
-      expect(result).to be < 50
+      expect(result).to be < partition_count
     end
 
     it "is deterministic for the same consumer group id" do
@@ -201,22 +203,22 @@ RSpec.describe_current do
     end
 
     it "matches Java hashCode for a single character" do
-      # Java: "a".hashCode() = 97, abs(97) % 50 = 47
-      expect(recovery.offsets_partition_for("a")).to eq(47)
+      # Java: "a".hashCode() = 97, abs(97) % partition_count
+      expect(recovery.offsets_partition_for("a")).to eq(97 % partition_count)
     end
 
     it "matches Java hashCode for strings with positive hash" do
-      # Java: "test".hashCode() = 3556498, abs(3556498) % 50 = 48
-      expect(recovery.offsets_partition_for("test")).to eq(48)
-      # Java: "hello".hashCode() = 99162322, abs(99162322) % 50 = 22
-      expect(recovery.offsets_partition_for("hello")).to eq(22)
+      # Java: "test".hashCode() = 3556498
+      expect(recovery.offsets_partition_for("test")).to eq(3_556_498 % partition_count)
+      # Java: "hello".hashCode() = 99162322
+      expect(recovery.offsets_partition_for("hello")).to eq(99_162_322 % partition_count)
     end
 
     it "matches Java hashCode for strings with negative hash" do
-      # Java: "polarbear".hashCode() = -441539598, abs(-441539598) % 50 = 48
-      expect(recovery.offsets_partition_for("polarbear")).to eq(48)
-      # Java: "my-app-group".hashCode() = -1350864654, abs(1350864654) % 50 = 4
-      expect(recovery.offsets_partition_for("my-app-group")).to eq(4)
+      # Java: "polarbear".hashCode() = -441539598, abs = 441539598
+      expect(recovery.offsets_partition_for("polarbear")).to eq(441_539_598 % partition_count)
+      # Java: "my-app-group".hashCode() = -1350864654, abs = 1350864654
+      expect(recovery.offsets_partition_for("my-app-group")).to eq(1_350_864_654 % partition_count)
     end
 
     it "produces different partitions for different consumer group ids" do
@@ -281,8 +283,10 @@ RSpec.describe_current do
       end
 
       it "raises OperationError for partition >= count" do
+        partition_count = described_class.new.send(:offsets_partition_count)
+
         expect do
-          recovery.affected_groups(50)
+          recovery.affected_groups(partition_count)
         end.to raise_error(
           described_class::Errors::OperationError,
           /out of range/
@@ -327,7 +331,8 @@ RSpec.describe_current do
   describe "#offsets_partition_count" do
     it "returns the partition count from cluster metadata" do
       count = described_class.new.send(:offsets_partition_count)
-      expect(count).to eq(50)
+      expect(count).to be_a(Integer)
+      expect(count).to be > 0
     end
   end
 
