@@ -79,7 +79,7 @@ module Karafka
       # the partitions but once we found it, given partition data is no longer needed and would
       # only eat up resources.
       def each
-        Admin.with_consumer(@settings) do |consumer|
+        ::Karafka::Admin.with_consumer(@settings) do |consumer|
           tpl = TplBuilder.new(consumer, @topics_with_partitions).call
           consumer.assign(tpl)
 

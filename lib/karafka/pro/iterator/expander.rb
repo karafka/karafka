@@ -89,7 +89,7 @@ module Karafka
         # We cache it so we do not have to run consecutive requests to obtain data about multiple
         # topics
         def topics
-          @topics ||= Admin.cluster_info.topics
+          @topics ||= ::Karafka::Admin.cluster_info.topics
         end
 
         # @param name [String] topic name
