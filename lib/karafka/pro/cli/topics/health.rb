@@ -79,8 +79,8 @@ module Karafka
           # @param topic_name [String] name of the topic
           # @return [Integer] min.insync.replicas value
           def fetch_min_insync_replicas(topic_name)
-            configs = Admin::Configs.describe(
-              Admin::Configs::Resource.new(type: :topic, name: topic_name)
+            configs = Karafka::Admin::Configs.describe(
+              Karafka::Admin::Configs::Resource.new(type: :topic, name: topic_name)
             ).first.configs
 
             configs.find { |c| c.name == "min.insync.replicas" }.value.to_i
