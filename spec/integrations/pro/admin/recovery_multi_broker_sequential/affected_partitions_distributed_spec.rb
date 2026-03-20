@@ -38,7 +38,21 @@ broker_ids = metadata.brokers.map do |b|
   b.is_a?(Hash) ? (b[:broker_id] || b[:node_id]) : b.node_id
 end
 
-offsets_topic = metadata.topics.find { |t| t[:topic_name] == "__consumer_offsets" }
+offsets_topic = nil
+
+# Internal topics may not appear in metadata immediately on multi-broker clusters
+5.times do
+  offsets_topic = Karafka::Admin.cluster_info.topics.find do |t|
+    t[:topic_name] == "__consumer_offsets"
+  end
+
+  break if offsets_topic
+
+  sleep(1)
+end
+
+exit 0 unless offsets_topic
+
 total_partitions = offsets_topic[:partition_count]
 
 # Collect partitions led by each broker
