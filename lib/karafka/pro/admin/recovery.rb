@@ -64,20 +64,21 @@ module Karafka
         # Default lookback window for offset scanning (1 hour). Covers any normal commit interval.
         # Provide an earlier Time if your group commits infrequently or the incident has been
         # ongoing for longer than 1 hour.
-        DEFAULT_START_TIME_OFFSET = 3_600
+        DEFAULT_LAST_COMMITTED_AT_OFFSET = 3_600
 
-        private_constant :OFFSETS_TOPIC, :DEFAULT_START_TIME_OFFSET
+        private_constant :OFFSETS_TOPIC, :DEFAULT_LAST_COMMITTED_AT_OFFSET
 
         class << self
           # @param consumer_group_id [String] consumer group to read offsets for
-          # @param start_time [Time] how far back to start scanning (default: 1 hour ago)
+          # @param last_committed_at [Time] approximate time of last successful offset commit
+          #   (default: 1 hour ago). A good rule of thumb is the crash time minus 10 minutes
           # @return [Hash{String => Hash{Integer => Integer}}]
           # @see #read_committed_offsets
           def read_committed_offsets(
             consumer_group_id,
-            start_time: Time.now - DEFAULT_START_TIME_OFFSET
+            last_committed_at: Time.now - DEFAULT_LAST_COMMITTED_AT_OFFSET
           )
-            new.read_committed_offsets(consumer_group_id, start_time: start_time)
+            new.read_committed_offsets(consumer_group_id, last_committed_at: last_committed_at)
           end
 
           # @param consumer_group_id [String] consumer group id
@@ -95,11 +96,12 @@ module Karafka
           end
 
           # @param partition [Integer] __consumer_offsets partition to scan
-          # @param start_time [Time] how far back to start scanning (default: 1 hour ago)
+          # @param last_committed_at [Time] approximate time of last successful offset commit
+          #   (default: 1 hour ago). A good rule of thumb is the crash time minus 10 minutes
           # @return [Array<String>] sorted consumer group names
           # @see #affected_groups
-          def affected_groups(partition, start_time: Time.now - DEFAULT_START_TIME_OFFSET)
-            new.affected_groups(partition, start_time: start_time)
+          def affected_groups(partition, last_committed_at: Time.now - DEFAULT_LAST_COMMITTED_AT_OFFSET)
+            new.affected_groups(partition, last_committed_at: last_committed_at)
           end
 
           # @param broker_id [Integer] broker node id
@@ -113,8 +115,9 @@ module Karafka
         # Reads committed offsets for a consumer group directly from the __consumer_offsets internal
         # topic, bypassing the group coordinator. Only scans the single __consumer_offsets partition
         # that holds data for the given group (determined by Java's String#hashCode mod partition
-        # count), starting from start_time and reading forward to EOF. Later records overwrite
-        # earlier ones so the result always reflects the most recent committed offset per partition.
+        # count), starting from last_committed_at and reading forward to EOF. Later records
+        # overwrite earlier ones so the result always reflects the most recent committed offset per
+        # partition.
         #
         # @note All consumers in this group should be fully stopped before calling this method.
         #   While normally they would already be stopped due to a coordinator failure, if the
@@ -122,18 +125,19 @@ module Karafka
         #   will not capture, resulting in stale data.
         #
         # @note This method may take a noticeable amount of time to complete because it scans
-        #   the raw __consumer_offsets log from start_time forward to the end. The duration depends
-        #   on the volume of offset commits in the scan window across all consumer groups that hash
-        #   to the same __consumer_offsets partition.
+        #   the raw __consumer_offsets log from last_committed_at forward to the end. The duration
+        #   depends on the volume of offset commits in the scan window across all consumer groups
+        #   that hash to the same __consumer_offsets partition.
         #
         # @note The result only contains topic-partitions that had offsets committed after
-        #   start_time. If a partition never had an offset committed, or if the commit happened
-        #   before start_time, it will be absent from the result. It is the caller's responsibility
-        #   to verify that all expected topic-partitions are present before using the result for
-        #   migration or other operations.
+        #   last_committed_at. If a partition never had an offset committed, or if the commit
+        #   happened before last_committed_at, it will be absent from the result. It is the
+        #   caller's responsibility to verify that all expected topic-partitions are present before
+        #   using the result for migration or other operations.
         #
         # @param consumer_group_id [String] consumer group to read offsets for
-        # @param start_time [Time] how far back to start scanning (default: 1 hour ago)
+        # @param last_committed_at [Time] approximate time of last successful offset commit
+        #   (default: 1 hour ago). A good rule of thumb is the crash time minus 10 minutes
         # @return [Hash{String => Hash{Integer => Integer}}]
         #   { topic => { partition => committed_offset } }
         #
@@ -142,10 +146,12 @@ module Karafka
         #   #=> { 'events' => { 0 => 1400, 1 => 1402, ... } }
         #
         # @example Read offsets for the last 6 hours
-        #   Karafka::Admin::Recovery.read_committed_offsets('sync', start_time: Time.now - 6 * 3600)
+        #   Karafka::Admin::Recovery.read_committed_offsets(
+        #     'sync', last_committed_at: Time.now - 6 * 3600
+        #   )
         #
         # @example Read offsets from a specific point in time
-        #   Karafka::Admin::Recovery.read_committed_offsets('sync', start_time: Time.new(2025, 3, 1))
+        #   Karafka::Admin::Recovery.read_committed_offsets('sync', last_committed_at: Time.new(2025, 3, 1))
         #
         # @example Migrate a stuck consumer group to a new name (two-step workflow)
         #   # Step 1: Read committed offsets from the broken group (bypasses coordinator)
@@ -161,13 +167,13 @@ module Karafka
         #   # Now reconfigure your consumers to use 'sync_v2' and restart them
         def read_committed_offsets(
           consumer_group_id,
-          start_time: Time.now - DEFAULT_START_TIME_OFFSET
+          last_committed_at: Time.now - DEFAULT_LAST_COMMITTED_AT_OFFSET
         )
           committed = Hash.new { |h, k| h[k] = {} }
           target_partition = offsets_partition_for(consumer_group_id)
 
           iterator = Pro::Iterator.new(
-            { OFFSETS_TOPIC => { target_partition => start_time } },
+            { OFFSETS_TOPIC => { target_partition => last_committed_at } },
             settings: @custom_kafka
           )
 
@@ -295,7 +301,8 @@ module Karafka
         # scan each partition to discover all affected consumer groups.
         #
         # @param partition [Integer] __consumer_offsets partition to scan
-        # @param start_time [Time] how far back to start scanning (default: 1 hour ago)
+        # @param last_committed_at [Time] approximate time of last successful offset commit
+        #   (default: 1 hour ago). A good rule of thumb is the crash time minus 10 minutes
         # @return [Array<String>] sorted list of consumer group names with active offsets
         #
         # @example Find all groups on partition 17
@@ -307,7 +314,7 @@ module Karafka
         #   all_affected = partitions.flat_map do |p|
         #     Karafka::Admin::Recovery.affected_groups(p)
         #   end.uniq
-        def affected_groups(partition, start_time: Time.now - DEFAULT_START_TIME_OFFSET)
+        def affected_groups(partition, last_committed_at: Time.now - DEFAULT_LAST_COMMITTED_AT_OFFSET)
           count = offsets_partition_count
 
           unless partition >= 0 && partition < count
@@ -322,7 +329,7 @@ module Karafka
           committed = Hash.new { |h, k| h[k] = Hash.new { |h2, k2| h2[k2] = {} } }
 
           iterator = Pro::Iterator.new(
-            { OFFSETS_TOPIC => { partition => start_time } },
+            { OFFSETS_TOPIC => { partition => last_committed_at } },
             settings: @custom_kafka
           )
 

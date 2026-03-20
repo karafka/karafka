@@ -20,8 +20,8 @@
 # License: https://karafka.io/docs/Pro-License-Comm/
 # Contact: contact@karafka.io
 
-# When reading committed offsets with a very recent start_time, commits that happened before it
-# should not be returned. This verifies the start_time parameter works correctly.
+# When reading committed offsets with last_committed_at set to now, commits that happened before it
+# should not be returned. This verifies the last_committed_at parameter works correctly.
 
 setup_karafka
 
@@ -41,10 +41,10 @@ Karafka::Admin.seek_consumer_group(GROUP_ID, { DT.topic => { 0 => 5 } })
 # Wait long enough for the commit to be well in the past
 sleep(5)
 
-# Read with start_time = now - the commit happened ~5 seconds ago so it should be missed
+# Read with last_committed_at = now - the commit happened ~5 seconds ago so it should be missed
 committed = Karafka::Admin::Recovery.read_committed_offsets(
   GROUP_ID,
-  start_time: Time.now
+  last_committed_at: Time.now
 )
 
 assert_equal({}, committed)

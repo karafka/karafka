@@ -54,7 +54,7 @@ assert !partitions.empty?, "Expected partitions for broker #{target_broker}"
 
 # Step 2: Discover groups on those partitions
 discovered_groups = partitions.flat_map do |p|
-  Karafka::Admin::Recovery.affected_groups(p, start_time: Time.now - 60)
+  Karafka::Admin::Recovery.affected_groups(p, last_committed_at: Time.now - 60)
 end.uniq
 
 # Step 3: Verify discovered groups are coordinated by the target broker

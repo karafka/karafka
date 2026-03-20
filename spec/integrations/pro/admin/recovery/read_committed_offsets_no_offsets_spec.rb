@@ -34,7 +34,7 @@ GROUP_ID = SecureRandom.uuid
 
 committed = Karafka::Admin::Recovery.read_committed_offsets(
   GROUP_ID,
-  start_time: Time.now - 60
+  last_committed_at: Time.now - 60
 )
 
 assert_equal({}, committed)
