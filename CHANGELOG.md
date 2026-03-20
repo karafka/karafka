@@ -1,5 +1,8 @@
 # Karafka Framework Changelog
 
+## 2.5.8 (Unreleased)
+- **[Feature]** Add `Karafka::Admin::Recovery` for coordinator-bypass offset reading and consumer group migration when the Kafka group coordinator is in a FAILED state (Pro).
+
 ## 2.5.7 (2026-03-16)
 - [Enhancement] Report detailed blocking information (active listeners, alive workers, and in-processing jobs) during forceful shutdown instead of only aggregate counts.
 - [Enhancement] Improve `ForcefulShutdownError` description to clearly explain when and why it is raised.
