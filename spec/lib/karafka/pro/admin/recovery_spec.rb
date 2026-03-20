@@ -261,9 +261,4 @@ RSpec.describe_current do
   describe "Karafka::Admin::Recovery alias" do
     it { expect(Karafka::Admin::Recovery).to eq(described_class) }
   end
-
-  describe "constants" do
-    it { expect(described_class::OFFSETS_TOPIC).to eq("__consumer_offsets") }
-    it { expect(described_class::DEFAULT_LOOKBACK_MS).to eq(3_600_000) }
-  end
 end

@@ -66,6 +66,8 @@ module Karafka
         # longer than 1 hour.
         DEFAULT_LOOKBACK_MS = 60 * 60 * 1_000
 
+        private_constant :OFFSETS_TOPIC, :DEFAULT_LOOKBACK_MS
+
         class << self
           # @param consumer_group_id [String] consumer group to read offsets for
           # @param lookback_ms [Integer] how far back to start scanning in ms
