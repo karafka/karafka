@@ -20,8 +20,7 @@
 # License: https://karafka.io/docs/Pro-License-Comm/
 # Contact: contact@karafka.io
 
-# When a consumer group has never committed any offsets, Recovery should return
-# an empty hash.
+# When a consumer group has never committed any offsets, Recovery should return an empty hash.
 
 setup_karafka
 

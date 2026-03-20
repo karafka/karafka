@@ -21,8 +21,8 @@
 # Contact: contact@karafka.io
 
 # In a multi-broker cluster, __consumer_offsets partitions should be distributed across brokers.
-# affected_partitions should return different subsets for each broker, and together they should
-# cover all partitions exactly once.
+# affected_partitions should return different subsets for each broker, and together they should cover
+# all partitions exactly once.
 
 setup_karafka
 
@@ -65,7 +65,7 @@ broker_ids.each do |bid|
   all_partitions.concat(partitions)
 end
 
-# In a multi-broker cluster, partitions should be distributed (not all on one broker)
+# In a multi-broker cluster, partitions should be distributed across brokers
 per_broker = broker_ids.map { |bid| Karafka::Admin::Recovery.affected_partitions(bid) }
 non_empty = per_broker.reject(&:empty?)
 assert non_empty.size > 1, "Expected partitions distributed across multiple brokers"

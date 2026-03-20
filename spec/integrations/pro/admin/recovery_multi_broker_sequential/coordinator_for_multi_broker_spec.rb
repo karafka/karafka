@@ -20,9 +20,9 @@
 # License: https://karafka.io/docs/Pro-License-Comm/
 # Contact: contact@karafka.io
 
-# In a multi-broker cluster, different consumer groups should map to different coordinators.
-# This verifies that coordinator_for returns valid broker info and that groups are distributed
-# across the cluster.
+# In a multi-broker cluster, different consumer groups should map to different coordinators. This
+# verifies that coordinator_for returns valid broker info and that groups are distributed across
+# the cluster.
 
 setup_karafka
 

@@ -20,8 +20,8 @@
 # License: https://karafka.io/docs/Pro-License-Comm/
 # Contact: contact@karafka.io
 
-# When a consumer group commits offsets multiple times, Recovery should return
-# the latest committed offset (last write wins).
+# When a consumer group commits offsets multiple times, Recovery should return the latest committed
+# offset (last write wins).
 
 setup_karafka
 

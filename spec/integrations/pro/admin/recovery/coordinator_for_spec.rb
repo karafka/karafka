@@ -20,8 +20,8 @@
 # License: https://karafka.io/docs/Pro-License-Comm/
 # Contact: contact@karafka.io
 
-# When looking up the coordinator for a consumer group, we should get back
-# valid broker information matching the real cluster.
+# When looking up the coordinator for a consumer group, we should get back valid broker information
+# matching the real cluster.
 
 setup_karafka
 

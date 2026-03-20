@@ -20,8 +20,8 @@
 # License: https://karafka.io/docs/Pro-License-Comm/
 # Contact: contact@karafka.io
 
-# When scanning a __consumer_offsets partition for affected groups, we should
-# discover all consumer groups that have committed offsets on that partition.
+# When scanning a __consumer_offsets partition for affected groups, we should discover all consumer
+# groups that have committed offsets on that partition.
 
 setup_karafka
 

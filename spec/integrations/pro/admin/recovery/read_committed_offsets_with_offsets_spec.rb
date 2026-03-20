@@ -20,8 +20,8 @@
 # License: https://karafka.io/docs/Pro-License-Comm/
 # Contact: contact@karafka.io
 
-# When a consumer group has committed offsets and we read them via Recovery,
-# we should get back the correct offsets per topic and partition.
+# When a consumer group has committed offsets and we read them via Recovery, we should get back the
+# correct offsets per topic and partition.
 
 setup_karafka
 

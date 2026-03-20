@@ -20,8 +20,8 @@
 # License: https://karafka.io/docs/Pro-License-Comm/
 # Contact: contact@karafka.io
 
-# When querying affected partitions for a broker, we should get back all
-# __consumer_offsets partitions led by that broker.
+# When querying affected partitions for a broker, we should get back all __consumer_offsets
+# partitions led by that broker.
 
 setup_karafka
 
@@ -41,8 +41,8 @@ result = Karafka::Admin::Recovery.affected_partitions(broker_id)
 assert result.is_a?(Array), "Expected Array, got #{result.class}"
 assert_equal result, result.sort
 
-# In a single-broker dev cluster, this broker leads all 50 partitions
-# In multi-broker clusters, it leads some subset
+# In a single-broker dev cluster, this broker leads all 50 partitions. In multi-broker clusters,
+# it leads some subset.
 assert !result.empty?, "Expected at least one partition led by broker #{broker_id}"
 
 # All returned partition numbers should be valid
