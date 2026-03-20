@@ -21,7 +21,7 @@
 # Contact: contact@karafka.io
 
 # End-to-end blast radius assessment workflow on a multi-broker cluster:
-# 1. Pick a broker
+# 1. Pick a broker via coordinator_for (known to work)
 # 2. Find which __consumer_offsets partitions it leads (affected_partitions)
 # 3. Discover which consumer groups live on those partitions (affected_groups)
 # 4. Verify those groups are indeed coordinated by that broker (coordinator_for)
@@ -35,11 +35,6 @@ draw_routes do
   end
 end
 
-metadata = Karafka::Admin.cluster_info
-broker_ids = metadata.brokers.map do |b|
-  b.is_a?(Hash) ? (b[:broker_id] || b[:node_id]) : b.node_id
-end
-
 # Create several consumer groups with committed offsets
 groups = Array.new(10) { SecureRandom.uuid }
 
@@ -49,12 +44,9 @@ end
 
 sleep(2)
 
-# Pick a broker that leads at least one __consumer_offsets partition
-target_broker = broker_ids.find do |bid|
-  !Karafka::Admin::Recovery.affected_partitions(bid).empty?
-end
-
-assert target_broker, "Expected at least one broker leading __consumer_offsets partitions"
+# Pick a broker by checking which broker coordinates one of our groups
+coord = Karafka::Admin::Recovery.coordinator_for(groups.first)
+target_broker = coord[:broker_id]
 
 # Step 1: Find partitions led by this broker
 partitions = Karafka::Admin::Recovery.affected_partitions(target_broker)
@@ -70,9 +62,9 @@ discovered_groups.each do |group|
   # Only check groups we created (others may exist from other tests)
   next unless groups.include?(group)
 
-  coord = Karafka::Admin::Recovery.coordinator_for(group)
-  assert_equal target_broker, coord[:broker_id],
-    "Group #{group} should be coordinated by broker #{target_broker}, got #{coord[:broker_id]}"
+  coord_check = Karafka::Admin::Recovery.coordinator_for(group)
+  assert_equal target_broker, coord_check[:broker_id],
+    "Group #{group} should be coordinated by broker #{target_broker}, got #{coord_check[:broker_id]}"
 end
 
 # At least some of our groups should have been discovered

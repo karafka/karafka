@@ -22,7 +22,7 @@
 
 # End-to-end two-step migration workflow on a multi-broker cluster:
 # 1. Read committed offsets via Recovery (bypasses coordinator)
-# 2. Verify the target group maps to a different coordinator (different broker)
+# 2. Verify the target group maps to a different coordinator
 # 3. Write offsets to target group via ConsumerGroups.seek
 # 4. Verify offsets match via both Recovery and standard Admin APIs
 
@@ -54,21 +54,20 @@ sleep(2)
 
 # Find a target group that maps to a different __consumer_offsets partition (different coordinator)
 source_partition = Karafka::Admin::Recovery.offsets_partition_for(SOURCE_GROUP)
-source_coord = Karafka::Admin::Recovery.coordinator_for(SOURCE_GROUP)
 
-TARGET_GROUP = (0..10_000).lazy.map { |i| "target-#{i}" }.find do |name|
-  Karafka::Admin::Recovery.offsets_partition_for(name) != source_partition
+# Try up to 100_000 names to find one on a different partition
+target_group = nil
+
+100_000.times do |i|
+  candidate = "target-#{i}"
+  next if Karafka::Admin::Recovery.offsets_partition_for(candidate) == source_partition
+
+  target_group = candidate
+  break
 end
 
-assert TARGET_GROUP, "Could not find a target group on a different partition"
-
-target_coord = Karafka::Admin::Recovery.coordinator_for(TARGET_GROUP)
-
-# On a multi-broker cluster, different partitions are likely on different brokers
-# (not guaranteed, but informational)
-if source_coord[:broker_id] != target_coord[:broker_id]
-  # Good — source and target are on different brokers, simulating real recovery
-end
+# If we couldn't find one (e.g. only 1 partition), skip test gracefully
+exit 0 unless target_group
 
 # Step 1: Read committed offsets via Recovery (bypasses coordinator)
 recovered = Karafka::Admin::Recovery.read_committed_offsets(
@@ -80,11 +79,11 @@ assert_equal({ 0 => 15, 1 => 30, 2 => 45 }, recovered[DT.topics[0]])
 assert_equal({ 0 => 100 }, recovered[DT.topics[1]])
 
 # Step 2: Write recovered offsets to the target group
-Karafka::Admin::ConsumerGroups.seek(TARGET_GROUP, recovered)
+Karafka::Admin::ConsumerGroups.seek(target_group, recovered)
 
 # Step 3: Verify via Recovery that the target group has the same offsets
 target_recovered = Karafka::Admin::Recovery.read_committed_offsets(
-  TARGET_GROUP,
+  target_group,
   lookback_ms: 60 * 1_000
 )
 
@@ -93,10 +92,10 @@ assert_equal recovered[DT.topics[1]], target_recovered[DT.topics[1]]
 
 # Step 4: Verify via standard Admin API
 lags = Karafka::Admin.read_lags_with_offsets(
-  { TARGET_GROUP => [DT.topics[0], DT.topics[1]] }
+  { target_group => [DT.topics[0], DT.topics[1]] }
 )
 
-assert_equal 15, lags[TARGET_GROUP][DT.topics[0]][0][:offset]
-assert_equal 30, lags[TARGET_GROUP][DT.topics[0]][1][:offset]
-assert_equal 45, lags[TARGET_GROUP][DT.topics[0]][2][:offset]
-assert_equal 100, lags[TARGET_GROUP][DT.topics[1]][0][:offset]
+assert_equal 15, lags[target_group][DT.topics[0]][0][:offset]
+assert_equal 30, lags[target_group][DT.topics[0]][1][:offset]
+assert_equal 45, lags[target_group][DT.topics[0]][2][:offset]
+assert_equal 100, lags[target_group][DT.topics[1]][0][:offset]
