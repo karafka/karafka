@@ -53,6 +53,19 @@ RSpec.describe_current do
         expect(result[topic]).to eq({ 0 => 100, 1 => 200 })
         expect(result[topic2]).to eq({ 0 => 50 })
       end
+
+      it "returns topics sorted alphabetically" do
+        result = recovery.read_committed_offsets(consumer_group_id)
+        expect(result.keys).to eq(result.keys.sort)
+      end
+
+      it "returns partitions sorted numerically within each topic" do
+        result = recovery.read_committed_offsets(consumer_group_id)
+
+        result.each_value do |partitions|
+          expect(partitions.keys).to eq(partitions.keys.sort)
+        end
+      end
     end
 
     context "when offsets are committed multiple times for the same partition" do

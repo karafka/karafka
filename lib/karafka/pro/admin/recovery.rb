@@ -195,7 +195,7 @@ module Karafka
             end
           end
 
-          committed
+          committed.sort.to_h.transform_values { |parts| parts.sort.to_h }
         end
 
         # Determines which __consumer_offsets partition holds data for a given consumer group. Kafka
