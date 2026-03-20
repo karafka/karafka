@@ -20,8 +20,8 @@
 # License: https://karafka.io/docs/Pro-License-Comm/
 # Contact: contact@karafka.io
 
-# When reading committed offsets with a very short lookback window, commits that happened before
-# the window should not be returned. This verifies the lookback_ms parameter works correctly.
+# When reading committed offsets with a very recent start_time, commits that happened before it
+# should not be returned. This verifies the start_time parameter works correctly.
 
 setup_karafka
 
@@ -41,10 +41,10 @@ Karafka::Admin.seek_consumer_group(GROUP_ID, { DT.topic => { 0 => 5 } })
 # Wait long enough for the commit to be well in the past
 sleep(5)
 
-# Read with a 1ms lookback window - the commit happened ~5 seconds ago so it should be missed
+# Read with start_time = now - the commit happened ~5 seconds ago so it should be missed
 committed = Karafka::Admin::Recovery.read_committed_offsets(
   GROUP_ID,
-  lookback_ms: 1
+  start_time: Time.now
 )
 
 assert_equal({}, committed)

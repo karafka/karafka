@@ -42,7 +42,7 @@ sleep(2)
 
 committed = Karafka::Admin::Recovery.read_committed_offsets(
   GROUP_ID,
-  lookback_ms: 60 * 1_000
+  start_time: Time.now - 60
 )
 
 assert !committed.empty?, "Expected to find committed offsets"

@@ -61,23 +61,23 @@ module Karafka
         # Internal topic where Kafka stores committed offsets and group metadata
         OFFSETS_TOPIC = "__consumer_offsets"
 
-        # Default lookback window for offset scanning (1 hour in ms). Covers any normal commit
-        # interval. Increase if your group commits infrequently or the incident has been ongoing for
-        # longer than 1 hour.
-        DEFAULT_LOOKBACK_MS = 60 * 60 * 1_000
+        # Default lookback window for offset scanning (1 hour). Covers any normal commit interval.
+        # Provide an earlier Time if your group commits infrequently or the incident has been
+        # ongoing for longer than 1 hour.
+        DEFAULT_START_TIME_OFFSET = 3_600
 
-        private_constant :OFFSETS_TOPIC, :DEFAULT_LOOKBACK_MS
+        private_constant :OFFSETS_TOPIC, :DEFAULT_START_TIME_OFFSET
 
         class << self
           # @param consumer_group_id [String] consumer group to read offsets for
-          # @param lookback_ms [Integer] how far back to start scanning in ms
+          # @param start_time [Time] how far back to start scanning (default: 1 hour ago)
           # @return [Hash{String => Hash{Integer => Integer}}]
           # @see #read_committed_offsets
           def read_committed_offsets(
             consumer_group_id,
-            lookback_ms: DEFAULT_LOOKBACK_MS
+            start_time: Time.now - DEFAULT_START_TIME_OFFSET
           )
-            new.read_committed_offsets(consumer_group_id, lookback_ms: lookback_ms)
+            new.read_committed_offsets(consumer_group_id, start_time: start_time)
           end
 
           # @param consumer_group_id [String] consumer group id
@@ -95,11 +95,11 @@ module Karafka
           end
 
           # @param partition [Integer] __consumer_offsets partition to scan
-          # @param lookback_ms [Integer] how far back to start scanning in ms
+          # @param start_time [Time] how far back to start scanning (default: 1 hour ago)
           # @return [Array<String>] sorted consumer group names
           # @see #affected_groups
-          def affected_groups(partition, lookback_ms: DEFAULT_LOOKBACK_MS)
-            new.affected_groups(partition, lookback_ms: lookback_ms)
+          def affected_groups(partition, start_time: Time.now - DEFAULT_START_TIME_OFFSET)
+            new.affected_groups(partition, start_time: start_time)
           end
 
           # @param broker_id [Integer] broker node id
@@ -113,9 +113,8 @@ module Karafka
         # Reads committed offsets for a consumer group directly from the __consumer_offsets internal
         # topic, bypassing the group coordinator. Only scans the single __consumer_offsets partition
         # that holds data for the given group (determined by Java's String#hashCode mod partition
-        # count), starting from (now - lookback_ms) and reading forward to EOF. Later records
-        # overwrite earlier ones so the result always reflects the most recent committed offset per
-        # partition.
+        # count), starting from start_time and reading forward to EOF. Later records overwrite
+        # earlier ones so the result always reflects the most recent committed offset per partition.
         #
         # @note All consumers in this group should be fully stopped before calling this method.
         #   While normally they would already be stopped due to a coordinator failure, if the
@@ -123,18 +122,18 @@ module Karafka
         #   will not capture, resulting in stale data.
         #
         # @note This method may take a noticeable amount of time to complete because it scans
-        #   the raw __consumer_offsets log from the lookback point forward to the end. The
-        #   duration depends on the volume of offset commits in the lookback window across all
-        #   consumer groups that hash to the same __consumer_offsets partition.
+        #   the raw __consumer_offsets log from start_time forward to the end. The duration depends
+        #   on the volume of offset commits in the scan window across all consumer groups that hash
+        #   to the same __consumer_offsets partition.
         #
-        # @note The result only contains topic-partitions that had offsets committed within the
-        #   lookback window. If a partition never had an offset committed, or if the commit happened
-        #   before the lookback window, it will be absent from the result. It is the caller's
-        #   responsibility to verify that all expected topic-partitions are present before using the
-        #   result for migration or other operations.
+        # @note The result only contains topic-partitions that had offsets committed after
+        #   start_time. If a partition never had an offset committed, or if the commit happened
+        #   before start_time, it will be absent from the result. It is the caller's responsibility
+        #   to verify that all expected topic-partitions are present before using the result for
+        #   migration or other operations.
         #
         # @param consumer_group_id [String] consumer group to read offsets for
-        # @param lookback_ms [Integer] how far back to start scanning in ms
+        # @param start_time [Time] how far back to start scanning (default: 1 hour ago)
         # @return [Hash{String => Hash{Integer => Integer}}]
         #   { topic => { partition => committed_offset } }
         #
@@ -143,17 +142,10 @@ module Karafka
         #   #=> { 'events' => { 0 => 1400, 1 => 1402, ... } }
         #
         # @example Read offsets for the last 6 hours
-        #   Karafka::Admin::Recovery.read_committed_offsets(
-        #     'sync',
-        #     lookback_ms: 6 * 60 * 60 * 1_000
-        #   )
+        #   Karafka::Admin::Recovery.read_committed_offsets('sync', start_time: Time.now - 6 * 3600)
         #
         # @example Read offsets from a specific point in time
-        #   since_ms = (Time.now - 7200).to_i * 1_000
-        #   Karafka::Admin::Recovery.read_committed_offsets(
-        #     'sync',
-        #     lookback_ms: Time.now.to_i * 1_000 - since_ms
-        #   )
+        #   Karafka::Admin::Recovery.read_committed_offsets('sync', start_time: Time.new(2025, 3, 1))
         #
         # @example Migrate a stuck consumer group to a new name (two-step workflow)
         #   # Step 1: Read committed offsets from the broken group (bypasses coordinator)
@@ -167,8 +159,10 @@ module Karafka
         #   Karafka::Admin::ConsumerGroups.seek('sync_v2', offsets)
         #
         #   # Now reconfigure your consumers to use 'sync_v2' and restart them
-        def read_committed_offsets(consumer_group_id, lookback_ms: DEFAULT_LOOKBACK_MS)
-          start_time = Time.now - (lookback_ms / 1_000.0)
+        def read_committed_offsets(
+          consumer_group_id,
+          start_time: Time.now - DEFAULT_START_TIME_OFFSET
+        )
           committed = Hash.new { |h, k| h[k] = {} }
           target_partition = offsets_partition_for(consumer_group_id)
 
@@ -293,7 +287,7 @@ module Karafka
 
         # Scans a __consumer_offsets partition and returns consumer group names that have active
         # committed offsets. Groups where all offsets have been tombstoned (deleted) within the
-        # lookback window are excluded.
+        # scan window are excluded.
         #
         # Use this to discover which consumer groups are affected when a coordinator broker fails.
         # Combined with {#affected_partitions}, this gives the full blast radius of a broker
@@ -301,7 +295,7 @@ module Karafka
         # scan each partition to discover all affected consumer groups.
         #
         # @param partition [Integer] __consumer_offsets partition to scan
-        # @param lookback_ms [Integer] how far back to start scanning in ms
+        # @param start_time [Time] how far back to start scanning (default: 1 hour ago)
         # @return [Array<String>] sorted list of consumer group names with active offsets
         #
         # @example Find all groups on partition 17
@@ -313,7 +307,7 @@ module Karafka
         #   all_affected = partitions.flat_map do |p|
         #     Karafka::Admin::Recovery.affected_groups(p)
         #   end.uniq
-        def affected_groups(partition, lookback_ms: DEFAULT_LOOKBACK_MS)
+        def affected_groups(partition, start_time: Time.now - DEFAULT_START_TIME_OFFSET)
           count = offsets_partition_count
 
           unless partition >= 0 && partition < count
@@ -322,8 +316,6 @@ module Karafka
               "Partition #{partition} is out of range (0...#{count})"
             )
           end
-
-          start_time = Time.now - (lookback_ms / 1_000.0)
 
           # Track offsets per group with last-write-wins so fully tombstoned groups
           # (all offsets deleted) are excluded from the result
@@ -448,23 +440,26 @@ module Karafka
           (hash >= 0x80000000) ? hash - 0x100000000 : hash
         end
 
-        # Returns the partition count of the __consumer_offsets topic.
+        # Returns the partition count of the __consumer_offsets topic. Memoized per instance since
+        # this value never changes at runtime.
         #
         # @return [Integer] number of partitions
         # @raise [Errors::MetadataError] when topic metadata cannot be retrieved
         def offsets_partition_count
-          topic_info = cluster_info.topics.find do |t|
-            t[:topic_name] == OFFSETS_TOPIC
-          end
+          @offsets_partition_count ||= begin
+            topic_info = cluster_info.topics.find do |t|
+              t[:topic_name] == OFFSETS_TOPIC
+            end
 
-          unless topic_info
-            raise(
-              Errors::MetadataError,
-              "Could not retrieve partition count for '#{OFFSETS_TOPIC}'"
-            )
-          end
+            unless topic_info
+              raise(
+                Errors::MetadataError,
+                "Could not retrieve partition count for '#{OFFSETS_TOPIC}'"
+              )
+            end
 
-          topic_info[:partition_count]
+            topic_info[:partition_count]
+          end
         end
       end
     end

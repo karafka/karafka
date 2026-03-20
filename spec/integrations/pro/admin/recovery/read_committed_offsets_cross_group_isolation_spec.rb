@@ -49,7 +49,7 @@ sleep(2)
 # Read offsets for Group A only
 committed_a = Karafka::Admin::Recovery.read_committed_offsets(
   GROUP_A,
-  lookback_ms: 60 * 1_000
+  start_time: Time.now - 60
 )
 
 assert_equal 5, committed_a[DT.topic][0]
@@ -58,7 +58,7 @@ assert !committed_a[DT.topic].key?(1), "Group A should not have partition 1 offs
 # Read offsets for Group B only
 committed_b = Karafka::Admin::Recovery.read_committed_offsets(
   GROUP_B,
-  lookback_ms: 60 * 1_000
+  start_time: Time.now - 60
 )
 
 assert_equal 9, committed_b[DT.topic][1]

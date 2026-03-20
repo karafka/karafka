@@ -72,7 +72,7 @@ exit 0 unless target_group
 # Step 1: Read committed offsets via Recovery (bypasses coordinator)
 recovered = Karafka::Admin::Recovery.read_committed_offsets(
   SOURCE_GROUP,
-  lookback_ms: 60 * 1_000
+  start_time: Time.now - 60
 )
 
 assert_equal({ 0 => 15, 1 => 30, 2 => 45 }, recovered[DT.topics[0]])
@@ -84,7 +84,7 @@ Karafka::Admin::ConsumerGroups.seek(target_group, recovered)
 # Step 3: Verify via Recovery that the target group has the same offsets
 target_recovered = Karafka::Admin::Recovery.read_committed_offsets(
   target_group,
-  lookback_ms: 60 * 1_000
+  start_time: Time.now - 60
 )
 
 assert_equal recovered[DT.topics[0]], target_recovered[DT.topics[0]]

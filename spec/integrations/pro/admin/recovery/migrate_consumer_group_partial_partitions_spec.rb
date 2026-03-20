@@ -50,7 +50,7 @@ sleep(2)
 # Step 1: Read committed offsets via Recovery (bypasses coordinator)
 recovered = Karafka::Admin::Recovery.read_committed_offsets(
   SOURCE_GROUP,
-  lookback_ms: 60 * 1_000
+  start_time: Time.now - 60
 )
 
 assert_equal 4, recovered[DT.topic][0]
@@ -63,7 +63,7 @@ Karafka::Admin::ConsumerGroups.seek(TARGET_GROUP, recovered)
 # Verify target group has only the recovered partitions
 target_offsets = Karafka::Admin::Recovery.read_committed_offsets(
   TARGET_GROUP,
-  lookback_ms: 60 * 1_000
+  start_time: Time.now - 60
 )
 
 assert_equal 4, target_offsets[DT.topic][0]

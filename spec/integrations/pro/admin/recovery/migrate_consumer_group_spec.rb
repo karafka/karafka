@@ -57,7 +57,7 @@ sleep(2)
 # Step 1: Read committed offsets from the broken group via Recovery (bypasses coordinator)
 recovered = Karafka::Admin::Recovery.read_committed_offsets(
   SOURCE_GROUP,
-  lookback_ms: 60 * 1_000
+  start_time: Time.now - 60
 )
 
 assert !recovered.empty?, "Expected recovered offsets"
