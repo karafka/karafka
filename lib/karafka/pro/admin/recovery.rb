@@ -26,7 +26,7 @@ module Karafka
     module Admin
       # Consumer group recovery toolkit.
       #
-      # Provides coordinator-bypass offset reading and consumer group migration for scenarios
+      # Provides coordinator-bypass offset reading and blast-radius assessment for scenarios
       # where the Kafka group coordinator is in a FAILED state and normal admin APIs return
       # NOT_COORDINATOR or time out.
       #
@@ -36,17 +36,22 @@ module Karafka
       #   - Network partition isolating the coordinator broker
       #   - Any future bug that transitions a coordinator shard to FAILED
       #
-      # Migrating to a new consumer group often helps because each group is assigned to a specific
-      # __consumer_offsets partition (and therefore a specific coordinator broker) based on its
-      # name. When that coordinator enters a FAILED state, all operations for the group - joins,
-      # heartbeats, offset commits, and offset fetches - are stuck until the coordinator recovers.
+      # Each consumer group is assigned to a specific __consumer_offsets partition (and therefore
+      # a specific coordinator broker) based on its name. When that coordinator enters a FAILED
+      # state, all operations for the group - joins, heartbeats, offset commits, and offset
+      # fetches - are stuck until the coordinator recovers.
       #
-      # Creating a new consumer group with a different name causes Kafka to hash it to a (likely)
-      # different __consumer_offsets partition, served by a different, healthy coordinator. By
-      # reading the committed offsets directly from the raw __consumer_offsets log (bypassing the
-      # broken coordinator) and writing them to the new group via a healthy coordinator, consumers
-      # can resume processing from exactly where they left off without waiting for the original
-      # coordinator to recover.
+      # A common recovery strategy is migrating to a new consumer group with a different name,
+      # which causes Kafka to hash it to a (likely) different __consumer_offsets partition served
+      # by a healthy coordinator. This class provides the tools to:
+      #   1. Read committed offsets directly from the raw __consumer_offsets log (bypassing the
+      #      broken coordinator) via {#read_committed_offsets}
+      #   2. Assess blast radius: which broker coordinates a group ({#coordinator_for}), which
+      #      partitions a broker leads ({#affected_partitions}), and which groups are affected
+      #      ({#affected_groups})
+      #
+      # To complete the migration, use {Karafka::Admin::ConsumerGroups.seek} to write the
+      # recovered offsets to the new group.
       #
       # All reads go through the fetch API and never touch the group coordinator.
       #
@@ -284,16 +289,18 @@ module Karafka
           { partition: target_partition, broker_id: broker_id, broker_host: broker_host }
         end
 
-        # Scans a __consumer_offsets partition and returns all consumer group names found. Use
-        # this to discover which consumer groups are affected when a coordinator broker fails.
+        # Scans a __consumer_offsets partition and returns consumer group names that have active
+        # committed offsets. Groups where all offsets have been tombstoned (deleted) within the
+        # lookback window are excluded.
         #
+        # Use this to discover which consumer groups are affected when a coordinator broker fails.
         # Combined with {#affected_partitions}, this gives the full blast radius of a broker
         # outage: first find which __consumer_offsets partitions the failed broker leads, then
         # scan each partition to discover all affected consumer groups.
         #
         # @param partition [Integer] __consumer_offsets partition to scan
         # @param lookback_ms [Integer] how far back to start scanning in ms
-        # @return [Array<String>] sorted list of consumer group names found
+        # @return [Array<String>] sorted list of consumer group names with active offsets
         #
         # @example Find all groups on partition 17
         #   Karafka::Admin::Recovery.affected_groups(17)
