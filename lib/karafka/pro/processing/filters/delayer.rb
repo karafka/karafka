@@ -40,9 +40,8 @@ module Karafka
             @applied = false
             @cursor = nil
 
-            # Time on message is in seconds with ms precision, so we need to convert the ttl that
-            # is in ms to this format
-            border = Time.now.utc - (@delay / 1_000.0)
+            # Time on message is in seconds with ms precision
+            border = Time.now.utc - @delay / 1_000.0
 
             messages.delete_if do |message|
               too_young = message.timestamp > border
@@ -61,7 +60,7 @@ module Karafka
           def timeout
             return 0 unless @cursor
 
-            timeout = (@delay / 1_000.0) - (::Time.now.utc - @cursor.timestamp)
+            timeout = @delay / 1_000.0 - (::Time.now.utc - @cursor.timestamp)
 
             (timeout <= 0) ? 0 : timeout * 1_000
           end

@@ -52,7 +52,14 @@ module Karafka
 
             marked = @manager.marked
 
-            messages.delete_if { |message| marked.include?(message.offset) }
+            # When there are many marked offsets, Array#include? is O(n) per message.
+            # We convert to a hash-based lookup for O(1) per message checks.
+            if marked.size > 10
+              marked_set = marked.each_with_object({}) { |o, h| h[o] = true }
+              messages.delete_if { |message| marked_set[message.offset] }
+            else
+              messages.delete_if { |message| marked.include?(message.offset) }
+            end
           end
 
           # @return [nil] This filter does not deal with pausing, so timeout is always nil
