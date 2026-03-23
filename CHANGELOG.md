@@ -1,6 +1,6 @@
 # Karafka Framework Changelog
 
-## 2.5.8 (Unreleased)
+## 2.5.8 (2026-03-23)
 - **[Feature]** Add `Karafka::Admin::Recovery` for coordinator-bypass offset reading and consumer group migration when the Kafka group coordinator is in a FAILED state (Pro).
 
 ## 2.5.7 (2026-03-16)
