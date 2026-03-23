@@ -32,6 +32,17 @@ draw_routes do
   end
 end
 
+# Produce some records and commit offsets so the __consumer_offsets topic is guaranteed to exist
+# on all brokers before we try to query coordinator metadata
+produce_many(DT.topics[0], Array.new(10) { rand.to_s })
+
+Karafka::Admin.seek_consumer_group(
+  SecureRandom.uuid,
+  { DT.topics[0] => { 0 => 5 } }
+)
+
+sleep(2)
+
 metadata = Karafka::Admin.cluster_info
 
 broker_ids = metadata.brokers.map do |b|
