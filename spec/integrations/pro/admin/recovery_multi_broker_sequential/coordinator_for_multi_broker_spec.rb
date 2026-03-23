@@ -32,8 +32,8 @@ draw_routes do
   end
 end
 
-# Produce some records and commit offsets so the __consumer_offsets topic is guaranteed to exist
-# on all brokers before we try to query coordinator metadata
+# Produce some records and commit offsets so the __consumer_offsets topic is created
+# and present in cluster metadata before we try to query coordinator info
 produce_many(DT.topics[0], Array.new(10) { rand.to_s })
 
 Karafka::Admin.seek_consumer_group(
@@ -41,9 +41,16 @@ Karafka::Admin.seek_consumer_group(
   { DT.topics[0] => { 0 => 5 } }
 )
 
-sleep(2)
+# Wait for __consumer_offsets to appear in metadata with a bounded timeout
+metadata = nil
 
-metadata = Karafka::Admin.cluster_info
+30.times do
+  metadata = Karafka::Admin.cluster_info
+
+  break if metadata.topics.any? { |t| t[:topic_name] == "__consumer_offsets" }
+
+  sleep(1)
+end
 
 broker_ids = metadata.brokers.map do |b|
   b.is_a?(Hash) ? (b[:broker_id] || b[:node_id]) : b.node_id
