@@ -32,18 +32,43 @@ draw_routes do
   end
 end
 
+# Produce some records and commit offsets so the __consumer_offsets topic is created
+# and present in cluster metadata before we try to query coordinator info
+produce_many(DT.topics[0], Array.new(10) { rand.to_s })
+
+Karafka::Admin.seek_consumer_group(
+  SecureRandom.uuid,
+  { DT.topics[0] => { 0 => 5 } }
+)
+
 metadata = Karafka::Admin.cluster_info
 
 broker_ids = metadata.brokers.map do |b|
   b.is_a?(Hash) ? (b[:broker_id] || b[:node_id]) : b.node_id
 end.sort
 
-# Generate several groups and check their coordinators
+# Generate several groups and check their coordinators.
+# On fresh KRaft clusters __consumer_offsets may take time to appear in metadata
+# (RF=3, 50 partitions), so retry the first call with a bounded timeout.
 groups = Array.new(20) { SecureRandom.uuid }
 coordinators = {}
+first_call = true
 
 groups.each do |group|
-  result = Karafka::Admin::Recovery.coordinator_for(group)
+  result = nil
+
+  if first_call
+    60.times do
+      result = Karafka::Admin::Recovery.coordinator_for(group)
+      break
+    rescue Karafka::Pro::Admin::Recovery::Errors::MetadataError
+      sleep(1)
+    end
+
+    first_call = false
+  else
+    result = Karafka::Admin::Recovery.coordinator_for(group)
+  end
 
   # Each result should have valid structure
   assert result.key?(:partition), "Missing :partition for #{group}"

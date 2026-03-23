@@ -32,34 +32,43 @@ draw_routes do
   end
 end
 
+# Produce some records and commit offsets so the __consumer_offsets topic is guaranteed to exist
+# on all brokers before we try to query partition metadata
+produce_many(DT.topics[0], Array.new(10) { rand.to_s })
+
+Karafka::Admin.seek_consumer_group(
+  SecureRandom.uuid,
+  { DT.topics[0] => { 0 => 5 } }
+)
+
 metadata = Karafka::Admin.cluster_info
 
 broker_ids = metadata.brokers.map do |b|
   b.is_a?(Hash) ? (b[:broker_id] || b[:node_id]) : b.node_id
 end
 
-offsets_topic = nil
-
-# Internal topics may not appear in metadata immediately on multi-broker clusters
-5.times do
-  offsets_topic = Karafka::Admin.cluster_info.topics.find do |t|
-    t[:topic_name] == "__consumer_offsets"
-  end
-
-  break if offsets_topic
-
-  sleep(1)
-end
-
-exit 0 unless offsets_topic
-
-total_partitions = offsets_topic[:partition_count]
-
-# Collect partitions led by each broker
+# Collect partitions led by each broker.
+# On fresh KRaft clusters __consumer_offsets may take time to appear in metadata
+# (RF=3, 50 partitions), so retry the first call with a bounded timeout.
 all_partitions = []
+first_call = true
 
 broker_ids.each do |bid|
-  partitions = Karafka::Admin::Recovery.affected_partitions(bid)
+  partitions = nil
+
+  if first_call
+    60.times do
+      partitions = Karafka::Admin::Recovery.affected_partitions(bid)
+      break
+    rescue Karafka::Pro::Admin::Recovery::Errors::MetadataError
+      sleep(1)
+    end
+
+    first_call = false
+  else
+    partitions = Karafka::Admin::Recovery.affected_partitions(bid)
+  end
+
   assert partitions.is_a?(Array), "Expected Array for broker #{bid}"
   assert_equal partitions, partitions.sort, "Partitions should be sorted for broker #{bid}"
   all_partitions.concat(partitions)
@@ -70,6 +79,7 @@ per_broker = broker_ids.map { |bid| Karafka::Admin::Recovery.affected_partitions
 non_empty = per_broker.reject(&:empty?)
 assert non_empty.size > 1, "Expected partitions distributed across multiple brokers"
 
-# Together, all brokers should cover every partition exactly once
-assert_equal total_partitions, all_partitions.size, "Expected #{total_partitions} total partitions"
-assert_equal (0...total_partitions).to_a, all_partitions.sort
+# Together, all brokers should cover every partition exactly once (contiguous range 0..N-1)
+assert all_partitions.size.positive?, "Expected some __consumer_offsets partitions"
+assert_equal (0...all_partitions.size).to_a, all_partitions.sort,
+  "Expected contiguous partition range 0..#{all_partitions.size - 1}"
