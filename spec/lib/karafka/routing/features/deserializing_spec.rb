@@ -32,11 +32,12 @@ RSpec.describe_current do
         it 'starts the Ractor pool' do
           pool = Karafka::Deserializing::Parallel::Pool.instance
           allow(config.deserializing.parallel).to receive(:concurrency).and_return(4)
+          allow(config.deserializing.parallel).to receive(:min_payloads).and_return(50)
           allow(pool).to receive(:start)
 
           described_class.post_setup(config)
 
-          expect(pool).to have_received(:start).with(4)
+          expect(pool).to have_received(:start).with(4, min_payloads: 50)
         end
       end
     end
