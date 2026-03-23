@@ -22,8 +22,11 @@ module Karafka
               )
             end
 
-            concurrency = Karafka::App.config.deserializing.parallel.concurrency
-            Karafka::Deserializing::Parallel::Pool.instance.start(concurrency)
+            parallel = Karafka::App.config.deserializing.parallel
+            Karafka::Deserializing::Parallel::Pool.instance.start(
+              parallel.concurrency,
+              min_payloads: parallel.min_payloads
+            )
           end
         end
       end

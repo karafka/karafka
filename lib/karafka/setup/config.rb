@@ -100,6 +100,10 @@ module Karafka
           setting :active, default: false
           # option [Integer] number of Ractor workers for parallel deserialization
           setting :concurrency, default: 4
+          # option [Integer] minimum number of messages in a partition batch to dispatch to
+          # Ractors. Below this threshold, messages are deserialized inline because Ractor
+          # coordination overhead would exceed the parallelism benefit.
+          setting :min_payloads, default: 50
         end
       end
 

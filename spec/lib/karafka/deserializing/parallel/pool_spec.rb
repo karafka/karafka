@@ -75,8 +75,20 @@ RSpec.describe_current do
       end
     end
 
-    # Threshold tests are covered by integration tests in:
-    # - spec/integrations/deserialization/parallel/thresholds_spec.rb
-    # - spec/integrations/deserialization/parallel/nil_payloads_spec.rb
+    context 'when messages count is below min_payloads threshold' do
+      let(:messages) do
+        Array.new(5) do |i|
+          instance_double(
+            Karafka::Messages::Message,
+            raw_payload: "payload_#{i}"
+          )
+        end
+      end
+
+      it 'returns Immediate for inline deserialization' do
+        result = pool.dispatch_async(messages, deserializer)
+        expect(result).to be_a(Karafka::Deserializing::Parallel::Immediate)
+      end
+    end
   end
 end

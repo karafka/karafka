@@ -7,11 +7,8 @@ module Karafka
     module Parallel
       # Marker for failed deserialization - used instead of actual error to keep it simple
       # Messages marked with this will be retried via lazy deserialization during consumption
-      # Made Ractor-shareable on Ruby 3.0+ for passing between Ractors
-      DESERIALIZATION_ERROR = begin
-        obj = Object.new
-        defined?(Ractor) ? Ractor.make_shareable(obj) : obj.freeze
-      end
+      # Frozen objects are automatically Ractor-shareable in Ruby 4.0+
+      DESERIALIZATION_ERROR = Object.new.freeze
 
       # Manages a pool of Ractor workers for parallel message deserialization
       # Uses mutex + port pattern for efficient work distribution
@@ -35,15 +32,21 @@ module Karafka
           @ready_port = nil
           @dispatch_mutex = nil
           @ready_queue = []
+          @distributor = nil
+          @min_payloads = 50
         end
 
         # Starts the pool with the specified number of workers
         # @param concurrency [Integer] number of Ractor workers to create
-        def start(concurrency)
+        # @param distributor [Distributor] strategy for splitting payloads across workers
+        # @param min_payloads [Integer] minimum batch size to dispatch to Ractors
+        def start(concurrency, distributor: Distributor.new, min_payloads: 50)
           @mutex.synchronize do
             return if @started
 
             @size = concurrency
+            @distributor = distributor
+            @min_payloads = min_payloads
             @ready_port = Ractor::Port.new
             @dispatch_mutex = Mutex.new
             create_workers
@@ -66,6 +69,8 @@ module Karafka
           @ready_port = nil
           @dispatch_mutex = nil
           @ready_queue = []
+          @distributor = nil
+          @min_payloads = 50
         end
 
         # Dispatches messages for async deserialization, returns Future for later retrieval
@@ -78,11 +83,11 @@ module Karafka
         def dispatch_async(messages, deserializer)
           return Immediate.instance if messages.empty?
           return Immediate.instance unless @started
+          return Immediate.instance if messages.size < @min_payloads
 
-          # Dispatch to Ractor pool - split evenly across workers
+          # Dispatch to Ractor pool - distribute across workers
           payloads = messages.map(&:raw_payload)
-          slice_size = (payloads.size + @size - 1) / @size
-          batches = payloads.each_slice(slice_size).to_a
+          batches = @distributor.call(payloads, @size, min_payloads: @min_payloads)
           result_port = Ractor::Port.new
 
           batches.each_with_index do |batch, idx|
@@ -111,7 +116,7 @@ module Karafka
               data: batch,
               result_port: result_port,
               deserializer: deserializer
-            }, move: true)
+            }.freeze, move: true)
           end
         end
 
@@ -141,13 +146,16 @@ module Karafka
             worker_id,
             ready_port,
             error_marker,
+            MessageProxy,
             name: "pd_worker_#{worker_id}"
-          ) do |wid, ready_p, err_marker|
+          ) do |wid, ready_p, err_marker, proxy_class|
             my_port = Ractor::Port.new
+
+            ready_signal = { worker_id: wid, port: my_port }.freeze
 
             loop do
               # Signal ready
-              ready_p.send({ worker_id: wid, port: my_port })
+              ready_p.send(ready_signal)
 
               # Wait for work
               msg = my_port.receive
@@ -157,18 +165,17 @@ module Karafka
               deserializer = msg[:deserializer]
 
               results = msg[:data].map do |payload|
-                message_proxy = Struct.new(:raw_payload).new(payload)
-                deserializer.call(message_proxy)
+                deserializer.call(proxy_class.new(raw_payload: payload))
               rescue StandardError
                 err_marker
               end
 
               # Send results to caller's port
-              # User's deserializer is responsible for returning Ractor-shareable results
+              # Frozen for zero-copy transfer back to caller
               msg[:result_port].send({
                 batch_index: msg[:batch_index],
-                results: results
-              })
+                results: results.freeze
+              }.freeze)
             end
           end
         end
