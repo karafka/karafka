@@ -41,8 +41,9 @@ module Karafka
           def apply!(messages)
             @applied = false
 
-            # Time on message is in seconds with ms precision
-            border = Time.now.utc - @ttl / 1_000.0
+            # Time on message is in seconds with ms precision, so we need to convert the ttl that
+            # is in ms to this format
+            border = Time.now.utc - (@ttl / 1_000.to_f)
 
             messages.delete_if do |message|
               too_old = message.timestamp < border

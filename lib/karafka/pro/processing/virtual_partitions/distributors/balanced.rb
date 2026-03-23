@@ -45,34 +45,21 @@ module Karafka
 
               # Assign each key to the worker with the least current load
               sorted_keys.each do |key|
-                # Find worker with minimum current load by scanning loads array directly
-                min_idx = 0
-                min_load = worker_loads[0]
-
-                worker_loads.each_with_index do |load, idx|
-                  if load < min_load
-                    min_load = load
-                    min_idx = idx
-                  end
-                end
-
-                msgs = key_groupings[key]
+                # Find worker with minimum current load
+                min_load_worker = worker_loads.each_with_index.min_by { |load, _| load }[1]
+                messages = key_groupings[key]
 
                 # Assign this key to that worker
-                worker_assignments[min_idx].concat(msgs)
-                worker_loads[min_idx] += msgs.size
+                worker_assignments[min_load_worker] += messages
+                worker_loads[min_load_worker] += messages.size
               end
 
-              # Combine messages for each worker and sort by offset - single pass
-              result = {}
-
-              worker_assignments.each_with_index do |group_messages, index|
-                next if group_messages.empty?
-
-                result[index] = group_messages.sort_by!(&:offset)
-              end
-
-              result
+              # Combine messages for each worker and sort by offset
+              worker_assignments
+                .each_with_index
+                .reject { |group_messages, _| group_messages.empty? }
+                .map! { |group_messages, index| [index, group_messages.sort_by!(&:offset)] }
+                .to_h
             end
           end
         end

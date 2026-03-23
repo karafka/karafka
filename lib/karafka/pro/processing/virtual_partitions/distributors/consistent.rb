@@ -36,6 +36,7 @@ module Karafka
             def call(messages)
               messages
                 .group_by { |msg| config.reducer.call(config.partitioner.call(msg)) }
+                .to_h
             end
           end
         end
