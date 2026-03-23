@@ -35,7 +35,6 @@ module Karafka
           @ready_port = nil
           @dispatch_mutex = nil
           @ready_queue = []
-          @config = nil
         end
 
         # Starts the pool with the specified number of workers
@@ -45,7 +44,6 @@ module Karafka
             return if @started
 
             @size = concurrency
-            @config = Karafka::App.config.deserializing.parallel
             @ready_port = Ractor::Port.new
             @dispatch_mutex = Mutex.new
             create_workers
@@ -68,7 +66,6 @@ module Karafka
           @ready_port = nil
           @dispatch_mutex = nil
           @ready_queue = []
-          @config = nil
         end
 
         # Dispatches messages for async deserialization, returns Future for later retrieval
@@ -82,15 +79,10 @@ module Karafka
           return Immediate.instance if messages.empty?
           return Immediate.instance unless @started
 
-          # Check thresholds - if not met, return Immediate (lazy deserialization will handle it)
-          return Immediate.instance if messages.size < @config.batch_threshold
-
-          total_size = messages.sum { |m| m.raw_payload&.bytesize || 0 }
-          return Immediate.instance if total_size < @config.total_payload_threshold
-
-          # Dispatch to Ractor pool
+          # Dispatch to Ractor pool - split evenly across workers
           payloads = messages.map(&:raw_payload)
-          batches = payloads.each_slice(@config.batch_size).to_a
+          slice_size = (payloads.size + @size - 1) / @size
+          batches = payloads.each_slice(slice_size).to_a
           result_port = Ractor::Port.new
 
           batches.each_with_index do |batch, idx|
@@ -174,7 +166,7 @@ module Karafka
               # Results are already Ractor-shareable because:
               # - JSON.parse(freeze: true) returns deeply frozen objects (done in C during parsing)
               # - Failed results (err_marker) are already shareable
-              # No Ractor.make_shareable needed — that traversal costs 307% of parse time on large payloads.
+              # No Ractor.make_shareable needed - that traversal costs 307% of parse time on large payloads.
 
               # Send results to caller's port - zero-copy since results are shareable
               msg[:result_port].send({

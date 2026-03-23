@@ -61,9 +61,6 @@ module Karafka
           nested(:parallel) do
             required(:active) { |val| [true, false].include?(val) }
             required(:concurrency) { |val| val.is_a?(Integer) && val.positive? }
-            required(:batch_threshold) { |val| val.is_a?(Integer) && val.positive? }
-            required(:total_payload_threshold) { |val| val.is_a?(Integer) && val >= 0 }
-            required(:batch_size) { |val| val.is_a?(Integer) && val.positive? }
           end
         end
 

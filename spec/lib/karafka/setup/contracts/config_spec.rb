@@ -33,10 +33,7 @@ RSpec.describe_current do
       deserializing: {
         parallel: {
           active: false,
-          concurrency: 4,
-          batch_threshold: 100,
-          total_payload_threshold: 50 * 1024,
-          batch_size: 50
+          concurrency: 4
         }
       },
       admin: {
@@ -927,58 +924,5 @@ RSpec.describe_current do
       it { expect(contract.call(config)).not_to be_success }
     end
 
-    context 'when batch_threshold is not an integer' do
-      before { parallel_config[:batch_threshold] = 'invalid' }
-
-      it { expect(contract.call(config)).not_to be_success }
-    end
-
-    context 'when batch_threshold is zero' do
-      before { parallel_config[:batch_threshold] = 0 }
-
-      it { expect(contract.call(config)).not_to be_success }
-    end
-
-    context 'when total_payload_threshold is not an integer' do
-      before { parallel_config[:total_payload_threshold] = 'invalid' }
-
-      it { expect(contract.call(config)).not_to be_success }
-    end
-
-    context 'when total_payload_threshold is negative' do
-      before { parallel_config[:total_payload_threshold] = -1 }
-
-      it { expect(contract.call(config)).not_to be_success }
-    end
-
-    context 'when total_payload_threshold is zero' do
-      before { parallel_config[:total_payload_threshold] = 0 }
-
-      it { expect(contract.call(config)).to be_success }
-    end
-
-    context 'when batch_size is not an integer' do
-      before { parallel_config[:batch_size] = 'invalid' }
-
-      it { expect(contract.call(config)).not_to be_success }
-    end
-
-    context 'when batch_size is zero' do
-      before { parallel_config[:batch_size] = 0 }
-
-      it { expect(contract.call(config)).not_to be_success }
-    end
-
-    context 'when batch_size is negative' do
-      before { parallel_config[:batch_size] = -1 }
-
-      it { expect(contract.call(config)).not_to be_success }
-    end
-
-    context 'when batch_size is a positive integer' do
-      before { parallel_config[:batch_size] = 100 }
-
-      it { expect(contract.call(config)).to be_success }
-    end
   end
 end
