@@ -44,8 +44,6 @@ draw_routes do
   end
 end
 
-create_routes_topics
-
 ARGV[0] = "topics"
 ARGV[1] = "health"
 

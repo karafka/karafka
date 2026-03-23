@@ -30,7 +30,7 @@ RSpec.describe_current do
   end
 
   context "when expanding on a full name" do
-    let(:topics) { "it-#{SecureRandom.uuid}" }
+    let(:topics) { generate_topic_name }
 
     before { Karafka::Admin.create_topic(topics, 2, 1) }
 
@@ -38,7 +38,7 @@ RSpec.describe_current do
   end
 
   context "when expanding on full names" do
-    let(:topics) { ["it-#{SecureRandom.uuid}", "it-#{SecureRandom.uuid}"] }
+    let(:topics) { [generate_topic_name, generate_topic_name] }
 
     before { topics.each { |topic| Karafka::Admin.create_topic(topic, 2, 1) } }
 
@@ -53,7 +53,7 @@ RSpec.describe_current do
   end
 
   context "when expanding on a full topic with given offset" do
-    let(:topics) { { "it-#{SecureRandom.uuid}" => 100 } }
+    let(:topics) { { generate_topic_name => 100 } }
 
     before { Karafka::Admin.create_topic(topics.keys.first, 2, 1) }
 
@@ -70,7 +70,7 @@ RSpec.describe_current do
 
   context "when expanding on a full topic with a time" do
     let(:time) { Time.now }
-    let(:topics) { { "it-#{SecureRandom.uuid}" => time } }
+    let(:topics) { { generate_topic_name => time } }
 
     before { Karafka::Admin.create_topic(topics.keys.first, 2, 1) }
 

@@ -16,9 +16,6 @@ end
 before = DT.uuids(2)
 after = DT.uuids(10)
 
-# Sends some messages before starting Karafka - those should not be received
-produce_many(DT.topic, before)
-
 class Consumer < Karafka::BaseConsumer
   def consume
     @retry ||= 0
@@ -32,7 +29,10 @@ class Consumer < Karafka::BaseConsumer
   end
 end
 
-draw_routes(Consumer, create_topics: false)
+draw_routes(Consumer)
+
+# Sends some messages before starting Karafka - those should not be received
+produce_many(DT.topic, before)
 
 # Start Karafka
 Thread.new { Karafka::Server.run }

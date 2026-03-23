@@ -1,6 +1,9 @@
 # Karafka Framework Changelog
 
-## 2.5.7 (Unreleased)
+## 2.5.8 (Unreleased)
+- **[Feature]** Add `Karafka::Admin::Recovery` for coordinator-bypass offset reading and consumer group migration when the Kafka group coordinator is in a FAILED state (Pro).
+
+## 2.5.7 (2026-03-16)
 - [Enhancement] Report detailed blocking information (active listeners, alive workers, and in-processing jobs) during forceful shutdown instead of only aggregate counts.
 - [Enhancement] Improve `ForcefulShutdownError` description to clearly explain when and why it is raised.
 - [Enhancement] Cache `messages.last` in `BatchMetadata` builder to avoid duplicate array traversal.
@@ -9,6 +12,9 @@
 - [Enhancement] Optimize `IntervalRunner#call` to use a single `monotonic_now` call instead of two per invocation.
 - [Enhancement] Support WaterDrop `:fd` mode in Swarm.
 - [Maintenance] Use both `:fd` and `:thread` producer backends in CI.
+- [Maintenance] Include spec file hash in integration test topic names for easier traceability in Kafka logs (#3056).
+- [Fix] Remove duplicate topic creation in multi-broker health integration specs (#3056).
+- [Fix] Preserve producer-specific kafka settings (e.g., `enable.idempotence`) when recreating the producer in swarm forks.
 
 ## 2.5.6 (2026-02-28)
 - **[Feature]** Add `karafka topics health` command to check Kafka topics for replication and durability issues, detecting no redundancy (RF=1), zero fault tolerance (RF≤min.insync), and low durability (min.insync=1) configurations with color-coded severity grouping and actionable recommendations (Pro).

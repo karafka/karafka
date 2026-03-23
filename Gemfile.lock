@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    karafka (2.5.7)
+    karafka (2.5.8)
       karafka-core (>= 2.5.6, < 2.6.0)
       karafka-rdkafka (>= 0.24.0)
       waterdrop (>= 2.8.14, < 3.0.0)
@@ -59,7 +59,7 @@ GEM
     i18n (1.14.8)
       concurrent-ruby (~> 1.0)
     io-console (0.8.2)
-    json (2.19.1)
+    json (2.19.2)
     karafka-core (2.5.10)
       karafka-rdkafka (>= 0.20.0)
       logger (>= 1.6.0)
@@ -209,8 +209,8 @@ CHECKSUMS
   globalid (1.3.0) sha256=05c639ad6eb4594522a0b07983022f04aa7254626ab69445a0e493aa3786ff11
   i18n (1.14.8) sha256=285778639134865c5e0f6269e0b818256017e8cde89993fdfcbfb64d088824a5
   io-console (0.8.2) sha256=d6e3ae7a7cc7574f4b8893b4fca2162e57a825b223a177b7afa236c5ef9814cc
-  json (2.19.1) sha256=dd94fdc59e48bff85913829a32350b3148156bc4fd2a95a2568a78b11344082d
-  karafka (2.5.7)
+  json (2.19.2) sha256=e7e1bd318b2c37c4ceee2444841c86539bc462e81f40d134cf97826cb14e83cf
+  karafka (2.5.8)
   karafka-core (2.5.10) sha256=a4f9127186728502decf0817d366b4eec46593390047c278acddb636e63e384c
   karafka-rdkafka (0.24.0) sha256=91e9eb753d7f72036721af4ce0f3f2dcf7c145a2e324fc1cba7b6f837def4e09
   karafka-rdkafka (0.24.0-aarch64-linux-gnu) sha256=1685c91b81ee97d81528f03db292eadad3a7e191b29613f24d5ba9a7a434f097

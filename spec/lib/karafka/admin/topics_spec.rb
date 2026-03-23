@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 RSpec.describe_current do
-  let(:name) { "it-#{SecureRandom.uuid}" }
+  let(:name) { generate_topic_name }
   let(:topics) { Karafka::Admin.cluster_info.topics.map { |tp| tp[:topic_name] } }
 
   describe "#create and #cluster_info" do
@@ -451,7 +451,7 @@ RSpec.describe_current do
   describe "#read_watermark_offsets with hash argument" do
     subject(:offsets) { described_class.read_watermark_offsets(topics_with_partitions) }
 
-    let(:name2) { "it-#{SecureRandom.uuid}" }
+    let(:name2) { generate_topic_name }
 
     context "when querying single topic with single partition" do
       let(:topics_with_partitions) { { name => [0] } }

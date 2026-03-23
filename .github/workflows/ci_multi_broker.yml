@@ -55,7 +55,7 @@ jobs:
           sleep 30
 
       - name: Set up Ruby
-        uses: ruby/setup-ruby@09a7688d3b55cf0e976497ff046b70949eeaccfd # v1.288.0
+        uses: ruby/setup-ruby@319994f95fa847cf3fb3cd3dbe89f6dcde9f178f # v1.295.0
         with:
           ruby-version: ${{ matrix.ruby }}
           bundler-cache: true
@@ -91,6 +91,12 @@ jobs:
         env:
           KARAFKA_PRO_LICENSE_TOKEN: ${{ secrets.KARAFKA_PRO_LICENSE_TOKEN }}
         run: bin/integrations 'multi_broker'
+
+      - name: Check Kafka logs for unexpected warnings
+        run: bin/verify_kafka_warnings kafka1 kafka2 kafka3
+
+      - name: Check test topics naming convention
+        run: bundle exec bin/verify_topics_naming
 
       - name: Show Kafka logs on failure
         if: failure()
