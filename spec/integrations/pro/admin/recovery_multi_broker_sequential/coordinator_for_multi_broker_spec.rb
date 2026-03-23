@@ -41,27 +41,34 @@ Karafka::Admin.seek_consumer_group(
   { DT.topics[0] => { 0 => 5 } }
 )
 
-# Wait for __consumer_offsets to appear in metadata with a bounded timeout
-metadata = nil
-
-30.times do
-  metadata = Karafka::Admin.cluster_info
-
-  break if metadata.topics.any? { |t| t[:topic_name] == "__consumer_offsets" }
-
-  sleep(1)
-end
+metadata = Karafka::Admin.cluster_info
 
 broker_ids = metadata.brokers.map do |b|
   b.is_a?(Hash) ? (b[:broker_id] || b[:node_id]) : b.node_id
 end.sort
 
-# Generate several groups and check their coordinators
+# Generate several groups and check their coordinators.
+# On fresh KRaft clusters __consumer_offsets may take time to appear in metadata
+# (RF=3, 50 partitions), so retry the first call with a bounded timeout.
 groups = Array.new(20) { SecureRandom.uuid }
 coordinators = {}
+first_call = true
 
 groups.each do |group|
-  result = Karafka::Admin::Recovery.coordinator_for(group)
+  result = nil
+
+  if first_call
+    60.times do
+      result = Karafka::Admin::Recovery.coordinator_for(group)
+      break
+    rescue Karafka::Pro::Admin::Recovery::Errors::MetadataError
+      sleep(1)
+    end
+
+    first_call = false
+  else
+    result = Karafka::Admin::Recovery.coordinator_for(group)
+  end
 
   # Each result should have valid structure
   assert result.key?(:partition), "Missing :partition for #{group}"
