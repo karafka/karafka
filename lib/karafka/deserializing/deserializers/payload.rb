@@ -10,7 +10,7 @@ module Karafka
         # @return [Hash, nil] hash with deserialized JSON data or nil for tombstone messages
         def call(message)
           # nil payload can be present for example for tombstone messages
-          message.raw_payload.nil? ? nil : JSON.parse(message.raw_payload, freeze: true)
+          message.raw_payload.nil? ? nil : JSON.parse(message.raw_payload)
         end
       end
     end

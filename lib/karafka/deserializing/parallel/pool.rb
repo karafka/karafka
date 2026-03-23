@@ -72,9 +72,9 @@ module Karafka
         # Non-blocking: dispatches work and returns immediately
         # Used for early dispatch in listener thread before job is scheduled
         # @param messages [Karafka::Messages::Messages] batch of messages
-        # @param deserializer [Object] Ractor-shareable deserializer that responds to #call
+        # @param deserializer [Object] deserializer that responds to #call
+        #   Must be Ractor-safe (frozen or shareable) when parallel deserialization is enabled
         # @return [Future, Immediate] future for retrieving results, or Immediate if skipped
-        # @note Deserializer must be Ractor-shareable (frozen or made shareable)
         def dispatch_async(messages, deserializer)
           return Immediate.instance if messages.empty?
           return Immediate.instance unless @started
@@ -102,7 +102,7 @@ module Karafka
         # @param batch [Array<String>] raw payloads
         # @param batch_index [Integer] index for result ordering
         # @param result_port [Ractor::Port] port for receiving results
-        # @param deserializer [Object] Ractor-shareable deserializer
+        # @param deserializer [Object] Ractor-safe deserializer
         def dispatch_batch(batch, batch_index, result_port, deserializer)
           @dispatch_mutex.synchronize do
             ready_msg = @ready_queue.shift || @ready_port.receive
@@ -153,7 +153,7 @@ module Karafka
               msg = my_port.receive
               break if msg == :stop
 
-              # Deserialize batch using the shareable deserializer directly
+              # Deserialize batch using the provided deserializer
               deserializer = msg[:deserializer]
 
               results = msg[:data].map do |payload|
@@ -163,12 +163,8 @@ module Karafka
                 err_marker
               end
 
-              # Results are already Ractor-shareable because:
-              # - JSON.parse(freeze: true) returns deeply frozen objects (done in C during parsing)
-              # - Failed results (err_marker) are already shareable
-              # No Ractor.make_shareable needed - that traversal costs 307% of parse time on large payloads.
-
-              # Send results to caller's port - zero-copy since results are shareable
+              # Send results to caller's port
+              # User's deserializer is responsible for returning Ractor-shareable results
               msg[:result_port].send({
                 batch_index: msg[:batch_index],
                 results: results
