@@ -49,11 +49,20 @@ broker_ids = metadata.brokers.map do |b|
   b.is_a?(Hash) ? (b[:broker_id] || b[:node_id]) : b.node_id
 end
 
-offsets_topic = metadata.topics.find do |t|
-  t[:topic_name] == '__consumer_offsets'
+# Internal topics may not appear in metadata immediately on multi-broker clusters
+offsets_topic = nil
+
+10.times do
+  offsets_topic = Karafka::Admin.cluster_info.topics.find do |t|
+    t[:topic_name] == "__consumer_offsets"
+  end
+
+  break if offsets_topic
+
+  sleep(1)
 end
 
-assert offsets_topic, '__consumer_offsets topic should exist after committing offsets'
+assert offsets_topic, "__consumer_offsets topic should exist after committing offsets"
 
 total_partitions = offsets_topic[:partition_count]
 
