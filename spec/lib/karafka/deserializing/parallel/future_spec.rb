@@ -7,10 +7,13 @@ RSpec.describe_current do
     end
   end
 
-  subject(:future) { described_class.new(result_port, batch_count) }
+  # 2 batches, chunk_size 2, total 3 messages
+  subject(:future) { described_class.new(result_port, batch_count, chunk_size, total) }
 
   let(:result_port) { instance_double(Ractor::Port) }
   let(:batch_count) { 2 }
+  let(:chunk_size) { 2 }
+  let(:total) { 3 }
 
   describe '#retrieve' do
     context 'when results are available' do
@@ -27,10 +30,12 @@ RSpec.describe_current do
         expect(result_port).to have_received(:receive).twice
       end
 
-      it 'returns flattened results array' do
+      it 'returns results array in original order' do
         results = future.retrieve
 
-        expect(results).to eq(%w[result1 result2 result3])
+        expect(results[0]).to eq('result1')
+        expect(results[1]).to eq('result2')
+        expect(results[2]).to eq('result3')
       end
     end
 
@@ -89,7 +94,9 @@ RSpec.describe_current do
       it 'correctly orders results by batch_index' do
         results = future.retrieve
 
-        expect(results).to eq(%w[result1 result2 result3])
+        expect(results[0]).to eq('result1')
+        expect(results[1]).to eq('result2')
+        expect(results[2]).to eq('result3')
       end
     end
   end

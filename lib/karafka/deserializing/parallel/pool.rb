@@ -11,13 +11,15 @@ module Karafka
       DESERIALIZATION_ERROR = Object.new.freeze
 
       # Manages a pool of Ractor workers for parallel message deserialization
-      # Uses mutex + port pattern for efficient work distribution
       #
       # Architecture:
-      # - Workers signal availability via @ready_port
-      # - Each worker has its own port for receiving work
-      # - Each caller creates a result_port for receiving results
-      # - Mutex only held during dispatch, not during processing
+      # - Listener threads push work to a thread-safe queue (non-blocking)
+      # - A background coordinator thread feeds Ractor workers from the queue
+      # - Workers signal availability via @ready_port after completing each batch
+      # - Coordinator loop: wait for work → wait for ready worker → dispatch
+      #
+      # This ensures workers are always busy when there's queued work, even across
+      # multiple subscription groups with different batch sizes.
       class Pool
         include Singleton
 
@@ -30,13 +32,13 @@ module Karafka
           @mutex = Mutex.new
           @started = false
           @ready_port = nil
-          @dispatch_mutex = nil
-          @ready_queue = []
+          @work_queue = nil
+          @coordinator = nil
           @distributor = nil
           @min_payloads = 50
         end
 
-        # Starts the pool with the specified number of workers
+        # Starts the pool with the specified number of workers and the coordinator thread
         # @param concurrency [Integer] number of Ractor workers to create
         # @param distributor [Distributor] strategy for splitting payloads across workers
         # @param min_payloads [Integer] minimum batch size to dispatch to Ractors
@@ -48,9 +50,9 @@ module Karafka
             @distributor = distributor
             @min_payloads = min_payloads
             @ready_port = Ractor::Port.new
-            @dispatch_mutex = Mutex.new
+            @work_queue = Thread::Queue.new
             create_workers
-            wait_for_workers_ready
+            start_coordinator
             @started = true
           end
         end
@@ -67,15 +69,14 @@ module Karafka
           @size = 0
           @started = false
           @ready_port = nil
-          @dispatch_mutex = nil
-          @ready_queue = []
+          @work_queue = nil
+          @coordinator = nil
           @distributor = nil
           @min_payloads = 50
         end
 
-        # Dispatches messages for async deserialization, returns Future for later retrieval
-        # Non-blocking: dispatches work and returns immediately
-        # Used for early dispatch in listener thread before job is scheduled
+        # Dispatches messages for parallel deserialization
+        # Non-blocking: pushes work to queue and returns Future immediately
         # @param messages [Karafka::Messages::Messages] batch of messages
         # @param deserializer [Object] deserializer that responds to #call
         #   Must be Ractor-safe (frozen or shareable) when parallel deserialization is enabled
@@ -85,44 +86,44 @@ module Karafka
           return Immediate.instance unless @started
           return Immediate.instance if messages.size < @min_payloads
 
-          # Dispatch to Ractor pool - distribute across workers
           payloads = messages.map(&:raw_payload)
           batches = @distributor.call(payloads, @size, min_payloads: @min_payloads)
           result_port = Ractor::Port.new
+          chunk_size = (payloads.size + batches.size - 1) / batches.size
 
           batches.each_with_index do |batch, idx|
-            dispatch_batch(batch, idx, result_port, deserializer)
+            @work_queue << {
+              batch_index: idx,
+              data: batch,
+              result_port: result_port,
+              deserializer: deserializer
+            }
           end
 
-          # Return future for later retrieval
-          Future.new(result_port, batches.size)
+          Future.new(result_port, batches.size, chunk_size, payloads.size)
         end
 
         private
 
-        # Dispatches a batch of payloads to an available worker
-        # Uses move: true for zero-copy transfer of payload strings to Ractor.
-        # This avoids expensive deep-copy of potentially large payloads (up to MBs).
-        # After move, the batch array is invalidated in the sending thread.
-        # @param batch [Array<String>] raw payloads
-        # @param batch_index [Integer] index for result ordering
-        # @param result_port [Ractor::Port] port for receiving results
-        # @param deserializer [Object] Ractor-safe deserializer
-        def dispatch_batch(batch, batch_index, result_port, deserializer)
-          @dispatch_mutex.synchronize do
-            ready_msg = @ready_queue.shift || @ready_port.receive
-            ready_msg[:port].send({
-              batch_index: batch_index,
-              data: batch,
-              result_port: result_port,
-              deserializer: deserializer
-            }.freeze, move: true)
-          end
-        end
+        # Starts the background coordinator thread
+        # Waits for work in the queue, then waits for a ready worker, then dispatches
+        def start_coordinator
+          @coordinator = Thread.new do
+            loop do
+              # 1. Wait for work (blocks until a listener pushes something)
+              work = @work_queue.pop
+              break if work == :stop
 
-        # Waits for all workers to signal readiness
-        def wait_for_workers_ready
-          @size.times { @ready_queue << @ready_port.receive }
+              # 2. Wait for a ready worker
+              ready = @ready_port.receive
+
+              # 3. Dispatch work to the ready worker
+              ready[:port].send(work.freeze)
+            end
+          end
+
+          @coordinator.name = 'karafka.parallel_deser.coordinator'
+          @coordinator.abort_on_exception = true
         end
 
         # Creates persistent Ractor workers
@@ -154,10 +155,10 @@ module Karafka
             ready_signal = { worker_id: wid, port: my_port }.freeze
 
             loop do
-              # Signal ready
+              # Signal ready to coordinator
               ready_p.send(ready_signal)
 
-              # Wait for work
+              # Wait for work from coordinator
               msg = my_port.receive
               break if msg == :stop
 
@@ -171,7 +172,6 @@ module Karafka
               end
 
               # Send results to caller's port
-              # Frozen for zero-copy transfer back to caller
               msg[:result_port].send({
                 batch_index: msg[:batch_index],
                 results: results.freeze

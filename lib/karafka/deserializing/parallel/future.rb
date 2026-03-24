@@ -3,39 +3,42 @@
 module Karafka
   module Deserializing
     module Parallel
-      # Represents a pending async deserialization dispatched to Ractor pool.
-      # Created in listener thread during before_schedule_consume, retrieved in worker thread
-      # during handle_before_consume. This allows Ractors to work while jobs wait in queue.
+      # Represents a pending parallel deserialization dispatched to the Ractor pool.
+      # Created by Pool#dispatch_async, retrieved in worker thread during handle_before_consume.
       #
       # Responsible only for collecting results from Ractors.
       # Payload injection is handled separately by Injector.
       class Future
         # @param result_port [Ractor::Port] port for receiving results from Ractor workers
         # @param batch_count [Integer] number of batches dispatched to workers
-        def initialize(result_port, batch_count)
+        # @param chunk_size [Integer] size of each chunk for offset calculation
+        # @param total [Integer] total number of messages dispatched
+        def initialize(result_port, batch_count, chunk_size, total)
           @result_port = result_port
           @batch_count = batch_count
-          @results = Array.new(batch_count)
-          @received_count = 0
+          @chunk_size = chunk_size
+          @total = total
           @retrieved = false
         end
 
         # Retrieves results from Ractor pool, blocking if necessary until all batches complete.
         # Safe to call multiple times - returns cached results if already retrieved.
         #
-        # @return [Array] flattened array of deserialized results in original message order
+        # @return [Array] array of deserialized results in original message order
         def retrieve
-          return @flattened_results if @retrieved
+          return @results if @retrieved
+
+          @results = Array.new(@total)
 
           # Collect all batch results from Ractor workers
-          while @received_count < @batch_count
+          @batch_count.times do
             msg = @result_port.receive
-            @results[msg[:batch_index]] = msg[:results]
-            @received_count += 1
+            offset = msg[:batch_index] * @chunk_size
+            msg[:results].each_with_index { |r, j| @results[offset + j] = r }
           end
 
           @retrieved = true
-          @flattened_results = @results.flatten
+          @results
         end
       end
     end
