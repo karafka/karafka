@@ -65,11 +65,12 @@ module Karafka
           super()
         end
 
-        # Tick on each fetch
+        # Tick on each fetch and report liveness so it works even when statistics are disabled
         #
         # @param _event [Karafka::Core::Monitoring::Event]
         def on_connection_listener_fetch_loop(_event)
           mark_polling_tick
+          report_status
         end
 
         {
@@ -103,13 +104,7 @@ module Karafka
         #
         # @param _event [Karafka::Core::Monitoring::Event]
         def on_statistics_emitted(_event)
-          periodically do
-            return unless node
-
-            current_status = status
-
-            current_status.positive? ? node.unhealthy(current_status) : node.healthy
-          end
+          report_status
         end
 
         # Deregister the polling tracker for given listener
@@ -133,6 +128,17 @@ module Karafka
         end
 
         private
+
+        # Reports the current status to the supervisor periodically
+        def report_status
+          periodically do
+            return unless node
+
+            current_status = status
+
+            current_status.positive? ? node.unhealthy(current_status) : node.healthy
+          end
+        end
 
         # @return [Integer] object id of the current thread
         def thread_id

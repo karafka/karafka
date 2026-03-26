@@ -26,14 +26,25 @@ module Karafka
       # as it will be picked up fast enough.
       # @param _event [Karafka::Core::Monitoring::Event]
       def on_statistics_emitted(_event)
+        report_liveness
+      end
+
+      # Also report from the fetch loop so liveness works even when statistics are disabled
+      # @param _event [Karafka::Core::Monitoring::Event]
+      def on_connection_listener_fetch_loop(_event)
+        report_liveness
+      end
+
+      private
+
+      # Reports liveness to the supervisor periodically
+      def report_liveness
         periodically do
           Kernel.exit!(orphaned_exit_code) if node.orphaned?
 
           node.healthy
         end
       end
-
-      private
 
       # Wraps the logic with a mutex
       def synchronize(&)

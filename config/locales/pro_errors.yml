@@ -2,6 +2,7 @@ en:
   validations:
     routing:
       swarm_nodes_not_used: 'At least one of the nodes has no assignments'
+      multiplexing_statistics_required_for_dynamic_multiplexing: 'Dynamic multiplexing requires statistics to be enabled (statistics.interval.ms must be greater than 0)'
 
       topic:
         virtual_partitions.partitioner_respond_to_call: needs to be defined and needs to respond to `#call`

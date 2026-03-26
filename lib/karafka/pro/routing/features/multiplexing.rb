@@ -41,8 +41,15 @@ module Karafka
 
             # If needed installs the needed listener and initializes tracker
             #
-            # @param _config [Karafka::Core::Configurable::Node] app config
-            def post_setup(_config)
+            # @param config [Karafka::Core::Configurable::Node]
+            def post_setup(config)
+              config.monitor.subscribe("app.before_warmup") do
+                Contracts::Routing.new.validate!(
+                  config.internal.routing.builder,
+                  scope: %w[multiplexing]
+                )
+              end
+
               Karafka::App.monitor.subscribe("app.running") do
                 # Do not install the manager and listener to control multiplexing unless there is
                 # multiplexing enabled and it is dynamic.
