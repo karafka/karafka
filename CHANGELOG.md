@@ -3,6 +3,7 @@
 ## 2.5.9 (Unreleased)
 - [Enhancement] Validate that `statistics.interval.ms` is not zero when dynamic multiplexing is enabled (Pro).
 - [Fix] Fix swarm liveness reporting to also use `on_connection_listener_fetch_loop` so nodes stay alive when `statistics.interval.ms` is disabled.
+- [Fix] Fix `ConfigProxy#producer` when called as a reader resetting the producer to nil instead of returning its value (#3076).
 
 ## 2.5.8 (2026-03-23)
 - **[Feature]** Add `Karafka::Admin::Recovery` for coordinator-bypass offset reading and consumer group migration when the Kafka group coordinator is in a FAILED state (Pro).
