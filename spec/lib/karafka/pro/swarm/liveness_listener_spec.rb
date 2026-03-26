@@ -42,6 +42,7 @@ RSpec.describe_current do
 
   before do
     allow(listener).to receive(:node).and_return(node)
+    allow(node).to receive(:healthy)
     allow(node).to receive(:unhealthy)
   end
 
