@@ -9,13 +9,13 @@
 # silently losing the user's custom producer.
 
 custom_producer = WaterDrop::Producer.new do |producer_config|
-  producer_config.kafka = { 'bootstrap.servers': '127.0.0.1:9092' }
+  producer_config.kafka = { "bootstrap.servers": "127.0.0.1:9092" }
 end
 
 producer_read_during_setup = nil
 
 Karafka::App.setup do |config|
-  config.kafka = { 'bootstrap.servers': '127.0.0.1:9092' }
+  config.kafka = { "bootstrap.servers": "127.0.0.1:9092" }
 
   # Assign a custom producer (goes through SimpleDelegator to real config's producer=)
   config.producer = custom_producer
