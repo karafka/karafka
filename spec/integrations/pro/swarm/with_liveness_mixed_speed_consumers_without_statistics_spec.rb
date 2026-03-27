@@ -20,9 +20,10 @@
 # License: https://karafka.io/docs/Pro-License-Comm/
 # Contact: contact@karafka.io
 
-# When statistics are disabled and consumer processing takes longer than node_report_timeout,
-# the node should NOT be killed because on_client_events_poll fires during wait and keeps
-# liveness reporting active.
+# When statistics are disabled, one consumer is very slow (80s) and another is fast,
+# and consuming_ttl is set lower than the slow consumer's processing time, the node
+# should be killed because the slow consumer exceeds consuming_ttl even though the
+# fast consumer is healthy.
 
 setup_karafka do |config|
   config.swarm.nodes = 1
@@ -31,35 +32,59 @@ setup_karafka do |config|
   config.internal.swarm.node_restart_timeout = 1_000
   config.internal.swarm.supervision_interval = 1_000
   config.internal.swarm.liveness_interval = 1_000
-  config.internal.swarm.node_report_timeout = 5_000
 end
 
 READER, WRITER = IO.pipe
 
-Karafka.monitor.subscribe("swarm.manager.stopping") do
-  DT[:killed] = true
+Karafka.monitor.subscribe(
+  Karafka::Pro::Swarm::LivenessListener.new(
+    consuming_ttl: 5_000
+  )
+)
+
+class SlowConsumer < Karafka::BaseConsumer
+  def consume
+    unless DT.key?(:done)
+      WRITER.puts("1")
+      WRITER.flush
+      DT[:done] = true
+    end
+
+    # Prevents post-kill restarted node from sleeping as well
+    mark_as_consumed(messages.last)
+
+    sleep(180) if messages.last.offset.zero?
+  end
 end
 
-class Consumer < Karafka::BaseConsumer
+class FastConsumer < Karafka::BaseConsumer
   def consume
-    # Simulate long processing that exceeds node_report_timeout (5s)
-    sleep(15)
-    WRITER.puts("1")
-    WRITER.flush
+    DT[:fast_consumed] = true
+    mark_as_consumed(messages.last)
   end
 end
 
 draw_routes do
-  topic DT.topic do
-    consumer Consumer
+  topic DT.topics[0] do
+    consumer SlowConsumer
     manual_offset_management true
+    max_messages 1
+  end
+
+  topic DT.topics[1] do
+    consumer FastConsumer
+    manual_offset_management true
+    max_messages 1
   end
 end
 
-produce_many(DT.topic, DT.uuids(1))
+produce_many(DT.topics[0], DT.uuids(2))
+produce_many(DT.topics[1], DT.uuids(2))
 
+# Node should be killed because slow consumer exceeds consuming_ttl.
+# Wait for 2 forks (original + restart after kill).
+done = []
 start_karafka_and_wait_until(mode: :swarm) do
-  READER.gets && sleep(1)
+  done << READER.gets
+  done.size >= 2
 end
-
-assert !DT.key?(:killed)
