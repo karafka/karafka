@@ -20,11 +20,10 @@
 # License: https://karafka.io/docs/Pro-License-Comm/
 # Contact: contact@karafka.io
 
-# When statistics are disabled and consumer processing takes longer than node_report_timeout,
-# the node should NOT be killed because on_client_events_poll fires during wait and keeps
-# liveness reporting active.
-# We produce multiple messages and process each one slowly to ensure that consecutive slow
-# processing cycles on the same node (or a restarted node) are all properly kept alive.
+# When a long running job consumer exceeds the consuming_ttl with statistics disabled,
+# consecutive slow nodes (after being killed and restarted) should also be detected and killed.
+# This ensures the liveness mechanism works not just for the first node but for all subsequent
+# respawned nodes as well.
 
 setup_karafka do |config|
   config.swarm.nodes = 1
@@ -33,43 +32,41 @@ setup_karafka do |config|
   config.internal.swarm.node_restart_timeout = 1_000
   config.internal.swarm.supervision_interval = 1_000
   config.internal.swarm.liveness_interval = 1_000
-  config.internal.swarm.node_report_timeout = 5_000
 end
 
 READER, WRITER = IO.pipe
 
-Karafka.monitor.subscribe("swarm.manager.stopping") do
-  DT[:killed] = true
-end
+Karafka.monitor.subscribe(
+  Karafka::Pro::Swarm::LivenessListener.new(
+    consuming_ttl: 1_000
+  )
+)
 
 class Consumer < Karafka::BaseConsumer
   def consume
-    messages.each do
-      # Simulate long processing that exceeds node_report_timeout (5s)
-      sleep(15)
+    unless DT.key?(:reported)
       WRITER.puts("1")
       WRITER.flush
+      DT[:reported] = true
     end
+
+    sleep(10)
   end
 end
 
 draw_routes do
   topic DT.topic do
     consumer Consumer
+    long_running_job true
     manual_offset_management true
-    max_messages 1
   end
 end
 
-# 3 messages means 3 consecutive slow processing cycles (~45s total)
-produce_many(DT.topic, DT.uuids(3))
+produce_many(DT.topic, DT.uuids(10))
 
-count = 0
-
+# Wait for 3 forks: original + 2 restarts, proving consecutive slow nodes also get killed
+done = []
 start_karafka_and_wait_until(mode: :swarm) do
-  READER.gets
-  count += 1
-  count >= 3
+  done << READER.gets
+  done.size >= 3
 end
-
-assert !DT.key?(:killed)
