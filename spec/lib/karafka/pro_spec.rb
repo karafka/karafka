@@ -3,6 +3,10 @@
 RSpec.describe_current do
   let(:header_title) { "Karafka Pro - Source Available Commercial Software" }
   let(:header_license) { "License: https://karafka.io/docs/Pro-License-Comm/" }
+  let(:header_ip_retention) { "The author retains all right, title, and interest" }
+  let(:header_no_patent) { "No patent rights are granted under this license" }
+  let(:header_reverse_eng) { "Reverse engineering, decompilation, or disassembly" }
+  let(:header_viewing) { "Receipt, viewing, or possession of this software" }
 
   Dir[Karafka.gem_root.join("lib", "karafka", "pro", "**/*.rb")].each do |pro_file|
     context "when checking #{pro_file}" do
@@ -10,6 +14,10 @@ RSpec.describe_current do
 
       it { expect(content).to include(header_title) }
       it { expect(content).to include(header_license) }
+      it { expect(content).to include(header_ip_retention) }
+      it { expect(content).to include(header_no_patent) }
+      it { expect(content).to include(header_reverse_eng) }
+      it { expect(content).to include(header_viewing) }
     end
   end
 
@@ -19,6 +27,10 @@ RSpec.describe_current do
 
       it { expect(content).to include(header_title) }
       it { expect(content).to include(header_license) }
+      it { expect(content).to include(header_ip_retention) }
+      it { expect(content).to include(header_no_patent) }
+      it { expect(content).to include(header_reverse_eng) }
+      it { expect(content).to include(header_viewing) }
     end
   end
 
@@ -28,6 +40,10 @@ RSpec.describe_current do
 
       it { expect(content).to include(header_title) }
       it { expect(content).to include(header_license) }
+      it { expect(content).to include(header_ip_retention) }
+      it { expect(content).to include(header_no_patent) }
+      it { expect(content).to include(header_reverse_eng) }
+      it { expect(content).to include(header_viewing) }
     end
   end
 
@@ -57,12 +73,18 @@ RSpec.describe_current do
           next if line.include?("PROHIBITED:")
           next if line.include?("PERMITTED:")
           next if line.include?("Use without a valid commercial license")
+          next if line.include?("The author retains all right")
+          next if line.include?("including all copyrights, patents")
+          next if line.include?("No patent rights are granted")
           next if line.include?("Redistribution, modification")
+          next if line.include?("Reverse engineering, decompilation")
           next if line.include?("Use as training data for AI/ML")
           next if line.include?("Scraping, crawling")
           next if line.include?("Reading, referencing")
           next if line.include?("Runtime retrieval by AI assistants")
           next if line.include?("contextual help to Karafka users")
+          next if line.include?("Receipt, viewing, or possession")
+          next if line.include?("imply any license or right beyond")
           next if line.include?("License: https://karafka.io")
           next if line.include?("Contact: contact@karafka.io")
         end
