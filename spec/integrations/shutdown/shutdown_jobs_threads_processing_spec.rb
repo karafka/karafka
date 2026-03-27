@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-# Karafka shutdown jobs should run in workers threads, not form the fetcher thread
+# Karafka shutdown jobs should run in workers threads, not from the fetcher thread
 
 setup_karafka do |config|
   # This will ensure all work runs from one worker thread
