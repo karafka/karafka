@@ -81,13 +81,10 @@ RSpec.describe_current do
     end
   end
 
-  describe "#on_statistics_emitted" do
-    it "reports healthy or unhealthy status based on conditions" do
-      allow(listener).to receive(:rss_mb).and_return(100)
-      allow(listener).to receive(:monotonic_now).and_return(0, 1_000, 5_000, 10_000, 15_000)
-
-      listener.on_statistics_emitted(event)
-      expect(node).not_to have_received(:unhealthy)
+  describe "#on_client_events_poll" do
+    it "reports healthy status" do
+      listener.on_client_events_poll(event)
+      expect(node).to have_received(:healthy)
     end
   end
 

@@ -73,6 +73,14 @@ module Karafka
           report_status
         end
 
+        # Report liveness during events poll so it works during long processing without statistics.
+        # This event fires periodically during wait even when the listener is blocked on consumer
+        # jobs, preventing the supervisor from killing the node.
+        # @param _event [Karafka::Core::Monitoring::Event]
+        def on_client_events_poll(_event)
+          report_status
+        end
+
         {
           consume: :consumed,
           revoke: :revoked,
@@ -98,13 +106,6 @@ module Karafka
         def on_error_occurred(_event)
           clear_consumption_tick
           clear_polling_tick
-        end
-
-        # Reports the current status once in a while
-        #
-        # @param _event [Karafka::Core::Monitoring::Event]
-        def on_statistics_emitted(_event)
-          report_status
         end
 
         # Deregister the polling tracker for given listener
