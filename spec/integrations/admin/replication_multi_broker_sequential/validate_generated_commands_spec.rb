@@ -72,7 +72,7 @@ begin
       .gsub("topics-to-move.json", topics_container_path)
       .gsub("kafka-reassign-partitions.sh", "kafka-reassign-partitions")
 
-    output = %x(docker exec kafka1 #{command} 2>&1)
+    output = `docker exec kafka1 #{command} 2>&1`
 
     has_error = error_patterns.any? { |pattern| output.include?(pattern) }
 
