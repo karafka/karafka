@@ -490,7 +490,7 @@ module Karafka
         @steps = [
           "1. Export the reassignment JSON using: plan.export_to_file('reassignment.json')",
           "2. Export topics-to-move JSON using: plan.export_topics_to_move_file('topics-to-move.json')",
-          "3. Validate the plan (optional): #{@execution_commands[:generate]}",
+          "3. Generate a Kafka-proposed plan (optional): #{@execution_commands[:generate]}",
           "4. Execute the reassignment: #{@execution_commands[:execute]}",
           "5. Monitor progress: #{@execution_commands[:verify]}",
           "6. Verify completion by checking topic metadata",

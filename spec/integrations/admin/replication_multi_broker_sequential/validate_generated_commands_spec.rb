@@ -48,10 +48,14 @@ begin
   reassignment_container_path = "/tmp/karafka_reassignment_#{SecureRandom.hex(4)}.json"
   topics_container_path = "/tmp/karafka_topics_#{SecureRandom.hex(4)}.json"
 
-  `docker cp #{reassignment_file.path} kafka1:#{reassignment_container_path} 2>&1`
-  `docker cp #{topics_to_move_file.path} kafka1:#{topics_container_path} 2>&1`
-  `docker exec kafka1 chmod 644 #{reassignment_container_path} 2>/dev/null`
-  `docker exec kafka1 chmod 644 #{topics_container_path} 2>/dev/null`
+  cp_reassignment = system("docker cp #{reassignment_file.path} kafka1:#{reassignment_container_path} 2>&1")
+  assert cp_reassignment, "Failed to copy reassignment JSON into kafka1 container"
+
+  cp_topics = system("docker cp #{topics_to_move_file.path} kafka1:#{topics_container_path} 2>&1")
+  assert cp_topics, "Failed to copy topics-to-move JSON into kafka1 container"
+
+  system("docker exec kafka1 chmod 644 #{reassignment_container_path} 2>/dev/null")
+  system("docker exec kafka1 chmod 644 #{topics_container_path} 2>/dev/null")
 
   error_patterns = [
     "Missing required argument",
