@@ -57,9 +57,8 @@ draw_routes(create_topics: false) do
 end
 
 start_karafka_and_wait_until do
-  sleep(1)
-
   unless @produced
+    Karafka::Admin.create_topic(DT.topic, 1, 1)
     produce_many(DT.topic, DT.uuids(100))
     @produced = true
   end
