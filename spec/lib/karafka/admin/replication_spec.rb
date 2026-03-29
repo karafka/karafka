@@ -323,8 +323,12 @@ RSpec.describe Karafka::Admin::Replication do
       commands.each_value do |command|
         expect(command).to include("kafka-reassign-partitions.sh")
         expect(command).to include("--bootstrap-server")
-        expect(command).to include("--reassignment-json-file")
       end
+
+      expect(commands[:generate]).to include("--topics-to-move-json-file")
+      expect(commands[:generate]).to include("--broker-list")
+      expect(commands[:execute]).to include("--reassignment-json-file")
+      expect(commands[:verify]).to include("--reassignment-json-file")
     end
   end
 

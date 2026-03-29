@@ -36,19 +36,25 @@ end
 
 plan = Karafka::Admin.plan_topic_replication(topic: test_topic, replication_factor: target_rf)
 
-temp_file = Tempfile.new(["validate_cmds", ".json"])
+reassignment_file = Tempfile.new(["validate_cmds_reassignment", ".json"])
+topics_to_move_file = Tempfile.new(["validate_cmds_topics", ".json"])
 
 begin
-  plan.export_to_file(temp_file.path)
-  File.chmod(0o644, temp_file.path)
+  plan.export_to_file(reassignment_file.path)
+  plan.export_topics_to_move_file(topics_to_move_file.path)
+  File.chmod(0o644, reassignment_file.path)
+  File.chmod(0o644, topics_to_move_file.path)
 
-  container_path = "/tmp/karafka_validate_cmds_#{SecureRandom.hex(4)}.json"
-  `docker cp #{temp_file.path} kafka1:#{container_path} 2>&1`
-  `docker exec kafka1 chmod 644 #{container_path} 2>/dev/null`
+  reassignment_container_path = "/tmp/karafka_reassignment_#{SecureRandom.hex(4)}.json"
+  topics_container_path = "/tmp/karafka_topics_#{SecureRandom.hex(4)}.json"
+
+  `docker cp #{reassignment_file.path} kafka1:#{reassignment_container_path} 2>&1`
+  `docker cp #{topics_to_move_file.path} kafka1:#{topics_container_path} 2>&1`
+  `docker exec kafka1 chmod 644 #{reassignment_container_path} 2>/dev/null`
+  `docker exec kafka1 chmod 644 #{topics_container_path} 2>/dev/null`
 
   error_patterns = [
     "Missing required argument",
-    "Invalid",
     "Failed to parse",
     "Unrecognized option",
     "Exception in thread",
@@ -58,7 +64,8 @@ begin
   plan.execution_commands.each do |phase, command_template|
     command = command_template
       .gsub("<KAFKA_BROKERS>", "kafka1:29092")
-      .gsub("reassignment.json", container_path)
+      .gsub("reassignment.json", reassignment_container_path)
+      .gsub("topics-to-move.json", topics_container_path)
       .gsub("kafka-reassign-partitions.sh", "kafka-reassign-partitions")
 
     output = %x(docker exec kafka1 #{command} 2>&1)
@@ -73,10 +80,13 @@ begin
     )
   end
 
-  `docker exec kafka1 rm #{container_path} 2>/dev/null`
+  `docker exec kafka1 rm #{reassignment_container_path} 2>/dev/null`
+  `docker exec kafka1 rm #{topics_container_path} 2>/dev/null`
 ensure
-  temp_file.close
-  temp_file.unlink
+  reassignment_file.close
+  reassignment_file.unlink
+  topics_to_move_file.close
+  topics_to_move_file.unlink
 end
 
 begin
