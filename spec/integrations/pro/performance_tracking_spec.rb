@@ -53,15 +53,16 @@ class Consumer < Karafka::BaseConsumer
   end
 end
 
-# They will be auto-created when producing
-draw_routes(create_topics: false) do
+draw_routes do
   TOPICS.each do |topic_name|
     topic topic_name do
       consumer Consumer
     end
-
-    produce_many(topic_name, DT.uuids(10))
   end
+end
+
+TOPICS.each do |topic_name|
+  produce_many(topic_name, DT.uuids(10))
 end
 
 start_karafka_and_wait_until do
