@@ -3,8 +3,8 @@
 RSpec.describe Karafka::Admin::ConsumerGroups do
   subject(:admin_consumer_groups) { described_class }
 
-  let(:name) { "it-#{SecureRandom.uuid}" }
-  let(:name2) { "it-#{SecureRandom.uuid}" }
+  let(:name) { generate_topic_name }
+  let(:name2) { generate_topic_name }
 
   describe "#seek" do
     subject(:seeking) { described_class.seek(cg_id, map) }
@@ -125,7 +125,10 @@ RSpec.describe Karafka::Admin::ConsumerGroups do
     end
 
     context "when querying existing topic with a CG that never consumed it" do
-      before { PRODUCERS.regular.produce_sync(topic: name, payload: "1") }
+      before do
+        Karafka::Admin::Topics.create(name, 1, 1)
+        PRODUCERS.regular.produce_sync(topic: name, payload: "1")
+      end
 
       let(:cgs_t) { { "doesnotexist" => [name] } }
 

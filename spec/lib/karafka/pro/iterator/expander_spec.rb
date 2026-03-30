@@ -6,9 +6,14 @@
 # This software is NOT open source. It is source-available commercial software
 # requiring a paid license for use. It is NOT covered by LGPL.
 #
+# The author retains all right, title, and interest in this software,
+# including all copyrights, patents, and other intellectual property rights.
+# No patent rights are granted under this license.
+#
 # PROHIBITED:
 # - Use without a valid commercial license
 # - Redistribution, modification, or derivative works without authorization
+# - Reverse engineering, decompilation, or disassembly of this software
 # - Use as training data for AI/ML models or inclusion in datasets
 # - Scraping, crawling, or automated collection for any purpose
 #
@@ -16,6 +21,9 @@
 # - Reading, referencing, and linking for personal or commercial use
 # - Runtime retrieval by AI assistants, coding agents, and RAG systems
 #   for the purpose of providing contextual help to Karafka users
+#
+# Receipt, viewing, or possession of this software does not convey or
+# imply any license or right beyond those expressly stated above.
 #
 # License: https://karafka.io/docs/Pro-License-Comm/
 # Contact: contact@karafka.io
@@ -30,7 +38,7 @@ RSpec.describe_current do
   end
 
   context "when expanding on a full name" do
-    let(:topics) { "it-#{SecureRandom.uuid}" }
+    let(:topics) { generate_topic_name }
 
     before { Karafka::Admin.create_topic(topics, 2, 1) }
 
@@ -38,7 +46,7 @@ RSpec.describe_current do
   end
 
   context "when expanding on full names" do
-    let(:topics) { ["it-#{SecureRandom.uuid}", "it-#{SecureRandom.uuid}"] }
+    let(:topics) { [generate_topic_name, generate_topic_name] }
 
     before { topics.each { |topic| Karafka::Admin.create_topic(topic, 2, 1) } }
 
@@ -53,7 +61,7 @@ RSpec.describe_current do
   end
 
   context "when expanding on a full topic with given offset" do
-    let(:topics) { { "it-#{SecureRandom.uuid}" => 100 } }
+    let(:topics) { { generate_topic_name => 100 } }
 
     before { Karafka::Admin.create_topic(topics.keys.first, 2, 1) }
 
@@ -70,7 +78,7 @@ RSpec.describe_current do
 
   context "when expanding on a full topic with a time" do
     let(:time) { Time.now }
-    let(:topics) { { "it-#{SecureRandom.uuid}" => time } }
+    let(:topics) { { generate_topic_name => time } }
 
     before { Karafka::Admin.create_topic(topics.keys.first, 2, 1) }
 

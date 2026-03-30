@@ -4,21 +4,21 @@
 
 setup_karafka
 
-produce_many(DT.topic, DT.uuids(40))
-
 class Consumer < Karafka::BaseConsumer
   def consume
     DT[:counts] << messages.size
   end
 end
 
-draw_routes(create_topics: false) do
+draw_routes do
   topic DT.topic do
     max_messages 5
     max_wait_time 10_000
     consumer Consumer
   end
 end
+
+produce_many(DT.topic, DT.uuids(40))
 
 start_karafka_and_wait_until do
   DT[:counts].size >= 8

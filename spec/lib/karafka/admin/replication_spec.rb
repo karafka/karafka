@@ -286,6 +286,31 @@ RSpec.describe Karafka::Admin::Replication do
     end
   end
 
+  describe "#topics_to_move_json" do
+    it "generates valid Kafka topics-to-move JSON format" do
+      json_data = JSON.parse(plan_instance.topics_to_move_json)
+
+      expect(json_data).to eq("version" => 1, "topics" => [{ "topic" => topic_name }])
+    end
+  end
+
+  describe "#export_topics_to_move_file" do
+    let(:temp_file) { Tempfile.new(["topics_to_move", ".json"]) }
+
+    after { temp_file.unlink }
+
+    it "exports topics-to-move JSON to specified file" do
+      file_path = plan_instance.export_topics_to_move_file(temp_file.path)
+
+      expect(file_path).to eq(temp_file.path)
+      expect(File.exist?(temp_file.path)).to be(true)
+
+      json_data = JSON.parse(File.read(temp_file.path))
+      expect(json_data["version"]).to eq(1)
+      expect(json_data["topics"]).to eq([{ "topic" => topic_name }])
+    end
+  end
+
   describe "#summary" do
     it "provides comprehensive plan summary" do
       summary = plan_instance.summary
@@ -323,8 +348,12 @@ RSpec.describe Karafka::Admin::Replication do
       commands.each_value do |command|
         expect(command).to include("kafka-reassign-partitions.sh")
         expect(command).to include("--bootstrap-server")
-        expect(command).to include("--reassignment-json-file")
       end
+
+      expect(commands[:generate]).to include("--topics-to-move-json-file")
+      expect(commands[:generate]).to include("--broker-list")
+      expect(commands[:execute]).to include("--reassignment-json-file")
+      expect(commands[:verify]).to include("--reassignment-json-file")
     end
   end
 

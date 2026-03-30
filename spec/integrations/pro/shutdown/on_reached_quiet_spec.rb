@@ -6,9 +6,14 @@
 # This software is NOT open source. It is source-available commercial software
 # requiring a paid license for use. It is NOT covered by LGPL.
 #
+# The author retains all right, title, and interest in this software,
+# including all copyrights, patents, and other intellectual property rights.
+# No patent rights are granted under this license.
+#
 # PROHIBITED:
 # - Use without a valid commercial license
 # - Redistribution, modification, or derivative works without authorization
+# - Reverse engineering, decompilation, or disassembly of this software
 # - Use as training data for AI/ML models or inclusion in datasets
 # - Scraping, crawling, or automated collection for any purpose
 #
@@ -17,14 +22,15 @@
 # - Runtime retrieval by AI assistants, coding agents, and RAG systems
 #   for the purpose of providing contextual help to Karafka users
 #
+# Receipt, viewing, or possession of this software does not convey or
+# imply any license or right beyond those expressly stated above.
+#
 # License: https://karafka.io/docs/Pro-License-Comm/
 # Contact: contact@karafka.io
 
 # When we have reached quiet state, we should still be subscribed to what we had
 
 setup_karafka
-
-produce(DT.topic, "1")
 
 class Consumer < Karafka::BaseConsumer
   def consume
@@ -33,7 +39,7 @@ class Consumer < Karafka::BaseConsumer
   end
 end
 
-draw_routes(create_topics: false) do
+draw_routes do
   5.times do |i|
     consumer_group "gr#{i}" do
       topic DT.topic do
@@ -42,6 +48,8 @@ draw_routes(create_topics: false) do
     end
   end
 end
+
+produce(DT.topic, "1")
 
 Thread.new do
   sleep(0.1) until DT.data.keys.size >= 5

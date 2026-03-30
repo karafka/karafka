@@ -1,12 +1,26 @@
 # Karafka Framework Changelog
 
-## 2.5.7 (Unreleased)
+## 2.5.9 (2026-03-30)
+- [Enhancement] Validate that `statistics.interval.ms` is not zero when dynamic multiplexing is enabled (Pro).
+- [Fix] Fix swarm liveness reporting to also use `on_connection_listener_fetch_loop` so nodes stay alive when `statistics.interval.ms` is disabled.
+- [Fix] Fix `ConfigProxy#producer` when called as a reader resetting the producer to nil instead of returning its value (#3076).
+- [Fix] Fix `Replication#build_generate_command` using `--reassignment-json-file` with `--generate` instead of `--topics-to-move-json-file` and `--broker-list` ([#3087](https://github.com/karafka/karafka/issues/3087)).
+
+## 2.5.8 (2026-03-23)
+- **[Feature]** Add `Karafka::Admin::Recovery` for coordinator-bypass offset reading and consumer group migration when the Kafka group coordinator is in a FAILED state (Pro).
+
+## 2.5.7 (2026-03-16)
 - [Enhancement] Report detailed blocking information (active listeners, alive workers, and in-processing jobs) during forceful shutdown instead of only aggregate counts.
 - [Enhancement] Improve `ForcefulShutdownError` description to clearly explain when and why it is raised.
 - [Enhancement] Cache `messages.last` in `BatchMetadata` builder to avoid duplicate array traversal.
 - [Enhancement] Optimize `VirtualOffsetManager#mark` to use a single array scan instead of separate `include?` and `index` calls (Pro).
 - [Enhancement] Optimize `VirtualOffsetManager#materialize_real_offset` to use `keys.sort` instead of `to_a.sort_by` with tuple destructuring (Pro).
 - [Enhancement] Optimize `IntervalRunner#call` to use a single `monotonic_now` call instead of two per invocation.
+- [Enhancement] Support WaterDrop `:fd` mode in Swarm.
+- [Maintenance] Use both `:fd` and `:thread` producer backends in CI.
+- [Maintenance] Include spec file hash in integration test topic names for easier traceability in Kafka logs (#3056).
+- [Fix] Remove duplicate topic creation in multi-broker health integration specs (#3056).
+- [Fix] Preserve producer-specific kafka settings (e.g., `enable.idempotence`) when recreating the producer in swarm forks.
 
 ## 2.5.6 (2026-02-28)
 - **[Feature]** Add `karafka topics health` command to check Kafka topics for replication and durability issues, detecting no redundancy (RF=1), zero fault tolerance (RF≤min.insync), and low durability (min.insync=1) configurations with color-coded severity grouping and actionable recommendations (Pro).

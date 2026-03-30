@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    karafka (2.5.7)
+    karafka (2.5.9)
       karafka-core (>= 2.5.6, < 2.6.0)
       karafka-rdkafka (>= 0.24.0)
       waterdrop (>= 2.8.14, < 3.0.0)
@@ -10,10 +10,10 @@ PATH
 GEM
   remote: https://rubygems.org/
   specs:
-    activejob (8.1.2)
-      activesupport (= 8.1.2)
+    activejob (8.1.2.1)
+      activesupport (= 8.1.2.1)
       globalid (>= 0.3.6)
-    activesupport (8.1.2)
+    activesupport (8.1.2.1)
       base64
       bigdecimal
       concurrent-ruby (~> 1.0, >= 1.3.1)
@@ -59,8 +59,8 @@ GEM
     i18n (1.14.8)
       concurrent-ruby (~> 1.0)
     io-console (0.8.2)
-    json (2.18.1)
-    karafka-core (2.5.8)
+    json (2.19.2)
+    karafka-core (2.5.10)
       karafka-rdkafka (>= 0.20.0)
       logger (>= 1.6.0)
     karafka-rdkafka (0.24.0)
@@ -110,10 +110,11 @@ GEM
       tilt (~> 2.0)
     logger (1.7.0)
     mini_portile2 (2.8.9)
-    minitest (6.0.1)
+    minitest (6.0.2)
+      drb (~> 2.0)
       prism (~> 1.5)
     ostruct (0.6.3)
-    prism (1.7.0)
+    prism (1.9.0)
     raabro (1.4.0)
     rack (3.2.5)
     rake (13.3.1)
@@ -147,11 +148,11 @@ GEM
       concurrent-ruby (~> 1.0)
     uri (1.1.1)
     warning (1.5.0)
-    waterdrop (2.8.15)
+    waterdrop (2.8.16)
       karafka-core (>= 2.4.9, < 3.0.0)
-      karafka-rdkafka (>= 0.23.1)
+      karafka-rdkafka (>= 0.24.0)
       zeitwerk (~> 2.3)
-    zeitwerk (2.7.4)
+    zeitwerk (2.7.5)
 
 PLATFORMS
   aarch64-linux-gnu
@@ -181,8 +182,8 @@ DEPENDENCIES
   warning
 
 CHECKSUMS
-  activejob (8.1.2) sha256=908dab3713b101859536375819f4156b07bdf4c232cc645e7538adb9e302f825
-  activesupport (8.1.2) sha256=88842578ccd0d40f658289b0e8c842acfe9af751afee2e0744a7873f50b6fdae
+  activejob (8.1.2.1) sha256=c89c311d07fd358b76c581ed8fee87c5b4351fb44994f3389385c014d22182fe
+  activesupport (8.1.2.1) sha256=beec20ced12ad569194554399449a6372fdab03061b8f48a9ed6ef9b7dc251b2
   base64 (0.3.0) sha256=27337aeabad6ffae05c265c450490628ef3ebd4b67be58257393227588f5a97b
   bigdecimal (4.0.1) sha256=8b07d3d065a9f921c80ceaea7c9d4ae596697295b584c296fe599dd0ad01c4a7
   byebug (13.0.0) sha256=d2263efe751941ca520fa29744b71972d39cbc41839496706f5d9b22e92ae05d
@@ -209,9 +210,9 @@ CHECKSUMS
   globalid (1.3.0) sha256=05c639ad6eb4594522a0b07983022f04aa7254626ab69445a0e493aa3786ff11
   i18n (1.14.8) sha256=285778639134865c5e0f6269e0b818256017e8cde89993fdfcbfb64d088824a5
   io-console (0.8.2) sha256=d6e3ae7a7cc7574f4b8893b4fca2162e57a825b223a177b7afa236c5ef9814cc
-  json (2.18.1) sha256=fe112755501b8d0466b5ada6cf50c8c3f41e897fa128ac5d263ec09eedc9f986
-  karafka (2.5.7)
-  karafka-core (2.5.8) sha256=3b056abe55cede3f189a3b68c444012f9fb70ec49afd8689c99702ab72837041
+  json (2.19.2) sha256=e7e1bd318b2c37c4ceee2444841c86539bc462e81f40d134cf97826cb14e83cf
+  karafka (2.5.9)
+  karafka-core (2.5.10) sha256=a4f9127186728502decf0817d366b4eec46593390047c278acddb636e63e384c
   karafka-rdkafka (0.24.0) sha256=91e9eb753d7f72036721af4ce0f3f2dcf7c145a2e324fc1cba7b6f837def4e09
   karafka-rdkafka (0.24.0-aarch64-linux-gnu) sha256=1685c91b81ee97d81528f03db292eadad3a7e191b29613f24d5ba9a7a434f097
   karafka-rdkafka (0.24.0-aarch64-linux-musl) sha256=498c70b2db1b89c2e68d6d8b8884cf60a5e3b24747c077c72dc0329007f6ba36
@@ -222,9 +223,9 @@ CHECKSUMS
   karafka-web (0.11.6) sha256=a257d631d544dfe7dedbb3cfd0c8312228d60147b69016a6876c386ec229785a
   logger (1.7.0) sha256=196edec7cc44b66cfb40f9755ce11b392f21f7967696af15d274dde7edff0203
   mini_portile2 (2.8.9) sha256=0cd7c7f824e010c072e33f68bc02d85a00aeb6fce05bb4819c03dfd3c140c289
-  minitest (6.0.1) sha256=7854c74f48e2e975969062833adc4013f249a4b212f5e7b9d5c040bf838d54bb
+  minitest (6.0.2) sha256=db6e57956f6ecc6134683b4c87467d6dd792323c7f0eea7b93f66bd284adbc3d
   ostruct (0.6.3) sha256=95a2ed4a4bd1d190784e666b47b2d3f078e4a9efda2fccf18f84ddc6538ed912
-  prism (1.7.0) sha256=10062f734bf7985c8424c44fac382ac04a58124ea3d220ec3ba9fe4f2da65103
+  prism (1.9.0) sha256=7b530c6a9f92c24300014919c9dcbc055bf4cdf51ec30aed099b06cd6674ef85
   raabro (1.4.0) sha256=d4fa9ff5172391edb92b242eed8be802d1934b1464061ae5e70d80962c5da882
   rack (3.2.5) sha256=4cbd0974c0b79f7a139b4812004a62e4c60b145cba76422e288ee670601ed6d3
   rake (13.3.1) sha256=8c9e89d09f66a26a01264e7e3480ec0607f0c497a861ef16063604b1b08eb19c
@@ -244,8 +245,8 @@ CHECKSUMS
   tzinfo (2.0.6) sha256=8daf828cc77bcf7d63b0e3bdb6caa47e2272dcfaf4fbfe46f8c3a9df087a829b
   uri (1.1.1) sha256=379fa58d27ffb1387eaada68c749d1426738bd0f654d812fcc07e7568f5c57c6
   warning (1.5.0) sha256=0f12c49fea0c06757778eefdcc7771e4fd99308901e3d55c504d87afdd718c53
-  waterdrop (2.8.15) sha256=1a8f515533dc9ef2528f1cd33d6135b6ed1cc33e8d2a8562212ebc1bb4c60c10
-  zeitwerk (2.7.4) sha256=2bef90f356bdafe9a6c2bd32bcd804f83a4f9b8bc27f3600fff051eb3edcec8b
+  waterdrop (2.8.16) sha256=a48e795b5eaeb3cef77b4eb0f98e9e88e657cf02a8120bc8a1597dc6bf9626c1
+  zeitwerk (2.7.5) sha256=d8da92128c09ea6ec62c949011b00ed4a20242b255293dd66bf41545398f73dd
 
 BUNDLED WITH
   4.0.3

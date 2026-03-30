@@ -35,6 +35,7 @@ unless ENV["PRISTINE_MODE"]
   require "byebug"
 end
 
+require "digest"
 require "singleton"
 require "securerandom"
 require "stringio"
@@ -120,6 +121,9 @@ def setup_karafka(
       # We need to wait a lot sometimes because we create a lot of new topics and this can take
       # time
       producer_config.max_wait_timeout = 120_000 # 2 minutes
+      # We set this randomly as a way of covering both cases in the integrations before we fully
+      # retire the thread backend
+      producer_config.polling.mode = %i[thread fd].sample
     end
 
     # This will ensure, that the recurring tasks data does not leak in between tests (if needed)

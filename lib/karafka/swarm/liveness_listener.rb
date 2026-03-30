@@ -19,21 +19,30 @@ module Karafka
         @mutex = Mutex.new
       end
 
-      # Since there may be many statistics emitted from multiple listeners, we do not want to write
-      # statuses that often. Instead we do it only once in a while which should be enough
-      #
-      # While this may provide a small lag in the orphaned detection, it does not really matter
-      # as it will be picked up fast enough.
+      # Report from the fetch loop at the top of each iteration
       # @param _event [Karafka::Core::Monitoring::Event]
-      def on_statistics_emitted(_event)
+      def on_connection_listener_fetch_loop(_event)
+        report_liveness
+      end
+
+      # Report from events poll so liveness works during long processing.
+      # This event fires periodically during wait even when the listener is blocked on consumer
+      # jobs, preventing the supervisor from killing the node.
+      # @param _event [Karafka::Core::Monitoring::Event]
+      def on_client_events_poll(_event)
+        report_liveness
+      end
+
+      private
+
+      # Reports liveness to the supervisor periodically
+      def report_liveness
         periodically do
           Kernel.exit!(orphaned_exit_code) if node.orphaned?
 
           node.healthy
         end
       end
-
-      private
 
       # Wraps the logic with a mutex
       def synchronize(&)

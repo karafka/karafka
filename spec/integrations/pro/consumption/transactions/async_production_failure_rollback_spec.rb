@@ -6,9 +6,14 @@
 # This software is NOT open source. It is source-available commercial software
 # requiring a paid license for use. It is NOT covered by LGPL.
 #
+# The author retains all right, title, and interest in this software,
+# including all copyrights, patents, and other intellectual property rights.
+# No patent rights are granted under this license.
+#
 # PROHIBITED:
 # - Use without a valid commercial license
 # - Redistribution, modification, or derivative works without authorization
+# - Reverse engineering, decompilation, or disassembly of this software
 # - Use as training data for AI/ML models or inclusion in datasets
 # - Scraping, crawling, or automated collection for any purpose
 #
@@ -16,6 +21,9 @@
 # - Reading, referencing, and linking for personal or commercial use
 # - Runtime retrieval by AI assistants, coding agents, and RAG systems
 #   for the purpose of providing contextual help to Karafka users
+#
+# Receipt, viewing, or possession of this software does not convey or
+# imply any license or right beyond those expressly stated above.
 #
 # License: https://karafka.io/docs/Pro-License-Comm/
 # Contact: contact@karafka.io
@@ -33,7 +41,7 @@ setup_karafka(allow_errors: true) do |config|
   config.max_messages = 5
 end
 
-DT[:attempts] = 0
+DT[:should_fail] = true
 DT[:processing] = []
 DT[:errors] = []
 DT[:target1] = []
@@ -42,38 +50,31 @@ DT[:success] = false
 
 class Consumer < Karafka::BaseConsumer
   def consume
-    return if DT[:attempts] >= 2
+    transaction do
+      messages.each do |message|
+        DT[:processing] << message.raw_payload
 
-    DT[:attempts] += 1
+        producer.produce_async(
+          topic: DT.topics[1],
+          payload: "target1_#{message.raw_payload}"
+        )
 
-    begin
-      transaction do
-        messages.each_with_index do |message, index|
-          DT[:processing] << message.raw_payload
+        producer.produce_async(
+          topic: DT.topics[2],
+          payload: "target2_#{message.raw_payload}"
+        )
 
-          producer.produce_async(
-            topic: DT.topics[1],
-            payload: "target1_#{message.raw_payload}"
-          )
-
-          if DT[:attempts] == 1 && index == 1
-            raise StandardError, "Simulated production failure"
-          end
-
-          producer.produce_async(
-            topic: DT.topics[2],
-            payload: "target2_#{message.raw_payload}"
-          )
-        end
-
-        mark_as_consumed(messages.last)
+        raise StandardError, "Simulated production failure" if DT[:should_fail]
       end
 
-      DT[:success] = true
-    rescue => e
-      DT[:errors] << e.message
-      raise
+      mark_as_consumed(messages.last)
     end
+
+    DT[:success] = true
+  rescue => e
+    DT[:errors] << e.message
+    DT[:should_fail] = false
+    raise
   end
 end
 
@@ -110,12 +111,12 @@ start_karafka_and_wait_until do
   DT[:success] == true && DT[:target1].size >= 3 && DT[:target2].size >= 3
 end
 
-# Verify one failure and one success
-assert_equal 2, DT[:attempts]
+# Verify one failure occurred with the expected error message
 assert_equal 1, DT[:errors].size
+assert_equal "Simulated production failure", DT[:errors].first
 
-# Verify messages processed (2 on failed attempt + 3 on successful attempt = 5 total)
-assert_equal 5, DT[:processing].size
+# Verify messages processed (1 from failed attempt + 3 from successful processing = 4 total)
+assert_equal 4, DT[:processing].size
 
 # Verify all messages eventually produced to both targets
 assert_equal 3, DT[:target1].size

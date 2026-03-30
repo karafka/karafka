@@ -31,6 +31,8 @@ Karafka::App.monitor.subscribe("statistics.emitted") do |event|
   end
 end
 
+draw_routes(Consumer)
+
 produce_many(DT.topic, DT.uuids(1))
 
 Thread.new do
@@ -43,8 +45,6 @@ Thread.new do
     break if DT[:lags].size >= 20
   end
 end
-
-draw_routes(Consumer)
 
 start_karafka_and_wait_until do
   DT[:lags].size >= 25

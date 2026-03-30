@@ -55,6 +55,7 @@ module Karafka
         :target_replication_factor,
         :partitions_assignment,
         :reassignment_json,
+        :topics_to_move_json,
         :execution_commands,
         :steps
       )
@@ -108,6 +109,7 @@ module Karafka
         @cluster_info = cluster_info
 
         generate_reassignment_json
+        generate_topics_to_move_json
         generate_execution_commands
         generate_steps
 
@@ -253,6 +255,15 @@ module Karafka
       # @param file_path [String] path where to save the JSON file
       def export_to_file(file_path)
         File.write(file_path, @reassignment_json)
+        file_path
+      end
+
+      # Export the topics-to-move JSON to a file for use with kafka-reassign-partitions.sh
+      # --generate. This optional step lets you ask Kafka to propose its own reassignment plan
+      # so you can compare it against the plan Karafka generated before executing.
+      # @param file_path [String] path where to save the JSON file
+      def export_topics_to_move_file(file_path)
+        File.write(file_path, @topics_to_move_json)
         file_path
       end
 
@@ -428,6 +439,19 @@ module Karafka
         @reassignment_json = JSON.pretty_generate(reassignment_data)
       end
 
+      # Generates the topics-to-move JSON required by kafka-reassign-partitions.sh --generate.
+      # This file is only needed when you want Kafka to propose its own reassignment plan for
+      # comparison against the plan Karafka already computed. It is not required for execution.
+      # @return [void]
+      def generate_topics_to_move_json
+        topics_data = {
+          version: 1,
+          topics: [{ topic: @topic }]
+        }
+
+        @topics_to_move_json = JSON.pretty_generate(topics_data)
+      end
+
       # Generates command templates for executing the reassignment plan
       # Builds generate, execute, and verify command templates with placeholders
       # @return [void]
@@ -439,11 +463,16 @@ module Karafka
         }
       end
 
-      # Builds the kafka-reassign-partitions.sh command for generating reassignment plan
-      # @return [String] command template with placeholder for broker addresses
+      # Builds the kafka-reassign-partitions.sh --generate command that asks Kafka to propose
+      # its own reassignment plan. This is optional — you can compare Kafka's suggestion against
+      # the plan Karafka already computed, or skip this step and go straight to --execute.
+      # @return [String] command template with placeholders for broker addresses and IDs
       def build_generate_command
+        broker_ids = @cluster_info[:brokers].map { |b| b[:node_id] }.sort.join(",")
+
         "kafka-reassign-partitions.sh --bootstrap-server <KAFKA_BROKERS> " \
-          "--reassignment-json-file reassignment.json --generate"
+          "--topics-to-move-json-file topics-to-move.json " \
+          "--broker-list #{broker_ids} --generate"
       end
 
       # Builds the kafka-reassign-partitions.sh command for executing reassignment
@@ -466,7 +495,10 @@ module Karafka
       def generate_steps
         @steps = [
           "1. Export the reassignment JSON using: plan.export_to_file('reassignment.json')",
-          "2. Validate the plan (optional): #{@execution_commands[:generate]}",
+          "2. (Optional) Compare against Kafka's own proposal:",
+          "   a. Export topics-to-move JSON: plan.export_topics_to_move_file('topics-to-move.json')",
+          "   b. Ask Kafka to generate its plan: #{@execution_commands[:generate]}",
+          "   c. Compare Kafka's output with the Karafka-generated reassignment.json above",
           "3. Execute the reassignment: #{@execution_commands[:execute]}",
           "4. Monitor progress: #{@execution_commands[:verify]}",
           "5. Verify completion by checking topic metadata",

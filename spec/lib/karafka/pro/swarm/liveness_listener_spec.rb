@@ -6,9 +6,14 @@
 # This software is NOT open source. It is source-available commercial software
 # requiring a paid license for use. It is NOT covered by LGPL.
 #
+# The author retains all right, title, and interest in this software,
+# including all copyrights, patents, and other intellectual property rights.
+# No patent rights are granted under this license.
+#
 # PROHIBITED:
 # - Use without a valid commercial license
 # - Redistribution, modification, or derivative works without authorization
+# - Reverse engineering, decompilation, or disassembly of this software
 # - Use as training data for AI/ML models or inclusion in datasets
 # - Scraping, crawling, or automated collection for any purpose
 #
@@ -16,6 +21,9 @@
 # - Reading, referencing, and linking for personal or commercial use
 # - Runtime retrieval by AI assistants, coding agents, and RAG systems
 #   for the purpose of providing contextual help to Karafka users
+#
+# Receipt, viewing, or possession of this software does not convey or
+# imply any license or right beyond those expressly stated above.
 #
 # License: https://karafka.io/docs/Pro-License-Comm/
 # Contact: contact@karafka.io
@@ -42,6 +50,7 @@ RSpec.describe_current do
 
   before do
     allow(listener).to receive(:node).and_return(node)
+    allow(node).to receive(:healthy)
     allow(node).to receive(:unhealthy)
   end
 
@@ -80,13 +89,73 @@ RSpec.describe_current do
     end
   end
 
-  describe "#on_statistics_emitted" do
-    it "reports healthy or unhealthy status based on conditions" do
-      allow(listener).to receive(:rss_mb).and_return(100)
-      allow(listener).to receive(:monotonic_now).and_return(0, 1_000, 5_000, 10_000, 15_000)
+  describe "#on_client_events_poll" do
+    it "reports healthy status" do
+      listener.on_client_events_poll(event)
+      expect(node).to have_received(:healthy)
+    end
+  end
 
-      listener.on_statistics_emitted(event)
-      expect(node).not_to have_received(:unhealthy)
+  describe "fiber-safety" do
+    it "tracks polling timestamps independently per fiber" do
+      fiber1_id = nil
+      fiber2_id = nil
+
+      f1 = Fiber.new do
+        fiber1_id = Fiber.current.object_id
+        listener.on_connection_listener_fetch_loop(event)
+      end
+
+      f2 = Fiber.new do
+        fiber2_id = Fiber.current.object_id
+        listener.on_connection_listener_fetch_loop(event)
+      end
+
+      f1.resume
+      f2.resume
+
+      expect(listener_pollings.keys).to contain_exactly(fiber1_id, fiber2_id)
+    end
+
+    it "tracks consumption timestamps independently per fiber" do
+      fiber1_id = nil
+      fiber2_id = nil
+
+      f1 = Fiber.new do
+        fiber1_id = Fiber.current.object_id
+        listener.on_consumer_consume(event)
+      end
+
+      f2 = Fiber.new do
+        fiber2_id = Fiber.current.object_id
+        listener.on_consumer_consume(event)
+      end
+
+      f1.resume
+      f2.resume
+
+      expect(listener_consumptions.keys).to contain_exactly(fiber1_id, fiber2_id)
+    end
+
+    it "clearing in one fiber does not remove the other fibers timestamp" do
+      f1 = Fiber.new do
+        listener.on_consumer_consume(event)
+        Fiber.yield
+        listener.on_consumer_consumed(event)
+      end
+
+      f2 = Fiber.new do
+        listener.on_consumer_consume(event)
+      end
+
+      # Both fibers mark consumption
+      f1.resume
+      f2.resume
+      expect(listener_consumptions.size).to eq(2)
+
+      # Only f1 clears its entry
+      f1.resume
+      expect(listener_consumptions.size).to eq(1)
     end
   end
 

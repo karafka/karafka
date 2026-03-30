@@ -6,9 +6,14 @@
 # This software is NOT open source. It is source-available commercial software
 # requiring a paid license for use. It is NOT covered by LGPL.
 #
+# The author retains all right, title, and interest in this software,
+# including all copyrights, patents, and other intellectual property rights.
+# No patent rights are granted under this license.
+#
 # PROHIBITED:
 # - Use without a valid commercial license
 # - Redistribution, modification, or derivative works without authorization
+# - Reverse engineering, decompilation, or disassembly of this software
 # - Use as training data for AI/ML models or inclusion in datasets
 # - Scraping, crawling, or automated collection for any purpose
 #
@@ -16,6 +21,9 @@
 # - Reading, referencing, and linking for personal or commercial use
 # - Runtime retrieval by AI assistants, coding agents, and RAG systems
 #   for the purpose of providing contextual help to Karafka users
+#
+# Receipt, viewing, or possession of this software does not convey or
+# imply any license or right beyond those expressly stated above.
 #
 # License: https://karafka.io/docs/Pro-License-Comm/
 # Contact: contact@karafka.io
@@ -65,11 +73,20 @@ module Karafka
           super()
         end
 
-        # Tick on each fetch
+        # Tick on each fetch and report liveness so it works even when statistics are disabled
         #
         # @param _event [Karafka::Core::Monitoring::Event]
         def on_connection_listener_fetch_loop(_event)
           mark_polling_tick
+          report_status
+        end
+
+        # Report liveness during events poll so it works during long processing without statistics.
+        # This event fires periodically during wait even when the listener is blocked on consumer
+        # jobs, preventing the supervisor from killing the node.
+        # @param _event [Karafka::Core::Monitoring::Event]
+        def on_client_events_poll(_event)
+          report_status
         end
 
         {
@@ -99,19 +116,6 @@ module Karafka
           clear_polling_tick
         end
 
-        # Reports the current status once in a while
-        #
-        # @param _event [Karafka::Core::Monitoring::Event]
-        def on_statistics_emitted(_event)
-          periodically do
-            return unless node
-
-            current_status = status
-
-            current_status.positive? ? node.unhealthy(current_status) : node.healthy
-          end
-        end
-
         # Deregister the polling tracker for given listener
         # @param _event [Karafka::Core::Monitoring::Event]
         def on_connection_listener_stopping(_event)
@@ -134,36 +138,50 @@ module Karafka
 
         private
 
-        # @return [Integer] object id of the current thread
-        def thread_id
-          Thread.current.object_id
-        end
+        # Reports the current status to the supervisor periodically
+        def report_status
+          periodically do
+            return unless node
 
-        # Update the polling tick time for current thread
-        def mark_polling_tick
-          synchronize do
-            @pollings[thread_id] = monotonic_now
+            current_status = status
+
+            current_status.positive? ? node.unhealthy(current_status) : node.healthy
           end
         end
 
-        # Clear current thread polling time tracker
+        # @return [Integer] object id of the current fiber
+        # @note We use fiber object id instead of thread object id to ensure fiber-safety.
+        #   Multiple fibers can run on the same thread, and using thread id would cause them
+        #   to overwrite each other's timestamps.
+        def fiber_id
+          Fiber.current.object_id
+        end
+
+        # Update the polling tick time for current fiber
+        def mark_polling_tick
+          synchronize do
+            @pollings[fiber_id] = monotonic_now
+          end
+        end
+
+        # Clear current fiber polling time tracker
         def clear_polling_tick
           synchronize do
-            @pollings.delete(thread_id)
+            @pollings.delete(fiber_id)
           end
         end
 
         # Update the processing tick time
         def mark_consumption_tick
           synchronize do
-            @consumptions[thread_id] = monotonic_now
+            @consumptions[fiber_id] = monotonic_now
           end
         end
 
-        # Clear current thread consumption time tracker
+        # Clear current fiber consumption time tracker
         def clear_consumption_tick
           synchronize do
-            @consumptions.delete(thread_id)
+            @consumptions.delete(fiber_id)
           end
         end
 
