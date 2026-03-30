@@ -32,7 +32,7 @@
 # it should not have duplicated data.
 
 setup_karafka do |config|
-  config.max_messages = 1_000
+  config.max_messages = 100
   config.kafka[:"transactional.id"] = SecureRandom.uuid
   config.kafka[:"partition.assignment.strategy"] = "cooperative-sticky"
 end
