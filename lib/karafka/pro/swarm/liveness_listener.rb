@@ -149,36 +149,39 @@ module Karafka
           end
         end
 
-        # @return [Integer] object id of the current thread
-        def thread_id
-          Thread.current.object_id
+        # @return [Integer] object id of the current fiber
+        # @note We use fiber object id instead of thread object id to ensure fiber-safety.
+        #   Multiple fibers can run on the same thread, and using thread id would cause them
+        #   to overwrite each other's timestamps.
+        def fiber_id
+          Fiber.current.object_id
         end
 
-        # Update the polling tick time for current thread
+        # Update the polling tick time for current fiber
         def mark_polling_tick
           synchronize do
-            @pollings[thread_id] = monotonic_now
+            @pollings[fiber_id] = monotonic_now
           end
         end
 
-        # Clear current thread polling time tracker
+        # Clear current fiber polling time tracker
         def clear_polling_tick
           synchronize do
-            @pollings.delete(thread_id)
+            @pollings.delete(fiber_id)
           end
         end
 
         # Update the processing tick time
         def mark_consumption_tick
           synchronize do
-            @consumptions[thread_id] = monotonic_now
+            @consumptions[fiber_id] = monotonic_now
           end
         end
 
-        # Clear current thread consumption time tracker
+        # Clear current fiber consumption time tracker
         def clear_consumption_tick
           synchronize do
-            @consumptions.delete(thread_id)
+            @consumptions.delete(fiber_id)
           end
         end
 
