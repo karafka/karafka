@@ -96,6 +96,69 @@ RSpec.describe_current do
     end
   end
 
+  describe "fiber-safety" do
+    it "tracks polling timestamps independently per fiber" do
+      fiber1_id = nil
+      fiber2_id = nil
+
+      f1 = Fiber.new do
+        fiber1_id = Fiber.current.object_id
+        listener.on_connection_listener_fetch_loop(event)
+      end
+
+      f2 = Fiber.new do
+        fiber2_id = Fiber.current.object_id
+        listener.on_connection_listener_fetch_loop(event)
+      end
+
+      f1.resume
+      f2.resume
+
+      expect(listener_pollings.keys).to contain_exactly(fiber1_id, fiber2_id)
+    end
+
+    it "tracks consumption timestamps independently per fiber" do
+      fiber1_id = nil
+      fiber2_id = nil
+
+      f1 = Fiber.new do
+        fiber1_id = Fiber.current.object_id
+        listener.on_consumer_consume(event)
+      end
+
+      f2 = Fiber.new do
+        fiber2_id = Fiber.current.object_id
+        listener.on_consumer_consume(event)
+      end
+
+      f1.resume
+      f2.resume
+
+      expect(listener_consumptions.keys).to contain_exactly(fiber1_id, fiber2_id)
+    end
+
+    it "clearing in one fiber does not remove the other fibers timestamp" do
+      f1 = Fiber.new do
+        listener.on_consumer_consume(event)
+        Fiber.yield
+        listener.on_consumer_consumed(event)
+      end
+
+      f2 = Fiber.new do
+        listener.on_consumer_consume(event)
+      end
+
+      # Both fibers mark consumption
+      f1.resume
+      f2.resume
+      expect(listener_consumptions.size).to eq(2)
+
+      # Only f1 clears its entry
+      f1.resume
+      expect(listener_consumptions.size).to eq(1)
+    end
+  end
+
   describe "#rss_mb" do
     it "delegates to platform-specific method based on RUBY_PLATFORM" do
       allow(listener).to receive_messages(rss_mb_linux: 50, rss_mb_macos: 60)
