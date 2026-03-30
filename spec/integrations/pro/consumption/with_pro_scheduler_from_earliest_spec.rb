@@ -47,14 +47,16 @@ class Consumer < Karafka::BaseConsumer
   end
 end
 
-draw_routes(create_topics: false) do
+draw_routes do
   DT.topics.first(10).each do |topic_name|
     topic topic_name do
       consumer Consumer
     end
-
-    produce_many(topic_name, DT.uuids(10))
   end
+end
+
+DT.topics.first(10).each do |topic_name|
+  produce_many(topic_name, DT.uuids(10))
 end
 
 start_karafka_and_wait_until do

@@ -19,16 +19,18 @@ class Consumer < Karafka::BaseConsumer
   end
 end
 
-draw_routes(create_topics: false) do
+draw_routes do
   DT.topics.first(10).each_with_index do |topic_name, index|
     topic topic_name do
       # This will force us to have many subscription groups
       max_messages index + 2
       consumer Consumer
     end
-
-    produce_many(topic_name, DT.uuids(10))
   end
+end
+
+DT.topics.first(10).each do |topic_name|
+  produce_many(topic_name, DT.uuids(10))
 end
 
 start_karafka_and_wait_until do
