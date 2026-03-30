@@ -258,7 +258,9 @@ module Karafka
         file_path
       end
 
-      # Export the topics-to-move JSON to a file (used with --generate)
+      # Export the topics-to-move JSON to a file for use with kafka-reassign-partitions.sh
+      # --generate. This optional step lets you ask Kafka to propose its own reassignment plan
+      # so you can compare it against the plan Karafka generated before executing.
       # @param file_path [String] path where to save the JSON file
       def export_topics_to_move_file(file_path)
         File.write(file_path, @topics_to_move_json)
@@ -437,7 +439,9 @@ module Karafka
         @reassignment_json = JSON.pretty_generate(reassignment_data)
       end
 
-      # Generates the topics-to-move JSON required by kafka-reassign-partitions.sh --generate
+      # Generates the topics-to-move JSON required by kafka-reassign-partitions.sh --generate.
+      # This file is only needed when you want Kafka to propose its own reassignment plan for
+      # comparison against the plan Karafka already computed. It is not required for execution.
       # @return [void]
       def generate_topics_to_move_json
         topics_data = {
@@ -459,7 +463,9 @@ module Karafka
         }
       end
 
-      # Builds the kafka-reassign-partitions.sh command for generating reassignment plan
+      # Builds the kafka-reassign-partitions.sh --generate command that asks Kafka to propose
+      # its own reassignment plan. This is optional — you can compare Kafka's suggestion against
+      # the plan Karafka already computed, or skip this step and go straight to --execute.
       # @return [String] command template with placeholders for broker addresses and IDs
       def build_generate_command
         broker_ids = @cluster_info[:brokers].map { |b| b[:node_id] }.sort.join(",")
@@ -489,11 +495,13 @@ module Karafka
       def generate_steps
         @steps = [
           "1. Export the reassignment JSON using: plan.export_to_file('reassignment.json')",
-          "2. Export topics-to-move JSON using: plan.export_topics_to_move_file('topics-to-move.json')",
-          "3. Generate a Kafka-proposed plan (optional): #{@execution_commands[:generate]}",
-          "4. Execute the reassignment: #{@execution_commands[:execute]}",
-          "5. Monitor progress: #{@execution_commands[:verify]}",
-          "6. Verify completion by checking topic metadata",
+          "2. (Optional) Compare against Kafka's own proposal:",
+          "   a. Export topics-to-move JSON: plan.export_topics_to_move_file('topics-to-move.json')",
+          "   b. Ask Kafka to generate its plan: #{@execution_commands[:generate]}",
+          "   c. Compare Kafka's output with the Karafka-generated reassignment.json above",
+          "3. Execute the reassignment: #{@execution_commands[:execute]}",
+          "4. Monitor progress: #{@execution_commands[:verify]}",
+          "5. Verify completion by checking topic metadata",
           "",
           "IMPORTANT NOTES:",
           "- Replace <KAFKA_BROKERS> with your actual Kafka broker addresses",
