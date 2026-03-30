@@ -2,8 +2,10 @@
 
 require "karafka"
 require "securerandom"
+require "digest"
 
-TOPIC = "it-#{SecureRandom.hex(6)}".freeze
+SPEC_HASH = Digest::MD5.hexdigest($PROGRAM_NAME)[0, 6]
+TOPIC = "it-#{SPEC_HASH}-#{SecureRandom.hex(6)}".freeze
 PID = Process.pid
 
 workers 1
