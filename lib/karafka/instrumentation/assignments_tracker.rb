@@ -179,13 +179,16 @@ module Karafka
           event[:tpl].to_h.each do |topic, partitions|
             topic = sg.topics.find(topic)
 
+            partition_ids = []
+
             partitions.each do |partition|
               partition_id = partition.partition
+              partition_ids << partition_id
               @generations[topic][partition_id] ||= 0
               @generations[topic][partition_id] += 1
             end
 
-            @assignments[topic] += partitions.map(&:partition)
+            @assignments[topic] += partition_ids
             @assignments[topic].sort!
           end
         end
