@@ -35,9 +35,6 @@
 #
 # This test verifies that the liveness listener continues to report during the `wait_pinging`
 # phase so the node does not stop communicating its health status to the supervisor.
-#
-# Currently FAILS because `wait_pinging` does not fire events for the liveness listener.
-# After fix: PASSES because `wait_pinging` fires events enabling continued liveness reporting.
 
 MACOS = RUBY_PLATFORM.include?("darwin")
 
@@ -84,7 +81,7 @@ Karafka::Pro::Swarm::LivenessListener.prepend(WaitPingingReportTracker)
 
 # Give the node plenty of time so it stays alive in wait_pinging waiting for the LRJ
 Karafka::App.monitor.subscribe("swarm.node.after_fork") do
-  Karafka::App.config.shutdown_timeout = 120_000
+  Karafka::App.config.shutdown_timeout = 30_000
 end
 
 class Consumer < Karafka::BaseConsumer
@@ -94,7 +91,7 @@ class Consumer < Karafka::BaseConsumer
 
     # Simulate a long-running job. During shutdown, the listener enters wait_pinging while
     # this job continues sleeping in the worker thread.
-    sleep(120)
+    sleep(30)
   end
 end
 
@@ -120,9 +117,6 @@ while (line = LIVENESS_R.gets)
 end
 LIVENESS_R.close
 
-# Currently fails: report_status is never called during wait_pinging because no instrumentation
-# events fire. The liveness listener goes completely silent during shutdown with active LRJ.
-# After fix: events fire in wait_pinging, report_status is called, and this passes.
 assert shutdown_reports.size >= 1,
        "Expected liveness reports during wait_pinging but got none. " \
        "wait_pinging does not fire events for the liveness listener to hook into."
