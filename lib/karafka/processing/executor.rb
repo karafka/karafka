@@ -90,7 +90,8 @@ module Karafka
         consumer.messages.metadata.deserialization =
           Deserializing::Parallel::Pool.instance.dispatch_async(
             consumer.messages,
-            topic.deserializing.payload
+            topic.deserializing.payload,
+            topic.deserializing.distributor
           )
 
         consumer.on_before_schedule_consume

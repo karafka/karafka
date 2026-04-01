@@ -340,6 +340,12 @@ module Karafka
           setting :worker_job_call_wrapper, default: false
         end
 
+        setting :deserializing do
+          # option distributor [Object] distributor for splitting payloads across Ractor workers
+          # Pro can override this globally or per-topic
+          setting :distributor, default: Deserializing::Parallel::Distributor.new
+        end
+
         # Things related to operating on messages
         setting :messages do
           # Parser is used to convert raw payload prior to deserialization

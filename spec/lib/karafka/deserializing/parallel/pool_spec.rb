@@ -36,7 +36,7 @@ RSpec.describe_current do
 
     # Skipped until Ruby 4.0 stable - Ractor warnings treated as errors in spec_helper
     context 'when pool is started', skip: 'Requires Ruby 4.0 stable with Ractors' do
-      before { pool.start(2) }
+      before { pool.start(2, min_payloads: 50) }
 
       it 'returns true' do
         expect(pool.started?).to be(true)
@@ -52,6 +52,7 @@ RSpec.describe_current do
 
   describe '#dispatch_async' do
     let(:deserializer) { Class.new { def call(message); end }.new }
+    let(:distributor) { Karafka::Deserializing::Parallel::Distributor.new }
     let(:messages) do
       Array.new(10) do |i|
         instance_double(
@@ -63,14 +64,14 @@ RSpec.describe_current do
 
     context 'when messages array is empty' do
       it 'returns Immediate' do
-        result = pool.dispatch_async([], deserializer)
+        result = pool.dispatch_async([], deserializer, distributor)
         expect(result).to be_a(Karafka::Deserializing::Parallel::Immediate)
       end
     end
 
     context 'when pool is not started' do
       it 'returns Immediate' do
-        result = pool.dispatch_async(messages, deserializer)
+        result = pool.dispatch_async(messages, deserializer, distributor)
         expect(result).to be_a(Karafka::Deserializing::Parallel::Immediate)
       end
     end
@@ -86,7 +87,7 @@ RSpec.describe_current do
       end
 
       it 'returns Immediate for inline deserialization' do
-        result = pool.dispatch_async(messages, deserializer)
+        result = pool.dispatch_async(messages, deserializer, distributor)
         expect(result).to be_a(Karafka::Deserializing::Parallel::Immediate)
       end
     end

@@ -71,4 +71,16 @@ RSpec.describe_current do
       end
     end
   end
+
+  describe '#distributor' do
+    it 'returns the internal default distributor' do
+      expect(config.distributor).to eq(
+        Karafka::App.config.internal.deserializing.distributor
+      )
+    end
+
+    it 'returns an instance of the default Distributor' do
+      expect(config.distributor).to be_a(Karafka::Deserializing::Parallel::Distributor)
+    end
+  end
 end

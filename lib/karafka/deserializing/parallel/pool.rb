@@ -34,20 +34,17 @@ module Karafka
           @ready_port = nil
           @work_queue = nil
           @coordinator = nil
-          @distributor = nil
           @min_payloads = 50
         end
 
         # Starts the pool with the specified number of workers and the coordinator thread
         # @param concurrency [Integer] number of Ractor workers to create
-        # @param distributor [Distributor] strategy for splitting payloads across workers
         # @param min_payloads [Integer] minimum batch size to dispatch to Ractors
-        def start(concurrency, distributor: Distributor.new, min_payloads: 50)
+        def start(concurrency, min_payloads:)
           @mutex.synchronize do
             return if @started
 
             @size = concurrency
-            @distributor = distributor
             @min_payloads = min_payloads
             @ready_port = Ractor::Port.new
             @work_queue = Thread::Queue.new
@@ -71,7 +68,6 @@ module Karafka
           @ready_port = nil
           @work_queue = nil
           @coordinator = nil
-          @distributor = nil
           @min_payloads = 50
         end
 
@@ -80,14 +76,15 @@ module Karafka
         # @param messages [Karafka::Messages::Messages] batch of messages
         # @param deserializer [Object] deserializer that responds to #call
         #   Must be Ractor-safe (frozen or shareable) when parallel deserialization is enabled
+        # @param distributor [Object] strategy for splitting payloads across workers
         # @return [Future, Immediate] future for retrieving results, or Immediate if skipped
-        def dispatch_async(messages, deserializer)
+        def dispatch_async(messages, deserializer, distributor)
           return Immediate.instance if messages.empty?
           return Immediate.instance unless @started
           return Immediate.instance if messages.size < @min_payloads
 
           payloads = messages.map(&:raw_payload)
-          batches = @distributor.call(payloads, @size, min_payloads: @min_payloads)
+          batches = distributor.call(payloads, @size, min_payloads: @min_payloads)
           result_port = Ractor::Port.new
           chunk_size = (payloads.size + batches.size - 1) / batches.size
 

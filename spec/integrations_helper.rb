@@ -22,7 +22,7 @@ unless ENV.key?("PRISTINE_MODE")
     # We redefine it on purpose
     next if warning.include?("fixture_file")
     # Ractor experimental warning is expected when using parallel deserialization
-    next if warning.include?("Ractor is experimental")
+    next if warning.include?("Ractor") && warning.include?("experimental")
 
     raise "Warning in your code: #{warning}"
   end
