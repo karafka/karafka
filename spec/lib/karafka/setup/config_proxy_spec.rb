@@ -38,6 +38,17 @@ RSpec.describe_current do
         expect(config).to have_received(:producer=).with(producer_instance)
       end
     end
+
+    context "when called without arguments or block" do
+      it "delegates to config.producer" do
+        allow(config).to receive(:producer).and_return("producer_config")
+
+        result = proxy.producer
+
+        expect(config).to have_received(:producer)
+        expect(result).to eq("producer_config")
+      end
+    end
   end
 
   describe "delegation" do

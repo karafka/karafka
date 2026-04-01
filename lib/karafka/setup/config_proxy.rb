@@ -119,6 +119,11 @@ module Karafka
     # @see Karafka::Setup::Config.setup
     # @see Karafka::Setup::Config.configure_components
     class ConfigProxy < SimpleDelegator
+      # A frozen object used as a sentinel value to indicate that the producer is called as
+      # a reader (without block) during setup.
+      READ = Object.new.freeze
+      private_constant :READ
+
       # @return [Proc] the stored producer initialization block (defaults to empty lambda)
       attr_reader :producer_initialization_block
 
@@ -195,10 +200,13 @@ module Karafka
       # @example Direct producer assignment
       #   custom_producer = WaterDrop::Producer.new { |c| c.kafka = { 'bootstrap.servers' => 'localhost:9092' } }
       #   config.producer = custom_producer
-      def producer(instance = nil, &block)
+      def producer(instance = READ, &block)
         if block
           # Store the configuration block for later execution
           @producer_initialization_block = block
+        elsif instance == READ
+          # Reading the producer configuration without a block
+          __getobj__.producer
         else
           # Direct assignment - delegate to real config via __getobj__
           __getobj__.producer = instance

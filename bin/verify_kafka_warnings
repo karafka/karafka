@@ -29,6 +29,7 @@ for container in "${containers[@]}"; do
 warnings=$(docker logs --since=0 "$container" 2>&1 | grep "] WARN ")
 
 while IFS= read -r line; do
+   [ -z "$line" ] && continue
    allowed=0
    for pattern in "${allowed_patterns[@]}"; do
        if echo "$line" | grep -q "$pattern"; then

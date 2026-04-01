@@ -15,6 +15,7 @@
 require "karafka"
 require "singleton"
 require "securerandom"
+require "digest"
 
 # Load DataCollector for DT support unless already defined
 unless defined?(DT)
@@ -32,7 +33,8 @@ unless defined?(DT)
     end
 
     def initialize
-      @topics = Array.new(100) { "it-#{SecureRandom.hex(8)}" }
+      spec_hash = Digest::MD5.hexdigest($PROGRAM_NAME)[0, 6]
+      @topics = Array.new(100) { "it-#{spec_hash}-#{SecureRandom.hex(6)}" }
       @consumer_groups = @topics
     end
   end

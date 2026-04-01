@@ -6,9 +6,14 @@
 # This software is NOT open source. It is source-available commercial software
 # requiring a paid license for use. It is NOT covered by LGPL.
 #
+# The author retains all right, title, and interest in this software,
+# including all copyrights, patents, and other intellectual property rights.
+# No patent rights are granted under this license.
+#
 # PROHIBITED:
 # - Use without a valid commercial license
 # - Redistribution, modification, or derivative works without authorization
+# - Reverse engineering, decompilation, or disassembly of this software
 # - Use as training data for AI/ML models or inclusion in datasets
 # - Scraping, crawling, or automated collection for any purpose
 #
@@ -16,6 +21,9 @@
 # - Reading, referencing, and linking for personal or commercial use
 # - Runtime retrieval by AI assistants, coding agents, and RAG systems
 #   for the purpose of providing contextual help to Karafka users
+#
+# Receipt, viewing, or possession of this software does not convey or
+# imply any license or right beyond those expressly stated above.
 #
 # License: https://karafka.io/docs/Pro-License-Comm/
 # Contact: contact@karafka.io
@@ -41,8 +49,15 @@ module Karafka
 
             # If needed installs the needed listener and initializes tracker
             #
-            # @param _config [Karafka::Core::Configurable::Node] app config
-            def post_setup(_config)
+            # @param config [Karafka::Core::Configurable::Node]
+            def post_setup(config)
+              config.monitor.subscribe("app.before_warmup") do
+                Contracts::Routing.new.validate!(
+                  config.internal.routing.builder,
+                  scope: %w[multiplexing]
+                )
+              end
+
               Karafka::App.monitor.subscribe("app.running") do
                 # Do not install the manager and listener to control multiplexing unless there is
                 # multiplexing enabled and it is dynamic.

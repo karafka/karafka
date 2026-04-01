@@ -8,6 +8,7 @@ require "bundler/setup"
 require "sidekiq"
 require "sidekiq/testing"
 require "karafka"
+require "digest"
 
 class Accu
   class << self
@@ -20,7 +21,8 @@ end
 # Enable fake mode to avoid Redis dependency
 Sidekiq::Testing.fake!
 
-TOPIC = "it-#{SecureRandom.hex(6)}".freeze
+SPEC_HASH = Digest::MD5.hexdigest($PROGRAM_NAME)[0, 6]
+TOPIC = "it-#{SPEC_HASH}-#{SecureRandom.hex(6)}".freeze
 PID = Process.pid
 
 # Define an in-memory worker class
@@ -49,6 +51,7 @@ Karafka::App.routes.draw do
   end
 end
 
+Karafka::Admin.create_topic(TOPIC, 1, 1)
 Karafka.producer.produce_sync(topic: TOPIC, payload: "")
 
 Karafka::Embedded.start
