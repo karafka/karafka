@@ -51,8 +51,8 @@ Karafka.monitor.subscribe(
 
 class Consumer < Karafka::BaseConsumer
   def consume
-    # Simulate a long first consumption that exceeds the report timeout.
-    # Without the before_fetch_loop report, the supervisor would kill this node.
+    # Simulate a long first consumption that, combined with startup and assignment overhead,
+    # could approach or exceed the report timeout without the before_fetch_loop report.
     unless DT.key?(:consumed)
       DT[:consumed] = true
       sleep(MACOS ? 4 : 2)
