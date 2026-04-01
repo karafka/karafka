@@ -38,6 +38,19 @@ module Karafka
         end
       end
 
+      def on_connection_listener_before_fetch_loop(_event)
+        periodically do
+          Kernel.exit!(orphaned_exit_code) if node.orphaned?
+
+          if DT[:forks].size > 2
+            node.healthy
+          else
+            # Fake hang it forever
+            sleep
+          end
+        end
+      end
+
       def on_connection_listener_fetch_loop(_event)
         periodically do
           Kernel.exit!(orphaned_exit_code) if node.orphaned?
