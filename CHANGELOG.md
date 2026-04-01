@@ -2,6 +2,7 @@
 
 ## 2.5.10 (Unreleased)
 - [Enhancement] Make liveness listeners fiber-safe.
+- [Fix] Fire liveness events during `wait_pinging` so nodes continue reporting health status during shutdown with active LRJ jobs.
 - [Maintenance] Use namespaced topic naming format in all integration specs for consistent traceability.
 
 ## 2.5.9 (2026-03-30)

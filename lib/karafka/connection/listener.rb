@@ -499,6 +499,7 @@ module Karafka
         until wait_until.call
           @client.ping
           @scheduler.on_manage
+          @events_poller.call
 
           after_ping.call
           sleep(0.2)
