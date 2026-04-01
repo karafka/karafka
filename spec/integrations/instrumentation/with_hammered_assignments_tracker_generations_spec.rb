@@ -11,9 +11,7 @@ class Consumer < Karafka::BaseConsumer
       gens = Karafka::Instrumentation::AssignmentsTracker.instance.generations
       gens.each_value { |partitions| partitions.each_value { |gen| raise if gen < 1 } }
 
-      topic_obj = messages.metadata.topic
-      partition = messages.metadata.partition
-      gen = Karafka::Instrumentation::AssignmentsTracker.instance.generation(topic_obj, partition)
+      gen = Karafka::Instrumentation::AssignmentsTracker.instance.generation(topic, partition)
       raise if gen < 1
     end
 
@@ -22,7 +20,7 @@ class Consumer < Karafka::BaseConsumer
 end
 
 draw_routes do
-  DT.consumer_groups[0..100].each do |cg|
+  DT.consumer_groups[0...100].each do |cg|
     consumer_group cg do
       topic DT.topic do
         consumer Consumer

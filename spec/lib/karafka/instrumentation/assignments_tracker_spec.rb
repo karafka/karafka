@@ -359,9 +359,10 @@ RSpec.describe_current do
 
         inspector = Thread.new do
           1_000_000.times { tracker.inspect }
-          inspecting = false
         rescue => e
           errors << e
+        ensure
+          inspecting = false
         end
 
         [modifier, inspector].each(&:join)
@@ -389,10 +390,10 @@ RSpec.describe_current do
             tracker.generations
             tracker.generation(topic1, 0)
           end
-
-          reading = false
         rescue => e
           errors << e
+        ensure
+          reading = false
         end
 
         [modifier, reader].each(&:join)
