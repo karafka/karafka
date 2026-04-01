@@ -117,6 +117,8 @@ while (line = LIVENESS_R.gets)
 end
 LIVENESS_R.close
 
-assert shutdown_reports.size >= 1,
-       "Expected liveness reports during wait_pinging but got none. " \
-       "wait_pinging does not fire events for the liveness listener to hook into."
+assert(
+  shutdown_reports.size >= 1,
+  "Expected liveness reports during wait_pinging but got none. " \
+  "wait_pinging does not fire events for the liveness listener to hook into."
+)
