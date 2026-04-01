@@ -145,12 +145,12 @@ RSpec.describe_current do
     end
   end
 
-  describe '#generation' do
-    context 'when topic-partition was never assigned' do
+  describe "#generation" do
+    context "when topic-partition was never assigned" do
       it { expect(tracker.generation(topic1, 0)).to eq(0) }
     end
 
-    context 'when first assignment occurs' do
+    context "when first assignment occurs" do
       before { tracker.on_rebalance_partitions_assigned(assign_event) }
 
       it { expect(tracker.generation(topic1, 0)).to eq(1) }
@@ -158,18 +158,18 @@ RSpec.describe_current do
       it { expect(tracker.generation(topic1, 2)).to eq(1) }
     end
 
-    context 'when revocation occurs' do
+    context "when revocation occurs" do
       before do
         tracker.on_rebalance_partitions_assigned(assign_event)
         tracker.on_rebalance_partitions_revoked(assign_event)
       end
 
-      it 'expect not to change generation' do
+      it "expect not to change generation" do
         expect(tracker.generation(topic1, 0)).to eq(1)
       end
     end
 
-    context 'when reassignment after revocation occurs' do
+    context "when reassignment after revocation occurs" do
       before do
         tracker.on_rebalance_partitions_assigned(assign_event)
         tracker.on_rebalance_partitions_revoked(assign_event)
@@ -180,7 +180,7 @@ RSpec.describe_current do
       it { expect(tracker.generation(topic1, 1)).to eq(2) }
     end
 
-    context 'when multiple assign/revoke cycles occur' do
+    context "when multiple assign/revoke cycles occur" do
       before do
         5.times do
           tracker.on_rebalance_partitions_assigned(assign_event)
@@ -191,18 +191,18 @@ RSpec.describe_current do
       it { expect(tracker.generation(topic1, 0)).to eq(5) }
     end
 
-    context 'when client reset occurs' do
+    context "when client reset occurs" do
       before do
         tracker.on_rebalance_partitions_assigned(assign_event)
         tracker.on_client_reset(assign_event)
       end
 
-      it 'expect not to reset generations' do
+      it "expect not to reset generations" do
         expect(tracker.generation(topic1, 0)).to eq(1)
       end
     end
 
-    context 'when assignment loss via events_poll occurs' do
+    context "when assignment loss via events_poll occurs" do
       let(:client) { instance_double(Karafka::Connection::Client, assignment_lost?: true) }
       let(:events_poll_event) do
         {
@@ -216,12 +216,12 @@ RSpec.describe_current do
         tracker.on_client_events_poll(events_poll_event)
       end
 
-      it 'expect not to reset generations' do
+      it "expect not to reset generations" do
         expect(tracker.generation(topic1, 0)).to eq(1)
       end
     end
 
-    context 'when multiple subscription groups have independent generations' do
+    context "when multiple subscription groups have independent generations" do
       let(:assign_event2) do
         tpl = Rdkafka::Consumer::TopicPartitionList.new
         tpl.add_topic(topic2.name, [0, 1])
@@ -244,40 +244,40 @@ RSpec.describe_current do
     end
   end
 
-  describe '#generations' do
-    context 'when no assignments exist' do
+  describe "#generations" do
+    context "when no assignments exist" do
       it { expect(tracker.generations).to eq({}) }
     end
 
-    context 'when assignments exist' do
+    context "when assignments exist" do
       before { tracker.on_rebalance_partitions_assigned(assign_event) }
 
-      it 'expect to return correct structure' do
+      it "expect to return correct structure" do
         gens = tracker.generations
         expect(gens[topic1]).to eq({ 0 => 1, 1 => 1, 2 => 1 })
       end
     end
 
-    context 'when partitions have been revoked' do
+    context "when partitions have been revoked" do
       before do
         tracker.on_rebalance_partitions_assigned(assign_event)
         tracker.on_rebalance_partitions_revoked(assign_event)
       end
 
-      it 'expect to still include revoked partitions' do
+      it "expect to still include revoked partitions" do
         gens = tracker.generations
         expect(gens[topic1]).to eq({ 0 => 1, 1 => 1, 2 => 1 })
       end
     end
 
-    it 'expect to return frozen deep copy' do
+    it "expect to return frozen deep copy" do
       tracker.on_rebalance_partitions_assigned(assign_event)
       gens = tracker.generations
       expect(gens).to be_frozen
       expect(gens[topic1]).to be_frozen
     end
 
-    context 'when clear is called' do
+    context "when clear is called" do
       before do
         tracker.on_rebalance_partitions_assigned(assign_event)
         tracker.clear
@@ -287,18 +287,18 @@ RSpec.describe_current do
     end
   end
 
-  describe 'class-level delegation' do
+  describe "class-level delegation" do
     before { tracker.on_rebalance_partitions_assigned(assign_event) }
 
-    it 'expect .current to delegate to instance' do
+    it "expect .current to delegate to instance" do
       expect(described_class.current).to eq(tracker.current)
     end
 
-    it 'expect .generations to delegate to instance' do
+    it "expect .generations to delegate to instance" do
       expect(described_class.generations).to eq(tracker.generations)
     end
 
-    it 'expect .generation to delegate to instance' do
+    it "expect .generation to delegate to instance" do
       expect(described_class.generation(topic1, 0)).to eq(tracker.generation(topic1, 0))
     end
   end
