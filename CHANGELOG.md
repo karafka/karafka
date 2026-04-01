@@ -1,6 +1,7 @@
 # Karafka Framework Changelog
 
 ## 2.5.10 (Unreleased)
+- [Enhancement] Add per-partition generation tracking to `AssignmentsTracker` to distinguish first-time assignments from reassignments.
 - [Enhancement] Make liveness listeners fiber-safe.
 - [Maintenance] Use namespaced topic naming format in all integration specs for consistent traceability.
 

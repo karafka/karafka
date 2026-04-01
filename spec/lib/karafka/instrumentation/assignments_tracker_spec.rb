@@ -145,6 +145,164 @@ RSpec.describe_current do
     end
   end
 
+  describe "#generation" do
+    context "when topic-partition was never assigned" do
+      it { expect(tracker.generation(topic1, 0)).to eq(0) }
+    end
+
+    context "when first assignment occurs" do
+      before { tracker.on_rebalance_partitions_assigned(assign_event) }
+
+      it { expect(tracker.generation(topic1, 0)).to eq(1) }
+      it { expect(tracker.generation(topic1, 1)).to eq(1) }
+      it { expect(tracker.generation(topic1, 2)).to eq(1) }
+    end
+
+    context "when revocation occurs" do
+      before do
+        tracker.on_rebalance_partitions_assigned(assign_event)
+        tracker.on_rebalance_partitions_revoked(assign_event)
+      end
+
+      it "expect not to change generation" do
+        expect(tracker.generation(topic1, 0)).to eq(1)
+      end
+    end
+
+    context "when reassignment after revocation occurs" do
+      before do
+        tracker.on_rebalance_partitions_assigned(assign_event)
+        tracker.on_rebalance_partitions_revoked(assign_event)
+        tracker.on_rebalance_partitions_assigned(assign_event)
+      end
+
+      it { expect(tracker.generation(topic1, 0)).to eq(2) }
+      it { expect(tracker.generation(topic1, 1)).to eq(2) }
+    end
+
+    context "when multiple assign/revoke cycles occur" do
+      before do
+        5.times do
+          tracker.on_rebalance_partitions_assigned(assign_event)
+          tracker.on_rebalance_partitions_revoked(assign_event)
+        end
+      end
+
+      it { expect(tracker.generation(topic1, 0)).to eq(5) }
+    end
+
+    context "when client reset occurs" do
+      before do
+        tracker.on_rebalance_partitions_assigned(assign_event)
+        tracker.on_client_reset(assign_event)
+      end
+
+      it "expect not to reset generations" do
+        expect(tracker.generation(topic1, 0)).to eq(1)
+      end
+    end
+
+    context "when assignment loss via events_poll occurs" do
+      let(:client) { instance_double(Karafka::Connection::Client, assignment_lost?: true) }
+      let(:events_poll_event) do
+        {
+          caller: client,
+          subscription_group: subscription_group1
+        }
+      end
+
+      before do
+        tracker.on_rebalance_partitions_assigned(assign_event)
+        tracker.on_client_events_poll(events_poll_event)
+      end
+
+      it "expect not to reset generations" do
+        expect(tracker.generation(topic1, 0)).to eq(1)
+      end
+    end
+
+    context "when multiple subscription groups have independent generations" do
+      let(:assign_event2) do
+        tpl = Rdkafka::Consumer::TopicPartitionList.new
+        tpl.add_topic(topic2.name, [0, 1])
+
+        {
+          subscription_group: subscription_group2,
+          tpl: tpl
+        }
+      end
+
+      before do
+        tracker.on_rebalance_partitions_assigned(assign_event)
+        tracker.on_rebalance_partitions_assigned(assign_event2)
+        tracker.on_rebalance_partitions_revoked(assign_event)
+        tracker.on_rebalance_partitions_assigned(assign_event)
+      end
+
+      it { expect(tracker.generation(topic1, 0)).to eq(2) }
+      it { expect(tracker.generation(topic2, 0)).to eq(1) }
+    end
+  end
+
+  describe "#generations" do
+    context "when no assignments exist" do
+      it { expect(tracker.generations).to eq({}) }
+    end
+
+    context "when assignments exist" do
+      before { tracker.on_rebalance_partitions_assigned(assign_event) }
+
+      it "expect to return correct structure" do
+        gens = tracker.generations
+        expect(gens[topic1]).to eq({ 0 => 1, 1 => 1, 2 => 1 })
+      end
+    end
+
+    context "when partitions have been revoked" do
+      before do
+        tracker.on_rebalance_partitions_assigned(assign_event)
+        tracker.on_rebalance_partitions_revoked(assign_event)
+      end
+
+      it "expect to still include revoked partitions" do
+        gens = tracker.generations
+        expect(gens[topic1]).to eq({ 0 => 1, 1 => 1, 2 => 1 })
+      end
+    end
+
+    it "expect to return frozen deep copy" do
+      tracker.on_rebalance_partitions_assigned(assign_event)
+      gens = tracker.generations
+      expect(gens).to be_frozen
+      expect(gens[topic1]).to be_frozen
+    end
+
+    context "when clear is called" do
+      before do
+        tracker.on_rebalance_partitions_assigned(assign_event)
+        tracker.clear
+      end
+
+      it { expect(tracker.generations).to eq({}) }
+    end
+  end
+
+  describe "class-level delegation" do
+    before { tracker.on_rebalance_partitions_assigned(assign_event) }
+
+    it "expect .current to delegate to instance" do
+      expect(described_class.current).to eq(tracker.current)
+    end
+
+    it "expect .generations to delegate to instance" do
+      expect(described_class.generations).to eq(tracker.generations)
+    end
+
+    it "expect .generation to delegate to instance" do
+      expect(described_class.generation(topic1, 0)).to eq(tracker.generation(topic1, 0))
+    end
+  end
+
   describe "#inspect" do
     let(:subscription_group) { build(:routing_subscription_group) }
     let(:topic) { subscription_group.topics.first }
@@ -201,12 +359,44 @@ RSpec.describe_current do
 
         inspector = Thread.new do
           1_000_000.times { tracker.inspect }
+        rescue => e
+          errors << e
+        ensure
           inspecting = false
+        end
+
+        [modifier, inspector].each(&:join)
+
+        expect(errors).to be_empty
+      end
+    end
+
+    context "with concurrent generation reads" do
+      it "expect to handle concurrent generation reads during assignment mutations safely" do
+        errors = []
+        reading = true
+
+        modifier = Thread.new do
+          while reading
+            tracker.on_rebalance_partitions_assigned(assign_event)
+            tracker.on_rebalance_partitions_revoked(assign_event)
+          end
         rescue => e
           errors << e
         end
 
-        [modifier, inspector].each(&:join)
+        reader = Thread.new do
+          1_000_000.times do
+            tracker.generations
+            tracker.generation(topic1, 0)
+          end
+        rescue => e
+          errors << e
+        ensure
+          reading = false
+        end
+
+        [modifier, reader].each(&:join)
 
         expect(errors).to be_empty
       end
