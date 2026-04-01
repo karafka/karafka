@@ -49,4 +49,13 @@ RSpec.describe_current do
       end
     end
   end
+
+  describe "#on_connection_listener_before_fetch_loop" do
+    before { allow(node).to receive(:write) }
+
+    it "expect to report liveness" do
+      listener.on_connection_listener_before_fetch_loop(nil)
+      expect(node).to have_received(:write).with("0")
+    end
+  end
 end
