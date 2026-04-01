@@ -73,6 +73,13 @@ module Karafka
           super()
         end
 
+        # Report status before the first fetch loop iteration so the supervisor gets an initial
+        # healthy report even if the first consumption takes longer than the report timeout.
+        # @param _event [Karafka::Core::Monitoring::Event]
+        def on_connection_listener_before_fetch_loop(_event)
+          report_status
+        end
+
         # Tick on each fetch and report liveness so it works even when statistics are disabled
         #
         # @param _event [Karafka::Core::Monitoring::Event]
@@ -142,6 +149,8 @@ module Karafka
         def report_status
           periodically do
             return unless node
+
+            Kernel.exit!(orphaned_exit_code) if node.orphaned?
 
             current_status = status
 

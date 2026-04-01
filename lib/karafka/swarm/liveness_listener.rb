@@ -19,6 +19,13 @@ module Karafka
         @mutex = Mutex.new
       end
 
+      # Report liveness before the first fetch loop iteration so the supervisor gets an initial
+      # healthy report even if the first consumption takes longer than the report timeout.
+      # @param _event [Karafka::Core::Monitoring::Event]
+      def on_connection_listener_before_fetch_loop(_event)
+        report_liveness
+      end
+
       # Report from the fetch loop at the top of each iteration
       # @param _event [Karafka::Core::Monitoring::Event]
       def on_connection_listener_fetch_loop(_event)

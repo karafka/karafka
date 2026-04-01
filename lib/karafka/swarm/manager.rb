@@ -19,12 +19,12 @@ module Karafka
         node_restart_timeout: %i[internal swarm node_restart_timeout]
       )
 
-      # Status we issue when we decide to shutdown unresponsive node
+      # Status we issue when we decide to shutdown a non-reporting node
       # We use -1 because nodes are expected to report 0+ statuses and we can use negative numbers
       # for non-node based statuses
-      NOT_RESPONDING_SHUTDOWN_STATUS = -1
+      NOT_REPORTING_SHUTDOWN_STATUS = -1
 
-      private_constant :NOT_RESPONDING_SHUTDOWN_STATUS
+      private_constant :NOT_REPORTING_SHUTDOWN_STATUS
 
       # @return [Array<Node>] All nodes that manager manages
       attr_reader :nodes
@@ -84,7 +84,7 @@ module Karafka
             if node.alive?
               next if terminate_if_hanging(statuses, node)
               next if stop_if_not_healthy(statuses, node)
-              next if stop_if_not_responding(statuses, node)
+              next if stop_if_not_reporting(statuses, node)
             else
               next if cleanup_one(statuses, node)
               next if restart_after_timeout(statuses, node)
@@ -144,12 +144,12 @@ module Karafka
         end
       end
 
-      # If node stopped responding, starts the stopping procedure.
+      # If node stopped reporting, starts the stopping procedure.
       #
       # @param statuses [Hash] hash with statuses transitions with times
       # @param node [Swarm::Node] node we're checking
       # @return [Boolean] should it be the last action taken on this node in this run
-      def stop_if_not_responding(statuses, node)
+      def stop_if_not_reporting(statuses, node)
         # Do nothing if already stopping
         return true if statuses.key?(:stop)
         # Do nothing if we've received status update recently enough
@@ -160,7 +160,7 @@ module Karafka
           "swarm.manager.stopping",
           caller: self,
           node: node,
-          status: NOT_RESPONDING_SHUTDOWN_STATUS
+          status: NOT_REPORTING_SHUTDOWN_STATUS
         ) do
           node.stop
           statuses[:stop] = monotonic_now

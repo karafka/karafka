@@ -3,6 +3,8 @@
 ## 2.5.10 (Unreleased)
 - [Enhancement] Add per-partition generation tracking to `AssignmentsTracker` to distinguish first-time assignments from reassignments.
 - [Enhancement] Make liveness listeners fiber-safe.
+- [Fix] Include orphaned node detection in Pro swarm liveness listener.
+- [Fix] Report liveness on `connection.listener.before_fetch_loop` so nodes send an initial healthy report before the first consumption.
 - [Maintenance] Use namespaced topic naming format in all integration specs for consistent traceability.
 
 ## 2.5.9 (2026-03-30)
