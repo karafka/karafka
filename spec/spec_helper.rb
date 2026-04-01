@@ -13,6 +13,7 @@ Warning.process do |warning|
   next if warning.include?("vendor/")
   next if warning.include?("rspec_locator.rb")
   next if warning.include?("fixture_file")
+  next if warning.include?("Ractor") && warning.include?("experimental")
 
   raise "Warning in your code: #{warning}"
 end

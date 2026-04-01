@@ -34,12 +34,13 @@ RSpec.describe_current do
       end
     end
 
-    # Skipped until Ruby 4.0 stable - Ractor warnings treated as errors in spec_helper
-    context "when pool is started", skip: "Requires Ruby 4.0 stable with Ractors" do
-      before { pool.start(2, min_payloads: 50) }
+    if RUBY_VERSION >= "4.0"
+      context "when pool is started" do
+        before { pool.start(2, min_payloads: 50) }
 
-      it "returns true" do
-        expect(pool.started?).to be(true)
+        it "returns true" do
+          expect(pool.started?).to be(true)
+        end
       end
     end
   end
@@ -47,6 +48,36 @@ RSpec.describe_current do
   describe "#size" do
     it "returns 0 when not started" do
       expect(pool.size).to eq(0)
+    end
+
+    if RUBY_VERSION >= "4.0"
+      context "when pool is started" do
+        before { pool.start(2, min_payloads: 50) }
+
+        it "returns the configured concurrency" do
+          expect(pool.size).to eq(2)
+        end
+      end
+    end
+  end
+
+  if RUBY_VERSION >= "4.0"
+    describe "#start" do
+      it "sets the pool as started" do
+        pool.start(2, min_payloads: 50)
+        expect(pool.started?).to be(true)
+      end
+
+      it "sets the pool size" do
+        pool.start(3, min_payloads: 50)
+        expect(pool.size).to eq(3)
+      end
+
+      it "is idempotent" do
+        pool.start(2, min_payloads: 50)
+        pool.start(4, min_payloads: 100)
+        expect(pool.size).to eq(2)
+      end
     end
   end
 
@@ -94,6 +125,41 @@ RSpec.describe_current do
       it "returns Immediate for inline deserialization" do
         result = pool.dispatch_async(messages, deserializer, distributor)
         expect(result).to be_a(Karafka::Deserializing::Parallel::Immediate)
+      end
+    end
+
+    if RUBY_VERSION >= "4.0"
+      context "when pool is started and batch meets threshold" do
+        let(:deserializer) do
+          Class.new do
+            def call(message)
+              message.raw_payload.upcase
+            end
+          end.new.freeze
+        end
+
+        let(:messages) do
+          Array.new(100) do |i|
+            instance_double(
+              Karafka::Messages::Message,
+              raw_payload: "payload_#{i}"
+            )
+          end
+        end
+
+        before { pool.start(2, min_payloads: 50) }
+
+        it "returns a Future" do
+          result = pool.dispatch_async(messages, deserializer, distributor)
+          expect(result).to be_a(Karafka::Deserializing::Parallel::Future)
+        end
+
+        it "dispatches work that can be retrieved" do
+          result = pool.dispatch_async(messages, deserializer, distributor)
+          deserialized = result.retrieve
+          expect(deserialized.size).to eq(100)
+          expect(deserialized.first).to eq("PAYLOAD_0")
+        end
       end
     end
   end
