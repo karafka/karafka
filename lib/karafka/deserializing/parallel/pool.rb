@@ -40,8 +40,6 @@ module Karafka
         # Starts the pool with the specified number of workers and the coordinator thread
         # @param concurrency [Integer] number of Ractor workers to create
         # @param min_payloads [Integer] minimum batch size to dispatch to Ractors
-        #
-        # :nocov: — requires Ruby 4.0+ Ractor APIs, tested on 4.0 CI and integration tests
         def start(concurrency, min_payloads:)
           @mutex.synchronize do
             return if @started
@@ -55,8 +53,6 @@ module Karafka
             @started = true
           end
         end
-
-        # :nocov:
 
         # @return [Boolean] is the pool started and ready
         def started?
@@ -87,7 +83,6 @@ module Karafka
           return Immediate.instance unless @started
           return Immediate.instance if messages.size < @min_payloads
 
-          # :nocov: — requires running Ractor pool, tested on Ruby 4.0 CI and integration tests
           payloads = messages.map(&:raw_payload)
           batches = distributor.call(payloads, @size, min_payloads: @min_payloads)
           result_port = Ractor::Port.new
@@ -103,12 +98,9 @@ module Karafka
           end
 
           Future.new(result_port, batches.size, chunk_size, payloads.size)
-          # :nocov:
         end
 
         private
-
-        # :nocov: — private Ractor/thread internals, tested on Ruby 4.0 CI and integration tests
 
         # Starts the background coordinator thread
         # Waits for work in the queue, then waits for a ready worker, then dispatches
@@ -184,8 +176,6 @@ module Karafka
             end
           end
         end
-
-        # :nocov:
       end
     end
   end

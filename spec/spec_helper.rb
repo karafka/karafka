@@ -60,6 +60,13 @@ SimpleCov.start do
   add_filter "/cli/topics.rb"
   add_filter "/vendors/"
 
+  # Ractor-based parallel deserialization requires Ruby 4.0+ APIs
+  # These files are fully covered on the Ruby 4.0 CI run and integration tests
+  if RUBY_VERSION < "4.0"
+    add_filter "/lib/karafka/deserializing/parallel/pool.rb"
+    add_filter "/lib/karafka/deserializing/parallel/future.rb"
+  end
+
   # enable_coverage :branch
   command_name [SPECS_TYPE, ARGV].flatten.join("-")
   merge_timeout 3600

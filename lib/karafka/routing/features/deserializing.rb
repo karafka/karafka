@@ -22,13 +22,11 @@ module Karafka
               )
             end
 
-            # :nocov: — only reachable on Ruby 4.0+, tested there
             parallel = Karafka::App.config.deserializing.parallel
             Karafka::Deserializing::Parallel::Pool.instance.start(
               parallel.concurrency,
               min_payloads: parallel.min_payloads
             )
-            # :nocov:
           end
         end
       end
