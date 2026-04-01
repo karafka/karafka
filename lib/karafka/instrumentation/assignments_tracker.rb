@@ -14,10 +14,33 @@ module Karafka
     class AssignmentsTracker
       include Singleton
 
+      class << self
+        # @return [Hash{Karafka::Routing::Topic => Array<Integer>}]
+        # @see #current
+        def current
+          instance.current
+        end
+
+        # @return [Hash{Karafka::Routing::Topic => Hash{Integer => Integer}}]
+        # @see #generations
+        def generations
+          instance.generations
+        end
+
+        # @param topic [Karafka::Routing::Topic]
+        # @param partition [Integer]
+        # @return [Integer]
+        # @see #generation
+        def generation(topic, partition)
+          instance.generation(topic, partition)
+        end
+      end
+
       # Initializes the assignments tracker with empty assignments
       def initialize
         @mutex = Mutex.new
         @assignments = Hash.new { |hash, key| hash[key] = [] }
+        @generations = Hash.new { |h, k| h[k] = {} }
       end
 
       # Returns all the active/current assignments of this given process
@@ -44,10 +67,41 @@ module Karafka
         assignments.freeze
       end
 
-      # Clears all the assignments
+      # Returns the generation counts for all partitions that have ever been assigned
+      #
+      # @return [Hash{Karafka::Routing::Topic => Hash{Integer => Integer}}] topic to partition
+      #   generation mapping. Generation starts at 1 on first assignment and increments on each
+      #   reassignment. Revoked partitions remain in the hash with their last generation value.
+      #
+      # @note Returns a frozen deep copy to prevent external mutation
+      def generations
+        result = {}
+
+        @mutex.synchronize do
+          @generations.each do |topic, partitions|
+            result[topic] = partitions.dup.freeze
+          end
+        end
+
+        result.freeze
+      end
+
+      # Returns the generation count for a specific topic-partition
+      #
+      # @param topic [Karafka::Routing::Topic]
+      # @param partition [Integer]
+      # @return [Integer] generation count (0 if never assigned, 1+ otherwise)
+      def generation(topic, partition)
+        @mutex.synchronize do
+          @generations.dig(topic, partition) || 0
+        end
+      end
+
+      # Clears all the assignments and generations
       def clear
         @mutex.synchronize do
           @assignments.clear
+          @generations.clear
         end
       end
 
@@ -124,6 +178,12 @@ module Karafka
         @mutex.synchronize do
           event[:tpl].to_h.each do |topic, partitions|
             topic = sg.topics.find(topic)
+
+            partitions.each do |partition|
+              partition_id = partition.partition
+              @generations[topic][partition_id] ||= 0
+              @generations[topic][partition_id] += 1
+            end
 
             @assignments[topic] += partitions.map(&:partition)
             @assignments[topic].sort!
