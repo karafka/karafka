@@ -27,6 +27,7 @@ draw_routes(create_topics: false) do
   end
 end
 
+Karafka::Admin.create_topic(DT.topic, 1, 1)
 elements = DT.uuids(100)
 produce_many(DT.topic, elements)
 

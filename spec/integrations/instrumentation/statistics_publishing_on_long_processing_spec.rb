@@ -19,7 +19,7 @@ class Consumer < Karafka::BaseConsumer
   end
 end
 
-draw_routes(nil, create_topics: false) do
+draw_routes(nil) do
   topic DT.topic do
     consumer Consumer
   end

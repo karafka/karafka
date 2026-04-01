@@ -5,7 +5,7 @@
 
 setup_karafka
 
-uuid1 = "it-#{SecureRandom.uuid}"
+uuid1 = DT.uuid
 acl1 = Karafka::Admin::Acl.new(
   resource_type: :topic,
   resource_name: uuid1,
@@ -22,7 +22,7 @@ Karafka::Admin::Acl.delete(acl1)
 sleep(1) until Karafka::Admin::Acl.describe(acl1).empty?
 sleep(1) while Karafka::Admin::Acl.all.map(&:resource_name).include?(uuid1)
 
-uuid2 = "it-#{SecureRandom.uuid}"
+uuid2 = DT.uuid
 acl2 = Karafka::Admin::Acl.new(
   resource_type: :topic,
   resource_name: uuid2,
