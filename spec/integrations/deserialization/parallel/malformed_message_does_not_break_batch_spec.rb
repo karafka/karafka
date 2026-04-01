@@ -39,10 +39,10 @@ end
 
 # Mix valid and invalid JSON messages
 payloads = []
-20.times { |i| payloads << { 'index' => i }.to_json }
-payloads << 'not valid json'
+20.times { |i| payloads << { "index" => i }.to_json }
+payloads << "not valid json"
 payloads << '{"broken":'
-20.times { |i| payloads << { 'index' => i + 20 }.to_json }
+20.times { |i| payloads << { "index" => i + 20 }.to_json }
 
 produce_many(DT.topic, payloads)
 
@@ -55,5 +55,5 @@ assert_equal 40, DT[:payloads].size
 
 # The 2 malformed messages should have triggered deserialization errors
 assert_equal 2, DT[:errors].size
-assert DT[:errors].include?('not valid json')
+assert DT[:errors].include?("not valid json")
 assert DT[:errors].include?('{"broken":')

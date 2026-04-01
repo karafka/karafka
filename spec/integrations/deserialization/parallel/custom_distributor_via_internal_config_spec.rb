@@ -46,7 +46,7 @@ draw_routes do
   end
 end
 
-payloads = Array.new(50) { |i| { 'index' => i }.to_json }
+payloads = Array.new(50) { |i| { "index" => i }.to_json }
 
 produce_many(DT.topic, payloads)
 
@@ -56,11 +56,11 @@ end
 
 assert_equal 50, DT[:payloads].size
 
-indices = DT[:payloads].map { |p| p['index'] }.sort
+indices = DT[:payloads].map { |p| p["index"] }.sort
 assert_equal (0..49).to_a, indices
 
-# Verify the custom distributor was used (it's set in internal config)
+# Verify the custom distributor was used (it"s set in internal config)
 assert(
   Karafka::App.config.internal.deserializing.distributor.is_a?(SingleMessageDistributor),
-  'Internal distributor should be the custom one'
+  "Internal distributor should be the custom one"
 )

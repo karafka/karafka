@@ -119,7 +119,7 @@ module Karafka
             end
           end
 
-          @coordinator.name = 'karafka.parallel_deser.coordinator'
+          @coordinator.name = "karafka.parallel_deser.coordinator"
           @coordinator.abort_on_exception = true
         end
 
@@ -164,7 +164,7 @@ module Karafka
 
               results = msg[:data].map do |payload|
                 deserializer.call(proxy_class.new(raw_payload: payload))
-              rescue StandardError
+              rescue
                 err_marker
               end
 

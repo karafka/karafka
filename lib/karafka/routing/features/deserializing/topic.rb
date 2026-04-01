@@ -38,7 +38,7 @@ module Karafka
           end
 
           # Backwards compatible alias for deserializing
-          alias deserializers deserializing
+          alias_method :deserializers, :deserializing
 
           # Supports pre 2.4 format where only payload deserializer could be defined. We do not
           # retire this format because it is not bad when users do not do anything advanced with
@@ -54,7 +54,7 @@ module Karafka
           end
 
           # Backwards compatible alias for deserializing?
-          alias deserializers? deserializing?
+          alias_method :deserializers?, :deserializing?
 
           # @return [Hash] topic setup hash
           def to_h

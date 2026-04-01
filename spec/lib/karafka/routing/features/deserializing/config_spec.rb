@@ -16,28 +16,28 @@ RSpec.describe_current do
   let(:headers) { rand }
   let(:parallel) { false }
 
-  describe '#active?' do
-    context 'when active' do
+  describe "#active?" do
+    context "when active" do
       let(:active) { true }
 
       it { expect(config.active?).to be(true) }
     end
 
-    context 'when not active' do
+    context "when not active" do
       let(:active) { false }
 
       it { expect(config.active?).to be(false) }
     end
   end
 
-  describe '#parallel?' do
-    context 'when parallel is false on topic' do
+  describe "#parallel?" do
+    context "when parallel is false on topic" do
       let(:parallel) { false }
 
       it { expect(config.parallel?).to be(false) }
     end
 
-    context 'when parallel is true on topic but globally disabled' do
+    context "when parallel is true on topic but globally disabled" do
       let(:parallel) { true }
 
       before do
@@ -47,7 +47,7 @@ RSpec.describe_current do
       it { expect(config.parallel?).to be(false) }
     end
 
-    context 'when parallel is true on topic and globally enabled' do
+    context "when parallel is true on topic and globally enabled" do
       let(:parallel) { true }
 
       before do
@@ -57,14 +57,14 @@ RSpec.describe_current do
       it { expect(config.parallel?).to be(true) }
     end
 
-    context 'when called multiple times' do
+    context "when called multiple times" do
       let(:parallel) { true }
 
       before do
         allow(Karafka::App.config.deserializing.parallel).to receive(:active).and_return(true)
       end
 
-      it 'caches the result' do
+      it "caches the result" do
         config.parallel?
         config.parallel?
         expect(Karafka::App.config.deserializing.parallel).to have_received(:active).once
@@ -72,14 +72,14 @@ RSpec.describe_current do
     end
   end
 
-  describe '#distributor' do
-    it 'returns the internal default distributor' do
+  describe "#distributor" do
+    it "returns the internal default distributor" do
       expect(config.distributor).to eq(
         Karafka::App.config.internal.deserializing.distributor
       )
     end
 
-    it 'returns an instance of the default Distributor' do
+    it "returns an instance of the default Distributor" do
       expect(config.distributor).to be_a(Karafka::Deserializing::Parallel::Distributor)
     end
   end

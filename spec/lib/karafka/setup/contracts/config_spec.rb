@@ -33,7 +33,8 @@ RSpec.describe_current do
       deserializing: {
         parallel: {
           active: false,
-          concurrency: 4
+          concurrency: 4,
+          min_payloads: 50
         }
       },
       admin: {
@@ -897,32 +898,49 @@ RSpec.describe_current do
     it { expect(contract.call(config)).to be_success }
   end
 
-  context 'when validating deserializing.parallel settings' do
+  context "when validating deserializing.parallel settings" do
     let(:parallel_config) { config[:deserializing][:parallel] }
 
-    context 'when active is not a boolean' do
-      before { parallel_config[:active] = 'invalid' }
+    context "when active is not a boolean" do
+      before { parallel_config[:active] = "invalid" }
 
       it { expect(contract.call(config)).not_to be_success }
     end
 
-    context 'when concurrency is not an integer' do
-      before { parallel_config[:concurrency] = 'invalid' }
+    context "when concurrency is not an integer" do
+      before { parallel_config[:concurrency] = "invalid" }
 
       it { expect(contract.call(config)).not_to be_success }
     end
 
-    context 'when concurrency is zero' do
+    context "when concurrency is zero" do
       before { parallel_config[:concurrency] = 0 }
 
       it { expect(contract.call(config)).not_to be_success }
     end
 
-    context 'when concurrency is negative' do
+    context "when concurrency is negative" do
       before { parallel_config[:concurrency] = -1 }
 
       it { expect(contract.call(config)).not_to be_success }
     end
 
+    context "when min_payloads is not an integer" do
+      before { parallel_config[:min_payloads] = "invalid" }
+
+      it { expect(contract.call(config)).not_to be_success }
+    end
+
+    context "when min_payloads is zero" do
+      before { parallel_config[:min_payloads] = 0 }
+
+      it { expect(contract.call(config)).not_to be_success }
+    end
+
+    context "when min_payloads is negative" do
+      before { parallel_config[:min_payloads] = -1 }
+
+      it { expect(contract.call(config)).not_to be_success }
+    end
   end
 end

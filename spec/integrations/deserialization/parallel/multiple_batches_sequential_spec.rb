@@ -37,13 +37,13 @@ draw_routes do
 end
 
 # Produce in two separate calls to encourage multiple polls
-first_batch = Array.new(20) { |i| { 'index' => i, 'batch' => 1 }.to_json }
+first_batch = Array.new(20) { |i| { "index" => i, "batch" => 1 }.to_json }
 produce_many(DT.topic, first_batch)
 
 # Small delay to help separate into different polls
 sleep(1)
 
-second_batch = Array.new(20) { |i| { 'index' => i + 20, 'batch' => 2 }.to_json }
+second_batch = Array.new(20) { |i| { "index" => i + 20, "batch" => 2 }.to_json }
 produce_many(DT.topic, second_batch)
 
 start_karafka_and_wait_until do
@@ -52,7 +52,7 @@ end
 
 assert_equal 40, DT[:payloads].size
 
-indices = DT[:payloads].map { |p| p['index'] }.sort
+indices = DT[:payloads].map { |p| p["index"] }.sort
 assert_equal (0..39).to_a, indices
 
 # Should have received multiple batches (at least 2 consume calls)

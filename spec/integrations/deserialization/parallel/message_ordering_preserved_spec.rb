@@ -15,7 +15,7 @@ end
 class Consumer < Karafka::BaseConsumer
   def consume
     messages.each do |message|
-      DT[:ordered_indices] << message.payload['index']
+      DT[:ordered_indices] << message.payload["index"]
       DT[:offsets] << message.offset
     end
   end
@@ -37,7 +37,7 @@ draw_routes do
   end
 end
 
-payloads = Array.new(200) { |i| { 'index' => i }.to_json }
+payloads = Array.new(200) { |i| { "index" => i }.to_json }
 
 produce_many(DT.topic, payloads)
 

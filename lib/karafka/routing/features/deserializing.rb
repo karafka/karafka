@@ -15,10 +15,10 @@ module Karafka
           def post_setup(_config)
             return unless Karafka::App.config.deserializing.parallel.active
 
-            if RUBY_VERSION < '4.0'
+            if RUBY_VERSION < "4.0"
               raise(
                 Karafka::Errors::UnsupportedOptionError,
-                'Parallel deserializing requires Ruby 4.0+ with stable Ractor support'
+                "Parallel deserializing requires Ruby 4.0+ with stable Ractor support"
               )
             end
 

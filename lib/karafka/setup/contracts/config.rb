@@ -61,6 +61,7 @@ module Karafka
           nested(:parallel) do
             required(:active) { |val| [true, false].include?(val) }
             required(:concurrency) { |val| val.is_a?(Integer) && val.positive? }
+            required(:min_payloads) { |val| val.is_a?(Integer) && val.positive? }
           end
         end
 

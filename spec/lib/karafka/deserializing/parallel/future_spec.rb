@@ -2,8 +2,8 @@
 
 RSpec.describe_current do
   before do
-    unless RUBY_VERSION >= '4.0' && defined?(Ractor::Port)
-      skip 'Requires Ruby 4.0+ with Ractor::Port'
+    unless RUBY_VERSION >= "4.0" && defined?(Ractor::Port)
+      skip "Requires Ruby 4.0+ with Ractor::Port"
     end
   end
 
@@ -15,39 +15,39 @@ RSpec.describe_current do
   let(:chunk_size) { 2 }
   let(:total) { 3 }
 
-  describe '#retrieve' do
-    context 'when results are available' do
+  describe "#retrieve" do
+    context "when results are available" do
       before do
         allow(result_port).to receive(:receive).and_return(
           { batch_index: 0, results: %w[result1 result2] },
-          { batch_index: 1, results: ['result3'] }
+          { batch_index: 1, results: ["result3"] }
         )
       end
 
-      it 'collects results from result_port' do
+      it "collects results from result_port" do
         future.retrieve
 
         expect(result_port).to have_received(:receive).twice
       end
 
-      it 'returns results array in original order' do
+      it "returns results array in original order" do
         results = future.retrieve
 
-        expect(results[0]).to eq('result1')
-        expect(results[1]).to eq('result2')
-        expect(results[2]).to eq('result3')
+        expect(results[0]).to eq("result1")
+        expect(results[1]).to eq("result2")
+        expect(results[2]).to eq("result3")
       end
     end
 
-    context 'when called multiple times' do
+    context "when called multiple times" do
       before do
         allow(result_port).to receive(:receive).and_return(
           { batch_index: 0, results: %w[result1 result2] },
-          { batch_index: 1, results: ['result3'] }
+          { batch_index: 1, results: ["result3"] }
         )
       end
 
-      it 'only retrieves once' do
+      it "only retrieves once" do
         future.retrieve
         future.retrieve
 
@@ -55,7 +55,7 @@ RSpec.describe_current do
         expect(result_port).to have_received(:receive).twice
       end
 
-      it 'returns cached results on subsequent calls' do
+      it "returns cached results on subsequent calls" do
         first_results = future.retrieve
         second_results = future.retrieve
 
@@ -63,40 +63,40 @@ RSpec.describe_current do
       end
     end
 
-    context 'when results contain errors' do
+    context "when results contain errors" do
       let(:error_marker) { Karafka::Deserializing::Parallel::DESERIALIZATION_ERROR }
 
       before do
         allow(result_port).to receive(:receive).and_return(
-          { batch_index: 0, results: [error_marker, 'result2'] },
-          { batch_index: 1, results: ['result3'] }
+          { batch_index: 0, results: [error_marker, "result2"] },
+          { batch_index: 1, results: ["result3"] }
         )
       end
 
-      it 'includes error markers in results array' do
+      it "includes error markers in results array" do
         results = future.retrieve
 
         expect(results[0]).to equal(error_marker)
-        expect(results[1]).to eq('result2')
-        expect(results[2]).to eq('result3')
+        expect(results[1]).to eq("result2")
+        expect(results[2]).to eq("result3")
       end
     end
 
-    context 'when results arrive out of order' do
+    context "when results arrive out of order" do
       before do
         # Results arrive in reverse order
         allow(result_port).to receive(:receive).and_return(
-          { batch_index: 1, results: ['result3'] },
+          { batch_index: 1, results: ["result3"] },
           { batch_index: 0, results: %w[result1 result2] }
         )
       end
 
-      it 'correctly orders results by batch_index' do
+      it "correctly orders results by batch_index" do
         results = future.retrieve
 
-        expect(results[0]).to eq('result1')
-        expect(results[1]).to eq('result2')
-        expect(results[2]).to eq('result3')
+        expect(results[0]).to eq("result1")
+        expect(results[1]).to eq("result2")
+        expect(results[2]).to eq("result3")
       end
     end
   end

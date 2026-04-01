@@ -36,7 +36,7 @@ draw_routes do
 end
 
 # Produce fewer messages than min_payloads so inline path is used
-payloads = Array.new(10) { |i| { 'index' => i }.to_json }
+payloads = Array.new(10) { |i| { "index" => i }.to_json }
 
 produce_many(DT.topic, payloads)
 
@@ -46,5 +46,5 @@ end
 
 assert_equal 10, DT[:payloads].size
 
-indices = DT[:payloads].map { |p| p['index'] }.sort
+indices = DT[:payloads].map { |p| p["index"] }.sort
 assert_equal (0..9).to_a, indices

@@ -35,7 +35,7 @@ draw_routes do
   end
 end
 
-payloads = Array.new(500) { |i| { 'index' => i, 'data' => 'x' * 100 }.to_json }
+payloads = Array.new(500) { |i| { "index" => i, "data" => "x" * 100 }.to_json }
 
 produce_many(DT.topic, payloads)
 
@@ -45,5 +45,5 @@ end
 
 assert_equal 500, DT[:payloads].size
 
-indices = DT[:payloads].map { |p| p['index'] }.sort
+indices = DT[:payloads].map { |p| p["index"] }.sort
 assert_equal (0..499).to_a, indices

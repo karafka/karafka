@@ -3,23 +3,23 @@
 RSpec.describe_current do
   subject(:distributor) { described_class.new }
 
-  describe '#call' do
-    context 'when there is 1 message' do
-      it 'returns a single batch' do
+  describe "#call" do
+    context "when there is 1 message" do
+      it "returns a single batch" do
         result = distributor.call(%w[a], 4)
         expect(result).to eq([%w[a]])
       end
     end
 
-    context 'when there are fewer messages than workers' do
-      it 'returns a single batch' do
+    context "when there are fewer messages than workers" do
+      it "returns a single batch" do
         result = distributor.call(%w[a b], 4)
         expect(result).to eq([%w[a b]])
       end
     end
 
-    context 'when messages divide evenly across workers' do
-      it 'returns equal-sized batches' do
+    context "when messages divide evenly across workers" do
+      it "returns equal-sized batches" do
         payloads = Array.new(100) { |i| "msg_#{i}" }
         result = distributor.call(payloads, 2)
 
@@ -30,8 +30,8 @@ RSpec.describe_current do
       end
     end
 
-    context 'with a large batch' do
-      it 'creates 2×workers chunks respecting min_payloads' do
+    context "with a large batch" do
+      it "creates 2×workers chunks respecting min_payloads" do
         payloads = Array.new(1000) { |i| "msg_#{i}" }
         result = distributor.call(payloads, 4)
 
@@ -41,8 +41,8 @@ RSpec.describe_current do
       end
     end
 
-    context 'when min_payloads limits chunk count' do
-      it 'does not create chunks smaller than min_payloads' do
+    context "when min_payloads limits chunk count" do
+      it "does not create chunks smaller than min_payloads" do
         payloads = Array.new(200) { |i| "msg_#{i}" }
         result = distributor.call(payloads, 10, min_payloads: 50)
 
@@ -52,8 +52,8 @@ RSpec.describe_current do
       end
     end
 
-    context 'with custom min_payloads' do
-      it 'respects the provided minimum' do
+    context "with custom min_payloads" do
+      it "respects the provided minimum" do
         payloads = Array.new(500) { |i| "msg_#{i}" }
         result = distributor.call(payloads, 5, min_payloads: 100)
 
@@ -63,8 +63,8 @@ RSpec.describe_current do
       end
     end
 
-    context 'when batch is very small' do
-      it 'returns a single batch when below min_payloads' do
+    context "when batch is very small" do
+      it "returns a single batch when below min_payloads" do
         payloads = Array.new(30) { |i| "msg_#{i}" }
         result = distributor.call(payloads, 4)
 

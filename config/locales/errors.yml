@@ -94,6 +94,7 @@ en:
 
         deserializing.parallel.active_format: needs to be either true or false
         deserializing.parallel.concurrency_format: needs to be an integer bigger than 0
+        deserializing.parallel.min_payloads_format: needs to be an integer bigger than 0
 
     cli:
       server:

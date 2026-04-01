@@ -18,7 +18,7 @@ end
 
 class CsvDeserializer
   def call(message)
-    message.raw_payload.split(',')
+    message.raw_payload.split(",")
   end
 end
 
@@ -59,7 +59,7 @@ draw_routes do
   end
 end
 
-json_payloads = Array.new(30) { |i| { 'index' => i }.to_json }
+json_payloads = Array.new(30) { |i| { "index" => i }.to_json }
 csv_payloads = Array.new(30) { |i| "#{i},data_#{i},value" }
 
 produce_many(json_topic, json_payloads)
@@ -73,7 +73,7 @@ assert_equal 30, DT[:json].size
 assert_equal 30, DT[:csv].size
 
 # Verify JSON topic messages
-json_indices = DT[:json].map { |p| p['index'] }.sort
+json_indices = DT[:json].map { |p| p["index"] }.sort
 assert_equal (0..29).to_a, json_indices
 
 # Verify CSV topic messages

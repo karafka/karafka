@@ -34,7 +34,7 @@ draw_routes do
   end
 end
 
-payloads = Array.new(100) { |i| { 'index' => i, 'data' => "value_#{i}" }.to_json }
+payloads = Array.new(100) { |i| { "index" => i, "data" => "value_#{i}" }.to_json }
 
 produce_many(DT.topic, payloads)
 
@@ -45,12 +45,12 @@ end
 assert_equal 100, DT[:payloads].size
 
 # Verify all messages were deserialized correctly
-indices = DT[:payloads].map { |p| p['index'] }.sort
+indices = DT[:payloads].map { |p| p["index"] }.sort
 assert_equal (0..99).to_a, indices
 
 # Verify payload content
 DT[:payloads].each do |payload|
   assert payload.is_a?(Hash), "Payload should be a Hash, got #{payload.class}"
-  assert payload.key?('index'), 'Payload should have index key'
-  assert payload.key?('data'), 'Payload should have data key'
+  assert payload.key?("index"), "Payload should have index key"
+  assert payload.key?("data"), "Payload should have data key"
 end
