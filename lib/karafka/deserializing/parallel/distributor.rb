@@ -15,8 +15,6 @@ module Karafka
       # - min_payloads floor ensures Ractor coordination cost (~30-50μs per batch) stays
       #   negligible relative to actual deserialization work
       # - Below min_payloads the Pool skips dispatch entirely (inline deserialization)
-      #
-      # Pro can swap in smarter strategies (adaptive sizing, priority-based, etc.)
       class Distributor
         # @param payloads [Array<String>] raw payloads to distribute
         # @param pool_size [Integer] number of available workers

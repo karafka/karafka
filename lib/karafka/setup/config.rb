@@ -342,7 +342,6 @@ module Karafka
 
         setting :deserializing do
           # option distributor [Object] distributor for splitting payloads across Ractor workers
-          # Pro can override this globally or per-topic
           setting :distributor, default: Deserializing::Parallel::Distributor.new
         end
 

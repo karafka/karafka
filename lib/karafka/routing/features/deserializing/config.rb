@@ -25,8 +25,6 @@ module Karafka
           end
 
           # @return [Object] distributor for splitting payloads across Ractor workers
-          # In OSS, always returns the internal default
-          # Pro can override per-topic via routing DSL
           def distributor
             Karafka::App.config.internal.deserializing.distributor
           end
