@@ -57,36 +57,36 @@ Karafka.monitor.subscribe(
   Karafka::Pro::Swarm::LivenessListener.new
 )
 
-# Track client.events_poll firing during shutdown directly.
-# After the node receives TERM, done? becomes true. We wait a few seconds to ensure
-# the listener has exited the fetch loop and entered wait_pinging, then signal via pipe.
-shutdown_poll_start = nil
-
-Karafka.monitor.subscribe('client.events_poll') do |_event|
-  next unless Karafka::App.done?
-
-  shutdown_poll_start ||= Process.clock_gettime(Process::CLOCK_MONOTONIC)
-  elapsed = Process.clock_gettime(Process::CLOCK_MONOTONIC) - shutdown_poll_start
-
-  # After a delay we are past the running->quieting transition and into wait_pinging
-  next unless elapsed > (MACOS ? 4.0 : 3.0)
-
-  begin
-    LIVENESS_W.puts('1')
-    LIVENESS_W.flush
-  rescue IOError, Errno::EPIPE
-    nil
-  end
-end
-
-# Give the node plenty of time so it stays alive in wait_pinging waiting for the LRJ
-Karafka::App.monitor.subscribe('swarm.node.after_fork') do
+# Subscribe inside after_fork so the callback is definitely registered in the child process.
+# Track client.events_poll firing during shutdown. After the node receives TERM, done? becomes
+# true. We wait a few seconds to ensure the listener has exited the fetch loop and entered
+# wait_pinging, then signal via pipe.
+Karafka::App.monitor.subscribe("swarm.node.after_fork") do
   Karafka::App.config.shutdown_timeout = 30_000
+
+  poll_start = nil
+
+  Karafka.monitor.subscribe("client.events_poll") do |_event|
+    next unless Karafka::App.done?
+
+    poll_start ||= Process.clock_gettime(Process::CLOCK_MONOTONIC)
+    elapsed = Process.clock_gettime(Process::CLOCK_MONOTONIC) - poll_start
+
+    # After a delay we are past the running->quieting transition and into wait_pinging
+    next unless elapsed > (MACOS ? 4.0 : 3.0)
+
+    begin
+      LIVENESS_W.puts("1")
+      LIVENESS_W.flush
+    rescue IOError, Errno::EPIPE
+      nil
+    end
+  end
 end
 
 class Consumer < Karafka::BaseConsumer
   def consume
-    STARTED_W.puts('1')
+    STARTED_W.puts("1")
     STARTED_W.flush
 
     # Simulate a long-running job. During shutdown, the listener enters wait_pinging while
