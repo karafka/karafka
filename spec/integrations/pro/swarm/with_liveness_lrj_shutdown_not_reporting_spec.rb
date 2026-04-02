@@ -99,7 +99,7 @@ start_karafka_and_wait_until(mode: :swarm) do
     # Send TERM directly to the node so it enters wait_pinging while
     # the supervisor continues monitoring via manager.control
     nodes = Karafka::App.config.internal.swarm.manager.nodes
-    Process.kill('TERM', nodes.first.pid)
+    Process.kill("TERM", nodes.first.pid)
     node_termed = true
     next false
   end
