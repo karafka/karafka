@@ -8,6 +8,8 @@
 
 setup_karafka
 
+Karafka::Admin.create_topic(DT.topic, 1, 1)
+
 reader, writer = IO.pipe
 
 # Ensure the producer has been used at least once, then close it before forking
