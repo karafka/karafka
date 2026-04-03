@@ -1,0 +1,72 @@
+#!/usr/bin/env ruby
+
+# Lists all spec and integration test files with their 6-char topic name hash prefix.
+# Use HASH=abc123 to look up which spec file produced a given hash.
+#
+# The hash computation mirrors DataCollector::SPEC_HASH:
+#   Digest::MD5.hexdigest(relative_path)[0, 6]
+# where relative_path is e.g. "spec/integrations/admin/consumer_group_operations_spec.rb"
+
+require "digest"
+require "pathname"
+
+ROOT_PATH = Pathname.new(File.expand_path(File.join(File.dirname(__FILE__), "../")))
+
+gem_root = ROOT_PATH.to_s
+lookup = ENV["HASH"]
+
+specs = Dir.glob("#{gem_root}/spec/**/*_spec.rb").sort
+integrations = Dir.glob("#{gem_root}/spec/integrations/**/*_spec.rb").sort
+non_integrations = specs - integrations
+
+hash_to_files = Hash.new { |h, k| h[k] = [] }
+
+specs.each do |file|
+  relative = file.sub("#{gem_root}/", "")
+  hash = Digest::MD5.hexdigest(relative)[0, 6]
+  hash_to_files[hash] << relative
+end
+
+if lookup
+  matches = hash_to_files[lookup]
+
+  if matches.empty?
+    puts "No spec file found for hash: #{lookup}"
+  else
+    matches.each { |f| puts "  #{lookup}  #{f}" }
+  end
+
+  exit
+end
+
+puts "Integration tests:"
+puts "-" * 80
+
+integrations.each do |file|
+  relative = file.sub("#{gem_root}/", "")
+  hash = Digest::MD5.hexdigest(relative)[0, 6]
+  puts "  #{hash}  #{relative}"
+end
+
+puts
+puts "Unit/other specs:"
+puts "-" * 80
+
+non_integrations.each do |file|
+  relative = file.sub("#{gem_root}/", "")
+  hash = Digest::MD5.hexdigest(relative)[0, 6]
+  puts "  #{hash}  #{relative}"
+end
+
+collisions = hash_to_files.select { |_, files| files.size > 1 }
+
+unless collisions.empty?
+  puts
+  puts "Hash collisions detected:"
+  puts "-" * 80
+
+  collisions.each do |hash, files|
+    puts "  #{hash}:"
+    files.each { |f| puts "    #{f}" }
+  end
+end

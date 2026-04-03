@@ -50,7 +50,7 @@ module Karafka
         @executors = Processing::ExecutorsBuffer.new(@client, subscription_group)
         @partitioner = partitioner_class.new(subscription_group)
         @scheduler = scheduler
-        @events_poller = Helpers::IntervalRunner.new { @client.events_poll }
+        @events_poller = Helpers::IntervalRunner.new { |**opts| @client.events_poll(**opts) }
         # We keep one buffer for messages to preserve memory and not allocate extra objects
         # We can do this that way because we always first schedule jobs using messages before we
         # fetch another batch.
@@ -499,6 +499,7 @@ module Karafka
         until wait_until.call
           @client.ping
           @scheduler.on_manage
+          @events_poller.call(safe: true)
 
           after_ping.call
           sleep(0.2)

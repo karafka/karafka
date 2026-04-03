@@ -198,6 +198,7 @@ class Scenario
       <<~CMD
         cd #{temp_dir} &&
         KARAFKA_GEM_DIR=#{ROOT_PATH} \
+        KARAFKA_SPEC_PATH=#{@path} \
         BUNDLE_AUTO_INSTALL=true \
         PRISTINE_MODE=true \
         bundle exec ruby #{file_name}
@@ -213,6 +214,7 @@ class Scenario
       <<~CMD
         cd #{temp_dir} &&
         KARAFKA_GEM_DIR=#{ROOT_PATH} \
+        KARAFKA_SPEC_PATH=#{@path} \
         BUNDLE_AUTO_INSTALL=true \
         PRISTINE_MODE=true \
         bundle exec ruby -r #{ROOT_PATH}/spec/integrations_helper.rb #{file_name}
@@ -220,6 +222,7 @@ class Scenario
     else
       <<~CMD
         KARAFKA_GEM_DIR=#{ROOT_PATH} \
+        KARAFKA_SPEC_PATH=#{@path} \
         bundle exec ruby -r ./spec/integrations_helper.rb #{@path}
       CMD
     end

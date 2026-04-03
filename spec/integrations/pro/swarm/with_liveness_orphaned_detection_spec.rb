@@ -28,41 +28,61 @@
 # License: https://karafka.io/docs/Pro-License-Comm/
 # Contact: contact@karafka.io
 
-# Karafka should work correctly when we configure it only to have public key and for messages
-# producing only. Decryption will not be possible.
-
-PUBLIC_KEY = fixture_file("rsa/public_key_1.pem")
+# Pro liveness listener should detect orphaned nodes and exit them, same as the base listener.
 
 setup_karafka do |config|
-  config.encryption.active = true
-  config.encryption.public_key = PUBLIC_KEY
+  config.swarm.nodes = 1
+  config.internal.swarm.node_restart_timeout = 1_000
+  config.internal.swarm.supervision_interval = 1_000
+  config.internal.swarm.liveness_interval = 1_000
+end
+
+READER, WRITER = IO.pipe
+
+Karafka.monitor.subscribe(
+  Karafka::Pro::Swarm::LivenessListener.new
+)
+
+# Simulate orphaned state on first fork only so the restarted node works normally
+Karafka::App.monitor.subscribe("swarm.manager.before_fork") do
+  DT[:forks] << true
+end
+
+module Karafka
+  module Swarm
+    class Node
+      alias_method :original_orphaned?, :orphaned?
+
+      def orphaned?
+        # First fork is "orphaned", subsequent ones are not
+        DT[:forks].size <= 1
+      end
+    end
+  end
 end
 
 class Consumer < Karafka::BaseConsumer
   def consume
-    messages.each do |message|
-      DT[message.metadata.partition] << message.raw_payload
-      DT[:encryption] << message.headers["encryption"]
-    end
+    WRITER.puts("1")
+    WRITER.flush
   end
 end
 
 draw_routes do
   topic DT.topic do
     consumer Consumer
+    manual_offset_management true
   end
 end
 
-elements = DT.uuids(10).map { |uuid| "non-random-#{uuid}" }
-produce_many(DT.topic, elements)
+produce_many(DT.topic, DT.uuids(10))
 
-start_karafka_and_wait_until do
-  DT[0].size >= 10
+# The orphaned node should exit and be restarted. The restarted node will consume and write to pipe.
+# We need at least 2 forks (first one exits as orphaned, second one runs normally).
+done = []
+start_karafka_and_wait_until(mode: :swarm) do
+  done << READER.gets
+  done.size >= 1 && DT[:forks].size >= 2
 end
 
-# There should be no raw info available
-chunk = elements.first
-assert(DT[0].none? { |payload| payload.include?(chunk) })
-
-# Correct encryption version headers should be present
-assert_equal %w[1], DT[:encryption].uniq
+assert DT[:forks].size >= 2

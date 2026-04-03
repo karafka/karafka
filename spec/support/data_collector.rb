@@ -16,7 +16,8 @@ class DataCollector
   # environments (local dev vs CI runners with different absolute paths)
   SPEC_HASH = begin
     gem_root = File.expand_path(File.join(__dir__, "..", ".."))
-    absolute_program = File.expand_path($PROGRAM_NAME)
+    spec_path = ENV.fetch("KARAFKA_SPEC_PATH", $PROGRAM_NAME)
+    absolute_program = File.expand_path(spec_path)
     relative_path = absolute_program.sub("#{gem_root}/", "")
     Digest::MD5.hexdigest(relative_path)[0, 6]
   end

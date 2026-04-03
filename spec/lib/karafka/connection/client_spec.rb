@@ -85,6 +85,54 @@ RSpec.describe_current do
     end
   end
 
+  describe "#events_poll" do
+    let(:kafka) { instance_double(Rdkafka::Consumer) }
+
+    before do
+      allow(client).to receive(:kafka).and_return(kafka)
+    end
+
+    context "when safe is false and rdkafka raises" do
+      before do
+        allow(kafka).to receive(:events_poll).and_raise(Rdkafka::RdkafkaError.new(0))
+      end
+
+      it "expect to raise the error" do
+        expect { client.events_poll }.to raise_error(Rdkafka::RdkafkaError)
+      end
+    end
+
+    context "when safe is true and rdkafka raises" do
+      before do
+        allow(kafka).to receive(:events_poll).and_raise(Rdkafka::RdkafkaError.new(0))
+      end
+
+      it "expect to swallow the error" do
+        expect { client.events_poll(safe: true) }.not_to raise_error
+      end
+
+      it "expect to return nil" do
+        expect(client.events_poll(safe: true)).to be_nil
+      end
+    end
+
+    context "when no error occurs" do
+      before do
+        allow(kafka).to receive(:events_poll)
+      end
+
+      it "expect to instrument the event" do
+        expect(Karafka.monitor).to receive(:instrument).with(
+          "client.events_poll",
+          caller: client,
+          subscription_group: subscription_group
+        )
+
+        client.events_poll
+      end
+    end
+  end
+
   describe "#inspect" do
     let(:client_name) { "test-consumer-1" }
 
