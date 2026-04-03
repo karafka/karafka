@@ -401,10 +401,14 @@ module Karafka
       #   - OAUTHBEARER token refresh callbacks
       #
       # @param timeout [Integer] number of milliseconds to wait on events or 0 not to wait.
+      # @param safe [Boolean] when true, rescues Rdkafka::RdkafkaError so callers in
+      #   shutdown/quiet paths do not trigger a full listener reset. When shutting down, errors
+      #   at this layer are not relevant enough. We want to log them but we should not propagate
+      #   them any further.
       #
       # @note It is non-blocking when timeout 0 and will not wait if queue empty. It costs up to
       #   2ms when no callbacks are triggered.
-      def events_poll(timeout = 0)
+      def events_poll(timeout = 0, safe: false)
         kafka.events_poll(timeout)
 
         # Emit event for monitoring - happens once per tick_interval (default 5s)
@@ -414,6 +418,8 @@ module Karafka
           caller: self,
           subscription_group: @subscription_group
         )
+      rescue Rdkafka::RdkafkaError
+        safe ? nil : raise
       end
 
       # Returns pointer to the consumer group metadata. It is used only in the context of

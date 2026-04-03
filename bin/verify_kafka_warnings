@@ -16,6 +16,7 @@ allowed_patterns=(
    "UNKNOWN_TOPIC_OR_PARTITION from the leader for partition"
    "Error processing kafka.server:type=BrokerTopicMetrics"
    "UNKNOWN_TOPIC_ID from the leader for partition"
+   "The replica state of replica ID"
 )
 
 # Use provided container names or default to "kafka"
