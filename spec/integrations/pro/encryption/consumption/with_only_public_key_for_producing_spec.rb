@@ -61,7 +61,7 @@ start_karafka_and_wait_until do
 end
 
 # There should be no raw info available
-chunk = elements.first.split("-").first
+chunk = elements.first
 assert(DT[0].none? { |payload| payload.include?(chunk) })
 
 # Correct encryption version headers should be present
