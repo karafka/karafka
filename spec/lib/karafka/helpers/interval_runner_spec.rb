@@ -72,4 +72,24 @@ RSpec.describe_current do
       end
     end
   end
+
+  context "when call forwards arguments to the block" do
+    subject(:runner) { described_class.new(interval: 500) { |**opts| buffer << opts } }
+
+    it "forwards keyword arguments" do
+      runner.call(safe: true)
+      expect(buffer).to eq([{ safe: true }])
+    end
+
+    it "forwards no arguments when none provided" do
+      runner.call
+      expect(buffer).to eq([{}])
+    end
+
+    it "does not forward arguments when within interval" do
+      runner.call(first: true)
+      runner.call(second: true)
+      expect(buffer).to eq([{ first: true }])
+    end
+  end
 end

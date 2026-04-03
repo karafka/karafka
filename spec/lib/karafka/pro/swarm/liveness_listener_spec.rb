@@ -52,6 +52,7 @@ RSpec.describe_current do
     allow(listener).to receive(:node).and_return(node)
     allow(node).to receive(:healthy)
     allow(node).to receive(:unhealthy)
+    allow(node).to receive(:orphaned?).and_return(false)
   end
 
   describe "#initialize" do
@@ -92,6 +93,25 @@ RSpec.describe_current do
   describe "#on_client_events_poll" do
     it "reports healthy status" do
       listener.on_client_events_poll(event)
+      expect(node).to have_received(:healthy)
+    end
+
+    context "when node becomes orphaned" do
+      before do
+        allow(node).to receive(:orphaned?).and_return(true)
+        allow(Kernel).to receive(:exit!)
+      end
+
+      it "exits with orphaned exit code" do
+        listener.on_client_events_poll(event)
+        expect(Kernel).to have_received(:exit!).with(3)
+      end
+    end
+  end
+
+  describe "#on_connection_listener_before_fetch_loop" do
+    it "reports healthy status" do
+      listener.on_connection_listener_before_fetch_loop(event)
       expect(node).to have_received(:healthy)
     end
   end

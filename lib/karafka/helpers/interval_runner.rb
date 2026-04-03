@@ -25,14 +25,14 @@ module Karafka
       end
 
       # Runs the requested code if it was not executed previously recently
-      def call
+      def call(...)
         now = monotonic_now
 
         return if now - @last_called_at < @interval
 
         @last_called_at = now
 
-        @block.call
+        @block.call(...)
       end
 
       # Runs the requested code bypassing any time frequencies
