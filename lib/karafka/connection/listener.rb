@@ -499,7 +499,11 @@ module Karafka
         until wait_until.call
           @client.ping
           @scheduler.on_manage
-          @events_poller.call
+          begin
+            @events_poller.call
+          rescue Rdkafka::RdkafkaError
+            nil
+          end
 
           after_ping.call
           sleep(0.2)
