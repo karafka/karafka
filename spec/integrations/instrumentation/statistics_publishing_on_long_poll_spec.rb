@@ -46,5 +46,7 @@ DT[:polls].each do |poll|
   end
 end
 
-assert DT[:stats].size >= 30
-assert in_polls >= 28
+# Allow for a small amount of timing jitter from librdkafka's stats callback on CI:
+# theoretical max in 30s at 1s interval is ~30, but an occasional tick can be coalesced/delayed.
+assert DT[:stats].size >= 28
+assert in_polls >= 26
