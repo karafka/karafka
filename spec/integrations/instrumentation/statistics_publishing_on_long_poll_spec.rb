@@ -34,7 +34,9 @@ Karafka::App.monitor.subscribe("connection.listener.fetch_loop.received") do |ev
 end
 
 start_karafka_and_wait_until do
-  sleep(30)
+  # Sleep longer than the 30 ticks we want to assert on to leave headroom for
+  # librdkafka stats callback jitter (occasional ticks get coalesced/delayed on CI).
+  sleep(33)
   true
 end
 
@@ -46,7 +48,5 @@ DT[:polls].each do |poll|
   end
 end
 
-# Allow for a small amount of timing jitter from librdkafka's stats callback on CI:
-# theoretical max in 30s at 1s interval is ~30, but an occasional tick can be coalesced/delayed.
-assert DT[:stats].size >= 28
-assert in_polls >= 26
+assert DT[:stats].size >= 30
+assert in_polls >= 28
