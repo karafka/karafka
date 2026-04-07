@@ -59,6 +59,8 @@ class EventFilter < Karafka::Pro::Processing::Filters::Base
 
   def apply!(messages)
     initialize_filter_state
+    return if messages.empty?
+
     DT[:filter_calls] << messages.size
     batch_start = messages.first.offset
 
