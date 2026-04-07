@@ -1,8 +1,9 @@
 # frozen_string_literal: true
 
-# When eof is in use we may not get it as it may go with messages polling via `#consume`
-# It may happen that eof goes via `#eofed` because of polling but we will correct this spec only
-# when this would happen as it should not be frequent
+# When eof is in use the eof indication may arrive either together with messages (detectable via
+# `eofed?` in `#consume`) or separately via the `#eofed` callback on a subsequent poll.
+# Both paths are valid and this spec verifies that `eofed?` is true in either case after all
+# messages have been consumed.
 
 setup_karafka do |config|
   config.kafka[:"enable.partition.eof"] = true
@@ -16,9 +17,8 @@ class Consumer < Karafka::BaseConsumer
     DT[:eof] = eofed?
   end
 
-  # This should never happen because we do not reach eof without messages
   def eofed
-    raise
+    DT[:eof] = eofed?
   end
 end
 
