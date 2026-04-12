@@ -50,7 +50,7 @@ end
 # shipped to the Ractor pool via `work.freeze` in `Parallel::Pool#dispatch_async`.
 class RactorTaggingDeserializer
   def call(message)
-    source = Ractor.current == Ractor.main ? "main" : "ractor"
+    source = (Ractor.current == Ractor.main) ? "main" : "ractor"
     { "source" => source, "bytes" => message.raw_payload.bytesize }
   end
 end

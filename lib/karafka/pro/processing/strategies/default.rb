@@ -337,8 +337,9 @@ module Karafka
               coordinator.pause_tracker.increment
             end
 
-            results = messages.metadata.deserialization.retrieve
-            Deserializing::Parallel::Injector.call(messages, results)
+            # On Ruby < 4.0 the deserialization attribute is nil (Ractor pool not loaded)
+            deser = messages.metadata.deserialization
+            Deserializing::Parallel::Injector.call(messages, deser&.retrieve) if deser
           end
 
           # Run the user consumption code
