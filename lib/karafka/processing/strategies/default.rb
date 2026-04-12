@@ -118,7 +118,7 @@ module Karafka
           # For Immediate (parallel not used), retrieve returns nil and Injector is a no-op.
           # On Ruby < 4.0 the deserialization attribute is nil (Ractor pool not loaded).
           deser = messages.metadata.deserialization
-          Deserializing::Parallel::Injector.call(messages, deser&.retrieve) if deser
+          Deserializing::Parallel::Injector.call(messages, deser.retrieve) if deser
         end
 
         # Runs the wrapping to execute appropriate action wrapped with the wrapper method code

@@ -339,7 +339,7 @@ module Karafka
 
             # On Ruby < 4.0 the deserialization attribute is nil (Ractor pool not loaded)
             deser = messages.metadata.deserialization
-            Deserializing::Parallel::Injector.call(messages, deser&.retrieve) if deser
+            Deserializing::Parallel::Injector.call(messages, deser.retrieve) if deser
           end
 
           # Run the user consumption code
