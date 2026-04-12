@@ -1,6 +1,7 @@
 # Karafka Framework Changelog
 
 ## 2.5.10 (Unreleased)
+- [Fix] Fix Pro `handle_before_consume` silently discarding parallel deserialization results from the Ractor pool, causing messages to fall back to inline deserialization on the worker thread while still paying the Ractor dispatch cost.
 - [Enhancement] Add per-partition generation tracking to `AssignmentsTracker` to distinguish first-time assignments from reassignments.
 - [Enhancement] Make liveness listeners fiber-safe.
 - [Fix] Include orphaned node detection in Pro swarm liveness listener.
