@@ -34,7 +34,9 @@ Karafka::App.monitor.subscribe("connection.listener.fetch_loop.received") do |ev
 end
 
 start_karafka_and_wait_until do
-  sleep(30)
+  # Sleep longer than the 30 ticks we want to assert on to leave headroom for
+  # librdkafka stats callback jitter (occasional ticks get coalesced/delayed on CI).
+  sleep(33)
   true
 end
 
