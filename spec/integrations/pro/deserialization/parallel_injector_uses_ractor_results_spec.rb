@@ -38,6 +38,9 @@
 # is present, `.payload` falls back to inline deserialization on the worker thread (still the
 # main Ractor), so the tag comes back as `"main"`.
 
+# Parallel deserialization requires Ruby 4.0+ with stable Ractor support
+exit 0 if RUBY_VERSION < "4.0"
+
 setup_karafka do |config|
   config.concurrency = 1
   config.deserializing.parallel.active = true
