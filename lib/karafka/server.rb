@@ -10,7 +10,8 @@ module Karafka
       shutdown_timeout: %i[shutdown_timeout],
       forceful_exit_code: %i[internal forceful_exit_code],
       forceful_shutdown_wait: %i[internal forceful_shutdown_wait],
-      process: %i[internal process]
+      process: %i[internal process],
+      jobs_queue_class: %i[internal processing jobs_queue_class]
     )
 
     class << self
@@ -40,7 +41,8 @@ module Karafka
       # Method which runs app
       def run
         self.listeners = []
-        self.workers = []
+        self.jobs_queue = jobs_queue_class.new
+        self.workers = Processing::WorkersPool.new
 
         # We need to validate this prior to running because it may be executed also from the
         # embedded
@@ -130,7 +132,7 @@ module Karafka
         alive_workers = workers.alive
 
         # Collect details about subscription groups that still have jobs in processing
-        in_processing = jobs_queue ? jobs_queue.in_processing : {}
+        in_processing = jobs_queue.in_processing
 
         Karafka.monitor.instrument(
           "error.occurred",

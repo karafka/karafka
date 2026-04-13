@@ -1,7 +1,12 @@
 # frozen_string_literal: true
 
 RSpec.describe_current do
-  subject(:pool) { described_class.new(jobs_queue) }
+  subject(:pool) do
+    pool = described_class.new
+    pool.jobs_queue = jobs_queue
+    pool.scale(concurrency)
+    pool
+  end
 
   let(:jobs_queue) { Karafka::Processing::JobsQueue.new }
   let(:concurrency) { Karafka::App.config.concurrency }

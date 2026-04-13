@@ -5,19 +5,21 @@ module Karafka
   class Runner
     include Helpers::ConfigImporter.new(
       manager: %i[internal connection manager],
-      conductor: %i[internal connection conductor],
-      jobs_queue_class: %i[internal processing jobs_queue_class]
+      conductor: %i[internal connection conductor]
     )
 
     # Starts listening on all the listeners asynchronously and handles the jobs queue closing
     # after listeners are done with their work.
     def call
-      # Despite possibility of having several independent listeners, we aim to have one queue for
-      # jobs across and one workers poll for that
-      jobs_queue = jobs_queue_class.new
+      jobs_queue = Karafka::Server.jobs_queue
+      workers = Karafka::Server.workers
 
-      workers = Processing::WorkersPool.new(jobs_queue)
+      # Wire up the circular dependency between pool and queue
+      workers.jobs_queue = jobs_queue
       jobs_queue.pool = workers
+
+      # Start worker threads at the configured concurrency
+      workers.scale(Karafka::App.config.concurrency)
 
       listeners = Connection::ListenersBatch.new(jobs_queue)
 
@@ -28,12 +30,8 @@ module Karafka
       # Register all the listeners so they can be started and managed
       manager.register(listeners)
 
-      # Workers already started by WorkersPool -- no async_call loop needed
-
       # We aggregate threads here for a supervised shutdown process
-      Karafka::Server.workers = workers
       Karafka::Server.listeners = listeners
-      Karafka::Server.jobs_queue = jobs_queue
 
       until manager.done?
         conductor.wait

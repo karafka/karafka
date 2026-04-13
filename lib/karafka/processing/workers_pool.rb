@@ -21,10 +21,17 @@ module Karafka
       #   Updated atomically under mutex, safe to read without locking.
       attr_reader :size
 
-      # @param jobs_queue [JobsQueue]
+      # Jobs queue reference, set by the Runner after both pool and queue are created.
+      # Must be assigned before calling {#scale}.
+      attr_writer :jobs_queue
+
+      # Initializes an empty pool with zero workers.
+      # Workers are not started until {#scale} is called, allowing the pool to be created early
+      # (e.g. in Server.run) before the jobs queue exists.
+      #
       # @return [WorkersPool]
-      def initialize(jobs_queue)
-        @jobs_queue = jobs_queue
+      def initialize
+        @jobs_queue = nil
         @workers = []
         @size = 0
         @mutex = Mutex.new
@@ -32,9 +39,6 @@ module Karafka
         # after a worker exits, so thread names remain unique across the lifetime of the process
         # and make it easy to correlate log entries with specific worker generations.
         @next_index = 0
-        # No mutex needed here -- no workers or concurrent access exist yet during construction.
-        event = grow(concurrency)
-        monitor.instrument(*event)
       end
 
       # Scale pool towards `target` workers (minimum 1).

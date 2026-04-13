@@ -6,7 +6,11 @@ RSpec.describe_current do
   describe "#call" do
     # We need to set it to 0 as otherwise the listener would always wait for workers threads that
     # would never stop without shutting down whole framework
-    before { Karafka::App.config.concurrency = 0 }
+    before do
+      Karafka::App.config.concurrency = 0
+      Karafka::Server.jobs_queue = Karafka::App.config.internal.processing.jobs_queue_class.new
+      Karafka::Server.workers = Karafka::Processing::WorkersPool.new
+    end
 
     after { Karafka::App.config.concurrency = 5 }
 
@@ -56,7 +60,7 @@ RSpec.describe_current do
       end
 
       before do
-        allow(Karafka::Processing::JobsQueue).to receive(:new).and_raise(error)
+        allow(Karafka::Connection::ListenersBatch).to receive(:new).and_raise(error)
         allow(Karafka::App).to receive(:stop!)
         allow(Karafka.monitor).to receive(:instrument)
       end
