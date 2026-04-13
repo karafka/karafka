@@ -131,7 +131,7 @@ module Karafka
         alive_workers = workers.alive
 
         # Collect details about subscription groups that still have jobs in processing
-        in_processing = jobs_queue.in_processing
+        in_processing = jobs_queue ? jobs_queue.in_processing : {}
 
         Karafka.monitor.instrument(
           "error.occurred",
