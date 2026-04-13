@@ -60,7 +60,7 @@ RSpec.describe_current do
   describe "<< with nil (pool downscaling)" do
     it "fast-tracks nil to the raw queue bypassing statistics" do
       queue << nil
-      expect(internal_queue.pop).to eq(nil)
+      expect(internal_queue.pop).to be(nil)
       expect(queue.statistics).to eq(busy: 0, enqueued: 0)
     end
 

@@ -25,7 +25,7 @@ class Consumer < Karafka::BaseConsumer
       DT[:size_before] = Karafka::Server.workers.size
       Karafka::Server.workers.scale(2)
       # Give workers time to pick up the nil sentinels and exit
-      sleep(0.5)
+      sleep(2)
       DT[:size_after] = Karafka::Server.workers.size
       DT[:scaled] = true
     end
