@@ -18,9 +18,6 @@ module Karafka
       workers.jobs_queue = jobs_queue
       jobs_queue.pool = workers
 
-      # Start worker threads at the configured concurrency
-      workers.scale(Karafka::App.config.concurrency)
-
       listeners = Connection::ListenersBatch.new(jobs_queue)
 
       # We mark it prior to delegating to the manager as manager will have to start at least one
@@ -32,6 +29,10 @@ module Karafka
 
       # We aggregate threads here for a supervised shutdown process
       Karafka::Server.listeners = listeners
+
+      # Start worker threads after listeners are created so a failure in the boot steps above
+      # does not leave live worker threads blocked on an open queue.
+      workers.scale(Karafka::App.config.concurrency)
 
       until manager.done?
         conductor.wait
@@ -61,6 +62,11 @@ module Karafka
         type: "runner.call.error"
       )
       Karafka::App.stop!
+
+      # Clean up workers so we don't leak threads blocked on the queue
+      jobs_queue.close
+      workers.join
+
       raise e
     end
   end
