@@ -4,7 +4,6 @@ module Karafka
   # Class used to run the Karafka listeners in separate threads
   class Runner
     include Helpers::ConfigImporter.new(
-      worker_thread_priority: %i[worker_thread_priority],
       manager: %i[internal connection manager],
       conductor: %i[internal connection conductor],
       jobs_queue_class: %i[internal processing jobs_queue_class]
@@ -17,7 +16,9 @@ module Karafka
       # jobs across and one workers poll for that
       jobs_queue = jobs_queue_class.new
 
-      workers = Processing::WorkersBatch.new(jobs_queue)
+      workers = Processing::WorkersPool.new(jobs_queue)
+      jobs_queue.pool = workers
+
       listeners = Connection::ListenersBatch.new(jobs_queue)
 
       # We mark it prior to delegating to the manager as manager will have to start at least one
@@ -27,12 +28,7 @@ module Karafka
       # Register all the listeners so they can be started and managed
       manager.register(listeners)
 
-      workers.each_with_index do |worker, i|
-        worker.async_call(
-          "karafka.worker##{i}",
-          worker_thread_priority
-        )
-      end
+      # Workers already started by WorkersPool -- no async_call loop needed
 
       # We aggregate threads here for a supervised shutdown process
       Karafka::Server.workers = workers
@@ -56,7 +52,7 @@ module Karafka
       # with everything. One thing worth keeping in mind though: It is the end user responsibility
       # to handle the shutdown detection in their long-running processes. Otherwise if timeout
       # is exceeded, there will be a forced shutdown.
-      workers.each(&:join)
+      workers.join
     # If anything crashes here, we need to raise the error and crush the runner because it means
     # that something terrible happened
     rescue => e

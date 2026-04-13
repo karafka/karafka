@@ -10,8 +10,10 @@ RSpec.describe_current do
     -> { OpenStruct.new(group_id: 2, id: SecureRandom.uuid, call: true, non_blocking?: false) }
   end
 
+  let(:pool) { instance_double(Karafka::Processing::WorkersPool, size: 5) }
+
   before do
-    allow(Karafka::App.config).to receive(:concurrency).and_return(5)
+    queue.pool = pool
     queue.instance_variable_set(:@queue, internal_queue)
     queue.register(job1.group_id)
     queue.register(job2.group_id)
@@ -51,6 +53,22 @@ RSpec.describe_current do
         before { 10.times { queue << job_n.call } }
 
         it { expect(queue.statistics).to eq(busy: 5, enqueued: 6) }
+      end
+    end
+  end
+
+  describe "<< with nil (pool downscaling)" do
+    it "fast-tracks nil to the raw queue bypassing statistics" do
+      queue << nil
+      expect(internal_queue.pop).to eq(nil)
+      expect(queue.statistics).to eq(busy: 0, enqueued: 0)
+    end
+
+    context "when queue is closed" do
+      before { queue.close }
+
+      it "does not push anything" do
+        expect { queue << nil }.not_to raise_error
       end
     end
   end
@@ -284,6 +302,17 @@ RSpec.describe_current do
       before { queue << job }
 
       it { expect(queue.empty?(job.group_id)).to be(false) }
+    end
+  end
+
+  describe "dynamic concurrency via pool" do
+    let(:pool) { instance_double(Karafka::Processing::WorkersPool, size: 2) }
+
+    before { queue.pool = pool }
+
+    it "uses pool size for busy/enqueued tracking" do
+      3.times { queue << job_n.call }
+      expect(queue.statistics).to eq(busy: 2, enqueued: 1)
     end
   end
 end

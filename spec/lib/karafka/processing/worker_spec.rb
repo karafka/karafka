@@ -2,16 +2,20 @@
 
 RSpec.describe_current do
   subject(:worker) do
-    described_class.new(queue).tap do |worker|
+    described_class.new(queue, pool).tap do |worker|
       worker.async_call("spec.worker")
     end
   end
 
   let(:queue) { Karafka::Processing::JobsQueue.new }
+  let(:pool) { instance_double(Karafka::Processing::WorkersPool, size: 5, deregister: nil) }
 
   # Since this worker has a background thread, we need to initialize the worker before running
   # any specs
-  before { worker }
+  before do
+    queue.pool = pool
+    worker
+  end
 
   after { worker.terminate }
 
@@ -85,6 +89,38 @@ RSpec.describe_current do
       it { expect(job).to have_received(:call).with(no_args) }
       it { expect(job).to have_received(:after_call).with(no_args) }
       it { expect(queue).to have_received(:complete).with(job) }
+    end
+
+    context "when nil is pushed to the queue (pool downscaling)" do
+      let(:downscale_queue) { Karafka::Processing::JobsQueue.new }
+      let(:downscale_pool) { instance_double(Karafka::Processing::WorkersPool, size: 5) }
+
+      let(:worker_with_pool) do
+        described_class.new(downscale_queue, downscale_pool).tap do |w|
+          w.async_call("spec.worker.downscale")
+        end
+      end
+
+      before do
+        allow(downscale_pool).to receive(:deregister)
+        allow(downscale_queue).to receive(:complete)
+        downscale_queue.pool = downscale_pool
+        worker_with_pool
+      end
+
+      after do
+        downscale_queue.close
+        worker_with_pool.join
+      end
+
+      it "deregisters from the pool and stops the loop" do
+        downscale_queue << nil
+        sleep(0.1)
+
+        expect(downscale_pool).to have_received(:deregister).with(worker_with_pool)
+        expect(downscale_queue).not_to have_received(:complete)
+        expect(worker_with_pool.alive?).to be(false)
+      end
     end
 
     context "when an error occurs in the worker" do

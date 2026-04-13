@@ -117,7 +117,7 @@ module Karafka
         # We divide it by 1000 because we use time in ms.
         ((timeout / 1_000) * (1 / supervision_sleep)).to_i.times do
           all_listeners_stopped = listeners.all?(&:stopped?)
-          all_workers_stopped = workers.none?(&:alive?)
+          all_workers_stopped = workers.stopped?
 
           return if all_listeners_stopped && all_workers_stopped
 
@@ -127,7 +127,7 @@ module Karafka
         raise Errors::ForcefulShutdownError
       rescue Errors::ForcefulShutdownError => e
         active_listeners = listeners.select(&:active?)
-        alive_workers = workers.select(&:alive?)
+        alive_workers = workers.alive
 
         # Collect details about subscription groups that still have jobs in processing
         in_processing = jobs_queue ? jobs_queue.in_processing : {}
@@ -143,7 +143,7 @@ module Karafka
         )
 
         # We're done waiting, lets kill them!
-        workers.each(&:terminate)
+        workers.terminate
         listeners.active.each(&:terminate)
 
         # We always need to shutdown clients to make sure we do not force the GC to close consumer.

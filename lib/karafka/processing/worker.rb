@@ -27,10 +27,12 @@ module Karafka
       attr_reader :id
 
       # @param jobs_queue [JobsQueue]
+      # @param pool [WorkersPool] pool this worker belongs to (for deregistration on shutdown)
       # @return [Worker]
-      def initialize(jobs_queue)
+      def initialize(jobs_queue, pool)
         @id = SecureRandom.hex(6)
         @jobs_queue = jobs_queue
+        @pool = pool
         @non_wrapped_flow = worker_job_call_wrapper == false
       end
 
@@ -80,6 +82,9 @@ module Karafka
             end
           end
         else
+          # nil means either queue closed (full shutdown) or pool downscaling.
+          # Either way, deregister from pool so it reflects the actual worker count.
+          @pool.deregister(self)
           false
         end
       # We signal critical exceptions, notify and do not allow worker to fail
@@ -95,7 +100,7 @@ module Karafka
           type: "worker.process.error"
         )
       ensure
-        # job can be nil when the queue is being closed
+        # job can be nil when the queue is being closed or during pool downscaling
         if job
           @jobs_queue.complete(job)
           job.finish!
