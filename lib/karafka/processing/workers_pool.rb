@@ -57,6 +57,8 @@ module Karafka
       #
       # @param target [Integer] desired number of workers
       def scale(target)
+        raise(Karafka::Errors::BaseError, 'jobs_queue must be set before scaling') unless @jobs_queue
+
         target = [target, 1].max
         event = nil
 

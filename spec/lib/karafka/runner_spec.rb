@@ -4,15 +4,14 @@ RSpec.describe_current do
   subject(:runner) { described_class.new }
 
   describe "#call" do
-    # We need to set it to 0 as otherwise the listener would always wait for workers threads that
-    # would never stop without shutting down whole framework
     before do
-      Karafka::App.config.concurrency = 0
       Karafka::Server.jobs_queue = Karafka::App.config.internal.processing.jobs_queue_class.new
       Karafka::Server.workers = Karafka::Processing::WorkersPool.new
+      # Stub scale so no real worker threads are started in specs. Without this, scale(N)
+      # spawns threads that block on jobs_queue.pop and never stop.
+      allow(Karafka::Server.workers).to receive(:scale)
+      allow(Karafka::Server.workers).to receive(:join)
     end
-
-    after { Karafka::App.config.concurrency = 5 }
 
     let(:subscription_group) { create(:routing_subscription_group) }
 

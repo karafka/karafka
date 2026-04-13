@@ -187,6 +187,10 @@ module Karafka
           WaterDrop::ConnectionPool.close
 
           Karafka::App.terminate!
+
+          # Allow prepare to run again if the server is restarted (e.g. reset_status in tests,
+          # or embedded re-start).
+          @prepared = false
         end
       end
 
