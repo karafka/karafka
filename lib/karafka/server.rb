@@ -40,9 +40,7 @@ module Karafka
 
       # Method which runs app
       def run
-        self.listeners = []
-        self.jobs_queue = jobs_queue_class.new
-        self.workers = Processing::WorkersPool.new
+        prepare
 
         # We need to validate this prior to running because it may be executed also from the
         # embedded
@@ -95,6 +93,7 @@ module Karafka
       # @note We don't need to sleep because Karafka::Runner is locking and waiting to finish loop
       # (and it won't happen until we explicitly want to stop)
       def start
+        prepare
         Karafka::Runner.new.call
       end
 
@@ -189,6 +188,19 @@ module Karafka
 
           Karafka::App.terminate!
         end
+      end
+
+      # Initializes listeners, jobs queue and workers pool.
+      # Called from both {.run} (standalone) and {.start} (embedded). Guarded so it runs only
+      # once even when {.run} delegates to {.start}.
+      def prepare
+        return if @prepared
+
+        @prepared = true
+
+        self.listeners = []
+        self.jobs_queue = jobs_queue_class.new
+        self.workers = Processing::WorkersPool.new
       end
 
       # Quiets the Karafka server.
