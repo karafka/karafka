@@ -66,7 +66,7 @@ loop do
   backoff = [backoff * 2, 10].min
 end
 
-assert offsets_topic_info, "__consumer_offsets topic not found in cluster metadata after #{total_waited}s"
+assert !offsets_topic_info.nil?, "__consumer_offsets topic not found in cluster metadata after #{total_waited}s"
 
 partition_count = offsets_topic_info[:partition_count]
 
