@@ -15,7 +15,9 @@ module Karafka
         monitor: %i[monitor]
       )
 
-      # @return [Integer] current number of workers in the pool.
+      # @return [Integer] current number of workers registered in the pool.
+      #   Reflects the actual thread count, not a target. After a downscale request this value
+      #   converges towards the target as workers pick up nil sentinels and deregister.
       #   Updated atomically under mutex, safe to read without locking.
       attr_reader :size
 
@@ -35,7 +37,17 @@ module Karafka
         monitor.instrument(*event)
       end
 
-      # Scale pool to exactly `target` workers (minimum 1).
+      # Scale pool towards `target` workers (minimum 1).
+      #
+      # **Scaling up** is synchronous -- new worker threads are spawned and registered before this
+      # method returns. {#size} reflects the new count immediately.
+      #
+      # **Scaling down** is asynchronous -- nil sentinels are enqueued and workers exit when they
+      # pick one up. {#size} decreases gradually as workers deregister themselves. Callers that
+      # need to know when downsizing is complete should poll {#size} or listen for the
+      # `worker.scaling.down` instrumentation event (whose `:to` payload reports the *target*,
+      # not the current count).
+      #
       # The entire read-decide-act cycle is synchronized to prevent stale reads.
       # Instrumentation runs outside the mutex to avoid holding the lock during user callbacks.
       #
