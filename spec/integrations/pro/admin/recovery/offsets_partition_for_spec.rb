@@ -39,10 +39,21 @@ draw_routes do
   end
 end
 
-# Get the real __consumer_offsets partition count from cluster metadata
-offsets_topic_info = Karafka::Admin.cluster_info.topics.find do |t|
-  t[:topic_name] == "__consumer_offsets"
+# Get the real __consumer_offsets partition count from cluster metadata.
+# On CI the internal topic may not be immediately visible after cluster start, so we retry.
+offsets_topic_info = nil
+
+10.times do
+  offsets_topic_info = Karafka::Admin.cluster_info.topics.find do |t|
+    t[:topic_name] == "__consumer_offsets"
+  end
+
+  break if offsets_topic_info
+
+  sleep(1)
 end
+
+assert offsets_topic_info, "__consumer_offsets topic not found in cluster metadata"
 
 partition_count = offsets_topic_info[:partition_count]
 
