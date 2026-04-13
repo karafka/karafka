@@ -93,6 +93,25 @@ module Karafka
         MSG
       end
 
+      # Logs info about the workers pool scaling up
+      #
+      # @param event [Karafka::Core::Monitoring::Event] event details including payload
+      def on_worker_scaling_up(event)
+        from = event[:from]
+        to = event[:to]
+        info "Workers pool scaled up from #{from} to #{to} workers"
+      end
+
+      # Logs info about the workers pool scaling down.
+      # The actual size change happens asynchronously as workers pick up nil sentinels and exit.
+      #
+      # @param event [Karafka::Core::Monitoring::Event] event details including payload
+      def on_worker_scaling_down(event)
+        from = event[:from]
+        to = event[:to]
+        info "Workers pool scaling down from #{from} to #{to} workers"
+      end
+
       # Prints info about a consumer pause occurrence. Irrelevant if user or system initiated.
       #
       # @param event [Karafka::Core::Monitoring::Event] event details including payload

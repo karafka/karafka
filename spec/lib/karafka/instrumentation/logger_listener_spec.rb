@@ -21,7 +21,12 @@ RSpec.describe_current do
 
   before do
     Karafka::Server.listeners = []
-    Karafka::Server.workers = []
+    Karafka::Server.workers = instance_double(
+      Karafka::Processing::WorkersPool,
+      stopped?: true,
+      alive: [],
+      terminate: nil
+    )
 
     allow(Karafka.logger).to receive(:debug)
     allow(Karafka.logger).to receive(:info)
@@ -104,6 +109,24 @@ RSpec.describe_current do
     let(:payload) { { job: job, time: 2 } }
 
     it { expect(Karafka.logger).to have_received(:info) }
+  end
+
+  describe "#on_worker_scaling_up" do
+    subject(:trigger) { listener.on_worker_scaling_up(event) }
+
+    let(:payload) { { from: 2, to: 5, workers_pool: nil } }
+    let(:message) { "Workers pool scaled up from 2 to 5 workers" }
+
+    it { expect(Karafka.logger).to have_received(:info).with(message) }
+  end
+
+  describe "#on_worker_scaling_down" do
+    subject(:trigger) { listener.on_worker_scaling_down(event) }
+
+    let(:payload) { { from: 5, to: 2, workers_pool: nil } }
+    let(:message) { "Workers pool scaling down from 5 to 2 workers" }
+
+    it { expect(Karafka.logger).to have_received(:info).with(message) }
   end
 
   describe "#on_client_pause" do

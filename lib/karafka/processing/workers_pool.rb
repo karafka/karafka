@@ -30,22 +30,34 @@ module Karafka
         # after a worker exits, so thread names remain unique across the lifetime of the process
         # and make it easy to correlate log entries with specific worker generations.
         @next_index = 0
-        grow(concurrency)
+        # No mutex needed here -- no workers or concurrent access exist yet during construction.
+        event = grow(concurrency)
+        monitor.instrument(*event)
       end
 
       # Scale pool to exactly `target` workers (minimum 1).
+      # The entire read-decide-act cycle is synchronized to prevent stale reads.
+      # Instrumentation runs outside the mutex to avoid holding the lock during user callbacks.
       #
       # @param target [Integer] desired number of workers
       def scale(target)
         target = [target, 1].max
-        current = size
-        delta = target - current
+        event = nil
 
-        if delta.positive?
-          grow(delta)
-        elsif delta.negative?
-          shrink(delta.abs)
+        @mutex.synchronize do
+          current = @workers.size
+          delta = target - current
+
+          if delta.positive?
+            event = grow(delta)
+          elsif delta.negative?
+            event = shrink(delta.abs)
+          end
         end
+
+        return unless event
+
+        monitor.instrument(*event)
       end
 
       # @return [Boolean] true if all workers have stopped
@@ -87,41 +99,41 @@ module Karafka
       end
 
       # Add `count` workers and start their threads immediately.
+      # Must be called under `@mutex` (from {#scale}) or during construction (no contention).
       #
       # @param count [Integer] number of workers to add
+      # @return [Array] instrumentation event args to be emitted outside the mutex
       def grow(count)
-        @mutex.synchronize do
-          from = @workers.size
+        from = @workers.size
 
-          count.times do
-            worker = Worker.new(@jobs_queue, self)
-            @workers << worker
-            worker.async_call("karafka.worker##{@next_index}", worker_thread_priority)
-            @next_index += 1
-          end
-
-          @size = @workers.size
-
-          monitor.instrument("worker.scaling.up", workers_pool: self, from: from, to: @size)
+        count.times do
+          worker = Worker.new(@jobs_queue, self)
+          @workers << worker
+          worker.async_call("karafka.worker##{@next_index}", worker_thread_priority)
+          @next_index += 1
         end
+
+        @size = @workers.size
+
+        ["worker.scaling.up", { workers_pool: self, from: from, to: @size }]
       end
 
       # Push nil into the queue to signal workers to exit.
       # Whichever workers pick them up will deregister and stop.
+      # Must be called under `@mutex` (from {#scale}).
       #
       # @param count [Integer] number of workers to remove
+      # @return [Array, nil] instrumentation event args or nil if no-op
       # @note Never shrinks below 1 worker.
       def shrink(count)
-        @mutex.synchronize do
-          effective = [count, @workers.size - 1].min
-          return if effective <= 0
+        effective = [count, @workers.size - 1].min
+        return if effective <= 0
 
-          from = @workers.size
-          effective.times { @jobs_queue << nil }
-          to = from - effective
+        from = @workers.size
+        effective.times { @jobs_queue << nil }
+        to = from - effective
 
-          monitor.instrument("worker.scaling.down", workers_pool: self, from: from, to: to)
-        end
+        ["worker.scaling.down", { workers_pool: self, from: from, to: to }]
       end
     end
   end
