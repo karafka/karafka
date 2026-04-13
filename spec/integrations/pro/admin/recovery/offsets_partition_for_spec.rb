@@ -43,13 +43,30 @@ end
 # to exist in cluster metadata. On a fresh CI broker it may not exist until a consumer group
 # has committed at least once.
 produce(DT.topic, "warmup")
+
 Karafka::Admin.seek_consumer_group(DT.consumer_group, { DT.topic => { 0 => 0 } })
 
-offsets_topic_info = Karafka::Admin.cluster_info.topics.find do |t|
-  t[:topic_name] == "__consumer_offsets"
+offsets_topic_info = nil
+
+# On a fresh CI broker the __consumer_offsets topic may take a while to appear in cluster
+# metadata even after a commit. Retry with exponential backoff for up to ~30 s.
+backoff = 1
+total_waited = 0
+
+loop do
+  offsets_topic_info = Karafka::Admin.cluster_info.topics.find do |t|
+    t[:topic_name] == "__consumer_offsets"
+  end
+
+  break if offsets_topic_info
+  break if total_waited >= 30
+
+  sleep(backoff)
+  total_waited += backoff
+  backoff = [backoff * 2, 10].min
 end
 
-assert offsets_topic_info, "__consumer_offsets topic not found in cluster metadata"
+assert offsets_topic_info, "__consumer_offsets topic not found in cluster metadata after #{total_waited}s"
 
 partition_count = offsets_topic_info[:partition_count]
 
