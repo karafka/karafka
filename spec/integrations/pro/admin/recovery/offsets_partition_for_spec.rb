@@ -39,18 +39,14 @@ draw_routes do
   end
 end
 
-# Get the real __consumer_offsets partition count from cluster metadata.
-# On CI the internal topic may not be immediately visible after cluster start, so we retry.
-offsets_topic_info = nil
+# Produce a message and commit an offset so the __consumer_offsets internal topic is guaranteed
+# to exist in cluster metadata. On a fresh CI broker it may not exist until a consumer group
+# has committed at least once.
+produce(DT.topic, "warmup")
+Karafka::Admin.seek_consumer_group(DT.consumer_group, { DT.topic => { 0 => 0 } })
 
-10.times do
-  offsets_topic_info = Karafka::Admin.cluster_info.topics.find do |t|
-    t[:topic_name] == "__consumer_offsets"
-  end
-
-  break if offsets_topic_info
-
-  sleep(1)
+offsets_topic_info = Karafka::Admin.cluster_info.topics.find do |t|
+  t[:topic_name] == "__consumer_offsets"
 end
 
 assert offsets_topic_info, "__consumer_offsets topic not found in cluster metadata"
