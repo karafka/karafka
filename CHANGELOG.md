@@ -9,6 +9,7 @@
 - [Maintenance] Use namespaced topic naming format in all integration specs for consistent traceability.
 - [Fix] Fix `DataCollector::SPEC_HASH` producing non-deterministic hashes for pristine and poro specs by passing the original spec path via `KARAFKA_SPEC_PATH` env var.
 - [Maintenance] Add `bin/tests_topics_hashes` script for looking up spec files by their topic name hash prefix.
+- [Change] Require `karafka-rdkafka` `>=` `0.26.1` to support upcoming features relying on low-level Rdkafka APIs.
 
 ## 2.5.9 (2026-03-30)
 - [Enhancement] Validate that `statistics.interval.ms` is not zero when dynamic multiplexing is enabled (Pro).
