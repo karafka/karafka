@@ -5,6 +5,17 @@ RSpec.describe_current do
 
   let(:kafka_config) { {} }
 
+  describe "#managed_keys" do
+    it "returns a set with managed keys" do
+      expect(injector.managed_keys).to be_a(Set)
+      expect(injector.managed_keys).not_to be_empty
+    end
+
+    it "includes statistics.unassigned.include" do
+      expect(injector.managed_keys).to include(:"statistics.unassigned.include")
+    end
+  end
+
   describe "#consumer" do
     context "when in production environment" do
       before do

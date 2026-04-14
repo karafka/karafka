@@ -30,6 +30,7 @@
 
 module Karafka
   module Pro
+    # Namespace for Pro setup components
     module Setup
       # Pro defaults injector that extends the OSS defaults with Pro-specific settings
       module DefaultsInjector
@@ -43,6 +44,14 @@ module Karafka
         }.freeze
 
         private_constant :CONSUMER_KAFKA_DEFAULTS
+
+        # Pro actively manages these keys via its own DefaultsInjector so users are allowed
+        # to set them if needed.
+        #
+        # @return [Set<Symbol>] empty set since Pro handles these keys
+        def managed_keys
+          @managed_keys ||= Set.new
+        end
 
         # Enriches consumer kafka config with Pro-specific defaults
         # @param kafka_config [Hash] kafka scoped config
