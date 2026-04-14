@@ -272,6 +272,23 @@ RSpec.describe_current do
 
       it { expect(contract.call(config)).not_to be_success }
     end
+
+    context "when kafka scope has a managed key" do
+      before { config[:kafka][:"statistics.unassigned.include"] = false }
+
+      it { expect(contract.call(config)).not_to be_success }
+    end
+
+    context "when managed keys set is empty" do
+      before do
+        config[:kafka][:"statistics.unassigned.include"] = false
+        allow(Karafka::Setup::DefaultsInjector)
+          .to receive(:managed_keys)
+          .and_return(Set.new)
+      end
+
+      it { expect(contract.call(config)).to be_success }
+    end
   end
 
   context "when validating admin details" do

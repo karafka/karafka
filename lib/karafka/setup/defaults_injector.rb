@@ -52,6 +52,16 @@ module Karafka
       )
 
       class << self
+        # Kafka settings that are managed internally by Karafka and should not be set directly
+        # by users. Setting them manually may cause misbehaviours and other unexpected issues.
+        #
+        # @return [Set<Symbol>] set of managed kafka setting keys
+        def managed_keys
+          @managed_keys ||= Set[
+            :"statistics.unassigned.include"
+          ]
+        end
+
         # Propagates the kafka setting defaults unless they are already present for consumer config
         # This makes it easier to set some values that users usually don't change but still allows
         # them to overwrite the whole hash if they want to

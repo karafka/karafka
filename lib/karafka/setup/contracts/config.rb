@@ -178,6 +178,23 @@ module Karafka
           detected_errors
         end
 
+        # Certain kafka settings are managed internally by Karafka and should not be set
+        # directly. Setting them manually may cause misbehaviours and other unexpected issues.
+        virtual do |data, errors|
+          next unless errors.empty?
+
+          managed_keys = Karafka::Setup::DefaultsInjector.managed_keys
+          detected_errors = []
+
+          data.fetch(:kafka).each_key do |key|
+            next unless managed_keys.include?(key)
+
+            detected_errors << [[:kafka, key], :managed_key_not_supported]
+          end
+
+          detected_errors
+        end
+
         virtual do |data, errors|
           next unless errors.empty?
 
