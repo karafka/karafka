@@ -22,7 +22,12 @@ RSpec.describe_current do
     jobs_queue = Karafka::Processing::JobsQueue.new
 
     described_class.listeners = Karafka::Connection::ListenersBatch.new(jobs_queue)
-    described_class.workers = []
+    described_class.workers = instance_double(
+      Karafka::Processing::WorkersPool,
+      stopped?: true,
+      alive: [],
+      terminate: nil
+    )
   end
 
   describe "#run" do
@@ -127,8 +132,13 @@ RSpec.describe_current do
 
     after do
       Karafka::App.config.internal.status.run!
+      described_class.workers = instance_double(
+        Karafka::Processing::WorkersPool,
+        stopped?: true,
+        alive: [],
+        terminate: nil
+      )
       server_class.stop
-      described_class.workers = []
       # After shutdown we need to reinitialize the app for other specs
       Karafka::App.initialize!
     end
@@ -230,9 +240,13 @@ RSpec.describe_current do
         end
 
         before do
-          described_class.workers = [active_thread]
+          described_class.workers = instance_double(
+            Karafka::Processing::WorkersPool,
+            stopped?: false,
+            alive: [active_thread],
+            terminate: nil
+          )
           server_class.stop
-          described_class.workers.clear
         end
 
         it "expect stop and exit with sleep" do

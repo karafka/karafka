@@ -38,8 +38,10 @@ RSpec.describe_current do
     -> { OpenStruct.new(group_id: 2, id: SecureRandom.uuid, call: true, non_blocking?: false) }
   end
 
+  let(:pool) { instance_double(Karafka::Processing::WorkersPool, size: 5) }
+
   before do
-    allow(Karafka::App.config).to receive(:concurrency).and_return(5)
+    queue.pool = pool
     queue.instance_variable_set(:@queue, internal_queue)
     queue.register(job1.group_id)
     queue.register(job2.group_id)
