@@ -25,6 +25,9 @@ en:
           Decrease max_wait_time or increase node_report_timeout
         kafka_format: needs to be a filled hash
         key_must_be_a_symbol: All keys under the kafka settings scope need to be symbols
+        managed_key_not_supported: >
+          this kafka setting is managed internally by Karafka and should not be set directly.
+          Setting it manually may cause misbehaviours and other unexpected issues
         pause.timeout_max_timeout_vs_pause_max_timeout: pause.timeout must be less or equal to pause.max_timeout
         shutdown_timeout_vs_max_wait_time: shutdown_timeout must be more than max_wait_time
         worker_thread_priority_format: must be between -3 and 3

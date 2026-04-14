@@ -113,6 +113,8 @@ module Karafka
         def reconfigure(config)
           icfg = config.internal
 
+          Karafka::Setup::DefaultsInjector.singleton_class.prepend(Setup::DefaultsInjector)
+
           icfg.cli.contract = Cli::Contracts::Server.new
 
           # Use manager that supports multiplexing
