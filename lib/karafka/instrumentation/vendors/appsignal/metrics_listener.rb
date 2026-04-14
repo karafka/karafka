@@ -328,10 +328,8 @@ module Karafka
 
           # Sends minute based probing metrics
           def minute_probe
-            concurrency = Karafka::App.config.concurrency
-
             count("processes_count", 1, {})
-            count("threads_count", concurrency, {})
+            count("threads_count", Karafka::Server.workers.size, {})
           end
         end
       end

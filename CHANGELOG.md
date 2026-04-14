@@ -1,6 +1,7 @@
 # Karafka Framework Changelog
 
 ## 2.5.10 (Unreleased)
+- **[Feature]** Add `Processing::WorkersPool` with dynamic thread pool scaling via `#scale`, `nil` sentinel-based worker exit for downscaling, and `worker.scaling.up`/`worker.scaling.down` instrumentation events.
 - [Enhancement] Add per-partition generation tracking to `AssignmentsTracker` to distinguish first-time assignments from reassignments.
 - [Enhancement] Make liveness listeners fiber-safe.
 - [Fix] Include orphaned node detection in Pro swarm liveness listener.
