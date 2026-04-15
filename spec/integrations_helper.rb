@@ -130,9 +130,9 @@ def setup_karafka(
     if Karafka.pro?
       # Do not redefine topics locations if re-configured
       unless @setup_karafka_first_run
-        config.recurring_tasks.group_id = "rt-#{SecureRandom.uuid}"
-        config.recurring_tasks.topics.schedules.name = "it-#{SecureRandom.uuid}"
-        config.recurring_tasks.topics.logs.name = "it-#{SecureRandom.uuid}"
+        config.recurring_tasks.group_id = DT.uuid
+        config.recurring_tasks.topics.schedules.name = DT.uuid
+        config.recurring_tasks.topics.logs.name = DT.uuid
         # Run often so we do not wait on the first run
         config.recurring_tasks.interval = 1_000
 
@@ -191,12 +191,12 @@ def setup_web(migrate: true)
 
   # Use new groups and topics for each spec, so we don't end up with conflicts
   Karafka::Web.setup do |config|
-    config.group_id = "it-#{SecureRandom.uuid}"
-    config.topics.consumers.reports.name = "it-#{SecureRandom.uuid}"
-    config.topics.consumers.states.name = "it-#{SecureRandom.uuid}"
-    config.topics.consumers.metrics.name = "it-#{SecureRandom.uuid}"
-    config.topics.consumers.commands.name = "it-#{SecureRandom.uuid}"
-    config.topics.errors.name = "it-#{SecureRandom.uuid}"
+    config.group_id = DT.uuid
+    config.topics.consumers.reports.name = DT.uuid
+    config.topics.consumers.states.name = DT.uuid
+    config.topics.consumers.metrics.name = DT.uuid
+    config.topics.consumers.commands.name = DT.uuid
+    config.topics.errors.name = DT.uuid
 
     yield(config) if block_given?
   end
