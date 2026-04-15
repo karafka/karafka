@@ -46,12 +46,25 @@ module Karafka
 
       # Check if License module and required methods are already defined
       # @return [Boolean]
+      # @raise [Errors::InvalidLicenseTokenError] when License module exists but is missing
+      #   required methods (token or version)
       def license_fully_defined?
         return false unless const_defined?("::Karafka::License")
 
-        # Check if the required methods exist
-        ::Karafka::License.respond_to?(:token) &&
-          ::Karafka::License.respond_to?(:version)
+        missing = []
+        missing << "#token" unless ::Karafka::License.respond_to?(:token)
+        missing << "#version" unless ::Karafka::License.respond_to?(:version)
+
+        return true if missing.empty?
+
+        raise(
+          Errors::InvalidLicenseTokenError,
+          <<~MSG.tr("\n", " ")
+            Karafka::License module is defined but missing required method(s): #{missing.join(", ")}.
+            When defining Karafka::License manually, both #token and #version must be implemented.
+            Please refer to https://karafka.io/docs/Pro-Enterprise-License/ for details.
+          MSG
+        )
       end
 
       # Attempt to safely load license without executing gem code
