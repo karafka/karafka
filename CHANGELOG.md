@@ -9,6 +9,7 @@
 - [Fix] Fire liveness events during `wait_pinging` so nodes continue reporting health status during shutdown with active LRJ jobs.
 - [Maintenance] Use namespaced topic naming format in all integration specs for consistent traceability.
 - [Fix] Fix `DataCollector::SPEC_HASH` producing non-deterministic hashes for pristine and poro specs by passing the original spec path via `KARAFKA_SPEC_PATH` env var.
+- [Fix] Fix swarm supervisor leaking reader pipe file descriptors on node restarts by closing the old reader before creating a new pipe in `Node#start`.
 - [Maintenance] Add `bin/tests_topics_hashes` script for looking up spec files by their topic name hash prefix.
 - [Change] Require `karafka-rdkafka` `>=` `0.26.1` to support upcoming features relying on low-level Rdkafka APIs.
 

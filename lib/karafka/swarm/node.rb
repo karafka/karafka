@@ -45,6 +45,7 @@ module Karafka
       #   - recreates producer and web producer
       # @note Parent API
       def start
+        @reader&.close
         @reader, @writer = IO.pipe
         # Reset alive status when starting/restarting a node
         # nil means unknown status - will check with waitpid
