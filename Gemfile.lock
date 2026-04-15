@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    karafka (2.5.10)
+    karafka (2.5.10.rc1)
       karafka-core (>= 2.5.13, < 2.6.0)
       karafka-rdkafka (>= 0.26.1)
       waterdrop (>= 2.8.14, < 3.0.0)
@@ -117,7 +117,7 @@ GEM
     prism (1.9.0)
     raabro (1.4.0)
     rack (3.2.6)
-    rake (13.3.1)
+    rake (13.4.1)
     reline (0.6.3)
       io-console (~> 0.5)
     roda (3.99.0)
@@ -148,8 +148,8 @@ GEM
       concurrent-ruby (~> 1.0)
     uri (1.1.1)
     warning (1.5.0)
-    waterdrop (2.8.16)
-      karafka-core (>= 2.4.9, < 3.0.0)
+    waterdrop (2.9.0)
+      karafka-core (>= 2.5.12, < 3.0.0)
       karafka-rdkafka (>= 0.24.0)
       zeitwerk (~> 2.3)
     zeitwerk (2.7.5)
@@ -211,7 +211,7 @@ CHECKSUMS
   i18n (1.14.8) sha256=285778639134865c5e0f6269e0b818256017e8cde89993fdfcbfb64d088824a5
   io-console (0.8.2) sha256=d6e3ae7a7cc7574f4b8893b4fca2162e57a825b223a177b7afa236c5ef9814cc
   json (2.19.3) sha256=289b0bb53052a1fa8c34ab33cc750b659ba14a5c45f3fcf4b18762dc67c78646
-  karafka (2.5.10)
+  karafka (2.5.10.rc1)
   karafka-core (2.5.13) sha256=0acec083043bb6166c4b647a7458091cc7b08066d3b92a026932925ec7e07f61
   karafka-rdkafka (0.26.1) sha256=d7ec3b4a786ba940f0080e6f4ef7982229c0c6bf4e6f6a616f9f824e6fecb55c
   karafka-rdkafka (0.26.1-aarch64-linux-gnu) sha256=59c77131a9961bdc2fd361049df27b45caa207283e65c587d326cb1a218fbc04
@@ -228,7 +228,7 @@ CHECKSUMS
   prism (1.9.0) sha256=7b530c6a9f92c24300014919c9dcbc055bf4cdf51ec30aed099b06cd6674ef85
   raabro (1.4.0) sha256=d4fa9ff5172391edb92b242eed8be802d1934b1464061ae5e70d80962c5da882
   rack (3.2.6) sha256=5ed78e1f73b2e25679bec7d45ee2d4483cc4146eb1be0264fc4d94cb5ef212c2
-  rake (13.3.1) sha256=8c9e89d09f66a26a01264e7e3480ec0607f0c497a861ef16063604b1b08eb19c
+  rake (13.4.1) sha256=b4e81bd6a748308a6799619d824ec6a23cd1acd07d9ec41e5f2ebfb2294447c8
   reline (0.6.3) sha256=1198b04973565b36ec0f11542ab3f5cfeeec34823f4e54cebde90968092b1835
   roda (3.99.0) sha256=05d0f44bd3431bd429f8dd799d8eb5136f04abf469776ce722d6f8c94950d42f
   rspec (3.13.2) sha256=206284a08ad798e61f86d7ca3e376718d52c0bc944626b2349266f239f820587
@@ -245,7 +245,7 @@ CHECKSUMS
   tzinfo (2.0.6) sha256=8daf828cc77bcf7d63b0e3bdb6caa47e2272dcfaf4fbfe46f8c3a9df087a829b
   uri (1.1.1) sha256=379fa58d27ffb1387eaada68c749d1426738bd0f654d812fcc07e7568f5c57c6
   warning (1.5.0) sha256=0f12c49fea0c06757778eefdcc7771e4fd99308901e3d55c504d87afdd718c53
-  waterdrop (2.8.16) sha256=a48e795b5eaeb3cef77b4eb0f98e9e88e657cf02a8120bc8a1597dc6bf9626c1
+  waterdrop (2.9.0) sha256=848d1360ccbefb310094f77addd46bfe047230984f364a3d141febfb2f129ae2
   zeitwerk (2.7.5) sha256=d8da92128c09ea6ec62c949011b00ed4a20242b255293dd66bf41545398f73dd
 
 BUNDLED WITH
