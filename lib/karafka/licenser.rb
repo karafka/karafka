@@ -62,7 +62,7 @@ module Karafka
           <<~MSG.tr("\n", " ")
             Karafka::License module is defined but missing required method(s): #{missing.join(", ")}.
             When defining Karafka::License manually, both #token and #version must be implemented.
-            Please refer to https://karafka.io/docs/Pro-Enterprise-License/ for details.
+            Please refer to https://karafka.io/docs/Pro-Enterprise-License-Setup/ for details.
           MSG
         )
       end
