@@ -45,6 +45,9 @@ module Karafka
       #   - recreates producer and web producer
       # @note Parent API
       def start
+        # Close the previous reader pipe if it exists to prevent FD leaks on node restarts.
+        # Without this, each restart orphans the old reader pipe in the supervisor, and forked
+        # children inherit all accumulated leaked FDs.
         @reader&.close rescue nil
         @reader, @writer = IO.pipe
         # Reset alive status when starting/restarting a node
