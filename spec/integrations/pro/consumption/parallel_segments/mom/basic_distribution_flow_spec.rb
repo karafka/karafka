@@ -112,5 +112,5 @@ assert_equal group1_payloads, DT[1]
 # Verify all messages were consumed exactly once
 assert_equal group0_messages.size + group1_messages.size, DT[0].size + DT[1].size
 
-assert_equal 0, fetch_next_offset(consumer_group_id: Karafka::App.routes.first.id)
-assert_equal 0, fetch_next_offset(consumer_group_id: Karafka::App.routes.last.id)
+assert_equal 0, fetch_next_offset(group_id: Karafka::App.routes.first.id)
+assert_equal 0, fetch_next_offset(group_id: Karafka::App.routes.last.id)

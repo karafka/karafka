@@ -150,9 +150,9 @@ segment1_group_id = "#{DT.group}-parallel-1"
 segment2_group_id = "#{DT.group}-parallel-2"
 
 # Verify offsets for all segments
-segment0_offset = fetch_next_offset(DT.topic, consumer_group_id: segment0_group_id)
-segment1_offset = fetch_next_offset(DT.topic, consumer_group_id: segment1_group_id)
-segment2_offset = fetch_next_offset(DT.topic, consumer_group_id: segment2_group_id)
+segment0_offset = fetch_next_offset(DT.topic, group_id: segment0_group_id)
+segment1_offset = fetch_next_offset(DT.topic, group_id: segment1_group_id)
+segment2_offset = fetch_next_offset(DT.topic, group_id: segment2_group_id)
 
 # All segments should have processed some messages
 assert segment0_offset > 0

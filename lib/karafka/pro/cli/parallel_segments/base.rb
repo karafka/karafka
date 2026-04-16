@@ -82,24 +82,25 @@ module Karafka
           end
 
           # Collects the offsets for the segment origin consumer group and the parallel segments
-          # consumers groups. We use segment origin cg offsets as a baseline for the distribution
-          # and use existing (if any) parallel segments cgs offsets for validations.
+          # consumers groups. We use segment origin group offsets as a baseline for the
+          # distribution and use existing (if any) parallel segments groups offsets for
+          # validations.
           #
           # @param segment_origin [String] name of the origin consumer group
           # @param segments [Array<Karafka::Routing::ConsumerGroup>]
-          # @return [Hash] fetched offsets for all the cg topics for all the consumer groups
+          # @return [Hash] fetched offsets for all the group topics for all the groups
           def collect_offsets(segment_origin, segments)
             topics_names = segments.first.topics.map(&:name)
-            consumer_groups = [segment_origin, segments.map(&:name)].flatten
+            groups = [segment_origin, segments.map(&:name)].flatten
 
-            consumer_groups_with_topics = consumer_groups
+            groups_with_topics = groups
               .to_h { |name| [name, topics_names] }
 
             lags_with_offsets = Karafka::Admin.read_lags_with_offsets(
-              consumer_groups_with_topics
+              groups_with_topics
             )
 
-            lags_with_offsets.each do |_cg_name, topics|
+            lags_with_offsets.each do |_group_name, topics|
               topics.each do |_topic_name, partitions|
                 partitions.transform_values! { |details| details[:offset] }
               end

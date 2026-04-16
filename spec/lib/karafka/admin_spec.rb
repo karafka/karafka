@@ -179,7 +179,7 @@ RSpec.describe_current do
       end
     end
 
-    context "when consumer_groups_with_topics is not specified" do
+    context "when groups_with_topics is not specified" do
       it "delegates to ConsumerGroups#read_lags_with_offsets with empty hash" do
         expect_any_instance_of(Karafka::Admin::ConsumerGroups)
           .to receive(:read_lags_with_offsets)

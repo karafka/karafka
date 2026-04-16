@@ -313,7 +313,7 @@ end
 # Returns the next offset that we would consume if we would subscribe again
 # @param topic [String] topic we are interested in
 # @param normalize [Boolean]
-# @param consumer_group_id [String]
+# @param group_id [String]
 # @return [Integer] next offset we would consume
 #
 # @note Please note, that for `latest` seek offset, -1 means from high-watermark. We simplify it
@@ -321,10 +321,10 @@ end
 def fetch_next_offset(
   topic = DT.topic,
   normalize: true,
-  consumer_group_id: Karafka::App.routes.first.id
+  group_id: Karafka::App.routes.first.id
 )
   results = Karafka::Admin.read_lags_with_offsets
-  part_results = results.fetch(consumer_group_id).fetch(topic)[0]
+  part_results = results.fetch(group_id).fetch(topic)[0]
   offset = part_results.fetch(:offset)
 
   return offset unless normalize

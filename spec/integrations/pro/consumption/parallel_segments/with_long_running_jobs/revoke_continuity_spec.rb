@@ -244,9 +244,9 @@ segment0_group_id = "#{DT.group}-parallel-0"
 segment1_group_id = "#{DT.group}-parallel-1"
 segment2_group_id = "#{DT.group}-parallel-2"
 
-segment0_offset = fetch_next_offset(DT.topic, consumer_group_id: segment0_group_id)
-segment1_offset = fetch_next_offset(DT.topic, consumer_group_id: segment1_group_id)
-segment2_offset = fetch_next_offset(DT.topic, consumer_group_id: segment2_group_id)
+segment0_offset = fetch_next_offset(DT.topic, group_id: segment0_group_id)
+segment1_offset = fetch_next_offset(DT.topic, group_id: segment1_group_id)
+segment2_offset = fetch_next_offset(DT.topic, group_id: segment2_group_id)
 
 # At least one segment should have committed offsets
 committed_segments = [

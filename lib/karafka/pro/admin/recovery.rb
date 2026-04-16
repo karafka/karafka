@@ -77,30 +77,30 @@ module Karafka
         private_constant :OFFSETS_TOPIC, :DEFAULT_LAST_COMMITTED_AT_OFFSET
 
         class << self
-          # @param consumer_group_id [String] consumer group to read offsets for
+          # @param group_id [String] consumer group to read offsets for
           # @param last_committed_at [Time] approximate time of last successful offset commit
           #   (default: 1 hour ago). A good rule of thumb is the crash time minus 10 minutes
           # @return [Hash{String => Hash{Integer => Integer}}]
           # @see #read_committed_offsets
           def read_committed_offsets(
-            consumer_group_id,
+            group_id,
             last_committed_at: Time.now - DEFAULT_LAST_COMMITTED_AT_OFFSET
           )
-            new.read_committed_offsets(consumer_group_id, last_committed_at: last_committed_at)
+            new.read_committed_offsets(group_id, last_committed_at: last_committed_at)
           end
 
-          # @param consumer_group_id [String] consumer group id
+          # @param group_id [String] consumer group id
           # @return [Integer] __consumer_offsets partition number
           # @see #offsets_partition_for
-          def offsets_partition_for(consumer_group_id)
-            new.offsets_partition_for(consumer_group_id)
+          def offsets_partition_for(group_id)
+            new.offsets_partition_for(group_id)
           end
 
-          # @param consumer_group_id [String] consumer group to look up
+          # @param group_id [String] consumer group to look up
           # @return [Hash] coordinator broker info
           # @see #coordinator_for
-          def coordinator_for(consumer_group_id)
-            new.coordinator_for(consumer_group_id)
+          def coordinator_for(group_id)
+            new.coordinator_for(group_id)
           end
 
           # @param partition [Integer] __consumer_offsets partition to scan
@@ -143,7 +143,7 @@ module Karafka
         #   caller's responsibility to verify that all expected topic-partitions are present before
         #   using the result for migration or other operations.
         #
-        # @param consumer_group_id [String] consumer group to read offsets for
+        # @param group_id [String] consumer group to read offsets for
         # @param last_committed_at [Time] approximate time of last successful offset commit
         #   (default: 1 hour ago). A good rule of thumb is the crash time minus 10 minutes
         # @return [Hash{String => Hash{Integer => Integer}}]
@@ -174,11 +174,11 @@ module Karafka
         #
         #   # Now reconfigure your consumers to use 'sync_v2' and restart them
         def read_committed_offsets(
-          consumer_group_id,
+          group_id,
           last_committed_at: Time.now - DEFAULT_LAST_COMMITTED_AT_OFFSET
         )
           committed = Hash.new { |h, k| h[k] = {} }
-          target_partition = offsets_partition_for(consumer_group_id)
+          target_partition = offsets_partition_for(group_id)
 
           iterator = Pro::Iterator.new(
             { OFFSETS_TOPIC => { target_partition => last_committed_at } },
@@ -190,7 +190,7 @@ module Karafka
 
             parsed = parse_offset_commit(message)
             next unless parsed
-            next unless parsed[:group] == consumer_group_id
+            next unless parsed[:group] == group_id
 
             if parsed[:offset].nil?
               # Tombstone — offset was deleted, remove from results
@@ -211,14 +211,14 @@ module Karafka
         # hash: s[0]*31^(n-1) + s[1]*31^(n-2) + ... + s[n-1], computed with int32 overflow
         # semantics. Utils.abs maps Integer.MIN_VALUE to 0.
         #
-        # @param consumer_group_id [String] consumer group id
+        # @param group_id [String] consumer group id
         # @return [Integer] __consumer_offsets partition number
         #
         # @example Check which partition stores offsets for a group
         #   Karafka::Admin::Recovery.offsets_partition_for('my-group')
         #   #=> 17
-        def offsets_partition_for(consumer_group_id)
-          h = java_hash_code(consumer_group_id)
+        def offsets_partition_for(group_id)
+          h = java_hash_code(group_id)
           # Kafka's Utils.abs: Integer.MIN_VALUE maps to 0
           h = (h == -2_147_483_648) ? 0 : h.abs
           h % offsets_partition_count
@@ -233,7 +233,7 @@ module Karafka
         # returned broker is the one that is down or in a FAILED state, the group is stuck and
         # needs migration.
         #
-        # @param consumer_group_id [String] consumer group to look up
+        # @param group_id [String] consumer group to look up
         # @return [Hash{Symbol => Object}] coordinator info with :partition, :broker_id,
         #   and :broker_host keys
         #
@@ -246,8 +246,8 @@ module Karafka
         #   if info[:broker_id] == failed_broker_id
         #     puts "Group 'my-group' is stuck on failed broker #{info[:broker_host]}"
         #   end
-        def coordinator_for(consumer_group_id)
-          target_partition = offsets_partition_for(consumer_group_id)
+        def coordinator_for(group_id)
+          target_partition = offsets_partition_for(group_id)
           metadata = cluster_info
 
           offsets_topic = metadata.topics.find { |t| t[:topic_name] == OFFSETS_TOPIC }

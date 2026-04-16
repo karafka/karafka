@@ -106,9 +106,9 @@ segment1_group_id = "#{DT.group}-parallel-1"
 segment2_group_id = "#{DT.group}-parallel-2"
 
 # 2. Get the current offsets for each segment
-segment0_offset = fetch_next_offset(DT.topic, consumer_group_id: segment0_group_id)
-segment1_offset = fetch_next_offset(DT.topic, consumer_group_id: segment1_group_id)
-segment2_offset = fetch_next_offset(DT.topic, consumer_group_id: segment2_group_id)
+segment0_offset = fetch_next_offset(DT.topic, group_id: segment0_group_id)
+segment1_offset = fetch_next_offset(DT.topic, group_id: segment1_group_id)
+segment2_offset = fetch_next_offset(DT.topic, group_id: segment2_group_id)
 
 # 3. Verify segment 0 received and processed messages
 consumed_by_segment0 = DT[:consumed_messages].select { |m| m[:segment_id] == 0 }

@@ -121,9 +121,9 @@ segment1_group_id = "#{DT.group}-parallel-1"
 segment2_group_id = "#{DT.group}-parallel-2"
 
 # Verify that offsets are marked for all segments, including segment 2 that filtered everything
-segment0_offset = fetch_next_offset(DT.topic, consumer_group_id: segment0_group_id)
-segment1_offset = fetch_next_offset(DT.topic, consumer_group_id: segment1_group_id)
-segment2_offset = fetch_next_offset(DT.topic, consumer_group_id: segment2_group_id)
+segment0_offset = fetch_next_offset(DT.topic, group_id: segment0_group_id)
+segment1_offset = fetch_next_offset(DT.topic, group_id: segment1_group_id)
+segment2_offset = fetch_next_offset(DT.topic, group_id: segment2_group_id)
 
 # All three segments should have marked offsets
 assert segment0_offset > 0
