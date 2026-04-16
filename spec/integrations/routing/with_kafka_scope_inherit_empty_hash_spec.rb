@@ -44,7 +44,7 @@ draw_routes(create_topics: false) do
   end
 end
 
-cgs = Karafka::App.consumer_groups
+cgs = Karafka::App.routes
 topic_with_empty = cgs.first.subscription_groups.find do |sg|
   sg.topics.any? { |t| t.name == "topic_with_empty_config" }
 end.topics.find("topic_with_empty_config")

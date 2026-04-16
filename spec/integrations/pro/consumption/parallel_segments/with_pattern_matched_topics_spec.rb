@@ -140,7 +140,7 @@ assert !DT[0].empty?, "Segment 0 should have received messages"
 assert !DT[1].empty?, "Segment 1 should have received messages"
 
 # Verify that both topics were matched and consumed
-topics = Karafka::App.consumer_groups.first.topics.map(&:name)
+topics = Karafka::App.routes.first.topics.map(&:name)
 assert topics.include?(@topic1), "First topic should be matched and added to routing"
 assert topics.include?(@topic2), "Second topic should be matched and added to routing"
 

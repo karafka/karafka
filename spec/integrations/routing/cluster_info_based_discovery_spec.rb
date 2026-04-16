@@ -33,6 +33,6 @@ draw_routes(create_topics: false) do
     end
 end
 
-subscribed_topics = Karafka::App.consumer_groups.first.topics.map(&:name).sort
+subscribed_topics = Karafka::App.routes.first.topics.map(&:name).sort
 
 assert_equal [t1, t2].sort, subscribed_topics, subscribed_topics

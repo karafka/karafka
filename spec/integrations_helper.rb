@@ -276,7 +276,7 @@ end
 def setup_rdkafka_consumer(options = {})
   config = {
     "bootstrap.servers": ENV.fetch("KAFKA_BOOTSTRAP_SERVERS", "127.0.0.1:9092"),
-    "group.id": Karafka::App.consumer_groups.first.id,
+    "group.id": Karafka::App.routes.first.id,
     "auto.offset.reset": "earliest",
     "enable.auto.offset.store": "false",
     "partition.assignment.strategy": "range,roundrobin"
@@ -321,7 +321,7 @@ end
 def fetch_next_offset(
   topic = DT.topic,
   normalize: true,
-  consumer_group_id: Karafka::App.consumer_groups.first.id
+  consumer_group_id: Karafka::App.routes.first.id
 )
   results = Karafka::Admin.read_lags_with_offsets
   part_results = results.fetch(consumer_group_id).fetch(topic)[0]

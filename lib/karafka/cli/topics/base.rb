@@ -39,7 +39,7 @@ module Karafka
           collected_topics = {}
           default_servers = kafka_config[:"bootstrap.servers"]
 
-          App.consumer_groups.each do |group|
+          App.routes.each do |group|
             group.topics.each do |topic|
               # Skip topics that were explicitly disabled from management
               next unless topic.declaratives.active?

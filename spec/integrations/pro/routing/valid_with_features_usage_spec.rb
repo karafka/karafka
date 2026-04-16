@@ -47,9 +47,9 @@ draw_routes(create_topics: false) do
   end
 end
 
-assert Karafka::App.consumer_groups.first.topics.first.dead_letter_queue?
-assert Karafka::App.consumer_groups.first.topics.first.manual_offset_management?
-assert Karafka::App.consumer_groups.first.topics.first.long_running_job?
-assert !Karafka::App.consumer_groups.first.topics.last.dead_letter_queue?
-assert !Karafka::App.consumer_groups.first.topics.last.manual_offset_management?
-assert !Karafka::App.consumer_groups.first.topics.last.long_running_job?
+assert Karafka::App.routes.first.topics.first.dead_letter_queue?
+assert Karafka::App.routes.first.topics.first.manual_offset_management?
+assert Karafka::App.routes.first.topics.first.long_running_job?
+assert !Karafka::App.routes.first.topics.last.dead_letter_queue?
+assert !Karafka::App.routes.first.topics.last.manual_offset_management?
+assert !Karafka::App.routes.first.topics.last.long_running_job?

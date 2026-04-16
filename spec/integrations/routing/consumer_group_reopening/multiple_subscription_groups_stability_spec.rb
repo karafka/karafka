@@ -107,7 +107,7 @@ end
 
 cg1 = Karafka::App.routes.find { |cg| cg.name == DT.groups[1] }
 
-assert_equal 2, Karafka::App.consumer_groups.size
+assert_equal 2, Karafka::App.routes.size
 assert_equal 2, cg0.subscription_groups.size
 assert_equal 2, cg1.subscription_groups.size
 
@@ -122,7 +122,7 @@ all_positions = (cg0_positions + cg1_positions).sort
 assert_equal [0, 1, 2, 3], all_positions
 
 # Verify all instance IDs are unique
-all_instance_ids = Karafka::App.consumer_groups.flat_map do |cg|
+all_instance_ids = Karafka::App.routes.flat_map do |cg|
   cg.subscription_groups.map { |sg| sg.kafka[:"group.instance.id"] }
 end
 
@@ -141,7 +141,7 @@ assert_equal [0, 1], cg0.subscription_groups.map(&:position).sort
 assert_equal [2, 3], cg1.subscription_groups.map(&:position).sort
 
 # Verify instance ID format includes position
-Karafka::App.consumer_groups.each do |cg|
+Karafka::App.routes.each do |cg|
   cg.subscription_groups.each do |sg|
     expected_suffix = "_#{sg.position}"
     assert sg.kafka[:"group.instance.id"].end_with?(expected_suffix)

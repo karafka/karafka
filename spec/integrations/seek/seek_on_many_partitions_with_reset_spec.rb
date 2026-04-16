@@ -45,7 +45,7 @@ start_karafka_and_wait_until do
 end
 
 results = Karafka::Admin.read_lags_with_offsets
-cg = Karafka::App.consumer_groups.first.id
+cg = Karafka::App.routes.first.id
 part_results = results.fetch(cg).fetch(DT.topic)
 
 PARTITIONS.each do |i|

@@ -71,7 +71,7 @@ end
 
 2.times do |i|
   dlq_message = DT[:broken][i]
-  cg = Karafka::App.consumer_groups.first.id
+  cg = Karafka::App.routes.first.id
 
   assert_equal dlq_message.key, i.to_s
   assert_equal dlq_message.raw_payload, elements[i]

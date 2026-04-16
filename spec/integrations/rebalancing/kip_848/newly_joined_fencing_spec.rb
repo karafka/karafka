@@ -36,7 +36,7 @@ thread = Thread.new do
   consumer = Rdkafka::Config.new(
     Karafka::Setup::AttributesMap.consumer(
       "bootstrap.servers": Karafka::App.config.kafka[:"bootstrap.servers"],
-      "group.id": Karafka::App.consumer_groups.first.id,
+      "group.id": Karafka::App.routes.first.id,
       "group.protocol": "consumer",
       "group.instance.id": "#{GROUP_INSTANCE_ID}_0",
       "auto.offset.reset": "earliest"

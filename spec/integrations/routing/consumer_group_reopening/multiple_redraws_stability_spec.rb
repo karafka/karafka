@@ -71,7 +71,7 @@ end
 
 cg1 = Karafka::App.routes.find { |cg| cg.name == DT.groups[1] }
 
-assert_equal 2, Karafka::App.consumer_groups.size
+assert_equal 2, Karafka::App.routes.size
 assert_equal 2, cg0.topics.size
 assert_equal 1, cg1.topics.size
 assert_equal 0, cg0.subscription_groups.first.position
@@ -118,18 +118,18 @@ end
 
 cg2 = Karafka::App.routes.find { |cg| cg.name == DT.groups[2] }
 
-assert_equal 3, Karafka::App.consumer_groups.size
+assert_equal 3, Karafka::App.routes.size
 assert_equal 2, cg2.subscription_groups.first.position
 
 # Verify all positions are unique and sequential
-all_positions = Karafka::App.consumer_groups.flat_map do |cg|
+all_positions = Karafka::App.routes.flat_map do |cg|
   cg.subscription_groups.map(&:position)
 end.sort
 
 assert_equal [0, 1, 2], all_positions
 
 # Verify all instance IDs are unique
-all_instance_ids = Karafka::App.consumer_groups.flat_map do |cg|
+all_instance_ids = Karafka::App.routes.flat_map do |cg|
   cg.subscription_groups.map { |sg| sg.kafka[:"group.instance.id"] }
 end
 

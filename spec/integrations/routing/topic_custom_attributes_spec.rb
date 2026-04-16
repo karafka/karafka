@@ -50,8 +50,8 @@ draw_routes(create_topics: true) do
   end
 end
 
-t1 = Karafka::App.consumer_groups[0].topics.first
-t2 = Karafka::App.consumer_groups[1].topics.first
+t1 = Karafka::App.routes[0].topics.first
+t2 = Karafka::App.routes[1].topics.first
 
 assert_equal 1, t1.custom_attributes.mine
 assert_equal 2, t1.custom_attributes.yours

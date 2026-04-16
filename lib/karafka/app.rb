@@ -111,7 +111,7 @@ module Karafka
         config.kafka[:debug] = contexts
         producer.config.kafka[:debug] = contexts
 
-        consumer_groups.map(&:topics).flat_map(&:to_a).each do |topic|
+        routes.map(&:topics).flat_map(&:to_a).each do |topic|
           topic.kafka[:debug] = contexts
         end
       end
