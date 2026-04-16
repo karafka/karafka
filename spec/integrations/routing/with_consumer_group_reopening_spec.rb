@@ -30,7 +30,7 @@ end
 group = Karafka::App.routes.find { |cg| cg.name == DT.groups[0] }
 
 # Basic assertions
-raise "Consumer group should exist" unless consumer_group
+raise "Consumer group should exist" unless group
 raise "Wrong consumer group name" unless group.name == DT.groups[0]
 raise "Expected 2 topics, got #{group.topics.size}" unless group.topics.size == 2
 
