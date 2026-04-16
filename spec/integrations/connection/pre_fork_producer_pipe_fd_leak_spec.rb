@@ -100,12 +100,12 @@ READER.close
 parent_pipe_after = count_pipe_fds if LINUX
 
 if LINUX
-  $stderr.puts "=== Pre-fork producer pipe FD leak test ==="
-  $stderr.puts "Parent pipes: #{parent_pipe_count} before, #{parent_pipe_after} after"
-  $stderr.puts ""
-  $stderr.puts "Child pipe FD counts per fork (inherited -> after_close -> after_produce):"
+  warn "=== Pre-fork producer pipe FD leak test ==="
+  warn "Parent pipes: #{parent_pipe_count} before, #{parent_pipe_after} after"
+  warn ""
+  warn "Child pipe FD counts per fork (inherited -> after_close -> after_produce):"
   child_results.each do |r|
-    $stderr.puts "  cycle #{r[:cycle]}: #{r[:inherited]} -> #{r[:after_close]} -> #{r[:after_produce]}"
+    warn "  cycle #{r[:cycle]}: #{r[:inherited]} -> #{r[:after_close]} -> #{r[:after_produce]}"
   end
 
   # All children should inherit the same number of pipe FDs (no growth between forks)
