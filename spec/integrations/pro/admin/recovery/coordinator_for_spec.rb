@@ -56,16 +56,14 @@ backoff = 1
 total_waited = 0
 
 loop do
-  begin
-    result = Karafka::Admin::Recovery.coordinator_for(GROUP_ID)
-    break
-  rescue Karafka::Pro::Admin::Recovery::Errors::MetadataError
-    raise if total_waited >= 30
+  result = Karafka::Admin::Recovery.coordinator_for(GROUP_ID)
+  break
+rescue Karafka::Pro::Admin::Recovery::Errors::MetadataError
+  raise if total_waited >= 30
 
-    sleep(backoff)
-    total_waited += backoff
-    backoff = [backoff * 2, 10].min
-  end
+  sleep(backoff)
+  total_waited += backoff
+  backoff = [backoff * 2, 10].min
 end
 
 # Should return the expected partition
