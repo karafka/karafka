@@ -257,8 +257,7 @@ RSpec.describe_current do
           described_class.detect { true }
         end
 
-        it "overwrites existing stale License constant with gem data" do
-          # First define a stale License module
+        it "raises when existing License constant is missing version" do
           stale_license = Module.new do
             def self.token
               "stale-token"
@@ -266,12 +265,8 @@ RSpec.describe_current do
           end
           stub_const("Karafka::License", stale_license)
 
-          # Should overwrite with actual gem data
-          described_class.detect { true }
-
-          expect(Karafka::License.token).to eq(license_content)
-          expect(Karafka::License.token).not_to eq("stale-token")
-          expect(Karafka::License.version).to eq(version_content)
+          expect { described_class.detect { true } }
+            .to raise_error(Karafka::Errors::InvalidLicenseTokenError, /missing required method/)
         end
       end
     end
@@ -281,16 +276,14 @@ RSpec.describe_current do
 
       before do
         stub_const("Karafka::License", incomplete_license_module)
-        # Module exists but doesn't have token or version methods
       end
 
-      it "attempts to load the license" do
-        expect(described_class).to receive(:safe_load_license).and_call_original
-        begin
-          described_class.detect { true }
-        rescue
-          nil
-        end
+      it "raises InvalidLicenseTokenError listing missing methods" do
+        expect { described_class.detect { true } }
+          .to raise_error(
+            Karafka::Errors::InvalidLicenseTokenError,
+            /missing required method\(s\): #token, #version/
+          )
       end
     end
   end
