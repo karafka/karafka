@@ -4,6 +4,7 @@
 # constant. Will be removed in Karafka 3.0.
 module Karafka
   module Processing
+    # @see ConsumerGroups::Executor
     Executor = ConsumerGroups::Executor
   end
 end

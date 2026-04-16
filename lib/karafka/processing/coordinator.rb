@@ -4,6 +4,7 @@
 # constant. Will be removed in Karafka 3.0.
 module Karafka
   module Processing
+    # @see ConsumerGroups::Coordinator
     Coordinator = ConsumerGroups::Coordinator
   end
 end

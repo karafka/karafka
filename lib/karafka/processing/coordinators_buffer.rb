@@ -4,6 +4,7 @@
 # the old, un-namespaced constant. Will be removed in Karafka 3.0.
 module Karafka
   module Processing
+    # @see ConsumerGroups::CoordinatorsBuffer
     CoordinatorsBuffer = ConsumerGroups::CoordinatorsBuffer
   end
 end

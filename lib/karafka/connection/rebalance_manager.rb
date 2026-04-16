@@ -4,6 +4,7 @@
 # constant. Will be removed in Karafka 3.0.
 module Karafka
   module Connection
+    # @see ConsumerGroups::RebalanceManager
     RebalanceManager = ConsumerGroups::RebalanceManager
   end
 end
