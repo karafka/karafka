@@ -68,7 +68,7 @@ RSpec.describe_current do
 
     context "when we have pattern matching defined" do
       before do
-        Karafka::App.consumer_groups.pattern(/test/) do
+        Karafka::App.routes.pattern(/test/) do
           consumer Class.new
         end
       end
@@ -84,7 +84,7 @@ RSpec.describe_current do
 
     context "when we have pattern matching defined" do
       before do
-        Karafka::App.consumer_groups.pattern(/test/) do
+        Karafka::App.routes.pattern(/test/) do
           consumer Class.new
         end
       end

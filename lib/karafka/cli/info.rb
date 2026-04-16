@@ -41,7 +41,7 @@ module Karafka
           "Karafka version: #{Karafka::VERSION}#{postfix}",
           "Ruby version: #{RUBY_DESCRIPTION}",
           "Rdkafka version: #{::Rdkafka::VERSION}",
-          "Consumer groups count: #{Karafka::App.consumer_groups.size}",
+          "Consumer groups count: #{Karafka::App.routes.size}",
           "Subscription groups count: #{Karafka::App.subscription_groups.values.flatten.size}",
           "Workers count: #{concurrency}",
           "Instance client id: #{client_id}",

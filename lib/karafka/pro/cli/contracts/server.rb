@@ -58,7 +58,7 @@ module Karafka
               # If there were no consumer_groups declared in the server cli, it means that we will
               # run all of them and no need to validate them here at all
               next if value.empty?
-              next if (value - Karafka::App.consumer_groups.map(&:name)).empty?
+              next if (value - Karafka::App.routes.map(&:name)).empty?
 
               # Found unknown consumer groups
               [[[:"#{action}_consumer_groups"], :consumer_groups_inclusion]]
@@ -74,7 +74,7 @@ module Karafka
               next if value.empty?
 
               subscription_groups = Karafka::App
-                .consumer_groups
+                .routes
                 .map(&:subscription_groups)
                 .flatten
                 .map(&:name)
@@ -95,7 +95,7 @@ module Karafka
               next if value.empty?
 
               topics = Karafka::App
-                .consumer_groups
+                .routes
                 .map(&:subscription_groups)
                 .flatten
                 .map(&:topics)
@@ -107,7 +107,7 @@ module Karafka
               # If there are any patterns defined, we cannot report on topics inclusions because
               # topics may be added during boot or runtime. We go with simple assumption:
               # if there are patterns defined, we do not check the inclusions at all
-              next unless Karafka::App.consumer_groups.map(&:patterns).flatten.empty?
+              next unless Karafka::App.routes.map(&:patterns).flatten.empty?
 
               # Found unknown topics
               [[[:"#{action}_topics"], :topics_inclusion]]
