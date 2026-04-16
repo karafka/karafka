@@ -28,31 +28,27 @@
 # License: https://karafka.io/docs/Pro-License-Comm/
 # Contact: contact@karafka.io
 
-module Karafka
-  module Pro
-    # Pro components related to processing part of Karafka
-    module Processing
-      # Pro jobs
-      module Jobs
-        # The main job type in a non-blocking variant.
-        # This variant works "like" the regular consumption but does not block the queue.
-        #
-        # It can be useful when having long lasting jobs that would exceed `max.poll.interval`
-        # if would block.
-        #
-        # @note It needs to be working with a proper consumer that will handle the partition
-        #   management. This layer of the framework knows nothing about Kafka messages consumption.
-        class ConsumeNonBlocking < Karafka::Processing::Jobs::Consume
-          self.action = :consume
+RSpec.describe_current do
+  subject(:job) { described_class.new(executor, messages) }
 
-          # Makes this job non-blocking from the start
-          # @param args [Array] any arguments accepted by `::Karafka::Processing::Jobs::Consume`
-          def initialize(*args)
-            super
-            @non_blocking = true
-          end
-        end
-      end
+  let(:executor) { build(:processing_executor) }
+  let(:messages) { [rand] }
+  let(:time_now) { Time.now }
+
+  specify { expect(described_class.action).to eq(:consume) }
+
+  it { expect(job.non_blocking?).to be(true) }
+  it { expect(described_class).to be < Karafka::Processing::ConsumerGroups::Jobs::Consume }
+
+  describe "#before_schedule_consume" do
+    before do
+      allow(Time).to receive(:now).and_return(time_now)
+      allow(executor).to receive(:before_schedule_consume)
+    end
+
+    it "expect to run before_schedule_consume on the executor with time and messages" do
+      job.before_schedule
+      expect(executor).to have_received(:before_schedule_consume).with(messages)
     end
   end
 end

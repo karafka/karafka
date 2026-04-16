@@ -30,28 +30,20 @@
 
 module Karafka
   module Pro
-    module Processing
-      module Jobs
-        # Job that represents a "ticking" work. Work that we run periodically for the Periodics
-        # enabled topics.
-        class Periodic < Karafka::Processing::Jobs::Base
-          self.action = :tick
+    module Admin
+      module ConsumerGroups
+        class Recovery < Karafka::Admin
+          # Recovery related errors
+          module Errors
+            # Base for all the recovery errors
+            BaseError = Class.new(::Karafka::Errors::BaseError)
 
-          # @param executor [Karafka::Pro::Processing::Executor] pro executor that is suppose to
-          #   run a given job
-          def initialize(executor)
-            @executor = executor
-            super()
-          end
+            # Raised when required cluster metadata cannot be retrieved (topic, partition, or
+            # broker not found)
+            MetadataError = Class.new(BaseError)
 
-          # Code executed before we schedule this job
-          def before_schedule
-            executor.before_schedule_periodic
-          end
-
-          # Runs the executor periodic action
-          def call
-            executor.periodic
+            # Raised when a partition number is outside the valid range for __consumer_offsets
+            PartitionOutOfRangeError = Class.new(BaseError)
           end
         end
       end

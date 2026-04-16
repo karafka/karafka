@@ -28,13 +28,29 @@
 # License: https://karafka.io/docs/Pro-License-Comm/
 # Contact: contact@karafka.io
 
-RSpec.describe_current do
-  subject(:job) { described_class.new(executor) }
+module Karafka
+  module Pro
+    module Processing
+      # Pro consumer-group-specific processing components
+      module ConsumerGroups
+        # Pro jobs
+        module Jobs
+          # Non-Blocking version of the Eofed job
+          # We use this version for LRJ topics for cases where saturated resources would not allow
+          # to run this job for extended period of time. Under such scenarios, if we would not use
+          # a non-blocking one, we would reach max.poll.interval.ms.
+          class EofedNonBlocking < Karafka::Processing::ConsumerGroups::Jobs::Eofed
+            self.action = :eofed
 
-  let(:executor) { build(:processing_executor) }
-
-  specify { expect(described_class.action).to eq(:tick) }
-
-  it { expect(job.non_blocking?).to be(true) }
-  it { expect(described_class).to be < Karafka::Pro::Processing::Jobs::Periodic }
+            # @param args [Array] any arguments accepted by
+            #   `::Karafka::Processing::ConsumerGroups::Jobs::Eofed`
+            def initialize(*args)
+              super
+              @non_blocking = true
+            end
+          end
+        end
+      end
+    end
+  end
 end

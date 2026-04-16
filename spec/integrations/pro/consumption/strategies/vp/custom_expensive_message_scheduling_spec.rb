@@ -44,7 +44,7 @@ become_pro!
 class ExpensiveFirstScheduler < Karafka::Pro::Processing::Schedulers::Base
   # Schedules consumption jobs, prioritizing VPs with expensive messages
   #
-  # @param jobs_array [Array<Karafka::Processing::Jobs::Consume>] jobs for scheduling
+  # @param jobs_array [Array<Karafka::Processing::ConsumerGroups::Jobs::Consume>] jobs for scheduling
   def schedule_consumption(jobs_array)
     # Separate expensive and normal jobs
     expensive_jobs = []
@@ -86,8 +86,8 @@ class ExpensiveFirstScheduler < Karafka::Pro::Processing::Schedulers::Base
 
   # Orders jobs by LJF (Longest Job First) based on estimated processing time
   #
-  # @param jobs [Array<Karafka::Processing::Jobs::Consume>] jobs to order
-  # @return [Array<Karafka::Processing::Jobs::Consume>] ordered jobs
+  # @param jobs [Array<Karafka::Processing::ConsumerGroups::Jobs::Consume>] jobs to order
+  # @return [Array<Karafka::Processing::ConsumerGroups::Jobs::Consume>] ordered jobs
   def order_by_ljf(jobs)
     perf_tracker = Karafka::Pro::Instrumentation::PerformanceTracker.instance
 

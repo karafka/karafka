@@ -8,21 +8,21 @@ RSpec.describe_current do
   describe "#consume" do
     it do
       job = builder.consume(executor, [])
-      expect(job).to be_a(Karafka::Processing::Jobs::Consume)
+      expect(job).to be_a(Karafka::Processing::ConsumerGroups::Jobs::Consume)
     end
   end
 
   describe "#eofed" do
     it do
       job = builder.eofed(executor)
-      expect(job).to be_a(Karafka::Processing::Jobs::Eofed)
+      expect(job).to be_a(Karafka::Processing::ConsumerGroups::Jobs::Eofed)
     end
   end
 
   describe "#revoked" do
     it do
       job = builder.revoked(executor)
-      expect(job).to be_a(Karafka::Processing::Jobs::Revoked)
+      expect(job).to be_a(Karafka::Processing::ConsumerGroups::Jobs::Revoked)
     end
   end
 

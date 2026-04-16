@@ -30,19 +30,30 @@
 
 module Karafka
   module Pro
+    # Pro components related to processing part of Karafka
     module Processing
-      module Jobs
-        # Non-Blocking version of the Periodic job
-        # We use this version for LRJ topics for cases where saturated resources would not allow
-        # to run this job for extended period of time. Under such scenarios, if we would not use
-        # a non-blocking one, we would reach max.poll.interval.ms.
-        class PeriodicNonBlocking < Periodic
-          self.action = :tick
+      # Pro consumer-group-specific processing components
+      module ConsumerGroups
+        # Pro jobs
+        module Jobs
+          # The main job type in a non-blocking variant.
+          # This variant works "like" the regular consumption but does not block the queue.
+          #
+          # It can be useful when having long lasting jobs that would exceed `max.poll.interval`
+          # if would block.
+          #
+          # @note It needs to be working with a proper consumer that will handle the partition
+          #   management. This layer of the framework knows nothing about Kafka messages consumption.
+          class ConsumeNonBlocking < Karafka::Processing::ConsumerGroups::Jobs::Consume
+            self.action = :consume
 
-          # @param args [Array] any arguments accepted by `::Karafka::Processing::Jobs::Periodic`
-          def initialize(*args)
-            super
-            @non_blocking = true
+            # Makes this job non-blocking from the start
+            # @param args [Array] any arguments accepted by
+            #   `::Karafka::Processing::ConsumerGroups::Jobs::Consume`
+            def initialize(*args)
+              super
+              @non_blocking = true
+            end
           end
         end
       end

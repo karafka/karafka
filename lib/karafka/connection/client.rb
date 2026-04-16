@@ -71,7 +71,10 @@ module Karafka
         @subscription_group = subscription_group
         @buffer = RawMessagesBuffer.new
         @rebalance_manager = RebalanceManager.new(@subscription_group.id, @buffer)
-        @rebalance_callback = Instrumentation::Callbacks::Rebalance.new(@subscription_group, id)
+        @rebalance_callback = Instrumentation::Callbacks::ConsumerGroups::Rebalance.new(
+          @subscription_group,
+          id
+        )
         @mode = Mode.new
 
         @interval_runner = Helpers::IntervalRunner.new do

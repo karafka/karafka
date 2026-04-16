@@ -45,7 +45,7 @@ RSpec.describe_current do
     context "when there are no metrics on any of the topics data" do
       before do
         4.times do |i|
-          jobs_array << Karafka::Processing::Jobs::Consume.new(
+          jobs_array << Karafka::Processing::ConsumerGroups::Jobs::Consume.new(
             nil,
             [public_send("message#{i}")]
           )
@@ -81,7 +81,7 @@ RSpec.describe_current do
 
       before do
         4.times do |i|
-          jobs_array << Karafka::Processing::Jobs::Consume.new(
+          jobs_array << Karafka::Processing::ConsumerGroups::Jobs::Consume.new(
             nil,
             [public_send("message#{i}")]
           )
@@ -116,7 +116,7 @@ RSpec.describe_current do
 
       before do
         4.times do |i|
-          jobs_array << Karafka::Processing::Jobs::Consume.new(
+          jobs_array << Karafka::Processing::ConsumerGroups::Jobs::Consume.new(
             nil,
             [public_send("message#{i}")]
           )
@@ -155,10 +155,10 @@ RSpec.describe_current do
       context "when there are jobs" do
         let(:jobs_array) do
           [
-            Karafka::Processing::Jobs::Consume.new(nil, []),
-            Karafka::Processing::Jobs::Consume.new(nil, []),
-            Karafka::Processing::Jobs::Consume.new(nil, []),
-            Karafka::Processing::Jobs::Consume.new(nil, [])
+            Karafka::Processing::ConsumerGroups::Jobs::Consume.new(nil, []),
+            Karafka::Processing::ConsumerGroups::Jobs::Consume.new(nil, []),
+            Karafka::Processing::ConsumerGroups::Jobs::Consume.new(nil, []),
+            Karafka::Processing::ConsumerGroups::Jobs::Consume.new(nil, [])
           ]
         end
 

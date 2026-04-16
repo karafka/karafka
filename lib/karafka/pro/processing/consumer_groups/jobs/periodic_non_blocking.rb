@@ -28,27 +28,29 @@
 # License: https://karafka.io/docs/Pro-License-Comm/
 # Contact: contact@karafka.io
 
-RSpec.describe_current do
-  subject(:job) { described_class.new(executor, messages) }
+module Karafka
+  module Pro
+    module Processing
+      # Pro consumer-group-specific processing components
+      module ConsumerGroups
+        # Pro jobs
+        module Jobs
+          # Non-Blocking version of the Periodic job
+          # We use this version for LRJ topics for cases where saturated resources would not allow
+          # to run this job for extended period of time. Under such scenarios, if we would not use
+          # a non-blocking one, we would reach max.poll.interval.ms.
+          class PeriodicNonBlocking < Periodic
+            self.action = :tick
 
-  let(:executor) { build(:processing_executor) }
-  let(:messages) { [rand] }
-  let(:time_now) { Time.now }
-
-  specify { expect(described_class.action).to eq(:consume) }
-
-  it { expect(job.non_blocking?).to be(true) }
-  it { expect(described_class).to be < Karafka::Processing::Jobs::Consume }
-
-  describe "#before_schedule_consume" do
-    before do
-      allow(Time).to receive(:now).and_return(time_now)
-      allow(executor).to receive(:before_schedule_consume)
-    end
-
-    it "expect to run before_schedule_consume on the executor with time and messages" do
-      job.before_schedule
-      expect(executor).to have_received(:before_schedule_consume).with(messages)
+            # @param args [Array] any arguments accepted by
+            #   `::Karafka::Pro::Processing::ConsumerGroups::Jobs::Periodic`
+            def initialize(*args)
+              super
+              @non_blocking = true
+            end
+          end
+        end
+      end
     end
   end
 end
