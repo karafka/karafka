@@ -14,8 +14,9 @@ module Karafka
       attr_reader :id, :name, :group
       attr_writer :consumer
 
-      # Backwards compatible alias. Today `#group` is always a {ConsumerGroup}; once other group
-      # types exist, `#consumer_group` will only work when the owning group is indeed one.
+      # Backwards compatible alias for `#group`. Kept purely for compatibility — this is an
+      # unconditional alias and performs no type validation, so callers should prefer `#group`
+      # once additional group types (e.g. KIP-932 share groups) land.
       alias_method :consumer_group, :group
 
       attr_accessor :subscription_group_details
