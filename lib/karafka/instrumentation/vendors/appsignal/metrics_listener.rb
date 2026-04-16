@@ -71,7 +71,7 @@ module Karafka
               batch_size: consumer.messages.size,
               first_offset: consumer.messages.metadata.first_offset,
               last_offset: consumer.messages.metadata.last_offset,
-              consumer_group: consumer.topic.consumer_group.id,
+              consumer_group: consumer.topic.group.id,
               topic: consumer.topic.name,
               partition: consumer.partition,
               attempt: consumer.coordinator.pause_tracker.attempt
@@ -314,7 +314,7 @@ module Karafka
           # @param consumer [Karafka::BaseConsumer] Karafka consumer instance
           def with_multiple_resolutions(consumer)
             topic_name = consumer.topic.name
-            consumer_group_id = consumer.topic.consumer_group.id
+            consumer_group_id = consumer.topic.group.id
             partition = consumer.partition
 
             tags = {

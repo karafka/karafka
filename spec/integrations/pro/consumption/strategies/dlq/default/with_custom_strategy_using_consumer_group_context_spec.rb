@@ -37,7 +37,7 @@ DT[:dlq_topics] = Set.new
 
 class DqlErrorStrategy
   def call(errors_tracker, _attempt)
-    case errors_tracker.topic.consumer_group.name
+    case errors_tracker.topic.group.name
     when DT.consumer_groups[0]
       [:dispatch, DT.topics[1]]
     when DT.consumer_groups[1]

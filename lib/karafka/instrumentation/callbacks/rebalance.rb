@@ -62,8 +62,13 @@ module Karafka
             # may use the id references
             subscription_group_id: @subscription_group.id,
             subscription_group: @subscription_group,
-            consumer_group_id: @subscription_group.consumer_group.id,
-            consumer_group: @subscription_group.consumer_group,
+            # `consumer_group_id:` / `consumer_group:` are kept for backwards compatibility.
+            # `group_id:` / `group:` are the forward-looking polymorphic keys and carry the same
+            # value. The legacy keys will be retired once share groups land.
+            consumer_group_id: @subscription_group.group.id,
+            consumer_group: @subscription_group.group,
+            group_id: @subscription_group.group.id,
+            group: @subscription_group.group,
             client_id: @client_id,
             tpl: tpl
           )
@@ -72,7 +77,8 @@ module Karafka
             "error.occurred",
             caller: self,
             subscription_group_id: @subscription_group.id,
-            consumer_group_id: @subscription_group.consumer_group.id,
+            consumer_group_id: @subscription_group.group.id,
+            group_id: @subscription_group.group.id,
             type: "callbacks.rebalance.#{name}.error",
             client_id: @client_id,
             error: e

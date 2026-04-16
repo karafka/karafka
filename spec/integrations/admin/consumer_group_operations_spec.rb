@@ -15,7 +15,7 @@ class ActiveConsumerGroupConsumer < Karafka::BaseConsumer
 
       DT[:consumed] << {
         message_id: message_data["id"],
-        consumer_group: topic.consumer_group.id,
+        consumer_group: topic.group.id,
         processed_at: Time.now.to_f
       }
     end

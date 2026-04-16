@@ -75,10 +75,10 @@ module Karafka
             #   routing from now on.
             # @param sg_topics [Array<Karafka::Routing::Topic>]
             def install(pattern, discovered_topic, sg_topics)
-              consumer_group = pattern.topic.consumer_group
+              group = pattern.topic.group
 
-              # Build new topic and register within the consumer group
-              topic = consumer_group.public_send(:topic=, discovered_topic, &pattern.config)
+              # Build new topic and register within the owning group
+              topic = group.public_send(:topic=, discovered_topic, &pattern.config)
               topic.patterns(active: true, type: :discovered)
 
               # Assign the appropriate subscription group to this topic

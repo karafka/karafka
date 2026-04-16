@@ -37,7 +37,7 @@ end
 
 class Consumer < Karafka::BaseConsumer
   def consume
-    segment_id = topic.consumer_group.segment_id
+    segment_id = topic.group.segment_id
 
     # Track all messages that reached the consumer
     messages.each do |message|

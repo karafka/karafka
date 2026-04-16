@@ -14,7 +14,11 @@ module Karafka
         node: %i[swarm node]
       )
 
-      attr_reader :id, :name, :topics, :kafka, :consumer_group, :position
+      attr_reader :id, :name, :topics, :kafka, :group, :position
+
+      # Backwards compatible alias. Today `#group` is always a {ConsumerGroup}; once other group
+      # types exist, `#consumer_group` will only work when the owning group is indeed one.
+      alias_method :consumer_group, :group
 
       # Lock for generating new ids safely
       ID_MUTEX = Mutex.new
@@ -45,12 +49,11 @@ module Karafka
       def initialize(position, topics)
         @details = topics.first.subscription_group_details
         @name = @details.fetch(:name)
-        @consumer_group = topics.first.consumer_group
-        # We include the consumer group id here because we want to have unique ids of subscription
+        @group = topics.first.group
+        # We include the owning group id here because we want to have unique ids of subscription
         # groups across the system. Otherwise user could set the same name for multiple
-        # subscription groups in many consumer groups effectively having same id for different
-        # entities
-        @id = "#{@consumer_group.id}_#{@name}_#{position}"
+        # subscription groups in many groups effectively having same id for different entities
+        @id = "#{@group.id}_#{@name}_#{position}"
         @position = position
         @topics = topics
         @kafka = build_kafka
@@ -124,7 +127,7 @@ module Karafka
         inject_group_instance_id(kafka)
         inject_client_id(kafka)
 
-        kafka[:"group.id"] ||= @consumer_group.id
+        kafka[:"group.id"] ||= @group.id
         kafka[:"auto.offset.reset"] ||= @topics.first.initial_offset
         # Karafka manages the offsets based on the processing state, thus we do not rely on the
         # rdkafka offset auto-storing

@@ -91,7 +91,7 @@ module Karafka
         #   here that would be a race-condition is a miss that anyhow we need to support due to
         #   how librdkafka ships metrics and a potential removal of data on heavily revoked LRJ.
         def find(topic, partition)
-          key = "#{topic.consumer_group.id}_#{topic.name}_#{partition}"
+          key = "#{topic.group.id}_#{topic.name}_#{partition}"
           @accu.fetch(key, EMPTY_ARRAY).last || EMPTY_HASH
         end
 

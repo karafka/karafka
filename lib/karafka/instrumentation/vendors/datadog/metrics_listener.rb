@@ -111,7 +111,7 @@ module Karafka
             time_taken = event[:time]
             messages_count = event[:messages_buffer].size
 
-            consumer_group_id = event[:subscription_group].consumer_group.id
+            consumer_group_id = event[:subscription_group].group.id
 
             tags = ["consumer_group:#{consumer_group_id}"]
             tags.concat(default_tags)
@@ -290,7 +290,7 @@ module Karafka
           def consumer_tags(consumer)
             messages = consumer.messages
             metadata = messages.metadata
-            consumer_group_id = consumer.topic.consumer_group.id
+            consumer_group_id = consumer.topic.group.id
 
             [
               "topic:#{metadata.topic}",

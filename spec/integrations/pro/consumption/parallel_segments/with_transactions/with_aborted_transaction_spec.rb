@@ -39,7 +39,7 @@ end
 
 class Consumer < Karafka::BaseConsumer
   def consume
-    segment_id = topic.consumer_group.segment_id
+    segment_id = topic.group.segment_id
 
     # Detect if this batch contains an abort trigger
     contains_abort = messages.any? { |m| m.raw_payload.include?("abort-trigger") }

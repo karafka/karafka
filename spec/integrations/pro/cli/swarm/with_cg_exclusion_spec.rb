@@ -37,7 +37,7 @@ READER, WRITER = IO.pipe
 
 class Consumer < Karafka::BaseConsumer
   def consume
-    WRITER.puts("#{topic.consumer_group.name}:#{topic.name}")
+    WRITER.puts("#{topic.group.name}:#{topic.name}")
     WRITER.flush
   end
 end

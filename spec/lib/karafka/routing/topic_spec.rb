@@ -16,8 +16,14 @@ RSpec.describe_current do
     end
   end
 
+  describe "#group" do
+    it { expect(topic.group).to eq consumer_group }
+  end
+
   describe "#consumer_group" do
+    # Backwards-compatible alias of `#group`. Kept to protect the public API.
     it { expect(topic.consumer_group).to eq consumer_group }
+    it { expect(topic.consumer_group).to be(topic.group) }
   end
 
   describe "#id" do
@@ -101,7 +107,7 @@ RSpec.describe_current do
     let(:expected_keys) do
       %i[
         kafka deserializers max_messages max_wait_time initial_offset id name active consumer
-        consumer_group_id pause_max_timeout pause_timeout pause_with_exponential_backoff
+        group_id consumer_group_id pause_max_timeout pause_timeout pause_with_exponential_backoff
         subscription_group_details active_job consumer_persistence dead_letter_queue declaratives
         inline_insights manual_offset_management eofed
       ]

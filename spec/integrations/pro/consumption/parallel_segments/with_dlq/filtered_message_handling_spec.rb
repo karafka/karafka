@@ -35,7 +35,7 @@ setup_karafka(allow_errors: %w[consumer.consume.error])
 
 class Consumer < Karafka::BaseConsumer
   def consume
-    segment_id = topic.consumer_group.segment_id
+    segment_id = topic.group.segment_id
 
     # Track all messages that reached this segment's consumer
     messages.each do |message|

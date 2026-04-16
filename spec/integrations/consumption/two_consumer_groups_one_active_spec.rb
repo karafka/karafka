@@ -8,7 +8,7 @@ setup_karafka
 class Consumer < Karafka::BaseConsumer
   def consume
     messages.each do |message|
-      group = topic.consumer_group.name
+      group = topic.group.name
       DT[group] << message.payload
     end
   end

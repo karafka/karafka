@@ -38,7 +38,7 @@ end
 class Consumer < Karafka::BaseConsumer
   def consume
     messages.each do |message|
-      segment_id = topic.consumer_group.segment_id
+      segment_id = topic.group.segment_id
       DT[segment_id] << message.raw_payload
     end
   end

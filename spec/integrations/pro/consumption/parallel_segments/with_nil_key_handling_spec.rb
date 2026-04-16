@@ -36,7 +36,7 @@ end
 
 class Consumer < Karafka::BaseConsumer
   def consume
-    segment_id = topic.consumer_group.segment_id
+    segment_id = topic.group.segment_id
 
     messages.each do |message|
       key_info = message.key.nil? ? "nil_key" : message.key

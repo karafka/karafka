@@ -55,7 +55,7 @@ DT[:segments] = Set.new
 class SegmentMonitorConsumer < Karafka::BaseConsumer
   def consume
     # Get the segment ID
-    segment_id = topic.consumer_group.segment_id
+    segment_id = topic.group.segment_id
 
     # Track segment info for all incoming messages
     messages.each do |message|

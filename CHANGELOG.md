@@ -1,6 +1,7 @@
 # Karafka Framework Changelog
 
 ## 2.5.10 (Unreleased)
+- [Enhancement] Introduce polymorphic `Routing::Topic#group` and `Routing::SubscriptionGroup#group` accessors (with `#consumer_group` kept as a backwards-compatible alias) and emit parallel `group:` / `group_id:` keys alongside `consumer_group:` / `consumer_group_id:` in `rebalance.*`, `error.occurred` and `statistics.emitted` payloads. Prepares routing for additional group types (e.g. KIP-932 share groups); legacy keys remain and will be retired once share groups land.
 - **[Feature]** Add `Processing::WorkersPool` with dynamic thread pool scaling via `#scale`, `nil` sentinel-based worker exit for downscaling, and `worker.scaling.up`/`worker.scaling.down` instrumentation events.
 - [Enhancement] Add per-partition generation tracking to `AssignmentsTracker` to distinguish first-time assignments from reassignments.
 - [Enhancement] Make liveness listeners fiber-safe.

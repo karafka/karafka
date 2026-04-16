@@ -28,7 +28,7 @@ module Karafka
       def on_connection_listener_before_fetch_loop(event)
         listener_id = event[:caller].id
         subscription_group = event[:subscription_group]
-        consumer_group_id = subscription_group.consumer_group.id
+        consumer_group_id = subscription_group.group.id
         topics = subscription_group.topics.select(&:active?).map(&:name).join(", ")
         group_details = "#{consumer_group_id}/#{subscription_group.id}"
 
@@ -516,7 +516,7 @@ module Karafka
       # @return [Hash] hash with consumer specific info for details of error
       def extract_consumer_info(consumer)
         {
-          consumer_group: consumer.topic.consumer_group.id,
+          consumer_group: consumer.topic.group.id,
           subscription_group: consumer.topic.subscription_group.id,
           topic: consumer.topic.name,
           partition: consumer.partition,
@@ -529,7 +529,7 @@ module Karafka
       # @return [Hash] hash with client specific info for details of error
       def extract_client_info(client)
         {
-          consumer_group: client.subscription_group.consumer_group.id,
+          consumer_group: client.subscription_group.group.id,
           subscription_group: client.subscription_group.id
         }
       end
@@ -538,7 +538,7 @@ module Karafka
       # @return [Hash] hash with listener specific info for details of error
       def extract_listener_info(listener)
         {
-          consumer_group: listener.subscription_group.consumer_group.id,
+          consumer_group: listener.subscription_group.group.id,
           subscription_group: listener.subscription_group.id
         }
       end

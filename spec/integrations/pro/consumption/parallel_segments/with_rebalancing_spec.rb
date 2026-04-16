@@ -36,7 +36,7 @@ end
 
 class Consumer < Karafka::BaseConsumer
   def consume
-    segment_id = topic.consumer_group.segment_id
+    segment_id = topic.group.segment_id
 
     messages.each do |message|
       # Track each message with its key, segment_id, and batch info

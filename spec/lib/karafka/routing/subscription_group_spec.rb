@@ -9,7 +9,7 @@ RSpec.describe_current do
   describe "#id" do
     it do
       expect(group.id)
-        .to eq("#{topic.consumer_group.id}_#{topic.subscription_group_details.fetch(:name)}_0")
+        .to eq("#{topic.group.id}_#{topic.subscription_group_details.fetch(:name)}_0")
     end
   end
 
@@ -29,8 +29,14 @@ RSpec.describe_current do
     it { expect(group.topics).to eq([topic]) }
   end
 
+  describe "#group" do
+    it { expect(group.group).to eq(topic.group) }
+  end
+
   describe "#consumer_group" do
-    it { expect(group.consumer_group).to eq(topic.consumer_group) }
+    # Backwards-compatible alias of `#group`. Kept to protect the public API.
+    it { expect(group.consumer_group).to eq(topic.group) }
+    it { expect(group.consumer_group).to be(group.group) }
   end
 
   describe "#subscriptions" do
@@ -48,7 +54,7 @@ RSpec.describe_current do
   end
 
   describe "#consumer_group_id" do
-    it { expect(group.consumer_group_id).to eq(topic.consumer_group.id) }
+    it { expect(group.consumer_group_id).to eq(topic.group.id) }
   end
 
   describe "#kafka" do
