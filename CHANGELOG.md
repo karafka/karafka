@@ -1,6 +1,7 @@
 # Karafka Framework Changelog
 
 ## 2.5.10 (Unreleased)
+- [Enhancement] Move processing strategies (`Karafka::Processing::Strategies::*` and `Karafka::Pro::Processing::Strategies::*`) under the `ConsumerGroups` namespace (internal). Prepares the processing layer for parallel `ShareGroups::Strategies` once KIP-932 lands.
 - [Enhancement] Move `Karafka::Processing::StrategySelector` and `Karafka::Pro::Processing::StrategySelector` under the `ConsumerGroups` namespace (internal). The `config.processing.strategy_selector` default is updated accordingly; user-provided selectors are unaffected.
 - [Enhancement] Move `Karafka::Connection::RebalanceManager` to `Karafka::Connection::ConsumerGroups::RebalanceManager` (internal). Prepares the connection layer for a parallel `ShareGroups` namespace once KIP-932 lands.
 - [Enhancement] Move the rebalance librdkafka callback to `Karafka::Instrumentation::Callbacks::ConsumerGroups::Rebalance` (internal). Published event names (`rebalance.*`) and payload shape are unchanged.

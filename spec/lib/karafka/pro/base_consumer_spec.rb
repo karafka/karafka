@@ -40,7 +40,7 @@ RSpec.describe Karafka::BaseConsumer, type: :pro do
     instance
   end
 
-  let(:strategy) { Karafka::Pro::Processing::Strategies::Default }
+  let(:strategy) { Karafka::Pro::Processing::ConsumerGroups::Strategies::Default }
   let(:coordinator) { build(:processing_coordinator_pro, seek_offset: nil) }
   let(:client) { instance_double(Karafka::Connection::Client, pause: true, seek: true) }
   let(:first_message) { instance_double(Karafka::Messages::Message, offset: offset, partition: 0) }
@@ -91,7 +91,7 @@ RSpec.describe Karafka::BaseConsumer, type: :pro do
   end
 
   describe "#on_before_schedule_consume for non LRJ" do
-    let(:strategy) { Karafka::Pro::Processing::Strategies::Default }
+    let(:strategy) { Karafka::Pro::Processing::ConsumerGroups::Strategies::Default }
 
     before { allow(client).to receive(:pause) }
 
@@ -102,7 +102,7 @@ RSpec.describe Karafka::BaseConsumer, type: :pro do
   end
 
   describe "#on_before_schedule_tick" do
-    let(:strategy) { Karafka::Pro::Processing::Strategies::Default }
+    let(:strategy) { Karafka::Pro::Processing::ConsumerGroups::Strategies::Default }
 
     it "expect to run handle_before_schedule_tick" do
       expect { consumer.on_before_schedule_tick }.not_to raise_error
@@ -122,7 +122,7 @@ RSpec.describe Karafka::BaseConsumer, type: :pro do
   end
 
   describe "#on_consume and #on_after_consume for non LRJ" do
-    let(:strategy) { Karafka::Pro::Processing::Strategies::Mom::Default }
+    let(:strategy) { Karafka::Pro::Processing::ConsumerGroups::Strategies::Mom::Default }
 
     let(:consume_with_after) do
       lambda do
@@ -201,7 +201,7 @@ RSpec.describe Karafka::BaseConsumer, type: :pro do
     end
 
     context "when everything went ok on consume with automatic offset management" do
-      let(:strategy) { Karafka::Pro::Processing::Strategies::Lrj::Default }
+      let(:strategy) { Karafka::Pro::Processing::ConsumerGroups::Strategies::Lrj::Default }
 
       before do
         topic.manual_offset_management false
@@ -268,7 +268,7 @@ RSpec.describe Karafka::BaseConsumer, type: :pro do
   end
 
   describe "#on_before_schedule_consume for LRJ" do
-    let(:strategy) { Karafka::Pro::Processing::Strategies::Lrj::Default }
+    let(:strategy) { Karafka::Pro::Processing::ConsumerGroups::Strategies::Lrj::Default }
 
     before do
       topic.long_running_job true
@@ -286,7 +286,7 @@ RSpec.describe Karafka::BaseConsumer, type: :pro do
   end
 
   describe "#on_consume and #on_after_consume for LRJ" do
-    let(:strategy) { Karafka::Pro::Processing::Strategies::Lrj::Default }
+    let(:strategy) { Karafka::Pro::Processing::ConsumerGroups::Strategies::Lrj::Default }
 
     let(:consume_with_after) do
       lambda do
@@ -306,7 +306,7 @@ RSpec.describe Karafka::BaseConsumer, type: :pro do
     end
 
     context "when everything went ok on consume with manual offset management" do
-      let(:strategy) { Karafka::Pro::Processing::Strategies::Lrj::Mom }
+      let(:strategy) { Karafka::Pro::Processing::ConsumerGroups::Strategies::Lrj::Mom }
 
       before { topic.manual_offset_management true }
 
@@ -334,7 +334,7 @@ RSpec.describe Karafka::BaseConsumer, type: :pro do
     end
 
     context "when there was an error on consume with manual offset management" do
-      let(:strategy) { Karafka::Pro::Processing::Strategies::Mom::Default }
+      let(:strategy) { Karafka::Pro::Processing::ConsumerGroups::Strategies::Mom::Default }
 
       let(:working_class) do
         ClassBuilder.inherit(described_class) do
@@ -549,7 +549,7 @@ RSpec.describe Karafka::BaseConsumer, type: :pro do
 
     context "when everything went ok on tick" do
       before do
-        consumer.singleton_class.include(Karafka::Processing::Strategies::Default)
+        consumer.singleton_class.include(Karafka::Processing::ConsumerGroups::Strategies::Default)
         consumer.singleton_class.include(Karafka::Pro::Processing::PeriodicJob::Consumer)
       end
 

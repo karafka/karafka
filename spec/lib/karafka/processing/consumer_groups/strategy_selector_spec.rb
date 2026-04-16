@@ -6,19 +6,19 @@ RSpec.describe_current do
   let(:topic) { build(:routing_topic) }
 
   context "when no features enabled" do
-    it { expect(selected_strategy).to eq(Karafka::Processing::Strategies::Default) }
+    it { expect(selected_strategy).to eq(Karafka::Processing::ConsumerGroups::Strategies::Default) }
   end
 
   context "when manual offset management is on" do
     before { topic.manual_offset_management(true) }
 
-    it { expect(selected_strategy).to eq(Karafka::Processing::Strategies::Mom) }
+    it { expect(selected_strategy).to eq(Karafka::Processing::ConsumerGroups::Strategies::Mom) }
   end
 
   context "when dead letter queue is on" do
     before { topic.dead_letter_queue(topic: "dead") }
 
-    it { expect(selected_strategy).to eq(Karafka::Processing::Strategies::Dlq) }
+    it { expect(selected_strategy).to eq(Karafka::Processing::ConsumerGroups::Strategies::Dlq) }
   end
 
   context "when dead letter queue is on with mom" do
@@ -27,7 +27,7 @@ RSpec.describe_current do
       topic.manual_offset_management(true)
     end
 
-    it { expect(selected_strategy).to eq(Karafka::Processing::Strategies::DlqMom) }
+    it { expect(selected_strategy).to eq(Karafka::Processing::ConsumerGroups::Strategies::DlqMom) }
   end
 
   context "when dead letter queue is on with mom and aj" do
@@ -37,7 +37,7 @@ RSpec.describe_current do
       topic.manual_offset_management(true)
     end
 
-    it { expect(selected_strategy).to eq(Karafka::Processing::Strategies::AjDlqMom) }
+    it { expect(selected_strategy).to eq(Karafka::Processing::ConsumerGroups::Strategies::AjDlqMom) }
   end
 
   context "when mom is on with aj" do
@@ -46,7 +46,7 @@ RSpec.describe_current do
       topic.manual_offset_management(true)
     end
 
-    it { expect(selected_strategy).to eq(Karafka::Processing::Strategies::AjMom) }
+    it { expect(selected_strategy).to eq(Karafka::Processing::ConsumerGroups::Strategies::AjMom) }
   end
 
   # Those specs make sure, that every expected features combination has a matching strategy

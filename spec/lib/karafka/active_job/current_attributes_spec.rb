@@ -68,7 +68,7 @@ RSpec.describe_current do
       consumer = Karafka::ActiveJob::Consumer.new
       consumer.client = client
       consumer.coordinator = coordinator
-      consumer.singleton_class.include Karafka::Processing::Strategies::Default
+      consumer.singleton_class.include Karafka::Processing::ConsumerGroups::Strategies::Default
       consumer
     end
 

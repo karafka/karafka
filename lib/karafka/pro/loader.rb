@@ -38,7 +38,7 @@ module Karafka
       FORCE_LOADED = %w[
         active_job/dispatcher
         processing/consumer_groups/jobs/consume_non_blocking
-        processing/strategies/base
+        processing/consumer_groups/strategies/base
         routing/features/base
         encryption
         encryption/cipher

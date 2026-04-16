@@ -34,19 +34,19 @@ RSpec.describe_current do
   let(:topic) { build(:routing_topic) }
 
   context "when no features enabled" do
-    it { expect(selected_strategy).to eq(Karafka::Pro::Processing::Strategies::Default) }
+    it { expect(selected_strategy).to eq(Karafka::Pro::Processing::ConsumerGroups::Strategies::Default) }
   end
 
   context "when manual offset management is on" do
     before { topic.manual_offset_management(true) }
 
-    it { expect(selected_strategy).to eq(Karafka::Pro::Processing::Strategies::Mom::Default) }
+    it { expect(selected_strategy).to eq(Karafka::Pro::Processing::ConsumerGroups::Strategies::Mom::Default) }
   end
 
   context "when virtual partitions are on" do
     before { topic.virtual_partitions(partitioner: true) }
 
-    it { expect(selected_strategy).to eq(Karafka::Pro::Processing::Strategies::Vp::Default) }
+    it { expect(selected_strategy).to eq(Karafka::Pro::Processing::ConsumerGroups::Strategies::Vp::Default) }
   end
 
   context "when lrj is enabled with vp" do
@@ -55,7 +55,7 @@ RSpec.describe_current do
       topic.virtual_partitions(partitioner: true)
     end
 
-    it { expect(selected_strategy).to eq(Karafka::Pro::Processing::Strategies::Lrj::Vp) }
+    it { expect(selected_strategy).to eq(Karafka::Pro::Processing::ConsumerGroups::Strategies::Lrj::Vp) }
   end
 
   context "when lrj is enabled with mom" do
@@ -64,7 +64,7 @@ RSpec.describe_current do
       topic.manual_offset_management(true)
     end
 
-    it { expect(selected_strategy).to eq(Karafka::Pro::Processing::Strategies::Lrj::Mom) }
+    it { expect(selected_strategy).to eq(Karafka::Pro::Processing::ConsumerGroups::Strategies::Lrj::Mom) }
   end
 
   context "when lrj is enabled with mom and thg" do
@@ -74,13 +74,13 @@ RSpec.describe_current do
       topic.throttling(limit: 5, interval: 100)
     end
 
-    it { expect(selected_strategy).to eq(Karafka::Pro::Processing::Strategies::Lrj::FtrMom) }
+    it { expect(selected_strategy).to eq(Karafka::Pro::Processing::ConsumerGroups::Strategies::Lrj::FtrMom) }
   end
 
   context "when lrj is enabled" do
     before { topic.long_running_job(true) }
 
-    it { expect(selected_strategy).to eq(Karafka::Pro::Processing::Strategies::Lrj::Default) }
+    it { expect(selected_strategy).to eq(Karafka::Pro::Processing::ConsumerGroups::Strategies::Lrj::Default) }
   end
 
   context "when aj is enabled with mom and vp" do
@@ -90,7 +90,7 @@ RSpec.describe_current do
       topic.virtual_partitions(partitioner: true)
     end
 
-    it { expect(selected_strategy).to eq(Karafka::Pro::Processing::Strategies::Aj::MomVp) }
+    it { expect(selected_strategy).to eq(Karafka::Pro::Processing::ConsumerGroups::Strategies::Aj::MomVp) }
   end
 
   context "when aj is enabled with mom and thg" do
@@ -100,7 +100,7 @@ RSpec.describe_current do
       topic.throttling(limit: 5, interval: 100)
     end
 
-    it { expect(selected_strategy).to eq(Karafka::Pro::Processing::Strategies::Aj::FtrMom) }
+    it { expect(selected_strategy).to eq(Karafka::Pro::Processing::ConsumerGroups::Strategies::Aj::FtrMom) }
   end
 
   context "when aj is enabled with mom, thg and vp" do
@@ -111,7 +111,7 @@ RSpec.describe_current do
       topic.virtual_partitions(partitioner: true)
     end
 
-    it { expect(selected_strategy).to eq(Karafka::Pro::Processing::Strategies::Aj::FtrMomVp) }
+    it { expect(selected_strategy).to eq(Karafka::Pro::Processing::ConsumerGroups::Strategies::Aj::FtrMomVp) }
   end
 
   context "when aj is enabled with lrj, mom, thg and vp" do
@@ -125,7 +125,7 @@ RSpec.describe_current do
     end
 
     it do
-      expect(selected_strategy).to eq(Karafka::Pro::Processing::Strategies::Aj::DlqFtrLrjMomVp)
+      expect(selected_strategy).to eq(Karafka::Pro::Processing::ConsumerGroups::Strategies::Aj::DlqFtrLrjMomVp)
     end
   end
 
@@ -135,7 +135,7 @@ RSpec.describe_current do
       topic.manual_offset_management(true)
     end
 
-    it { expect(selected_strategy).to eq(Karafka::Pro::Processing::Strategies::Aj::Mom) }
+    it { expect(selected_strategy).to eq(Karafka::Pro::Processing::ConsumerGroups::Strategies::Aj::Mom) }
   end
 
   context "when aj is enabled with lrj, mom and vp" do
@@ -146,7 +146,7 @@ RSpec.describe_current do
       topic.virtual_partitions(partitioner: true)
     end
 
-    it { expect(selected_strategy).to eq(Karafka::Pro::Processing::Strategies::Aj::LrjMomVp) }
+    it { expect(selected_strategy).to eq(Karafka::Pro::Processing::ConsumerGroups::Strategies::Aj::LrjMomVp) }
   end
 
   context "when aj is enabled with lrj and mom" do
@@ -156,7 +156,7 @@ RSpec.describe_current do
       topic.long_running_job(true)
     end
 
-    it { expect(selected_strategy).to eq(Karafka::Pro::Processing::Strategies::Aj::LrjMom) }
+    it { expect(selected_strategy).to eq(Karafka::Pro::Processing::ConsumerGroups::Strategies::Aj::LrjMom) }
   end
 
   context "when aj is enabled with lrj, mom and thg" do
@@ -167,7 +167,7 @@ RSpec.describe_current do
       topic.throttling(limit: 5, interval: 100)
     end
 
-    it { expect(selected_strategy).to eq(Karafka::Pro::Processing::Strategies::Aj::FtrLrjMom) }
+    it { expect(selected_strategy).to eq(Karafka::Pro::Processing::ConsumerGroups::Strategies::Aj::FtrLrjMom) }
   end
 
   context "when aj is enabled with lrj, mom and ftr" do
@@ -178,7 +178,7 @@ RSpec.describe_current do
       topic.filter -> {}
     end
 
-    it { expect(selected_strategy).to eq(Karafka::Pro::Processing::Strategies::Aj::FtrLrjMom) }
+    it { expect(selected_strategy).to eq(Karafka::Pro::Processing::ConsumerGroups::Strategies::Aj::FtrLrjMom) }
   end
 
   context "when we enable not supported combination" do
@@ -193,7 +193,7 @@ RSpec.describe_current do
   context "when dlq is enabled" do
     before { topic.dead_letter_queue(topic: "test") }
 
-    it { expect(selected_strategy).to eq(Karafka::Pro::Processing::Strategies::Dlq::Default) }
+    it { expect(selected_strategy).to eq(Karafka::Pro::Processing::ConsumerGroups::Strategies::Dlq::Default) }
   end
 
   context "when dlq with vp is enabled" do
@@ -202,7 +202,7 @@ RSpec.describe_current do
       topic.virtual_partitions(partitioner: true)
     end
 
-    it { expect(selected_strategy).to eq(Karafka::Pro::Processing::Strategies::Dlq::Vp) }
+    it { expect(selected_strategy).to eq(Karafka::Pro::Processing::ConsumerGroups::Strategies::Dlq::Vp) }
   end
 
   context "when dlq with mom is enabled" do
@@ -211,7 +211,7 @@ RSpec.describe_current do
       topic.manual_offset_management(true)
     end
 
-    it { expect(selected_strategy).to eq(Karafka::Pro::Processing::Strategies::Dlq::Mom) }
+    it { expect(selected_strategy).to eq(Karafka::Pro::Processing::ConsumerGroups::Strategies::Dlq::Mom) }
   end
 
   context "when dlq, mom and lrj is enabled" do
@@ -221,7 +221,7 @@ RSpec.describe_current do
       topic.long_running_job(true)
     end
 
-    it { expect(selected_strategy).to eq(Karafka::Pro::Processing::Strategies::Dlq::LrjMom) }
+    it { expect(selected_strategy).to eq(Karafka::Pro::Processing::ConsumerGroups::Strategies::Dlq::LrjMom) }
   end
 
   context "when dlq, mom, lrj and thg is enabled" do
@@ -232,7 +232,7 @@ RSpec.describe_current do
       topic.throttling(limit: 100, interval: 100)
     end
 
-    it { expect(selected_strategy).to eq(Karafka::Pro::Processing::Strategies::Dlq::FtrLrjMom) }
+    it { expect(selected_strategy).to eq(Karafka::Pro::Processing::ConsumerGroups::Strategies::Dlq::FtrLrjMom) }
   end
 
   context "when dlq, lrj and thg is enabled" do
@@ -242,7 +242,7 @@ RSpec.describe_current do
       topic.throttling(limit: 100, interval: 100)
     end
 
-    it { expect(selected_strategy).to eq(Karafka::Pro::Processing::Strategies::Dlq::FtrLrj) }
+    it { expect(selected_strategy).to eq(Karafka::Pro::Processing::ConsumerGroups::Strategies::Dlq::FtrLrj) }
   end
 
   context "when dlq, lrj, vp and thg is enabled" do
@@ -253,7 +253,7 @@ RSpec.describe_current do
       topic.virtual_partitions(partitioner: true)
     end
 
-    it { expect(selected_strategy).to eq(Karafka::Pro::Processing::Strategies::Dlq::FtrLrjVp) }
+    it { expect(selected_strategy).to eq(Karafka::Pro::Processing::ConsumerGroups::Strategies::Dlq::FtrLrjVp) }
   end
 
   context "when dlq and thg" do
@@ -262,7 +262,7 @@ RSpec.describe_current do
       topic.throttling(limit: 100, interval: 100)
     end
 
-    it { expect(selected_strategy).to eq(Karafka::Pro::Processing::Strategies::Dlq::Ftr) }
+    it { expect(selected_strategy).to eq(Karafka::Pro::Processing::ConsumerGroups::Strategies::Dlq::Ftr) }
   end
 
   context "when dlq, thg and vps" do
@@ -272,7 +272,7 @@ RSpec.describe_current do
       topic.virtual_partitions(partitioner: true)
     end
 
-    it { expect(selected_strategy).to eq(Karafka::Pro::Processing::Strategies::Dlq::FtrVp) }
+    it { expect(selected_strategy).to eq(Karafka::Pro::Processing::ConsumerGroups::Strategies::Dlq::FtrVp) }
   end
 
   context "when aj, dlq and mom is enabled" do
@@ -282,7 +282,7 @@ RSpec.describe_current do
       topic.active_job(true)
     end
 
-    it { expect(selected_strategy).to eq(Karafka::Pro::Processing::Strategies::Aj::DlqMom) }
+    it { expect(selected_strategy).to eq(Karafka::Pro::Processing::ConsumerGroups::Strategies::Aj::DlqMom) }
   end
 
   context "when aj, dlq, mom and thg is enabled" do
@@ -293,7 +293,7 @@ RSpec.describe_current do
       topic.throttling(limit: 100, interval: 100)
     end
 
-    it { expect(selected_strategy).to eq(Karafka::Pro::Processing::Strategies::Aj::DlqFtrMom) }
+    it { expect(selected_strategy).to eq(Karafka::Pro::Processing::ConsumerGroups::Strategies::Aj::DlqFtrMom) }
   end
 
   context "when aj, dlq, mom, thg and vp is enabled" do
@@ -305,7 +305,7 @@ RSpec.describe_current do
       topic.virtual_partitions(partitioner: true)
     end
 
-    it { expect(selected_strategy).to eq(Karafka::Pro::Processing::Strategies::Aj::DlqFtrMomVp) }
+    it { expect(selected_strategy).to eq(Karafka::Pro::Processing::ConsumerGroups::Strategies::Aj::DlqFtrMomVp) }
   end
 
   context "when aj, dlq, mom and vp is enabled" do
@@ -316,7 +316,7 @@ RSpec.describe_current do
       topic.active_job(true)
     end
 
-    it { expect(selected_strategy).to eq(Karafka::Pro::Processing::Strategies::Aj::DlqMomVp) }
+    it { expect(selected_strategy).to eq(Karafka::Pro::Processing::ConsumerGroups::Strategies::Aj::DlqMomVp) }
   end
 
   context "when aj, dlq, mom and lrj is enabled" do
@@ -327,7 +327,7 @@ RSpec.describe_current do
       topic.active_job(true)
     end
 
-    it { expect(selected_strategy).to eq(Karafka::Pro::Processing::Strategies::Aj::DlqLrjMom) }
+    it { expect(selected_strategy).to eq(Karafka::Pro::Processing::ConsumerGroups::Strategies::Aj::DlqLrjMom) }
   end
 
   context "when thg and vps are enabled" do
@@ -336,7 +336,7 @@ RSpec.describe_current do
       topic.throttling(limit: 100, interval: 100)
     end
 
-    it { expect(selected_strategy).to eq(Karafka::Pro::Processing::Strategies::Ftr::Vp) }
+    it { expect(selected_strategy).to eq(Karafka::Pro::Processing::ConsumerGroups::Strategies::Ftr::Vp) }
   end
 
   context "when mom and thg are enabled" do
@@ -345,7 +345,7 @@ RSpec.describe_current do
       topic.throttling(limit: 100, interval: 100)
     end
 
-    it { expect(selected_strategy).to eq(Karafka::Pro::Processing::Strategies::Mom::Ftr) }
+    it { expect(selected_strategy).to eq(Karafka::Pro::Processing::ConsumerGroups::Strategies::Mom::Ftr) }
   end
 
   context "when lrj and thg are enabled" do
@@ -354,7 +354,7 @@ RSpec.describe_current do
       topic.throttling(limit: 100, interval: 100)
     end
 
-    it { expect(selected_strategy).to eq(Karafka::Pro::Processing::Strategies::Lrj::Ftr) }
+    it { expect(selected_strategy).to eq(Karafka::Pro::Processing::ConsumerGroups::Strategies::Lrj::Ftr) }
   end
 
   # Those specs make sure, that every expected features combination has a matching strategy
