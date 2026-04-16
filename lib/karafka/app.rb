@@ -37,13 +37,13 @@ module Karafka
         # We then narrow this to active consumer groups from which we select active subscription
         # groups.
         consumer_groups
-          .map { |cg| [cg, cg.subscription_groups] }
-          .select { |cg, _| cg.active? }
+          .map { |group| [group, group.subscription_groups] }
+          .select { |group, _| group.active? }
           .select { |_, sgs| sgs.delete_if { |sg| !sg.active? } }
           .delete_if { |_, sgs| sgs.empty? }
-          .each { |_, sgs| sgs.each { |sg| sg.topics.delete_if { |top| !top.active? } } }
+          .each { |_, sgs| sgs.each { |sg| sg.topics.delete_if { |topic| !topic.active? } } }
           .each { |_, sgs| sgs.delete_if { |sg| sg.topics.empty? } }
-          .reject { |cg, _| cg.subscription_groups.empty? }
+          .reject { |group, _| group.subscription_groups.empty? }
           .to_h
       end
 

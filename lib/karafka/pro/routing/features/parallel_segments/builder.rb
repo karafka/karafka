@@ -39,7 +39,7 @@ module Karafka
             # @param group_id [String, Symbol] name for consumer group
             # @param block [Proc] proc that should be executed in the proxy context
             def consumer_group(group_id, &block)
-              existing = find { |cg| cg.name == group_id.to_s }
+              existing = find { |group| group.name == group_id.to_s }
 
               # Re-opening a CG should not change its parallel setup
               if existing

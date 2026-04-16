@@ -16,7 +16,7 @@ module Karafka
           include
           exclude
         ].each do |action|
-          optional(:"#{action}_consumer_groups") { |cg| cg.is_a?(Array) }
+          optional(:"#{action}_consumer_groups") { |val| val.is_a?(Array) }
           optional(:"#{action}_subscription_groups") { |sg| sg.is_a?(Array) }
           optional(:"#{action}_topics") { |topics| topics.is_a?(Array) }
 

@@ -125,7 +125,7 @@ module Karafka
       # Builds and saves given consumer group
       # @param group_id [String, Symbol] name for consumer group
       def consumer_group(group_id, &)
-        group = find { |cg| cg.name == group_id.to_s }
+        group = find { |existing| existing.name == group_id.to_s }
 
         if group
           Proxy.new(group, &).target

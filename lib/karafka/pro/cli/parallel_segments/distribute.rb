@@ -101,15 +101,15 @@ module Karafka
           # It prevents users from overwriting the already set segments distribution.
           # Adding new topics to the same parallel segments consumer group does not require us to
           # run this at all and on top of that users can always use `--consumer_groups` flag to
-          # limit the cgs that we will be operating here
+          # limit the groups that we will be operating here
           #
           # @param offsets [Hash]
           # @param segments [Array<Karafka::Routing::ConsumerGroup>]
           def validate!(offsets, segments)
             segments_names = segments.map(&:name)
 
-            offsets.each do |cg_name, topics|
-              next unless segments_names.include?(cg_name)
+            offsets.each do |group_name, topics|
+              next unless segments_names.include?(group_name)
 
               topics.each do |topic_name, partitions|
                 partitions.each do |partition_id, offset|
@@ -117,7 +117,7 @@ module Karafka
 
                   raise(
                     Karafka::Errors::CommandValidationError,
-                    "Parallel segment #{red(cg_name)} already has offset #{red(offset)} " \
+                    "Parallel segment #{red(group_name)} already has offset #{red(offset)} " \
                     "set for #{red("#{topic_name}##{partition_id}")}"
                   )
                 end
@@ -136,8 +136,8 @@ module Karafka
             distributions = []
             segments_names = segments.map(&:name)
 
-            offsets.each do |cg_name, topics|
-              next if segments_names.include?(cg_name)
+            offsets.each do |group_name, topics|
+              next if segments_names.include?(group_name)
 
               distribution = {}
 
