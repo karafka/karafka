@@ -56,7 +56,7 @@ end
 
 draw_routes do
   2.times do |i|
-    consumer_group DT.consumer_groups[i] do
+    consumer_group DT.groups[i] do
       topic DT.topics[i] do
         consumer Consumer
         filter VpStabilizer

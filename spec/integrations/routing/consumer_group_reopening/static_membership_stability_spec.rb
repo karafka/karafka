@@ -15,7 +15,7 @@ Consumer2 = Class.new(Karafka::BaseConsumer)
 
 # First draw - define consumer group with one topic
 draw_routes(create_topics: false) do
-  consumer_group DT.consumer_groups[0] do
+  consumer_group DT.groups[0] do
     topic DT.topics[0] do
       consumer Consumer1
     end
@@ -23,7 +23,7 @@ draw_routes(create_topics: false) do
 end
 
 # Capture the subscription group details after first draw
-group = Karafka::App.routes.find { |cg| cg.name == DT.consumer_groups[0] }
+group = Karafka::App.routes.find { |cg| cg.name == DT.groups[0] }
 first_sg = group.subscription_groups.first
 first_sg_id = first_sg.id
 first_sg_kafka = first_sg.kafka.dup
@@ -35,7 +35,7 @@ raise "group.instance.id should include position" unless first_group_instance_id
 
 # Second draw - reopen consumer group and add another topic
 draw_routes(create_topics: false) do
-  consumer_group DT.consumer_groups[0] do
+  consumer_group DT.groups[0] do
     topic DT.topics[1] do
       consumer Consumer2
     end

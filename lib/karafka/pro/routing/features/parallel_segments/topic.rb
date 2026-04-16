@@ -42,7 +42,7 @@ module Karafka
             def initialize(*args)
               super
 
-              return unless consumer_group.parallel_segments?
+              return unless group.parallel_segments?
 
               builder = lambda do |topic, _partition|
                 mom = topic.manual_offset_management?
@@ -52,9 +52,9 @@ module Karafka
                 filter_class = mom ? filter_scope::Mom : filter_scope::Default
 
                 filter_class.new(
-                  segment_id: consumer_group.segment_id,
-                  partitioner: consumer_group.parallel_segments.partitioner,
-                  reducer: consumer_group.parallel_segments.reducer
+                  segment_id: group.segment_id,
+                  partitioner: group.parallel_segments.partitioner,
+                  reducer: group.parallel_segments.reducer
                 )
               end
 

@@ -61,8 +61,8 @@ module Karafka
                 App.config.swarm.nodes.times { |node_id| nodes_setup[node_id] }
                 nodes_setup.freeze
 
-                builder.each do |consumer_group|
-                  consumer_group.topics.each do |topic|
+                builder.each do |group|
+                  group.topics.each do |topic|
                     nodes_setup.each do |node_id, details|
                       next unless topic.active?
                       next unless topic.swarm.nodes.include?(node_id)

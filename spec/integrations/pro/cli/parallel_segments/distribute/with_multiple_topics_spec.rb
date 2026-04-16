@@ -32,12 +32,12 @@
 
 setup_karafka
 
-segment1 = "#{DT.consumer_group}-parallel-0"
-segment2 = "#{DT.consumer_group}-parallel-1"
+segment1 = "#{DT.group}-parallel-0"
+segment2 = "#{DT.group}-parallel-1"
 topics = [DT.topic, "#{DT.topic}_2", "#{DT.topic}_3"]
 
 draw_routes do
-  consumer_group DT.consumer_group do
+  consumer_group DT.group do
     parallel_segments(
       count: 2,
       partitioner: ->(msg) { msg.key }
@@ -61,7 +61,7 @@ origin_offsets = topics.each_with_object({}) do |topic_name, hash|
   hash[topic_name] = { 0 => 3, 1 => 2 }
 end
 
-Karafka::Admin.seek_consumer_group(DT.consumer_group, origin_offsets)
+Karafka::Admin.seek_consumer_group(DT.group, origin_offsets)
 
 ARGV[0] = "parallel_segments"
 ARGV[1] = "distribute"

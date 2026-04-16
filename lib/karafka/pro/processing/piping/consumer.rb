@@ -118,7 +118,7 @@ module Karafka
                 "source_topic" => message.topic,
                 "source_partition" => message.partition.to_s,
                 "source_offset" => message.offset.to_s,
-                "source_consumer_group" => self.topic.consumer_group.id
+                "source_consumer_group" => self.topic.group.id
               )
             }
 

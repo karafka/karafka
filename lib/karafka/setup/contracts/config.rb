@@ -8,7 +8,7 @@ module Karafka
       #
       # @note There are many more configuration options inside of the
       #   `Karafka::Setup::Config` model, but we don't validate them here as they are
-      #   validated per each route (topic + consumer_group) because they can be overwritten,
+      #   validated per each route (topic + group) because they can be overwritten,
       #   so we validate all of that once all the routes are defined and ready.
       class Config < Karafka::Contracts::Base
         configure do |config|

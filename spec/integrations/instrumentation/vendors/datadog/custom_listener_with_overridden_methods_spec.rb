@@ -82,8 +82,8 @@ assert DT[:statistics_emitted_called].size >= 3,
 
 # Verify all calls were for the correct consumer group
 DT[:statistics_emitted_called].each do |cg_id|
-  assert_equal DT.consumer_group.to_s, cg_id,
-    "Expected consumer_group_id to be #{DT.consumer_group}, got #{cg_id}"
+  assert_equal DT.group.to_s, cg_id,
+    "Expected consumer_group_id to be #{DT.group}, got #{cg_id}"
 end
 
 # Verify statistics-derived metrics were published (from on_statistics_emitted)

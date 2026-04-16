@@ -22,7 +22,7 @@ time_ref = nil
 end
 
 Karafka::Admin.seek_consumer_group(
-  DT.consumer_group,
+  DT.group,
   {
     DT.topic => {
       0 => time_ref,
@@ -32,7 +32,7 @@ Karafka::Admin.seek_consumer_group(
 )
 
 results = Karafka::Admin.read_lags_with_offsets
-cg = DT.consumer_group
+cg = DT.group
 part_results = results.fetch(cg)
 
 assert_equal 4, part_results[DT.topic][0][:offset]

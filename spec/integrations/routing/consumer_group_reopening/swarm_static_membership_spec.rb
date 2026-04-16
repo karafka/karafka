@@ -17,7 +17,7 @@ Consumer3 = Class.new(Karafka::BaseConsumer)
 
 # First draw - define first consumer group with one topic
 draw_routes(create_topics: false) do
-  consumer_group DT.consumer_groups[0] do
+  consumer_group DT.groups[0] do
     topic DT.topics[0] do
       consumer Consumer1
     end
@@ -26,7 +26,7 @@ end
 
 # Second draw - define second consumer group with one topic
 draw_routes(create_topics: false) do
-  consumer_group DT.consumer_groups[1] do
+  consumer_group DT.groups[1] do
     topic DT.topics[1] do
       consumer Consumer2
     end
@@ -34,8 +34,8 @@ draw_routes(create_topics: false) do
 end
 
 # Capture state after initial draws
-group1 = Karafka::App.routes.find { |cg| cg.name == DT.consumer_groups[0] }
-group2 = Karafka::App.routes.find { |cg| cg.name == DT.consumer_groups[1] }
+group1 = Karafka::App.routes.find { |cg| cg.name == DT.groups[0] }
+group2 = Karafka::App.routes.find { |cg| cg.name == DT.groups[1] }
 
 sg1_initial = group1.subscription_groups.first
 sg2_initial = group2.subscription_groups.first
@@ -54,7 +54,7 @@ raise "Instance IDs should be different" if sg1_initial_instance_id == sg2_initi
 
 # Third draw - reopen first consumer group and add another topic
 draw_routes(create_topics: false) do
-  consumer_group DT.consumer_groups[0] do
+  consumer_group DT.groups[0] do
     topic DT.topics[2] do
       consumer Consumer3
     end

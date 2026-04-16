@@ -37,7 +37,7 @@ end
 
 class Consumer < Karafka::BaseConsumer
   def consume
-    segment_id = topic.consumer_group.segment_id
+    segment_id = topic.group.segment_id
     batch_id = SecureRandom.hex(4)
 
     transaction do
@@ -66,7 +66,7 @@ class Consumer < Karafka::BaseConsumer
 end
 
 draw_routes do
-  consumer_group DT.consumer_group do
+  consumer_group DT.group do
     parallel_segments(
       count: 3,
       partitioner: ->(message) { message.raw_key }
@@ -174,13 +174,13 @@ by_batch.each do |segment_id, batches|
 end
 
 # 4. Get committed offsets for all segments
-segment0_group_id = "#{DT.consumer_group}-parallel-0"
-segment1_group_id = "#{DT.consumer_group}-parallel-1"
-segment2_group_id = "#{DT.consumer_group}-parallel-2"
+segment0_group_id = "#{DT.group}-parallel-0"
+segment1_group_id = "#{DT.group}-parallel-1"
+segment2_group_id = "#{DT.group}-parallel-2"
 
-segment0_offset = fetch_next_offset(DT.topics[0], consumer_group_id: segment0_group_id)
-segment1_offset = fetch_next_offset(DT.topics[0], consumer_group_id: segment1_group_id)
-segment2_offset = fetch_next_offset(DT.topics[0], consumer_group_id: segment2_group_id)
+segment0_offset = fetch_next_offset(DT.topics[0], group_id: segment0_group_id)
+segment1_offset = fetch_next_offset(DT.topics[0], group_id: segment1_group_id)
+segment2_offset = fetch_next_offset(DT.topics[0], group_id: segment2_group_id)
 
 # All segments should have committed offsets
 assert(segment0_offset > 0, "Segment 0 did not commit any offsets")

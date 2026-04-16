@@ -27,7 +27,7 @@ draw_routes(create_topics: false) do
   end
 end
 
-cgs = Karafka::App.consumer_groups
+cgs = Karafka::App.routes
 
 assert_equal 1, cgs.size
 # First and last topic setup should go to one SG

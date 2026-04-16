@@ -13,7 +13,7 @@ class Consumer < Karafka::BaseConsumer
 end
 
 draw_routes do
-  consumer_group DT.consumer_group do
+  consumer_group DT.group do
     topic DT.topic do
       consumer Consumer
       config(partitions: 3)
@@ -36,14 +36,14 @@ start_karafka_and_wait_until do
 end
 
 Karafka::Admin.seek_consumer_group(
-  DT.consumer_group,
+  DT.group,
   {
     DT.topic => Time.now - (60 * 60)
   }
 )
 
 results = Karafka::Admin.read_lags_with_offsets
-cg = DT.consumer_group
+cg = DT.group
 part_results = results.fetch(cg).fetch(DT.topic)
 
 assert_equal 0, part_results[0][:offset]

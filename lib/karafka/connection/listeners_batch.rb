@@ -13,7 +13,7 @@ module Karafka
         # should be able to distribute work whenever any work is done in any of the listeners
         scheduler = App.config.internal.processing.scheduler_class.new(jobs_queue)
 
-        @batch = App.subscription_groups.flat_map do |_consumer_group, subscription_groups|
+        @batch = App.subscription_groups.flat_map do |_group, subscription_groups|
           subscription_groups.map do |subscription_group|
             Connection::Listener.new(
               subscription_group,

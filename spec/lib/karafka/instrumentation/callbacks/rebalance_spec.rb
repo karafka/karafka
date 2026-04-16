@@ -7,7 +7,7 @@ RSpec.describe_current do
   let(:subscription_group_id) { subscription_group.id }
   let(:consumer_group_id) { consumer_group.id }
   let(:client_id) { rand.to_s }
-  let(:consumer_group) { subscription_group.consumer_group }
+  let(:consumer_group) { subscription_group.group }
   let(:tpl) { rand }
   let(:monitor) { Karafka::Instrumentation::Monitor.new }
   let(:previous_monitor) { Karafka::App.config.monitor }
@@ -31,6 +31,8 @@ RSpec.describe_current do
         subscription_group: subscription_group,
         consumer_group_id: consumer_group_id,
         consumer_group: consumer_group,
+        group_id: consumer_group_id,
+        group: consumer_group,
         tpl: tpl,
         client_id: client_id
       )
@@ -72,6 +74,8 @@ RSpec.describe_current do
         subscription_group: subscription_group,
         consumer_group_id: consumer_group_id,
         consumer_group: consumer_group,
+        group_id: consumer_group_id,
+        group: consumer_group,
         tpl: tpl,
         client_id: client_id
       )
@@ -89,6 +93,8 @@ RSpec.describe_current do
         subscription_group: subscription_group,
         consumer_group_id: consumer_group_id,
         consumer_group: consumer_group,
+        group_id: consumer_group_id,
+        group: consumer_group,
         tpl: tpl,
         client_id: client_id
       )
@@ -106,6 +112,8 @@ RSpec.describe_current do
         subscription_group: subscription_group,
         consumer_group_id: consumer_group_id,
         consumer_group: consumer_group,
+        group_id: consumer_group_id,
+        group: consumer_group,
         tpl: tpl,
         client_id: client_id
       )

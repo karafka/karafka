@@ -36,4 +36,4 @@ end
 logs = strio.string
 
 assert logs.include?("Application maximum poll interval (10000ms)")
-assert logs.include?("[consumer_group: #{DT.consumer_group}")
+assert logs.include?("[consumer_group: #{DT.group}")

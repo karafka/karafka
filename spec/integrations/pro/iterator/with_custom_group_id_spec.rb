@@ -38,7 +38,7 @@
 setup_karafka
 
 draw_routes do
-  consumer_group DT.consumer_group do
+  consumer_group DT.group do
     topic DT.topic do
       active false
     end
@@ -81,8 +81,8 @@ assert_equal 10, offset
 
 # Verify that the routing-defined consumer group has NOT stored any offsets
 # (proving the iterator didn't use it)
-routing_results = Karafka::Admin.read_lags_with_offsets({ DT.consumer_group => [DT.topic] })
-routing_offset = routing_results.fetch(DT.consumer_group).fetch(DT.topic)[0][:offset]
+routing_results = Karafka::Admin.read_lags_with_offsets({ DT.group => [DT.topic] })
+routing_offset = routing_results.fetch(DT.group).fetch(DT.topic)[0][:offset]
 assert_equal(-1, routing_offset, "Iterator should not use routing-defined consumer group")
 
 # Second iteration: resume from where we left off using the same custom group ID
