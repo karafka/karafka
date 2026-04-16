@@ -33,8 +33,8 @@ assert_equal 0, Karafka::App.producer.config.logger.level
 assert_equal "all", Karafka::App.config.kafka[:debug]
 assert_equal "all", Karafka::App.producer.config.kafka[:debug]
 
-Karafka::App.consumer_groups.each do |consumer_group|
-  consumer_group.topics.each do |topic|
+Karafka::App.consumer_groups.each do |group|
+  group.topics.each do |topic|
     assert_equal "all", topic.kafka[:debug]
   end
 end
@@ -46,8 +46,8 @@ assert_equal 0, Karafka::App.producer.config.logger.level
 assert_equal "test", Karafka::App.config.kafka[:debug]
 assert_equal "test", Karafka::App.producer.config.kafka[:debug]
 
-Karafka::App.consumer_groups.each do |consumer_group|
-  consumer_group.topics.each do |topic|
+Karafka::App.consumer_groups.each do |group|
+  group.topics.each do |topic|
     assert_equal "test", topic.kafka[:debug]
   end
 end

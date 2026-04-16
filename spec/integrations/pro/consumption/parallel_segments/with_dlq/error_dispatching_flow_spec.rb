@@ -36,13 +36,13 @@ setup_karafka(allow_errors: %w[consumer.consume.error])
 # Define a DLQ strategy that dispatches to segment-specific DLQ topics
 class SegmentSpecificDlqStrategy
   def call(errors_tracker, attempt)
-    consumer_group = errors_tracker.topic.group
-    segment_id = consumer_group.segment_id
+    group = errors_tracker.topic.group
+    segment_id = group.segment_id
 
     # Track decision for verification
     DT[:dlq_decisions] << {
       segment_id: segment_id,
-      consumer_group: consumer_group.name,
+      group: group.name,
       attempt: attempt
     }
 

@@ -27,14 +27,14 @@ draw_routes(create_topics: false) do
 end
 
 # Verify the consumer group exists and has both topics
-consumer_group = Karafka::App.routes.find { |cg| cg.name == DT.groups[0] }
+group = Karafka::App.routes.find { |cg| cg.name == DT.groups[0] }
 
 # Basic assertions
 raise "Consumer group should exist" unless consumer_group
-raise "Wrong consumer group name" unless consumer_group.name == DT.groups[0]
-raise "Expected 2 topics, got #{consumer_group.topics.size}" unless consumer_group.topics.size == 2
+raise "Wrong consumer group name" unless group.name == DT.groups[0]
+raise "Expected 2 topics, got #{group.topics.size}" unless group.topics.size == 2
 
-topic_names = consumer_group.topics.map(&:name).sort
+topic_names = group.topics.map(&:name).sort
 expected_topics = [DT.topics[0], DT.topics[1]].sort
 
 unless topic_names == expected_topics
@@ -42,7 +42,7 @@ unless topic_names == expected_topics
 end
 
 # Verify each topic has the correct consumer
-topic0 = consumer_group.topics.to_a.find { |t| t.name == DT.topics[0] }
-topic1 = consumer_group.topics.to_a.find { |t| t.name == DT.topics[1] }
+topic0 = group.topics.to_a.find { |t| t.name == DT.topics[0] }
+topic1 = group.topics.to_a.find { |t| t.name == DT.topics[1] }
 raise "topic0 should have Consumer1" unless topic0.consumer == Consumer1
 raise "topic1 should have Consumer2" unless topic1.consumer == Consumer2

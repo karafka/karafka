@@ -28,9 +28,9 @@ module Karafka
       def on_connection_listener_before_fetch_loop(event)
         listener_id = event[:caller].id
         subscription_group = event[:subscription_group]
-        consumer_group_id = subscription_group.group.id
+        group_id = subscription_group.group.id
         topics = subscription_group.topics.select(&:active?).map(&:name).join(", ")
-        group_details = "#{consumer_group_id}/#{subscription_group.id}"
+        group_details = "#{group_id}/#{subscription_group.id}"
 
         info(
           "[#{listener_id}] Group #{group_details} subscribing to topics: #{topics}"
@@ -243,7 +243,7 @@ module Karafka
       # @param event [Karafka::Core::Monitoring::Event] event details with revoked partitions
       def on_rebalance_partitions_revoked(event)
         revoked_partitions = event[:tpl].to_h.transform_values { |part| part.map(&:partition) }
-        group_id = event[:consumer_group_id]
+        group_id = event[:group_id]
         client_id = event[:client_id]
         group_prefix = "[#{client_id}] Group #{group_id} rebalance"
 
@@ -261,7 +261,7 @@ module Karafka
       # @param event [Karafka::Core::Monitoring::Event] event details with assigned partitions
       def on_rebalance_partitions_assigned(event)
         assigned_partitions = event[:tpl].to_h.transform_values { |part| part.map(&:partition) }
-        group_id = event[:consumer_group_id]
+        group_id = event[:group_id]
         client_id = event[:client_id]
         group_prefix = "[#{client_id}] Group #{group_id} rebalance"
 

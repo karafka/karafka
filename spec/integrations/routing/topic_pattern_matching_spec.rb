@@ -42,8 +42,8 @@ end
 
 # Verify all topics were registered in routing
 registered_topics = []
-Karafka::App.routes.each do |consumer_group|
-  consumer_group.topics.each do |topic|
+Karafka::App.routes.each do |group|
+  group.topics.each do |topic|
     registered_topics << topic.name
   end
 end

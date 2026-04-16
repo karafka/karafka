@@ -308,16 +308,16 @@ module Karafka
       # @example Trigger rebalance for a consumer group
       #   Karafka::Admin::ConsumerGroups.trigger_rebalance('my-group')
       def trigger_rebalance(consumer_group_id)
-        consumer_group = Karafka::App.routes.find { |cg| cg.id == consumer_group_id }
+        group = Karafka::App.routes.find { |cg| cg.id == consumer_group_id }
 
-        unless consumer_group
+        unless group
           raise(
             Errors::InvalidConfigurationError,
             "Consumer group '#{consumer_group_id}' not found in routing"
           )
         end
 
-        topics = consumer_group.topics.map(&:name)
+        topics = group.topics.map(&:name)
 
         if topics.empty?
           raise(
@@ -327,13 +327,13 @@ module Karafka
         end
 
         # Get the first topic to extract kafka settings
-        first_topic = consumer_group.topics.first
+        first_topic = group.topics.first
 
-        # Build consumer settings using the consumer group's kafka config from first topic
+        # Build consumer settings using the group's kafka config from first topic
         # This ensures we use the same settings as the actual consumers
         # Following the same pattern as in Karafka::Connection::Client#build_kafka
         consumer_settings = Setup::AttributesMap.consumer(first_topic.kafka.dup)
-        consumer_settings[:"group.id"] = consumer_group.id
+        consumer_settings[:"group.id"] = group.id
         consumer_settings[:"enable.auto.offset.store"] = false
         consumer_settings[:"auto.offset.reset"] ||= first_topic.initial_offset
 

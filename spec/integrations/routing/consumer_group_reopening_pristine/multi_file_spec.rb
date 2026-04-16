@@ -60,23 +60,23 @@ require File.join(current_dir, "routes", "users_routes")
 require File.join(current_dir, "routes", "orders_routes")
 
 # Verify that consumer group reopening worked correctly
-consumer_group = Karafka::App.routes.find { |cg| cg.name == DT.groups[0] }
+group = Karafka::App.routes.find { |cg| cg.name == DT.groups[0] }
 
-raise "Consumer group should exist" if consumer_group.nil?
+raise "Consumer group should exist" if group.nil?
 
 # Should have all 4 topics from both route files
 expected_topics = [DT.topics[0], DT.topics[1], DT.topics[2], DT.topics[3]].sort
-actual_topics = consumer_group.topics.map(&:name).sort
+actual_topics = group.topics.map(&:name).sort
 
 unless actual_topics == expected_topics
   raise "Expected topics #{expected_topics.inspect}, got #{actual_topics.inspect}"
 end
 
 # Verify consumers are correctly assigned
-topic0 = consumer_group.topics.to_a.find { |t| t.name == DT.topics[0] }
-topic1 = consumer_group.topics.to_a.find { |t| t.name == DT.topics[1] }
-topic2 = consumer_group.topics.to_a.find { |t| t.name == DT.topics[2] }
-topic3 = consumer_group.topics.to_a.find { |t| t.name == DT.topics[3] }
+topic0 = group.topics.to_a.find { |t| t.name == DT.topics[0] }
+topic1 = group.topics.to_a.find { |t| t.name == DT.topics[1] }
+topic2 = group.topics.to_a.find { |t| t.name == DT.topics[2] }
+topic3 = group.topics.to_a.find { |t| t.name == DT.topics[3] }
 
 raise "topic0 should have UsersConsumer" unless topic0.consumer == UsersConsumer
 raise "topic1 should have UsersConsumer" unless topic1.consumer == UsersConsumer
