@@ -51,7 +51,7 @@ module Karafka
                 config = Config.new(active: !delay.nil?, delay: delay)
 
                 if config.active?
-                  factory = ->(*) { Pro::Processing::Filters::Delayer.new(delay) }
+                  factory = ->(*) { Pro::Processing::ConsumerGroups::Filters::Delayer.new(delay) }
                   filter(factory)
                 end
 

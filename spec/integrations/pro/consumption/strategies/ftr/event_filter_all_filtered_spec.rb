@@ -52,7 +52,7 @@ class Consumer < Karafka::BaseConsumer
   end
 end
 
-class EventFilter < Karafka::Pro::Processing::Filters::Base
+class EventFilter < Karafka::Pro::Processing::ConsumerGroups::Filters::Base
   TARGET_EVENT = "order_created"
 
   def apply!(messages)

@@ -37,7 +37,7 @@ setup_karafka do |config|
   config.max_messages = 1
 end
 
-class Filter < Karafka::Pro::Processing::Filters::Base
+class Filter < Karafka::Pro::Processing::ConsumerGroups::Filters::Base
   def initialize(topic, partition)
     super()
     @topic = topic
@@ -45,7 +45,7 @@ class Filter < Karafka::Pro::Processing::Filters::Base
   end
 
   def apply!(_messages)
-    DT[:metadata] << Karafka::Pro::Processing::OffsetMetadata::Fetcher.find(@topic, @partition)
+    DT[:metadata] << Karafka::Pro::Processing::ConsumerGroups::OffsetMetadata::Fetcher.find(@topic, @partition)
 
     @applied = false
     @cursor = nil

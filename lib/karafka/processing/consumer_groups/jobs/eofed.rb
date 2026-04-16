@@ -11,7 +11,7 @@ module Karafka
         class Eofed < Processing::Jobs::Base
           self.action = :eofed
 
-          # @param executor [Karafka::Processing::Executor] executor that is suppose to run the job
+          # @param executor [Karafka::Processing::ConsumerGroups::Executor] executor that is suppose to run the job
           # @return [Eofed]
           def initialize(executor)
             @executor = executor

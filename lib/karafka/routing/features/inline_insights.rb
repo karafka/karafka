@@ -25,11 +25,11 @@ module Karafka
                 .any?(&:inline_insights?)
 
               # Initialize the tracker prior to becoming multi-threaded
-              Karafka::Processing::InlineInsights::Tracker.instance
+              Karafka::Processing::ConsumerGroups::InlineInsights::Tracker.instance
 
               # Subscribe to the statistics reports and collect them
               Karafka.monitor.subscribe(
-                Karafka::Processing::InlineInsights::Listener.new
+                Karafka::Processing::ConsumerGroups::InlineInsights::Listener.new
               )
             end
           end

@@ -41,11 +41,11 @@ module Karafka
             def post_setup(_config)
               Karafka::App.monitor.subscribe("app.running") do
                 # Initialize the tracker prior to becoming multi-threaded
-                Karafka::Processing::InlineInsights::Tracker.instance
+                Karafka::Processing::ConsumerGroups::InlineInsights::Tracker.instance
 
                 # Subscribe to the statistics reports and collect them
                 Karafka.monitor.subscribe(
-                  Karafka::Pro::Processing::OffsetMetadata::Listener.new
+                  Karafka::Pro::Processing::ConsumerGroups::OffsetMetadata::Listener.new
                 )
               end
             end

@@ -33,12 +33,12 @@ module Karafka
     module Processing
       # Pro jobs builder that supports lrj
       class JobsBuilder < Karafka::Processing::JobsBuilder
-        # @param executor [Karafka::Pro::Processing::Executor]
+        # @param executor [Karafka::Pro::Processing::ConsumerGroups::Executor]
         def idle(executor)
           Karafka::Processing::Jobs::Idle.new(executor)
         end
 
-        # @param executor [Karafka::Pro::Processing::Executor]
+        # @param executor [Karafka::Pro::Processing::ConsumerGroups::Executor]
         # @param messages [Karafka::Messages::Messages] messages batch to be consumed
         # @return [Karafka::Processing::ConsumerGroups::Jobs::Consume] blocking job
         # @return [Karafka::Pro::Processing::ConsumerGroups::Jobs::ConsumeNonBlocking] non blocking
@@ -51,7 +51,7 @@ module Karafka
           end
         end
 
-        # @param executor [Karafka::Pro::Processing::Executor]
+        # @param executor [Karafka::Pro::Processing::ConsumerGroups::Executor]
         # @return [Karafka::Processing::ConsumerGroups::Jobs::Eofed] eofed job for non LRJ
         # @return [Karafka::Pro::Processing::ConsumerGroups::Jobs::EofedNonBlocking] eofed job that
         #   is non-blocking, so when revocation job is scheduled for LRJ it also will not block
@@ -63,7 +63,7 @@ module Karafka
           end
         end
 
-        # @param executor [Karafka::Pro::Processing::Executor]
+        # @param executor [Karafka::Pro::Processing::ConsumerGroups::Executor]
         # @return [Karafka::Processing::ConsumerGroups::Jobs::Revoked] revocation job for non LRJ
         # @return [Karafka::Pro::Processing::ConsumerGroups::Jobs::RevokedNonBlocking] revocation
         #   job that is non-blocking, so when revocation job is scheduled for LRJ it also will not
@@ -76,7 +76,7 @@ module Karafka
           end
         end
 
-        # @param executor [Karafka::Pro::Processing::Executor]
+        # @param executor [Karafka::Pro::Processing::ConsumerGroups::Executor]
         # @return [Karafka::Pro::Processing::ConsumerGroups::Jobs::Periodic] Periodic job
         # @return [Karafka::Pro::Processing::ConsumerGroups::Jobs::PeriodicNonBlocking] Periodic
         #   non-blocking job

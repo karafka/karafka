@@ -40,7 +40,7 @@ module Karafka
           class Periodic < Karafka::Processing::Jobs::Base
             self.action = :tick
 
-            # @param executor [Karafka::Pro::Processing::Executor] pro executor that is suppose to
+            # @param executor [Karafka::Pro::Processing::ConsumerGroups::Executor] pro executor that is suppose to
             #   run a given job
             def initialize(executor)
               @executor = executor

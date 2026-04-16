@@ -50,7 +50,7 @@ class Consumer < Karafka::BaseConsumer
   end
 end
 
-class Skipper < Karafka::Pro::Processing::Filters::Base
+class Skipper < Karafka::Pro::Processing::ConsumerGroups::Filters::Base
   attr_reader :cursor
 
   # We allow one batch once to go so we get the first offset store

@@ -83,7 +83,7 @@ module Karafka
           features.each { |feature| feature.post_setup(config) }
 
           # We initialize it here so we don't initialize it during multi-threading work
-          Processing::SubscriptionGroupsCoordinator.instance
+          Processing::ConsumerGroups::SubscriptionGroupsCoordinator.instance
         end
 
         # Runs operations needed after fork in swarm for features that need it
@@ -120,15 +120,15 @@ module Karafka
           # Use manager that supports multiplexing
           icfg.connection.manager = Connection::Manager.new
 
-          icfg.processing.coordinator_class = Processing::Coordinator
-          icfg.processing.errors_tracker_class = Processing::Coordinators::ErrorsTracker
-          icfg.processing.partitioner_class = Processing::Partitioner
+          icfg.processing.coordinator_class = Processing::ConsumerGroups::Coordinator
+          icfg.processing.errors_tracker_class = Processing::ConsumerGroups::Coordinators::ErrorsTracker
+          icfg.processing.partitioner_class = Processing::ConsumerGroups::Partitioner
           icfg.processing.scheduler_class = Processing::Schedulers::Default
           icfg.processing.jobs_queue_class = Processing::JobsQueue
-          icfg.processing.executor_class = Processing::Executor
+          icfg.processing.executor_class = Processing::ConsumerGroups::Executor
           icfg.processing.jobs_builder = Processing::JobsBuilder.new
           icfg.processing.strategy_selector = Processing::ConsumerGroups::StrategySelector.new
-          icfg.processing.expansions_selector = Processing::ExpansionsSelector.new
+          icfg.processing.expansions_selector = Processing::ConsumerGroups::ExpansionsSelector.new
 
           icfg.active_job.consumer_class = ActiveJob::Consumer
           icfg.active_job.dispatcher = ActiveJob::Dispatcher.new

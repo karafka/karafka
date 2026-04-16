@@ -61,7 +61,7 @@ module Karafka
 
                 if config.active? && config.required?
                   factory = lambda do |topic, partition|
-                    Pro::Processing::Filters::InlineInsightsDelayer.new(topic, partition)
+                    Pro::Processing::ConsumerGroups::Filters::InlineInsightsDelayer.new(topic, partition)
                   end
 
                   filter(factory)

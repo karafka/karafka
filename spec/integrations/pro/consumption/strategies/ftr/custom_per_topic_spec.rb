@@ -50,7 +50,7 @@ end
 
 # This is a funny throttler because it will always allow only one message and if more, it will
 # throttle.
-class BaseThrottler < Karafka::Pro::Processing::Filters::Base
+class BaseThrottler < Karafka::Pro::Processing::ConsumerGroups::Filters::Base
   attr_reader :cursor
 
   def apply!(messages)

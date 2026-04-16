@@ -15,7 +15,7 @@ module Karafka
 
           self.action = :consume
 
-          # @param executor [Karafka::Processing::Executor] executor that is suppose to run a given
+          # @param executor [Karafka::Processing::ConsumerGroups::Executor] executor that is suppose to run a given
           #   job
           # @param messages [Karafka::Messages::Messages] karafka messages batch
           # @return [Consume]

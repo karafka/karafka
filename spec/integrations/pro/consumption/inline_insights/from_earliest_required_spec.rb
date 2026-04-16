@@ -47,7 +47,7 @@ module Patch
   end
 end
 
-Karafka::Processing::InlineInsights::Tracker.prepend(Patch)
+Karafka::Processing::ConsumerGroups::InlineInsights::Tracker.prepend(Patch)
 
 class Consumer < Karafka::BaseConsumer
   def consume

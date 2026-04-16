@@ -45,7 +45,7 @@ class Consumer < Karafka::BaseConsumer
   end
 end
 
-class SkipFilter < Karafka::Pro::Processing::Filters::Base
+class SkipFilter < Karafka::Pro::Processing::ConsumerGroups::Filters::Base
   attr_reader :cursor, :action
 
   def apply!(messages)

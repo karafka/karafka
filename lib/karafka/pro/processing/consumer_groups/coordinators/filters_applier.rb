@@ -1,0 +1,157 @@
+# frozen_string_literal: true
+
+# Karafka Pro - Source Available Commercial Software
+# Copyright (c) 2017-present Maciej Mensfeld. All rights reserved.
+#
+# This software is NOT open source. It is source-available commercial software
+# requiring a paid license for use. It is NOT covered by LGPL.
+#
+# The author retains all right, title, and interest in this software,
+# including all copyrights, patents, and other intellectual property rights.
+# No patent rights are granted under this license.
+#
+# PROHIBITED:
+# - Use without a valid commercial license
+# - Redistribution, modification, or derivative works without authorization
+# - Reverse engineering, decompilation, or disassembly of this software
+# - Use as training data for AI/ML models or inclusion in datasets
+# - Scraping, crawling, or automated collection for any purpose
+#
+# PERMITTED:
+# - Reading, referencing, and linking for personal or commercial use
+# - Runtime retrieval by AI assistants, coding agents, and RAG systems
+#   for the purpose of providing contextual help to Karafka users
+#
+# Receipt, viewing, or possession of this software does not convey or
+# imply any license or right beyond those expressly stated above.
+#
+# License: https://karafka.io/docs/Pro-License-Comm/
+# Contact: contact@karafka.io
+
+module Karafka
+  module Pro
+    module Processing
+      # Consumer-group-specific Pro processing components (driven by rebalance callbacks and
+      # partition ticks). Parallel `ShareGroups` will live next to this namespace once KIP-932
+      # lands.
+      module ConsumerGroups
+        module Coordinators
+          # Applier for all filters we want to have. Whether related to limiting messages based
+          # on the payload or any other things.
+          #
+          # From the outside world perspective, this encapsulates all the filters.
+          # This means that this is the API we expose as a single filter, allowing us to control
+          # the filtering via many filters easily.
+          class FiltersApplier
+            # @return [Array] registered filters array. Useful if we want to inject internal context
+            #   aware filters.
+            attr_reader :filters
+
+            # @param coordinator [Pro::Coordinator] pro coordinator
+            def initialize(coordinator)
+              # Builds filters out of their factories
+              # We build it that way (providing topic and partition) because there may be a case
+              # where someone wants to have a specific logic that is per topic or partition. Like for
+              # example a case where there is a cache bypassing revocations for topic partition.
+              #
+              # We provide full Karafka routing topic here and not the name only, in case the filter
+              # would be customized based on other topic settings (like VPs, etc)
+              #
+              # This setup allows for biggest flexibility also because topic object holds the
+              # reference to the subscription group and consumer group
+              @filters = coordinator.topic.filtering.factories.map do |factory|
+                factory.call(coordinator.topic, coordinator.partition)
+              end
+            end
+
+            # @param messages [Array<Karafka::Messages::Message>] array with messages from the
+            #   partition
+            def apply!(messages)
+              return unless active?
+
+              @filters.each { |filter| filter.apply!(messages) }
+            end
+
+            # @return [Boolean] did we filter out any messages during filtering run
+            def applied?
+              return false unless active?
+
+              !applied.empty?
+            end
+
+            # @return [Symbol] consumer post-filtering action that should be taken
+            def action
+              return :skip unless applied?
+
+              # The highest priority is on a potential backoff from any of the filters because it is
+              # the less risky (delay and continue later)
+              return :pause if applied.any? { |filter| filter.action == :pause }
+
+              # If none of the filters wanted to pause, we can check for any that would want to seek
+              # and if there is any, we can go with this strategy
+              return :seek if applied.any? { |filter| filter.action == :seek }
+
+              :skip
+            end
+
+            # @return [Integer] minimum timeout we need to pause. This is the minimum for all the
+            #   filters to satisfy all of them.
+            def timeout
+              applied.filter_map(&:timeout).min || 0
+            end
+
+            # The first message we do need to get next time we poll. We use the minimum not to jump
+            # accidentally by over any.
+            # @return [Karafka::Messages::Message, nil] cursor message or nil if none
+            # @note Cursor message can also return the offset in the time format
+            def cursor
+              return nil unless active?
+
+              applied.filter_map(&:cursor).min_by(&:offset)
+            end
+
+            # @return [Boolean] did any of the filters requested offset storage during filter
+            #   application
+            def mark_as_consumed?
+              # We can manage filtering offset only when user wanted that and there is a cursor
+              # to use
+              applied.any?(&:mark_as_consumed?) && cursor
+            end
+
+            # @return [Symbol] `:mark_as_consumed` or `:mark_as_consumed!`
+            def marking_method
+              candidates = applied.map(&:marking_method)
+
+              return :mark_as_consumed! if candidates.include?(:mark_as_consumed!)
+
+              :mark_as_consumed
+            end
+
+            # The first (lowest) message we want to mark as consumed in marking. By default it uses
+            #   same position as cursor in case user wants to mark same message as consumed as the
+            #   one on which cursor action is applied.
+            # @return [Karafka::Messages::Message, nil] cursor marking message or nil if none
+            # @note It should not return position in time format, only numerical offset
+            def marking_cursor
+              return nil unless active?
+
+              applied.filter_map(&:marking_cursor).min_by(&:offset)
+            end
+
+            private
+
+            # @return [Boolean] is filtering active
+            def active?
+              !@filters.empty?
+            end
+
+            # @return [Array<Object>] filters that applied any sort of messages limiting
+            def applied
+              @filters.select(&:applied?)
+            end
+          end
+        end
+      end
+    end
+  end
+end

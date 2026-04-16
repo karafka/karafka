@@ -34,7 +34,7 @@ RSpec.describe Karafka::BaseConsumer, type: :pro do
     instance.coordinator = coordinator
     instance.client = client
     instance.singleton_class.include Karafka::Pro::BaseConsumer
-    instance.singleton_class.include Karafka::Pro::Processing::PeriodicJob::Consumer
+    instance.singleton_class.include Karafka::Pro::Processing::ConsumerGroups::PeriodicJob::Consumer
     instance.singleton_class.include(strategy)
     instance.producer = Karafka.producer
     instance
@@ -550,7 +550,7 @@ RSpec.describe Karafka::BaseConsumer, type: :pro do
     context "when everything went ok on tick" do
       before do
         consumer.singleton_class.include(Karafka::Processing::ConsumerGroups::Strategies::Default)
-        consumer.singleton_class.include(Karafka::Pro::Processing::PeriodicJob::Consumer)
+        consumer.singleton_class.include(Karafka::Pro::Processing::ConsumerGroups::PeriodicJob::Consumer)
       end
 
       it { expect { consumer.on_tick }.not_to raise_error }

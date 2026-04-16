@@ -41,7 +41,7 @@ REGULAR_TOPIC = DT.topics[1]
 # This simulates normal flow where karafka loads pro when license is detected
 become_pro!
 
-class CustomPartitioner < Karafka::Pro::Processing::Partitioner
+class CustomPartitioner < Karafka::Pro::Processing::ConsumerGroups::Partitioner
   def call(topic_name, messages, coordinator, &)
     if topic_name == SPECIAL_TOPIC
       balanced_strategy(messages, &)
