@@ -771,6 +771,29 @@ module Karafka
         end
 
         consumer
+      rescue StandardError
+        # If anything past the consumer allocation raises (e.g., subscribe/assign failing due to
+        # DNS, unknown_topic_or_part, unreleased_instance_id for static group membership,
+        # transient broker issues, etc.), we must clean up the native rdkafka handle and the
+        # callback registry entries we just added. Otherwise the oauth callback keeps a strong
+        # reference to the consumer, pinning it from GC, and the native rd_kafka_t plus its
+        # internal pipe FDs and housekeeping threads leak. Callers up the stack (the listener
+        # rescue + reset loop) will simply retry build_consumer.
+        sg_id = @subscription_group.id
+        Karafka::Core::Instrumentation.statistics_callbacks.delete(sg_id)
+        Karafka::Core::Instrumentation.error_callbacks.delete(sg_id)
+        Karafka::Core::Instrumentation.oauthbearer_token_refresh_callbacks.delete(sg_id)
+
+        # Close safely if the consumer was allocated. Native kafka was never started
+        # (native_kafka_auto_start: false and we did not reach @kafka.start), so close only
+        # destroys the inner handle without needing to join any polling thread.
+        begin
+          consumer&.close
+        rescue StandardError
+          nil
+        end
+
+        raise
       end
 
       # @return [Rdkafka::Consumer] librdkafka consumer instance
