@@ -30,7 +30,13 @@ module Karafka
       # to reach out nodes and be processed to start the shutdown flow. Because of that and
       # because we always want to give all nodes all the time of `shutdown_timeout` they are
       # expected to have, we add this just to compensate.
-      SHUTDOWN_GRACE_PERIOD = 1_000
+      #
+      # Beyond signal propagation, child nodes also need a window after their own graceful
+      # `shutdown_timeout` to actually exit the process (run `at_exit` handlers, finalize
+      # librdkafka handles, close pools, etc.). A too-tight grace period causes the supervisor
+      # to raise `ForcefulShutdownError` even when nodes are in the final cleanup phase, which
+      # manifests as flaky shutdowns in swarm integration tests.
+      SHUTDOWN_GRACE_PERIOD = 5_000
 
       private_constant :SHUTDOWN_GRACE_PERIOD
 

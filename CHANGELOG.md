@@ -13,6 +13,7 @@
 - [Maintenance] Add `bin/tests_topics_hashes` script for looking up spec files by their topic name hash prefix.
 - [Change] Require `karafka-rdkafka` `>=` `0.26.1` to support upcoming features relying on low-level Rdkafka APIs.
 - [Fix] Raise `InvalidLicenseTokenError` when a manually-defined `Karafka::License` module is missing required methods (`#token` or `#version`) instead of silently skipping pro component loading, which previously caused confusing `NameError` exceptions later in the boot process.
+- [Enhancement] Bump swarm supervisor `SHUTDOWN_GRACE_PERIOD` from 1s to 5s to give forked nodes enough time to finish post-`shutdown_timeout` cleanup (at_exit handlers, librdkafka finalization, connection pool close) before the supervisor forcefully terminates them.
 
 ## 2.5.9 (2026-03-30)
 - [Enhancement] Validate that `statistics.interval.ms` is not zero when dynamic multiplexing is enabled (Pro).
