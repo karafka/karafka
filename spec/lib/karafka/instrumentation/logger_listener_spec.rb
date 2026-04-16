@@ -706,6 +706,7 @@ RSpec.describe_current do
       let(:payload) do
         {
           tpl: {},
+          group_id: group_id,
           consumer_group_id: group_id,
           client_id: client_id
         }
@@ -725,6 +726,7 @@ RSpec.describe_current do
             "topic1" => [double(partition: 0), double(partition: 1)],
             "topic2" => [double(partition: 0)]
           },
+          group_id: group_id,
           consumer_group_id: group_id,
           client_id: client_id
         }
@@ -751,6 +753,7 @@ RSpec.describe_current do
       let(:payload) do
         {
           tpl: {},
+          group_id: group_id,
           consumer_group_id: group_id,
           client_id: client_id
         }
@@ -770,6 +773,7 @@ RSpec.describe_current do
             "topic1" => [double(partition: 0), double(partition: 1)],
             "topic2" => [double(partition: 0)]
           },
+          group_id: group_id,
           consumer_group_id: group_id,
           client_id: client_id
         }
