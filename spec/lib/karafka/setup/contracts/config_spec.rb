@@ -96,7 +96,7 @@ RSpec.describe_current do
           coordinator_class: Karafka::Processing::Coordinator,
           errors_tracker_class: nil,
           partitioner_class: Karafka::Processing::Partitioner,
-          strategy_selector: Karafka::Processing::StrategySelector.new,
+          strategy_selector: Karafka::Processing::ConsumerGroups::StrategySelector.new,
           expansions_selector: Karafka::Processing::ExpansionsSelector.new,
           executor_class: Karafka::Processing::Executor,
           worker_job_call_wrapper: false

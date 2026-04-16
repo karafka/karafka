@@ -44,7 +44,7 @@ RSpec.describe_current do
     consumer
   end
 
-  strategies = Karafka::Pro::Processing::StrategySelector.new.strategies
+  strategies = Karafka::Pro::Processing::ConsumerGroups::StrategySelector.new.strategies
 
   strategies
     .select { |strategy| strategy::FEATURES.include?(:virtual_partitions) }

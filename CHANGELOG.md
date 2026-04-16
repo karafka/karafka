@@ -1,6 +1,7 @@
 # Karafka Framework Changelog
 
 ## 2.5.10 (Unreleased)
+- [Enhancement] Move `Karafka::Processing::StrategySelector` and `Karafka::Pro::Processing::StrategySelector` under the `ConsumerGroups` namespace (internal). The `config.processing.strategy_selector` default is updated accordingly; user-provided selectors are unaffected.
 - [Enhancement] Move `Karafka::Connection::RebalanceManager` to `Karafka::Connection::ConsumerGroups::RebalanceManager` (internal). Prepares the connection layer for a parallel `ShareGroups` namespace once KIP-932 lands.
 - [Enhancement] Move the rebalance librdkafka callback to `Karafka::Instrumentation::Callbacks::ConsumerGroups::Rebalance` (internal). Published event names (`rebalance.*`) and payload shape are unchanged.
 - [Enhancement] Namespace consumer-group-specific processing job classes under `Karafka::Processing::ConsumerGroups::Jobs` (OSS: `Consume`, `Eofed`, `Revoked`) and `Karafka::Pro::Processing::ConsumerGroups::Jobs` (Pro: `ConsumeNonBlocking`, `EofedNonBlocking`, `Periodic`, `PeriodicNonBlocking`, `RevokedNonBlocking`). Generic jobs (`Base`, `Idle`, `Shutdown`) stay under `Karafka::Processing::Jobs`. Internal move only — no public API changes; prepares the processing layer for parallel `ShareGroups::Jobs` (KIP-932).

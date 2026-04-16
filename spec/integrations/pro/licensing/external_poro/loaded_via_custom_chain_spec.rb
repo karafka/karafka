@@ -63,7 +63,7 @@ end
 raise unless Karafka.pro?
 
 # None of this should fail as all should be visible
-raise unless Karafka::Pro::Processing::StrategySelector
+raise unless Karafka::Pro::Processing::ConsumerGroups::StrategySelector
 raise unless Karafka::Pro::Processing::Coordinator
 raise unless Karafka::Pro::Processing::Partitioner
 raise unless Karafka::BaseConsumer

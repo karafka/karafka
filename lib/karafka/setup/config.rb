@@ -315,7 +315,7 @@ module Karafka
           # option partitioner_class [Class] partitioner we use against a batch of data
           setting :partitioner_class, default: Processing::Partitioner
           # option strategy_selector [Object] processing strategy selector to be used
-          setting :strategy_selector, default: Processing::StrategySelector.new
+          setting :strategy_selector, default: Processing::ConsumerGroups::StrategySelector.new
           # option expansions_selector [Object] processing expansions selector to be used
           setting :expansions_selector, default: Processing::ExpansionsSelector.new
           # option [Class] executor class

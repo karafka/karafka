@@ -127,7 +127,7 @@ module Karafka
           icfg.processing.jobs_queue_class = Processing::JobsQueue
           icfg.processing.executor_class = Processing::Executor
           icfg.processing.jobs_builder = Processing::JobsBuilder.new
-          icfg.processing.strategy_selector = Processing::StrategySelector.new
+          icfg.processing.strategy_selector = Processing::ConsumerGroups::StrategySelector.new
           icfg.processing.expansions_selector = Processing::ExpansionsSelector.new
 
           icfg.active_job.consumer_class = ActiveJob::Consumer
