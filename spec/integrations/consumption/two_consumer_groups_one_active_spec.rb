@@ -15,13 +15,13 @@ class Consumer < Karafka::BaseConsumer
 end
 
 draw_routes do
-  consumer_group DT.consumer_groups.first do
+  consumer_group DT.groups.first do
     topic DT.topics.first do
       consumer Consumer
     end
   end
 
-  consumer_group DT.consumer_groups.last do
+  consumer_group DT.groups.last do
     topic DT.topics.last do
       consumer Consumer
     end
@@ -34,7 +34,7 @@ Karafka::App
   .internal
   .routing
   .activity_manager
-  .include(:consumer_groups, DT.consumer_groups.first)
+  .include(:consumer_groups, DT.groups.first)
 
 jsons = Array.new(10) { { SecureRandom.hex(6) => rand.to_s } }
 

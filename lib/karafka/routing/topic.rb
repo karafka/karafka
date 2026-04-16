@@ -143,7 +143,7 @@ module Karafka
       end
 
       # @return [Hash] hash with all the topic attributes
-      # @note This is being used when we validate the consumer_group and its topics
+      # @note This is being used when we validate the group and its topics
       def to_h
         map = INHERITABLE_ATTRIBUTES.map do |attribute|
           [attribute, public_send(attribute)]

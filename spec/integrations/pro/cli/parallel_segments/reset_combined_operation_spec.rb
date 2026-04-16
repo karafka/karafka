@@ -32,11 +32,11 @@
 
 setup_karafka
 
-segment1 = "#{DT.consumer_group}-parallel-0"
-segment2 = "#{DT.consumer_group}-parallel-1"
+segment1 = "#{DT.group}-parallel-0"
+segment2 = "#{DT.group}-parallel-1"
 
 draw_routes do
-  consumer_group DT.consumer_group do
+  consumer_group DT.group do
     parallel_segments(
       count: 2,
       partitioner: ->(msg) { msg.key }
@@ -55,7 +55,7 @@ Karafka::Admin.seek_consumer_group(segment1, { DT.topic => { 0 => 5, 1 => 2 } })
 Karafka::Admin.seek_consumer_group(segment2, { DT.topic => { 0 => 5, 1 => 2 } })
 
 # Set offsets for the origin consumer group (needed for distribute part of reset)
-Karafka::Admin.seek_consumer_group(DT.consumer_group, { DT.topic => { 0 => 5, 1 => 2 } })
+Karafka::Admin.seek_consumer_group(DT.group, { DT.topic => { 0 => 5, 1 => 2 } })
 
 ARGV[0] = "parallel_segments"
 ARGV[1] = "reset"
@@ -70,9 +70,9 @@ assert results.include?("Distribution completed")
 assert results.include?("successfully")
 
 # Verify the origin consumer group received the offsets
-origin_offsets = Karafka::Admin.read_lags_with_offsets({ DT.consumer_group => [DT.topic] })
-assert_equal 5, origin_offsets[DT.consumer_group][DT.topic][0][:offset]
-assert_equal 2, origin_offsets[DT.consumer_group][DT.topic][1][:offset]
+origin_offsets = Karafka::Admin.read_lags_with_offsets({ DT.group => [DT.topic] })
+assert_equal 5, origin_offsets[DT.group][DT.topic][0][:offset]
+assert_equal 2, origin_offsets[DT.group][DT.topic][1][:offset]
 
 # Verify segments received the offsets back from origin
 segment1_offsets = Karafka::Admin.read_lags_with_offsets({ segment1 => [DT.topic] })

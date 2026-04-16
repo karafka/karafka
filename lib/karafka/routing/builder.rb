@@ -56,23 +56,23 @@ module Karafka
             scope: %w[routes]
           )
 
-          each do |consumer_group|
-            # Validate consumer group settings
+          each do |group|
+            # Validate group settings
             Contracts::ConsumerGroup.new.validate!(
-              consumer_group.to_h,
-              scope: ["routes", consumer_group.name]
+              group.to_h,
+              scope: ["routes", group.name]
             )
 
             # and then its topics settings
-            consumer_group.topics.each do |topic|
+            group.topics.each do |topic|
               Contracts::Topic.new.validate!(
                 topic.to_h,
-                scope: ["routes", consumer_group.name, topic.name]
+                scope: ["routes", group.name, topic.name]
               )
             end
 
             # Initialize subscription groups after all the routing is done
-            consumer_group.subscription_groups
+            group.subscription_groups
           end
         end
       end

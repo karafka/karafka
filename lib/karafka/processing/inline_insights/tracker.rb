@@ -63,16 +63,15 @@ module Karafka
         #
         # We iterate over those topics and partitions and store topics partitions data only.
         #
-        # @param consumer_group_id [String] id of the consumer group for which statistics were
-        #   emitted.
+        # @param group_id [String] id of the group for which statistics were emitted.
         # @param statistics [Hash] librdkafka enriched statistics
-        def add(consumer_group_id, statistics)
+        def add(group_id, statistics)
           @mutex.synchronize do
             statistics.fetch("topics", EMPTY_HASH).each do |topic_name, t_details|
               t_details.fetch("partitions", EMPTY_HASH).each do |partition_id, p_details|
                 next unless track?(partition_id, p_details)
 
-                key = "#{consumer_group_id}_#{topic_name}_#{partition_id}"
+                key = "#{group_id}_#{topic_name}_#{partition_id}"
                 @accu[key] = [monotonic_now, p_details]
               end
             end

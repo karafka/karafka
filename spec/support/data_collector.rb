@@ -24,7 +24,7 @@ class DataCollector
 
   private_constant :MUTEX, :SPEC_HASH
 
-  attr_reader :topics, :consumer_groups, :data
+  attr_reader :topics, :groups, :data
 
   class << self
     # @return [String] topic we want to use in the context of the current spec
@@ -42,14 +42,14 @@ class DataCollector
       instance.data
     end
 
-    # @return [String] first consumer group
-    def consumer_group
-      instance.consumer_group
+    # @return [String] first group (polymorphic — consumer group today)
+    def group
+      instance.group
     end
 
-    # @return [Array<String>] available consumer groups
-    def consumer_groups
-      instance.consumer_groups
+    # @return [Array<String>] available groups (polymorphic — consumer groups today)
+    def groups
+      instance.groups
     end
 
     # Alias to the data key (used frequently)
@@ -115,7 +115,7 @@ class DataCollector
   def initialize
     @mutex = Mutex.new
     @topics = Array.new(100) { "it-#{SPEC_HASH}-#{SecureRandom.hex(6)}" }
-    @consumer_groups = @topics
+    @groups = @topics
     @data = Hash.new do |hash, key|
       @mutex.synchronize do
         break hash[key] if hash.key?(key)
@@ -130,8 +130,8 @@ class DataCollector
     topics.first
   end
 
-  # @return [String] first consumer group
-  def consumer_group
+  # @return [String] first group (polymorphic — consumer group today)
+  def group
     topics.first
   end
 
@@ -140,7 +140,7 @@ class DataCollector
   def clear
     @mutex.synchronize do
       @topics.clear
-      @consumer_groups.clear
+      @groups.clear
       @data.clear
     end
   end

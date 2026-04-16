@@ -35,7 +35,7 @@ setup_karafka
 nonexistent_group = "nonexistent_group_#{SecureRandom.uuid}"
 
 draw_routes do
-  consumer_group DT.consumer_group do
+  consumer_group DT.group do
     parallel_segments(
       count: 2,
       partitioner: ->(msg) { msg.key }

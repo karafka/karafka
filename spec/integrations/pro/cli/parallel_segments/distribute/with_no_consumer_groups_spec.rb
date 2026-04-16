@@ -35,7 +35,7 @@ setup_karafka
 
 # Create routes without parallel segments configuration
 draw_routes do
-  consumer_group DT.consumer_group do
+  consumer_group DT.group do
     topic DT.topic do
       config(partitions: 2)
       consumer Class.new(Karafka::BaseConsumer)

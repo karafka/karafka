@@ -61,7 +61,7 @@ Karafka.monitor.subscribe("error.occurred") do |event|
 end
 
 draw_routes do
-  consumer_group DT.consumer_group do
+  consumer_group DT.group do
     # Configure 3 parallel segments for clearer testing
     parallel_segments(
       count: 3,

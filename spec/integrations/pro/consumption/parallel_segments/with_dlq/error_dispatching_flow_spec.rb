@@ -95,7 +95,7 @@ end
 
 draw_routes do
   # Main consumer group with parallel segments
-  consumer_group DT.consumer_group do
+  consumer_group DT.group do
     parallel_segments(
       count: 3,
       partitioner: ->(message) { message.raw_key }

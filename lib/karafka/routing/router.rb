@@ -11,8 +11,8 @@ module Karafka
       # @param lookup [Hash{Symbol => String}] hash with attribute - value key pairs
       # @return [Karafka::Routing::Topic, nil] proper route details or nil if not found
       def find_by(lookup)
-        App.consumer_groups.each do |consumer_group|
-          consumer_group.topics.each do |topic|
+        App.consumer_groups.each do |group|
+          group.topics.each do |topic|
             return topic if lookup.all? do |attribute, value|
               topic.public_send(attribute) == value
             end

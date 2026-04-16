@@ -40,7 +40,7 @@ setup_karafka
 # Draw routes with different consumer groups using different protocols
 draw_routes do
   # Consumer group using KIP-848
-  consumer_group "#{DT.consumer_group}-kip848" do
+  consumer_group "#{DT.group}-kip848" do
     topic DT.topic do
       config(partitions: 3)
       consumer Kip848Consumer
@@ -54,7 +54,7 @@ draw_routes do
   end
 
   # Consumer group using cooperative-sticky (old protocol)
-  consumer_group "#{DT.consumer_group}-cooperative" do
+  consumer_group "#{DT.group}-cooperative" do
     topic DT.topic do
       consumer CooperativeConsumer
       # Use old protocol with cooperative-sticky
@@ -67,7 +67,7 @@ draw_routes do
   end
 
   # Consumer group using range,roundrobin (old protocol)
-  consumer_group "#{DT.consumer_group}-range" do
+  consumer_group "#{DT.group}-range" do
     topic DT.topic do
       consumer RangeConsumer
       # Use old protocol with range,roundrobin

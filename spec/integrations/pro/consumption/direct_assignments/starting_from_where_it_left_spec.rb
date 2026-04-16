@@ -43,7 +43,7 @@ class Consumer < Karafka::BaseConsumer
 end
 
 draw_routes do
-  consumer_group DT.consumer_group do
+  consumer_group DT.group do
     topic DT.topic do
       consumer Consumer
       assign(true)
@@ -53,7 +53,7 @@ end
 
 produce_many(DT.topic, DT.uuids(50))
 
-Karafka::Admin.seek_consumer_group(DT.consumer_group, DT.topic => { 0 => 7 })
+Karafka::Admin.seek_consumer_group(DT.group, DT.topic => { 0 => 7 })
 
 start_karafka_and_wait_until do
   DT.key?(:offsets)

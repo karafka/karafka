@@ -18,14 +18,14 @@ Consumer4 = Class.new(Karafka::BaseConsumer)
 
 # Initial draw with one consumer group and one topic
 draw_routes(create_topics: false) do
-  consumer_group DT.consumer_groups[0] do
+  consumer_group DT.groups[0] do
     topic DT.topics[0] do
       consumer Consumer1
     end
   end
 end
 
-cg0 = Karafka::App.routes.find { |cg| cg.name == DT.consumer_groups[0] }
+cg0 = Karafka::App.routes.find { |cg| cg.name == DT.groups[0] }
 
 assert_equal 1, cg0.topics.size
 assert_equal 1, cg0.subscription_groups.size
@@ -48,7 +48,7 @@ assert_equal original_instance_id, cg0.subscription_groups.first.kafka[:"group.i
 
 # Reopen consumer group and add a topic
 draw_routes(create_topics: false) do
-  consumer_group DT.consumer_groups[0] do
+  consumer_group DT.groups[0] do
     topic DT.topics[1] do
       consumer Consumer2
     end
@@ -62,14 +62,14 @@ assert_equal original_instance_id, cg0.subscription_groups.first.kafka[:"group.i
 
 # Add a second consumer group
 draw_routes(create_topics: false) do
-  consumer_group DT.consumer_groups[1] do
+  consumer_group DT.groups[1] do
     topic DT.topics[2] do
       consumer Consumer3
     end
   end
 end
 
-cg1 = Karafka::App.routes.find { |cg| cg.name == DT.consumer_groups[1] }
+cg1 = Karafka::App.routes.find { |cg| cg.name == DT.groups[1] }
 
 assert_equal 2, Karafka::App.consumer_groups.size
 assert_equal 2, cg0.topics.size
@@ -79,13 +79,13 @@ assert_equal 1, cg1.subscription_groups.first.position
 
 # Reopen both consumer groups and add topics
 draw_routes(create_topics: false) do
-  consumer_group DT.consumer_groups[0] do
+  consumer_group DT.groups[0] do
     topic DT.topics[3] do
       consumer Consumer4
     end
   end
 
-  consumer_group DT.consumer_groups[1] do
+  consumer_group DT.groups[1] do
     topic DT.topics[4] do
       consumer Consumer4
     end
@@ -109,14 +109,14 @@ assert_equal 0, cg0.subscription_groups.first.position
 
 # Add third consumer group after many operations
 draw_routes(create_topics: false) do
-  consumer_group DT.consumer_groups[2] do
+  consumer_group DT.groups[2] do
     topic DT.topics[5] do
       consumer Consumer1
     end
   end
 end
 
-cg2 = Karafka::App.routes.find { |cg| cg.name == DT.consumer_groups[2] }
+cg2 = Karafka::App.routes.find { |cg| cg.name == DT.groups[2] }
 
 assert_equal 3, Karafka::App.consumer_groups.size
 assert_equal 2, cg2.subscription_groups.first.position

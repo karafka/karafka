@@ -60,7 +60,7 @@ require File.join(current_dir, "routes", "users_routes")
 require File.join(current_dir, "routes", "orders_routes")
 
 # Verify that consumer group reopening worked correctly
-consumer_group = Karafka::App.routes.find { |cg| cg.name == DT.consumer_groups[0] }
+consumer_group = Karafka::App.routes.find { |cg| cg.name == DT.groups[0] }
 
 raise "Consumer group should exist" if consumer_group.nil?
 

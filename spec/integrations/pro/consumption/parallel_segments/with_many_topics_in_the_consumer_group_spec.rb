@@ -51,7 +51,7 @@ end
 topics = DT.topics.first(5)
 
 draw_routes do
-  consumer_group DT.consumer_group do
+  consumer_group DT.group do
     parallel_segments(
       count: 3,
       partitioner: ->(message) { message.raw_key }

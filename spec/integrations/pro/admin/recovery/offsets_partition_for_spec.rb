@@ -44,7 +44,7 @@ end
 # has committed at least once.
 produce(DT.topic, "warmup")
 
-Karafka::Admin.seek_consumer_group(DT.consumer_group, { DT.topic => { 0 => 0 } })
+Karafka::Admin.seek_consumer_group(DT.group, { DT.topic => { 0 => 0 } })
 
 offsets_topic_info = nil
 

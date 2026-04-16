@@ -41,7 +41,7 @@ start_karafka_and_wait_until do
 end
 
 Karafka::Admin.seek_consumer_group(
-  DT.consumer_group,
+  DT.group,
   {
     DT.topics[0] => {
       0 => 1,
@@ -57,7 +57,7 @@ Karafka::Admin.seek_consumer_group(
 )
 
 results = Karafka::Admin.read_lags_with_offsets
-cg = DT.consumer_group
+cg = DT.group
 part_results = results.fetch(cg)
 
 assert_equal 1, part_results[DT.topics[0]][0][:offset]

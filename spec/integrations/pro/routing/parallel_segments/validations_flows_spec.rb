@@ -36,7 +36,7 @@ guarded = false
 
 begin
   draw_routes(create_topics: false) do
-    consumer_group DT.consumer_group do
+    consumer_group DT.group do
       # Disabled ok
       parallel_segments(count: 1)
 
@@ -57,7 +57,7 @@ guarded = false
 
 begin
   draw_routes(create_topics: false) do
-    consumer_group DT.consumer_group do
+    consumer_group DT.group do
       # Too few
       parallel_segments(count: 0)
 
@@ -77,7 +77,7 @@ guarded = false
 
 begin
   draw_routes(create_topics: false) do
-    consumer_group DT.consumer_group do
+    consumer_group DT.group do
       # Enough but no partitioner
       parallel_segments(count: 2)
 
@@ -97,7 +97,7 @@ guarded = false
 
 begin
   draw_routes(create_topics: false) do
-    consumer_group DT.consumer_group do
+    consumer_group DT.group do
       # Enough with partitioner
       parallel_segments(
         count: 2,
@@ -117,5 +117,5 @@ assert !guarded
 
 assert Karafka::App.routes.first.parallel_segments.active?
 assert_equal 2, Karafka::App.routes.size
-assert_equal "#{DT.consumer_group}-parallel-0", Karafka::App.routes.first.name
-assert_equal "#{DT.consumer_group}-parallel-1", Karafka::App.routes.last.name
+assert_equal "#{DT.group}-parallel-0", Karafka::App.routes.first.name
+assert_equal "#{DT.group}-parallel-1", Karafka::App.routes.last.name

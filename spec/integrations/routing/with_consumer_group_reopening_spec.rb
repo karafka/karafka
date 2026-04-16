@@ -10,7 +10,7 @@ Consumer2 = Class.new(Karafka::BaseConsumer)
 
 # First draw - define consumer group with one topic
 draw_routes(create_topics: false) do
-  consumer_group DT.consumer_groups[0] do
+  consumer_group DT.groups[0] do
     topic DT.topics[0] do
       consumer Consumer1
     end
@@ -19,7 +19,7 @@ end
 
 # Second draw - reopen the same consumer group and add another topic
 draw_routes(create_topics: false) do
-  consumer_group DT.consumer_groups[0] do
+  consumer_group DT.groups[0] do
     topic DT.topics[1] do
       consumer Consumer2
     end
@@ -27,11 +27,11 @@ draw_routes(create_topics: false) do
 end
 
 # Verify the consumer group exists and has both topics
-consumer_group = Karafka::App.routes.find { |cg| cg.name == DT.consumer_groups[0] }
+consumer_group = Karafka::App.routes.find { |cg| cg.name == DT.groups[0] }
 
 # Basic assertions
 raise "Consumer group should exist" unless consumer_group
-raise "Wrong consumer group name" unless consumer_group.name == DT.consumer_groups[0]
+raise "Wrong consumer group name" unless consumer_group.name == DT.groups[0]
 raise "Expected 2 topics, got #{consumer_group.topics.size}" unless consumer_group.topics.size == 2
 
 topic_names = consumer_group.topics.map(&:name).sort

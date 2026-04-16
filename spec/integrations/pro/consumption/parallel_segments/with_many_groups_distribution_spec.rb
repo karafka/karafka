@@ -50,7 +50,7 @@ end
 segment_count = 8
 
 draw_routes do
-  consumer_group DT.consumer_group do
+  consumer_group DT.group do
     parallel_segments(
       count: segment_count,
       partitioner: ->(message) { message.raw_key }

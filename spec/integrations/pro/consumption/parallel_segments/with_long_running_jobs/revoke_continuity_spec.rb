@@ -72,7 +72,7 @@ class Consumer < Karafka::BaseConsumer
 end
 
 draw_routes do
-  consumer_group DT.consumer_group do
+  consumer_group DT.group do
     parallel_segments(
       count: 3,
       partitioner: ->(message) { message.raw_key }
@@ -240,9 +240,9 @@ assert(
 end
 
 # 6. Check that offsets were committed for each segment
-segment0_group_id = "#{DT.consumer_group}-parallel-0"
-segment1_group_id = "#{DT.consumer_group}-parallel-1"
-segment2_group_id = "#{DT.consumer_group}-parallel-2"
+segment0_group_id = "#{DT.group}-parallel-0"
+segment1_group_id = "#{DT.group}-parallel-1"
+segment2_group_id = "#{DT.group}-parallel-2"
 
 segment0_offset = fetch_next_offset(DT.topic, consumer_group_id: segment0_group_id)
 segment1_offset = fetch_next_offset(DT.topic, consumer_group_id: segment1_group_id)

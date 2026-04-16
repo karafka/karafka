@@ -80,9 +80,9 @@ module Karafka
           # @param event [Karafka::Core::Monitoring::Event]
           def on_statistics_emitted(event)
             statistics = event[:statistics]
-            consumer_group_id = event[:consumer_group_id]
+            group_id = event[:group_id]
 
-            tags = ["consumer_group:#{consumer_group_id}"]
+            tags = ["consumer_group:#{group_id}"]
             tags.concat(default_tags)
 
             rd_kafka_metrics.each do |metric|
@@ -111,9 +111,9 @@ module Karafka
             time_taken = event[:time]
             messages_count = event[:messages_buffer].size
 
-            consumer_group_id = event[:subscription_group].group.id
+            group_id = event[:subscription_group].group.id
 
-            tags = ["consumer_group:#{consumer_group_id}"]
+            tags = ["consumer_group:#{group_id}"]
             tags.concat(default_tags)
 
             histogram("listener.polling.time_taken", time_taken, tags: tags)
@@ -290,12 +290,12 @@ module Karafka
           def consumer_tags(consumer)
             messages = consumer.messages
             metadata = messages.metadata
-            consumer_group_id = consumer.topic.group.id
+            group_id = consumer.topic.group.id
 
             [
               "topic:#{metadata.topic}",
               "partition:#{metadata.partition}",
-              "consumer_group:#{consumer_group_id}"
+              "consumer_group:#{group_id}"
             ]
           end
         end

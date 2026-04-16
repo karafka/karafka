@@ -44,7 +44,7 @@ class Consumer < Karafka::BaseConsumer
 end
 
 draw_routes do
-  consumer_group DT.consumer_group do
+  consumer_group DT.group do
     # Using 3 segments to make the uneven distribution more apparent
     parallel_segments(
       count: 3,
@@ -145,9 +145,9 @@ assert DT[1].size > DT[2].size
 assert_equal 100, DT[0].size + DT[1].size + DT[2].size
 
 # Get the consumer group IDs for all segments to verify they've processed some data
-segment0_group_id = "#{DT.consumer_group}-parallel-0"
-segment1_group_id = "#{DT.consumer_group}-parallel-1"
-segment2_group_id = "#{DT.consumer_group}-parallel-2"
+segment0_group_id = "#{DT.group}-parallel-0"
+segment1_group_id = "#{DT.group}-parallel-1"
+segment2_group_id = "#{DT.group}-parallel-2"
 
 # Verify offsets for all segments
 segment0_offset = fetch_next_offset(DT.topic, consumer_group_id: segment0_group_id)

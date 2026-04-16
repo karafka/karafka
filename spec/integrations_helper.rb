@@ -93,9 +93,9 @@ def setup_karafka(
       "queue.buffering.max.ms": 5,
       "partition.assignment.strategy": "range,roundrobin"
     }
-    config.client_id = DT.consumer_group
+    config.client_id = DT.group
     # Prevents conflicts when running in parallel
-    config.group_id = DT.consumer_group
+    config.group_id = DT.group
     config.pause.timeout = 1
     config.pause.max_timeout = 1
     config.pause.with_exponential_backoff = false
@@ -297,7 +297,7 @@ def draw_routes(consumer_class = nil, create_topics: true, &block)
     if block
       instance_eval(&block)
     else
-      consumer_group DT.consumer_group do
+      consumer_group DT.group do
         topic DT.topic do
           consumer consumer_class
         end

@@ -77,7 +77,7 @@ end
 
 draw_routes do
   # Main consumer group with parallel segments for ActiveJob processing
-  consumer_group DT.consumer_group do
+  consumer_group DT.group do
     parallel_segments(
       count: 3,
       partitioner: ->(message) { message.raw_key }
@@ -88,7 +88,7 @@ draw_routes do
 
   # Separate monitoring consumer group with parallel segments
   # This just tracks which segment received which message
-  consumer_group "#{DT.consumer_group}-monitor" do
+  consumer_group "#{DT.group}-monitor" do
     parallel_segments(
       count: 3,
       partitioner: ->(message) { message.raw_key }

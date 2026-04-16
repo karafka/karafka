@@ -166,20 +166,20 @@ module Karafka
           # @param event [Karafka::Core::Monitoring::Event]
           def on_statistics_emitted(event)
             statistics = event[:statistics]
-            consumer_group_id = event[:consumer_group_id]
+            group_id = event[:group_id]
 
             rd_kafka_metrics.each do |metric|
-              report_metric(metric, statistics, consumer_group_id)
+              report_metric(metric, statistics, group_id)
             end
 
-            report_aggregated_topics_metrics(statistics, consumer_group_id)
+            report_aggregated_topics_metrics(statistics, group_id)
           end
 
           # Reports a given metric statistics to Appsignal
           # @param metric [RdKafkaMetric] metric value object
           # @param statistics [Hash] hash with all the statistics emitted
-          # @param consumer_group_id [String] cg in context which we operate
-          def report_metric(metric, statistics, consumer_group_id)
+          # @param group_id [String] group id in context which we operate
+          def report_metric(metric, statistics, group_id)
             case metric.scope
             when :root
               # Do nothing on the root metrics as the same metrics are reported in a granular
@@ -218,7 +218,7 @@ module Karafka
                     metric.name,
                     partition_statistics.dig(*metric.key_location),
                     {
-                      consumer_group: consumer_group_id,
+                      consumer_group: group_id,
                       topic: topic_name,
                       partition: partition_name
                     }
@@ -233,8 +233,8 @@ module Karafka
           # Publishes aggregated topic-level metrics that are sum of per partition metrics
           #
           # @param statistics [Hash] hash with all the statistics emitted
-          # @param consumer_group_id [String] cg in context which we operate
-          def report_aggregated_topics_metrics(statistics, consumer_group_id)
+          # @param group_id [String] group id in context which we operate
+          def report_aggregated_topics_metrics(statistics, group_id)
             config.aggregated_rd_kafka_metrics.each do |metric|
               statistics.fetch("topics").each do |topic_name, topic_values|
                 sum = 0
@@ -253,7 +253,7 @@ module Karafka
                   metric.name,
                   sum,
                   {
-                    consumer_group: consumer_group_id,
+                    consumer_group: group_id,
                     topic: topic_name
                   }
                 )
@@ -314,11 +314,11 @@ module Karafka
           # @param consumer [Karafka::BaseConsumer] Karafka consumer instance
           def with_multiple_resolutions(consumer)
             topic_name = consumer.topic.name
-            consumer_group_id = consumer.topic.group.id
+            group_id = consumer.topic.group.id
             partition = consumer.partition
 
             tags = {
-              consumer_group: consumer_group_id,
+              consumer_group: group_id,
               topic: topic_name
             }
 

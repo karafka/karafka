@@ -36,20 +36,20 @@ module Karafka
               define_method :draw do |&block|
                 result = super(&block)
 
-                each do |consumer_group|
+                each do |group|
                   if scope::Contracts.const_defined?("ConsumerGroup", false)
                     scope::Contracts::ConsumerGroup.new.validate!(
-                      consumer_group.to_h,
-                      scope: ["routes", consumer_group.name]
+                      group.to_h,
+                      scope: ["routes", group.name]
                     )
                   end
 
                   next unless scope::Contracts.const_defined?("Topic", false)
 
-                  consumer_group.topics.each do |topic|
+                  group.topics.each do |topic|
                     scope::Contracts::Topic.new.validate!(
                       topic.to_h,
-                      scope: ["routes", consumer_group.name, topic.name]
+                      scope: ["routes", group.name, topic.name]
                     )
                   end
                 end

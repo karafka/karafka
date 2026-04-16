@@ -26,8 +26,8 @@ module Karafka
           # All topics including the DLQ topics names that are marked as active
           topics = Set.new
 
-          data.each do |consumer_group|
-            consumer_group[:topics].each do |topic|
+          data.each do |group|
+            group[:topics].each do |topic|
               pat = topic[:patterns]
               # Ignore pattern topics because they won't exist and should not be declarative
               # managed

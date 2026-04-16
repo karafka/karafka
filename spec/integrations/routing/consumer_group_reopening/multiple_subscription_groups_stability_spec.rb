@@ -14,14 +14,14 @@ Consumer2 = Class.new(Karafka::BaseConsumer)
 
 # Create consumer group with topic using default settings
 draw_routes(create_topics: false) do
-  consumer_group DT.consumer_groups[0] do
+  consumer_group DT.groups[0] do
     topic DT.topics[0] do
       consumer Consumer1
     end
   end
 end
 
-cg0 = Karafka::App.routes.find { |cg| cg.name == DT.consumer_groups[0] }
+cg0 = Karafka::App.routes.find { |cg| cg.name == DT.groups[0] }
 
 assert_equal 1, cg0.subscription_groups.size
 
@@ -33,7 +33,7 @@ assert_equal 0, sg_default_position
 
 # Add topic with DIFFERENT max_messages (creates new subscription group)
 draw_routes(create_topics: false) do
-  consumer_group DT.consumer_groups[0] do
+  consumer_group DT.groups[0] do
     topic DT.topics[1] do
       consumer Consumer2
       max_messages 500
@@ -55,7 +55,7 @@ sg_custom_instance_id = sg_custom.kafka[:"group.instance.id"]
 
 # Add another topic to the default settings subscription group
 draw_routes(create_topics: false) do
-  consumer_group DT.consumer_groups[0] do
+  consumer_group DT.groups[0] do
     topic DT.topics[2] do
       consumer Consumer1
     end
@@ -75,7 +75,7 @@ assert_equal sg_custom_instance_id, sg_custom.kafka[:"group.instance.id"]
 
 # Add another topic to the custom settings subscription group
 draw_routes(create_topics: false) do
-  consumer_group DT.consumer_groups[0] do
+  consumer_group DT.groups[0] do
     topic DT.topics[3] do
       consumer Consumer2
       max_messages 500
@@ -93,7 +93,7 @@ assert_equal sg_custom_position, sg_custom.position
 
 # Add a second consumer group with its own subscription groups
 draw_routes(create_topics: false) do
-  consumer_group DT.consumer_groups[1] do
+  consumer_group DT.groups[1] do
     topic DT.topics[4] do
       consumer Consumer1
     end
@@ -105,7 +105,7 @@ draw_routes(create_topics: false) do
   end
 end
 
-cg1 = Karafka::App.routes.find { |cg| cg.name == DT.consumer_groups[1] }
+cg1 = Karafka::App.routes.find { |cg| cg.name == DT.groups[1] }
 
 assert_equal 2, Karafka::App.consumer_groups.size
 assert_equal 2, cg0.subscription_groups.size

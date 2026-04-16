@@ -54,7 +54,7 @@ class Consumer < Karafka::BaseConsumer
 end
 
 draw_routes do
-  consumer_group DT.consumer_group do
+  consumer_group DT.group do
     parallel_segments(
       count: 3,
       partitioner: ->(message) { message.raw_key }
@@ -110,9 +110,9 @@ start_karafka_and_wait_until do
 end
 
 # 1. Get the consumer group IDs for all segments
-segment0_group_id = "#{DT.consumer_group}-parallel-0"
-segment1_group_id = "#{DT.consumer_group}-parallel-1"
-segment2_group_id = "#{DT.consumer_group}-parallel-2"
+segment0_group_id = "#{DT.group}-parallel-0"
+segment1_group_id = "#{DT.group}-parallel-1"
+segment2_group_id = "#{DT.group}-parallel-2"
 
 # 2. Get the current offsets for each segment
 segment0_offset = fetch_next_offset(DT.topic, consumer_group_id: segment0_group_id)
@@ -183,7 +183,7 @@ offsets_with_lags = Karafka::Admin.read_lags_with_offsets
 
 # For each segment, verify lag is equal to total number of messages (nothing consumed)
 [0, 1, 2].each do |segment_id|
-  segment_group_id = "#{DT.consumer_group}-parallel-#{segment_id}"
+  segment_group_id = "#{DT.group}-parallel-#{segment_id}"
 
   # Get lag for all partitions for this segment
   total_lag = 0

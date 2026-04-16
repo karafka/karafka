@@ -107,7 +107,7 @@ class Consumer < Karafka::BaseConsumer
 end
 
 draw_routes do
-  consumer_group DT.consumer_group do
+  consumer_group DT.group do
     parallel_segments(
       count: 2,
       partitioner: ->(message) { message.raw_key }
@@ -249,8 +249,8 @@ assert(
 )
 
 # 6. Get committed offsets to verify they were only marked for successful transactions
-segment0_group_id = "#{DT.consumer_group}-parallel-0"
-segment1_group_id = "#{DT.consumer_group}-parallel-1"
+segment0_group_id = "#{DT.group}-parallel-0"
+segment1_group_id = "#{DT.group}-parallel-1"
 
 segment0_offset = fetch_next_offset(DT.topics[0], consumer_group_id: segment0_group_id)
 segment1_offset = fetch_next_offset(DT.topics[0], consumer_group_id: segment1_group_id)

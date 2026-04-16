@@ -38,9 +38,9 @@ DT[:dlq_topics] = Set.new
 class DqlErrorStrategy
   def call(errors_tracker, _attempt)
     case errors_tracker.topic.group.name
-    when DT.consumer_groups[0]
+    when DT.groups[0]
       [:dispatch, DT.topics[1]]
-    when DT.consumer_groups[1]
+    when DT.groups[1]
       [:dispatch, DT.topics[2]]
     else
       exit 1
@@ -61,7 +61,7 @@ class ErrorsConsumer < Karafka::BaseConsumer
 end
 
 draw_routes do
-  consumer_group DT.consumer_groups[0] do
+  consumer_group DT.groups[0] do
     topic DT.topics[0] do
       consumer Consumer
 
@@ -72,7 +72,7 @@ draw_routes do
     end
   end
 
-  consumer_group DT.consumer_groups[1] do
+  consumer_group DT.groups[1] do
     topic DT.topics[0] do
       consumer Consumer
 

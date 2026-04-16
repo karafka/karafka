@@ -81,7 +81,7 @@ dynamic_partitioner = DynamicPartitioner.new
 segment_count = 3
 
 draw_routes do
-  consumer_group DT.consumer_group do
+  consumer_group DT.group do
     parallel_segments(
       count: segment_count,
       partitioner: dynamic_partitioner
