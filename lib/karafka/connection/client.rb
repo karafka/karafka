@@ -771,7 +771,7 @@ module Karafka
         end
 
         consumer
-      rescue StandardError
+      rescue
         # If anything past the consumer allocation raises (e.g., subscribe/assign failing due to
         # DNS, unknown_topic_or_part, unreleased_instance_id for static group membership,
         # transient broker issues, etc.), we must clean up the native rdkafka handle and the
@@ -789,7 +789,7 @@ module Karafka
         # destroys the inner handle without needing to join any polling thread.
         begin
           consumer&.close
-        rescue StandardError
+        rescue
           nil
         end
 
