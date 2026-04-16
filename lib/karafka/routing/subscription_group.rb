@@ -59,10 +59,15 @@ module Karafka
         @kafka = build_kafka
       end
 
-      # @return [String] consumer group id
-      def consumer_group_id
+      # @return [String] group id (the Kafka `group.id` value assigned to this subscription
+      #   group's connection)
+      def group_id
         kafka[:"group.id"]
       end
+
+      # Backwards compatible alias. Will be retired in Karafka 3.0 once additional group types
+      # (e.g. KIP-932 share groups) land.
+      alias_method :consumer_group_id, :group_id
 
       # @return [Integer] max messages fetched in a single go
       def max_messages

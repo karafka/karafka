@@ -53,8 +53,14 @@ RSpec.describe_current do
     end
   end
 
+  describe "#group_id" do
+    it { expect(group.group_id).to eq(topic.group.id) }
+  end
+
   describe "#consumer_group_id" do
+    # Backwards-compatible alias of `#group_id`. Kept to protect the public API.
     it { expect(group.consumer_group_id).to eq(topic.group.id) }
+    it { expect(group.consumer_group_id).to eq(group.group_id) }
   end
 
   describe "#kafka" do

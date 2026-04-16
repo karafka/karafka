@@ -49,6 +49,9 @@ module Karafka
 
       # Just a nicer name for the consumer groups
       alias_method :routes, :consumer_groups
+      # Generalized alias — routing entries are "groups" (consumer groups today, other kinds
+      # of groups like KIP-932 share groups in the future).
+      alias_method :groups, :consumer_groups
 
       # Returns current assignments of this process. Both topics and partitions
       #

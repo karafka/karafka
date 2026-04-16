@@ -1,9 +1,9 @@
 # frozen_string_literal: true
 
 RSpec.describe_current do
-  subject(:topic) { described_class.new(name, consumer_group) }
+  subject(:topic) { described_class.new(name, group) }
 
-  let(:consumer_group) { instance_double(Karafka::Routing::ConsumerGroup, id: group_id) }
+  let(:group) { instance_double(Karafka::Routing::ConsumerGroup, id: group_id) }
   let(:name) { "test" }
   let(:group_id) { rand.to_s }
   let(:consumer) { Class.new(Karafka::BaseConsumer) }
@@ -17,17 +17,17 @@ RSpec.describe_current do
   end
 
   describe "#group" do
-    it { expect(topic.group).to eq consumer_group }
+    it { expect(topic.group).to eq group }
   end
 
   describe "#consumer_group" do
     # Backwards-compatible alias of `#group`. Kept to protect the public API.
-    it { expect(topic.consumer_group).to eq consumer_group }
+    it { expect(topic.consumer_group).to eq group }
     it { expect(topic.consumer_group).to be(topic.group) }
   end
 
   describe "#id" do
-    it { expect(topic.id).to eq "#{consumer_group.id}_#{name}" }
+    it { expect(topic.id).to eq "#{group.id}_#{name}" }
   end
 
   describe "#consumer_class" do
