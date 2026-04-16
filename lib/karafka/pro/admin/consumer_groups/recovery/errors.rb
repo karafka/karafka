@@ -30,7 +30,9 @@
 
 module Karafka
   module Pro
+    # Pro admin utilities
     module Admin
+      # Consumer-group-specific Pro admin utilities
       module ConsumerGroups
         class Recovery < Karafka::Admin
           # Recovery related errors

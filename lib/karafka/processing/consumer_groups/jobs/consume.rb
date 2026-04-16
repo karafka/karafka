@@ -2,7 +2,10 @@
 
 module Karafka
   module Processing
+    # Consumer-group-specific processing components (driven by rebalance callbacks and partition
+    # ticks). Parallel `ShareGroups` will live next to this namespace once KIP-932 lands.
     module ConsumerGroups
+      # Consumer-group-specific job types
       module Jobs
         # The main job type. It runs the executor that triggers given topic partition messages
         # processing in an underlying consumer instance.
