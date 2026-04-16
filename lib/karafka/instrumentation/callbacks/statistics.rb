@@ -12,11 +12,11 @@ module Karafka
         )
 
         # @param subscription_group_id [String]
-        # @param consumer_group_id [String]
+        # @param group_id [String] id of the owning group (consumer group today)
         # @param client_name [String] rdkafka client name
-        def initialize(subscription_group_id, consumer_group_id, client_name)
+        def initialize(subscription_group_id, group_id, client_name)
           @subscription_group_id = subscription_group_id
-          @consumer_group_id = consumer_group_id
+          @group_id = group_id
           @client_name = client_name
           @statistics_decorator = Karafka::Core::Monitoring::StatisticsDecorator.new
         end
@@ -33,7 +33,8 @@ module Karafka
           monitor.instrument(
             "statistics.emitted",
             subscription_group_id: @subscription_group_id,
-            consumer_group_id: @consumer_group_id,
+            consumer_group_id: @group_id,
+            group_id: @group_id,
             statistics: @statistics_decorator.call(statistics)
           )
         # We need to catch and handle any potential errors coming from the instrumentation pipeline
@@ -44,7 +45,8 @@ module Karafka
             "error.occurred",
             caller: self,
             subscription_group_id: @subscription_group_id,
-            consumer_group_id: @consumer_group_id,
+            consumer_group_id: @group_id,
+            group_id: @group_id,
             type: "callbacks.statistics.error",
             error: e
           )

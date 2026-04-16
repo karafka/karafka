@@ -47,7 +47,7 @@ end
 
 class Consumer < Karafka::BaseConsumer
   def consume
-    segment_id = topic.consumer_group.segment_id
+    segment_id = topic.group.segment_id
 
     # Track all messages that reached the consumer
     messages.each do |message|
@@ -61,7 +61,7 @@ class Consumer < Karafka::BaseConsumer
 end
 
 draw_routes do
-  consumer_group DT.consumer_group do
+  consumer_group DT.group do
     parallel_segments(
       count: 3,
       partitioner: ->(message) { message.raw_key },

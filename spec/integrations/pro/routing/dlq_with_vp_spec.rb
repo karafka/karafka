@@ -38,7 +38,7 @@ guarded = []
 
 begin
   draw_routes(create_topics: false) do
-    consumer_group DT.consumer_group do
+    consumer_group DT.group do
       topic DT.topic do
         consumer Class.new(Karafka::BaseConsumer)
         virtual_partitions(

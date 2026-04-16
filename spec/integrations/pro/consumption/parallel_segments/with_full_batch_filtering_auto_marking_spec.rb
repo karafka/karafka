@@ -37,7 +37,7 @@ end
 
 class Consumer < Karafka::BaseConsumer
   def consume
-    segment_id = topic.consumer_group.segment_id
+    segment_id = topic.group.segment_id
 
     # Track all messages that reached the consumer
     messages.each do |message|
@@ -53,7 +53,7 @@ class Consumer < Karafka::BaseConsumer
 end
 
 draw_routes do
-  consumer_group DT.consumer_group do
+  consumer_group DT.group do
     parallel_segments(
       count: 3,
       partitioner: ->(message) { message.raw_key }
@@ -101,14 +101,14 @@ end
 sleep(2)
 
 # 1. Get the consumer group IDs for all segments
-segment0_group_id = "#{DT.consumer_group}-parallel-0"
-segment1_group_id = "#{DT.consumer_group}-parallel-1"
-segment2_group_id = "#{DT.consumer_group}-parallel-2"
+segment0_group_id = "#{DT.group}-parallel-0"
+segment1_group_id = "#{DT.group}-parallel-1"
+segment2_group_id = "#{DT.group}-parallel-2"
 
 # 2. Get the current offsets for each segment
-segment0_offset = fetch_next_offset(DT.topic, consumer_group_id: segment0_group_id)
-segment1_offset = fetch_next_offset(DT.topic, consumer_group_id: segment1_group_id)
-segment2_offset = fetch_next_offset(DT.topic, consumer_group_id: segment2_group_id)
+segment0_offset = fetch_next_offset(DT.topic, group_id: segment0_group_id)
+segment1_offset = fetch_next_offset(DT.topic, group_id: segment1_group_id)
+segment2_offset = fetch_next_offset(DT.topic, group_id: segment2_group_id)
 
 # 3. Verify segment 0 received and processed messages
 consumed_by_segment0 = DT[:consumed_messages].select { |m| m[:segment_id] == 0 }

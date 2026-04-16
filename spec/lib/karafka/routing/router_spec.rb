@@ -35,8 +35,8 @@ RSpec.describe_current do
     context "when we look for non existing topic" do
       let(:name) { rand.to_s }
 
-      it "expect to create it with consumer group reference" do
-        expect(found_topic.consumer_group).not_to be_nil
+      it "expect to create it with group reference" do
+        expect(found_topic.group).not_to be_nil
       end
 
       it "expect to match the name" do

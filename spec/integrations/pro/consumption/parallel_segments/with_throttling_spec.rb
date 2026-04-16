@@ -36,7 +36,7 @@ end
 
 class Consumer < Karafka::BaseConsumer
   def consume
-    segment_id = topic.consumer_group.segment_id
+    segment_id = topic.group.segment_id
 
     # Track processing time for throttling analysis
     DT[:times] << [segment_id, Time.now.to_f]
@@ -48,7 +48,7 @@ class Consumer < Karafka::BaseConsumer
 end
 
 draw_routes do
-  consumer_group DT.consumer_group do
+  consumer_group DT.group do
     parallel_segments(
       count: 2,
       partitioner: ->(message) { message.raw_key }

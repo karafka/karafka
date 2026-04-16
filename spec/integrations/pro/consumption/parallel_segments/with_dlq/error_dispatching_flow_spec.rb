@@ -36,13 +36,13 @@ setup_karafka(allow_errors: %w[consumer.consume.error])
 # Define a DLQ strategy that dispatches to segment-specific DLQ topics
 class SegmentSpecificDlqStrategy
   def call(errors_tracker, attempt)
-    consumer_group = errors_tracker.topic.consumer_group
-    segment_id = consumer_group.segment_id
+    group = errors_tracker.topic.group
+    segment_id = group.segment_id
 
     # Track decision for verification
     DT[:dlq_decisions] << {
       segment_id: segment_id,
-      consumer_group: consumer_group.name,
+      group: group.name,
       attempt: attempt
     }
 
@@ -53,7 +53,7 @@ end
 
 class Consumer < Karafka::BaseConsumer
   def consume
-    segment_id = topic.consumer_group.segment_id
+    segment_id = topic.group.segment_id
 
     messages.each do |message|
       # Track processing with key and segment information
@@ -95,7 +95,7 @@ end
 
 draw_routes do
   # Main consumer group with parallel segments
-  consumer_group DT.consumer_group do
+  consumer_group DT.group do
     parallel_segments(
       count: 3,
       partitioner: ->(message) { message.raw_key }

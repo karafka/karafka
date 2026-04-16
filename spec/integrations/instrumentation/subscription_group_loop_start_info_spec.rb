@@ -48,7 +48,7 @@ assert content.include?("[#{Karafka::Server.id}] Running Karafka")
 assert content.include?("[#{Karafka::Server.id}] Stopping Karafka server")
 assert content.include?("[#{Karafka::Server.id}] Stopped Karafka server")
 
-cg_id = DT.consumer_group
+cg_id = DT.group
 sg_id = Karafka::App.routes.first.subscription_groups.first.id
 
 assert content.include?(

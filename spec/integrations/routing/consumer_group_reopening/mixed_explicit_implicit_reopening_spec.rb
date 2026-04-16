@@ -19,7 +19,7 @@ end
 
 # Second draw - add explicit named consumer group
 draw_routes(create_topics: false) do
-  consumer_group DT.consumer_groups[1] do
+  consumer_group DT.groups[1] do
     topic DT.topics[1] do
       consumer Consumer2
     end
@@ -35,7 +35,7 @@ end
 
 # Fourth draw - reopen explicit named group
 draw_routes(create_topics: false) do
-  consumer_group DT.consumer_groups[1] do
+  consumer_group DT.groups[1] do
     topic DT.topics[3] do
       consumer Consumer4
     end
@@ -46,8 +46,8 @@ end
 assert_equal 2, Karafka::App.routes.size
 
 # Find both groups - one is the default implicit group, one is named
-named_group = Karafka::App.routes.find { |cg| cg.name == DT.consumer_groups[1] }
-default_group = Karafka::App.routes.find { |cg| cg.name != DT.consumer_groups[1] }
+named_group = Karafka::App.routes.find { |cg| cg.name == DT.groups[1] }
+default_group = Karafka::App.routes.find { |cg| cg.name != DT.groups[1] }
 
 # Verify default implicit group exists
 raise "default implicit group should exist" if default_group.nil?

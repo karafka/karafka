@@ -9,7 +9,7 @@ module Karafka
         # @param event [Karafka::Core::Monitoring::Event] event with statistics
         def on_statistics_emitted(event)
           Tracker.add(
-            event[:consumer_group_id],
+            event[:group_id],
             event[:statistics]
           )
         end

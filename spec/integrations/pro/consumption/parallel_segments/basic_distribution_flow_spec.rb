@@ -38,14 +38,14 @@ end
 class Consumer < Karafka::BaseConsumer
   def consume
     messages.each do |message|
-      segment_id = topic.consumer_group.segment_id
+      segment_id = topic.group.segment_id
       DT[segment_id] << message.raw_payload
     end
   end
 end
 
 draw_routes do
-  consumer_group DT.consumer_group do
+  consumer_group DT.group do
     parallel_segments(
       count: 2,
       partitioner: ->(message) { message.raw_key }
@@ -111,5 +111,5 @@ assert_equal group1_payloads, DT[1]
 # Verify all messages were consumed exactly once
 assert_equal group0_messages.size + group1_messages.size, DT[0].size + DT[1].size
 
-assert fetch_next_offset(consumer_group_id: Karafka::App.consumer_groups.first.id) >= 19
-assert fetch_next_offset(consumer_group_id: Karafka::App.consumer_groups.last.id) >= 19
+assert fetch_next_offset(group_id: Karafka::App.routes.first.id) >= 19
+assert fetch_next_offset(group_id: Karafka::App.routes.last.id) >= 19

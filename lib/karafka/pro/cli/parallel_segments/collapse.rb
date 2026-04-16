@@ -97,8 +97,8 @@ module Karafka
             collapse = Hash.new { |h, k| h[k] = {} }
             segments_names = segments.map(&:name)
 
-            offsets.each do |cg_name, topics|
-              next unless segments_names.include?(cg_name)
+            offsets.each do |group_name, topics|
+              next unless segments_names.include?(group_name)
 
               topics.each do |topic_name, partitions|
                 partitions.each do |partition_id, offset|
@@ -128,8 +128,8 @@ module Karafka
           def validate!(offsets, segment_origin)
             collapse = Hash.new { |h, k| h[k] = {} }
 
-            offsets.each do |cg_name, topics|
-              next if cg_name == segment_origin
+            offsets.each do |group_name, topics|
+              next if group_name == segment_origin
 
               topics.each do |topic_name, partitions|
                 partitions.each do |partition_id, offset|

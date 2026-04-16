@@ -20,14 +20,14 @@ class Consumer2 < Karafka::BaseConsumer
 end
 
 draw_routes do
-  consumer_group DT.consumer_groups.first do
+  consumer_group DT.groups.first do
     topic DT.topics.first do
       consumer Consumer1
       initial_offset "earliest"
     end
   end
 
-  consumer_group DT.consumer_groups.last do
+  consumer_group DT.groups.last do
     topic DT.topics.last do
       consumer Consumer2
       initial_offset "latest"

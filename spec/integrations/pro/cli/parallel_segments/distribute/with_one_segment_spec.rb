@@ -34,7 +34,7 @@ setup_karafka
 
 # Setting count to 1 effectively disables parallel segments
 draw_routes do
-  consumer_group DT.consumer_group do
+  consumer_group DT.group do
     parallel_segments(
       count: 1,
       partitioner: ->(msg) { msg.key }

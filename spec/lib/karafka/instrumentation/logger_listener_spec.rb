@@ -470,7 +470,7 @@ RSpec.describe_current do
 
         expect(details).to include(message)
         expect(details).to include(con_listener.subscription_group.id)
-        expect(details).to include(con_listener.subscription_group.consumer_group.id)
+        expect(details).to include(con_listener.subscription_group.group.id)
       end
     end
 
@@ -496,7 +496,7 @@ RSpec.describe_current do
         expect(details).to include(message)
         expect(details).to include(consumer.topic.name)
         expect(details).to include(consumer.topic.subscription_group.id)
-        expect(details).to include(consumer.topic.subscription_group.consumer_group.id)
+        expect(details).to include(consumer.topic.subscription_group.group.id)
       end
     end
 
@@ -621,7 +621,7 @@ RSpec.describe_current do
 
         expect(details).to include(message)
         expect(details).to include(con_client.subscription_group.id)
-        expect(details).to include(con_client.subscription_group.consumer_group.id)
+        expect(details).to include(con_client.subscription_group.group.id)
       end
     end
 
@@ -706,6 +706,7 @@ RSpec.describe_current do
       let(:payload) do
         {
           tpl: {},
+          group_id: group_id,
           consumer_group_id: group_id,
           client_id: client_id
         }
@@ -725,6 +726,7 @@ RSpec.describe_current do
             "topic1" => [double(partition: 0), double(partition: 1)],
             "topic2" => [double(partition: 0)]
           },
+          group_id: group_id,
           consumer_group_id: group_id,
           client_id: client_id
         }
@@ -751,6 +753,7 @@ RSpec.describe_current do
       let(:payload) do
         {
           tpl: {},
+          group_id: group_id,
           consumer_group_id: group_id,
           client_id: client_id
         }
@@ -770,6 +773,7 @@ RSpec.describe_current do
             "topic1" => [double(partition: 0), double(partition: 1)],
             "topic2" => [double(partition: 0)]
           },
+          group_id: group_id,
           consumer_group_id: group_id,
           client_id: client_id
         }

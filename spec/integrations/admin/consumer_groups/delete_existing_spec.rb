@@ -34,7 +34,7 @@ produce_many(DT.topic, DT.uuids(1))
 
 assert_equal 10, fetch_next_offset
 
-Karafka::Admin.delete_consumer_group(DT.consumer_group)
+Karafka::Admin.delete_consumer_group(DT.group)
 
 # Should start from beginning as it was removed
 assert_equal 0, fetch_next_offset

@@ -30,7 +30,7 @@ start_karafka_and_wait_until do
 end
 
 Karafka::Admin.seek_consumer_group(
-  DT.consumer_group,
+  DT.group,
   {
     DT.topic => {
       0 => :latest,
@@ -39,7 +39,7 @@ Karafka::Admin.seek_consumer_group(
   }
 )
 
-offsets_with_lags = Karafka::Admin.read_lags_with_offsets[DT.consumer_group][DT.topic]
+offsets_with_lags = Karafka::Admin.read_lags_with_offsets[DT.group][DT.topic]
 
 assert_equal 10, offsets_with_lags[0][:offset]
 assert_equal 0, offsets_with_lags[0][:lag]

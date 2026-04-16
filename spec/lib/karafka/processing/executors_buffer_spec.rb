@@ -9,13 +9,13 @@ RSpec.describe_current do
   let(:topic_name) { "topic_name1" }
   let(:partition_id) { 0 }
   let(:parallel_key) { 0 }
-  let(:subscription_group) { consumer_groups.first.subscription_groups.first }
+  let(:subscription_group) { groups.first.subscription_groups.first }
 
   let(:fetched_executor) do
     buffer.find_or_create(topic_name, partition_id, parallel_key, coordinator)
   end
 
-  let(:consumer_groups) do
+  let(:groups) do
     Karafka::Routing::Builder.new.draw do
       consumer_group :group_name1 do
         topic :topic_name1 do

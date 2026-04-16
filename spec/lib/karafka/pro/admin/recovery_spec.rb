@@ -31,14 +31,14 @@
 RSpec.describe_current do
   subject(:recovery) { described_class }
 
-  let(:consumer_group_id) { SecureRandom.uuid }
+  let(:group_id) { SecureRandom.uuid }
   let(:topic) { generate_topic_name }
 
   before { Karafka::Admin.create_topic(topic, 2, 1) }
 
   describe ".read_committed_offsets" do
     context "when consumer group has no committed offsets" do
-      it { expect(recovery.read_committed_offsets(consumer_group_id)).to eq({}) }
+      it { expect(recovery.read_committed_offsets(group_id)).to eq({}) }
     end
 
     context "when consumer group has committed offsets for multiple topics and partitions" do
@@ -53,22 +53,22 @@ RSpec.describe_current do
 
       before do
         Karafka::Admin.create_topic(topic2, 1, 1)
-        Karafka::Admin::ConsumerGroups.seek(consumer_group_id, offsets)
+        Karafka::Admin::ConsumerGroups.seek(group_id, offsets)
       end
 
       it "returns committed offsets grouped by topic and partition" do
-        result = recovery.read_committed_offsets(consumer_group_id)
+        result = recovery.read_committed_offsets(group_id)
         expect(result[topic]).to eq({ 0 => 100, 1 => 200 })
         expect(result[topic2]).to eq({ 0 => 50 })
       end
 
       it "returns topics sorted alphabetically" do
-        result = recovery.read_committed_offsets(consumer_group_id)
+        result = recovery.read_committed_offsets(group_id)
         expect(result.keys).to eq(result.keys.sort)
       end
 
       it "returns partitions sorted numerically within each topic" do
-        result = recovery.read_committed_offsets(consumer_group_id)
+        result = recovery.read_committed_offsets(group_id)
 
         result.each_value do |partitions|
           expect(partitions.keys).to eq(partitions.keys.sort)
@@ -78,23 +78,23 @@ RSpec.describe_current do
 
     context "when offsets are committed multiple times for the same partition" do
       before do
-        Karafka::Admin::ConsumerGroups.seek(consumer_group_id, { topic => { 0 => 100 } })
-        Karafka::Admin::ConsumerGroups.seek(consumer_group_id, { topic => { 0 => 150 } })
+        Karafka::Admin::ConsumerGroups.seek(group_id, { topic => { 0 => 100 } })
+        Karafka::Admin::ConsumerGroups.seek(group_id, { topic => { 0 => 150 } })
       end
 
       it "keeps the latest offset (last write wins)" do
-        result = recovery.read_committed_offsets(consumer_group_id)
+        result = recovery.read_committed_offsets(group_id)
         expect(result[topic][0]).to eq(150)
       end
     end
 
     context "when offsets exist only for a single partition out of many" do
       before do
-        Karafka::Admin::ConsumerGroups.seek(consumer_group_id, { topic => { 1 => 42 } })
+        Karafka::Admin::ConsumerGroups.seek(group_id, { topic => { 1 => 42 } })
       end
 
       it "returns only the partition that has committed offsets" do
-        result = recovery.read_committed_offsets(consumer_group_id)
+        result = recovery.read_committed_offsets(group_id)
         expect(result[topic]).to eq({ 1 => 42 })
         expect(result[topic].key?(0)).to be(false)
       end
@@ -105,22 +105,22 @@ RSpec.describe_current do
 
       before do
         Karafka::Admin::ConsumerGroups.seek(other_group_id, { topic => { 0 => 999 } })
-        Karafka::Admin::ConsumerGroups.seek(consumer_group_id, { topic => { 0 => 10 } })
+        Karafka::Admin::ConsumerGroups.seek(group_id, { topic => { 0 => 10 } })
       end
 
       it "returns only offsets for the requested consumer group" do
-        result = recovery.read_committed_offsets(consumer_group_id)
+        result = recovery.read_committed_offsets(group_id)
         expect(result[topic][0]).to eq(10)
       end
     end
 
     context "when offset is 0" do
       before do
-        Karafka::Admin::ConsumerGroups.seek(consumer_group_id, { topic => { 0 => 0 } })
+        Karafka::Admin::ConsumerGroups.seek(group_id, { topic => { 0 => 0 } })
       end
 
       it "returns zero offset correctly" do
-        result = recovery.read_committed_offsets(consumer_group_id)
+        result = recovery.read_committed_offsets(group_id)
         expect(result[topic][0]).to eq(0)
       end
     end
@@ -130,7 +130,7 @@ RSpec.describe_current do
     let(:partition_count) { described_class.new.send(:offsets_partition_count) }
 
     it "returns a value within the partition range" do
-      result = recovery.offsets_partition_for(consumer_group_id)
+      result = recovery.offsets_partition_for(group_id)
       expect(result).to be >= 0
       expect(result).to be < partition_count
     end
@@ -175,25 +175,25 @@ RSpec.describe_current do
 
   describe ".coordinator_for" do
     it "returns a hash with partition, broker_id, and broker_host" do
-      result = recovery.coordinator_for(consumer_group_id)
+      result = recovery.coordinator_for(group_id)
       expect(result).to have_key(:partition)
       expect(result).to have_key(:broker_id)
       expect(result).to have_key(:broker_host)
     end
 
     it "returns the correct partition for the group" do
-      result = recovery.coordinator_for(consumer_group_id)
-      expected_partition = recovery.offsets_partition_for(consumer_group_id)
+      result = recovery.coordinator_for(group_id)
+      expected_partition = recovery.offsets_partition_for(group_id)
       expect(result[:partition]).to eq(expected_partition)
     end
 
     it "returns a valid broker_id" do
-      result = recovery.coordinator_for(consumer_group_id)
+      result = recovery.coordinator_for(group_id)
       expect(result[:broker_id]).to be_a(Integer)
     end
 
     it "returns a broker_host with host:port format" do
-      result = recovery.coordinator_for(consumer_group_id)
+      result = recovery.coordinator_for(group_id)
       expect(result[:broker_host]).to match(/\A.+:\d+\z/)
     end
   end
@@ -238,7 +238,7 @@ RSpec.describe_current do
     end
 
     it "returns a sorted array" do
-      partition = recovery.offsets_partition_for(consumer_group_id)
+      partition = recovery.offsets_partition_for(group_id)
       result = recovery.affected_groups(partition)
       expect(result).to be_an(Array)
       expect(result).to eq(result.sort)

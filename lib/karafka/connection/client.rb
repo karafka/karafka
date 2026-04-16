@@ -735,7 +735,7 @@ module Karafka
           @subscription_group.id,
           Instrumentation::Callbacks::Statistics.new(
             @subscription_group.id,
-            @subscription_group.consumer_group.id,
+            @subscription_group.group.id,
             @name
           )
         )
@@ -745,7 +745,7 @@ module Karafka
           @subscription_group.id,
           Instrumentation::Callbacks::Error.new(
             @subscription_group.id,
-            @subscription_group.consumer_group.id,
+            @subscription_group.group.id,
             @name
           )
         )

@@ -32,10 +32,10 @@
 
 setup_karafka
 
-segments = Array.new(10) { |i| "#{DT.consumer_group}-parallel-#{i}" }
+segments = Array.new(10) { |i| "#{DT.group}-parallel-#{i}" }
 
 draw_routes do
-  consumer_group DT.consumer_group do
+  consumer_group DT.group do
     parallel_segments(
       count: 10,
       partitioner: ->(msg) { msg.key }
@@ -73,8 +73,8 @@ end
 assert results.include?("Collapse completed")
 assert results.include?("successfully")
 
-offsets = Karafka::Admin.read_lags_with_offsets({ DT.consumer_group => [DT.topic] })
-assert_equal 5, offsets[DT.consumer_group][DT.topic][0][:offset]
-assert_equal 7, offsets[DT.consumer_group][DT.topic][1][:offset]
-assert_equal 3, offsets[DT.consumer_group][DT.topic][2][:offset]
-assert_equal 9, offsets[DT.consumer_group][DT.topic][3][:offset]
+offsets = Karafka::Admin.read_lags_with_offsets({ DT.group => [DT.topic] })
+assert_equal 5, offsets[DT.group][DT.topic][0][:offset]
+assert_equal 7, offsets[DT.group][DT.topic][1][:offset]
+assert_equal 3, offsets[DT.group][DT.topic][2][:offset]
+assert_equal 9, offsets[DT.group][DT.topic][3][:offset]

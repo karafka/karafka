@@ -39,8 +39,8 @@ end
 
 # Verify routes were created correctly
 created_topics = []
-Karafka::App.routes.each do |consumer_group|
-  consumer_group.topics.each do |topic|
+Karafka::App.routes.each do |group|
+  group.topics.each do |topic|
     created_topics << topic.name
   end
 end
@@ -101,8 +101,8 @@ end
 
 # Verify new configuration replaced the old one
 new_topics = []
-Karafka::App.routes.each do |consumer_group|
-  consumer_group.topics.each do |topic|
+Karafka::App.routes.each do |group|
+  group.topics.each do |topic|
     new_topics << topic.name
   end
 end
@@ -152,8 +152,8 @@ end
 
 # Verify conditional topics were created correctly
 conditional_route_topics = []
-Karafka::App.routes.each do |consumer_group|
-  consumer_group.topics.each do |topic|
+Karafka::App.routes.each do |group|
+  group.topics.each do |topic|
     conditional_route_topics << topic.name
   end
 end

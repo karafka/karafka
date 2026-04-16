@@ -2,11 +2,11 @@
 
 RSpec.describe_current do
   subject(:callback) do
-    described_class.new(subscription_group_id, consumer_group_id, client_name)
+    described_class.new(subscription_group_id, group_id, client_name)
   end
 
   let(:subscription_group_id) { SecureRandom.hex(6) }
-  let(:consumer_group_id) { SecureRandom.hex(6) }
+  let(:group_id) { SecureRandom.hex(6) }
   let(:client_name) { SecureRandom.hex(6) }
   let(:monitor) { Karafka.monitor }
 
@@ -68,6 +68,8 @@ RSpec.describe_current do
 
     it { expect(event.id).to eq("statistics.emitted") }
     it { expect(event[:subscription_group_id]).to eq(subscription_group_id) }
+    it { expect(event[:consumer_group_id]).to eq(group_id) }
+    it { expect(event[:group_id]).to eq(group_id) }
     it { expect(event[:statistics]).to eq(statistics) }
     it { expect(event[:statistics]["val_d"]).to eq(0) }
   end

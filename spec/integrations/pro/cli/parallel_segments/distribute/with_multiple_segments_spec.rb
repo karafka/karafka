@@ -32,10 +32,10 @@
 
 setup_karafka
 
-segments = Array.new(10) { |i| "#{DT.consumer_group}-parallel-#{i}" }
+segments = Array.new(10) { |i| "#{DT.group}-parallel-#{i}" }
 
 draw_routes do
-  consumer_group DT.consumer_group do
+  consumer_group DT.group do
     parallel_segments(
       count: 10,
       partitioner: ->(msg) { msg.key }
@@ -52,7 +52,7 @@ produce_many(DT.topic, DT.uuids(20))
 
 # Set offsets in the origin consumer group
 Karafka::Admin.seek_consumer_group(
-  DT.consumer_group,
+  DT.group,
   {
     DT.topic => {
       0 => 5,

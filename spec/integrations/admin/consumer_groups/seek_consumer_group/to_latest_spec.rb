@@ -25,7 +25,7 @@ start_karafka_and_wait_until do
 end
 
 Karafka::Admin.seek_consumer_group(
-  DT.consumer_group,
+  DT.group,
   { DT.topic => :latest }
 )
 

@@ -32,7 +32,7 @@ produce_many(DT.topic, messages)
 rebalance_thread = Thread.new do
   sleep(0.5) until DT.key?(:consumed)
 
-  Karafka::Admin.trigger_rebalance(DT.consumer_group)
+  Karafka::Admin.trigger_rebalance(DT.group)
 end
 
 # Start consumer and wait for initial consumption

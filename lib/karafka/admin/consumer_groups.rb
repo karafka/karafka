@@ -18,65 +18,64 @@ module Karafka
       private_constant :LONG_TIME_AGO, :DAY_IN_SECONDS
 
       class << self
-        # @param consumer_group_id [String] consumer group for which we want to move offsets
+        # @param group_id [String] group for which we want to move offsets
         # @param topics_with_partitions_and_offsets [Hash] hash with topics and settings
         # @see #seek
-        def seek(consumer_group_id, topics_with_partitions_and_offsets)
-          new.seek(consumer_group_id, topics_with_partitions_and_offsets)
+        def seek(group_id, topics_with_partitions_and_offsets)
+          new.seek(group_id, topics_with_partitions_and_offsets)
         end
 
-        # @param previous_name [String] old consumer group name
-        # @param new_name [String] new consumer group name
+        # @param previous_name [String] old group name
+        # @param new_name [String] new group name
         # @param topics [Array<String>] topics for which we want to copy offsets
         # @see #copy
         def copy(previous_name, new_name, topics)
           new.copy(previous_name, new_name, topics)
         end
 
-        # @param previous_name [String] old consumer group name
-        # @param new_name [String] new consumer group name
+        # @param previous_name [String] old group name
+        # @param new_name [String] new group name
         # @param topics [Array<String>] topics for which we want to migrate offsets
-        # @param delete_previous [Boolean] should we delete previous consumer group after rename
+        # @param delete_previous [Boolean] should we delete previous group after rename
         # @see #rename
         def rename(previous_name, new_name, topics, delete_previous: true)
           new.rename(previous_name, new_name, topics, delete_previous: delete_previous)
         end
 
-        # @param consumer_group_id [String] consumer group name
+        # @param group_id [String] group name
         # @see #delete
-        def delete(consumer_group_id)
-          new.delete(consumer_group_id)
+        def delete(group_id)
+          new.delete(group_id)
         end
 
-        # @param consumer_group_id [String] consumer group id to trigger rebalance for
+        # @param group_id [String] group id to trigger rebalance for
         # @see #trigger_rebalance
-        def trigger_rebalance(consumer_group_id)
-          new.trigger_rebalance(consumer_group_id)
+        def trigger_rebalance(group_id)
+          new.trigger_rebalance(group_id)
         end
 
-        # @param consumer_groups_with_topics [Hash{String => Array<String>}] hash with consumer
-        #   groups names with array of topics
+        # @param groups_with_topics [Hash{String => Array<String>}] hash with group names with
+        #   array of topics
         # @param active_topics_only [Boolean] if set to false, will select also inactive topics
         # @see #read_lags_with_offsets
-        def read_lags_with_offsets(consumer_groups_with_topics = {}, active_topics_only: true)
+        def read_lags_with_offsets(groups_with_topics = {}, active_topics_only: true)
           new.read_lags_with_offsets(
-            consumer_groups_with_topics,
+            groups_with_topics,
             active_topics_only: active_topics_only
           )
         end
       end
 
-      # Moves the offset on a given consumer group and provided topic to the requested location
+      # Moves the offset on a given group and provided topic to the requested location
       #
-      # @param consumer_group_id [String] id of the consumer group for which we want to move the
-      #   existing offset
+      # @param group_id [String] id of the group for which we want to move the existing offset
       # @param topics_with_partitions_and_offsets [Hash] Hash with list of topics and settings to
       #   where to move given consumer. It allows us to move particular partitions or whole
       #   topics if we want to reset all partitions to for example a point in time.
       #
       # @return [void]
       #
-      # @note This method should **not** be executed on a running consumer group as it creates a
+      # @note This method should **not** be executed on a running group as it creates a
       #   "fake" consumer and uses it to move offsets.
       #
       # @example Move a single topic partition nr 1 offset to 100
@@ -99,7 +98,7 @@ module Karafka
       #
       # @example Move offset of a single partition to latest
       #   Karafka::Admin::ConsumerGroups.seek('group-id', { 'topic' => { 1 => 'latest' } })
-      def seek(consumer_group_id, topics_with_partitions_and_offsets)
+      def seek(group_id, topics_with_partitions_and_offsets)
         tpl_base = {}
 
         # Normalize the data so we always have all partitions and topics in the same format
@@ -161,7 +160,7 @@ module Karafka
           end
         end
 
-        settings = { "group.id": consumer_group_id }
+        settings = { "group.id": group_id }
 
         with_consumer(settings) do |consumer|
           # If we have any time based stuff to resolve, we need to do it prior to commits
@@ -198,18 +197,18 @@ module Karafka
         end
       end
 
-      # Takes consumer group and its topics and copies all the offsets to a new named group
+      # Takes group and its topics and copies all the offsets to a new named group
       #
-      # @param previous_name [String] old consumer group name
-      # @param new_name [String] new consumer group name
+      # @param previous_name [String] old group name
+      # @param new_name [String] new group name
       # @param topics [Array<String>] topics for which we want to migrate offsets during rename
       #
       # @return [Boolean] true if anything was migrated, otherwise false
       #
-      # @note This method should **not** be executed on a running consumer group as it creates a
+      # @note This method should **not** be executed on a running group as it creates a
       #   "fake" consumer and uses it to move offsets.
       #
-      # @note If new consumer group exists, old offsets will be added to it.
+      # @note If new group exists, old offsets will be added to it.
       def copy(previous_name, new_name, topics)
         remap = Hash.new { |h, k| h[k] = {} }
 
@@ -236,24 +235,24 @@ module Karafka
         true
       end
 
-      # Takes consumer group and its topics and migrates all the offsets to a new named group
+      # Takes group and its topics and migrates all the offsets to a new named group
       #
-      # @param previous_name [String] old consumer group name
-      # @param new_name [String] new consumer group name
+      # @param previous_name [String] old group name
+      # @param new_name [String] new group name
       # @param topics [Array<String>] topics for which we want to migrate offsets during rename
-      # @param delete_previous [Boolean] should we delete previous consumer group after rename.
+      # @param delete_previous [Boolean] should we delete previous group after rename.
       #   Defaults to true.
       #
       # @return [Boolean] true if rename (and optionally removal) was ok or false if there was
       #   nothing really to rename
       #
-      # @note This method should **not** be executed on a running consumer group as it creates a
+      # @note This method should **not** be executed on a running group as it creates a
       #   "fake" consumer and uses it to move offsets.
       #
       # @note After migration unless `delete_previous` is set to `false`, old group will be
       #   removed.
       #
-      # @note If new consumer group exists, old offsets will be added to it.
+      # @note If new group exists, old offsets will be added to it.
       def rename(previous_name, new_name, topics, delete_previous: true)
         copy_result = copy(previous_name, new_name, topics)
 
@@ -265,35 +264,35 @@ module Karafka
         true
       end
 
-      # Removes given consumer group (if exists)
+      # Removes given group (if exists)
       #
-      # @param consumer_group_id [String] consumer group name
+      # @param group_id [String] group name
       #
       # @return [void]
       #
-      # @note This method should not be used on a running consumer group as it will not yield any
+      # @note This method should not be used on a running group as it will not yield any
       #   results.
-      def delete(consumer_group_id)
+      def delete(group_id)
         with_admin do |admin|
-          handler = admin.delete_group(consumer_group_id)
+          handler = admin.delete_group(group_id)
           handler.wait(max_wait_timeout_ms: max_wait_time_ms)
         end
       end
 
-      # Triggers a rebalance for the specified consumer group by briefly joining and leaving
+      # Triggers a rebalance for the specified group by briefly joining and leaving
       #
-      # @param consumer_group_id [String] consumer group id to trigger rebalance for
+      # @param group_id [String] group id to trigger rebalance for
       #
       # @return [void]
       #
-      # @raise [Karafka::Errors::InvalidConfigurationError] when consumer group is not found in
+      # @raise [Karafka::Errors::InvalidConfigurationError] when group is not found in
       #   routing or has no topics
       #
-      # @note This method creates a temporary "fake" consumer that joins the consumer group,
+      # @note This method creates a temporary "fake" consumer that joins the group,
       #   triggering a rebalance when it joins and another when it leaves. This should only be
       #   used for operational/testing purposes as it causes two rebalances.
       #
-      # @note The consumer group does not need to be running for this to work, but if it is,
+      # @note The group does not need to be running for this to work, but if it is,
       #   it will experience rebalances.
       #
       # @note The behavior follows the configured rebalance protocol. For cooperative sticky
@@ -302,38 +301,38 @@ module Karafka
       #   stopping all consumers.
       #
       # @note Topics are always detected from the routing configuration. The consumer settings
-      #   (kafka config) are taken from the first topic in the consumer group to ensure
+      #   (kafka config) are taken from the first topic in the group to ensure
       #   consistency with the actual consumer configuration.
       #
-      # @example Trigger rebalance for a consumer group
+      # @example Trigger rebalance for a group
       #   Karafka::Admin::ConsumerGroups.trigger_rebalance('my-group')
-      def trigger_rebalance(consumer_group_id)
-        consumer_group = Karafka::App.routes.find { |cg| cg.id == consumer_group_id }
+      def trigger_rebalance(group_id)
+        group = Karafka::App.routes.find { |g| g.id == group_id }
 
-        unless consumer_group
+        unless group
           raise(
             Errors::InvalidConfigurationError,
-            "Consumer group '#{consumer_group_id}' not found in routing"
+            "Group '#{group_id}' not found in routing"
           )
         end
 
-        topics = consumer_group.topics.map(&:name)
+        topics = group.topics.map(&:name)
 
         if topics.empty?
           raise(
             Errors::InvalidConfigurationError,
-            "Consumer group '#{consumer_group_id}' has no topics"
+            "Group '#{group_id}' has no topics"
           )
         end
 
         # Get the first topic to extract kafka settings
-        first_topic = consumer_group.topics.first
+        first_topic = group.topics.first
 
-        # Build consumer settings using the consumer group's kafka config from first topic
+        # Build consumer settings using the group's kafka config from first topic
         # This ensures we use the same settings as the actual consumers
         # Following the same pattern as in Karafka::Connection::Client#build_kafka
         consumer_settings = Setup::AttributesMap.consumer(first_topic.kafka.dup)
-        consumer_settings[:"group.id"] = consumer_group.id
+        consumer_settings[:"group.id"] = group.id
         consumer_settings[:"enable.auto.offset.store"] = false
         consumer_settings[:"auto.offset.reset"] ||= first_topic.initial_offset
 
@@ -350,26 +349,25 @@ module Karafka
         end
       end
 
-      # Reads lags and offsets for given topics in the context of consumer groups defined in the
-      #   routing
+      # Reads lags and offsets for given topics in the context of groups defined in the routing
       #
-      # @param consumer_groups_with_topics [Hash{String => Array<String>}] hash with consumer
-      #   groups names with array of topics to query per consumer group inside
+      # @param groups_with_topics [Hash{String => Array<String>}] hash with group names with
+      #   array of topics to query per group inside
       # @param active_topics_only [Boolean] if set to false, when we use routing topics, will
       #   select also topics that are marked as inactive in routing
       #
       # @return [Hash{String => Hash{Integer => Hash{Integer => Object}}}] hash where the top
-      #   level keys are the consumer groups and values are hashes with topics and inside
+      #   level keys are the groups and values are hashes with topics and inside
       #   partitions with lags and offsets
       #
       # @note For topics that do not exist, topic details will be set to an empty hash
       #
-      # @note For topics that exist but were never consumed by a given CG we set `-1` as lag and
-      #   the offset on each of the partitions that were not consumed.
+      # @note For topics that exist but were never consumed by a given group we set `-1` as lag
+      #   and the offset on each of the partitions that were not consumed.
       #
       # @note This lag reporting is for committed lags and is "Kafka-centric", meaning that this
       #   represents lags from Kafka perspective and not the consumer. They may differ.
-      def read_lags_with_offsets(consumer_groups_with_topics = {}, active_topics_only: true)
+      def read_lags_with_offsets(groups_with_topics = {}, active_topics_only: true)
         # We first fetch all the topics with partitions count that exist in the cluster so we
         # do not query for topics that do not exist and so we can get partitions count for all
         # the topics we may need. The non-existent and not consumed will be filled at the end
@@ -377,82 +375,82 @@ module Karafka
           [topic[:topic_name], topic[:partition_count]]
         end.freeze
 
-        # If no expected CGs, we use all from routing that have active topics
-        if consumer_groups_with_topics.empty?
-          consumer_groups_with_topics = Karafka::App.routes.to_h do |cg|
-            cg_topics = cg.topics.select do |cg_topic|
-              active_topics_only ? cg_topic.active? : true
+        # If no expected groups, we use all from routing that have active topics
+        if groups_with_topics.empty?
+          groups_with_topics = Karafka::App.routes.to_h do |group|
+            group_topics = group.topics.select do |group_topic|
+              active_topics_only ? group_topic.active? : true
             end
 
-            [cg.id, cg_topics.map(&:name)]
+            [group.id, group_topics.map(&:name)]
           end
         end
 
         # We make a copy because we will remove once with non-existing topics
-        # We keep original requested consumer groups with topics for later backfilling
-        cgs_with_topics = consumer_groups_with_topics.dup
-        cgs_with_topics.transform_values!(&:dup)
+        # We keep original requested groups with topics for later backfilling
+        queryable_groups = groups_with_topics.dup
+        queryable_groups.transform_values!(&:dup)
 
         # We can query only topics that do exist, this is why we are cleaning those that do not
         # exist
-        cgs_with_topics.each_value do |requested_topics|
+        queryable_groups.each_value do |requested_topics|
           requested_topics.delete_if { |topic| !existing_topics.include?(topic) }
         end
 
         groups_lags = Hash.new { |h, k| h[k] = {} }
         groups_offs = Hash.new { |h, k| h[k] = {} }
 
-        cgs_with_topics.each do |cg, topics|
+        queryable_groups.each do |group, topics|
           # Do not add to tpl topics that do not exist
           next if topics.empty?
 
           tpl = Rdkafka::Consumer::TopicPartitionList.new
 
-          with_consumer("group.id": cg) do |consumer|
+          with_consumer("group.id": group) do |consumer|
             topics.each { |topic| tpl.add_topic(topic, existing_topics[topic]) }
 
             commit_offsets = consumer.committed(tpl)
 
             commit_offsets.to_h.each do |topic, partitions|
-              groups_offs[cg][topic] = {}
+              groups_offs[group][topic] = {}
 
               partitions.each do |partition|
                 # -1 when no offset is stored
-                groups_offs[cg][topic][partition.partition] = partition.offset || -1
+                groups_offs[group][topic][partition.partition] = partition.offset || -1
               end
             end
 
             consumer.lag(commit_offsets).each do |topic, partitions_lags|
-              groups_lags[cg][topic] = partitions_lags
+              groups_lags[group][topic] = partitions_lags
             end
           end
         end
 
-        consumer_groups_with_topics.each do |cg, topics|
-          groups_lags[cg]
+        groups_with_topics.each do |group, topics|
+          groups_lags[group]
 
           topics.each do |topic|
-            groups_lags[cg][topic] ||= {}
+            groups_lags[group][topic] ||= {}
 
             next unless existing_topics.key?(topic)
 
-            # We backfill because there is a case where our consumer group would consume for
+            # We backfill because there is a case where our group would consume for
             # example only one partition out of 20, rest needs to get -1
             existing_topics[topic].times do |partition_id|
-              groups_lags[cg][topic][partition_id] ||= -1
+              groups_lags[group][topic][partition_id] ||= -1
             end
           end
         end
 
         merged = Hash.new { |h, k| h[k] = {} }
 
-        groups_lags.each do |cg, topics|
+        groups_lags.each do |group, topics|
           topics.each do |topic, partitions|
-            merged[cg][topic] = {}
+            merged[group][topic] = {}
 
             partitions.each do |partition, lag|
-              merged[cg][topic][partition] = {
-                offset: groups_offs.fetch(cg).fetch(topic).fetch(partition),
+              merged[group][topic][partition] = {
+                offset: groups_offs.fetch(group).fetch(topic).fetch(partition),
                 lag: lag
               }
             end
