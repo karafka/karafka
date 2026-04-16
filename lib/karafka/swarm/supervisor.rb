@@ -33,10 +33,12 @@ module Karafka
       #
       # Beyond signal propagation, child nodes also need a window after their own graceful
       # `shutdown_timeout` to actually exit the process (run `at_exit` handlers, finalize
-      # librdkafka handles, close pools, etc.). A too-tight grace period causes the supervisor
-      # to raise `ForcefulShutdownError` even when nodes are in the final cleanup phase, which
-      # manifests as flaky shutdowns in swarm integration tests.
-      SHUTDOWN_GRACE_PERIOD = 5_000
+      # librdkafka handles, close pools, etc.). On CI (especially macOS) the effective loop
+      # duration is noticeably longer than the nominal budget because `sleep` granularity and
+      # the per-iteration `waitpid` cost stretch each 0.1s tick. A too-tight grace period
+      # causes the supervisor to raise `ForcefulShutdownError` while a node is still in its
+      # final cleanup phase, which manifests as flaky shutdowns in swarm integration tests.
+      SHUTDOWN_GRACE_PERIOD = 15_000
 
       private_constant :SHUTDOWN_GRACE_PERIOD
 
