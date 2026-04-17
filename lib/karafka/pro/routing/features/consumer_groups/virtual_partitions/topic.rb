@@ -36,13 +36,13 @@ module Karafka
           class VirtualPartitions < Base
             # Topic extensions to be able to manage virtual partitions feature
             module Topic
-              # This method calls the parent class initializer and then sets up the
-              # extra instance variable to nil. The explicit initialization
+              # This method sets up the extra instance variable to nil before calling
+              # the parent class initializer. The explicit initialization
               # to nil is included as an optimization for Ruby's object shapes system,
               # which improves memory layout and access performance.
               def initialize(...)
-                super
                 @virtual_partitions = nil
+                super
               end
 
               # @param max_partitions [Integer] max number of virtual partitions that can come out of
