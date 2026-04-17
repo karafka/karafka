@@ -13,7 +13,7 @@ module Karafka
       #   thread-safe.
       class CoordinatorsBuffer
         include Helpers::ConfigImporter.new(
-          coordinator_class: %i[internal processing coordinator_class]
+          coordinator_class: %i[internal processing consumer_groups coordinator_class]
         )
 
         # @param topics [Karafka::Routing::Topics]

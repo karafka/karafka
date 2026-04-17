@@ -13,8 +13,8 @@ module Karafka
       include Helpers::Async
 
       include Helpers::ConfigImporter.new(
-        jobs_builder: %i[internal processing jobs_builder],
-        partitioner_class: %i[internal processing partitioner_class],
+        jobs_builder: %i[internal processing consumer_groups jobs_builder],
+        partitioner_class: %i[internal processing consumer_groups partitioner_class],
         reset_backoff: %i[internal connection reset_backoff],
         listener_thread_priority: %i[internal connection listener_thread_priority]
       )

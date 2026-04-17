@@ -305,24 +305,30 @@ module Karafka
           setting :jobs_queue_class, default: Processing::JobsQueue
           # option scheduler [Object] scheduler we will be using
           setting :scheduler_class, default: Processing::Schedulers::Default
-          # option jobs_builder [Object] jobs builder we want to use
-          setting :jobs_builder, default: Processing::JobsBuilder.new
-          # option coordinator [Class] work coordinator we want to user for processing coordination
-          setting :coordinator_class, default: Processing::ConsumerGroups::Coordinator
-          # option errors_tracker_class [Class, nil] errors tracker that is used by the coordinator
-          #   for granular error tracking. `nil` for OSS as it is not in use.
-          setting :errors_tracker_class, default: nil
-          # option partitioner_class [Class] partitioner we use against a batch of data
-          setting :partitioner_class, default: Processing::ConsumerGroups::Partitioner
-          # option strategy_selector [Object] processing strategy selector to be used
-          setting :strategy_selector, default: Processing::ConsumerGroups::StrategySelector.new
-          # option expansions_selector [Object] processing expansions selector to be used
-          setting :expansions_selector, default: Processing::ConsumerGroups::ExpansionsSelector.new
-          # option [Class] executor class
-          setting :executor_class, default: Processing::ConsumerGroups::Executor
           # option worker_job_call_wrapper [Proc, false] callable object that will be used to wrap
           #   the worker execution of a job or false if no wrapper needed
           setting :worker_job_call_wrapper, default: false
+
+          # Consumer-group-specific processing defaults. When share groups land, a parallel
+          # `share_groups` namespace will hold their equivalents.
+          setting :consumer_groups do
+            # option jobs_builder [Object] jobs builder we want to use
+            setting :jobs_builder, default: Processing::JobsBuilder.new
+            # option coordinator [Class] work coordinator we want to use for processing
+            #   coordination
+            setting :coordinator_class, default: Processing::ConsumerGroups::Coordinator
+            # option errors_tracker_class [Class, nil] errors tracker that is used by the
+            #   coordinator for granular error tracking. `nil` for OSS as it is not in use.
+            setting :errors_tracker_class, default: nil
+            # option partitioner_class [Class] partitioner we use against a batch of data
+            setting :partitioner_class, default: Processing::ConsumerGroups::Partitioner
+            # option strategy_selector [Object] processing strategy selector to be used
+            setting :strategy_selector, default: Processing::ConsumerGroups::StrategySelector.new
+            # option expansions_selector [Object] processing expansions selector to be used
+            setting :expansions_selector, default: Processing::ConsumerGroups::ExpansionsSelector.new
+            # option [Class] executor class
+            setting :executor_class, default: Processing::ConsumerGroups::Executor
+          end
         end
 
         # Things related to operating on messages

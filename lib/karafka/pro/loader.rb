@@ -120,15 +120,16 @@ module Karafka
           # Use manager that supports multiplexing
           icfg.connection.manager = Connection::Manager.new
 
-          icfg.processing.coordinator_class = Processing::ConsumerGroups::Coordinator
-          icfg.processing.errors_tracker_class = Processing::ConsumerGroups::Coordinators::ErrorsTracker
-          icfg.processing.partitioner_class = Processing::ConsumerGroups::Partitioner
           icfg.processing.scheduler_class = Processing::Schedulers::Default
           icfg.processing.jobs_queue_class = Processing::JobsQueue
-          icfg.processing.executor_class = Processing::ConsumerGroups::Executor
-          icfg.processing.jobs_builder = Processing::JobsBuilder.new
-          icfg.processing.strategy_selector = Processing::ConsumerGroups::StrategySelector.new
-          icfg.processing.expansions_selector = Processing::ConsumerGroups::ExpansionsSelector.new
+
+          icfg.processing.consumer_groups.coordinator_class = Processing::ConsumerGroups::Coordinator
+          icfg.processing.consumer_groups.errors_tracker_class = Processing::ConsumerGroups::Coordinators::ErrorsTracker
+          icfg.processing.consumer_groups.partitioner_class = Processing::ConsumerGroups::Partitioner
+          icfg.processing.consumer_groups.executor_class = Processing::ConsumerGroups::Executor
+          icfg.processing.consumer_groups.jobs_builder = Processing::JobsBuilder.new
+          icfg.processing.consumer_groups.strategy_selector = Processing::ConsumerGroups::StrategySelector.new
+          icfg.processing.consumer_groups.expansions_selector = Processing::ConsumerGroups::ExpansionsSelector.new
 
           icfg.active_job.consumer_class = ActiveJob::Consumer
           icfg.active_job.dispatcher = ActiveJob::Dispatcher.new

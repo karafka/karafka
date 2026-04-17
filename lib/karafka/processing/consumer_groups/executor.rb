@@ -26,8 +26,8 @@ module Karafka
       class Executor
         extend Forwardable
         include Helpers::ConfigImporter.new(
-          strategy_selector: %i[internal processing strategy_selector],
-          expansions_selector: %i[internal processing expansions_selector]
+          strategy_selector: %i[internal processing consumer_groups strategy_selector],
+          expansions_selector: %i[internal processing consumer_groups expansions_selector]
         )
 
         def_delegators :@coordinator, :topic, :partition

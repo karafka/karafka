@@ -9,7 +9,7 @@ module Karafka
       # and caching them, so we can re-use them instead of creating new each time.
       class ExecutorsBuffer
         include Helpers::ConfigImporter.new(
-          executor_class: %i[internal processing executor_class]
+          executor_class: %i[internal processing consumer_groups executor_class]
         )
 
         # @param client [Connection::Client]

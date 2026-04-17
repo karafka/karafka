@@ -121,16 +121,19 @@ module Karafka
           end
 
           nested(:processing) do
-            required(:jobs_builder) { |val| !val.nil? }
             required(:jobs_queue_class) { |val| !val.nil? }
             required(:scheduler_class) { |val| !val.nil? }
-            required(:coordinator_class) { |val| !val.nil? }
-            required(:errors_tracker_class) { |val| val.nil? || val.is_a?(Class) }
-            required(:partitioner_class) { |val| !val.nil? }
-            required(:strategy_selector) { |val| !val.nil? }
-            required(:expansions_selector) { |val| !val.nil? }
-            required(:executor_class) { |val| !val.nil? }
             required(:worker_job_call_wrapper) { |val| val == false || val.respond_to?(:wrap) }
+
+            nested(:consumer_groups) do
+              required(:jobs_builder) { |val| !val.nil? }
+              required(:coordinator_class) { |val| !val.nil? }
+              required(:errors_tracker_class) { |val| val.nil? || val.is_a?(Class) }
+              required(:partitioner_class) { |val| !val.nil? }
+              required(:strategy_selector) { |val| !val.nil? }
+              required(:expansions_selector) { |val| !val.nil? }
+              required(:executor_class) { |val| !val.nil? }
+            end
           end
 
           nested(:active_job) do
