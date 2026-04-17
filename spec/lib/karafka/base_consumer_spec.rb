@@ -4,7 +4,7 @@ RSpec.describe_current do
   subject(:consumer) do
     instance = working_class.new
     instance.coordinator = coordinator
-    instance.singleton_class.include Karafka::Processing::Strategies::Default
+    instance.singleton_class.include Karafka::Processing::ConsumerGroups::Strategies::Default
     instance
   end
 
@@ -81,7 +81,7 @@ RSpec.describe_current do
 
     context "when everything went ok on consume with manual offset management" do
       before do
-        consumer.singleton_class.include(Karafka::Processing::Strategies::Mom)
+        consumer.singleton_class.include(Karafka::Processing::ConsumerGroups::Strategies::Mom)
         topic.manual_offset_management true
       end
 
@@ -103,7 +103,7 @@ RSpec.describe_current do
     end
 
     context "when there was an error on consume with manual offset management" do
-      before { consumer.singleton_class.include(Karafka::Processing::Strategies::Mom) }
+      before { consumer.singleton_class.include(Karafka::Processing::ConsumerGroups::Strategies::Mom) }
 
       let(:working_class) do
         ClassBuilder.inherit(described_class) do
@@ -143,7 +143,7 @@ RSpec.describe_current do
       before do
         topic.manual_offset_management false
         allow(client).to receive(:mark_as_consumed)
-        consumer.singleton_class.include(Karafka::Processing::Strategies::Default)
+        consumer.singleton_class.include(Karafka::Processing::ConsumerGroups::Strategies::Default)
       end
 
       it { expect { consumer.on_consume }.not_to raise_error }
@@ -167,7 +167,7 @@ RSpec.describe_current do
     before { consumer.coordinator.increment(:revoked) }
 
     context "when everything went ok on revoked" do
-      before { consumer.singleton_class.include(Karafka::Processing::Strategies::Default) }
+      before { consumer.singleton_class.include(Karafka::Processing::ConsumerGroups::Strategies::Default) }
 
       it { expect { consumer.on_revoked }.not_to raise_error }
 
@@ -216,7 +216,7 @@ RSpec.describe_current do
   describe "#on_shutdown" do
     before do
       consumer.coordinator.increment(:shutdown)
-      consumer.singleton_class.include(Karafka::Processing::Strategies::Default)
+      consumer.singleton_class.include(Karafka::Processing::ConsumerGroups::Strategies::Default)
     end
 
     context "when everything went ok on shutdown" do

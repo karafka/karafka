@@ -46,7 +46,7 @@ class Consumer < Karafka::BaseConsumer
   end
 end
 
-class AllMessagesFilter < Karafka::Pro::Processing::Filters::Base
+class AllMessagesFilter < Karafka::Pro::Processing::ConsumerGroups::Filters::Base
   attr_reader :cursor
 
   def apply!(messages)

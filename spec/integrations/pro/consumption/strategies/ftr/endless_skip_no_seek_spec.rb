@@ -53,7 +53,7 @@ class Consumer < Karafka::BaseConsumer
   end
 end
 
-class Skipper < Karafka::Pro::Processing::Filters::Base
+class Skipper < Karafka::Pro::Processing::ConsumerGroups::Filters::Base
   def apply!(messages)
     messages.each { |message| DT[:offsets] << message.offset }
     messages.clear

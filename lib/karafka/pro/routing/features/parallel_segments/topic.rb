@@ -48,7 +48,7 @@ module Karafka
                 mom = topic.manual_offset_management?
 
                 # We have two filters for mom and non-mom scenario not to mix this logic
-                filter_scope = Karafka::Pro::Processing::ParallelSegments::Filters
+                filter_scope = Karafka::Pro::Processing::ConsumerGroups::ParallelSegments::Filters
                 filter_class = mom ? filter_scope::Mom : filter_scope::Default
 
                 filter_class.new(

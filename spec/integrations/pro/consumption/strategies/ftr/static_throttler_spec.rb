@@ -57,7 +57,7 @@ class Factory
 
         key = "#{topic.name}-#{partition}"
         # We set 10 seconds so we can trigger a rebalance and check that it still complies
-        @cache[key] ||= ::Karafka::Pro::Processing::Filters::Throttler.new(5, 10_000)
+        @cache[key] ||= ::Karafka::Pro::Processing::ConsumerGroups::Filters::Throttler.new(5, 10_000)
       end
     end
   end

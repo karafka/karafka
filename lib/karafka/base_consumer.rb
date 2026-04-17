@@ -26,7 +26,7 @@ module Karafka
     attr_accessor :messages
     # @return [Karafka::Connection::Client] kafka connection client
     attr_accessor :client
-    # @return [Karafka::Processing::Coordinator] coordinator
+    # @return [Karafka::Processing::ConsumerGroups::Coordinator] coordinator
     attr_accessor :coordinator
     # @return [Waterdrop::Producer] producer instance
     attr_accessor :producer

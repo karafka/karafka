@@ -45,9 +45,9 @@ pro = Karafka::Pro
 assert_equal false, logs.include?("] ERROR -- : Your license expired")
 assert_equal false, logs.include?("Please reach us")
 assert Karafka.pro?
-assert const_visible?("Karafka::Pro::Processing::StrategySelector")
-assert const_visible?("Karafka::Pro::Processing::Coordinator")
-assert const_visible?("Karafka::Pro::Processing::Partitioner")
+assert const_visible?("Karafka::Pro::Processing::ConsumerGroups::StrategySelector")
+assert const_visible?("Karafka::Pro::Processing::ConsumerGroups::Coordinator")
+assert const_visible?("Karafka::Pro::Processing::ConsumerGroups::Partitioner")
 assert const_visible?("Karafka::BaseConsumer")
 assert const_visible?("Karafka::Pro::Processing::JobsBuilder")
 assert const_visible?("Karafka::Pro::Processing::Schedulers::Default")
@@ -57,14 +57,14 @@ assert const_visible?("Karafka::Pro::Routing::Features::LongRunningJob::Config")
 assert const_visible?("Karafka::Pro::Routing::Features::VirtualPartitions::Topic")
 assert const_visible?("Karafka::Pro::Routing::Features::VirtualPartitions::Contracts")
 assert const_visible?("Karafka::Pro::Routing::Features::VirtualPartitions::Config")
-assert const_visible?("Karafka::Pro::Processing::Jobs::ConsumeNonBlocking")
+assert const_visible?("Karafka::Pro::Processing::ConsumerGroups::Jobs::ConsumeNonBlocking")
 assert const_visible?("Karafka::Pro::ActiveJob::Consumer")
 assert const_visible?("Karafka::Pro::ActiveJob::Dispatcher")
 assert const_visible?("Karafka::Pro::ActiveJob::JobOptionsContract")
 assert const_visible?("Karafka::Pro::Instrumentation::PerformanceTracker")
-assert_equal pro::Processing::StrategySelector, config.processing.strategy_selector.class
-assert_equal pro::Processing::Partitioner, config.processing.partitioner_class
-assert_equal pro::Processing::Coordinator, config.processing.coordinator_class
+assert_equal pro::Processing::ConsumerGroups::StrategySelector, config.processing.strategy_selector.class
+assert_equal pro::Processing::ConsumerGroups::Partitioner, config.processing.partitioner_class
+assert_equal pro::Processing::ConsumerGroups::Coordinator, config.processing.coordinator_class
 assert_equal pro::Processing::Schedulers::Default, config.processing.scheduler_class
 assert_equal pro::Processing::JobsQueue, config.processing.jobs_queue_class
 assert_equal pro::Processing::JobsBuilder, config.processing.jobs_builder.class

@@ -66,7 +66,7 @@ class Consumer < Karafka::BaseConsumer
 end
 
 # Filter that demonstrates race condition with cursor and marking
-class CursorRaceFilter < Karafka::Pro::Processing::Filters::Base
+class CursorRaceFilter < Karafka::Pro::Processing::ConsumerGroups::Filters::Base
   attr_reader :cursor
 
   def initialize

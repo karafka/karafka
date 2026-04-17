@@ -114,7 +114,7 @@ RSpec.describe_current do
 
         # Verify filter type
         expect(filter).to be_instance_of(
-          Karafka::Pro::Processing::ParallelSegments::Filters::Mom
+          Karafka::Pro::Processing::ConsumerGroups::ParallelSegments::Filters::Mom
         )
       end
 
@@ -174,7 +174,7 @@ RSpec.describe_current do
 
         # Verify filter type
         expect(filter).to be_instance_of(
-          Karafka::Pro::Processing::ParallelSegments::Filters::Default
+          Karafka::Pro::Processing::ConsumerGroups::ParallelSegments::Filters::Default
         )
       end
 

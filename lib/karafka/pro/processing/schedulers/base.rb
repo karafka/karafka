@@ -59,7 +59,8 @@ module Karafka
           # Runs the consumption jobs scheduling flow under a mutex
           #
           # @param jobs_array
-          #   [Array<Karafka::Processing::Jobs::Consume, Processing::Jobs::ConsumeNonBlocking>]
+          #   [Array<Karafka::Processing::ConsumerGroups::Jobs::Consume,
+          #   Karafka::Pro::Processing::ConsumerGroups::Jobs::ConsumeNonBlocking>]
           #   jobs for scheduling
           def on_schedule_consumption(jobs_array)
             @mutex.synchronize do
@@ -70,7 +71,8 @@ module Karafka
           # Should schedule the consumption jobs
           #
           # @param _jobs_array
-          #   [Array<Karafka::Processing::Jobs::Consume, Processing::Jobs::ConsumeNonBlocking>]
+          #   [Array<Karafka::Processing::ConsumerGroups::Jobs::Consume,
+          #   Karafka::Pro::Processing::ConsumerGroups::Jobs::ConsumeNonBlocking>]
           #   jobs for scheduling
           def schedule_consumption(_jobs_array)
             raise NotImplementedError, "Implement in a subclass"
@@ -79,7 +81,8 @@ module Karafka
           # Runs the revocation jobs scheduling flow under a mutex
           #
           # @param jobs_array
-          #   [Array<Karafka::Processing::Jobs::Revoked, Processing::Jobs::RevokedNonBlocking>]
+          #   [Array<Karafka::Processing::ConsumerGroups::Jobs::Revoked,
+          #   Karafka::Pro::Processing::ConsumerGroups::Jobs::RevokedNonBlocking>]
           #   jobs for scheduling
           def on_schedule_revocation(jobs_array)
             @mutex.synchronize do
@@ -108,7 +111,8 @@ module Karafka
           # Runs the periodic jobs scheduling flow under a mutex
           #
           # @param jobs_array
-          #   [Array<Processing::Jobs::Periodic, Processing::Jobs::PeriodicNonBlocking>]
+          #   [Array<Karafka::Pro::Processing::ConsumerGroups::Jobs::Periodic,
+          #   Karafka::Pro::Processing::ConsumerGroups::Jobs::PeriodicNonBlocking>]
           #   jobs for scheduling
           def on_schedule_periodic(jobs_array)
             @mutex.synchronize do

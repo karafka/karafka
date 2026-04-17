@@ -93,12 +93,12 @@ RSpec.describe_current do
           scheduler_class: Karafka::Processing::Schedulers::Default,
           jobs_builder: Karafka::Processing::JobsBuilder.new,
           jobs_queue_class: Karafka::Processing::JobsQueue,
-          coordinator_class: Karafka::Processing::Coordinator,
+          coordinator_class: Karafka::Processing::ConsumerGroups::Coordinator,
           errors_tracker_class: nil,
-          partitioner_class: Karafka::Processing::Partitioner,
-          strategy_selector: Karafka::Processing::StrategySelector.new,
-          expansions_selector: Karafka::Processing::ExpansionsSelector.new,
-          executor_class: Karafka::Processing::Executor,
+          partitioner_class: Karafka::Processing::ConsumerGroups::Partitioner,
+          strategy_selector: Karafka::Processing::ConsumerGroups::StrategySelector.new,
+          expansions_selector: Karafka::Processing::ConsumerGroups::ExpansionsSelector.new,
+          executor_class: Karafka::Processing::ConsumerGroups::Executor,
           worker_job_call_wrapper: false
         },
         active_job: {

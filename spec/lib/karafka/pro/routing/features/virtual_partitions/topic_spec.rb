@@ -82,7 +82,7 @@ RSpec.describe_current do
         )
 
         expect(topic.virtual_partitions.distributor).to be_a(
-          Karafka::Pro::Processing::VirtualPartitions::Distributors::Consistent
+          Karafka::Pro::Processing::ConsumerGroups::VirtualPartitions::Distributors::Consistent
         )
       end
     end
@@ -96,7 +96,7 @@ RSpec.describe_current do
         )
 
         expect(topic.virtual_partitions.distributor).to be_a(
-          Karafka::Pro::Processing::VirtualPartitions::Distributors::Balanced
+          Karafka::Pro::Processing::ConsumerGroups::VirtualPartitions::Distributors::Balanced
         )
       end
     end
@@ -109,7 +109,7 @@ RSpec.describe_current do
         )
 
         expect(topic.virtual_partitions.distributor).to be_a(
-          Karafka::Pro::Processing::VirtualPartitions::Distributors::Consistent
+          Karafka::Pro::Processing::ConsumerGroups::VirtualPartitions::Distributors::Consistent
         )
       end
     end

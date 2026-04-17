@@ -51,7 +51,7 @@ module Karafka
                 config = Config.new(active: !ttl.nil?, ttl: ttl)
 
                 if config.active?
-                  factory = ->(*) { Pro::Processing::Filters::Expirer.new(ttl) }
+                  factory = ->(*) { Pro::Processing::ConsumerGroups::Filters::Expirer.new(ttl) }
                   filter(factory)
                 end
 
