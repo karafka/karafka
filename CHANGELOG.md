@@ -20,6 +20,8 @@
 - [Maintenance] Add `bin/tests_topics_hashes` script for looking up spec files by their topic name hash prefix.
 - [Change] Require `karafka-rdkafka` `>=` `0.26.1` to support upcoming features relying on low-level Rdkafka APIs.
 - [Fix] Raise `InvalidLicenseTokenError` when a manually-defined `Karafka::License` module is missing required methods (`#token` or `#version`) instead of silently skipping pro component loading, which previously caused confusing `NameError` exceptions later in the boot process.
+- [Enhancement] Bump swarm supervisor `SHUTDOWN_GRACE_PERIOD` from 1s to 15s to give forked nodes enough time to finish post-`shutdown_timeout` cleanup (at_exit handlers, librdkafka finalization, connection pool close) before the supervisor forcefully terminates them, especially on CI where `sleep` granularity and `waitpid` cost stretch each supervision loop iteration.
+- [Maintenance] Fix flaky `pro/admin/recovery/coordinator_for_spec.rb` by warming up the `__consumer_offsets` internal topic with a produce + `seek_consumer_group` and retrying the first `Recovery.coordinator_for` call with exponential backoff on `MetadataError`.
 
 ## 2.5.9 (2026-03-30)
 - [Enhancement] Validate that `statistics.interval.ms` is not zero when dynamic multiplexing is enabled (Pro).
