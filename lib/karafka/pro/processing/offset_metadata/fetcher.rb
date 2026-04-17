@@ -31,6 +31,7 @@
 module Karafka
   module Pro
     module Processing
+      # Backwards-compatible alias for offset metadata classes moved under ConsumerGroups.
       module OffsetMetadata
         # @see ConsumerGroups::OffsetMetadata::Fetcher
         Fetcher = ConsumerGroups::OffsetMetadata::Fetcher

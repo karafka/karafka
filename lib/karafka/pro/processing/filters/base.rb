@@ -31,6 +31,7 @@
 module Karafka
   module Pro
     module Processing
+      # Backwards-compatible aliases for filter classes moved under ConsumerGroups.
       module Filters
         # @see ConsumerGroups::Filters::Base
         Base = ConsumerGroups::Filters::Base
