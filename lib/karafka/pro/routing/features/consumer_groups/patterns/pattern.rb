@@ -70,7 +70,7 @@ module Karafka
                 # This will not prevent users from creating a different regexps matching the same
                 # topic but this minimizes simple mistakes
                 #
-                # This sub-part of sh1 should be unique enough and short-enough to use it here
+                # This sub-part of SHA-256 should be unique enough and short enough to use here
                 digest = Digest::SHA256.hexdigest(safe_regexp.source)[8..16]
                 @name = name ? name.to_s : "karafka-pattern-#{digest}"
                 @config = config
