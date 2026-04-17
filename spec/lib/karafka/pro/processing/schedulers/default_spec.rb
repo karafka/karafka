@@ -123,7 +123,7 @@ RSpec.describe_current do
           tracker.on_consumer_consumed(public_send("event#{i}"))
         end
 
-        jobs_array << Karafka::Processing::Jobs::Idle.new(nil)
+        jobs_array << Karafka::Processing::ConsumerGroups::Jobs::Idle.new(nil)
 
         schedule
       end

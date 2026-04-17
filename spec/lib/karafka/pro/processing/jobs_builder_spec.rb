@@ -92,14 +92,14 @@ RSpec.describe_current do
   describe "#shutdown" do
     it do
       job = builder.shutdown(executor)
-      expect(job).to be_a(Karafka::Processing::Jobs::Shutdown)
+      expect(job).to be_a(Karafka::Processing::ConsumerGroups::Jobs::Shutdown)
     end
   end
 
   describe "#idle" do
     it do
       job = builder.idle(executor)
-      expect(job).to be_a(Karafka::Processing::Jobs::Idle)
+      expect(job).to be_a(Karafka::Processing::ConsumerGroups::Jobs::Idle)
     end
   end
 
