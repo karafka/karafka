@@ -10,7 +10,7 @@ module Karafka
             # This method simplifies routes definition for ActiveJob topics / queues by
             # auto-injecting the consumer class
             #
-            # @param name [String, Symbol] name of the topic where ActiveJobs jobs should go
+            # @param name [String, Symbol] name of the topic where ActiveJob jobs should go
             # @param block [Proc] block that we can use for some extra configuration
             def active_job_topic(name, &block)
               topic(name) do

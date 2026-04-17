@@ -7,7 +7,7 @@ module Karafka
         class DeadLetterQueue < Base
           # DLQ topic extensions
           module Topic
-            # After how many retries should be move data to DLQ
+            # After how many retries should data be moved to DLQ
             DEFAULT_MAX_RETRIES = 3
 
             private_constant :DEFAULT_MAX_RETRIES

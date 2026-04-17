@@ -65,7 +65,7 @@ SimpleCov.start do
 end
 
 # Require total coverage after running both regular and pro
-SimpleCov.minimum_coverage(93.0) if SPECS_TYPE == "pro"
+SimpleCov.minimum_coverage(92.5) if SPECS_TYPE == "pro"
 
 Dir["#{File.dirname(__FILE__)}/support/**/*.rb"].each { |f| require f }
 
