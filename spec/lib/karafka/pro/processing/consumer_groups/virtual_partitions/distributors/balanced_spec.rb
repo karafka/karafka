@@ -31,7 +31,7 @@
 RSpec.describe_current do
   let(:config) do
     instance_double(
-      Karafka::Pro::Routing::Features::VirtualPartitions::Config,
+      Karafka::Pro::Routing::Features::ConsumerGroups::VirtualPartitions::Config,
       partitioner: partitioner,
       reducer: reducer,
       max_partitions: max_partitions

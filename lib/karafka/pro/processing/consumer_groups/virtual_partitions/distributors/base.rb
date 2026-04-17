@@ -41,14 +41,14 @@ module Karafka
           module Distributors
             # Base class for all virtual partition distributors
             class Base
-              # @param config [Karafka::Pro::Routing::Features::VirtualPartitions::Config]
+              # @param config [Karafka::Pro::Routing::Features::ConsumerGroups::VirtualPartitions::Config]
               def initialize(config)
                 @config = config
               end
 
               private
 
-              # @return [Karafka::Pro::Routing::Features::VirtualPartitions::Config]
+              # @return [Karafka::Pro::Routing::Features::ConsumerGroups::VirtualPartitions::Config]
               attr_reader :config
             end
           end
