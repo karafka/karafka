@@ -476,11 +476,16 @@ module Karafka
             expansions_selector
             executor_class
           ].each do |setting_name|
-            processing.define_singleton_method(setting_name) { cg_node.public_send(setting_name) }
+            writer = :"#{setting_name}="
 
-            processing.define_singleton_method(:"#{setting_name}=") do |val|
-              cg_node.public_send(:"#{setting_name}=", val)
-            end
+            # Remove previous definitions (if setup runs more than once) to avoid
+            # "method redefined" warnings that spec_helper promotes to errors
+            sc = processing.singleton_class
+            sc.remove_method(setting_name) if processing.respond_to?(setting_name)
+            sc.remove_method(writer) if processing.respond_to?(writer)
+
+            processing.define_singleton_method(setting_name) { cg_node.public_send(setting_name) }
+            processing.define_singleton_method(writer) { |val| cg_node.public_send(writer, val) }
           end
         end
 
