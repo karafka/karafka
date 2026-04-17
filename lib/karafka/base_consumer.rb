@@ -304,7 +304,7 @@ module Karafka
     # @return [Boolean] was this consumer in active use. Active use means running `#consume` at
     #   least once. Consumer may have to run `#revoked` or `#shutdown` despite not running
     #   `#consume` previously in delayed job cases and other cases that potentially involve running
-    #   the `Jobs::Idle` for house-keeping
+    #   the `ConsumerGroups::Jobs::Idle` for house-keeping
     def used?
       @used
     end

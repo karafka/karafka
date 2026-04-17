@@ -92,7 +92,7 @@ module Karafka
 
           # Runs the shutdown jobs scheduling flow under a mutex
           #
-          # @param jobs_array [Array<Karafka::Processing::Jobs::Shutdown>] jobs for scheduling
+          # @param jobs_array [Array<Karafka::Processing::ConsumerGroups::Jobs::Shutdown>] jobs for scheduling
           def on_schedule_shutdown(jobs_array)
             @mutex.synchronize do
               schedule_shutdown(jobs_array)
@@ -101,7 +101,7 @@ module Karafka
 
           # Runs the idle jobs scheduling flow under a mutex
           #
-          # @param jobs_array [Array<Karafka::Processing::Jobs::Idle>] jobs for scheduling
+          # @param jobs_array [Array<Karafka::Processing::ConsumerGroups::Jobs::Idle>] jobs for scheduling
           def on_schedule_idle(jobs_array)
             @mutex.synchronize do
               schedule_idle(jobs_array)

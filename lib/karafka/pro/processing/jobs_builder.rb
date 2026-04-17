@@ -35,7 +35,7 @@ module Karafka
       class JobsBuilder < Karafka::Processing::JobsBuilder
         # @param executor [Karafka::Pro::Processing::ConsumerGroups::Executor]
         def idle(executor)
-          Karafka::Processing::Jobs::Idle.new(executor)
+          Karafka::Processing::ConsumerGroups::Jobs::Idle.new(executor)
         end
 
         # @param executor [Karafka::Pro::Processing::ConsumerGroups::Executor]

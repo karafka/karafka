@@ -9,7 +9,7 @@ module Karafka
       module Jobs
         # The main job type. It runs the executor that triggers given topic partition messages
         # processing in an underlying consumer instance.
-        class Consume < Processing::Jobs::Base
+        class Consume < ::Karafka::Processing::Jobs::Base
           # @return [Array<Rdkafka::Consumer::Message>] array with messages
           attr_reader :messages
 

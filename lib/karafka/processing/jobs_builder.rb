@@ -25,9 +25,9 @@ module Karafka
       end
 
       # @param executor [Karafka::Processing::ConsumerGroups::Executor]
-      # @return [Karafka::Processing::Jobs::Shutdown] shutdown job
+      # @return [Karafka::Processing::ConsumerGroups::Jobs::Shutdown] shutdown job
       def shutdown(executor)
-        Jobs::Shutdown.new(executor)
+        ConsumerGroups::Jobs::Shutdown.new(executor)
       end
     end
   end
