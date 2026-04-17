@@ -5,10 +5,10 @@ module Karafka
     module ConsumerGroups
       module Jobs
         # Job that runs on each active consumer upon process shutdown (one job per consumer).
-        class Shutdown < Processing::Jobs::Base
+        class Shutdown < ::Karafka::Processing::Jobs::Base
           self.action = :shutdown
 
-          # @param executor [Karafka::Processing::ConsumerGroups::Executor] executor that is suppose to run a given
+          # @param executor [Karafka::Processing::ConsumerGroups::Executor] executor that is supposed to run a given
           #   job on an active consumer
           # @return [Shutdown]
           def initialize(executor)

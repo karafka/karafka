@@ -8,10 +8,10 @@ module Karafka
       # Consumer-group-specific job types
       module Jobs
         # Job that runs the eofed operation when we receive eof without messages alongside.
-        class Eofed < Processing::Jobs::Base
+        class Eofed < ::Karafka::Processing::Jobs::Base
           self.action = :eofed
 
-          # @param executor [Karafka::Processing::ConsumerGroups::Executor] executor that is suppose to run the job
+          # @param executor [Karafka::Processing::ConsumerGroups::Executor] executor that is supposed to run the job
           # @return [Eofed]
           def initialize(executor)
             @executor = executor

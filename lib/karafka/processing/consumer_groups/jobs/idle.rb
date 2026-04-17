@@ -6,10 +6,10 @@ module Karafka
       module Jobs
         # Type of job that we may use to run some extra handling that happens without the user
         # related lifecycle event like consumption, revocation, etc.
-        class Idle < Processing::Jobs::Base
+        class Idle < ::Karafka::Processing::Jobs::Base
           self.action = :idle
 
-          # @param executor [Karafka::Processing::ConsumerGroups::Executor] executor that is suppose to run a given
+          # @param executor [Karafka::Processing::ConsumerGroups::Executor] executor that is supposed to run a given
           #   job on an active consumer
           # @return [Idle]
           def initialize(executor)
