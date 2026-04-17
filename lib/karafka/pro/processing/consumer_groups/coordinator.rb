@@ -40,7 +40,7 @@ module Karafka
         class Coordinator < Karafka::Processing::ConsumerGroups::Coordinator
           extend Forwardable
           include Helpers::ConfigImporter.new(
-            errors_tracker_class: %i[internal processing errors_tracker_class]
+            errors_tracker_class: %i[internal processing consumer_groups errors_tracker_class]
           )
 
           def_delegators :@collapser, :collapsed?, :collapse_until!

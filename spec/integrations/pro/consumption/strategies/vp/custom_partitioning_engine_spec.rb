@@ -64,10 +64,10 @@ setup_karafka do |config|
   config.max_messages = 500
   config.max_wait_time = 5_000
   config.initial_offset = "earliest"
-  config.internal.processing.partitioner_class = CustomPartitioner
+  config.internal.processing.consumer_groups.partitioner_class = CustomPartitioner
 end
 
-assert_equal Karafka::App.config.internal.processing.partitioner_class, CustomPartitioner
+assert_equal Karafka::App.config.internal.processing.consumer_groups.partitioner_class, CustomPartitioner
 
 class Consumer < Karafka::BaseConsumer
   def consume
