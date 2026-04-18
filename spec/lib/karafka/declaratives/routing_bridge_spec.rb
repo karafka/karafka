@@ -9,8 +9,6 @@ RSpec.describe "Declaratives routing bridge" do
     end
   end
 
-  after { Karafka::App.declaratives.repository.clear }
-
   describe "routing config(...) creates declaration in repository" do
     before { topic.config(partitions: 5, replication_factor: 3) }
 

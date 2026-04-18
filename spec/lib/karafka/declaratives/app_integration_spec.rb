@@ -1,8 +1,6 @@
 # frozen_string_literal: true
 
 RSpec.describe "Karafka::App.declaratives integration" do
-  after { Karafka::App.declaratives.repository.clear }
-
   describe "Karafka::App.declaratives" do
     it "returns a Declaratives::Builder" do
       expect(Karafka::App.declaratives).to be_a(Karafka::Declaratives::Builder)
