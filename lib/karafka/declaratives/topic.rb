@@ -18,7 +18,16 @@ module Karafka
         @details = {}
       end
 
-      # Gets or sets the active flag
+      # Gets or sets the active flag.
+      #
+      # The active flag exists because the routing bridge (Routing::Features::Declaratives::Topic)
+      # auto-creates a declaration for every routing topic that calls config(). Some routing
+      # topics — notably Pro pattern-matched virtual topics — must exist in routing but cannot
+      # be managed declaratively (their real Kafka topic names are unknown). Those call
+      # config(active: false) to opt out. Once the routing bridge is retired and declaratives
+      # are defined exclusively via Karafka::App.declaratives.draw, this flag becomes
+      # unnecessary: topics simply won't be declared if they shouldn't be managed.
+      #
       # @param value [Symbol, Boolean] when :not_set returns current value, otherwise sets it
       # @return [Boolean] active state
       def active(value = :not_set)
