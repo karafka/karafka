@@ -37,25 +37,25 @@ READER, WRITER = IO.pipe
 
 class Consumer < Karafka::BaseConsumer
   def consume
-    WRITER.puts("#{topic.consumer_group.name}:#{topic.name}")
+    WRITER.puts("#{topic.group.name}:#{topic.name}")
     WRITER.flush
   end
 end
 
 draw_routes do
-  consumer_group DT.consumer_groups[0] do
+  consumer_group DT.groups[0] do
     topic DT.topics[0] do
       consumer Consumer
     end
   end
 
-  consumer_group DT.consumer_groups[1] do
+  consumer_group DT.groups[1] do
     topic DT.topics[1] do
       consumer Consumer
     end
   end
 
-  consumer_group DT.consumer_groups[2] do
+  consumer_group DT.groups[2] do
     topic DT.topics[2] do
       consumer Consumer
     end
@@ -64,7 +64,7 @@ end
 
 ARGV[0] = "swarm"
 ARGV[1] = "--exclude-consumer-groups"
-ARGV[2] = DT.consumer_groups[1]
+ARGV[2] = DT.groups[1]
 
 produce_many(DT.topics[0], DT.uuids(5))
 produce_many(DT.topics[1], DT.uuids(5))
@@ -86,9 +86,9 @@ thread.join
 
 # Should consume from consumer_groups[0] and consumer_groups[2],
 # but not consumer_groups[1] (excluded)
-cg0 = DT.consumer_groups[0]
-cg1 = DT.consumer_groups[1]
-cg2 = DT.consumer_groups[2]
+cg0 = DT.groups[0]
+cg1 = DT.groups[1]
+cg2 = DT.groups[2]
 
 assert(
   consumed.any? { |c| c.include?(cg0) },

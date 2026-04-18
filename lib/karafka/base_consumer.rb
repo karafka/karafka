@@ -26,7 +26,7 @@ module Karafka
     attr_accessor :messages
     # @return [Karafka::Connection::Client] kafka connection client
     attr_accessor :client
-    # @return [Karafka::Processing::Coordinator] coordinator
+    # @return [Karafka::Processing::ConsumerGroups::Coordinator] coordinator
     attr_accessor :coordinator
     # @return [Waterdrop::Producer] producer instance
     attr_accessor :producer
@@ -304,7 +304,7 @@ module Karafka
     # @return [Boolean] was this consumer in active use. Active use means running `#consume` at
     #   least once. Consumer may have to run `#revoked` or `#shutdown` despite not running
     #   `#consume` previously in delayed job cases and other cases that potentially involve running
-    #   the `Jobs::Idle` for house-keeping
+    #   the `ConsumerGroups::Jobs::Idle` for house-keeping
     def used?
       @used
     end

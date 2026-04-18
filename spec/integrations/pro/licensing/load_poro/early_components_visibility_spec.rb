@@ -33,5 +33,5 @@
 
 require "karafka"
 
-class Partitioner < Karafka::Pro::Processing::Partitioner
+class Partitioner < Karafka::Pro::Processing::ConsumerGroups::Partitioner
 end

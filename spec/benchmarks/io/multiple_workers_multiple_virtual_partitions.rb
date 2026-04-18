@@ -56,7 +56,7 @@ class Consumer < Karafka::BaseConsumer
 end
 
 Karafka::App.routes.draw do
-  consumer_group DT.consumer_group do
+  consumer_group DT.group do
     topic "benchmarks_01_05" do
       max_messages 1_000
       max_wait_time 1_000

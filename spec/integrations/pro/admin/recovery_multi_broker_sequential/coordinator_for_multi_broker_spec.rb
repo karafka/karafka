@@ -69,7 +69,7 @@ groups.each do |group|
     60.times do
       result = Karafka::Admin::Recovery.coordinator_for(group)
       break
-    rescue Karafka::Pro::Admin::Recovery::Errors::MetadataError
+    rescue Karafka::Admin::Recovery::Errors::MetadataError
       sleep(1)
     end
 

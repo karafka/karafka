@@ -48,7 +48,7 @@ class Consumer < Karafka::BaseConsumer
 end
 
 # Complex filter that combines multiple predicates
-class ComplexPredicateFilter < Karafka::Pro::Processing::Filters::Base
+class ComplexPredicateFilter < Karafka::Pro::Processing::ConsumerGroups::Filters::Base
   attr_reader :cursor
 
   def apply!(messages)

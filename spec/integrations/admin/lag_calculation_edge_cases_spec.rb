@@ -59,12 +59,12 @@ end
 lag_test_messages.each { |msg| produce(DT.topic, msg) }
 
 # Get consumer group ID for lag calculations
-consumer_group_id = Karafka::App.routes.first.id
+group_id = Karafka::App.routes.first.id
 
 # Test lag calculation before consumer starts
 begin
   pre_consumption_lags = Karafka::Admin.read_lags_with_offsets(
-    consumer_group_id,
+    group_id,
     [DT.topic]
   )
 
@@ -91,7 +91,7 @@ end
 # Test lag calculation after full consumption
 begin
   post_consumption_lags = Karafka::Admin.read_lags_with_offsets(
-    consumer_group_id,
+    group_id,
     [DT.topic]
   )
 
@@ -113,7 +113,7 @@ end
 # Test lag calculation with specific partitions
 begin
   partition_specific_lags = Karafka::Admin.read_lags_with_offsets(
-    consumer_group_id,
+    group_id,
     [DT.topic],
     [0] # Specify partition 0
   )

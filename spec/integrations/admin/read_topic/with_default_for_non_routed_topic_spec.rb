@@ -25,6 +25,8 @@ draw_routes do
   end
 end
 
+Karafka::Admin.create_topic(DT.topic, 1, 1)
+
 produce(DT.topic, "10")
 
 message = Karafka::Admin.read_topic(DT.topic, 0, 1).last

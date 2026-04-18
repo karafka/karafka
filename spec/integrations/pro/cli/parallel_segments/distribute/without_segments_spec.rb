@@ -33,7 +33,7 @@
 setup_karafka
 
 draw_routes do
-  consumer_group DT.consumer_group do
+  consumer_group DT.group do
     # No parallel_segments defined
     topic DT.topic do
       config(partitions: 2)

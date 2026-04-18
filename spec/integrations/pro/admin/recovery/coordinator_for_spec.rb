@@ -41,7 +41,30 @@ end
 
 GROUP_ID = SecureRandom.uuid
 
-result = Karafka::Admin::Recovery.coordinator_for(GROUP_ID)
+# Produce a message and commit an offset so the __consumer_offsets internal topic is guaranteed
+# to exist in cluster metadata. On a fresh CI broker it may not exist until a consumer group
+# has committed at least once.
+produce(DT.topics[0], "warmup")
+
+Karafka::Admin.seek_consumer_group(GROUP_ID, { DT.topics[0] => { 0 => 0 } })
+
+# On a fresh CI broker the __consumer_offsets topic may take a while to appear in cluster
+# metadata even after a commit. Retry the first Recovery call with exponential backoff for
+# up to ~30 s before giving up with the original MetadataError.
+result = nil
+backoff = 1
+total_waited = 0
+
+loop do
+  result = Karafka::Admin::Recovery.coordinator_for(GROUP_ID)
+  break
+rescue Karafka::Pro::Admin::Recovery::Errors::MetadataError
+  raise if total_waited >= 30
+
+  sleep(backoff)
+  total_waited += backoff
+  backoff = [backoff * 2, 10].min
+end
 
 # Should return the expected partition
 expected_partition = Karafka::Admin::Recovery.offsets_partition_for(GROUP_ID)

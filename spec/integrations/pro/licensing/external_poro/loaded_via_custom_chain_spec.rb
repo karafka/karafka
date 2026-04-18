@@ -63,19 +63,19 @@ end
 raise unless Karafka.pro?
 
 # None of this should fail as all should be visible
-raise unless Karafka::Pro::Processing::StrategySelector
-raise unless Karafka::Pro::Processing::Coordinator
-raise unless Karafka::Pro::Processing::Partitioner
+raise unless Karafka::Pro::Processing::ConsumerGroups::StrategySelector
+raise unless Karafka::Pro::Processing::ConsumerGroups::Coordinator
+raise unless Karafka::Pro::Processing::ConsumerGroups::Partitioner
 raise unless Karafka::BaseConsumer
 raise unless Karafka::Pro::Processing::JobsBuilder
 raise unless Karafka::Pro::Processing::Schedulers::Default
-raise unless Karafka::Pro::Routing::Features::LongRunningJob::Topic
-raise unless Karafka::Pro::Routing::Features::LongRunningJob::Contracts
-raise unless Karafka::Pro::Routing::Features::LongRunningJob::Config
-raise unless Karafka::Pro::Routing::Features::VirtualPartitions::Topic
-raise unless Karafka::Pro::Routing::Features::VirtualPartitions::Contracts
-raise unless Karafka::Pro::Routing::Features::VirtualPartitions::Config
-raise unless Karafka::Pro::Processing::Jobs::ConsumeNonBlocking
+raise unless Karafka::Pro::Routing::Features::ConsumerGroups::LongRunningJob::Topic
+raise unless Karafka::Pro::Routing::Features::ConsumerGroups::LongRunningJob::Contracts
+raise unless Karafka::Pro::Routing::Features::ConsumerGroups::LongRunningJob::Config
+raise unless Karafka::Pro::Routing::Features::ConsumerGroups::VirtualPartitions::Topic
+raise unless Karafka::Pro::Routing::Features::ConsumerGroups::VirtualPartitions::Contracts
+raise unless Karafka::Pro::Routing::Features::ConsumerGroups::VirtualPartitions::Config
+raise unless Karafka::Pro::Processing::ConsumerGroups::Jobs::ConsumeNonBlocking
 raise unless Karafka::Pro::ActiveJob::Consumer
 raise unless Karafka::Pro::ActiveJob::Dispatcher
 raise unless Karafka::Pro::ActiveJob::JobOptionsContract

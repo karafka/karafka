@@ -95,9 +95,9 @@ def setup_karafka(
       "queue.buffering.max.ms": 5,
       "partition.assignment.strategy": "range,roundrobin"
     }
-    config.client_id = DT.consumer_group
+    config.client_id = DT.group
     # Prevents conflicts when running in parallel
-    config.group_id = DT.consumer_group
+    config.group_id = DT.group
     config.pause.timeout = 1
     config.pause.max_timeout = 1
     config.pause.with_exponential_backoff = false
@@ -234,7 +234,7 @@ def setup_testing(framework)
         Karafka::App.routes.clear
         Karafka.monitor.notifications_bus.clear
         Karafka::App.config.internal.routing.activity_manager.clear
-        Karafka::Processing::InlineInsights::Tracker.clear
+        Karafka::Processing::ConsumerGroups::InlineInsights::Tracker.clear
       end
     end
   else
@@ -278,7 +278,7 @@ end
 def setup_rdkafka_consumer(options = {})
   config = {
     "bootstrap.servers": ENV.fetch("KAFKA_BOOTSTRAP_SERVERS", "127.0.0.1:9092"),
-    "group.id": Karafka::App.consumer_groups.first.id,
+    "group.id": Karafka::App.routes.first.id,
     "auto.offset.reset": "earliest",
     "enable.auto.offset.store": "false",
     "partition.assignment.strategy": "range,roundrobin"
@@ -299,7 +299,7 @@ def draw_routes(consumer_class = nil, create_topics: true, &block)
     if block
       instance_eval(&block)
     else
-      consumer_group DT.consumer_group do
+      consumer_group DT.group do
         topic DT.topic do
           consumer consumer_class
         end
@@ -315,7 +315,7 @@ end
 # Returns the next offset that we would consume if we would subscribe again
 # @param topic [String] topic we are interested in
 # @param normalize [Boolean]
-# @param consumer_group_id [String]
+# @param group_id [String]
 # @return [Integer] next offset we would consume
 #
 # @note Please note, that for `latest` seek offset, -1 means from high-watermark. We simplify it
@@ -323,10 +323,10 @@ end
 def fetch_next_offset(
   topic = DT.topic,
   normalize: true,
-  consumer_group_id: Karafka::App.consumer_groups.first.id
+  group_id: Karafka::App.routes.first.id
 )
   results = Karafka::Admin.read_lags_with_offsets
-  part_results = results.fetch(consumer_group_id).fetch(topic)[0]
+  part_results = results.fetch(group_id).fetch(topic)[0]
   offset = part_results.fetch(:offset)
 
   return offset unless normalize
@@ -350,10 +350,14 @@ def fetch_declarative_routes_topics_configs
     next unless topic.dead_letter_queue?
     next unless topic.dead_letter_queue.topic
 
-    # Setting to false will force defaults, useful when we do not want to declare DLQ topics
-    # manually. This will ensure we always create DLQ topics if their details are not defined
-    # in the routing
-    accu[topic.name] ||= false
+    dlq_topic = topic.dead_letter_queue.topic.to_s
+
+    # Only pre-create DLQ topics that follow the integration test naming convention.
+    # Some specs use hardcoded names like "dead_messages" or symbols like :strategy
+    # that are not real auto-created topics.
+    next unless dlq_topic.start_with?("it-")
+
+    accu[dlq_topic] ||= false
   end
 end
 

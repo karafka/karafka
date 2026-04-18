@@ -40,7 +40,7 @@ class Consumer < Karafka::BaseConsumer
   end
 end
 
-class DelayThrottler < Karafka::Pro::Processing::Filters::Base
+class DelayThrottler < Karafka::Pro::Processing::ConsumerGroups::Filters::Base
   include Karafka::Core::Helpers::Time
 
   attr_reader :cursor

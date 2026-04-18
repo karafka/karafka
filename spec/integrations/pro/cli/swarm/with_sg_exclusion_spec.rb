@@ -44,13 +44,13 @@ class Consumer < Karafka::BaseConsumer
 end
 
 draw_routes do
-  subscription_group DT.consumer_groups[0] do
+  subscription_group DT.groups[0] do
     topic DT.topics[0] do
       consumer Consumer
     end
   end
 
-  subscription_group DT.consumer_groups[1] do
+  subscription_group DT.groups[1] do
     topic DT.topics[1] do
       consumer Consumer
     end
@@ -59,7 +59,7 @@ end
 
 ARGV[0] = "swarm"
 ARGV[1] = "--exclude-subscription-groups"
-ARGV[2] = DT.consumer_groups[0]
+ARGV[2] = DT.groups[0]
 
 produce_many(DT.topics[0], DT.uuids(10))
 produce_many(DT.topics[1], DT.uuids(10))

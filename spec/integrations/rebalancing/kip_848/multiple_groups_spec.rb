@@ -32,7 +32,7 @@ end
 # Draw routes with three separate consumer groups, all using KIP-848
 draw_routes do
   # First consumer group
-  consumer_group "#{DT.consumer_group}-group1" do
+  consumer_group "#{DT.group}-group1" do
     topic DT.topic do
       config(partitions: 3)
       consumer ConsumerGroup1
@@ -40,14 +40,14 @@ draw_routes do
   end
 
   # Second consumer group
-  consumer_group "#{DT.consumer_group}-group2" do
+  consumer_group "#{DT.group}-group2" do
     topic DT.topic do
       consumer ConsumerGroup2
     end
   end
 
   # Third consumer group
-  consumer_group "#{DT.consumer_group}-group3" do
+  consumer_group "#{DT.group}-group3" do
     topic DT.topic do
       consumer ConsumerGroup3
     end

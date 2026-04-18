@@ -3,11 +3,21 @@
 module Karafka
   module Routing
     # Topic stores all the details on how we should interact with Kafka given topic.
-    # It belongs to a consumer group as from 0.6 all the topics can work in the same consumer group
+    # It belongs to a group as from 0.6 all the topics can work in the same group
     # It is a part of Karafka's DSL.
+    #
+    # @note `#group` is the polymorphic reference to the owning group. Today this is always a
+    #   {ConsumerGroup}, but the accessor is named generically in preparation for additional group
+    #   types (e.g. KIP-932 share groups). `#consumer_group` is kept as an alias for backwards
+    #   compatibility.
     class Topic
-      attr_reader :id, :name, :consumer_group
+      attr_reader :id, :name, :group
       attr_writer :consumer
+
+      # Backwards compatible alias for `#group`. Kept purely for compatibility — this is an
+      # unconditional alias and performs no type validation, so callers should prefer `#group`
+      # once additional group types (e.g. KIP-932 share groups) land.
+      alias_method :consumer_group, :group
 
       attr_accessor :subscription_group_details
 
@@ -30,16 +40,17 @@ module Karafka
       private_constant :INHERITABLE_ATTRIBUTES
 
       # @param name [String, Symbol] name of a topic on which we want to listen
-      # @param consumer_group [Karafka::Routing::ConsumerGroup] owning consumer group of this topic
-      def initialize(name, consumer_group)
+      # @param group [Karafka::Routing::ConsumerGroup] owning group of this topic. Polymorphic
+      #   placeholder for future group types (e.g. share groups); today always a ConsumerGroup.
+      def initialize(name, group)
         @name = name.to_s
-        @consumer_group = consumer_group
+        @group = group
         @attributes = {}
         @active = true
-        # @note We use identifier related to the consumer group that owns a topic, because from
-        #   Karafka 0.6 we can handle multiple Kafka instances with the same process and we can
-        #   have same topic name across multiple consumer groups
-        @id = "#{consumer_group.id}_#{@name}"
+        # @note We use identifier related to the group that owns a topic, because from Karafka 0.6
+        #   we can handle multiple Kafka instances with the same process and we can have same
+        #   topic name across multiple groups
+        @id = "#{group.id}_#{@name}"
         @consumer = nil
         @active_assigned = false
         @subscription_group_details = nil
@@ -133,7 +144,7 @@ module Karafka
       end
 
       # @return [Hash] hash with all the topic attributes
-      # @note This is being used when we validate the consumer_group and its topics
+      # @note This is being used when we validate the group and its topics
       def to_h
         map = INHERITABLE_ATTRIBUTES.map do |attribute|
           [attribute, public_send(attribute)]
@@ -144,7 +155,10 @@ module Karafka
           name: name,
           active: active?,
           consumer: consumer,
-          consumer_group_id: consumer_group.id,
+          group_id: group.id,
+          # Kept as a reference alongside `group_id` for backwards compatibility. Will be removed
+          # in Karafka 3.0.
+          consumer_group_id: group.id,
           subscription_group_details: subscription_group_details
         ).freeze
       end

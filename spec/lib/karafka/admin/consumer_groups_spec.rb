@@ -137,9 +137,9 @@ RSpec.describe Karafka::Admin::ConsumerGroups do
   end
 
   describe "#trigger_rebalance" do
-    subject(:trigger) { described_class.trigger_rebalance(consumer_group_id) }
+    subject(:trigger) { described_class.trigger_rebalance(group_id) }
 
-    let(:consumer_group_id) { SecureRandom.uuid }
+    let(:group_id) { SecureRandom.uuid }
 
     context "when consumer group is not in routing" do
       it "expect to raise InvalidConfigurationError with proper message" do

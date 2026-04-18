@@ -36,7 +36,7 @@ class Consumer < Karafka::BaseConsumer
 end
 
 Karafka::App.routes.draw do
-  consumer_group DT.consumer_group do
+  consumer_group DT.group do
     subscription_group do
       multiplexing(min: 5, max: 5)
 

@@ -15,7 +15,7 @@ class ActiveConsumerGroupConsumer < Karafka::BaseConsumer
 
       DT[:consumed] << {
         message_id: message_data["id"],
-        consumer_group: topic.consumer_group.id,
+        consumer_group: topic.group.id,
         processed_at: Time.now.to_f
       }
     end
@@ -47,7 +47,7 @@ end
 sleep(1)
 
 # Get the consumer group ID from the routing
-consumer_group_id = Karafka::App.routes.first.id
+group_id = Karafka::App.routes.first.id
 
 # Perform admin operations on active consumer group
 begin
@@ -58,7 +58,7 @@ begin
     operation: "read_consumer_groups",
     success: true,
     groups_count: consumer_groups_info.size,
-    target_group_found: consumer_groups_info.any? { |cg| cg.group_id == consumer_group_id }
+    target_group_found: consumer_groups_info.any? { |cg| cg.group_id == group_id }
   }
 rescue => e
   DT[:admin_operations] << {
@@ -71,7 +71,7 @@ end
 
 begin
   # Get specific consumer group details
-  group_details = Karafka::Admin.read_consumer_group(consumer_group_id)
+  group_details = Karafka::Admin.read_consumer_group(group_id)
 
   DT[:admin_operations] << {
     operation: "read_consumer_group",
@@ -91,7 +91,7 @@ end
 
 begin
   # Try to get consumer group offsets while active
-  offsets_info = Karafka::Admin.read_consumer_group_offsets(consumer_group_id)
+  offsets_info = Karafka::Admin.read_consumer_group_offsets(group_id)
 
   DT[:admin_operations] << {
     operation: "read_consumer_group_offsets",
@@ -111,7 +111,7 @@ end
 # Test seeking operations on active consumer (this might be restricted)
 begin
   # Try to seek to beginning (this operation might fail or be ignored while consumer is active)
-  seek_result = Karafka::Admin.seek_consumer_group(consumer_group_id, { DT.topic => { 0 => 0 } })
+  seek_result = Karafka::Admin.seek_consumer_group(group_id, { DT.topic => { 0 => 0 } })
 
   DT[:admin_operations] << {
     operation: "seek_consumer_group",
@@ -136,7 +136,7 @@ sleep(0.5) # Give time for consumer to fully shutdown
 
 begin
   # Read consumer group info after shutdown
-  post_shutdown_info = Karafka::Admin.read_consumer_group(consumer_group_id)
+  post_shutdown_info = Karafka::Admin.read_consumer_group(group_id)
 
   DT[:admin_operations] << {
     operation: "read_consumer_group_post_shutdown",

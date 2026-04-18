@@ -49,7 +49,8 @@ module Karafka
           # Schedules jobs in the LJF order for consumption
           #
           # @param jobs_array
-          #   [Array<Karafka::Processing::Jobs::Consume, Processing::Jobs::ConsumeNonBlocking>]
+          #   [Array<Karafka::Processing::ConsumerGroups::Jobs::Consume,
+          #   Karafka::Pro::Processing::ConsumerGroups::Jobs::ConsumeNonBlocking>]
           #   jobs for scheduling
           def on_schedule_consumption(jobs_array)
             perf_tracker = Instrumentation::PerformanceTracker.instance
@@ -101,10 +102,11 @@ module Karafka
           private
 
           # @param perf_tracker [PerformanceTracker]
-          # @param job [Karafka::Processing::Jobs::Consume] job we will be processing
+          # @param job [Karafka::Processing::ConsumerGroups::Jobs::Consume] job we will be
+          #   processing
           # @return [Numeric] estimated cost of processing this job
           def processing_cost(perf_tracker, job)
-            if job.is_a?(::Karafka::Processing::Jobs::Consume)
+            if job.is_a?(::Karafka::Processing::ConsumerGroups::Jobs::Consume)
               messages = job.messages
               message = messages.first
 

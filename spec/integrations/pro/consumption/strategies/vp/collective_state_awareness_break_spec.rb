@@ -39,7 +39,7 @@ end
 
 # Ensures, that we don't process at all unless we have at least 10 messages
 # This eliminates the case of running a single virtual partition
-class Buffer < Karafka::Pro::Processing::Filters::Base
+class Buffer < Karafka::Pro::Processing::ConsumerGroups::Filters::Base
   def apply!(messages)
     @applied = messages.size < 10
 

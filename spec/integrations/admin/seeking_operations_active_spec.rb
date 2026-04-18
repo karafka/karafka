@@ -40,13 +40,13 @@ start_karafka_and_wait_until do
 end
 
 # Get the consumer group ID
-consumer_group_id = Karafka::App.routes.first.id
+group_id = Karafka::App.routes.first.id
 
 # Test seeking to beginning while consumer might be active
 begin
   # Attempt to seek to beginning
   seek_result = Karafka::Admin.seek_consumer_group(
-    consumer_group_id,
+    group_id,
     { DT.topic => { 0 => 0 } }
   )
 
@@ -72,7 +72,7 @@ end
 begin
   # Try to seek to a specific offset (offset 2)
   seek_specific_result = Karafka::Admin.seek_consumer_group(
-    consumer_group_id,
+    group_id,
     { DT.topic => { 0 => 2 } }
   )
 
@@ -101,7 +101,7 @@ begin
   high_watermark = watermarks.high
 
   seek_end_result = Karafka::Admin.seek_consumer_group(
-    consumer_group_id,
+    group_id,
     { DT.topic => { 0 => high_watermark } }
   )
 

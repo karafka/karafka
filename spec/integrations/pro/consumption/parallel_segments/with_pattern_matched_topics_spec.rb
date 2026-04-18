@@ -37,7 +37,7 @@ end
 
 class Consumer < Karafka::BaseConsumer
   def consume
-    segment_id = topic.consumer_group.segment_id
+    segment_id = topic.group.segment_id
 
     messages.each do |message|
       DT[:assignments] << [message.key, segment_id, message.metadata.topic]
@@ -50,7 +50,7 @@ pattern_base = SecureRandom.hex(4)
 topic_pattern = /#{pattern_base}-.*-topic/
 
 draw_routes(create_topics: false) do
-  consumer_group DT.consumer_group do
+  consumer_group DT.group do
     parallel_segments(
       count: 2,
       partitioner: ->(message) { message.raw_key }
@@ -140,7 +140,7 @@ assert !DT[0].empty?, "Segment 0 should have received messages"
 assert !DT[1].empty?, "Segment 1 should have received messages"
 
 # Verify that both topics were matched and consumed
-topics = Karafka::App.consumer_groups.first.topics.map(&:name)
+topics = Karafka::App.routes.first.topics.map(&:name)
 assert topics.include?(@topic1), "First topic should be matched and added to routing"
 assert topics.include?(@topic2), "Second topic should be matched and added to routing"
 

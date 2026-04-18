@@ -16,7 +16,7 @@ time_ref = nil
 end
 
 Karafka::Admin.seek_consumer_group(
-  DT.consumer_group,
+  DT.group,
   { DT.topic => { 0 => time_ref } }
 )
 

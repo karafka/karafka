@@ -20,7 +20,7 @@ class Consumer < Karafka::BaseConsumer
 end
 
 draw_routes do
-  DT.consumer_groups[0...100].each do |cg|
+  DT.groups[0...100].each do |cg|
     consumer_group cg do
       topic DT.topic do
         consumer Consumer

@@ -87,13 +87,13 @@ RSpec.describe_current do
 
   # More specs in the integrations
   describe "#seek_consumer_group" do
-    let(:cg_id) { SecureRandom.uuid }
+    let(:group_id) { SecureRandom.uuid }
     let(:map) { { "topic" => { 0 => 10 } } }
 
     it "delegates to ConsumerGroups#seek" do
       expect_any_instance_of(Karafka::Admin::ConsumerGroups)
-        .to receive(:seek).with(cg_id, map)
-      described_class.seek_consumer_group(cg_id, map)
+        .to receive(:seek).with(group_id, map)
+      described_class.seek_consumer_group(group_id, map)
     end
   end
 
@@ -139,34 +139,34 @@ RSpec.describe_current do
   end
 
   describe "#delete_consumer_group" do
-    let(:cg_id) { SecureRandom.uuid }
+    let(:group_id) { SecureRandom.uuid }
 
     it "delegates to ConsumerGroups#delete" do
       expect_any_instance_of(Karafka::Admin::ConsumerGroups)
-        .to receive(:delete).with(cg_id)
-      described_class.delete_consumer_group(cg_id)
+        .to receive(:delete).with(group_id)
+      described_class.delete_consumer_group(group_id)
     end
   end
 
   describe "#trigger_rebalance" do
-    let(:cg_id) { SecureRandom.uuid }
+    let(:group_id) { SecureRandom.uuid }
 
     it "delegates to ConsumerGroups#trigger_rebalance" do
       expect_any_instance_of(Karafka::Admin::ConsumerGroups)
-        .to receive(:trigger_rebalance).with(cg_id)
-      described_class.trigger_rebalance(cg_id)
+        .to receive(:trigger_rebalance).with(group_id)
+      described_class.trigger_rebalance(group_id)
     end
   end
 
   describe "#read_lags_with_offsets" do
-    let(:cgs_t) { { "test_cg" => ["test_topic"] } }
+    let(:groups_with_topics) { { "test_group" => ["test_topic"] } }
 
     context "when active_topics_only is not specified" do
       it "delegates to ConsumerGroups#read_lags_with_offsets with default active_topics_only" do
         expect_any_instance_of(Karafka::Admin::ConsumerGroups)
           .to receive(:read_lags_with_offsets)
-          .with(cgs_t, active_topics_only: true)
-        described_class.read_lags_with_offsets(cgs_t)
+          .with(groups_with_topics, active_topics_only: true)
+        described_class.read_lags_with_offsets(groups_with_topics)
       end
     end
 
@@ -174,12 +174,12 @@ RSpec.describe_current do
       it "delegates to ConsumerGroups#read_lags_with_offsets with specified active_topics_only" do
         expect_any_instance_of(Karafka::Admin::ConsumerGroups)
           .to receive(:read_lags_with_offsets)
-          .with(cgs_t, active_topics_only: false)
-        described_class.read_lags_with_offsets(cgs_t, active_topics_only: false)
+          .with(groups_with_topics, active_topics_only: false)
+        described_class.read_lags_with_offsets(groups_with_topics, active_topics_only: false)
       end
     end
 
-    context "when consumer_groups_with_topics is not specified" do
+    context "when groups_with_topics is not specified" do
       it "delegates to ConsumerGroups#read_lags_with_offsets with empty hash" do
         expect_any_instance_of(Karafka::Admin::ConsumerGroups)
           .to receive(:read_lags_with_offsets)

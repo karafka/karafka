@@ -13,7 +13,8 @@ module Karafka
 
         # Schedules jobs in the fifo order
         #
-        # @param jobs_array [Array<Karafka::Processing::Jobs::Consume>] jobs we want to schedule
+        # @param jobs_array [Array<Karafka::Processing::ConsumerGroups::Jobs::Consume>] jobs we
+        #   want to schedule
         def on_schedule_consumption(jobs_array)
           jobs_array.each do |job|
             @queue << job

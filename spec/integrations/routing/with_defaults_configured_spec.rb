@@ -25,9 +25,9 @@ draw_routes(create_topics: false) do
   end
 end
 
-t1 = Karafka::App.consumer_groups.first.topics.first
-t2 = Karafka::App.consumer_groups.first.topics.last
-t3 = Karafka::App.consumer_groups.last.topics.last
+t1 = Karafka::App.routes.first.topics.first
+t2 = Karafka::App.routes.first.topics.last
+t3 = Karafka::App.routes.last.topics.last
 
 assert t1.dead_letter_queue?
 assert t1.manual_offset_management?

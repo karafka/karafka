@@ -37,9 +37,10 @@ module Karafka
       # We require those not to deal with this and then all works as expected
       FORCE_LOADED = %w[
         active_job/dispatcher
-        processing/jobs/consume_non_blocking
-        processing/strategies/base
+        processing/consumer_groups/jobs/consume_non_blocking
+        processing/consumer_groups/strategies/base
         routing/features/base
+        routing/features/consumer_groups
         encryption
         encryption/cipher
         encryption/setup/config
@@ -83,7 +84,7 @@ module Karafka
           features.each { |feature| feature.post_setup(config) }
 
           # We initialize it here so we don't initialize it during multi-threading work
-          Processing::SubscriptionGroupsCoordinator.instance
+          Processing::ConsumerGroups::SubscriptionGroupsCoordinator.instance
         end
 
         # Runs operations needed after fork in swarm for features that need it
@@ -120,15 +121,16 @@ module Karafka
           # Use manager that supports multiplexing
           icfg.connection.manager = Connection::Manager.new
 
-          icfg.processing.coordinator_class = Processing::Coordinator
-          icfg.processing.errors_tracker_class = Processing::Coordinators::ErrorsTracker
-          icfg.processing.partitioner_class = Processing::Partitioner
           icfg.processing.scheduler_class = Processing::Schedulers::Default
           icfg.processing.jobs_queue_class = Processing::JobsQueue
-          icfg.processing.executor_class = Processing::Executor
-          icfg.processing.jobs_builder = Processing::JobsBuilder.new
-          icfg.processing.strategy_selector = Processing::StrategySelector.new
-          icfg.processing.expansions_selector = Processing::ExpansionsSelector.new
+
+          icfg.processing.consumer_groups.coordinator_class = Processing::ConsumerGroups::Coordinator
+          icfg.processing.consumer_groups.errors_tracker_class = Processing::ConsumerGroups::Coordinators::ErrorsTracker
+          icfg.processing.consumer_groups.partitioner_class = Processing::ConsumerGroups::Partitioner
+          icfg.processing.consumer_groups.executor_class = Processing::ConsumerGroups::Executor
+          icfg.processing.consumer_groups.jobs_builder = Processing::JobsBuilder.new
+          icfg.processing.consumer_groups.strategy_selector = Processing::ConsumerGroups::StrategySelector.new
+          icfg.processing.consumer_groups.expansions_selector = Processing::ConsumerGroups::ExpansionsSelector.new
 
           icfg.active_job.consumer_class = ActiveJob::Consumer
           icfg.active_job.dispatcher = ActiveJob::Dispatcher.new

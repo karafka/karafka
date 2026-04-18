@@ -39,7 +39,7 @@ setup_karafka do |config|
   config.kafka[:"session.timeout.ms"] = 10_000
 end
 
-class SkipFilter < Karafka::Pro::Processing::Filters::Base
+class SkipFilter < Karafka::Pro::Processing::ConsumerGroups::Filters::Base
   def apply!(messages)
     @applied = false
     @cursor = nil

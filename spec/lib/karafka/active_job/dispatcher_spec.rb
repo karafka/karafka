@@ -129,6 +129,8 @@ RSpec.describe_current do
     end
 
     it "expect not to raise an error on current time dispatches" do
+      allow(Karafka.producer).to receive(:produce_async)
+
       expect { dispatcher.dispatch_at(job, time_now) }.not_to raise_error
     end
   end

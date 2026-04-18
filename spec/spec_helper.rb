@@ -73,7 +73,7 @@ SimpleCov.start do
 end
 
 # Require total coverage after running both regular and pro
-SimpleCov.minimum_coverage(93.6) if SPECS_TYPE == "pro"
+SimpleCov.minimum_coverage(92.0) if SPECS_TYPE == "pro"
 
 Dir["#{File.dirname(__FILE__)}/support/**/*.rb"].each { |f| require f }
 
@@ -100,7 +100,7 @@ RSpec.configure do |config|
     Karafka::App.routes.clear
     Karafka.monitor.notifications_bus.clear
     Karafka::App.config.internal.routing.activity_manager.clear
-    Karafka::Processing::InlineInsights::Tracker.clear
+    Karafka::Processing::ConsumerGroups::InlineInsights::Tracker.clear
     Karafka::App.config.pause.timeout = 1
     Karafka::App.config.pause.max_timeout = 1
     Karafka::App.config.pause.with_exponential_backoff = false

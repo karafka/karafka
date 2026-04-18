@@ -45,7 +45,7 @@ Karafka.monitor.subscribe("error.occurred") do |event|
 
   assert !all_jobs.empty?, "Expected at least one job in processing"
 
-  consume_jobs = all_jobs.select { |job| job.is_a?(Karafka::Processing::Jobs::Consume) }
+  consume_jobs = all_jobs.select { |job| job.is_a?(Karafka::Processing::ConsumerGroups::Jobs::Consume) }
 
   assert !consume_jobs.empty?, "Expected at least one Consume job still in processing"
 

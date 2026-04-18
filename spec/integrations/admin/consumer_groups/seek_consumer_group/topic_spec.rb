@@ -35,7 +35,7 @@ produce_many(DT.topic, DT.uuids(1))
 assert_equal 10, fetch_next_offset
 
 Karafka::Admin.seek_consumer_group(
-  DT.consumer_group,
+  DT.group,
   { DT.topic => 5 }
 )
 

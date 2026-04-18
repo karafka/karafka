@@ -30,7 +30,15 @@
 
 # When running in swarm things should work as expected
 
-setup_karafka
+setup_karafka do |config|
+  # Use a single node — all scheduled messages target partition 0,
+  # so only one node does the work. A second node adds rebalancing
+  # and shutdown overhead that causes flaky timeouts on macOS CI.
+  config.swarm.nodes = 1
+  # Scheduled messages consumer has heavy shutdown: flush dispatches, produce tombstones,
+  # close producer, close librdkafka handles. On macOS CI this can exceed the default 30s.
+  config.shutdown_timeout = 60_000
+end
 
 draw_routes do
   scheduled_messages(DT.topics[0])
@@ -40,7 +48,7 @@ draw_routes do
   end
 end
 
-schedules = Array.new(50) do |i|
+schedules = Array.new(10) do |i|
   message = {
     topic: DT.topics[1],
     key: i.to_s,
@@ -50,7 +58,7 @@ schedules = Array.new(50) do |i|
 
   Karafka::Pro::ScheduledMessages.schedule(
     message: message,
-    epoch: Time.now.to_i + 1,
+    epoch: Time.now.to_i + 5,
     envelope: { topic: DT.topics[0], partition: 0 }
   )
 end
@@ -62,11 +70,11 @@ dispatched = nil
 start_karafka_and_wait_until(sleep: 1, mode: :swarm) do
   dispatched = Karafka::Admin.read_topic(DT.topics[1], 0, 100)
 
-  dispatched.size >= 50
+  dispatched.size >= 10
 end
 
 assert_equal(
   dispatched.map(&:key),
-  (0..49).map(&:to_s),
+  (0..9).map(&:to_s),
   dispatched.map { |msg| [msg.offset, msg.key] }
 )

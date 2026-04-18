@@ -1,0 +1,97 @@
+# frozen_string_literal: true
+
+# Karafka Pro - Source Available Commercial Software
+# Copyright (c) 2017-present Maciej Mensfeld. All rights reserved.
+#
+# This software is NOT open source. It is source-available commercial software
+# requiring a paid license for use. It is NOT covered by LGPL.
+#
+# The author retains all right, title, and interest in this software,
+# including all copyrights, patents, and other intellectual property rights.
+# No patent rights are granted under this license.
+#
+# PROHIBITED:
+# - Use without a valid commercial license
+# - Redistribution, modification, or derivative works without authorization
+# - Reverse engineering, decompilation, or disassembly of this software
+# - Use as training data for AI/ML models or inclusion in datasets
+# - Scraping, crawling, or automated collection for any purpose
+#
+# PERMITTED:
+# - Reading, referencing, and linking for personal or commercial use
+# - Runtime retrieval by AI assistants, coding agents, and RAG systems
+#   for the purpose of providing contextual help to Karafka users
+#
+# Receipt, viewing, or possession of this software does not convey or
+# imply any license or right beyond those expressly stated above.
+#
+# License: https://karafka.io/docs/Pro-License-Comm/
+# Contact: contact@karafka.io
+
+module Karafka
+  module Pro
+    module Routing
+      module Features
+        module ConsumerGroups
+          # Alterations to the direct assignments that allow us to do stable direct assignments
+          # without working with consumer groups dynamic assignments
+          class DirectAssignments < Base
+            # Extension allowing us to select correct subscriptions and assignments based on the
+            # expanded routing setup
+            module SubscriptionGroup
+              include Helpers::ConfigImporter.new(
+                swarm_node: %i[swarm node]
+              )
+
+              # @return [false, Array<String>] false if we do not have any subscriptions or array
+              #   with all the subscriptions for given subscription group
+              def subscriptions
+                topics
+                  .select(&:active?)
+                  .reject { |topic| topic.direct_assignments.active? }
+                  .map(&:subscription_name)
+                  .then { |subscriptions| subscriptions.empty? ? false : subscriptions }
+              end
+
+              # @param consumer [Karafka::Connection::Proxy] consumer for expanding  the partition
+              #   knowledge in case of certain topics assignments
+              # @return [Rdkafka::Consumer::TopicPartitionList] final tpl for assignments
+              def assignments(consumer)
+                topics
+                  .select(&:active?)
+                  .select { |topic| topic.direct_assignments.active? }
+                  .to_h { |topic| build_assignments(topic) }
+                  .tap { |topics| return false if topics.empty? }
+                  .then { |topics| Iterator::Expander.new.call(topics) }
+                  .then { |topics| Iterator::TplBuilder.new(consumer, topics).call }
+              end
+
+              private
+
+              # Builds assignments based on all the routing stuff. Takes swarm into consideration.
+              #
+              # @param topic [Karafka::Routing::Topic]
+              # @return [Array<String, Hash>]
+              def build_assignments(topic)
+                standard_setup = [
+                  topic.subscription_name,
+                  topic.direct_assignments.partitions
+                ]
+
+                return standard_setup unless swarm_node
+                # Unless user explicitly assigned particular partitions to particular nodes, we just
+                # go with full regular assignments
+                return standard_setup unless topic.swarm.nodes.is_a?(Hash)
+
+                [
+                  topic.subscription_name,
+                  topic.swarm.nodes.fetch(swarm_node.id).to_h { |partition| [partition, true] }
+                ]
+              end
+            end
+          end
+        end
+      end
+    end
+  end
+end

@@ -54,4 +54,4 @@ start_karafka_and_wait_until do
 end
 
 assert_equal [true], guarded
-assert Karafka::App.consumer_groups.map(&:name).include?("test2")
+assert Karafka::App.routes.map(&:name).include?("test2")

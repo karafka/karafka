@@ -61,7 +61,7 @@ setup_karafka do |config|
   config.pause.with_exponential_backoff = false
 end
 
-class FeatureTogglePauseFilter < Karafka::Pro::Processing::Filters::Base
+class FeatureTogglePauseFilter < Karafka::Pro::Processing::ConsumerGroups::Filters::Base
   PAUSE_DURATION = 1_000
 
   def initialize(topic, partition)
