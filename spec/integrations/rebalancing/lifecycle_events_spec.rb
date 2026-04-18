@@ -58,7 +58,6 @@ end
 
 start_karafka_and_wait_until do
   produce(DT.topics[0], rand.to_s)
-  produce(DT.topics[1], rand.to_s)
 
   sleep(1)
 

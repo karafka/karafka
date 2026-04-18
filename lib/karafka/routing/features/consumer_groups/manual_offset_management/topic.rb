@@ -7,13 +7,13 @@ module Karafka
         class ManualOffsetManagement < Base
           # Topic extensions to be able to manage manual offset management settings
           module Topic
-            # This method calls the parent class initializer and then sets up the
-            # extra instance variable to nil. The explicit initialization
+            # This method sets up the extra instance variable to nil before calling
+            # the parent class initializer. The explicit initialization
             # to nil is included as an optimization for Ruby's object shapes system,
             # which improves memory layout and access performance.
             def initialize(...)
-              super
               @manual_offset_management = nil
+              super
             end
 
             # @param active [Boolean] should we stop managing the offset in Karafka and make the user

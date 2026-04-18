@@ -9,13 +9,13 @@ module Karafka
         # a Karafka::Declaratives::Topic in the repository. This preserves backwards compatibility
         # while the actual declarative state lives in Karafka::Declaratives.
         module Topic
-          # This method calls the parent class initializer and then sets up the
-          # extra instance variable to nil. The explicit initialization
+          # This method sets up the extra instance variable to nil before calling
+          # the parent class initializer. The explicit initialization
           # to nil is included as an optimization for Ruby's object shapes system,
           # which improves memory layout and access performance.
           def initialize(...)
-            super
             @declaratives = nil
+            super
           end
 
           # Bridge: creates/retrieves a Declaratives::Topic in the repository and returns it.

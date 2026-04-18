@@ -13,13 +13,13 @@ module Karafka
           #   across all ActiveJob topics. If you need custom serialization (e.g., Avro, Protobuf),
           #   configure it once at the application level rather than per-topic.
           module Topic
-            # This method calls the parent class initializer and then sets up the
-            # extra instance variable to nil. The explicit initialization
+            # This method sets up the extra instance variable to nil before calling
+            # the parent class initializer. The explicit initialization
             # to nil is included as an optimization for Ruby's object shapes system,
             # which improves memory layout and access performance.
             def initialize(...)
-              super
               @active_job = nil
+              super
             end
 
             # @param active [Boolean] should this topic be considered one working with ActiveJob
