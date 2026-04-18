@@ -13,7 +13,6 @@ allowed_patterns=(
    "Unloaded transaction metadata"
    "Topic '__consumer_offsets' already exists"
    "Topic '__transaction_state' already exists"
-   "Auto topic creation failed for it-"
    "Node may not be available"
    "UNKNOWN_TOPIC_OR_PARTITION from the leader for partition"
    "Error processing kafka.server:type=BrokerTopicMetrics"
