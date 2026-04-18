@@ -24,7 +24,7 @@ end
 assert failed, "Should have raised InvalidConfigurationError for namespace collision"
 
 # Test empty consumer class assignment
-Karafka::App.routes.clear
+clear_app_draws
 
 class ConsumerA < Karafka::BaseConsumer; end
 class ConsumerB < Karafka::BaseConsumer; end
@@ -40,7 +40,7 @@ rescue Karafka::Errors::InvalidConfigurationError
 end
 
 # Test multiple topics with same consumer (should be allowed)
-Karafka::App.routes.clear
+clear_app_draws
 multiple_topics_passed = true
 
 begin

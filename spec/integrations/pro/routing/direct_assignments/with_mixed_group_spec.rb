@@ -51,7 +51,7 @@ end
 
 assert failed
 
-Karafka::App.routes.clear
+clear_app_draws
 
 failed = false
 
@@ -75,7 +75,7 @@ end
 # Should be ok when separate CGs
 assert !failed
 
-Karafka::App.routes.clear
+clear_app_draws
 
 failed = false
 

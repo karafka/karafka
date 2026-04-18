@@ -52,7 +52,7 @@ end
 assert !Karafka::App.routes.first.parallel_segments.active?
 assert !guarded
 
-Karafka::App.routes.clear
+clear_app_draws
 guarded = false
 
 begin
@@ -72,7 +72,7 @@ end
 
 assert guarded
 
-Karafka::App.routes.clear
+clear_app_draws
 guarded = false
 
 begin
@@ -92,7 +92,7 @@ end
 
 assert guarded
 
-Karafka::App.routes.clear
+clear_app_draws
 guarded = false
 
 begin

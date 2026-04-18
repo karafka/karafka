@@ -25,7 +25,7 @@ assert failed
 
 # Should be ok from multiple consumer groups
 
-Karafka::App.routes.clear
+clear_app_draws
 
 failed = false
 

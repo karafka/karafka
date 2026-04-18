@@ -7,7 +7,7 @@ setup_karafka
 AM = Karafka::App.config.internal.routing.activity_manager
 
 def redraw
-  Karafka::App.routes.clear
+  clear_app_draws
   ARGV.clear
   AM.clear
 

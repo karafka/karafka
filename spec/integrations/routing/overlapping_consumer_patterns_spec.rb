@@ -44,7 +44,7 @@ class PatternConsumerC < Karafka::BaseConsumer
 end
 
 # Test multiple topics in same subscription group (allowed)
-Karafka::App.routes.clear
+clear_app_draws
 
 draw_routes do
   subscription_group "multi_topic_group" do
@@ -115,7 +115,7 @@ assert_equal(
 )
 
 # Test that attempting to assign same topic to multiple consumers fails
-Karafka::App.routes.clear
+clear_app_draws
 duplicate_assignment_failed = false
 
 begin
@@ -136,7 +136,7 @@ rescue Karafka::Errors::InvalidConfigurationError
 end
 
 # Test consumer assignment patterns across multiple subscription groups
-Karafka::App.routes.clear
+clear_app_draws
 multiple_groups_failed = false
 
 begin

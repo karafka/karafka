@@ -21,7 +21,7 @@ rescue Karafka::Errors::InvalidConfigurationError
 end
 
 # Test extremely long topic names
-Karafka::App.routes.clear
+clear_app_draws
 long_name_failed = false
 
 begin
@@ -40,7 +40,7 @@ rescue Karafka::Errors::InvalidConfigurationError
 end
 
 # Test topic names with invalid Kafka characters
-Karafka::App.routes.clear
+clear_app_draws
 invalid_chars_failed = false
 
 begin
@@ -57,7 +57,7 @@ rescue Karafka::Errors::InvalidConfigurationError
 end
 
 # Test empty topic name
-Karafka::App.routes.clear
+clear_app_draws
 empty_name_failed = false
 
 begin
