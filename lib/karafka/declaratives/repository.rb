@@ -16,7 +16,7 @@ module Karafka
         @topics[name.to_s] ||= Topic.new(name)
       end
 
-# @return [Array<Karafka::Declaratives::Topic>] all declarations where active? is true
+      # @return [Array<Karafka::Declaratives::Topic>] all declarations where active? is true
       def active
         @topics.values.select(&:active?)
       end
