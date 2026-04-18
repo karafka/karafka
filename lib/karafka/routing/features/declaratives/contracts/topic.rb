@@ -4,12 +4,10 @@ module Karafka
   module Routing
     module Features
       class Declaratives < Base
-        # This feature validation contracts
+        # Contracts used by the routing Expander to validate topic declarations after draw
         module Contracts
-          # Backwards-compatible alias. The actual contract has moved to
-          # Karafka::Declaratives::Contracts::Topic. This constant is preserved so that existing
-          # code referencing the old location continues to work, and so the routing feature
-          # Expander mechanism continues to find and apply the contract.
+          # Delegates to the canonical contract in the Declaratives namespace.
+          # Required here because the Expander looks up `scope::Contracts::Topic`.
           Topic = Karafka::Declaratives::Contracts::Topic
         end
       end
