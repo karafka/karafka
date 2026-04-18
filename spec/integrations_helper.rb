@@ -348,10 +348,14 @@ def fetch_declarative_routes_topics_configs
     next unless topic.dead_letter_queue?
     next unless topic.dead_letter_queue.topic
 
-    # Setting to false will force defaults, useful when we do not want to declare DLQ topics
-    # manually. This will ensure we always create DLQ topics if their details are not defined
-    # in the routing
-    accu[topic.dead_letter_queue.topic] ||= false
+    dlq_topic = topic.dead_letter_queue.topic.to_s
+
+    # Only pre-create DLQ topics that follow the integration test naming convention.
+    # Some specs use hardcoded names like "dead_messages" or symbols like :strategy
+    # that are not real auto-created topics.
+    next unless dlq_topic.start_with?("it-")
+
+    accu[dlq_topic] ||= false
   end
 end
 
