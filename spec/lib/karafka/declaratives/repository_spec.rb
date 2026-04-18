@@ -23,7 +23,7 @@ RSpec.describe Karafka::Declaratives::Repository do
     end
   end
 
-  describe "#active_topics" do
+  describe "#active" do
     before do
       repository.find_or_create(:active_topic)
       inactive = repository.find_or_create(:inactive_topic)
@@ -31,7 +31,7 @@ RSpec.describe Karafka::Declaratives::Repository do
     end
 
     it "returns only active topics" do
-      topics = repository.active_topics
+      topics = repository.active
       expect(topics.size).to eq(1)
       expect(topics.first.name).to eq("active_topic")
     end

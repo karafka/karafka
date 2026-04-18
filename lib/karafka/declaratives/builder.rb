@@ -42,7 +42,7 @@ module Karafka
 
       # @return [Array<Karafka::Declaratives::Topic>] all active topic declarations
       def topics
-        @repository.active_topics
+        @repository.active
       end
 
       # @param name [String, Symbol] topic name

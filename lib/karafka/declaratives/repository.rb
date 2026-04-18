@@ -33,7 +33,7 @@ module Karafka
       end
 
       # @return [Array<Karafka::Declaratives::Topic>] all declarations where active? is true
-      def active_topics
+      def active
         @topics.values.select(&:active?)
       end
 

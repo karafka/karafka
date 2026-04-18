@@ -43,7 +43,7 @@ RSpec.describe "Declaratives routing bridge" do
       expect(declaration.active?).to be(false)
     end
 
-    it "is not included in active_topics" do
+    it "is not included in active" do
       expect(Karafka::App.declaratives.topics).to be_empty
     end
   end
