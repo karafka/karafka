@@ -351,7 +351,7 @@ def fetch_declarative_routes_topics_configs
     # Setting to false will force defaults, useful when we do not want to declare DLQ topics
     # manually. This will ensure we always create DLQ topics if their details are not defined
     # in the routing
-    accu[topic.name] ||= false
+    accu[topic.dead_letter_queue.topic] ||= false
   end
 end
 
