@@ -84,10 +84,23 @@ module Karafka
           Karafka::Process.tags.add(:execution_mode, "mode:swarm")
           Karafka::Process.tags.add(:swarm_nodeid, "node:#{@id}")
 
+          # DEBUG: track when the child process actually exits
+          at_exit do
+            $stderr.puts "[SWARM_DEBUG] node #{@id} pid=#{::Process.pid} AT_EXIT running " \
+              "wall=#{Time.now.strftime('%H:%M:%S.%L')}"
+            $stderr.flush
+          end
+
           Server.execution_mode.swarm!
           Server.run
 
+          $stderr.puts "[SWARM_DEBUG] node #{@id} pid=#{::Process.pid} Server.run returned, " \
+            "closing writer pipe wall=#{Time.now.strftime('%H:%M:%S.%L')}"
+          $stderr.flush
           @writer.close
+          $stderr.puts "[SWARM_DEBUG] node #{@id} pid=#{::Process.pid} fork block ending, " \
+            "process will exit now wall=#{Time.now.strftime('%H:%M:%S.%L')}"
+          $stderr.flush
         end
         # :nocov:
 
@@ -135,26 +148,55 @@ module Karafka
 
         @mutex.synchronize do
           # Return cached result if we've already determined the process is dead
-          return false if @alive == false
+          if @alive == false
+            # DEBUG: only log first time we return cached false
+            unless @_debug_cached_logged
+              $stderr.puts "[SWARM_DEBUG] node #{@id} pid=#{@pid} alive? returning cached false"
+              $stderr.flush
+              @_debug_cached_logged = true
+            end
+            return false
+          end
+
+          before_waitpid = ::Process.clock_gettime(::Process::CLOCK_MONOTONIC, :float_millisecond)
 
           begin
             # Try to reap the process without blocking. If it returns the pid,
             # the process has exited (zombie). If it returns nil, still running.
             result = ::Process.waitpid(@pid, ::Process::WNOHANG)
+            after_waitpid = ::Process.clock_gettime(::Process::CLOCK_MONOTONIC, :float_millisecond)
+            waitpid_ms = after_waitpid - before_waitpid
 
             if result
               # Process has exited and we've reaped it
               @alive = false
+              $stderr.puts "[SWARM_DEBUG] node #{@id} pid=#{@pid} REAPED by waitpid " \
+                "(result=#{result}, took=#{waitpid_ms.round(2)}ms) wall=#{Time.now.strftime('%H:%M:%S.%L')}"
+              $stderr.flush
               false
             else
+              # DEBUG: log slow waitpid or periodic status
+              if waitpid_ms > 1.0
+                $stderr.puts "[SWARM_DEBUG] node #{@id} pid=#{@pid} waitpid(WNOHANG) returned nil " \
+                  "but took #{waitpid_ms.round(2)}ms (SLOW)"
+                $stderr.flush
+              end
               # Process is still running
               true
             end
-          rescue Errno::ECHILD
+          rescue Errno::ECHILD => e
+            after_waitpid = ::Process.clock_gettime(::Process::CLOCK_MONOTONIC, :float_millisecond)
+            $stderr.puts "[SWARM_DEBUG] node #{@id} pid=#{@pid} got ECHILD " \
+              "(took=#{(after_waitpid - before_waitpid).round(2)}ms) — already reaped elsewhere"
+            $stderr.flush
             # Process doesn't exist or already reaped
             @alive = false
             false
-          rescue Errno::ESRCH
+          rescue Errno::ESRCH => e
+            after_waitpid = ::Process.clock_gettime(::Process::CLOCK_MONOTONIC, :float_millisecond)
+            $stderr.puts "[SWARM_DEBUG] node #{@id} pid=#{@pid} got ESRCH " \
+              "(took=#{(after_waitpid - before_waitpid).round(2)}ms) — process doesn't exist"
+            $stderr.flush
             # Process doesn't exist
             @alive = false
             false
