@@ -16,6 +16,22 @@ module Karafka
         @topics[name.to_s] ||= Topic.new(name)
       end
 
+      # Finds an existing declaration or creates a new one.
+      # Yields the declaration only when it was freshly created.
+      # @param name [String, Symbol] topic name
+      # @yield [Karafka::Declaratives::Topic] only invoked for newly created declarations
+      # @return [Karafka::Declaratives::Topic] the declaration
+      def find_or_create_if_new(name)
+        key = name.to_s
+        existing = @topics[key]
+        return existing if existing
+
+        declaration = Topic.new(name)
+        @topics[key] = declaration
+        yield(declaration) if block_given?
+        declaration
+      end
+
       # @return [Array<Karafka::Declaratives::Topic>] all declarations where active? is true
       def active_topics
         @topics.values.select(&:active?)

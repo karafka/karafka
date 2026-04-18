@@ -103,6 +103,7 @@ module Karafka
           @defaults = EMPTY_DEFAULTS
           @draws.clear
           array_clear
+          Karafka::App.declaratives.repository.clear
         end
       end
 
