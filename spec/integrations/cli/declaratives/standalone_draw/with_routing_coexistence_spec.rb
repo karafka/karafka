@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 # Standalone declaratives.draw and routing config() share the same repository.
-# First declaration wins — if standalone draw defines a topic first, routing config()
+# First declaration wins - if standalone draw defines a topic first, routing config()
 # does not overwrite it (find_or_create_if_new semantics).
 
 Consumer = Class.new(Karafka::BaseConsumer)
@@ -23,7 +23,7 @@ Karafka::App.declaratives.draw do
   end
 end
 
-# Now define topics[0] via routing — routing config() should NOT overwrite because
+# Now define topics[0] via routing - routing config() should NOT overwrite because
 # the declaration already exists from standalone draw
 draw_routes(create_topics: false) do
   topic DT.topics[0] do

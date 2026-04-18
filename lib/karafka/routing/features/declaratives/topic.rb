@@ -30,11 +30,17 @@ module Karafka
           #   (none, gzip, snappy, lz4, zstd)
           # @return [Karafka::Declaratives::Topic] the declarative topic
           def config(active: true, partitions: 1, replication_factor: 1, **details)
-            @declaratives ||= Karafka::App.declaratives.repository.find_or_create_if_new(name) do |declaration|
-              declaration.active(active)
-              declaration.partitions(partitions)
-              declaration.replication_factor(replication_factor)
-              declaration.config(details) unless details.empty?
+            @declaratives ||= begin
+              repo = Karafka::App.declaratives.repository
+
+              repo.find(name) || begin
+                declaration = repo.find_or_create(name)
+                declaration.active(active)
+                declaration.partitions(partitions)
+                declaration.replication_factor(replication_factor)
+                declaration.config(details) unless details.empty?
+                declaration
+              end
             end
           end
 

@@ -2,7 +2,7 @@
 
 module Karafka
   module Declaratives
-    # Represents a single declarative topic definition — what a topic should look like on the
+    # Represents a single declarative topic definition - what a topic should look like on the
     # broker. This is a standalone object, independent of routing concepts like consumers or
     # subscription groups.
     class Topic
@@ -22,7 +22,7 @@ module Karafka
       #
       # The active flag exists because the routing bridge (Routing::Features::Declaratives::Topic)
       # auto-creates a declaration for every routing topic that calls config(). Some routing
-      # topics — notably Pro pattern-matched virtual topics — must exist in routing but cannot
+      # topics - notably Pro pattern-matched virtual topics - must exist in routing but cannot
       # be managed declaratively (their real Kafka topic names are unknown). Those call
       # config(active: false) to opt out. Once the routing bridge is retired and declaratives
       # are defined exclusively via Karafka::App.declaratives.draw, this flag becomes
