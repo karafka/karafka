@@ -15,6 +15,7 @@ draw_routes do
 end
 
 Karafka::App.routes.clear
+Karafka::App.declaratives.repository.clear
 
 draw_routes(create_topics: false) do
   topic DT.topic do

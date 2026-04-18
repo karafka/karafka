@@ -230,6 +230,7 @@ def setup_testing(framework)
 
       config.after do
         Karafka::App.routes.clear
+        Karafka::App.declaratives.repository.clear
         Karafka.monitor.notifications_bus.clear
         Karafka::App.config.internal.routing.activity_manager.clear
         Karafka::Processing::ConsumerGroups::InlineInsights::Tracker.clear

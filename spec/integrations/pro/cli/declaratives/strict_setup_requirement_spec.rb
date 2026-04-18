@@ -53,6 +53,7 @@ def draw_and_validate(valid:, &block)
   valid ? assert(!guarded) : assert(guarded)
 
   Karafka::App.routes.clear
+  Karafka::App.declaratives.repository.clear
 end
 
 draw_and_validate(valid: false) do

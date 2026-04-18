@@ -19,6 +19,7 @@ cluster_topics = Karafka::Admin.cluster_info.topics.map { |topic| topic.fetch(:t
 assert cluster_topics.include?(DT.topics[0])
 
 Karafka::App.routes.clear
+Karafka::App.declaratives.repository.clear
 
 ARGV[0] = "topics"
 ARGV[1] = "delete"
