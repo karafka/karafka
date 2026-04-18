@@ -26,8 +26,6 @@ jobs:
       matrix:
         ruby:
           - '3.2'
-          - '3.3'
-          - '3.4'
         macos-version:
           - 'macos-15'
     runs-on: ${{ matrix.macos-version }}
@@ -110,7 +108,7 @@ jobs:
           bundler-cache: true
           bundler: 'latest'
 
-      - name: Run within_swarm_spec 5 times (debug flaky shutdown)
+      - name: Run within_swarm_spec 20 times (debug flaky shutdown)
         env:
           KARAFKA_PRO_LICENSE_TOKEN: ${{ secrets.KARAFKA_PRO_LICENSE_TOKEN }}
           KARAFKA_PRO_USERNAME: ${{ secrets.KARAFKA_PRO_USERNAME }}
@@ -118,17 +116,22 @@ jobs:
           KARAFKA_PRO_VERSION: ${{ secrets.KARAFKA_PRO_VERSION }}
           KARAFKA_PRO_LICENSE_CHECKSUM: ${{ secrets.KARAFKA_PRO_LICENSE_CHECKSUM }}
         run: |
-          for run in 1 2 3 4 5; do
-            echo "========== RUN $run/5 =========="
-            # Run with stderr visible for debug output
-            bin/integrations 'pro/scheduled_messages/within_swarm_spec.rb' 2>&1 || {
-              echo "========== RUN $run FAILED (exit $?) =========="
-              echo "Continuing to gather more data..."
-            }
+          failures=0
+          for run in $(seq 1 20); do
+            echo "========== RUN $run/20 =========="
+            bin/integrations 'pro/scheduled_messages/within_swarm_spec.rb' 2>&1
+            rc=$?
+            if [ $rc -ne 0 ]; then
+              echo "========== RUN $run FAILED (exit $rc) =========="
+              failures=$((failures + 1))
+            else
+              echo "========== RUN $run PASSED =========="
+            fi
             echo ""
           done
-          # Always succeed — we want to see all 5 runs' output
-          echo "All 5 runs completed. Check output above for SWARM_DEBUG lines."
+          echo "========== SUMMARY: $failures failures out of 20 runs =========="
+          # Always succeed — we want to see all output
+          true
 
   ci-success-macos:
     name: CI macOS ARM64 Swarm Success
