@@ -9,7 +9,7 @@ module Karafka
 
       def initialize
         @repository = Repository.new
-        @defaults = nil
+        @defaults = ->(_) {}
       end
 
       # DSL entry point for declaring topics outside of routing blocks.
@@ -45,7 +45,7 @@ module Karafka
       # @return [Karafka::Declaratives::Topic] the declaration
       def topic(name, &block)
         declaration = @repository.find_or_create(name)
-        declaration.instance_eval(&@defaults) if @defaults
+        declaration.instance_eval(&@defaults)
         declaration.instance_eval(&block) if block
         declaration
       end
