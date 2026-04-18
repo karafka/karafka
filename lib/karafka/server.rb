@@ -113,6 +113,11 @@ module Karafka
 
         timeout = shutdown_timeout
 
+        stop_t0 = ::Process.clock_gettime(::Process::CLOCK_MONOTONIC, :float_millisecond)
+        $stderr.puts "[SWARM_DEBUG] Server.stop: entering shutdown loop " \
+          "timeout=#{timeout}ms wall=#{Time.now.strftime('%H:%M:%S.%L')}"
+        $stderr.flush
+
         # We check from time to time (for the timeout period) if all the threads finished
         # their work and if so, we can just return and normal shutdown process will take place
         # We divide it by 1000 because we use time in ms.
@@ -120,11 +125,21 @@ module Karafka
           all_listeners_stopped = listeners.all?(&:stopped?)
           all_workers_stopped = workers.stopped?
 
-          return if all_listeners_stopped && all_workers_stopped
+          if all_listeners_stopped && all_workers_stopped
+            elapsed = ::Process.clock_gettime(::Process::CLOCK_MONOTONIC, :float_millisecond) - stop_t0
+            $stderr.puts "[SWARM_DEBUG] Server.stop: all stopped in #{elapsed.round(1)}ms " \
+              "wall=#{Time.now.strftime('%H:%M:%S.%L')}"
+            $stderr.flush
+            return
+          end
 
           sleep(supervision_sleep)
         end
 
+        elapsed = ::Process.clock_gettime(::Process::CLOCK_MONOTONIC, :float_millisecond) - stop_t0
+        $stderr.puts "[SWARM_DEBUG] Server.stop: TIMEOUT after #{elapsed.round(1)}ms, " \
+          "raising ForcefulShutdownError wall=#{Time.now.strftime('%H:%M:%S.%L')}"
+        $stderr.flush
         raise Errors::ForcefulShutdownError
       rescue Errors::ForcefulShutdownError => e
         active_listeners = listeners.select(&:active?)
@@ -176,9 +191,21 @@ module Karafka
         if timeout
           Karafka::App.stopped!
 
+          # DEBUG: time the producer close
+          t0 = ::Process.clock_gettime(::Process::CLOCK_MONOTONIC, :float_millisecond)
+          $stderr.puts "[SWARM_DEBUG] Server.stop ensure: closing producer " \
+            "wall=#{Time.now.strftime('%H:%M:%S.%L')}"
+          $stderr.flush
+
           # We close producer as the last thing as it can be used in the notification pipeline
           # to dispatch state changes, etc
           Karafka::App.producer.close
+
+          t1 = ::Process.clock_gettime(::Process::CLOCK_MONOTONIC, :float_millisecond)
+          $stderr.puts "[SWARM_DEBUG] Server.stop ensure: producer closed " \
+            "took=#{(t1 - t0).round(1)}ms, closing connection pool " \
+            "wall=#{Time.now.strftime('%H:%M:%S.%L')}"
+          $stderr.flush
 
           # Closes the default connection pool (if used). If not used, will do nothing
           # This ensures that if users have configured the default pool, it is closed correctly
@@ -186,7 +213,18 @@ module Karafka
           # Custom pools need to be closed by users themselves
           WaterDrop::ConnectionPool.close
 
+          t2 = ::Process.clock_gettime(::Process::CLOCK_MONOTONIC, :float_millisecond)
+          $stderr.puts "[SWARM_DEBUG] Server.stop ensure: pool closed " \
+            "took=#{(t2 - t1).round(1)}ms, terminating app " \
+            "wall=#{Time.now.strftime('%H:%M:%S.%L')}"
+          $stderr.flush
+
           Karafka::App.terminate!
+
+          $stderr.puts "[SWARM_DEBUG] Server.stop ensure: DONE " \
+            "total=#{(::Process.clock_gettime(::Process::CLOCK_MONOTONIC, :float_millisecond) - t0).round(1)}ms " \
+            "wall=#{Time.now.strftime('%H:%M:%S.%L')}"
+          $stderr.flush
 
           # Allow prepare to run again if the server is restarted (e.g. reset_status in tests,
           # or embedded re-start).
