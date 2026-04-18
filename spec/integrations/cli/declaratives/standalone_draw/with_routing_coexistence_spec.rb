@@ -1,7 +1,8 @@
 # frozen_string_literal: true
 
 # Standalone declaratives.draw and routing config() should share the same repository.
-# If both define the same topic name, routing's first-call-wins semantics apply.
+# Both populate the same Declaratives::Topic object. Routing config() always applies its
+# values (it overwrites), so the last writer wins on the shared declaration.
 
 Consumer = Class.new(Karafka::BaseConsumer)
 
@@ -15,19 +16,30 @@ Karafka::App.declaratives.draw do
   end
 end
 
-# Now define the same topic via routing — should get the same declaration object
-draw_routes(create_topics: false) do
-  topic DT.topics[0] do
-    consumer Consumer
-    config(partitions: 99, replication_factor: 99)
+# Define a different topic only via standalone draw (no routing counterpart)
+Karafka::App.declaratives.draw do
+  topic DT.topics[1] do
+    partitions 30
   end
 end
 
-# Standalone draw was first, so its values win (||= semantics in routing bridge)
-declaration = Karafka::App.declaratives.find_topic(DT.topics[0])
-assert_equal 20, declaration.partitions
-assert_equal 1, declaration.replication_factor
+# Now define topics[0] via routing — routing config() overwrites values on the shared object
+draw_routes(create_topics: false) do
+  topic DT.topics[0] do
+    consumer Consumer
+    config(partitions: 99, replication_factor: 2)
+  end
+end
 
-# Routing topic should reference the same declaration
+# Routing config() overwrote the shared declaration
+declaration = Karafka::App.declaratives.find_topic(DT.topics[0])
+assert_equal 99, declaration.partitions
+assert_equal 2, declaration.replication_factor
+
+# Routing topic and standalone draw share the same object
 routing_topic = Karafka::App.routes.first.topics.first
 assert_equal declaration.object_id, routing_topic.declaratives.object_id
+
+# topics[1] was only defined via standalone draw, so its values are untouched
+standalone_only = Karafka::App.declaratives.find_topic(DT.topics[1])
+assert_equal 30, standalone_only.partitions
