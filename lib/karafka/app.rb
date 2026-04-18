@@ -47,6 +47,14 @@ module Karafka
           .to_h
       end
 
+      # @return [Karafka::Declaratives::Builder] declaratives builder instance
+      def declaratives
+        config
+          .internal
+          .declaratives
+          .builder
+      end
+
       # Just a nicer name for the consumer groups
       alias_method :routes, :consumer_groups
       # Generalized alias — routing entries are "groups" (consumer groups today, other kinds

@@ -6,24 +6,11 @@ module Karafka
       class Declaratives < Base
         # This feature validation contracts
         module Contracts
-          # Basic validation of the Kafka expected config details
-          class Topic < Karafka::Contracts::Base
-            configure do |config|
-              config.error_messages = YAML.safe_load_file(
-                File.join(Karafka.gem_root, "config", "locales", "errors.yml")
-              ).fetch("en").fetch("validations").fetch("routing").fetch("topic")
-            end
-
-            nested :declaratives do
-              required(:active) { |val| [true, false].include?(val) }
-              required(:partitions) { |val| val.is_a?(Integer) && val.positive? }
-              required(:replication_factor) { |val| val.is_a?(Integer) && val.positive? }
-              required(:details) do |val|
-                val.is_a?(Hash) &&
-                  val.keys.all?(Symbol)
-              end
-            end
-          end
+          # Backwards-compatible alias. The actual contract has moved to
+          # Karafka::Declaratives::Contracts::Topic. This constant is preserved so that existing
+          # code referencing the old location continues to work, and so the routing feature
+          # Expander mechanism continues to find and apply the contract.
+          Topic = Karafka::Declaratives::Contracts::Topic
         end
       end
     end

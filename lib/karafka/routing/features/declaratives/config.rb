@@ -4,14 +4,10 @@ module Karafka
   module Routing
     module Features
       class Declaratives < Base
-        # Config for declarative topics feature
-        Config = Struct.new(
-          :active,
-          :partitions,
-          :replication_factor,
-          :details,
-          keyword_init: true
-        ) { alias_method :active?, :active }
+        # Backwards-compatible alias. The actual implementation has moved to
+        # Karafka::Declaratives::Topic. This constant is preserved so that existing code
+        # referencing Karafka::Routing::Features::Declaratives::Config continues to work.
+        Config = Karafka::Declaratives::Topic
       end
     end
   end
