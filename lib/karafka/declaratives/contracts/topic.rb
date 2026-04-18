@@ -10,7 +10,7 @@ module Karafka
         configure do |config|
           config.error_messages = YAML.safe_load_file(
             File.join(Karafka.gem_root, "config", "locales", "errors.yml")
-          ).fetch("en").fetch("validations").fetch("routing").fetch("topic")
+          ).fetch("en").fetch("validations").fetch("declaratives").fetch("topic")
         end
 
         nested :declaratives do
