@@ -9,6 +9,7 @@ module Karafka
 
       def initialize
         @repository = Repository.new
+        @defaults = nil
       end
 
       # DSL entry point for declaring topics outside of routing blocks.
@@ -27,6 +28,14 @@ module Karafka
         instance_eval(&block)
       end
 
+      # Sets default values applied to every topic declared after this call.
+      # Defaults are evaluated before the topic block, so topic-specific values override them.
+      #
+      # @param block [Proc] block evaluated in each topic's context before the topic block
+      def defaults(&block)
+        @defaults = block
+      end
+
       # Declares a topic with the given name. If a topic with this name was already declared
       # (via routing bridge or a prior draw call), the existing declaration is returned and
       # the block is evaluated on it (allowing additive configuration).
@@ -36,6 +45,7 @@ module Karafka
       # @return [Karafka::Declaratives::Topic] the declaration
       def topic(name, &block)
         declaration = @repository.find_or_create(name)
+        declaration.instance_eval(&@defaults) if @defaults
         declaration.instance_eval(&block) if block
         declaration
       end

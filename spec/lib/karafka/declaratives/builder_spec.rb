@@ -92,6 +92,61 @@ RSpec.describe Karafka::Declaratives::Builder do
     end
   end
 
+  describe "#defaults" do
+    it "applies defaults to all topics" do
+      builder.draw do
+        defaults do
+          partitions 5
+          replication_factor 3
+        end
+
+        topic :orders
+        topic :events
+      end
+
+      expect(builder.find_topic(:orders).partitions).to eq(5)
+      expect(builder.find_topic(:orders).replication_factor).to eq(3)
+      expect(builder.find_topic(:events).partitions).to eq(5)
+      expect(builder.find_topic(:events).replication_factor).to eq(3)
+    end
+
+    it "allows topic-specific values to override defaults" do
+      builder.draw do
+        defaults do
+          partitions 5
+          replication_factor 3
+        end
+
+        topic :orders do
+          partitions 10
+        end
+
+        topic :events
+      end
+
+      expect(builder.find_topic(:orders).partitions).to eq(10)
+      expect(builder.find_topic(:orders).replication_factor).to eq(3)
+      expect(builder.find_topic(:events).partitions).to eq(5)
+    end
+
+    it "applies default config details" do
+      builder.draw do
+        defaults do
+          config "retention.ms" => 604_800_000
+        end
+
+        topic :orders
+        topic :events do
+          config "cleanup.policy" => "compact"
+        end
+      end
+
+      expect(builder.find_topic(:orders).details).to eq("retention.ms": 604_800_000)
+      expect(builder.find_topic(:events).details).to include("retention.ms": 604_800_000)
+      expect(builder.find_topic(:events).details).to include("cleanup.policy": "compact")
+    end
+  end
+
   describe "#find_topic" do
     it "returns nil for unknown topics" do
       expect(builder.find_topic(:unknown)).to be_nil
