@@ -184,7 +184,7 @@ module Karafka
               # Process is still running
               true
             end
-          rescue Errno::ECHILD => e
+          rescue Errno::ECHILD
             after_waitpid = ::Process.clock_gettime(::Process::CLOCK_MONOTONIC, :float_millisecond)
             $stderr.puts "[SWARM_DEBUG] node #{@id} pid=#{@pid} got ECHILD " \
               "(took=#{(after_waitpid - before_waitpid).round(2)}ms) — already reaped elsewhere"
@@ -192,7 +192,7 @@ module Karafka
             # Process doesn't exist or already reaped
             @alive = false
             false
-          rescue Errno::ESRCH => e
+          rescue Errno::ESRCH
             after_waitpid = ::Process.clock_gettime(::Process::CLOCK_MONOTONIC, :float_millisecond)
             $stderr.puts "[SWARM_DEBUG] node #{@id} pid=#{@pid} got ESRCH " \
               "(took=#{(after_waitpid - before_waitpid).round(2)}ms) — process doesn't exist"
