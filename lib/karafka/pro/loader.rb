@@ -40,6 +40,7 @@ module Karafka
         processing/consumer_groups/jobs/consume_non_blocking
         processing/consumer_groups/strategies/base
         routing/features/base
+        routing/features/consumer_groups
         encryption
         encryption/cipher
         encryption/setup/config
