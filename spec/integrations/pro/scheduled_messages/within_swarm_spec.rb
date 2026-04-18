@@ -30,7 +30,12 @@
 
 # When running in swarm things should work as expected
 
-setup_karafka
+setup_karafka do |config|
+  # Use a single node — all scheduled messages target partition 0,
+  # so only one node does the work. A second node adds rebalancing
+  # and shutdown overhead that causes flaky timeouts on macOS CI.
+  config.swarm.nodes = 1
+end
 
 draw_routes do
   scheduled_messages(DT.topics[0])
@@ -50,7 +55,7 @@ schedules = Array.new(50) do |i|
 
   Karafka::Pro::ScheduledMessages.schedule(
     message: message,
-    epoch: Time.now.to_i + 1,
+    epoch: Time.now.to_i + 5,
     envelope: { topic: DT.topics[0], partition: 0 }
   )
 end
