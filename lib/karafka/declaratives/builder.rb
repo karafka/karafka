@@ -13,6 +13,8 @@ module Karafka
 
       # DSL entry point for declaring topics outside of routing blocks.
       #
+      # @param block [Proc] block to evaluate in builder context
+      #
       # @example
       #   Karafka::App.declaratives.draw do
       #     topic :orders do
@@ -21,8 +23,6 @@ module Karafka
       #       config 'retention.ms' => 604_800_000
       #     end
       #   end
-      #
-      # @param block [Proc] block to evaluate in builder context
       def draw(&block)
         instance_eval(&block)
       end
