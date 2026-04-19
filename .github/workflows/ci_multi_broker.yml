@@ -17,9 +17,8 @@ on:
           - '3.3'
           - '3.2'
 
-  # Disabled for debug branch
-  # pull_request:
-  #   branches: [master]
+  pull_request:
+    branches: [master]
 
   schedule:
     - cron: '0 3 * * *' # Daily at 3 AM UTC (after main CI at 1 AM)

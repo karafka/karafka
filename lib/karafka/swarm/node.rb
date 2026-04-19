@@ -84,95 +84,10 @@ module Karafka
           Karafka::Process.tags.add(:execution_mode, "mode:swarm")
           Karafka::Process.tags.add(:swarm_nodeid, "node:#{@id}")
 
-          # DEBUG: Monkey-patch NativeKafka#close to log timing
-          original_nk_close = Rdkafka::NativeKafka.instance_method(:close)
-          Rdkafka::NativeKafka.define_method(:close) do |object_id = nil, &block|
-            caller_loc = caller_locations(1, 3).map { |l| "#{l.path}:#{l.lineno}:#{l.label}" }.join(" <- ")
-            name_str = begin
-                          @inner ? Rdkafka::Bindings.rd_kafka_name(@inner) : "nil"
-                        rescue StandardError
-                          "unknown"
-                        end
-            $stderr.puts "[SWARM_DEBUG] NativeKafka#close ENTER name=#{name_str} " \
-              "closed=#{closed?} ops_in_progress=#{@operations_in_progress} " \
-              "caller=#{caller_loc} wall=#{Time.now.strftime('%H:%M:%S.%L')}"
-            $stderr.flush
-            t0 = ::Process.clock_gettime(::Process::CLOCK_MONOTONIC, :float_millisecond)
-            result = original_nk_close.bind_call(self, object_id, &block)
-            elapsed = ::Process.clock_gettime(::Process::CLOCK_MONOTONIC, :float_millisecond) - t0
-            $stderr.puts "[SWARM_DEBUG] NativeKafka#close EXIT name=#{name_str} " \
-              "took=#{elapsed.round(1)}ms wall=#{Time.now.strftime('%H:%M:%S.%L')}"
-            $stderr.flush
-            result
-          end
-
-          # DEBUG: earliest at_exit (registered first, runs LAST)
-          at_exit do
-            $stderr.puts "[SWARM_DEBUG] node #{@id} pid=#{::Process.pid} FINAL_AT_EXIT " \
-              "(last registered handler done) wall=#{Time.now.strftime('%H:%M:%S.%L')}"
-            $stderr.puts "[SWARM_DEBUG] Thread.list at FINAL_AT_EXIT:"
-            Thread.list.each do |t|
-              bt = t.backtrace
-              $stderr.puts "  thread=#{t.object_id} name=#{t.name.inspect} " \
-                "status=#{t.status} alive=#{t.alive?}"
-              if bt && !bt.empty?
-                bt.first(5).each { |frame| $stderr.puts "    #{frame}" }
-              end
-            end
-            $stderr.flush
-          end
-
-          # DEBUG: later at_exit (registered second, runs FIRST) — dump state
-          at_exit do
-            $stderr.puts "[SWARM_DEBUG] node #{@id} pid=#{::Process.pid} AT_EXIT running " \
-              "wall=#{Time.now.strftime('%H:%M:%S.%L')}"
-            # Dump all live threads with backtraces
-            $stderr.puts "[SWARM_DEBUG] Thread.list at AT_EXIT (#{Thread.list.size} threads):"
-            Thread.list.each do |t|
-              bt = t.backtrace
-              $stderr.puts "  thread=#{t.object_id} name=#{t.name.inspect} " \
-                "status=#{t.status} alive=#{t.alive?}"
-              if bt && !bt.empty?
-                bt.first(8).each { |frame| $stderr.puts "    #{frame}" }
-              end
-            end
-            # Count live rdkafka/waterdrop objects
-            nk_count = 0
-            ObjectSpace.each_object(Rdkafka::NativeKafka) do |nk|
-              nk_count += 1
-              inner_nil = begin
-                            nk.instance_variable_get(:@inner).nil?
-                          rescue StandardError
-                            "err"
-                          end
-              closing = begin
-                          nk.instance_variable_get(:@closing)
-                        rescue StandardError
-                          "err"
-                        end
-              $stderr.puts "  NativeKafka obj=#{nk.object_id} inner_nil=#{inner_nil} " \
-                "closing=#{closing} closed=#{nk.closed?}"
-            end
-            $stderr.puts "[SWARM_DEBUG] live NativeKafka objects: #{nk_count}"
-            wp_count = 0
-            ObjectSpace.each_object(WaterDrop::Producer) do |wp|
-              wp_count += 1
-              $stderr.puts "  WaterDrop::Producer obj=#{wp.object_id} status=#{wp.status}"
-            end
-            $stderr.puts "[SWARM_DEBUG] live WaterDrop::Producer objects: #{wp_count}"
-            $stderr.flush
-          end
-
           Server.execution_mode.swarm!
           Server.run
 
-          $stderr.puts "[SWARM_DEBUG] node #{@id} pid=#{::Process.pid} Server.run returned " \
-            "wall=#{Time.now.strftime('%H:%M:%S.%L')}"
-          $stderr.flush
           @writer.close
-          $stderr.puts "[SWARM_DEBUG] node #{@id} pid=#{::Process.pid} fork block ending " \
-            "wall=#{Time.now.strftime('%H:%M:%S.%L')}"
-          $stderr.flush
         end
         # :nocov:
 
@@ -220,55 +135,26 @@ module Karafka
 
         @mutex.synchronize do
           # Return cached result if we've already determined the process is dead
-          if @alive == false
-            # DEBUG: only log first time we return cached false
-            unless @_debug_cached_logged
-              $stderr.puts "[SWARM_DEBUG] node #{@id} pid=#{@pid} alive? returning cached false"
-              $stderr.flush
-              @_debug_cached_logged = true
-            end
-            return false
-          end
-
-          before_waitpid = ::Process.clock_gettime(::Process::CLOCK_MONOTONIC, :float_millisecond)
+          return false if @alive == false
 
           begin
             # Try to reap the process without blocking. If it returns the pid,
             # the process has exited (zombie). If it returns nil, still running.
             result = ::Process.waitpid(@pid, ::Process::WNOHANG)
-            after_waitpid = ::Process.clock_gettime(::Process::CLOCK_MONOTONIC, :float_millisecond)
-            waitpid_ms = after_waitpid - before_waitpid
 
             if result
               # Process has exited and we've reaped it
               @alive = false
-              $stderr.puts "[SWARM_DEBUG] node #{@id} pid=#{@pid} REAPED by waitpid " \
-                "(result=#{result}, took=#{waitpid_ms.round(2)}ms) wall=#{Time.now.strftime('%H:%M:%S.%L')}"
-              $stderr.flush
               false
             else
-              # DEBUG: log slow waitpid or periodic status
-              if waitpid_ms > 1.0
-                $stderr.puts "[SWARM_DEBUG] node #{@id} pid=#{@pid} waitpid(WNOHANG) returned nil " \
-                  "but took #{waitpid_ms.round(2)}ms (SLOW)"
-                $stderr.flush
-              end
               # Process is still running
               true
             end
           rescue Errno::ECHILD
-            after_waitpid = ::Process.clock_gettime(::Process::CLOCK_MONOTONIC, :float_millisecond)
-            $stderr.puts "[SWARM_DEBUG] node #{@id} pid=#{@pid} got ECHILD " \
-              "(took=#{(after_waitpid - before_waitpid).round(2)}ms) — already reaped elsewhere"
-            $stderr.flush
             # Process doesn't exist or already reaped
             @alive = false
             false
           rescue Errno::ESRCH
-            after_waitpid = ::Process.clock_gettime(::Process::CLOCK_MONOTONIC, :float_millisecond)
-            $stderr.puts "[SWARM_DEBUG] node #{@id} pid=#{@pid} got ESRCH " \
-              "(took=#{(after_waitpid - before_waitpid).round(2)}ms) — process doesn't exist"
-            $stderr.flush
             # Process doesn't exist
             @alive = false
             false

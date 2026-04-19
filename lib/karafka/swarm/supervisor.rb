@@ -134,81 +134,24 @@ module Karafka
           @stopping = true
         end
 
-        $stderr.puts "[SWARM_DEBUG] stop method entered, thread=#{Thread.current.object_id} " \
-          "wall=#{Time.now.strftime('%H:%M:%S.%L')}"
-        $stderr.flush
-
         initialized = true
         Karafka::App.stop!
 
         manager.stop
 
         total_shutdown_timeout = shutdown_timeout + SHUTDOWN_GRACE_PERIOD
-        total_iterations = ((total_shutdown_timeout / 1_000) * (1 / supervision_sleep)).to_i
 
-        # DEBUG: log all timing parameters
-        loop_start = monotonic_now
-        wall_start = Time.now
-        $stderr.puts "[SWARM_DEBUG] stop loop starting: " \
-          "shutdown_timeout=#{shutdown_timeout} " \
-          "grace=#{SHUTDOWN_GRACE_PERIOD} " \
-          "total_timeout=#{total_shutdown_timeout}ms " \
-          "supervision_sleep=#{supervision_sleep} " \
-          "iterations=#{total_iterations} " \
-          "thread=#{Thread.current.object_id} " \
-          "wall=#{wall_start.strftime('%H:%M:%S.%L')} " \
-          "nodes=#{manager.nodes.map { |n| "#{n.id}:pid=#{n.pid}" }.join(',')}"
-        $stderr.flush
-
-        iteration = 0
-        last_report = loop_start
-
-        total_iterations.times do
-          iteration += 1
-          iter_start = monotonic_now
-
-          stopped = manager.stopped?
-
-          if stopped
-            elapsed = monotonic_now - loop_start
-            $stderr.puts "[SWARM_DEBUG] manager.stopped?=true at iteration #{iteration}/#{total_iterations}, " \
-              "elapsed=#{elapsed.round(1)}ms (#{(elapsed / 1_000).round(2)}s), " \
-              "wall=#{Time.now.strftime('%H:%M:%S.%L')}"
-            $stderr.flush
+        # We check from time to time (for the timeout period) if all the threads finished
+        # their work and if so, we can just return and normal shutdown process will take place
+        # We divide it by 1000 because we use time in ms.
+        ((total_shutdown_timeout / 1_000) * (1 / supervision_sleep)).to_i.times do
+          if manager.stopped?
             manager.cleanup
             return
           end
 
-          slept_start = monotonic_now
           sleep(supervision_sleep)
-          slept_end = monotonic_now
-
-          now = monotonic_now
-          # Report every 5 seconds or on first/last iterations
-          if (now - last_report) >= 5_000 || iteration == 1 || iteration == total_iterations
-            elapsed = now - loop_start
-            alive_detail = manager.nodes.map do |n|
-              "#{n.id}:alive=#{n.alive?}:pid=#{n.pid}"
-            end.join(",")
-            $stderr.puts "[SWARM_DEBUG] iteration #{iteration}/#{total_iterations} " \
-              "elapsed=#{elapsed.round(1)}ms (#{(elapsed / 1_000).round(2)}s) " \
-              "stopped_check=#{(slept_start - iter_start).round(2)}ms " \
-              "sleep_actual=#{(slept_end - slept_start).round(2)}ms " \
-              "iter_total=#{(now - iter_start).round(2)}ms " \
-              "nodes=[#{alive_detail}] " \
-              "wall=#{Time.now.strftime('%H:%M:%S.%L')}"
-            $stderr.flush
-            last_report = now
-          end
         end
-
-        final_elapsed = monotonic_now - loop_start
-        $stderr.puts "[SWARM_DEBUG] TIMEOUT: loop exhausted #{total_iterations} iterations in " \
-          "#{final_elapsed.round(1)}ms (#{(final_elapsed / 1_000).round(2)}s), " \
-          "wall_start=#{wall_start.strftime('%H:%M:%S.%L')} " \
-          "wall_end=#{Time.now.strftime('%H:%M:%S.%L')} " \
-          "raising ForcefulShutdownError"
-        $stderr.flush
 
         raise Errors::ForcefulShutdownError
       rescue Errors::ForcefulShutdownError => e
@@ -224,24 +167,11 @@ module Karafka
         )
 
         # Run forceful kill
-        $stderr.puts "[SWARM_DEBUG] sending SIGKILL to all nodes"
-        $stderr.flush
         manager.terminate
-
-        kill_wait_start = monotonic_now
-        kill_iters = 0
-        until manager.stopped?
-          kill_iters += 1
-          sleep(supervision_sleep)
-          if kill_iters % 10 == 0
-            $stderr.puts "[SWARM_DEBUG] post-SIGKILL wait: #{kill_iters} iterations, " \
-              "elapsed=#{(monotonic_now - kill_wait_start).round(1)}ms"
-            $stderr.flush
-          end
-        end
-        $stderr.puts "[SWARM_DEBUG] post-SIGKILL stopped after #{kill_iters} iterations, " \
-          "#{(monotonic_now - kill_wait_start).round(1)}ms"
-        $stderr.flush
+        # And wait until linux kills them
+        # This prevents us from exiting forcefully with any dead child process still existing
+        # Since we have sent the `KILL` signal, it must die, so we can wait until all dead
+        sleep(supervision_sleep) until manager.stopped?
 
         # Cleanup the process table
         manager.cleanup
