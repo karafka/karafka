@@ -416,6 +416,14 @@ def wait_until(mode: :server, sleep: 0.01)
   started_at = Time.now
   stop = false
 
+  # In swarm mode, wait for the supervisor to finish forking before evaluating the block.
+  # Without this, block code that creates rdkafka handles (e.g. Admin.read_topic) can race
+  # with Process.fork — the child inherits the handle whose polling thread is dead, causing
+  # NativeKafka#close to hang forever in the finalizer on a stuck @operations_in_progress.
+  if mode == :swarm
+    sleep(sleep) until Karafka::App.supervising? || (Time.now - started_at) > 240
+  end
+
   until stop
     stop = yield
 
