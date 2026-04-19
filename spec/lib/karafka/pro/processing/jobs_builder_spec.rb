@@ -41,14 +41,14 @@ RSpec.describe_current do
 
       it "expect to use the non blocking pro consumption job" do
         job = builder.consume(executor, [])
-        expect(job).to be_a(Karafka::Pro::Processing::Jobs::ConsumeNonBlocking)
+        expect(job).to be_a(Karafka::Pro::Processing::ConsumerGroups::Jobs::ConsumeNonBlocking)
       end
     end
 
     context "when it is not a lrj topic" do
       it do
         job = builder.consume(executor, [])
-        expect(job).to be_a(Karafka::Processing::Jobs::Consume)
+        expect(job).to be_a(Karafka::Processing::ConsumerGroups::Jobs::Consume)
       end
     end
   end
@@ -59,14 +59,14 @@ RSpec.describe_current do
 
       it "expect to use the non blocking pro revocation job" do
         job = builder.eofed(executor)
-        expect(job).to be_a(Karafka::Pro::Processing::Jobs::EofedNonBlocking)
+        expect(job).to be_a(Karafka::Pro::Processing::ConsumerGroups::Jobs::EofedNonBlocking)
       end
     end
 
     context "when it is not a lrj topic" do
       it do
         job = builder.eofed(executor)
-        expect(job).to be_a(Karafka::Processing::Jobs::Eofed)
+        expect(job).to be_a(Karafka::Processing::ConsumerGroups::Jobs::Eofed)
       end
     end
   end
@@ -77,14 +77,14 @@ RSpec.describe_current do
 
       it "expect to use the non blocking pro revocation job" do
         job = builder.revoked(executor)
-        expect(job).to be_a(Karafka::Pro::Processing::Jobs::RevokedNonBlocking)
+        expect(job).to be_a(Karafka::Pro::Processing::ConsumerGroups::Jobs::RevokedNonBlocking)
       end
     end
 
     context "when it is not a lrj topic" do
       it do
         job = builder.revoked(executor)
-        expect(job).to be_a(Karafka::Processing::Jobs::Revoked)
+        expect(job).to be_a(Karafka::Processing::ConsumerGroups::Jobs::Revoked)
       end
     end
   end
@@ -92,14 +92,14 @@ RSpec.describe_current do
   describe "#shutdown" do
     it do
       job = builder.shutdown(executor)
-      expect(job).to be_a(Karafka::Processing::Jobs::Shutdown)
+      expect(job).to be_a(Karafka::Processing::ConsumerGroups::Jobs::Shutdown)
     end
   end
 
   describe "#idle" do
     it do
       job = builder.idle(executor)
-      expect(job).to be_a(Karafka::Processing::Jobs::Idle)
+      expect(job).to be_a(Karafka::Processing::ConsumerGroups::Jobs::Idle)
     end
   end
 
@@ -109,14 +109,14 @@ RSpec.describe_current do
 
       it "expect to use the non blocking pro revocation job" do
         job = builder.periodic(executor)
-        expect(job).to be_a(Karafka::Pro::Processing::Jobs::PeriodicNonBlocking)
+        expect(job).to be_a(Karafka::Pro::Processing::ConsumerGroups::Jobs::PeriodicNonBlocking)
       end
     end
 
     context "when it is not a lrj topic" do
       it do
         job = builder.periodic(executor)
-        expect(job).to be_a(Karafka::Pro::Processing::Jobs::Periodic)
+        expect(job).to be_a(Karafka::Pro::Processing::ConsumerGroups::Jobs::Periodic)
       end
     end
   end

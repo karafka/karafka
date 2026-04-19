@@ -32,6 +32,6 @@ draw_routes(create_topics: false) do
   end
 end
 
-assert_equal true, Karafka::App.consumer_groups.first.topics.first.consumer_persistence
-assert_equal false, Karafka::App.consumer_groups.last.topics[0].consumer_persistence
-assert_equal false, Karafka::App.consumer_groups.last.topics[1].consumer_persistence
+assert_equal true, Karafka::App.routes.first.topics.first.consumer_persistence
+assert_equal false, Karafka::App.routes.last.topics[0].consumer_persistence
+assert_equal false, Karafka::App.routes.last.topics[1].consumer_persistence

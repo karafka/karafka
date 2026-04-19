@@ -125,6 +125,7 @@ module Karafka
         sasl.oauthbearer.metadata.authentication.type
         sasl.oauthbearer.method
         sasl.oauthbearer.scope
+        sasl.oauthbearer.sub.claim.name
         sasl.oauthbearer.token.endpoint.url
         sasl.password
         sasl.username
@@ -283,6 +284,7 @@ module Karafka
         sasl.oauthbearer.metadata.authentication.type
         sasl.oauthbearer.method
         sasl.oauthbearer.scope
+        sasl.oauthbearer.sub.claim.name
         sasl.oauthbearer.token.endpoint.url
         sasl.password
         sasl.username

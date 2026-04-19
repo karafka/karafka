@@ -78,4 +78,4 @@ assert_equal elements[0], broken.raw_payload, DT.data
 assert_equal broken.headers["source_topic"], DT.topic
 assert_equal "0", broken.headers["source_partition"]
 assert_equal "0", broken.headers["source_offset"]
-assert_equal broken.headers["source_consumer_group"], Karafka::App.consumer_groups.first.id
+assert_equal broken.headers["source_consumer_group"], Karafka::App.routes.first.id

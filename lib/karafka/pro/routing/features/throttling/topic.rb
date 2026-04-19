@@ -35,13 +35,13 @@ module Karafka
         class Throttling < Base
           # Topic throttling API extensions
           module Topic
-            # This method calls the parent class initializer and then sets up the
-            # extra instance variable to nil. The explicit initialization
+            # This method sets up the extra instance variable to nil before calling
+            # the parent class initializer. The explicit initialization
             # to nil is included as an optimization for Ruby's object shapes system,
             # which improves memory layout and access performance.
             def initialize(...)
-              super
               @throttling = nil
+              super
             end
 
             # @param limit [Integer] max messages to process in an time interval
@@ -61,7 +61,7 @@ module Karafka
                 # If someone defined throttling setup, we need to create appropriate filter for it
                 # and inject it via filtering feature
                 if config.active?
-                  factory = ->(*) { Pro::Processing::Filters::Throttler.new(limit, interval) }
+                  factory = ->(*) { Pro::Processing::ConsumerGroups::Filters::Throttler.new(limit, interval) }
                   filter(factory)
                 end
 

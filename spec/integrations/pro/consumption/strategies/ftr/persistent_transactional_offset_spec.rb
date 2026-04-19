@@ -87,7 +87,7 @@ class Consumer < Karafka::BaseConsumer
   end
 end
 
-class OffsetManager < Karafka::Pro::Processing::Filters::Base
+class OffsetManager < Karafka::Pro::Processing::ConsumerGroups::Filters::Base
   def initialize(topic, partition)
     super()
     @topic = topic

@@ -42,7 +42,7 @@ class Consumer < Karafka::BaseConsumer
   end
 end
 
-class Jumper < Karafka::Pro::Processing::Filters::Base
+class Jumper < Karafka::Pro::Processing::ConsumerGroups::Filters::Base
   def initialize(topic, partition)
     super()
     @topic = topic.name

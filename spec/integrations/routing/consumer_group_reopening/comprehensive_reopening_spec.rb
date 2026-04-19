@@ -17,7 +17,7 @@ Consumer6 = Class.new(Karafka::BaseConsumer)
 
 # Draw 1: Create first named group with one topic
 draw_routes(create_topics: false) do
-  consumer_group DT.consumer_groups[1] do
+  consumer_group DT.groups[1] do
     topic DT.topics[0] do
       consumer Consumer1
     end
@@ -26,14 +26,14 @@ end
 
 # Draw 2: Create second named group with one topic
 draw_routes(create_topics: false) do
-  consumer_group DT.consumer_groups[2] do
+  consumer_group DT.groups[2] do
     topic DT.topics[1] do
       consumer Consumer2
     end
   end
 end
 
-# Draw 3: Add to implicit default group (uses DT.consumer_groups[0] from config)
+# Draw 3: Add to implicit default group (uses DT.groups[0] from config)
 draw_routes(create_topics: false) do
   topic DT.topics[2] do
     consumer Consumer3
@@ -42,7 +42,7 @@ end
 
 # Draw 4: Reopen first named group and add another topic
 draw_routes(create_topics: false) do
-  consumer_group DT.consumer_groups[1] do
+  consumer_group DT.groups[1] do
     topic DT.topics[3] do
       consumer Consumer4
     end
@@ -58,7 +58,7 @@ end
 
 # Draw 6: Reopen second named group and add another topic
 draw_routes(create_topics: false) do
-  consumer_group DT.consumer_groups[2] do
+  consumer_group DT.groups[2] do
     topic DT.topics[5] do
       consumer Consumer6
     end
@@ -69,10 +69,10 @@ end
 assert_equal 3, Karafka::App.routes.size
 
 # Find all groups
-group_a = Karafka::App.routes.find { |cg| cg.name == DT.consumer_groups[1] }
-group_b = Karafka::App.routes.find { |cg| cg.name == DT.consumer_groups[2] }
+group_a = Karafka::App.routes.find { |cg| cg.name == DT.groups[1] }
+group_b = Karafka::App.routes.find { |cg| cg.name == DT.groups[2] }
 default_group = Karafka::App.routes.find do |cg|
-  cg.name != DT.consumer_groups[1] && cg.name != DT.consumer_groups[2]
+  cg.name != DT.groups[1] && cg.name != DT.groups[2]
 end
 
 # Verify first named group has both topics

@@ -59,7 +59,7 @@ class Consumer2 < Karafka::BaseConsumer
 end
 
 draw_routes do
-  consumer_group DT.consumer_group do
+  consumer_group DT.group do
     topic DT.topics[0] do
       config(partitions: 2)
       consumer Consumer1
@@ -96,5 +96,5 @@ DT[:piped].each do |message|
   assert EXPECTED_PARTITIONS.include?(source_partition)
   assert EXPECTED_KEYS.include?(message.key)
   assert_equal headers["source_topic"], DT.topics.first
-  assert_equal headers["source_consumer_group"], DT.consumer_group
+  assert_equal headers["source_consumer_group"], DT.group
 end

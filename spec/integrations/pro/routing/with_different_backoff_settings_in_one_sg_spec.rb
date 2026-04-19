@@ -52,8 +52,8 @@ draw_routes(create_topics: false) do
   end
 end
 
-t1 = Karafka::App.consumer_groups.first.topics.first
-t2 = Karafka::App.consumer_groups.first.topics.last
+t1 = Karafka::App.routes.first.topics.first
+t2 = Karafka::App.routes.first.topics.last
 
 assert_equal t1.subscription_group, t2.subscription_group
 

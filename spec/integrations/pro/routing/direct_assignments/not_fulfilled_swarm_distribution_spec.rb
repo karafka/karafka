@@ -60,7 +60,7 @@ end
 
 assert failed
 
-Karafka::App.routes.clear
+clear_app_draws
 
 failed = false
 

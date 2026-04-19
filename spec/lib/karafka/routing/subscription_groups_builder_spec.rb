@@ -1,18 +1,18 @@
 # frozen_string_literal: true
 
 RSpec.describe_current do
-  subject(:groups) { described_class.new.call(consumer_group_topics) }
+  subject(:groups) { described_class.new.call(group_topics) }
 
-  let(:consumer_group_topics) { [topic1, topic2] }
+  let(:group_topics) { [topic1, topic2] }
 
   context "when there is just one topic in the consumer group" do
-    let(:consumer_group_topics) { [build(:routing_topic)] }
+    let(:group_topics) { [build(:routing_topic)] }
 
     it { expect(groups.size).to eq(1) }
   end
 
   context "when there are more topics with the same settings" do
-    let(:consumer_group_topics) do
+    let(:group_topics) do
       Array.new(3) { build(:routing_topic, subscription_group_details: { name: "1" }) }
     end
 

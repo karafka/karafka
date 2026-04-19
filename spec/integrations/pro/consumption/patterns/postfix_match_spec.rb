@@ -47,10 +47,13 @@ draw_routes(create_topics: false) do
 end
 
 # If works, won't hang.
+TOPIC_NAME = "#{DT.topics[0]}-#{DT.topics[1]}"
+
 start_karafka_and_wait_until do
   unless @created
     sleep(5)
-    produce_many("#{DT.topics[0]}-#{DT.topics[1]}", DT.uuids(1))
+    Karafka::Admin.create_topic(TOPIC_NAME, 1, 1)
+    produce_many(TOPIC_NAME, DT.uuids(1))
     @created = true
   end
 

@@ -8,7 +8,7 @@ module Karafka
       #
       # @note There are many more configuration options inside of the
       #   `Karafka::Setup::Config` model, but we don't validate them here as they are
-      #   validated per each route (topic + consumer_group) because they can be overwritten,
+      #   validated per each route (topic + group) because they can be overwritten,
       #   so we validate all of that once all the routes are defined and ready.
       class Config < Karafka::Contracts::Base
         configure do |config|
@@ -121,16 +121,19 @@ module Karafka
           end
 
           nested(:processing) do
-            required(:jobs_builder) { |val| !val.nil? }
             required(:jobs_queue_class) { |val| !val.nil? }
             required(:scheduler_class) { |val| !val.nil? }
-            required(:coordinator_class) { |val| !val.nil? }
-            required(:errors_tracker_class) { |val| val.nil? || val.is_a?(Class) }
-            required(:partitioner_class) { |val| !val.nil? }
-            required(:strategy_selector) { |val| !val.nil? }
-            required(:expansions_selector) { |val| !val.nil? }
-            required(:executor_class) { |val| !val.nil? }
             required(:worker_job_call_wrapper) { |val| val == false || val.respond_to?(:wrap) }
+
+            nested(:consumer_groups) do
+              required(:jobs_builder) { |val| !val.nil? }
+              required(:coordinator_class) { |val| !val.nil? }
+              required(:errors_tracker_class) { |val| val.nil? || val.is_a?(Class) }
+              required(:partitioner_class) { |val| !val.nil? }
+              required(:strategy_selector) { |val| !val.nil? }
+              required(:expansions_selector) { |val| !val.nil? }
+              required(:executor_class) { |val| !val.nil? }
+            end
           end
 
           nested(:active_job) do
@@ -165,6 +168,23 @@ module Karafka
             next if key.is_a?(Symbol)
 
             detected_errors << [[:admin, :kafka, key], :key_must_be_a_symbol]
+          end
+
+          detected_errors
+        end
+
+        # Certain kafka settings are managed internally by Karafka and should not be set
+        # directly. Setting them manually may cause misbehaviours and other unexpected issues.
+        virtual do |data, errors|
+          next unless errors.empty?
+
+          managed_keys = Karafka::Setup::DefaultsInjector.managed_keys
+          detected_errors = []
+
+          data.fetch(:kafka).each_key do |key|
+            next unless managed_keys.include?(key)
+
+            detected_errors << [[:kafka, key], :managed_key_not_supported]
           end
 
           detected_errors

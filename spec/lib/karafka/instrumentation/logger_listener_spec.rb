@@ -21,7 +21,12 @@ RSpec.describe_current do
 
   before do
     Karafka::Server.listeners = []
-    Karafka::Server.workers = []
+    Karafka::Server.workers = instance_double(
+      Karafka::Processing::WorkersPool,
+      stopped?: true,
+      alive: [],
+      terminate: nil
+    )
 
     allow(Karafka.logger).to receive(:debug)
     allow(Karafka.logger).to receive(:info)
@@ -89,7 +94,7 @@ RSpec.describe_current do
   describe "#on_worker_process" do
     subject(:trigger) { listener.on_worker_process(event) }
 
-    let(:job) { Karafka::Processing::Jobs::Shutdown.new(executor) }
+    let(:job) { Karafka::Processing::ConsumerGroups::Jobs::Shutdown.new(executor) }
     let(:executor) { build(:processing_executor) }
     let(:payload) { { job: job } }
 
@@ -99,11 +104,29 @@ RSpec.describe_current do
   describe "#on_worker_processed" do
     subject(:trigger) { listener.on_worker_processed(event) }
 
-    let(:job) { Karafka::Processing::Jobs::Shutdown.new(executor) }
+    let(:job) { Karafka::Processing::ConsumerGroups::Jobs::Shutdown.new(executor) }
     let(:executor) { build(:processing_executor) }
     let(:payload) { { job: job, time: 2 } }
 
     it { expect(Karafka.logger).to have_received(:info) }
+  end
+
+  describe "#on_worker_scaling_up" do
+    subject(:trigger) { listener.on_worker_scaling_up(event) }
+
+    let(:payload) { { from: 2, to: 5, workers_pool: nil } }
+    let(:message) { "Workers pool scaled up from 2 to 5 workers" }
+
+    it { expect(Karafka.logger).to have_received(:info).with(message) }
+  end
+
+  describe "#on_worker_scaling_down" do
+    subject(:trigger) { listener.on_worker_scaling_down(event) }
+
+    let(:payload) { { from: 5, to: 2, workers_pool: nil } }
+    let(:message) { "Workers pool scaling down from 5 to 2 workers" }
+
+    it { expect(Karafka.logger).to have_received(:info).with(message) }
   end
 
   describe "#on_client_pause" do
@@ -447,7 +470,7 @@ RSpec.describe_current do
 
         expect(details).to include(message)
         expect(details).to include(con_listener.subscription_group.id)
-        expect(details).to include(con_listener.subscription_group.consumer_group.id)
+        expect(details).to include(con_listener.subscription_group.group.id)
       end
     end
 
@@ -473,7 +496,7 @@ RSpec.describe_current do
         expect(details).to include(message)
         expect(details).to include(consumer.topic.name)
         expect(details).to include(consumer.topic.subscription_group.id)
-        expect(details).to include(consumer.topic.subscription_group.consumer_group.id)
+        expect(details).to include(consumer.topic.subscription_group.group.id)
       end
     end
 
@@ -598,7 +621,7 @@ RSpec.describe_current do
 
         expect(details).to include(message)
         expect(details).to include(con_client.subscription_group.id)
-        expect(details).to include(con_client.subscription_group.consumer_group.id)
+        expect(details).to include(con_client.subscription_group.group.id)
       end
     end
 
@@ -683,6 +706,7 @@ RSpec.describe_current do
       let(:payload) do
         {
           tpl: {},
+          group_id: group_id,
           consumer_group_id: group_id,
           client_id: client_id
         }
@@ -702,6 +726,7 @@ RSpec.describe_current do
             "topic1" => [double(partition: 0), double(partition: 1)],
             "topic2" => [double(partition: 0)]
           },
+          group_id: group_id,
           consumer_group_id: group_id,
           client_id: client_id
         }
@@ -728,6 +753,7 @@ RSpec.describe_current do
       let(:payload) do
         {
           tpl: {},
+          group_id: group_id,
           consumer_group_id: group_id,
           client_id: client_id
         }
@@ -747,6 +773,7 @@ RSpec.describe_current do
             "topic1" => [double(partition: 0), double(partition: 1)],
             "topic2" => [double(partition: 0)]
           },
+          group_id: group_id,
           consumer_group_id: group_id,
           client_id: client_id
         }

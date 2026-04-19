@@ -68,7 +68,7 @@ broker_ids.each do |bid|
     60.times do
       partitions = Karafka::Admin::Recovery.affected_partitions(bid)
       break
-    rescue Karafka::Pro::Admin::Recovery::Errors::MetadataError
+    rescue Karafka::Admin::Recovery::Errors::MetadataError
       sleep(1)
     end
 

@@ -225,6 +225,12 @@ module Karafka
           setting :activity_manager, default: Routing::ActivityManager.new
         end
 
+        # Namespace for declarative topics management (infrastructure-as-code)
+        setting :declaratives do
+          # option builder [Karafka::Declaratives::Builder] builder instance
+          setting :builder, default: Declaratives::Builder.new
+        end
+
         # Namespace for internal connection related settings
         setting :connection do
           # Manages starting up and stopping Kafka connections
@@ -305,24 +311,30 @@ module Karafka
           setting :jobs_queue_class, default: Processing::JobsQueue
           # option scheduler [Object] scheduler we will be using
           setting :scheduler_class, default: Processing::Schedulers::Default
-          # option jobs_builder [Object] jobs builder we want to use
-          setting :jobs_builder, default: Processing::JobsBuilder.new
-          # option coordinator [Class] work coordinator we want to user for processing coordination
-          setting :coordinator_class, default: Processing::Coordinator
-          # option errors_tracker_class [Class, nil] errors tracker that is used by the coordinator
-          #   for granular error tracking. `nil` for OSS as it is not in use.
-          setting :errors_tracker_class, default: nil
-          # option partitioner_class [Class] partitioner we use against a batch of data
-          setting :partitioner_class, default: Processing::Partitioner
-          # option strategy_selector [Object] processing strategy selector to be used
-          setting :strategy_selector, default: Processing::StrategySelector.new
-          # option expansions_selector [Object] processing expansions selector to be used
-          setting :expansions_selector, default: Processing::ExpansionsSelector.new
-          # option [Class] executor class
-          setting :executor_class, default: Processing::Executor
           # option worker_job_call_wrapper [Proc, false] callable object that will be used to wrap
           #   the worker execution of a job or false if no wrapper needed
           setting :worker_job_call_wrapper, default: false
+
+          # Consumer-group-specific processing defaults. When share groups land, a parallel
+          # `share_groups` namespace will hold their equivalents.
+          setting :consumer_groups do
+            # option jobs_builder [Object] jobs builder we want to use
+            setting :jobs_builder, default: Processing::JobsBuilder.new
+            # option coordinator [Class] work coordinator we want to use for processing
+            #   coordination
+            setting :coordinator_class, default: Processing::ConsumerGroups::Coordinator
+            # option errors_tracker_class [Class, nil] errors tracker that is used by the
+            #   coordinator for granular error tracking. `nil` for OSS as it is not in use.
+            setting :errors_tracker_class, default: nil
+            # option partitioner_class [Class] partitioner we use against a batch of data
+            setting :partitioner_class, default: Processing::ConsumerGroups::Partitioner
+            # option strategy_selector [Object] processing strategy selector to be used
+            setting :strategy_selector, default: Processing::ConsumerGroups::StrategySelector.new
+            # option expansions_selector [Object] processing expansions selector to be used
+            setting :expansions_selector, default: Processing::ConsumerGroups::ExpansionsSelector.new
+            # option [Class] executor class
+            setting :executor_class, default: Processing::ConsumerGroups::Executor
+          end
         end
 
         # Things related to operating on messages
@@ -428,6 +440,11 @@ module Karafka
 
           configure_components(proxy)
 
+          # Install backwards-compatible forwarding so that gems (e.g. karafka-testing) that
+          # still access config.internal.processing.strategy_selector (etc.) keep working after
+          # the move to config.internal.processing.consumer_groups.*
+          install_processing_cg_forwarders(config)
+
           # Refreshes the references that are cached that might have been changed by the config
           Karafka.refresh!
 
@@ -445,6 +462,38 @@ module Karafka
         end
 
         private
+
+        # Installs forwarding reader methods on the processing config node so that the old
+        # (pre-nesting) paths like `config.internal.processing.strategy_selector` still resolve
+        # by delegating to `config.internal.processing.consumer_groups.strategy_selector`.
+        # This keeps external gems (e.g. karafka-testing) working until they migrate.
+        #
+        # @param config [Karafka::Core::Configurable::Node] root config node
+        def install_processing_cg_forwarders(config)
+          processing = config.internal.processing
+          cg_node = processing.consumer_groups
+
+          %i[
+            jobs_builder
+            coordinator_class
+            errors_tracker_class
+            partitioner_class
+            strategy_selector
+            expansions_selector
+            executor_class
+          ].each do |setting_name|
+            writer = :"#{setting_name}="
+
+            # Remove previous definitions (if setup runs more than once) to avoid
+            # "method redefined" warnings that spec_helper promotes to errors
+            sc = processing.singleton_class
+            sc.remove_method(setting_name) if processing.respond_to?(setting_name)
+            sc.remove_method(writer) if processing.respond_to?(writer)
+
+            processing.define_singleton_method(setting_name) { cg_node.public_send(setting_name) }
+            processing.define_singleton_method(writer) { |val| cg_node.public_send(writer, val) }
+          end
+        end
 
         # Sets up all the components that are based on the user configuration
         # @param config_proxy [ConfigProxy] the configuration proxy containing deferred setup

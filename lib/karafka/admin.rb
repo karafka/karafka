@@ -86,12 +86,12 @@ module Karafka
         new.topic_info(topic_name)
       end
 
-      # @param consumer_group_id [String] id of the consumer group for which we want to move the
+      # @param group_id [String] id of the group for which we want to move the
       #   existing offset
       # @param topics_with_partitions_and_offsets [Hash] Hash with list of topics and settings
       # @see ConsumerGroups.seek
-      def seek_consumer_group(consumer_group_id, topics_with_partitions_and_offsets)
-        new.seek_consumer_group(consumer_group_id, topics_with_partitions_and_offsets)
+      def seek_consumer_group(group_id, topics_with_partitions_and_offsets)
+        new.seek_consumer_group(group_id, topics_with_partitions_and_offsets)
       end
 
       # Takes consumer group and its topics and copies all the offsets to a new named group
@@ -124,36 +124,36 @@ module Karafka
         )
       end
 
-      # Removes given consumer group (if exists)
+      # Removes given group (if exists)
       #
-      # @param consumer_group_id [String] consumer group name
+      # @param group_id [String] group name
       # @see ConsumerGroups.delete
-      def delete_consumer_group(consumer_group_id)
-        new.delete_consumer_group(consumer_group_id)
+      def delete_consumer_group(group_id)
+        new.delete_consumer_group(group_id)
       end
 
-      # Triggers a rebalance for the specified consumer group
+      # Triggers a rebalance for the specified group
       #
-      # @param consumer_group_id [String] consumer group id to trigger rebalance for
+      # @param group_id [String] group id to trigger rebalance for
       # @see ConsumerGroups.trigger_rebalance
       # @note This API should be used only for development.
-      def trigger_rebalance(consumer_group_id)
-        new.trigger_rebalance(consumer_group_id)
+      def trigger_rebalance(group_id)
+        new.trigger_rebalance(group_id)
       end
 
-      # Reads lags and offsets for given topics in the context of consumer groups defined in the
+      # Reads lags and offsets for given topics in the context of groups defined in the
       #   routing
-      # @param consumer_groups_with_topics [Hash{String => Array<String>}] hash with consumer
-      #   groups names with array of topics to query per consumer group inside
+      # @param groups_with_topics [Hash{String => Array<String>}] hash with group
+      #   names with array of topics to query per group inside
       # @param active_topics_only [Boolean] if set to false, when we use routing topics, will
       #   select also topics that are marked as inactive in routing
       # @return [Hash{String => Hash{Integer => Hash{Integer => Object}}}] hash where the top
-      #   level keys are the consumer groups and values are hashes with topics and inside
+      #   level keys are the groups and values are hashes with topics and inside
       #   partitions with lags and offsets
       # @see ConsumerGroups.read_lags_with_offsets
-      def read_lags_with_offsets(consumer_groups_with_topics = {}, active_topics_only: true)
+      def read_lags_with_offsets(groups_with_topics = {}, active_topics_only: true)
         new.read_lags_with_offsets(
-          consumer_groups_with_topics,
+          groups_with_topics,
           active_topics_only: active_topics_only
         )
       end
@@ -274,12 +274,12 @@ module Karafka
       Topics.new(kafka: @custom_kafka).info(topic_name)
     end
 
-    # @param consumer_group_id [String] consumer group for which we want to move offsets
+    # @param group_id [String] group for which we want to move offsets
     # @param topics_with_partitions_and_offsets [Hash] hash with topics and settings
     # @see ConsumerGroups#seek
-    def seek_consumer_group(consumer_group_id, topics_with_partitions_and_offsets)
+    def seek_consumer_group(group_id, topics_with_partitions_and_offsets)
       ConsumerGroups.new(kafka: @custom_kafka).seek(
-        consumer_group_id,
+        group_id,
         topics_with_partitions_and_offsets
       )
     end
@@ -306,25 +306,25 @@ module Karafka
       )
     end
 
-    # @param consumer_group_id [String] consumer group name
+    # @param group_id [String] group name
     # @see ConsumerGroups#delete
-    def delete_consumer_group(consumer_group_id)
-      ConsumerGroups.new(kafka: @custom_kafka).delete(consumer_group_id)
+    def delete_consumer_group(group_id)
+      ConsumerGroups.new(kafka: @custom_kafka).delete(group_id)
     end
 
-    # @param consumer_group_id [String] consumer group id to trigger rebalance for
+    # @param group_id [String] group id to trigger rebalance for
     # @see ConsumerGroups#trigger_rebalance
-    def trigger_rebalance(consumer_group_id)
-      ConsumerGroups.new(kafka: @custom_kafka).trigger_rebalance(consumer_group_id)
+    def trigger_rebalance(group_id)
+      ConsumerGroups.new(kafka: @custom_kafka).trigger_rebalance(group_id)
     end
 
-    # @param consumer_groups_with_topics [Hash{String => Array<String>}] hash with consumer
-    #   groups names with array of topics
+    # @param groups_with_topics [Hash{String => Array<String>}] hash with group
+    #   names with array of topics
     # @param active_topics_only [Boolean] if set to false, will select also inactive topics
     # @see ConsumerGroups#read_lags_with_offsets
-    def read_lags_with_offsets(consumer_groups_with_topics = {}, active_topics_only: true)
+    def read_lags_with_offsets(groups_with_topics = {}, active_topics_only: true)
       ConsumerGroups.new(kafka: @custom_kafka).read_lags_with_offsets(
-        consumer_groups_with_topics,
+        groups_with_topics,
         active_topics_only: active_topics_only
       )
     end

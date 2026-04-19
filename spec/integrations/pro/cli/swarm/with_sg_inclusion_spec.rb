@@ -46,7 +46,7 @@ end
 SG_NAMES = DT.uuids(3).map { |uuid| "sg_#{uuid}" }
 
 draw_routes do
-  consumer_group DT.consumer_group do
+  consumer_group DT.group do
     subscription_group SG_NAMES[0] do
       topic DT.topics[0] do
         consumer Consumer

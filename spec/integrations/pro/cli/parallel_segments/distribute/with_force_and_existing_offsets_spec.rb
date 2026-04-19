@@ -32,11 +32,11 @@
 
 setup_karafka
 
-segment1 = "#{DT.consumer_group}-parallel-0"
-segment2 = "#{DT.consumer_group}-parallel-1"
+segment1 = "#{DT.group}-parallel-0"
+segment2 = "#{DT.group}-parallel-1"
 
 draw_routes do
-  consumer_group DT.consumer_group do
+  consumer_group DT.group do
     parallel_segments(
       count: 2,
       partitioner: ->(msg) { msg.key }
@@ -51,7 +51,7 @@ end
 produce_many(DT.topic, DT.uuids(10))
 
 # Set initial offsets in origin consumer group
-Karafka::Admin.seek_consumer_group(DT.consumer_group, { DT.topic => { 0 => 5, 1 => 7 } })
+Karafka::Admin.seek_consumer_group(DT.group, { DT.topic => { 0 => 5, 1 => 7 } })
 
 # Set existing offsets in parallel segments (that would normally cause failure)
 Karafka::Admin.seek_consumer_group(segment1, { DT.topic => { 0 => 2, 1 => 3 } })

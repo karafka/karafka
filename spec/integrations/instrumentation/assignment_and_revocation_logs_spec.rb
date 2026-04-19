@@ -38,7 +38,7 @@ $stderr = proper_stderr
 
 str = strio.string
 
-group_prefix = "Group #{DT.consumer_group} rebalance"
+group_prefix = "Group #{DT.group} rebalance"
 
 assert str.include?("#{group_prefix}: #{DT.topic}-[0,1,2] assigned")
 assert str.include?("#{group_prefix}: #{DT.topic}-[0,1,2] revoked")

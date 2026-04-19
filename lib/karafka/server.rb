@@ -10,7 +10,8 @@ module Karafka
       shutdown_timeout: %i[shutdown_timeout],
       forceful_exit_code: %i[internal forceful_exit_code],
       forceful_shutdown_wait: %i[internal forceful_shutdown_wait],
-      process: %i[internal process]
+      process: %i[internal process],
+      jobs_queue_class: %i[internal processing jobs_queue_class]
     )
 
     class << self
@@ -39,8 +40,7 @@ module Karafka
 
       # Method which runs app
       def run
-        self.listeners = []
-        self.workers = []
+        prepare
 
         # We need to validate this prior to running because it may be executed also from the
         # embedded
@@ -93,6 +93,7 @@ module Karafka
       # @note We don't need to sleep because Karafka::Runner is locking and waiting to finish loop
       # (and it won't happen until we explicitly want to stop)
       def start
+        prepare
         Karafka::Runner.new.call
       end
 
@@ -117,7 +118,7 @@ module Karafka
         # We divide it by 1000 because we use time in ms.
         ((timeout / 1_000) * (1 / supervision_sleep)).to_i.times do
           all_listeners_stopped = listeners.all?(&:stopped?)
-          all_workers_stopped = workers.none?(&:alive?)
+          all_workers_stopped = workers.stopped?
 
           return if all_listeners_stopped && all_workers_stopped
 
@@ -127,7 +128,7 @@ module Karafka
         raise Errors::ForcefulShutdownError
       rescue Errors::ForcefulShutdownError => e
         active_listeners = listeners.select(&:active?)
-        alive_workers = workers.select(&:alive?)
+        alive_workers = workers.alive
 
         # Collect details about subscription groups that still have jobs in processing
         in_processing = jobs_queue ? jobs_queue.in_processing : {}
@@ -143,7 +144,7 @@ module Karafka
         )
 
         # We're done waiting, lets kill them!
-        workers.each(&:terminate)
+        workers.terminate
         listeners.active.each(&:terminate)
 
         # We always need to shutdown clients to make sure we do not force the GC to close consumer.
@@ -186,7 +187,24 @@ module Karafka
           WaterDrop::ConnectionPool.close
 
           Karafka::App.terminate!
+
+          # Allow prepare to run again if the server is restarted (e.g. reset_status in tests,
+          # or embedded re-start).
+          @prepared = false
         end
+      end
+
+      # Initializes listeners, jobs queue and workers pool.
+      # Called from both {.run} (standalone) and {.start} (embedded). Guarded so it runs only
+      # once even when {.run} delegates to {.start}.
+      def prepare
+        return if @prepared
+
+        @prepared = true
+
+        self.listeners = []
+        self.jobs_queue = jobs_queue_class.new
+        self.workers = Processing::WorkersPool.new
       end
 
       # Quiets the Karafka server.

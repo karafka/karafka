@@ -37,7 +37,7 @@ end
 
 class Consumer < Karafka::BaseConsumer
   def consume
-    segment_id = topic.consumer_group.segment_id
+    segment_id = topic.group.segment_id
 
     DT[:post_trigger] = true if DT[:error_triggered] && segment_id == 0
 
@@ -61,7 +61,7 @@ Karafka.monitor.subscribe("error.occurred") do |event|
 end
 
 draw_routes do
-  consumer_group DT.consumer_group do
+  consumer_group DT.group do
     # Configure 3 parallel segments for clearer testing
     parallel_segments(
       count: 3,

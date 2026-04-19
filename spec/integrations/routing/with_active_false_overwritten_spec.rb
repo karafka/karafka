@@ -24,8 +24,8 @@ draw_routes(create_topics: false) do
   end
 end
 
-t1 = Karafka::App.consumer_groups.first.topics.first
-t2 = Karafka::App.consumer_groups.last.topics.first
+t1 = Karafka::App.routes.first.topics.first
+t2 = Karafka::App.routes.last.topics.first
 
 assert !t1.active?
 assert t2.active?

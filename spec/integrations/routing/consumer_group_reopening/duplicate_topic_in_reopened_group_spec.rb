@@ -11,7 +11,7 @@ Consumer2 = Class.new(Karafka::BaseConsumer)
 
 # First draw - define consumer group with a topic
 draw_routes(create_topics: false) do
-  consumer_group DT.consumer_groups[0] do
+  consumer_group DT.groups[0] do
     topic DT.topics[0] do
       consumer Consumer1
       initial_offset "earliest"
@@ -34,7 +34,7 @@ error_message = nil
 
 begin
   draw_routes(create_topics: false) do
-    consumer_group DT.consumer_groups[0] do
+    consumer_group DT.groups[0] do
       topic DT.topics[0] do
         consumer Consumer2
         initial_offset "latest"

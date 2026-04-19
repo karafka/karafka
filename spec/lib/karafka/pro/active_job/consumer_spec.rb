@@ -46,7 +46,7 @@ RSpec.describe_current do
   let(:message2) { build(:messages_message, raw_payload: payload2.to_json) }
   let(:payload1) { { "1" => "2" } }
   let(:payload2) { { "3" => "4" } }
-  let(:strategy) { Karafka::Pro::Processing::Strategies::Aj::Mom }
+  let(:strategy) { Karafka::Pro::Processing::ConsumerGroups::Strategies::Aj::Mom }
 
   before do
     coordinator.start(messages)
@@ -69,7 +69,7 @@ RSpec.describe_current do
     end
 
     context "when it is a lrj" do
-      let(:strategy) { Karafka::Pro::Processing::Strategies::Aj::LrjMom }
+      let(:strategy) { Karafka::Pro::Processing::ConsumerGroups::Strategies::Aj::LrjMom }
 
       before do
         consumer.messages = messages
@@ -112,7 +112,7 @@ RSpec.describe_current do
     end
 
     context "when messages are available to the consumer and it is virtual partition" do
-      let(:strategy) { Karafka::Pro::Processing::Strategies::Aj::MomVp }
+      let(:strategy) { Karafka::Pro::Processing::ConsumerGroups::Strategies::Aj::MomVp }
 
       let(:topic) do
         topic = build(:routing_topic)

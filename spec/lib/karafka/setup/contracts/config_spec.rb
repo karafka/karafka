@@ -91,15 +91,17 @@ RSpec.describe_current do
         },
         processing: {
           scheduler_class: Karafka::Processing::Schedulers::Default,
-          jobs_builder: Karafka::Processing::JobsBuilder.new,
           jobs_queue_class: Karafka::Processing::JobsQueue,
-          coordinator_class: Karafka::Processing::Coordinator,
-          errors_tracker_class: nil,
-          partitioner_class: Karafka::Processing::Partitioner,
-          strategy_selector: Karafka::Processing::StrategySelector.new,
-          expansions_selector: Karafka::Processing::ExpansionsSelector.new,
-          executor_class: Karafka::Processing::Executor,
-          worker_job_call_wrapper: false
+          worker_job_call_wrapper: false,
+          consumer_groups: {
+            jobs_builder: Karafka::Processing::JobsBuilder.new,
+            coordinator_class: Karafka::Processing::ConsumerGroups::Coordinator,
+            errors_tracker_class: nil,
+            partitioner_class: Karafka::Processing::ConsumerGroups::Partitioner,
+            strategy_selector: Karafka::Processing::ConsumerGroups::StrategySelector.new,
+            expansions_selector: Karafka::Processing::ConsumerGroups::ExpansionsSelector.new,
+            executor_class: Karafka::Processing::ConsumerGroups::Executor
+          }
         },
         active_job: {
           dispatcher: Karafka::ActiveJob::Dispatcher.new,
@@ -264,6 +266,23 @@ RSpec.describe_current do
       before { config[:kafka] = { "test" => 1 } }
 
       it { expect(contract.call(config)).not_to be_success }
+    end
+
+    context "when kafka scope has a managed key" do
+      before { config[:kafka][:"statistics.unassigned.include"] = false }
+
+      it { expect(contract.call(config)).not_to be_success }
+    end
+
+    context "when managed keys set is empty" do
+      before do
+        config[:kafka][:"statistics.unassigned.include"] = false
+        allow(Karafka::Setup::DefaultsInjector)
+          .to receive(:managed_keys)
+          .and_return(Set.new)
+      end
+
+      it { expect(contract.call(config)).to be_success }
     end
   end
 
@@ -718,14 +737,8 @@ RSpec.describe_current do
     end
 
     %i[
-      jobs_builder
       jobs_queue_class
       scheduler_class
-      coordinator_class
-      partitioner_class
-      strategy_selector
-      expansions_selector
-      executor_class
       worker_job_call_wrapper
     ].each do |key|
       context "when processing #{key} is missing" do
@@ -741,14 +754,35 @@ RSpec.describe_current do
       end
     end
 
-    context "when processing errors_tracker_class is missing" do
-      before { config[:internal][:processing].delete(:errors_tracker_class) }
+    %i[
+      jobs_builder
+      coordinator_class
+      partitioner_class
+      strategy_selector
+      expansions_selector
+      executor_class
+    ].each do |key|
+      context "when processing consumer_groups #{key} is missing" do
+        before { config[:internal][:processing][:consumer_groups].delete(key) }
+
+        it { expect(contract.call(config)).not_to be_success }
+      end
+
+      context "when processing consumer_groups #{key} is nil" do
+        before { config[:internal][:processing][:consumer_groups][key] = nil }
+
+        it { expect(contract.call(config)).not_to be_success }
+      end
+    end
+
+    context "when processing consumer_groups errors_tracker_class is missing" do
+      before { config[:internal][:processing][:consumer_groups].delete(:errors_tracker_class) }
 
       it { expect(contract.call(config)).not_to be_success }
     end
 
-    context "when processing errors_tracker_class is not a class" do
-      before { config[:internal][:processing][:errors_tracker_class] = "invalid" }
+    context "when processing consumer_groups errors_tracker_class is not a class" do
+      before { config[:internal][:processing][:consumer_groups][:errors_tracker_class] = "invalid" }
 
       it { expect(contract.call(config)).not_to be_success }
     end

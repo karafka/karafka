@@ -37,7 +37,7 @@ rescue Karafka::Errors::InvalidConfigurationError
 end
 
 # Test duplicate consumer assignment to same topic (may not be supported)
-Karafka::App.routes.clear
+clear_app_draws
 
 begin
   draw_routes(create_topics: false) do
@@ -62,7 +62,7 @@ class SelfReferencingConsumer < Karafka::BaseConsumer
   end
 end
 
-Karafka::App.routes.clear
+clear_app_draws
 self_ref_passed = true
 
 begin
@@ -78,7 +78,7 @@ rescue Karafka::Errors::InvalidConfigurationError
 end
 
 # Test multiple subscription groups with same topic (this should be allowed)
-Karafka::App.routes.clear
+clear_app_draws
 multi_group_passed = true
 
 begin

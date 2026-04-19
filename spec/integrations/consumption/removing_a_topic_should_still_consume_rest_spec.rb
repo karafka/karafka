@@ -22,7 +22,7 @@ class Consumer2 < Karafka::BaseConsumer
 end
 
 draw_routes do
-  consumer_group DT.consumer_group do
+  consumer_group DT.group do
     topic DT.topics.first do
       consumer Consumer1
     end
@@ -45,10 +45,10 @@ start_karafka_and_wait_until(reset_status: true) do
 end
 
 # Clear all the routes so later we can subscribe to only one topic
-Karafka::App.routes.clear
+clear_app_draws
 
 draw_routes do
-  consumer_group DT.consumer_group do
+  consumer_group DT.group do
     topic DT.topics.last do
       consumer Consumer2
     end

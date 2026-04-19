@@ -25,22 +25,25 @@ en:
           Decrease max_wait_time or increase node_report_timeout
         kafka_format: needs to be a filled hash
         key_must_be_a_symbol: All keys under the kafka settings scope need to be symbols
+        managed_key_not_supported: >
+          this kafka setting is managed internally by Karafka and should not be set directly.
+          Setting it manually may cause misbehaviours and other unexpected issues
         pause.timeout_max_timeout_vs_pause_max_timeout: pause.timeout must be less or equal to pause.max_timeout
         shutdown_timeout_vs_max_wait_time: shutdown_timeout must be more than max_wait_time
         worker_thread_priority_format: must be between -3 and 3
 
         oauth.token_provider_listener_format: 'must be false or respond to #on_oauthbearer_token_refresh'
 
-        internal.processing.jobs_builder_format: cannot be nil
         internal.processing.jobs_queue_class_format: cannot be nil
         internal.processing.scheduler_class_format: cannot be nil
-        internal.processing.coordinator_class_format: cannot be nil
-        internal.processing.partitioner_class_format: cannot be nil
-        internal.processing.strategy_selector_format: cannot be nil
-        internal.processing.expansions_selector_format: cannot be nil
-        internal.processing.executor_class_format: cannot be nil
         internal.processing.worker_job_call_wrapper_format: 'needs to be false or respond to #wrap'
-        internal.processing.errors_tracker_class_format: 'needs to be nil or a class'
+        internal.processing.consumer_groups.jobs_builder_format: cannot be nil
+        internal.processing.consumer_groups.coordinator_class_format: cannot be nil
+        internal.processing.consumer_groups.errors_tracker_class_format: 'needs to be nil or a class'
+        internal.processing.consumer_groups.partitioner_class_format: cannot be nil
+        internal.processing.consumer_groups.strategy_selector_format: cannot be nil
+        internal.processing.consumer_groups.expansions_selector_format: cannot be nil
+        internal.processing.consumer_groups.executor_class_format: cannot be nil
 
         internal.active_job.dispatcher_format: cannot be nil
         internal.active_job.job_options_contract_format: cannot be nil
@@ -172,6 +175,13 @@ en:
         topics_namespaced_names_not_unique: |
           all topic names within a single consumer group must be unique considering namespacing styles
           disable this validation by setting config.strict_topics_namespacing to false
+
+    declaratives:
+      topic:
+        declaratives.partitions_format: needs to be more or equal to 1
+        declaratives.active_format: needs to be either true or false
+        declaratives.replication_factor_format: needs to be more or equal to 1
+        declaratives.details_format: needs to be a hash with only symbol keys
 
     job_options:
       missing: needs to be present

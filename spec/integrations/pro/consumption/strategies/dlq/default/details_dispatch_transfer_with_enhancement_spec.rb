@@ -79,7 +79,7 @@ end
 
 2.times do |i|
   dlq_message = DT[:broken][i]
-  cg = Karafka::App.consumer_groups.first.id
+  cg = Karafka::App.routes.first.id
 
   expected_payload = { orig: elements[i], extra: 1 }.to_json
 

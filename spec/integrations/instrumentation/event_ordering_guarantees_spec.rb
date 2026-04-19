@@ -20,7 +20,7 @@ class Consumer < Karafka::BaseConsumer
 end
 
 draw_routes do
-  consumer_group DT.consumer_group do
+  consumer_group DT.group do
     topic DT.topic do
       consumer Consumer
       deserializer ->(message) { message.raw_payload }

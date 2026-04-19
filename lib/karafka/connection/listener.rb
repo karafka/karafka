@@ -13,8 +13,8 @@ module Karafka
       include Helpers::Async
 
       include Helpers::ConfigImporter.new(
-        jobs_builder: %i[internal processing jobs_builder],
-        partitioner_class: %i[internal processing partitioner_class],
+        jobs_builder: %i[internal processing consumer_groups jobs_builder],
+        partitioner_class: %i[internal processing consumer_groups partitioner_class],
         reset_backoff: %i[internal connection reset_backoff],
         listener_thread_priority: %i[internal connection listener_thread_priority]
       )
@@ -26,7 +26,7 @@ module Karafka
       # @return [Karafka::Routing::SubscriptionGroup] subscription group that this listener handles
       attr_reader :subscription_group
 
-      # @return [Processing::CoordinatorsBuffer] coordinator buffers that can be used directly in
+      # @return [Processing::ConsumerGroups::CoordinatorsBuffer] coordinator buffers that can be used directly in
       #   advanced cases of changes to the polling flow (like triggered seek back without messages
       #   ahead in the topic)
       attr_reader :coordinators
@@ -45,9 +45,9 @@ module Karafka
         @id = SecureRandom.hex(6)
         @subscription_group = subscription_group
         @jobs_queue = jobs_queue
-        @coordinators = Processing::CoordinatorsBuffer.new(subscription_group.topics)
+        @coordinators = Processing::ConsumerGroups::CoordinatorsBuffer.new(subscription_group.topics)
         @client = Client.new(@subscription_group, -> { running? })
-        @executors = Processing::ExecutorsBuffer.new(@client, subscription_group)
+        @executors = Processing::ConsumerGroups::ExecutorsBuffer.new(@client, subscription_group)
         @partitioner = partitioner_class.new(subscription_group)
         @scheduler = scheduler
         @events_poller = Helpers::IntervalRunner.new { |**opts| @client.events_poll(**opts) }
@@ -521,7 +521,7 @@ module Karafka
         @client.reset
         @coordinators.reset
         @interval_runner.reset
-        @executors = Processing::ExecutorsBuffer.new(@client, @subscription_group)
+        @executors = Processing::ConsumerGroups::ExecutorsBuffer.new(@client, @subscription_group)
       end
     end
   end

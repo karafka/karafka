@@ -14,9 +14,12 @@ module Karafka
     #   we use a single workers poll that can have granular scheduling.
     class JobsQueue
       include Helpers::ConfigImporter.new(
-        concurrency: %i[concurrency],
         tick_interval: %i[internal tick_interval]
       )
+
+      # Set via writer because of a circular dependency: the queue must exist before the pool
+      # (workers need the queue at construction), but the queue needs the pool for concurrency.
+      attr_writer :pool
 
       # @return [Karafka::Processing::JobsQueue]
       def initialize
@@ -56,9 +59,14 @@ module Karafka
       #
       # @param job [Jobs::Base] job that we want to run
       def <<(job)
-        # We do not push the job if the queue is closed as it means that it would anyhow not be
-        # executed
         return if @queue.closed?
+
+        # nil is used by WorkersPool to signal a worker to exit during downscaling.
+        # Passed straight through to the raw queue, bypassing statistics and tracking.
+        unless job
+          @queue << job
+          return
+        end
 
         @mutex.synchronize do
           group = @in_processing[job.group_id]
@@ -70,7 +78,7 @@ module Karafka
           # Assume that moving to queue means being picked up immediately not to create stats
           # race conditions because of pop overhead. If there are workers available, we assume
           # work is going to be handled as we never reject enqueued jobs
-          if @statistics[:busy] < concurrency
+          if @statistics[:busy] < @pool.size
             @statistics[:busy] += 1
           else
             # If system is fully loaded, it means this job is indeed enqueued

@@ -14,7 +14,12 @@ module Karafka
         node: %i[swarm node]
       )
 
-      attr_reader :id, :name, :topics, :kafka, :consumer_group, :position
+      attr_reader :id, :name, :topics, :kafka, :group, :position
+
+      # Backwards compatible alias for `#group`. Kept purely for compatibility — this is an
+      # unconditional alias and performs no type validation, so callers should prefer `#group`
+      # once additional group types (e.g. KIP-932 share groups) land.
+      alias_method :consumer_group, :group
 
       # Lock for generating new ids safely
       ID_MUTEX = Mutex.new
@@ -45,21 +50,25 @@ module Karafka
       def initialize(position, topics)
         @details = topics.first.subscription_group_details
         @name = @details.fetch(:name)
-        @consumer_group = topics.first.consumer_group
-        # We include the consumer group id here because we want to have unique ids of subscription
+        @group = topics.first.group
+        # We include the owning group id here because we want to have unique ids of subscription
         # groups across the system. Otherwise user could set the same name for multiple
-        # subscription groups in many consumer groups effectively having same id for different
-        # entities
-        @id = "#{@consumer_group.id}_#{@name}_#{position}"
+        # subscription groups in many groups effectively having same id for different entities
+        @id = "#{@group.id}_#{@name}_#{position}"
         @position = position
         @topics = topics
         @kafka = build_kafka
       end
 
-      # @return [String] consumer group id
-      def consumer_group_id
+      # @return [String] group id (the Kafka `group.id` value assigned to this subscription
+      #   group's connection)
+      def group_id
         kafka[:"group.id"]
       end
+
+      # Backwards compatible alias. Will be retired in Karafka 3.0 once additional group types
+      # (e.g. KIP-932 share groups) land.
+      alias_method :consumer_group_id, :group_id
 
       # @return [Integer] max messages fetched in a single go
       def max_messages
@@ -124,7 +133,7 @@ module Karafka
         inject_group_instance_id(kafka)
         inject_client_id(kafka)
 
-        kafka[:"group.id"] ||= @consumer_group.id
+        kafka[:"group.id"] ||= @group.id
         kafka[:"auto.offset.reset"] ||= @topics.first.initial_offset
         # Karafka manages the offsets based on the processing state, thus we do not rely on the
         # rdkafka offset auto-storing

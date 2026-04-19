@@ -108,6 +108,8 @@ module Karafka
         worker.process
         worker.processed
         worker.completed
+        worker.scaling.up
+        worker.scaling.down
 
         error.occurred
       ].freeze

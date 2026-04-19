@@ -33,16 +33,16 @@ end
 subscription_groups = Karafka::App.subscription_groups.values.flatten
 
 assert_equal 2, Karafka::App.routes.size
-assert_equal 2, Karafka::App.consumer_groups.size
+assert_equal 2, Karafka::App.routes.size
 assert_equal 2, subscription_groups.size
-assert_equal 1, Karafka::App.consumer_groups.first.topics.size
-assert_equal "topic1", Karafka::App.consumer_groups.first.topics.first.name
-assert_equal "topic1", Karafka::App.consumer_groups.last.topics[0].name
-assert_equal "topic2", Karafka::App.consumer_groups.last.topics[1].name
+assert_equal 1, Karafka::App.routes.first.topics.size
+assert_equal "topic1", Karafka::App.routes.first.topics.first.name
+assert_equal "topic1", Karafka::App.routes.last.topics[0].name
+assert_equal "topic2", Karafka::App.routes.last.topics[1].name
 
-t1 = Karafka::App.consumer_groups.first.topics.first.kafka
-t2 = Karafka::App.consumer_groups.last.topics.first.kafka
-t3 = Karafka::App.consumer_groups.last.topics.last.kafka
+t1 = Karafka::App.routes.first.topics.first.kafka
+t2 = Karafka::App.routes.last.topics.first.kafka
+t3 = Karafka::App.routes.last.topics.last.kafka
 
 assert t1 != t2
 assert_equal t2, t3

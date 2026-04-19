@@ -54,7 +54,7 @@ invalid_mixed_topics = %w[
 valid_topics = []
 
 [valid_dash_topics, valid_underscore_topics, valid_dot_topics].flatten.each do |topic_name|
-  Karafka::App.routes.clear
+  clear_app_draws
 
   draw_routes(create_topics: false) do
     subscription_group do
@@ -73,7 +73,7 @@ end
 rejected_topics = []
 
 invalid_mixed_topics.each do |topic_name|
-  Karafka::App.routes.clear
+  clear_app_draws
 
   draw_routes(create_topics: false) do
     subscription_group do
@@ -89,7 +89,7 @@ end
 # Now test with one valid special character topic name for actual consumption
 test_topic = DT.topic
 
-Karafka::App.routes.clear
+clear_app_draws
 
 draw_routes do
   subscription_group do

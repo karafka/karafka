@@ -2,7 +2,7 @@
 
 FactoryBot.define do
   factory :routing_topic, class: "Karafka::Routing::Topic" do
-    consumer_group { build(:routing_consumer_group) }
+    group { build(:routing_consumer_group) }
     name { "test" }
     consumer { Class.new(Karafka::BaseConsumer) }
     kafka { {} }
@@ -14,7 +14,7 @@ FactoryBot.define do
     skip_create
 
     initialize_with do
-      instance = new(name, consumer_group)
+      instance = new(name, group)
 
       instance.tap do |topic|
         topic.consumer = consumer
@@ -27,13 +27,13 @@ FactoryBot.define do
   factory :pattern_routing_topic, parent: :routing_topic do
     transient do
       regexp { /xda/ }
-      pattern { Karafka::Pro::Routing::Features::Patterns::Pattern.new(nil, regexp, ->(_) {}) }
+      pattern { Karafka::Pro::Routing::Features::ConsumerGroups::Patterns::Pattern.new(nil, regexp, ->(_) {}) }
     end
 
     skip_create
 
     initialize_with do
-      instance = new(name, consumer_group)
+      instance = new(name, group)
 
       instance.tap do |topic|
         topic.consumer = consumer

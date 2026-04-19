@@ -32,13 +32,13 @@
 
 setup_karafka
 
-segment1_1 = "#{DT.consumer_group}-parallel-0"
-segment1_2 = "#{DT.consumer_group}-parallel-1"
-segment2_1 = "#{DT.consumer_group}_2-parallel-0"
-segment2_2 = "#{DT.consumer_group}_2-parallel-1"
+segment1_1 = "#{DT.group}-parallel-0"
+segment1_2 = "#{DT.group}-parallel-1"
+segment2_1 = "#{DT.group}_2-parallel-0"
+segment2_2 = "#{DT.group}_2-parallel-1"
 
 draw_routes do
-  consumer_group DT.consumer_group do
+  consumer_group DT.group do
     parallel_segments(
       count: 2,
       partitioner: ->(msg) { msg.key }
@@ -49,7 +49,7 @@ draw_routes do
     end
   end
 
-  consumer_group "#{DT.consumer_group}_2" do
+  consumer_group "#{DT.group}_2" do
     parallel_segments(
       count: 2,
       partitioner: ->(msg) { msg.key }
@@ -66,11 +66,11 @@ produce_many("#{DT.topic}_2", DT.uuids(10))
 
 # Set offsets in origin consumer groups
 Karafka::Admin.seek_consumer_group(
-  DT.consumer_group,
+  DT.group,
   { DT.topic => { 0 => 3, 1 => 5 } }
 )
 Karafka::Admin.seek_consumer_group(
-  "#{DT.consumer_group}_2",
+  "#{DT.group}_2",
   { "#{DT.topic}_2" => { 0 => 6, 1 => 8 } }
 )
 
@@ -78,7 +78,7 @@ Karafka::Admin.seek_consumer_group(
 ARGV[0] = "parallel_segments"
 ARGV[1] = "distribute"
 ARGV[2] = "--groups"
-ARGV[3] = DT.consumer_group
+ARGV[3] = DT.group
 
 results = capture_stdout do
   Karafka::Cli.start
@@ -86,8 +86,8 @@ end
 
 assert results.include?("Distribution completed")
 assert results.include?("successfully")
-assert results.include?(DT.consumer_group)
-assert !results.include?("#{DT.consumer_group}_2")
+assert results.include?(DT.group)
+assert !results.include?("#{DT.group}_2")
 
 # Verify only the first consumer group was distributed
 offsets1_1 = Karafka::Admin.read_lags_with_offsets({ segment1_1 => [DT.topic] })
