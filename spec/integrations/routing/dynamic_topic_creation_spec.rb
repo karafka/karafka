@@ -25,7 +25,7 @@ topics_to_create = [
 ]
 
 # Build routes dynamically
-Karafka::App.routes.clear
+clear_app_draws
 
 draw_routes do
   subscription_group "dynamic_group" do
@@ -82,7 +82,7 @@ end
 
 # Test routing configuration modification at runtime
 # Clear and rebuild with different configuration
-Karafka::App.routes.clear
+clear_app_draws
 
 additional_topics = [
   "#{DT.topic}_runtime_1",
@@ -116,7 +116,7 @@ additional_topics.each do |expected_topic|
 end
 
 # Test conditional topic creation based on configuration
-Karafka::App.routes.clear
+clear_app_draws
 
 conditional_topics = []
 feature_flags = {

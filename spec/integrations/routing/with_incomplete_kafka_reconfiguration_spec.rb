@@ -20,7 +20,7 @@ end
 
 assert failed
 
-Karafka::App.routes.clear
+clear_app_draws
 
 draw_routes(create_topics: false) do
   topic "name2" do

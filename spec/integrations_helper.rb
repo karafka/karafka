@@ -229,7 +229,7 @@ def setup_testing(framework)
       end
 
       config.after do
-        Karafka::App.routes.clear
+        clear_app_draws
         Karafka.monitor.notifications_bus.clear
         Karafka::App.config.internal.routing.activity_manager.clear
         Karafka::Processing::ConsumerGroups::InlineInsights::Tracker.clear
@@ -285,6 +285,12 @@ def setup_rdkafka_consumer(options = {})
   Rdkafka::Config.new(
     Karafka::Setup::AttributesMap.consumer(config)
   ).consumer
+end
+
+# Clears all routing and declaratives state
+def clear_app_draws
+  Karafka::App.routes.clear
+  Karafka::App.declaratives.repository.clear
 end
 
 # Sets up default routes (mostly used in integration specs) or allows to configure custom routes
