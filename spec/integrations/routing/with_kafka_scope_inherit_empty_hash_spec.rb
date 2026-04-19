@@ -27,7 +27,7 @@ end
 
 assert failed
 
-Karafka::App.routes.clear
+clear_app_draws
 
 # Now test the working cases with inherit
 draw_routes(create_topics: false) do

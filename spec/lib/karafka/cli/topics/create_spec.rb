@@ -17,7 +17,7 @@ RSpec.describe_current do
 
       declaratives_routing_topics.each_with_index do |topic, index|
         declaratives = instance_double(
-          Karafka::Routing::Features::Declaratives::Config,
+          Karafka::Declaratives::Topic,
           partitions: 1,
           replication_factor: 1,
           details: {}

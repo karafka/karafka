@@ -176,6 +176,13 @@ en:
           all topic names within a single consumer group must be unique considering namespacing styles
           disable this validation by setting config.strict_topics_namespacing to false
 
+    declaratives:
+      topic:
+        declaratives.partitions_format: needs to be more or equal to 1
+        declaratives.active_format: needs to be either true or false
+        declaratives.replication_factor_format: needs to be more or equal to 1
+        declaratives.details_format: needs to be a hash with only symbol keys
+
     job_options:
       missing: needs to be present
       dispatch_method_format: needs to be either :produce_async or :produce_sync

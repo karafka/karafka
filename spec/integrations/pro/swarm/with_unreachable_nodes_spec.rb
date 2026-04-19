@@ -49,7 +49,7 @@ rescue Karafka::Errors::InvalidConfigurationError
   guarded << true
 end
 
-Karafka::App.routes.clear
+clear_app_draws
 
 begin
   draw_routes(create_topics: false) do
@@ -64,7 +64,7 @@ rescue Karafka::Errors::InvalidConfigurationError
   guarded << true
 end
 
-Karafka::App.routes.clear
+clear_app_draws
 
 begin
   draw_routes(create_topics: false) do

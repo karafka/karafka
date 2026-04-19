@@ -45,7 +45,7 @@ start_karafka_and_wait_until(reset_status: true) do
 end
 
 # Clear all the routes so later we can subscribe to only one topic
-Karafka::App.routes.clear
+clear_app_draws
 
 draw_routes do
   consumer_group DT.group do
