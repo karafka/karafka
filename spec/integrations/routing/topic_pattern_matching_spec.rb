@@ -28,7 +28,7 @@ test_topics = [
 ]
 
 # Set up routing for different topic patterns
-Karafka::App.routes.clear
+clear_app_draws
 
 draw_routes do
   subscription_group "pattern_group" do

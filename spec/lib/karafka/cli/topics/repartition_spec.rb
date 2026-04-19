@@ -3,7 +3,7 @@
 RSpec.describe Karafka::Cli::Topics::Repartition do
   subject(:repartition_topics) { described_class.new }
 
-  let(:config_class) { Karafka::Routing::Features::Declaratives::Config }
+  let(:config_class) { Karafka::Declaratives::Topic }
 
   describe "#call" do
     let(:existing_topics) do

@@ -240,6 +240,12 @@ module Karafka
           setting :activity_manager, default: Routing::ActivityManager.new
         end
 
+        # Namespace for declarative topics management (infrastructure-as-code)
+        setting :declaratives do
+          # option builder [Karafka::Declaratives::Builder] builder instance
+          setting :builder, default: Declaratives::Builder.new
+        end
+
         # Namespace for internal connection related settings
         setting :connection do
           # Manages starting up and stopping Kafka connections
