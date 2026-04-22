@@ -11,12 +11,10 @@ module Karafka
       class Future
         # @param result_port [Ractor::Port] port for receiving results from Ractor workers
         # @param batch_count [Integer] number of batches dispatched to workers
-        # @param chunk_size [Integer] size of each chunk for offset calculation
         # @param total [Integer] total number of messages dispatched
-        def initialize(result_port, batch_count, chunk_size, total)
+        def initialize(result_port, batch_count, total)
           @result_port = result_port
           @batch_count = batch_count
-          @chunk_size = chunk_size
           @total = total
           @retrieved = false
         end
@@ -33,7 +31,7 @@ module Karafka
           # Collect all batch results from Ractor workers
           @batch_count.times do
             msg = @result_port.receive
-            offset = msg[:batch_index] * @chunk_size
+            offset = msg[:offset]
             msg[:results].each_with_index { |r, j| @results[offset + j] = r }
           end
 

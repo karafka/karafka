@@ -86,18 +86,22 @@ module Karafka
           payloads = messages.map(&:raw_payload)
           batches = distributor.call(payloads, @size, min_payloads: @min_payloads)
           result_port = Ractor::Port.new
-          chunk_size = (payloads.size + batches.size - 1) / batches.size
+
+          offset = 0
 
           batches.each_with_index do |batch, idx|
             @work_queue << {
               batch_index: idx,
+              offset: offset,
               data: batch,
               result_port: result_port,
               deserializer: deserializer
             }
+
+            offset += batch.size
           end
 
-          Future.new(result_port, batches.size, chunk_size, payloads.size)
+          Future.new(result_port, batches.size, payloads.size)
         end
 
         private
@@ -170,7 +174,7 @@ module Karafka
 
               # Send results to caller's port
               msg[:result_port].send({
-                batch_index: msg[:batch_index],
+                offset: msg[:offset],
                 results: results.freeze
               }.freeze)
             end

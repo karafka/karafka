@@ -7,20 +7,19 @@ RSpec.describe_current do
     end
   end
 
-  # 2 batches, chunk_size 2, total 3 messages
-  subject(:future) { described_class.new(result_port, batch_count, chunk_size, total) }
+  # 2 batches, total 3 messages
+  subject(:future) { described_class.new(result_port, batch_count, total) }
 
   let(:result_port) { instance_double(Ractor::Port) }
   let(:batch_count) { 2 }
-  let(:chunk_size) { 2 }
   let(:total) { 3 }
 
   describe "#retrieve" do
     context "when results are available" do
       before do
         allow(result_port).to receive(:receive).and_return(
-          { batch_index: 0, results: %w[result1 result2] },
-          { batch_index: 1, results: ["result3"] }
+          { offset: 0, results: %w[result1 result2] },
+          { offset: 2, results: ["result3"] }
         )
       end
 
@@ -42,8 +41,8 @@ RSpec.describe_current do
     context "when called multiple times" do
       before do
         allow(result_port).to receive(:receive).and_return(
-          { batch_index: 0, results: %w[result1 result2] },
-          { batch_index: 1, results: ["result3"] }
+          { offset: 0, results: %w[result1 result2] },
+          { offset: 2, results: ["result3"] }
         )
       end
 
@@ -68,8 +67,8 @@ RSpec.describe_current do
 
       before do
         allow(result_port).to receive(:receive).and_return(
-          { batch_index: 0, results: [error_marker, "result2"] },
-          { batch_index: 1, results: ["result3"] }
+          { offset: 0, results: [error_marker, "result2"] },
+          { offset: 2, results: ["result3"] }
         )
       end
 
@@ -86,12 +85,12 @@ RSpec.describe_current do
       before do
         # Results arrive in reverse order
         allow(result_port).to receive(:receive).and_return(
-          { batch_index: 1, results: ["result3"] },
-          { batch_index: 0, results: %w[result1 result2] }
+          { offset: 2, results: ["result3"] },
+          { offset: 0, results: %w[result1 result2] }
         )
       end
 
-      it "correctly orders results by batch_index" do
+      it "correctly orders results by offset" do
         results = future.retrieve
 
         expect(results[0]).to eq("result1")
