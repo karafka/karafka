@@ -92,6 +92,21 @@ module Karafka
       # @see https://github.com/edenhill/librdkafka/blob/master/CONFIGURATION.md
       setting :kafka, default: {}
 
+      # Deserializing settings namespace
+      setting :deserializing do
+        # Parallel deserializing settings for Ractor-based batch deserialization
+        setting :parallel do
+          # option [Boolean] whether parallel deserializing is enabled globally
+          setting :active, default: false
+          # option [Integer] number of Ractor workers for parallel deserialization
+          setting :concurrency, default: 4
+          # option [Integer] minimum number of messages in a partition batch to dispatch to
+          # Ractors. Below this threshold, messages are deserialized inline because Ractor
+          # coordination overhead would exceed the parallelism benefit.
+          setting :min_payloads, default: 50
+        end
+      end
+
       # Public configuration for swarm operations
       setting :swarm do
         # option [Integer] how many processes do we want to run in a swarm mode
@@ -335,6 +350,11 @@ module Karafka
             # option [Class] executor class
             setting :executor_class, default: Processing::ConsumerGroups::Executor
           end
+        end
+
+        setting :deserializing do
+          # option distributor [Object] distributor for splitting payloads across Ractor workers
+          setting :distributor, default: Deserializing::Parallel::Distributor.new
         end
 
         # Things related to operating on messages

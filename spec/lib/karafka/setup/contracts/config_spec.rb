@@ -30,6 +30,13 @@ RSpec.describe_current do
       oauth: {
         token_provider_listener: false
       },
+      deserializing: {
+        parallel: {
+          active: false,
+          concurrency: 4,
+          min_payloads: 50
+        }
+      },
       admin: {
         kafka: {},
         group_id: "karafka_admin",
@@ -923,5 +930,51 @@ RSpec.describe_current do
     before { config[:oauth][:token_provider_listener] = listener.new }
 
     it { expect(contract.call(config)).to be_success }
+  end
+
+  context "when validating deserializing.parallel settings" do
+    let(:parallel_config) { config[:deserializing][:parallel] }
+
+    context "when active is not a boolean" do
+      before { parallel_config[:active] = "invalid" }
+
+      it { expect(contract.call(config)).not_to be_success }
+    end
+
+    context "when concurrency is not an integer" do
+      before { parallel_config[:concurrency] = "invalid" }
+
+      it { expect(contract.call(config)).not_to be_success }
+    end
+
+    context "when concurrency is zero" do
+      before { parallel_config[:concurrency] = 0 }
+
+      it { expect(contract.call(config)).not_to be_success }
+    end
+
+    context "when concurrency is negative" do
+      before { parallel_config[:concurrency] = -1 }
+
+      it { expect(contract.call(config)).not_to be_success }
+    end
+
+    context "when min_payloads is not an integer" do
+      before { parallel_config[:min_payloads] = "invalid" }
+
+      it { expect(contract.call(config)).not_to be_success }
+    end
+
+    context "when min_payloads is zero" do
+      before { parallel_config[:min_payloads] = 0 }
+
+      it { expect(contract.call(config)).not_to be_success }
+    end
+
+    context "when min_payloads is negative" do
+      before { parallel_config[:min_payloads] = -1 }
+
+      it { expect(contract.call(config)).not_to be_success }
+    end
   end
 end
