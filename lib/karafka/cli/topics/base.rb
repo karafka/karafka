@@ -29,28 +29,20 @@ module Karafka
           raise Errors::CommandValidationError, cause: e
         end
 
-        # @return [Array<Karafka::Routing::Topic>] all available topics that can be managed
-        # @note If topic is defined in multiple consumer groups, first config will be used. This
-        #   means, that this CLI will not work for simultaneous management of multiple clusters
-        #   from a single CLI command execution flow.
+        # @return [Array<Karafka::Declaratives::Topic>] all available topics that can be managed
+        # @note Topics with bootstrap servers that differ from the default kafka config are
+        #   considered to belong to a different cluster and are excluded.
         def declaratives_routing_topics
-          return @declaratives_routing_topics if @declaratives_routing_topics
+          @declaratives_routing_topics ||= begin
+            default_servers = kafka_config[:"bootstrap.servers"]
 
-          collected_topics = {}
-          default_servers = kafka_config[:"bootstrap.servers"]
-
-          App.routes.each do |group|
-            group.topics.each do |topic|
-              # Skip topics that were explicitly disabled from management
-              next unless topic.declaratives.active?
-              # If bootstrap servers are different, consider this a different cluster
-              next unless default_servers == topic.kafka[:"bootstrap.servers"]
-
-              collected_topics[topic.name] ||= topic
+            App.declaratives.topics.reject do |topic|
+              # Topics with explicit bootstrap servers that differ from the default are on a
+              # different cluster. Topics without bootstrap_servers set (e.g. from the standalone
+              # DSL) are assumed to belong to the default cluster.
+              topic.bootstrap_servers && topic.bootstrap_servers != default_servers
             end
           end
-
-          @declaratives_routing_topics = collected_topics.values
         end
 
         # @return [Array<Hash>] existing topics details
