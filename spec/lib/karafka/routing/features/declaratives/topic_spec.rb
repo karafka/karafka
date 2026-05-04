@@ -98,6 +98,48 @@ RSpec.describe_current do
     end
   end
 
+  describe "bootstrap_servers propagation" do
+    context "when routing topic has bootstrap.servers in kafka config" do
+      subject(:topic) do
+        build(:routing_topic, kafka: { "bootstrap.servers": "kafka1:9092" }).tap do |topic|
+          topic.singleton_class.prepend described_class
+        end
+      end
+
+      before { topic.config(partitions: 3) }
+
+      it "sets bootstrap_servers on the declaration" do
+        expect(topic.declaratives.bootstrap_servers).to eq("kafka1:9092")
+      end
+    end
+
+    context "when routing topic has no bootstrap.servers" do
+      before { topic.config(partitions: 3) }
+
+      it "leaves bootstrap_servers as nil" do
+        expect(topic.declaratives.bootstrap_servers).to be_nil
+      end
+    end
+
+    context "when declaration already has bootstrap_servers set" do
+      subject(:topic) do
+        build(:routing_topic, kafka: { "bootstrap.servers": "kafka2:9092" }).tap do |topic|
+          topic.singleton_class.prepend described_class
+        end
+      end
+
+      before do
+        declaration = Karafka::App.declaratives.repository.find_or_create(topic.name)
+        declaration.bootstrap_servers = "kafka1:9092"
+        topic.config(partitions: 3)
+      end
+
+      it "does not overwrite existing bootstrap_servers" do
+        expect(topic.declaratives.bootstrap_servers).to eq("kafka1:9092")
+      end
+    end
+  end
+
   describe "||= semantics (first call wins)" do
     before { topic.config(partitions: 5) }
 

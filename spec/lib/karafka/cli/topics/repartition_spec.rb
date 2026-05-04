@@ -12,23 +12,16 @@ RSpec.describe Karafka::Cli::Topics::Repartition do
     end
 
     let(:declaratives_routing_topics) do
-      [
-        instance_double(
-          Karafka::Declaratives::Topic,
-          name: "topic_1",
-          declaratives: instance_double(Karafka::Declaratives::Topic, partitions: 3)
-        ),
-        instance_double(
-          Karafka::Declaratives::Topic,
-          name: "topic_2",
-          declaratives: instance_double(Karafka::Declaratives::Topic, partitions: 2)
-        ),
-        instance_double(
-          Karafka::Declaratives::Topic,
-          name: "topic_3",
-          declaratives: instance_double(Karafka::Declaratives::Topic, partitions: 1)
-        )
-      ]
+      topic1 = Karafka::Declaratives::Topic.new(:topic_1)
+      topic1.partitions(3)
+
+      topic2 = Karafka::Declaratives::Topic.new(:topic_2)
+      topic2.partitions(2)
+
+      topic3 = Karafka::Declaratives::Topic.new(:topic_3)
+      topic3.partitions(1)
+
+      [topic1, topic2, topic3]
     end
 
     before do
@@ -56,13 +49,10 @@ RSpec.describe Karafka::Cli::Topics::Repartition do
 
     context "when no topics need repartitioning" do
       let(:declaratives_routing_topics) do
-        [
-          instance_double(
-            Karafka::Declaratives::Topic,
-            name: "topic_2",
-            declaratives: instance_double(Karafka::Declaratives::Topic, partitions: 2)
-          )
-        ]
+        topic2 = Karafka::Declaratives::Topic.new(:topic_2)
+        topic2.partitions(2)
+
+        [topic2]
       end
 
       it "does not repartition any topic and returns false" do
