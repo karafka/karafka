@@ -23,8 +23,7 @@ RSpec.describe_current do
       metadata: Karafka::Messages::BatchMetadata.new(
         topic: topic.name,
         partition: 0,
-        processed_at: Time.now,
-        deserialization: Karafka::Deserializing::Parallel::Immediate.instance
+        processed_at: Time.now
       )
     )
   end

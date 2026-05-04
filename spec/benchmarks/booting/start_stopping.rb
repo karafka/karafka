@@ -36,10 +36,10 @@ end
 Tracker.run do
   start = Time.monotonic
 
-  reset_karafka_state!
+  Karafka::App.config.internal.status.reset!
   Karafka::Server.run
 
   Time.monotonic - start
 end
 
-# Time taken: 4.422757552936673
+# Time taken: 0.11975190569792175
