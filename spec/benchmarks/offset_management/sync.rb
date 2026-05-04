@@ -7,7 +7,7 @@
 
 setup_karafka { |config| config.concurrency = 1 }
 
-MAX_MESSAGES = 10_000
+MAX_MESSAGES = 100_000
 
 $times = []
 
@@ -25,6 +25,7 @@ class Consumer < Karafka::BaseConsumer
     end
 
     return if @count < MAX_MESSAGES
+    return if $stop
 
     Thread.new { Karafka::Server.stop }
   end
@@ -33,11 +34,11 @@ end
 draw_routes("benchmarks_00_01")
 
 Tracker.run(messages_count: MAX_MESSAGES) do
-  reset_karafka_state!
+  Karafka::App.config.internal.status.reset!
   Karafka::Server.run
 
   $times.sum
 end
 
-# Time taken: 5.723441941
-# Messages per second: 174.7200391492536
+# Time taken: 16.43162835
+# Messages per second: 6085.824111278661
