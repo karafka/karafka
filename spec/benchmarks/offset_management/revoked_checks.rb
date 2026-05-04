@@ -29,11 +29,11 @@ end
 draw_routes("benchmarks_00_01")
 
 Tracker.run(messages_count: MAX_MESSAGES) do
-  reset_karafka_state!
+  Karafka::App.config.internal.status.reset!
   Karafka::Server.run
 
   $times.sum
 end
 
-# Time taken: 0.097942081
-# Messages per second: 1021011.5915343886
+# Time taken: 0.094014255
+# Messages per second: 1063668.4830401517
