@@ -9,6 +9,11 @@ module Karafka
       attr_reader :name, :details
       attr_writer :active, :partitions, :replication_factor, :details
 
+      # Bootstrap servers for the Kafka cluster this topic belongs to.
+      # Set by the routing bridge from the routing topic's kafka config.
+      # Topics declared via the standalone DSL leave this nil (treated as default cluster).
+      attr_accessor :bootstrap_servers
+
       # @param name [String, Symbol] topic name
       def initialize(name)
         @name = name.to_s
@@ -16,6 +21,16 @@ module Karafka
         @partitions = 1
         @replication_factor = 1
         @details = {}
+        @bootstrap_servers = nil
+      end
+
+      # Self-accessor for backwards compatibility.
+      # CLI commands that previously accessed topic.declaratives.partitions on routing topics
+      # can now call the same on Declaratives::Topic instances directly.
+      #
+      # @return [Karafka::Declaratives::Topic] self
+      def declaratives
+        self
       end
 
       # Gets or sets the active flag.

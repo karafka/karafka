@@ -3,8 +3,6 @@
 RSpec.describe Karafka::Cli::Topics::Repartition do
   subject(:repartition_topics) { described_class.new }
 
-  let(:config_class) { Karafka::Declaratives::Topic }
-
   describe "#call" do
     let(:existing_topics) do
       [
@@ -16,19 +14,19 @@ RSpec.describe Karafka::Cli::Topics::Repartition do
     let(:declaratives_routing_topics) do
       [
         instance_double(
-          Karafka::Routing::Topic,
+          Karafka::Declaratives::Topic,
           name: "topic_1",
-          config: instance_double(config_class, partitions: 3)
+          declaratives: instance_double(Karafka::Declaratives::Topic, partitions: 3)
         ),
         instance_double(
-          Karafka::Routing::Topic,
+          Karafka::Declaratives::Topic,
           name: "topic_2",
-          config: instance_double(config_class, partitions: 2)
+          declaratives: instance_double(Karafka::Declaratives::Topic, partitions: 2)
         ),
         instance_double(
-          Karafka::Routing::Topic,
+          Karafka::Declaratives::Topic,
           name: "topic_3",
-          config: instance_double(config_class, partitions: 1)
+          declaratives: instance_double(Karafka::Declaratives::Topic, partitions: 1)
         )
       ]
     end
@@ -60,9 +58,9 @@ RSpec.describe Karafka::Cli::Topics::Repartition do
       let(:declaratives_routing_topics) do
         [
           instance_double(
-            Karafka::Routing::Topic,
+            Karafka::Declaratives::Topic,
             name: "topic_2",
-            config: instance_double(config_class, partitions: 2)
+            declaratives: instance_double(Karafka::Declaratives::Topic, partitions: 2)
           )
         ]
       end
