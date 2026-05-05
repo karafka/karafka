@@ -94,6 +94,24 @@ RSpec.describe Karafka::Declaratives::Topic do
     end
   end
 
+  describe "#declaratives" do
+    it "returns self for backwards compatibility" do
+      expect(topic.declaratives).to be(topic)
+    end
+  end
+
+  describe "#bootstrap_servers" do
+    it "defaults to nil" do
+      expect(topic.bootstrap_servers).to be_nil
+    end
+
+    context "when set" do
+      before { topic.bootstrap_servers = "kafka1:9092" }
+
+      it { expect(topic.bootstrap_servers).to eq("kafka1:9092") }
+    end
+  end
+
   describe "#to_h" do
     before do
       topic.partitions(10)

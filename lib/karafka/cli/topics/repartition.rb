@@ -17,7 +17,7 @@ module Karafka
           declaratives_routing_topics.each do |topic|
             name = topic.name
 
-            desired_count = topic.config.partitions
+            desired_count = topic.declaratives.partitions
             existing_count = existing_partitions.fetch(name, false)
 
             if existing_count && existing_count < desired_count
