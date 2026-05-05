@@ -125,6 +125,7 @@ draw_routes do
   topic DT.topic do
     consumer Consumer
     manual_offset_management true
+    filter ->(*) { VpStabilizer.new(10) }
     filter ->(*) { CursorRaceFilter.new }
   end
 end
