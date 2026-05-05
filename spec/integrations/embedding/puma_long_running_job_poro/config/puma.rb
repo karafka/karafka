@@ -41,7 +41,7 @@ class LongRunningConsumer < Karafka::BaseConsumer
       # Karafka::App.stopping? — this is the problematic pattern.
       # In reality this would be downloading + parsing a parquet file with 400k entries,
       # deduplicating via Redis, and producing to another topic in batches.
-      50.times do |i|
+      50.times do
         # Each "batch" takes some time — total exceeds Puma's worker_shutdown_timeout
         sleep 1
         # Simulate producing a batch of events to Kafka
@@ -67,14 +67,14 @@ Karafka::App.routes.draw do
   end
 end
 
-before_worker_boot do
+on_worker_boot do
   # Produce a message that will trigger the long-running consumer
   Karafka.producer.produce_sync(topic: TOPIC, payload: "big-log-drop-s3-event")
 
   Karafka::Embedded.start
 end
 
-before_worker_shutdown do
+on_worker_shutdown do
   # This hook calls Embedded.stop which is BLOCKING — it waits until Karafka::App.terminated?
   # Because the consumer is stuck in a long sleep loop, Karafka can't terminate quickly.
   # Puma master's worker_shutdown_timeout fires and sends SIGKILL to this worker process.
@@ -85,7 +85,7 @@ before_worker_shutdown do
 end
 
 # Trigger Puma shutdown after the consumer has started processing
-after_booted do
+on_booted do
   Thread.new do
     # Wait until the consumer actually starts processing (writes result file)
     sleep 0.5 until File.exist?(RESULT_FILE)

@@ -40,9 +40,9 @@ class EarlyStopConsumer < Karafka::BaseConsumer
     # Between each chunk, we check if Karafka is shutting down.
     batches_processed = 0
 
-    50.times do |i|
+    50.times do
       # Check if Karafka is shutting down — this is the key fix!
-      # When Puma triggers shutdown → before_worker_shutdown → Karafka::Embedded.stop →
+      # When Puma triggers shutdown → on_worker_shutdown → Karafka::Embedded.stop →
       # Karafka::App.stopping? becomes true
       if Karafka::App.stopping?
         File.write(RESULT_FILE, "early_exit:#{batches_processed}")
@@ -78,13 +78,13 @@ Karafka::App.routes.draw do
   end
 end
 
-before_worker_boot do
+on_worker_boot do
   Karafka.producer.produce_sync(topic: TOPIC, payload: "big-log-drop-s3-event")
 
   Karafka::Embedded.start
 end
 
-before_worker_shutdown do
+on_worker_shutdown do
   # Now Embedded.stop will resolve quickly because the consumer checks stopping? and returns
   # early, allowing Karafka to complete its shutdown within Puma's worker_shutdown_timeout.
   File.write(SHUTDOWN_FILE, "shutdown_hook_started:#{Time.now.to_f}")
@@ -93,7 +93,7 @@ before_worker_shutdown do
 end
 
 # Trigger Puma shutdown after the consumer has started processing
-after_booted do
+on_booted do
   Thread.new do
     # Wait until the consumer actually starts processing (writes result file)
     sleep 0.5 until File.exist?(RESULT_FILE)
