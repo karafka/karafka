@@ -3,7 +3,10 @@
 # Karafka should be able to consume and web tracking should not interfere even when web ui
 # topics are not created
 
-setup_karafka(allow_errors: true)
+setup_karafka(allow_errors: true) do |config|
+  config.kafka[:"allow.auto.create.topics"] = false
+end
+
 setup_web(migrate: false)
 
 class Consumer < Karafka::BaseConsumer
