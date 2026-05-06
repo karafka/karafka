@@ -94,7 +94,7 @@ RSpec.describe_current do
           jobs_queue_class: Karafka::Processing::JobsQueue,
           worker_job_call_wrapper: false,
           consumer_groups: {
-            jobs_builder: Karafka::Processing::JobsBuilder.new,
+            jobs_builder: Karafka::Processing::ConsumerGroups::JobsBuilder.new,
             coordinator_class: Karafka::Processing::ConsumerGroups::Coordinator,
             errors_tracker_class: nil,
             partitioner_class: Karafka::Processing::ConsumerGroups::Partitioner,
