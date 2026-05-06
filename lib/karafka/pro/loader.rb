@@ -128,7 +128,7 @@ module Karafka
           icfg.processing.consumer_groups.errors_tracker_class = Processing::ConsumerGroups::Coordinators::ErrorsTracker
           icfg.processing.consumer_groups.partitioner_class = Processing::ConsumerGroups::Partitioner
           icfg.processing.consumer_groups.executor_class = Processing::ConsumerGroups::Executor
-          icfg.processing.consumer_groups.jobs_builder = Processing::JobsBuilder.new
+          icfg.processing.consumer_groups.jobs_builder = Processing::ConsumerGroups::JobsBuilder.new
           icfg.processing.consumer_groups.strategy_selector = Processing::ConsumerGroups::StrategySelector.new
           icfg.processing.consumer_groups.expansions_selector = Processing::ConsumerGroups::ExpansionsSelector.new
 

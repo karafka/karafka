@@ -49,7 +49,7 @@ assert const_visible?("Karafka::Pro::Processing::ConsumerGroups::StrategySelecto
 assert const_visible?("Karafka::Pro::Processing::ConsumerGroups::Coordinator")
 assert const_visible?("Karafka::Pro::Processing::ConsumerGroups::Partitioner")
 assert const_visible?("Karafka::BaseConsumer")
-assert const_visible?("Karafka::Pro::Processing::JobsBuilder")
+assert const_visible?("Karafka::Pro::Processing::ConsumerGroups::JobsBuilder")
 assert const_visible?("Karafka::Pro::Processing::Schedulers::Default")
 assert const_visible?("Karafka::Pro::Routing::Features::ConsumerGroups::LongRunningJob::Topic")
 assert const_visible?("Karafka::Pro::Routing::Features::ConsumerGroups::LongRunningJob::Contracts")
@@ -67,7 +67,7 @@ assert_equal pro::Processing::ConsumerGroups::Partitioner, config.processing.con
 assert_equal pro::Processing::ConsumerGroups::Coordinator, config.processing.consumer_groups.coordinator_class
 assert_equal pro::Processing::Schedulers::Default, config.processing.scheduler_class
 assert_equal pro::Processing::JobsQueue, config.processing.jobs_queue_class
-assert_equal pro::Processing::JobsBuilder, config.processing.consumer_groups.jobs_builder.class
+assert_equal pro::Processing::ConsumerGroups::JobsBuilder, config.processing.consumer_groups.jobs_builder.class
 assert_equal pro::ActiveJob::Dispatcher, config.active_job.dispatcher.class
 assert_equal pro::ActiveJob::Consumer, config.active_job.consumer_class
 assert_equal pro::ActiveJob::JobOptionsContract, config.active_job.job_options_contract.class
