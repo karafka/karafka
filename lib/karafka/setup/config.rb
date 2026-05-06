@@ -334,7 +334,7 @@ module Karafka
           # `share_groups` namespace will hold their equivalents.
           setting :consumer_groups do
             # option jobs_builder [Object] jobs builder we want to use
-            setting :jobs_builder, default: Processing::JobsBuilder.new
+            setting :jobs_builder, default: Processing::ConsumerGroups::JobsBuilder.new
             # option coordinator [Class] work coordinator we want to use for processing
             #   coordination
             setting :coordinator_class, default: Processing::ConsumerGroups::Coordinator
