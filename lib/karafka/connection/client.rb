@@ -736,7 +736,7 @@ module Karafka
         # Register statistics runner for this particular type of callbacks
         Karafka::Core::Instrumentation.statistics_callbacks.add(
           @subscription_group.id,
-          Instrumentation::Callbacks::Statistics.new(
+          Instrumentation::Callbacks::ConsumerGroups::Statistics.new(
             @subscription_group.id,
             @subscription_group.group.id,
             @name
@@ -746,7 +746,7 @@ module Karafka
         # Register error tracking callback
         Karafka::Core::Instrumentation.error_callbacks.add(
           @subscription_group.id,
-          Instrumentation::Callbacks::Error.new(
+          Instrumentation::Callbacks::ConsumerGroups::Error.new(
             @subscription_group.id,
             @subscription_group.group.id,
             @name
