@@ -104,6 +104,7 @@ class KarafkaApp < Karafka::App
   # declaratives.draw do
   #   topic :example do
   #     partitions 2
+  #     replication_factor 1
   #     config 'cleanup.policy': 'compact'
   #   end
   # end
