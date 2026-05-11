@@ -20,6 +20,7 @@ allowed_patterns=(
    "The replica state of replica ID"
    "Auto topic creation failed for it-e8a1b9-"
    "Auto topic creation failed for it-2c2272-"
+   "Auto topic creation failed for it-4b9ec4-"
 )
 
 # Use provided container names or default to "kafka"
