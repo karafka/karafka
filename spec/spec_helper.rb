@@ -13,6 +13,7 @@ Warning.process do |warning|
   next if warning.include?("vendor/")
   next if warning.include?("rspec_locator.rb")
   next if warning.include?("fixture_file")
+  next if warning.include?("Ractor") && warning.include?("experimental")
 
   raise "Warning in your code: #{warning}"
 end
@@ -58,6 +59,13 @@ SimpleCov.start do
   # CLI commands are also checked via integrations
   add_filter "/cli/topics.rb"
   add_filter "/vendors/"
+
+  # Ractor-based parallel deserialization requires Ruby 4.0+ APIs
+  # These files are fully covered on the Ruby 4.0 CI run and integration tests
+  if RUBY_VERSION < "4.0"
+    add_filter "/lib/karafka/deserializing/parallel/pool.rb"
+    add_filter "/lib/karafka/deserializing/parallel/future.rb"
+  end
 
   # enable_coverage :branch
   command_name [SPECS_TYPE, ARGV].flatten.join("-")
