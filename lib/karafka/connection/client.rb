@@ -137,6 +137,15 @@ module Karafka
             nil
           else
             @buffer << response
+            # After the first message lands, drain any additional messages that are already
+            # buffered in librdkafka without an extra blocking wait. This reduces FFI boundary
+            # crossings and Ruby loop iterations for backlogged partitions.
+            # We only drain when we got a real message (not EOF/nil) so that:
+            #   - EOF events are always handled one-at-a-time via the kafka.poll path above,
+            #     avoiding concurrent-EOF loss and the rd_kafka_consume_batch_queue offset bug.
+            #   - The drain never races against the events_poll queue (separate queue).
+            remaining = @subscription_group.max_messages - @buffer.size
+            drain_nb(remaining).each { |msg| @buffer << msg } if remaining > 0
           end
 
           # Upon polling rebalance manager might have been updated.
@@ -603,6 +612,23 @@ module Karafka
         tpl = Rdkafka::Consumer::TopicPartitionList.new(topic => [rd_partition])
 
         kafka.position(tpl).to_h.fetch(topic).first.offset || -1
+      end
+
+      # Drains all immediately available messages from the consumer queue without blocking.
+      #
+      # Called after a regular message is received from `#poll` to amortise FFI crossings
+      # across a batch_poll iteration. Because this is non-blocking (timeout 0) and executes
+      # only after a successful message, EOF events are extremely unlikely to appear here —
+      # they are delivered one-at-a-time by the blocking `kafka.poll` path which handles them
+      # safely. If any error does surface during the drain we stop early and let the next
+      # `#poll` call resolve it cleanly.
+      #
+      # @param max_items [Integer] maximum number of additional messages to fetch
+      # @return [Array<Rdkafka::Consumer::Message>] additional messages (may be empty)
+      def drain_nb(max_items)
+        kafka.poll_batch_nb(0, max_items: max_items)
+      rescue Rdkafka::RdkafkaError
+        []
       end
 
       # Performs a single poll operation and handles retries and errors
