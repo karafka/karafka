@@ -3,7 +3,7 @@ PATH
   specs:
     karafka (2.5.10.rc1)
       karafka-core (>= 2.5.13, < 2.6.0)
-      karafka-rdkafka (>= 0.27.1)
+      karafka-rdkafka (>= 0.27.2)
       waterdrop (>= 2.10.1, < 3.0.0)
       zeitwerk (~> 2.3)
 

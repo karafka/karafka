@@ -120,24 +120,25 @@ module Karafka
           # Don't fetch more messages if we've fetched max that we've wanted
           break if @buffer.size >= @subscription_group.max_messages
 
-          # Fetch message within our time boundaries
-          response = poll(time_poll.remaining)
+          remaining_capacity = @subscription_group.max_messages - @buffer.size
+          poll_tick = [time_poll.remaining, tick_interval].min
+          got_eof = false
+
+          # poll_batch returns Array<Message, RdkafkaError> — errors are inline, never raised.
+          # This lets us capture EOF events from multiple partitions in a single call without
+          # losing the later ones to the ensure-block cleanup that the old raise-on-first approach
+          # triggered. The tick_interval cap keeps events_poll running at its expected frequency.
+          kafka.poll_batch(poll_tick, max_items: remaining_capacity).each do |result|
+            if result.is_a?(Rdkafka::RdkafkaError)
+              got_eof = true if handle_batch_poll_error(result)
+            else
+              @buffer << result
+            end
+          end
 
           # We track when last polling happened so we can provide means to detect upcoming
           # `max.poll.interval.ms` limit
           @buffer.polled
-
-          case response
-          when :tick_time
-            nil
-          # We get a hash only in case of eof error
-          when Hash
-            @buffer.eof(response[:topic], response[:partition])
-          when nil
-            nil
-          else
-            @buffer << response
-          end
 
           # Upon polling rebalance manager might have been updated.
           # If partition revocation happens, we need to remove messages from revoked partitions
@@ -159,12 +160,11 @@ module Karafka
           # Track time spent on all of the processing and polling
           time_poll.checkpoint
 
-          # Finally once we've (potentially) removed revoked, etc, if no messages were returned
-          # and it was not an early poll exist, we can break. We also break if we got the eof
-          # signaling to propagate it asap
-          # Worth keeping in mind, that the rebalance manager might have been updated despite no
-          # messages being returned during a poll
-          break if response.nil? || response.is_a?(Hash)
+          # Propagate EOF as soon as it arrives so the consumer can act on it immediately.
+          # When there were no results at all, time_poll.exceeded? at the top of the next
+          # iteration handles the exit; no explicit nil-break is needed because poll_batch
+          # always blocks for the full poll_tick before returning empty.
+          break if got_eof
         end
 
         @buffer
@@ -603,6 +603,46 @@ module Karafka
         tpl = Rdkafka::Consumer::TopicPartitionList.new(topic => [rd_partition])
 
         kafka.position(tpl).to_h.fetch(topic).first.offset || -1
+      end
+
+      # Handles a single error event returned inline from kafka.poll_batch.
+      #
+      # @param error [Rdkafka::RdkafkaError]
+      # @return [Boolean] true when the error is a partition EOF (so caller can break early)
+      def handle_batch_poll_error(error)
+        if error.fatal?
+          Karafka.monitor.instrument(
+            "error.occurred",
+            caller: self,
+            error: error,
+            type: "connection.client.poll.error"
+          )
+          raise error
+        end
+
+        case error.code
+        when :partition_eof
+          @buffer.eof(error.details[:topic], error.details[:partition])
+          return true
+        when :unknown_topic_or_part
+          return false if @subscription_group.kafka[:"allow.auto.create.topics"]
+
+          Karafka.monitor.instrument(
+            "error.occurred",
+            caller: self,
+            error: error,
+            type: "connection.client.poll.error"
+          )
+          raise error
+        else
+          Karafka.monitor.instrument(
+            "error.occurred",
+            caller: self,
+            error: error,
+            type: "connection.client.poll.error"
+          )
+          raise error
+        end
       end
 
       # Performs a single poll operation and handles retries and errors
