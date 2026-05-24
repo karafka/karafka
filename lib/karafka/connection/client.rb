@@ -123,18 +123,55 @@ module Karafka
           remaining_capacity = @subscription_group.max_messages - @buffer.size
           poll_tick = [time_poll.remaining, tick_interval].min
           got_eof = false
+          first_error = nil
 
           # poll_batch returns Array<Message, RdkafkaError> - errors are inline, never raised.
-          # This lets us capture EOF events from multiple partitions in a single call without
-          # losing the later ones to the ensure-block cleanup that the old raise-on-first approach
-          # triggered. The tick_interval cap keeps events_poll running at its expected frequency.
+          # We always iterate the full batch before acting on errors so that messages appearing
+          # after an error (e.g. from other partitions following an EOF or an unknown-topic error)
+          # are not silently dropped by an early raise. Fatal errors are the exception - the
+          # consumer is dead at that point so there is no value in continuing.
           kafka.poll_batch(poll_tick, max_items: remaining_capacity).each do |result|
-            if result.is_a?(Rdkafka::RdkafkaError)
-              got_eof = true if handle_batch_poll_error(result)
-            else
+            unless result.is_a?(Rdkafka::RdkafkaError)
               @buffer << result
+              next
+            end
+
+            if result.fatal?
+              Karafka.monitor.instrument(
+                "error.occurred",
+                caller: self,
+                error: result,
+                type: "connection.client.poll.error"
+              )
+              raise result
+            end
+
+            case result.code
+            when :partition_eof
+              @buffer.eof(result.details[:topic], result.details[:partition])
+              got_eof = true
+            when :unknown_topic_or_part
+              next if @subscription_group.kafka[:"allow.auto.create.topics"]
+
+              first_error ||= result
+              Karafka.monitor.instrument(
+                "error.occurred",
+                caller: self,
+                error: result,
+                type: "connection.client.poll.error"
+              )
+            else
+              first_error ||= result
+              Karafka.monitor.instrument(
+                "error.occurred",
+                caller: self,
+                error: result,
+                type: "connection.client.poll.error"
+              )
             end
           end
+
+          raise first_error if first_error
 
           # We track when last polling happened so we can provide means to detect upcoming
           # `max.poll.interval.ms` limit
@@ -605,45 +642,6 @@ module Karafka
         kafka.position(tpl).to_h.fetch(topic).first.offset || -1
       end
 
-      # Handles a single error event returned inline from kafka.poll_batch.
-      #
-      # @param error [Rdkafka::RdkafkaError]
-      # @return [Boolean] true when the error is a partition EOF (so caller can break early)
-      def handle_batch_poll_error(error)
-        if error.fatal?
-          Karafka.monitor.instrument(
-            "error.occurred",
-            caller: self,
-            error: error,
-            type: "connection.client.poll.error"
-          )
-          raise error
-        end
-
-        case error.code
-        when :partition_eof
-          @buffer.eof(error.details[:topic], error.details[:partition])
-          return true
-        when :unknown_topic_or_part
-          return false if @subscription_group.kafka[:"allow.auto.create.topics"]
-
-          Karafka.monitor.instrument(
-            "error.occurred",
-            caller: self,
-            error: error,
-            type: "connection.client.poll.error"
-          )
-          raise error
-        else
-          Karafka.monitor.instrument(
-            "error.occurred",
-            caller: self,
-            error: error,
-            type: "connection.client.poll.error"
-          )
-          raise error
-        end
-      end
 
       # Performs a single poll operation and handles retries and errors
       #
