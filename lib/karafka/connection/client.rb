@@ -124,6 +124,12 @@ module Karafka
           poll_tick = [time_poll.remaining, tick_interval].min
           got_eof = false
           first_error = nil
+          # Set when max_poll_exceeded is returned inline. The consumer has already sent
+          # LeaveGroup; we instrument the error but must not raise - raising would trigger a
+          # full listener reset that discards coordinator state needed for proper
+          # post-revocation handling. Instead we break gracefully and let the normal
+          # rebalance path process the revocation on this or the next batch_poll cycle.
+          graceful_break = false
 
           # poll_batch returns Array<Message, RdkafkaError> - errors are inline, never raised.
           # We always iterate the full batch before acting on errors so that messages appearing
@@ -160,6 +166,17 @@ module Karafka
                 error: result,
                 type: "connection.client.poll.error"
               )
+            when :max_poll_exceeded
+              # The consumer has already sent LeaveGroup. Instrument early (matches old
+              # EARLY_REPORT_ERRORS behavior) but do not raise. The revocation callback
+              # fires shortly after; raising here would skip the normal revocation flow.
+              Karafka.monitor.instrument(
+                "error.occurred",
+                caller: self,
+                error: result,
+                type: "connection.client.poll.error"
+              )
+              graceful_break = true
             else
               first_error ||= result
               Karafka.monitor.instrument(
@@ -171,7 +188,7 @@ module Karafka
             end
           end
 
-          raise first_error if first_error
+          raise first_error if first_error && !graceful_break
 
           # We track when last polling happened so we can provide means to detect upcoming
           # `max.poll.interval.ms` limit
@@ -202,6 +219,10 @@ module Karafka
           # iteration handles the exit; no explicit nil-break is needed because poll_batch
           # always blocks for the full poll_tick before returning empty.
           break if got_eof
+
+          # Break after max_poll_exceeded so the listener can process the pending revocation
+          # on the next cycle (if the revoke callback has not fired yet during poll_batch).
+          break if graceful_break
         end
 
         @buffer
