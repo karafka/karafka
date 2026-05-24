@@ -150,7 +150,7 @@ module Karafka
             when :partition_eof
               @buffer.eof(result.details[:topic], result.details[:partition])
               got_eof = true
-            when :unknown_topic_or_part
+            when :unknown_topic_or_part, :unknown_topic, :unknown_partition
               next if @subscription_group.kafka[:"allow.auto.create.topics"]
 
               first_error ||= result
@@ -707,7 +707,7 @@ module Karafka
         # https://github.com/confluentinc/confluent-kafka-dotnet/issues/1366#issuecomment-821842990
         # This will be raised each time poll detects a non-existing topic. When auto creation is
         # on, we can safely ignore it
-        when :unknown_topic_or_part # 3
+        when :unknown_topic_or_part, :unknown_topic, :unknown_partition # 3, -188, -190
           return nil if @subscription_group.kafka[:"allow.auto.create.topics"]
 
           early_report = true
