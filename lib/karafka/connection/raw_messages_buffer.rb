@@ -71,6 +71,22 @@ module Karafka
         end
       end
 
+      # Returns true when no messages have been buffered for the given topic partition yet.
+      # Used to decide whether an inline EOF should be applied immediately or deferred to the
+      # next batch_poll cycle.
+      # @param topic [String]
+      # @param partition [Integer]
+      # @return [Boolean]
+      def partition_messages_empty?(topic, partition)
+        return true unless @groups.key?(topic)
+
+        partitions = @groups[topic]
+
+        return true unless partitions.key?(partition)
+
+        partitions[partition][:messages].empty?
+      end
+
       # Removes given topic and partition data out of the buffer
       # This is used when there's a partition revocation
       # @param topic [String] topic we're interested in
