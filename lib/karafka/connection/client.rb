@@ -124,7 +124,7 @@ module Karafka
           poll_tick = [time_poll.remaining, tick_interval].min
           got_eof = false
 
-          # poll_batch returns Array<Message, RdkafkaError> — errors are inline, never raised.
+          # poll_batch returns Array<Message, RdkafkaError> - errors are inline, never raised.
           # This lets us capture EOF events from multiple partitions in a single call without
           # losing the later ones to the ensure-block cleanup that the old raise-on-first approach
           # triggered. The tick_interval cap keeps events_poll running at its expected frequency.
