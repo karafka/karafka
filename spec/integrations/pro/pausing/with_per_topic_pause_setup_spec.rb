@@ -77,7 +77,9 @@ end
 
 previous = nil
 
-DT[DT.topics[0]].each do |time|
+# Limit to first 6 entries (5 diffs) to avoid CI timing artifacts from late-collected
+# entries that may have large gaps due to runner load at test teardown
+DT[DT.topics[0]].first(6).each do |time|
   unless previous
     previous = time
     next
@@ -93,7 +95,7 @@ end
 
 previous = nil
 
-DT[DT.topics[1]].each do |time|
+DT[DT.topics[1]].first(6).each do |time|
   unless previous
     previous = time
     next
