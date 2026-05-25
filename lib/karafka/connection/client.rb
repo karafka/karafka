@@ -142,7 +142,10 @@ module Karafka
               next
             end
 
-            if result.fatal?
+            # Fatal EARLY_REPORT_ERRORS (e.g., unreleased_instance_id from KIP-848 fencing) must
+            # not bypass the graceful_break path. Their recovery is via the rebalance callback,
+            # not a listener reset. All other fatal errors are immediately raised.
+            if result.fatal? && !EARLY_REPORT_ERRORS.include?(result.code)
               Karafka.monitor.instrument(
                 "error.occurred",
                 caller: self,
@@ -159,7 +162,9 @@ module Karafka
             when :unknown_topic_or_part, :unknown_topic, :unknown_partition
               next if @subscription_group.kafka[:"allow.auto.create.topics"]
 
-              first_error ||= result
+              # Report the error but do NOT raise — messages from other topics in the same
+              # subscription group must still be returned. A listener reset does not help here
+              # (the topic is still missing) and would discard buffered messages unnecessarily.
               Karafka.monitor.instrument(
                 "error.occurred",
                 caller: self,
