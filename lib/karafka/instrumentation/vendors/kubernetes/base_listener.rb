@@ -41,11 +41,13 @@ module Karafka
           def respond
             client = @server.accept
             client.gets
-            # Compute body and status after accepting the request so both reflect the same health
-            # snapshot. Computing body before accept means the body could be stale by the time
-            # the status line is sent (e.g., an error fires between body-generation and accept).
-            body = JSON.generate(status_body)
-            client.print "HTTP/1.1 #{healthy? ? OK_CODE : FAIL_CODE}\r\n"
+            # Compute body after accepting so it reflects current health at request time.
+            # Derive the HTTP status code from the same snapshot to guarantee consistency —
+            # calling healthy? separately could observe a different state.
+            snapshot = status_body
+            body = JSON.generate(snapshot)
+            code = snapshot[:status] == "healthy" ? OK_CODE : FAIL_CODE
+            client.print "HTTP/1.1 #{code}\r\n"
             client.print "Content-Type: application/json\r\n"
             client.print "Content-Length: #{body.bytesize}\r\n"
             client.print "\r\n"

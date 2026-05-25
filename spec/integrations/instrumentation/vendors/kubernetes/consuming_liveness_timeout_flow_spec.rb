@@ -66,7 +66,10 @@ assert_equal '-> "HTTP/1.1 500 Internal Server Error\r\n"', resp500[0], resp500[
 assert_equal '-> "Content-Type: application/json\r\n"', resp500[1], resp500[1]
 assert_equal '-> "\r\n"', resp500[3], resp500[3]
 
-last = JSON.parse(DT[:bodies].last)
+# Use the last 500-response body — after the consumer finishes and clears the tick,
+# the probing thread may capture one more healthy response before stopping.
+last_500_index = DT[:probing].rindex("500")
+last = JSON.parse(DT[:bodies][last_500_index])
 
 assert_equal "unhealthy", last["status"]
 assert last.key?("timestamp")
