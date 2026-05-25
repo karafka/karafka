@@ -212,6 +212,27 @@ module Karafka
             break
           end
 
+          # :nocov:
+          if graceful_break
+            # After max_poll_exceeded or similar, the rebalance/revocation callback is queued
+            # internally but not yet delivered. One extra rd_kafka_consumer_poll call flushes the
+            # pending callback into @rebalance_manager so the listener can schedule revoke jobs.
+            # We use kafka.poll (rd_kafka_consumer_poll) here, NOT poll_batch
+            # (rd_kafka_consume_batch_queue), because only rd_kafka_consumer_poll invokes the
+            # registered rebalance callback. This must also run BEFORE the stop-signal check:
+            # Karafka may already be stopping when the error arrives (the consumer finishes its
+            # work, wait_until calls Server.stop, then the next batch_poll gets max_poll_exceeded)
+            # — checking :stop first would skip this poll and the revoke job would be missed.
+            begin
+              kafka.poll(tick_interval)
+            rescue Rdkafka::RdkafkaError
+              nil # Expected: max_poll_exceeded, auto_offset_reset, etc.
+            end
+            @buffer.polled
+            break
+          end
+          # :nocov:
+
           # If we were signaled from the outside to break the loop, we should
           break if @interval_runner.call == :stop
 
@@ -223,20 +244,6 @@ module Karafka
           # iteration handles the exit; no explicit nil-break is needed because poll_batch
           # always blocks for the full poll_tick before returning empty.
           break if got_eof
-
-          # :nocov:
-          if graceful_break
-            # After max_poll_exceeded or similar, the rebalance/revocation callback is queued
-            # internally but not yet delivered. One extra brief poll flushes the pending callback
-            # into @rebalance_manager so the listener can schedule revoke jobs on this cycle
-            # rather than missing them when Karafka is stopping immediately after.
-            kafka.poll_batch(tick_interval, max_items: 1).each do |result|
-              @buffer << result unless result.is_a?(Rdkafka::RdkafkaError)
-            end
-            @buffer.polled
-            break
-          end
-          # :nocov:
         end
 
         @buffer
