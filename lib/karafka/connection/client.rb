@@ -167,10 +167,12 @@ module Karafka
                 type: "connection.client.poll.error"
               )
             # :nocov:
-            when :max_poll_exceeded
-              # The consumer has already sent LeaveGroup. Instrument early (matches old
-              # EARLY_REPORT_ERRORS behavior) but do not raise. The revocation callback
-              # fires shortly after; raising here would skip the normal revocation flow.
+            when :max_poll_exceeded, *EARLY_REPORT_ERRORS
+              # The consumer has already sent LeaveGroup (max_poll_exceeded) or a serious but
+              # potentially transient condition occurred. Instrument early for visibility but
+              # break gracefully instead of raising. Raising would trigger a full listener reset
+              # that can discard coordinator state or suppress the revocation flow.
+              # The listener will retry on the next batch_poll cycle.
               Karafka.monitor.instrument(
                 "error.occurred",
                 caller: self,
@@ -222,10 +224,18 @@ module Karafka
           # always blocks for the full poll_tick before returning empty.
           break if got_eof
 
-          # Break after max_poll_exceeded so the listener can process the pending revocation
-          # on the next cycle (if the revoke callback has not fired yet during poll_batch).
           # :nocov:
-          break if graceful_break
+          if graceful_break
+            # After max_poll_exceeded or similar, the rebalance/revocation callback is queued
+            # internally but not yet delivered. One extra brief poll flushes the pending callback
+            # into @rebalance_manager so the listener can schedule revoke jobs on this cycle
+            # rather than missing them when Karafka is stopping immediately after.
+            kafka.poll_batch(tick_interval, max_items: 1).each do |result|
+              @buffer << result unless result.is_a?(Rdkafka::RdkafkaError)
+            end
+            @buffer.polled
+            break
+          end
           # :nocov:
         end
 
