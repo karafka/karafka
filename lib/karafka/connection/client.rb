@@ -224,7 +224,8 @@ module Karafka
             # work, wait_until calls Server.stop, then the next batch_poll gets max_poll_exceeded)
             # — checking :stop first would skip this poll and the revoke job would be missed.
             begin
-              kafka.poll(tick_interval)
+              message = kafka.poll(tick_interval)
+              @buffer << message if message
             rescue Rdkafka::RdkafkaError
               nil # Expected: max_poll_exceeded, auto_offset_reset, etc.
             end
