@@ -166,7 +166,6 @@ module Karafka
                 error: result,
                 type: "connection.client.poll.error"
               )
-            # :nocov:
             when :max_poll_exceeded, *EARLY_REPORT_ERRORS
               # The consumer has already sent LeaveGroup (max_poll_exceeded) or a serious but
               # potentially transient condition occurred. Instrument early for visibility but
@@ -180,7 +179,6 @@ module Karafka
                 type: "connection.client.poll.error"
               )
               graceful_break = true
-            # :nocov:
             else
               first_error ||= result
               Karafka.monitor.instrument(
@@ -212,7 +210,6 @@ module Karafka
             break
           end
 
-          # :nocov:
           if graceful_break
             # After max_poll_exceeded or similar, the rebalance/revocation callback is queued
             # internally but not yet delivered. One extra rd_kafka_consumer_poll call flushes the
@@ -232,7 +229,6 @@ module Karafka
             @buffer.polled
             break
           end
-          # :nocov:
 
           # If we were signaled from the outside to break the loop, we should
           break if @interval_runner.call == :stop
