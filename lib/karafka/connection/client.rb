@@ -95,10 +95,6 @@ module Karafka
         # no longer may be able to fetch them from Kafka. We could build them but it is easier
         # to just keep them here and use if needed when cannot be obtained
         @paused_tpls = Hash.new { |h, k| h[k] = {} }
-        # EOFs that arrived inline with messages in the same poll_batch call. The listener only
-        # creates eofed jobs when messages.empty? && eof, so we defer these EOFs to the next
-        # batch_poll cycle where the buffer will have eof=true and no messages for those partitions.
-        @deferred_eofs = []
       end
 
       # Fetches messages within boundaries defined by the settings (time, size, topics, etc).
@@ -115,18 +111,6 @@ module Karafka
         @rebalance_manager.clear
 
         events_poll
-
-        # If EOFs were deferred from the previous batch (they arrived inline with messages),
-        # signal them now as eof-only entries and return immediately. The listener will see
-        # messages.empty? && eof and schedule the eofed jobs.
-        # :nocov:
-        unless @deferred_eofs.empty?
-          @deferred_eofs.each { |t, p| @buffer.eof(t, p) }
-          @deferred_eofs.clear
-          @buffer.polled
-          return @buffer
-        end
-        # :nocov:
 
         loop do
           time_poll.start
@@ -170,19 +154,8 @@ module Karafka
 
             case result.code
             when :partition_eof
-              eof_topic = result.details[:topic]
-              eof_partition = result.details[:partition]
-
-              if @buffer.partition_messages_empty?(eof_topic, eof_partition)
-                @buffer.eof(eof_topic, eof_partition)
-                got_eof = true
-              else
-                # :nocov:
-                # EOF arrived in the same poll_batch as the last message for this partition.
-                # Defer to the next batch_poll so the listener processes the message first.
-                @deferred_eofs << [eof_topic, eof_partition]
-                # :nocov:
-              end
+              @buffer.eof(result.details[:topic], result.details[:partition])
+              got_eof = true
             when :unknown_topic_or_part, :unknown_topic, :unknown_partition
               next if @subscription_group.kafka[:"allow.auto.create.topics"]
 
@@ -471,7 +444,6 @@ module Karafka
           @interval_runner.reset
           @closed = false
           @paused_tpls.clear
-          @deferred_eofs.clear
         end
       end
 

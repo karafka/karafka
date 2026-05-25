@@ -59,6 +59,10 @@ module Karafka
         @status = Status.new
 
         @jobs_queue.register(@subscription_group.id)
+        # Partitions whose EOF arrived inline with messages in the same poll_batch result.
+        # The listener only schedules eofed jobs when messages.empty? && eof; we defer these
+        # to the next build_and_schedule_flow_jobs cycle when the buffer has no new data.
+        @eofed_pending = Set.new
 
         # This makes sure that even if we tick more often than the interval time due to frequent
         # unlocks from short-lived jobs or async queues synchronization, events handling and jobs
@@ -144,6 +148,7 @@ module Karafka
 
           @executors.clear
           @coordinators.reset
+          @eofed_pending.clear
           @client.stop
 
           stopped!
@@ -352,7 +357,17 @@ module Karafka
         idle_jobs = []
         eofed_jobs = []
 
+        # Swap pending set: process the previous cycle's deferred eofed after the buffer loop
+        # so we know which partitions have fresh data in this cycle.
+        prev_eofed_pending = @eofed_pending
+        @eofed_pending = Set.new
+
+        # Track which partitions appear in the current buffer
+        current_buffer = Set.new
+
         @messages_buffer.each do |topic, partition, messages, eof, last_polled_at|
+          current_buffer << [topic, partition]
+
           # In case we did not receive any new messages without eof we skip.
           # We may yield empty array here in case we have reached eof without new messages but in
           # such cases, we can run an eof job
@@ -400,6 +415,35 @@ module Karafka
             coordinator.increment(:consume)
             executor = @executors.find_or_create(topic, partition, group_id, coordinator)
             consume_jobs << jobs_builder.consume(executor, partition_messages)
+          end
+
+          # When EOF arrives inline with the last batch of messages, poll_batch includes both
+          # in the same result array. The listener does not call eofed when messages are present
+          # (correct behavior), but librdkafka will not re-signal EOF in a subsequent poll.
+          # Defer the eofed job to the next cycle when the buffer will be empty for this
+          # partition and the eofed condition (messages.empty? && eof) will be satisfied.
+          @eofed_pending << [topic, partition] if eof && coordinator.topic.eofed?
+        end
+
+        # Schedule eofed for partitions whose EOF was deferred from the previous cycle.
+        # Only fire if the partition did not receive new data in this cycle; if it did,
+        # re-deferral will happen naturally when the buffer loop runs again.
+        prev_eofed_pending.each do |pending_topic, pending_partition|
+          next if current_buffer.include?([pending_topic, pending_partition])
+
+          coordinator = @coordinators.find_or_create(pending_topic, pending_partition)
+
+          next unless coordinator.topic.eofed?
+
+          # Use find_all (not find_all_or_create) to skip partitions that were revoked and had
+          # their executors cleared; creating a new executor for a non-owned partition is wrong.
+          executors = @executors.find_all(pending_topic, pending_partition)
+
+          next if executors.empty?
+
+          executors.each do |executor|
+            coordinator.increment(:eofed)
+            eofed_jobs << jobs_builder.eofed(executor)
           end
         end
 
@@ -520,6 +564,7 @@ module Karafka
         @events_poller.reset
         @client.reset
         @coordinators.reset
+        @eofed_pending.clear
         @interval_runner.reset
         @executors = Processing::ConsumerGroups::ExecutorsBuffer.new(@client, @subscription_group)
       end

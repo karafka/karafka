@@ -221,35 +221,6 @@ RSpec.describe_current do
     end
   end
 
-  describe "#partition_messages_empty?" do
-    let(:message) { build(:messages_message, topic: "test", partition: 0) }
-
-    context "when the topic has never been seen" do
-      it { expect(buffer.partition_messages_empty?("test", 0)).to be(true) }
-    end
-
-    context "when the topic exists but the partition has never been seen" do
-      before { buffer << build(:messages_message, topic: "test", partition: 1) }
-
-      it { expect(buffer.partition_messages_empty?("test", 0)).to be(true) }
-    end
-
-    context "when the partition has messages" do
-      before { buffer << message }
-
-      it { expect(buffer.partition_messages_empty?("test", 0)).to be(false) }
-    end
-
-    context "when the partition had messages but was cleared" do
-      before do
-        buffer << message
-        buffer.clear
-      end
-
-      it { expect(buffer.partition_messages_empty?("test", 0)).to be(true) }
-    end
-  end
-
   describe "uniq!" do
     let(:message1) { build(:messages_message, topic: "test", partition: 0, offset: 0) }
     let(:message2) { build(:messages_message, topic: "test", partition: 0, offset: 1) }
