@@ -4,7 +4,7 @@ PATH
     karafka (2.5.10.rc1)
       karafka-core (>= 2.5.13, < 2.6.0)
       karafka-rdkafka (>= 0.27.1)
-      waterdrop (>= 2.8.14, < 3.0.0)
+      waterdrop (>= 2.10.1, < 3.0.0)
       zeitwerk (~> 2.3)
 
 GEM
@@ -148,7 +148,7 @@ GEM
       concurrent-ruby (~> 1.0)
     uri (1.1.1)
     warning (1.6.0)
-    waterdrop (2.10.0)
+    waterdrop (2.10.1)
       karafka-core (>= 2.5.12, < 3.0.0)
       karafka-rdkafka (>= 0.24.0)
       zeitwerk (~> 2.3)
@@ -245,7 +245,7 @@ CHECKSUMS
   tzinfo (2.0.6) sha256=8daf828cc77bcf7d63b0e3bdb6caa47e2272dcfaf4fbfe46f8c3a9df087a829b
   uri (1.1.1) sha256=379fa58d27ffb1387eaada68c749d1426738bd0f654d812fcc07e7568f5c57c6
   warning (1.6.0) sha256=a49cdfae19fb77d19afff2efbe45f8ab759e9cd25b4e4ce2c79dbaf46bdb6c9e
-  waterdrop (2.10.0) sha256=d247f6e96621aa20a56076b2d0151ed5b8cb4065705364dd93a9180e6fea19fb
+  waterdrop (2.10.1) sha256=4335c5602ebcbb9f92ca38887a393eaebfd351cafdd3c7bbeb0e2c085510ff94
   zeitwerk (2.8.2) sha256=7212a61311083c604184b1ea2574b9aa05cd14f855a0841c06985cabe9181d12
 
 BUNDLED WITH
