@@ -38,6 +38,14 @@ module Karafka
       @custom_kafka = kafka
     end
 
+    # No-op close to normalize the API surface.
+    #
+    # Each admin operation opens and closes its own underlying rdkafka admin instance internally,
+    # so there is nothing to release at the `Karafka::Admin` level. This method exists so that
+    # callers who hold an instance and call `#close` on it (matching the pattern of other
+    # closeable resources) do not raise `NoMethodError`.
+    def close; end
+
     class << self
       # Delegate topic-related operations to Topics class
 
