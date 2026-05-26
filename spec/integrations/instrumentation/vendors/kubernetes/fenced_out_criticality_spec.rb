@@ -74,12 +74,13 @@ fenced.join
 assert DT[:probing].include?("200")
 assert DT[:probing].include?("500")
 
-last = JSON.parse(DT[:bodies].last)
+first_500_index = DT[:probing].index("500")
+first_500 = JSON.parse(DT[:bodies][first_500_index])
 
-assert_equal "unhealthy", last["status"]
-assert last.key?("timestamp")
-assert_equal 9013, last["port"]
-assert_equal Process.pid, last["process_id"]
-assert_equal false, last["errors"]["polling_ttl_exceeded"]
-assert_equal false, last["errors"]["consumption_ttl_exceeded"]
-assert_equal "fenced_instance_id", last["errors"]["unrecoverable"]
+assert_equal "unhealthy", first_500["status"]
+assert first_500.key?("timestamp")
+assert_equal 9013, first_500["port"]
+assert_equal Process.pid, first_500["process_id"]
+assert_equal false, first_500["errors"]["polling_ttl_exceeded"]
+assert_equal false, first_500["errors"]["consumption_ttl_exceeded"]
+assert_equal "fenced_instance_id", first_500["errors"]["unrecoverable"]
