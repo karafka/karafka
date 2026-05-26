@@ -269,8 +269,8 @@ module Karafka
       #     timestamp in milliseconds (returns the first offset at or after that timestamp)
       #   Each partition may appear at most once per call.
       # @param isolation_level [Integer, nil] optional isolation level constant. Pass
-      #   `Rdkafka::Bindings::RD_KAFKA_ISOLATION_LEVEL_READ_COMMITTED` to get the LSO instead of
-      #   the high-watermark for `:latest` queries on transactionally-produced topics.
+      #   `Karafka::Admin::IsolationLevels::READ_COMMITTED` to get the LSO instead of the
+      #   high-watermark for `:latest` queries on transactionally-produced topics.
       #
       # @return [Array<Hash>] array of result hashes, each containing:
       #   - `:topic` [String]
@@ -296,7 +296,7 @@ module Karafka
       # @example Get LSO (Last Stable Offset) for accurate lag on transactional topics
       #   Karafka::Admin::Topics.read_partition_offsets(
       #     'events' => [{ partition: 0, offset: :latest }],
-      #     isolation_level: Rdkafka::Bindings::RD_KAFKA_ISOLATION_LEVEL_READ_COMMITTED
+      #     isolation_level: Karafka::Admin::IsolationLevels::READ_COMMITTED
       #   )
       #
       # @example Find offset at a specific point in time

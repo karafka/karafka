@@ -49,7 +49,7 @@ assert sample.key?(:leader_epoch)
 # --- isolation_level keyword is accepted ---
 committed_results = Karafka::Admin.read_partition_offsets(
   { topic => [{ partition: 0, offset: :latest }] },
-  isolation_level: Rdkafka::Bindings::RD_KAFKA_ISOLATION_LEVEL_READ_COMMITTED
+  isolation_level: Karafka::Admin::IsolationLevels::READ_COMMITTED
 )
 
 assert_equal 1, committed_results.size

@@ -95,7 +95,7 @@ RSpec.describe_current do
     end
 
     it "delegates to Admin::Topics#read_partition_offsets with custom isolation_level" do
-      level = Rdkafka::Bindings::RD_KAFKA_ISOLATION_LEVEL_READ_COMMITTED
+      level = Karafka::Admin::IsolationLevels::READ_COMMITTED
       expect_any_instance_of(Karafka::Admin::Topics)
         .to receive(:read_partition_offsets).with(specs, isolation_level: level)
       described_class.read_partition_offsets(specs, isolation_level: level)
