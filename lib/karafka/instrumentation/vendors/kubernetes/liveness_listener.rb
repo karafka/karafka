@@ -198,10 +198,8 @@ module Karafka
           def status_body
             super.merge!(
               errors: {
-                # When unrecoverable, TTL checks are irrelevant - polling/consuming stopped
-                # because of the fatal error, not because of a genuine liveness violation
-                polling_ttl_exceeded: !@unrecoverable && polling_ttl_exceeded?,
-                consumption_ttl_exceeded: !@unrecoverable && consuming_ttl_exceeded?,
+                polling_ttl_exceeded: polling_ttl_exceeded?,
+                consumption_ttl_exceeded: consuming_ttl_exceeded?,
                 unrecoverable: @unrecoverable
               }
             )
