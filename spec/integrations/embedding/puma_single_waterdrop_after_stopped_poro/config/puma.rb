@@ -29,14 +29,12 @@ end
 # signal trap context, so calling Mutex#synchronize raises ThreadError unless waterdrop
 # detects and escapes the trap context automatically.
 after_stopped do
-  begin
-    PRODUCER.close
-    File.write(RESULT_FILE, "success")
-  rescue ThreadError => e
-    File.write(RESULT_FILE, "thread_error:#{e.message}")
-  rescue => e
-    File.write(RESULT_FILE, "error:#{e.class}:#{e.message}")
-  end
+  PRODUCER.close
+  File.write(RESULT_FILE, "success")
+rescue ThreadError => e
+  File.write(RESULT_FILE, "thread_error:#{e.message}")
+rescue => e
+  File.write(RESULT_FILE, "error:#{e.class}:#{e.message}")
 end
 
 on_booted do
