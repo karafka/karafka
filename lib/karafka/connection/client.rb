@@ -154,8 +154,7 @@ module Karafka
 
               # Instrument but do not raise and do not feed the safety valve. A missing topic
               # is a configuration issue - resetting the consumer won't fix it and would only
-              # generate pointless rebalances. Messages from other topics in the group must
-              # still be returned. The error stream alerts operators without disrupting the consumer.
+              # generate pointless rebalances. Messages from other topics must still be returned.
               Karafka.monitor.instrument(
                 "error.occurred",
                 caller: self,
@@ -217,7 +216,21 @@ module Karafka
             break
           end
 
-          break if graceful_break
+          if graceful_break
+            # After max_poll_exceeded or other EARLY_REPORT_ERRORS, the revocation callback
+            # arrives asynchronously via the librdkafka heartbeat background thread. Polling
+            # here releases the GVL so that thread can acquire it, fire the rebalance callback,
+            # and update the rebalance manager before we return to the listener. Without this
+            # poll the revocation arrives only after the shutdown sequence starts, too late for
+            # the listener to schedule revoke jobs on the current cycle.
+            kafka.poll_batch(tick_interval, max_items: remaining_capacity).each do |result|
+              @buffer << result unless result.is_a?(Rdkafka::RdkafkaError)
+            end
+
+            events_poll if @rebalance_manager.changed?
+
+            break
+          end
 
           # If we were signaled from the outside to break the loop, we should
           break if @interval_runner.call == :stop

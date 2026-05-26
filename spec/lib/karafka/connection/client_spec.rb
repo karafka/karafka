@@ -290,7 +290,6 @@ RSpec.describe_current do
 
       before do
         allow(kafka).to receive(:poll_batch).and_return([error])
-        allow(kafka).to receive(:poll).and_return(nil)
       end
 
       it "does not raise immediately but takes the graceful_break path" do
