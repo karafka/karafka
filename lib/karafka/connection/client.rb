@@ -117,9 +117,9 @@ module Karafka
 
         events_poll
 
-        # Tracks the last non-fatal, non-EARLY error seen in the else branch this batch_poll.
+        # Tracks the last recoverable error seen across the full batch_poll invocation.
         # Used to raise for escalation after MAX_POLL_RETRIES consecutive error-only batches.
-        last_poll_error = nil
+        recoverable_error = nil
 
         loop do
           time_poll.start
@@ -156,9 +156,10 @@ module Karafka
             when :unknown_topic_or_part, :unknown_topic, :unknown_partition
               next if @subscription_group.kafka[:"allow.auto.create.topics"]
 
-              # Report the error but do NOT raise - messages from other topics in the same
-              # subscription group must still be returned. A listener reset does not help here
-              # (the topic is still missing) and would discard buffered messages unnecessarily.
+              # Instrument but do not raise and do not feed the safety valve. A missing topic
+              # is a configuration issue - resetting the consumer won't fix it and would only
+              # generate pointless rebalances. Messages from other topics in the group must
+              # still be returned. The error stream alerts operators without disrupting the consumer.
               Karafka.monitor.instrument(
                 "error.occurred",
                 caller: self,
@@ -192,7 +193,7 @@ module Karafka
                 raise result
               end
 
-              last_poll_error = result
+              recoverable_error = result
               Karafka.monitor.instrument(
                 "error.occurred",
                 caller: self,
@@ -221,13 +222,15 @@ module Karafka
           end
 
           if graceful_break
-            # After max_poll_exceeded or similar, the rebalance/revocation callback is queued
-            # internally but not yet delivered. One extra kafka.poll call flushes the pending
-            # callback into @rebalance_manager so the listener can schedule revoke jobs.
+            # After max_poll_exceeded or similar, librdkafka has queued a revocation event
+            # but it may not have been delivered yet within this poll_batch call - the broker's
+            # LeaveGroup acknowledgment can arrive after poll_batch returns. One extra kafka.poll
+            # gives librdkafka a chance to process that response and fire the rebalance callback
+            # in this cycle rather than waiting a full batch_poll interval for the next one.
             # This must run BEFORE the stop-signal check: Karafka may already be stopping when
             # the error arrives (the consumer finishes its work, wait_until calls Server.stop,
             # then the next batch_poll gets max_poll_exceeded) - checking :stop first would skip
-            # this poll and the revoke job would be missed.
+            # this poll and delay the revoke job by a full batch_poll cycle.
             begin
               message = kafka.poll(tick_interval)
               @buffer << message if message
@@ -257,12 +260,12 @@ module Karafka
         # consecutive such batches, raise to let the listener reset the consumer and wait out the
         # configured backoff before reconnecting - without this the consumer can get permanently
         # stuck on a persistent but non-fatal error with no recovery path.
-        if last_poll_error && @buffer.empty?
+        if recoverable_error && @buffer.empty?
           @consecutive_poll_errors += 1
 
           if @consecutive_poll_errors >= MAX_POLL_RETRIES
             @consecutive_poll_errors = 0
-            raise last_poll_error
+            raise recoverable_error
           end
         else
           @consecutive_poll_errors = 0

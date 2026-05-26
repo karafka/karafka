@@ -59,6 +59,11 @@ module Karafka
         @any_eof
       end
 
+      # @return [Boolean] true if the buffer contains no messages
+      def empty?
+        @size.zero?
+      end
+
       # Marks the last polling time that can be accessed via `#last_polled_at`
       def polled
         @last_polled_at = monotonic_now

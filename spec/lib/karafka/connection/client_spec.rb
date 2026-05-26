@@ -189,4 +189,148 @@ RSpec.describe_current do
       expect(end_time - start_time).to be < 0.01
     end
   end
+
+  describe "#batch_poll" do
+    let(:kafka) { instance_double(Rdkafka::Consumer) }
+    let(:max_wait_time) { 1_000 }
+    let(:max_messages) { 100 }
+
+    before do
+      allow(client).to receive(:kafka).and_return(kafka)
+      allow(client).to receive(:events_poll)
+      allow(client).to receive(:tick_interval).and_return(100)
+      allow(client).to receive(:running?).and_return(true)
+      allow(client).to receive(:interval_runner).and_return(-> { :run })
+      allow(kafka).to receive(:events_poll)
+      allow(subscription_group).to receive(:max_wait_time).and_return(max_wait_time)
+      allow(subscription_group).to receive(:max_messages).and_return(max_messages)
+    end
+
+    def make_error(code_int, fatal: false)
+      Rdkafka::RdkafkaError.new(code_int, fatal: fatal)
+    end
+
+    context "when poll_batch returns only messages" do
+      let(:message) { instance_double(Rdkafka::Consumer::Message, topic: "test", partition: 0) }
+
+      before do
+        allow(kafka).to receive(:poll_batch).and_return([message], [])
+      end
+
+      it "adds messages to the buffer and resets the consecutive error counter" do
+        client.instance_variable_set(:@consecutive_poll_errors, 5)
+        client.batch_poll
+        expect(client.instance_variable_get(:@consecutive_poll_errors)).to eq(0)
+      end
+    end
+
+    context "when poll_batch returns :partition_eof" do
+      let(:eof_error) { make_error(-191) }
+
+      before do
+        allow(eof_error).to receive(:details).and_return({ topic: "test", partition: 0 })
+        allow(kafka).to receive(:poll_batch).and_return([eof_error])
+      end
+
+      it "marks the buffer partition as EOF without raising" do
+        expect { client.batch_poll }.not_to raise_error
+        expect(client.instance_variable_get(:@buffer).eof?).to be(true)
+      end
+    end
+
+    context "when poll_batch returns :unknown_topic_or_part with auto-create off" do
+      let(:error) { make_error(3) }
+      let(:kafka_config) { { "allow.auto.create.topics": false } }
+
+      before do
+        allow(subscription_group).to receive(:kafka).and_return(kafka_config)
+        allow(kafka).to receive(:poll_batch).and_return([error])
+      end
+
+      it "instruments the error without raising and without feeding the safety valve" do
+        expect { client.batch_poll }.not_to raise_error
+        expect(client.instance_variable_get(:@consecutive_poll_errors)).to eq(0)
+      end
+    end
+
+    context "when poll_batch returns :unknown_topic_or_part with auto-create on" do
+      let(:error) { make_error(3) }
+      let(:kafka_config) { { "allow.auto.create.topics": true } }
+
+      before do
+        allow(subscription_group).to receive(:kafka).and_return(kafka_config)
+        allow(kafka).to receive(:poll_batch).and_return([error])
+      end
+
+      it "silently skips the error without incrementing the error counter" do
+        expect { client.batch_poll }.not_to raise_error
+        expect(client.instance_variable_get(:@consecutive_poll_errors)).to eq(0)
+      end
+    end
+
+    context "when poll_batch returns an EARLY_REPORT_ERROR" do
+      let(:error) { make_error(-195) } # :transport
+
+      before do
+        allow(kafka).to receive(:poll_batch).and_return([error])
+        allow(kafka).to receive(:poll).and_return(nil)
+      end
+
+      it "does not raise and does not increment the error counter" do
+        expect { client.batch_poll }.not_to raise_error
+        expect(client.instance_variable_get(:@consecutive_poll_errors)).to eq(0)
+      end
+    end
+
+    context "when poll_batch returns a fatal EARLY_REPORT_ERROR (e.g., unreleased_instance_id)" do
+      let(:error) { make_error(111, fatal: true) } # :unreleased_instance_id, fatal
+
+      before do
+        allow(kafka).to receive(:poll_batch).and_return([error])
+        allow(kafka).to receive(:poll).and_return(nil)
+      end
+
+      it "does not raise immediately but takes the graceful_break path" do
+        expect { client.batch_poll }.not_to raise_error
+      end
+    end
+
+    context "when poll_batch returns a non-fatal transient error" do
+      let(:error) { make_error(-1) } # :unknown, non-fatal
+
+      before do
+        allow(kafka).to receive(:poll_batch).and_return([error])
+      end
+
+      it "instruments and increments the consecutive error counter" do
+        expect { client.batch_poll }.not_to raise_error
+        expect(client.instance_variable_get(:@consecutive_poll_errors)).to eq(1)
+      end
+
+      it "raises after MAX_POLL_RETRIES consecutive error-only batches" do
+        client.instance_variable_set(:@consecutive_poll_errors, 20 - 1)
+        expect { client.batch_poll }.to raise_error(Rdkafka::RdkafkaError)
+      end
+
+      it "resets the counter when a subsequent batch delivers messages" do
+        client.instance_variable_set(:@consecutive_poll_errors, 10)
+        message = instance_double(Rdkafka::Consumer::Message, topic: "test", partition: 0)
+        allow(kafka).to receive(:poll_batch).and_return([message])
+        client.batch_poll
+        expect(client.instance_variable_get(:@consecutive_poll_errors)).to eq(0)
+      end
+    end
+
+    context "when poll_batch returns a fatal non-EARLY error" do
+      let(:error) { make_error(-1, fatal: true) }
+
+      before do
+        allow(kafka).to receive(:poll_batch).and_return([error])
+      end
+
+      it "raises immediately" do
+        expect { client.batch_poll }.to raise_error(Rdkafka::RdkafkaError)
+      end
+    end
+  end
 end
