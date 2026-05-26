@@ -85,6 +85,23 @@ RSpec.describe_current do
     end
   end
 
+  describe "#read_partition_offsets" do
+    let(:specs) { { name => [{ partition: 0, offset: :earliest }] } }
+
+    it "delegates to Admin::Topics#read_partition_offsets with default isolation_level" do
+      expect_any_instance_of(Karafka::Admin::Topics)
+        .to receive(:read_partition_offsets).with(specs, isolation_level: nil)
+      described_class.read_partition_offsets(specs)
+    end
+
+    it "delegates to Admin::Topics#read_partition_offsets with custom isolation_level" do
+      level = Rdkafka::Bindings::RD_KAFKA_ISOLATION_LEVEL_READ_COMMITTED
+      expect_any_instance_of(Karafka::Admin::Topics)
+        .to receive(:read_partition_offsets).with(specs, isolation_level: level)
+      described_class.read_partition_offsets(specs, isolation_level: level)
+    end
+  end
+
   # More specs in the integrations
   describe "#seek_consumer_group" do
     let(:group_id) { SecureRandom.uuid }

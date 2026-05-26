@@ -80,6 +80,13 @@ module Karafka
         new.read_watermark_offsets(name_or_hash, partition)
       end
 
+      # @param topic_partition_offsets [Hash{String => Array<Hash>}] topics with partition specs
+      # @param isolation_level [Integer, nil] optional isolation level constant
+      # @see Topics.read_partition_offsets
+      def read_partition_offsets(topic_partition_offsets, isolation_level: nil)
+        new.read_partition_offsets(topic_partition_offsets, isolation_level: isolation_level)
+      end
+
       # @param topic_name [String] name of the topic we're interested in
       # @see Topics.info
       def topic_info(topic_name)
@@ -266,6 +273,13 @@ module Karafka
     # @see Topics#read_watermark_offsets
     def read_watermark_offsets(name_or_hash, partition = nil)
       Topics.new(kafka: @custom_kafka).read_watermark_offsets(name_or_hash, partition)
+    end
+
+    # @param topic_partition_offsets [Hash{String => Array<Hash>}] topics with partition specs
+    # @param isolation_level [Integer, nil] optional isolation level constant
+    # @see Topics#read_partition_offsets
+    def read_partition_offsets(topic_partition_offsets, isolation_level: nil)
+      Topics.new(kafka: @custom_kafka).read_partition_offsets(topic_partition_offsets, isolation_level: isolation_level)
     end
 
     # @param topic_name [String] name of the topic we're interested in
