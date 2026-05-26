@@ -42,7 +42,7 @@ module Karafka
             client = @server.accept
             client.gets
             # Compute body after accepting so it reflects current health at request time.
-            # Derive the HTTP status code from the same snapshot to guarantee consistency —
+            # Derive the HTTP status code from the same snapshot to guarantee consistency -
             # calling healthy? separately could observe a different state.
             snapshot = status_body
             body = JSON.generate(snapshot)
