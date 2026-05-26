@@ -55,10 +55,14 @@ Karafka.monitor.subscribe(listener)
 Thread.new do
   until Karafka::App.stopping?
     sleep(1)
-    uri = URI.parse("http://127.0.0.1:9013/")
-    response = Net::HTTP.get_response(uri)
-    DT[:probing] << response.code
-    DT[:bodies] << response.body
+    begin
+      uri = URI.parse("http://127.0.0.1:9013/")
+      response = Net::HTTP.get_response(uri)
+      DT[:probing] << response.code
+      DT[:bodies] << response.body
+    rescue Errno::ECONNREFUSED
+      break
+    end
   end
 end
 
