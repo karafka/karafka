@@ -2,10 +2,10 @@
 
 module Karafka
   class Admin
-    # Isolation level constants for use with Admin#read_partition_offsets.
+    # Isolation level constants for Kafka operations.
     #
-    # Controls whether a :latest offset query returns the high-watermark (includes messages
-    # from uncommitted or in-flight transactions) or the Last Stable Offset (excludes them).
+    # Controls whether a query returns the high-watermark (includes messages from uncommitted
+    # or in-flight transactions) or the Last Stable Offset (excludes them).
     #
     # For non-transactional topics both values give the same result.
     module IsolationLevels
