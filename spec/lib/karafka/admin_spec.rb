@@ -205,4 +205,20 @@ RSpec.describe_current do
       end
     end
   end
+
+  describe "#close" do
+    subject(:admin) { described_class.new }
+
+    it "responds to close" do
+      expect(admin).to respond_to(:close)
+    end
+
+    it "returns nil" do
+      expect(admin.close).to be_nil
+    end
+
+    it "can be called multiple times without error" do
+      expect { 3.times { admin.close } }.not_to raise_error
+    end
+  end
 end
