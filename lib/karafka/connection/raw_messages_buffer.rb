@@ -22,6 +22,7 @@ module Karafka
       # @return [Karafka::Connection::MessagesBuffer] buffer instance
       def initialize
         @size = 0
+        @any_eof = false
         @last_polled_at = monotonic_now
 
         @groups = Hash.new do |topic_groups, topic|
@@ -49,18 +50,13 @@ module Karafka
       # @param topic [String] topic that reached eof
       # @param partition [Integer] partition that reached eof
       def eof(topic, partition)
+        @any_eof = true
         @groups[topic][partition][:eof] = true
       end
 
       # @return [Boolean] true if any partition has been marked as having reached EOF
       def eof?
-        @groups.each_value do |partitions|
-          partitions.each_value do |details|
-            return true if details[:eof]
-          end
-        end
-
-        false
+        @any_eof
       end
 
       # Marks the last polling time that can be accessed via `#last_polled_at`
@@ -126,6 +122,7 @@ module Karafka
       #   discover new messages for given topic partition.
       def clear
         @size = 0
+        @any_eof = false
         @groups.each_value(&:clear)
       end
 
