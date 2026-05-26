@@ -46,7 +46,7 @@ module Karafka
             # calling healthy? separately could observe a different state.
             snapshot = status_body
             body = JSON.generate(snapshot)
-            code = snapshot[:status] == "healthy" ? OK_CODE : FAIL_CODE
+            code = (snapshot[:status] == "healthy") ? OK_CODE : FAIL_CODE
             client.print "HTTP/1.1 #{code}\r\n"
             client.print "Content-Type: application/json\r\n"
             client.print "Content-Length: #{body.bytesize}\r\n"
