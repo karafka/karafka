@@ -221,30 +221,7 @@ module Karafka
             break
           end
 
-          if graceful_break
-            # If poll_batch already delivered the rebalance callback, @rebalance_manager.changed?
-            # above would have been true and we would have broken out before reaching here.
-            # So this block only runs when the revocation callback has not fired yet.
-            #
-            # One extra kafka.poll gives librdkafka the opportunity to deliver the pending
-            # revocation callback in this batch_poll cycle rather than waiting until the next
-            # one (which starts with events_poll and would deliver it anyway). It is a latency
-            # optimisation, not a correctness requirement.
-            #
-            # This must run before the stop-signal check: Karafka may already be stopping when
-            # the error arrives, and checking :stop first would skip this poll entirely and
-            # delay the revoke job by a full batch_poll cycle.
-            #
-            # Any message returned is from a partition being revoked. We discard it - the
-            # offset will not be committed, so redelivery after reassignment handles correctness.
-            begin
-              kafka.poll(tick_interval)
-            rescue Rdkafka::RdkafkaError
-              nil # Expected: max_poll_exceeded, auto_offset_reset, etc.
-            end
-            @buffer.polled
-            break
-          end
+          break if graceful_break
 
           # If we were signaled from the outside to break the loop, we should
           break if @interval_runner.call == :stop
