@@ -156,7 +156,7 @@ module Karafka
             when :unknown_topic_or_part, :unknown_topic, :unknown_partition
               next if @subscription_group.kafka[:"allow.auto.create.topics"]
 
-              # Report the error but do NOT raise — messages from other topics in the same
+              # Report the error but do NOT raise - messages from other topics in the same
               # subscription group must still be returned. A listener reset does not help here
               # (the topic is still missing) and would discard buffered messages unnecessarily.
               Karafka.monitor.instrument(
@@ -179,7 +179,7 @@ module Karafka
               )
               graceful_break = true
             else
-              # For any other fatal error the consumer is permanently dead — raise immediately.
+              # For any other fatal error the consumer is permanently dead - raise immediately.
               # Non-fatal errors are transient; librdkafka retries internally and the
               # @consecutive_poll_errors counter escalates after MAX_POLL_RETRIES if stuck.
               if result.fatal?
