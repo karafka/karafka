@@ -95,6 +95,11 @@ module Karafka
         # no longer may be able to fetch them from Kafka. We could build them but it is easier
         # to just keep them here and use if needed when cannot be obtained
         @paused_tpls = Hash.new { |h, k| h[k] = {} }
+        # Counts consecutive batch_poll calls that produced only non-fatal errors with no messages.
+        # Mirrors the MAX_POLL_RETRIES safety valve from the old poll() method: if librdkafka
+        # consistently returns errors without any progress we escalate via raise so the listener
+        # can reset the consumer and retry after the configured backoff.
+        @consecutive_poll_errors = 0
       end
 
       # Fetches messages within boundaries defined by the settings (time, size, topics, etc).
@@ -111,6 +116,10 @@ module Karafka
         @rebalance_manager.clear
 
         events_poll
+
+        # Tracks the last non-fatal, non-EARLY error seen in the else branch this batch_poll.
+        # Used to raise for escalation after MAX_POLL_RETRIES consecutive error-only batches.
+        last_poll_error = nil
 
         loop do
           time_poll.start
@@ -184,8 +193,9 @@ module Karafka
               graceful_break = true
             else
               # Transient or recoverable error - librdkafka handles retries internally.
-              # Instrument for visibility but do not raise: a listener reset would be premature
-              # and more disruptive than letting the next batch_poll attempt succeed naturally.
+              # Instrument for visibility; escalation is handled after the outer loop via
+              # @consecutive_poll_errors so we don't reset prematurely on a single occurrence.
+              last_poll_error = result
               Karafka.monitor.instrument(
                 "error.occurred",
                 caller: self,
@@ -242,6 +252,23 @@ module Karafka
           # iteration handles the exit; no explicit nil-break is needed because poll_batch
           # always blocks for the full poll_tick before returning empty.
           break if @buffer.eof?
+        end
+
+        # Mirror the MAX_POLL_RETRIES safety valve from the old poll() method.
+        # If we received any messages this batch, librdkafka is healthy - reset the counter.
+        # If we only saw non-fatal errors with no progress, increment it. After MAX_POLL_RETRIES
+        # consecutive such batches, raise to let the listener reset the consumer and wait out the
+        # configured backoff before reconnecting - without this the consumer can get permanently
+        # stuck on a persistent but non-fatal error with no recovery path.
+        if last_poll_error && @buffer.empty?
+          @consecutive_poll_errors += 1
+
+          if @consecutive_poll_errors >= MAX_POLL_RETRIES
+            @consecutive_poll_errors = 0
+            raise last_poll_error
+          end
+        else
+          @consecutive_poll_errors = 0
         end
 
         @buffer
@@ -459,6 +486,7 @@ module Karafka
           @interval_runner.reset
           @closed = false
           @paused_tpls.clear
+          @consecutive_poll_errors = 0
         end
       end
 
