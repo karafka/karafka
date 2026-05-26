@@ -95,11 +95,7 @@ module Karafka
         # no longer may be able to fetch them from Kafka. We could build them but it is easier
         # to just keep them here and use if needed when cannot be obtained
         @paused_tpls = Hash.new { |h, k| h[k] = {} }
-        # Counts consecutive batch_poll calls that produced only non-fatal errors with no messages.
-        # Mirrors the MAX_POLL_RETRIES safety valve from the old poll() method: if librdkafka
-        # consistently returns errors without any progress we escalate via raise so the listener
-        # can reset the consumer and retry after the configured backoff.
-        @consecutive_poll_errors = 0
+        @recoverable_errors_tracker = RecoverableErrorsTracker.new(MAX_POLL_RETRIES)
       end
 
       # Fetches messages within boundaries defined by the settings (time, size, topics, etc).
@@ -236,22 +232,7 @@ module Karafka
           break if @buffer.eof?
         end
 
-        # Mirror the MAX_POLL_RETRIES safety valve from the old poll() method.
-        # If we received any messages this batch, librdkafka is healthy - reset the counter.
-        # If we only saw non-fatal errors with no progress, increment it. After MAX_POLL_RETRIES
-        # consecutive such batches, raise to let the listener reset the consumer and wait out the
-        # configured backoff before reconnecting - without this the consumer can get permanently
-        # stuck on a persistent but non-fatal error with no recovery path.
-        if recoverable_error && @buffer.empty?
-          @consecutive_poll_errors += 1
-
-          if @consecutive_poll_errors >= MAX_POLL_RETRIES
-            @consecutive_poll_errors = 0
-            raise recoverable_error
-          end
-        else
-          @consecutive_poll_errors = 0
-        end
+        @recoverable_errors_tracker.call(recoverable_error, progress: !@buffer.empty?)
 
         @buffer
       end
@@ -468,7 +449,7 @@ module Karafka
           @interval_runner.reset
           @closed = false
           @paused_tpls.clear
-          @consecutive_poll_errors = 0
+          @recoverable_errors_tracker.reset
         end
       end
 

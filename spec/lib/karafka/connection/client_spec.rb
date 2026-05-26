@@ -217,10 +217,11 @@ RSpec.describe_current do
         allow(kafka).to receive(:poll_batch).and_return([message], [])
       end
 
-      it "adds messages to the buffer and resets the consecutive error counter" do
-        client.instance_variable_set(:@consecutive_poll_errors, 5)
+      it "adds messages to the buffer and resets the error tracker" do
+        tracker = client.instance_variable_get(:@recoverable_errors_tracker)
+        tracker.instance_variable_set(:@count, 5)
         client.batch_poll
-        expect(client.instance_variable_get(:@consecutive_poll_errors)).to eq(0)
+        expect(tracker.instance_variable_get(:@count)).to eq(0)
       end
     end
 
@@ -248,8 +249,9 @@ RSpec.describe_current do
       end
 
       it "instruments the error without raising and without feeding the safety valve" do
+        tracker = client.instance_variable_get(:@recoverable_errors_tracker)
         expect { client.batch_poll }.not_to raise_error
-        expect(client.instance_variable_get(:@consecutive_poll_errors)).to eq(0)
+        expect(tracker.instance_variable_get(:@count)).to eq(0)
       end
     end
 
@@ -262,9 +264,10 @@ RSpec.describe_current do
         allow(kafka).to receive(:poll_batch).and_return([error])
       end
 
-      it "silently skips the error without incrementing the error counter" do
+      it "silently skips the error without incrementing the error tracker" do
+        tracker = client.instance_variable_get(:@recoverable_errors_tracker)
         expect { client.batch_poll }.not_to raise_error
-        expect(client.instance_variable_get(:@consecutive_poll_errors)).to eq(0)
+        expect(tracker.instance_variable_get(:@count)).to eq(0)
       end
     end
 
@@ -273,12 +276,12 @@ RSpec.describe_current do
 
       before do
         allow(kafka).to receive(:poll_batch).and_return([error])
-        allow(kafka).to receive(:poll).and_return(nil)
       end
 
-      it "does not raise and does not increment the error counter" do
+      it "does not raise and does not feed the error tracker" do
+        tracker = client.instance_variable_get(:@recoverable_errors_tracker)
         expect { client.batch_poll }.not_to raise_error
-        expect(client.instance_variable_get(:@consecutive_poll_errors)).to eq(0)
+        expect(tracker.instance_variable_get(:@count)).to eq(0)
       end
     end
 
@@ -302,22 +305,25 @@ RSpec.describe_current do
         allow(kafka).to receive(:poll_batch).and_return([error])
       end
 
-      it "instruments and increments the consecutive error counter" do
+      it "instruments without raising and increments the error tracker" do
+        tracker = client.instance_variable_get(:@recoverable_errors_tracker)
         expect { client.batch_poll }.not_to raise_error
-        expect(client.instance_variable_get(:@consecutive_poll_errors)).to eq(1)
+        expect(tracker.instance_variable_get(:@count)).to eq(1)
       end
 
       it "raises after MAX_POLL_RETRIES consecutive error-only batches" do
-        client.instance_variable_set(:@consecutive_poll_errors, 20 - 1)
+        tracker = client.instance_variable_get(:@recoverable_errors_tracker)
+        tracker.instance_variable_set(:@count, 19)
         expect { client.batch_poll }.to raise_error(Rdkafka::RdkafkaError)
       end
 
-      it "resets the counter when a subsequent batch delivers messages" do
-        client.instance_variable_set(:@consecutive_poll_errors, 10)
+      it "resets the tracker when a subsequent batch delivers messages" do
+        tracker = client.instance_variable_get(:@recoverable_errors_tracker)
+        tracker.instance_variable_set(:@count, 10)
         message = instance_double(Rdkafka::Consumer::Message, topic: "test", partition: 0)
         allow(kafka).to receive(:poll_batch).and_return([message])
         client.batch_poll
-        expect(client.instance_variable_get(:@consecutive_poll_errors)).to eq(0)
+        expect(tracker.instance_variable_get(:@count)).to eq(0)
       end
     end
 
