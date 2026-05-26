@@ -150,19 +150,6 @@ module Karafka
               next
             end
 
-            # Fatal EARLY_REPORT_ERRORS (e.g., unreleased_instance_id from KIP-848 fencing) must
-            # not bypass the graceful_break path. Their recovery is via the rebalance callback,
-            # not a listener reset. All other fatal errors are immediately raised.
-            if result.fatal? && !EARLY_REPORT_ERRORS.include?(result.code)
-              Karafka.monitor.instrument(
-                "error.occurred",
-                caller: self,
-                error: result,
-                type: "connection.client.poll.error"
-              )
-              raise result
-            end
-
             case result.code
             when :partition_eof
               @buffer.eof(result.details[:topic], result.details[:partition])
@@ -179,11 +166,11 @@ module Karafka
                 type: "connection.client.poll.error"
               )
             when :max_poll_exceeded, *EARLY_REPORT_ERRORS
-              # The consumer has already sent LeaveGroup (max_poll_exceeded) or a serious but
-              # potentially transient condition occurred. Instrument early for visibility but
-              # break gracefully instead of raising. Raising would trigger a full listener reset
-              # that can discard coordinator state or suppress the revocation flow.
-              # The listener will retry on the next batch_poll cycle.
+              # Instrument and break gracefully regardless of fatality. Some of these errors
+              # (e.g., unreleased_instance_id from KIP-848 fencing) are marked fatal by
+              # librdkafka, but their recovery path is the rebalance callback, not a listener
+              # reset. Raising here would destroy coordinator state and suppress the revocation
+              # flow. The listener will see the rebalance on the next batch_poll cycle.
               Karafka.monitor.instrument(
                 "error.occurred",
                 caller: self,
@@ -192,9 +179,19 @@ module Karafka
               )
               graceful_break = true
             else
-              # Transient or recoverable error - librdkafka handles retries internally.
-              # Instrument for visibility; escalation is handled after the outer loop via
-              # @consecutive_poll_errors so we don't reset prematurely on a single occurrence.
+              # For any other fatal error the consumer is permanently dead — raise immediately.
+              # Non-fatal errors are transient; librdkafka retries internally and the
+              # @consecutive_poll_errors counter escalates after MAX_POLL_RETRIES if stuck.
+              if result.fatal?
+                Karafka.monitor.instrument(
+                  "error.occurred",
+                  caller: self,
+                  error: result,
+                  type: "connection.client.poll.error"
+                )
+                raise result
+              end
+
               last_poll_error = result
               Karafka.monitor.instrument(
                 "error.occurred",
