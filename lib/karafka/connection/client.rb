@@ -222,15 +222,25 @@ module Karafka
           end
 
           if graceful_break
-            # After max_poll_exceeded or similar, librdkafka has queued a revocation event
-            # but it may not have been delivered yet within this poll_batch call - the broker's
-            # LeaveGroup acknowledgment can arrive after poll_batch returns. One extra kafka.poll
-            # gives librdkafka a chance to process that response and fire the rebalance callback
-            # in this cycle rather than waiting a full batch_poll interval for the next one.
+            # Why this poll exists:
+            # max_poll_exceeded and similar errors mean the consumer has already left the group.
+            # The revocation rebalance callback fires when librdkafka processes the broker's
+            # LeaveGroup acknowledgment. That ack may arrive after poll_batch returns, so one
+            # extra kafka.poll gives librdkafka the opportunity to receive it and invoke the
+            # callback within this batch_poll cycle. Without it the callback fires on the next
+            # batch_poll call - a full polling interval of extra latency before revoke jobs run.
             # This must run BEFORE the stop-signal check: Karafka may already be stopping when
-            # the error arrives (the consumer finishes its work, wait_until calls Server.stop,
-            # then the next batch_poll gets max_poll_exceeded) - checking :stop first would skip
-            # this poll and delay the revoke job by a full batch_poll cycle.
+            # the error arrives, and checking :stop first would skip this poll entirely.
+            #
+            # What can come back:
+            # A message from a partition currently owned and in the process of being revoked.
+            # New assignments only exist after the full rebalance cycle completes, which is well
+            # past this point - so there is no risk of receiving data from a fresh assignment.
+            #
+            # Why we discard the returned message:
+            # The partition is being revoked; librdkafka will reject any offset commit for it.
+            # Buffering and processing the message would be wasted work - redelivery after
+            # reassignment guarantees correctness. We call poll purely for its side effect.
             begin
               kafka.poll(tick_interval)
             rescue Rdkafka::RdkafkaError
