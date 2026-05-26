@@ -95,7 +95,7 @@ module Karafka
         # no longer may be able to fetch them from Kafka. We could build them but it is easier
         # to just keep them here and use if needed when cannot be obtained
         @paused_tpls = Hash.new { |h, k| h[k] = {} }
-        @recoverable_errors_tracker = RecoverableErrorsTracker.new(MAX_POLL_RETRIES)
+        @consecutive_errors_tracker = ConsecutiveErrorsTracker.new(MAX_POLL_RETRIES)
       end
 
       # Fetches messages within boundaries defined by the settings (time, size, topics, etc).
@@ -232,7 +232,7 @@ module Karafka
           break if @buffer.eof?
         end
 
-        @recoverable_errors_tracker.call(recoverable_error, progress: !@buffer.empty?)
+        @consecutive_errors_tracker.call(recoverable_error, progress: !@buffer.empty?)
 
         @buffer
       end
@@ -449,7 +449,7 @@ module Karafka
           @interval_runner.reset
           @closed = false
           @paused_tpls.clear
-          @recoverable_errors_tracker.reset
+          @consecutive_errors_tracker.reset
         end
       end
 

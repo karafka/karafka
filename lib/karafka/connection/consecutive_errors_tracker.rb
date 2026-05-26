@@ -6,7 +6,7 @@ module Karafka
     # messages. After max_retries such batches, raises the last error so the listener
     # can reset the consumer and wait out the configured backoff - without this the
     # consumer can get permanently stuck on a persistent non-fatal error with no way out.
-    class RecoverableErrorsTracker
+    class ConsecutiveErrorsTracker
       # @param max_retries [Integer]
       def initialize(max_retries)
         @max_retries = max_retries
