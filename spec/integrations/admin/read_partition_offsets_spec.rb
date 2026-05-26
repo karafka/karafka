@@ -10,8 +10,8 @@ topic = DT.topics[0]
 Karafka::Admin.create_topic(topic, 2, 1)
 
 # Produce some messages so watermarks are non-trivial
-5.times { |i| PRODUCERS.regular.produce_sync(topic: topic, payload: i.to_s, partition: 0) }
-3.times { |i| PRODUCERS.regular.produce_sync(topic: topic, payload: i.to_s, partition: 1) }
+5.times { |i| Karafka.producer.produce_sync(topic: topic, payload: i.to_s, partition: 0) }
+3.times { |i| Karafka.producer.produce_sync(topic: topic, payload: i.to_s, partition: 1) }
 
 # --- :earliest ---
 earliest_results = Karafka::Admin.read_partition_offsets(
