@@ -50,7 +50,8 @@ module Karafka
     # that happens, this method will need to release that shared instance. The no-op is here now
     # so that all callers are already written against the correct API and require no changes when
     # the real implementation lands.
-    def close; end
+    def close
+    end
 
     class << self
       # Delegate topic-related operations to Topics class
