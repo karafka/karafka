@@ -69,7 +69,12 @@ other = Thread.new do
       DT[:data][message.partition] << message.payload.to_i
 
       consumer.store_offset(message)
-      consumer.commit
+
+      begin
+        consumer.commit
+      rescue Rdkafka::RdkafkaError => e
+        raise unless e.code == :no_offset
+      end
 
       break
     end
