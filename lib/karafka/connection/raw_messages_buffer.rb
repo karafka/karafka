@@ -22,7 +22,7 @@ module Karafka
       # @return [Karafka::Connection::MessagesBuffer] buffer instance
       def initialize
         @size = 0
-        @any_eof = false
+        @eof_count = 0
         @last_polled_at = monotonic_now
 
         @groups = Hash.new do |topic_groups, topic|
@@ -42,6 +42,9 @@ module Karafka
       def <<(message)
         @size += 1
         partition_state = @groups[message.topic][message.partition]
+        # A new message clears the EOF marker for this partition. Adjust the counter so
+        # eof? accurately reflects only partitions that are still at EOF.
+        @eof_count -= 1 if partition_state[:eof]
         partition_state[:messages] << message
         partition_state[:eof] = false
       end
@@ -50,13 +53,14 @@ module Karafka
       # @param topic [String] topic that reached eof
       # @param partition [Integer] partition that reached eof
       def eof(topic, partition)
-        @any_eof = true
-        @groups[topic][partition][:eof] = true
+        partition_state = @groups[topic][partition]
+        @eof_count += 1 unless partition_state[:eof]
+        partition_state[:eof] = true
       end
 
       # @return [Boolean] true if any partition has been marked as having reached EOF
       def eof?
-        @any_eof
+        @eof_count.positive?
       end
 
       # @return [Boolean] true if the buffer contains no messages
@@ -92,6 +96,7 @@ module Karafka
         return unless @groups.fetch(topic).key?(partition)
 
         topic_data = @groups.fetch(topic)
+        @eof_count -= 1 if topic_data[partition][:eof]
         topic_data.delete(partition)
 
         recount!
@@ -127,7 +132,7 @@ module Karafka
       #   discover new messages for given topic partition.
       def clear
         @size = 0
-        @any_eof = false
+        @eof_count = 0
         @groups.each_value(&:clear)
       end
 

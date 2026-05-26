@@ -196,14 +196,18 @@ RSpec.describe_current do
     let(:max_messages) { 100 }
 
     before do
-      allow(client).to receive(:kafka).and_return(kafka)
-      allow(client).to receive(:events_poll)
-      allow(client).to receive(:tick_interval).and_return(100)
-      allow(client).to receive(:running?).and_return(true)
-      allow(client).to receive(:interval_runner).and_return(-> { :run })
+      allow(client).to receive_messages(
+        kafka: kafka,
+        events_poll: nil,
+        tick_interval: 100,
+        running?: true,
+        interval_runner: -> { :run }
+      )
       allow(kafka).to receive(:events_poll)
-      allow(subscription_group).to receive(:max_wait_time).and_return(max_wait_time)
-      allow(subscription_group).to receive(:max_messages).and_return(max_messages)
+      allow(subscription_group).to receive_messages(
+        max_wait_time: max_wait_time,
+        max_messages: max_messages
+      )
     end
 
     def make_error(code_int, fatal: false)
