@@ -122,7 +122,6 @@ module Karafka
 
           remaining_capacity = @subscription_group.max_messages - @buffer.size
           poll_tick = [time_poll.remaining, tick_interval].min
-          got_eof = false
           first_error = nil
           # Set when max_poll_exceeded is returned inline. The consumer has already sent
           # LeaveGroup; we instrument the error but must not raise - raising would trigger a
@@ -158,7 +157,6 @@ module Karafka
             case result.code
             when :partition_eof
               @buffer.eof(result.details[:topic], result.details[:partition])
-              got_eof = true
             when :unknown_topic_or_part, :unknown_topic, :unknown_partition
               next if @subscription_group.kafka[:"allow.auto.create.topics"]
 
@@ -217,14 +215,12 @@ module Karafka
 
           if graceful_break
             # After max_poll_exceeded or similar, the rebalance/revocation callback is queued
-            # internally but not yet delivered. One extra rd_kafka_consumer_poll call flushes the
-            # pending callback into @rebalance_manager so the listener can schedule revoke jobs.
-            # We use kafka.poll (rd_kafka_consumer_poll) here, NOT poll_batch
-            # (rd_kafka_consume_batch_queue), because only rd_kafka_consumer_poll invokes the
-            # registered rebalance callback. This must also run BEFORE the stop-signal check:
-            # Karafka may already be stopping when the error arrives (the consumer finishes its
-            # work, wait_until calls Server.stop, then the next batch_poll gets max_poll_exceeded)
-            # — checking :stop first would skip this poll and the revoke job would be missed.
+            # internally but not yet delivered. One extra kafka.poll call flushes the pending
+            # callback into @rebalance_manager so the listener can schedule revoke jobs.
+            # This must run BEFORE the stop-signal check: Karafka may already be stopping when
+            # the error arrives (the consumer finishes its work, wait_until calls Server.stop,
+            # then the next batch_poll gets max_poll_exceeded) - checking :stop first would skip
+            # this poll and the revoke job would be missed.
             begin
               message = kafka.poll(tick_interval)
               @buffer << message if message
@@ -245,7 +241,7 @@ module Karafka
           # When there were no results at all, time_poll.exceeded? at the top of the next
           # iteration handles the exit; no explicit nil-break is needed because poll_batch
           # always blocks for the full poll_tick before returning empty.
-          break if got_eof
+          break if @buffer.eof?
         end
 
         @buffer

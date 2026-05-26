@@ -134,6 +134,29 @@ RSpec.describe_current do
     end
   end
 
+  describe "#eof?" do
+    let(:message) { build(:messages_message) }
+
+    context "when no partitions have been marked as EOF" do
+      it { expect(buffer.eof?).to be(false) }
+    end
+
+    context "when a partition has been marked as EOF" do
+      before { buffer.eof(message.topic, message.partition) }
+
+      it { expect(buffer.eof?).to be(true) }
+    end
+
+    context "when a partition was marked as EOF but a message arrived after" do
+      before do
+        buffer.eof(message.topic, message.partition)
+        buffer << message
+      end
+
+      it { expect(buffer.eof?).to be(false) }
+    end
+  end
+
   describe "#clear" do
     before { buffer << build(:messages_message) }
 
