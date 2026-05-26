@@ -122,7 +122,6 @@ module Karafka
 
           remaining_capacity = @subscription_group.max_messages - @buffer.size
           poll_tick = [time_poll.remaining, tick_interval].min
-          first_error = nil
           # Set when max_poll_exceeded is returned inline. The consumer has already sent
           # LeaveGroup; we instrument the error but must not raise - raising would trigger a
           # full listener reset that discards coordinator state needed for proper
@@ -131,10 +130,11 @@ module Karafka
           graceful_break = false
 
           # poll_batch returns Array<Message, RdkafkaError> - errors are inline, never raised.
-          # We always iterate the full batch before acting on errors so that messages appearing
-          # after an error (e.g. from other partitions following an EOF or an unknown-topic error)
-          # are not silently dropped by an early raise. Fatal errors are the exception - the
-          # consumer is dead at that point so there is no value in continuing.
+          # We always iterate the full batch so messages from other partitions after an error are
+          # not silently dropped. Fatal non-EARLY errors are the only case where we raise: the
+          # consumer is dead and no recovery is possible. All other errors are instrumented and
+          # skipped - librdkafka has already exhausted its internal retry budget and will continue
+          # to recover on subsequent polls, matching the behaviour of the old poll retry loop.
           kafka.poll_batch(poll_tick, max_items: remaining_capacity).each do |result|
             unless result.is_a?(Rdkafka::RdkafkaError)
               @buffer << result
@@ -183,7 +183,9 @@ module Karafka
               )
               graceful_break = true
             else
-              first_error ||= result
+              # Transient or recoverable error - librdkafka handles retries internally.
+              # Instrument for visibility but do not raise: a listener reset would be premature
+              # and more disruptive than letting the next batch_poll attempt succeed naturally.
               Karafka.monitor.instrument(
                 "error.occurred",
                 caller: self,
@@ -192,8 +194,6 @@ module Karafka
               )
             end
           end
-
-          raise first_error if first_error && !graceful_break
 
           # We track when last polling happened so we can provide means to detect upcoming
           # `max.poll.interval.ms` limit
