@@ -39,11 +39,15 @@ module Karafka
 
           # Responds to a HTTP request with the process liveness status
           def respond
-            body = JSON.generate(status_body)
-
             client = @server.accept
             client.gets
-            client.print "HTTP/1.1 #{healthy? ? OK_CODE : FAIL_CODE}\r\n"
+            # Compute body after accepting so it reflects current health at request time.
+            # Derive the HTTP status code from the same snapshot to guarantee consistency -
+            # calling healthy? separately could observe a different state.
+            snapshot = status_body
+            body = JSON.generate(snapshot)
+            code = (snapshot[:status] == "healthy") ? OK_CODE : FAIL_CODE
+            client.print "HTTP/1.1 #{code}\r\n"
             client.print "Content-Type: application/json\r\n"
             client.print "Content-Length: #{body.bytesize}\r\n"
             client.print "\r\n"

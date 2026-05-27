@@ -38,6 +38,21 @@ module Karafka
       @custom_kafka = kafka
     end
 
+    # No-op close to normalize the API surface.
+    #
+    # Each admin operation currently opens and closes its own underlying rdkafka admin instance
+    # internally, so there is nothing to release at the `Karafka::Admin` level right now. This
+    # method exists so that callers who hold an instance and call `#close` on it (matching the
+    # pattern of other closeable resources) do not raise `NoMethodError`.
+    #
+    # In the future, `Karafka::Admin` is planned to be refactored to reuse a single rdkafka admin
+    # instance across multiple operations rather than creating and tearing one down per call. When
+    # that happens, this method will need to release that shared instance. The no-op is here now
+    # so that all callers are already written against the correct API and require no changes when
+    # the real implementation lands.
+    def close
+    end
+
     class << self
       # Delegate topic-related operations to Topics class
 
@@ -78,6 +93,13 @@ module Karafka
       # @see Topics.read_watermark_offsets
       def read_watermark_offsets(name_or_hash, partition = nil)
         new.read_watermark_offsets(name_or_hash, partition)
+      end
+
+      # @param topic_partition_offsets [Hash{String => Array<Hash>}] topics with partition specs
+      # @param isolation_level [Integer, nil] optional isolation level constant
+      # @see Topics.read_partition_offsets
+      def read_partition_offsets(topic_partition_offsets, isolation_level: nil)
+        new.read_partition_offsets(topic_partition_offsets, isolation_level: isolation_level)
       end
 
       # @param topic_name [String] name of the topic we're interested in
@@ -266,6 +288,13 @@ module Karafka
     # @see Topics#read_watermark_offsets
     def read_watermark_offsets(name_or_hash, partition = nil)
       Topics.new(kafka: @custom_kafka).read_watermark_offsets(name_or_hash, partition)
+    end
+
+    # @param topic_partition_offsets [Hash{String => Array<Hash>}] topics with partition specs
+    # @param isolation_level [Integer, nil] optional isolation level constant
+    # @see Topics#read_partition_offsets
+    def read_partition_offsets(topic_partition_offsets, isolation_level: nil)
+      Topics.new(kafka: @custom_kafka).read_partition_offsets(topic_partition_offsets, isolation_level: isolation_level)
     end
 
     # @param topic_name [String] name of the topic we're interested in
