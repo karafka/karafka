@@ -6,11 +6,11 @@ RSpec.describe_current do
   describe "#call" do
     context "when there is no error" do
       it "does not raise" do
-        expect { tracker.call(nil, progress: false) }.not_to raise_error
+        expect { tracker.call(nil, with_messages: false) }.not_to raise_error
       end
 
       it "resets the count" do
-        tracker.call(nil, progress: false)
+        tracker.call(nil, with_messages: false)
         expect(tracker.instance_variable_get(:@count)).to eq(0)
       end
     end
@@ -19,12 +19,12 @@ RSpec.describe_current do
       let(:error) { Rdkafka::RdkafkaError.new(-1) }
 
       it "does not raise" do
-        expect { tracker.call(error, progress: true) }.not_to raise_error
+        expect { tracker.call(error, with_messages: true) }.not_to raise_error
       end
 
       it "resets the count" do
         tracker.instance_variable_set(:@count, 2)
-        tracker.call(error, progress: true)
+        tracker.call(error, with_messages: true)
         expect(tracker.instance_variable_get(:@count)).to eq(0)
       end
     end
@@ -33,18 +33,18 @@ RSpec.describe_current do
       let(:error) { Rdkafka::RdkafkaError.new(-1) }
 
       it "does not raise before the threshold" do
-        expect { tracker.call(error, progress: false) }.not_to raise_error
-        expect { tracker.call(error, progress: false) }.not_to raise_error
+        expect { tracker.call(error, with_messages: false) }.not_to raise_error
+        expect { tracker.call(error, with_messages: false) }.not_to raise_error
       end
 
       it "raises at the threshold" do
         tracker.instance_variable_set(:@count, 2)
-        expect { tracker.call(error, progress: false) }.to raise_error(Rdkafka::RdkafkaError)
+        expect { tracker.call(error, with_messages: false) }.to raise_error(Rdkafka::RdkafkaError)
       end
 
       it "raises the error that was passed in" do
         tracker.instance_variable_set(:@count, 2)
-        expect { tracker.call(error, progress: false) }.to raise_error(error)
+        expect { tracker.call(error, with_messages: false) }.to raise_error(error)
       end
     end
   end
