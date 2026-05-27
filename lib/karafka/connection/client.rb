@@ -245,7 +245,7 @@ module Karafka
           break if @buffer.eof?
         end
 
-        @consecutive_errors_tracker.call(recoverable_error, progress: !@buffer.empty?)
+        @consecutive_errors_tracker.call(recoverable_error, with_messages: !@buffer.empty?)
 
         @buffer
       end

@@ -18,9 +18,9 @@ module Karafka
       # the threshold is reached. Resets when progress is made or no error occurred.
       #
       # @param error [Rdkafka::RdkafkaError, nil] last recoverable error seen, or nil
-      # @param progress [Boolean] true if the buffer contained at least one message
-      def call(error, progress:)
-        if error && !progress
+      # @param with_messages [Boolean] true if the buffer contained at least one message
+      def call(error, with_messages:)
+        if error && !with_messages
           @count += 1
           raise error if @count >= @max_retries
         else
