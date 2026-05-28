@@ -4,7 +4,7 @@ module Karafka
   module Connection
     class Client
       module PollingStrategies
-        # Polling strategy for consumers that use enable.partition.eof. Uses the single-message
+        # Polling strategy for consumers with enable.partition.eof enabled. Uses the single-message
         # poll path which returns immediately on any event including EOF, preserving the
         # low-latency yielding that EOF consumers depend on.
         #
