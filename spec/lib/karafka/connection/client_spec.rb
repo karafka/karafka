@@ -344,10 +344,16 @@ RSpec.describe_current do
 
     context "when enable.partition.eof is set" do
       let(:eof_error) { make_error(-191) }
-      let(:kafka_config) { { "enable.partition.eof": true } }
+      # Override subscription_group so the kafka config stub is in place before
+      # client is initialized - the outer before block accesses client (triggering
+      # initialize) before any inner before blocks run.
+      let(:subscription_group) do
+        sg = build(:routing_subscription_group)
+        allow(sg).to receive(:kafka).and_return({ "enable.partition.eof": true })
+        sg
+      end
 
       before do
-        allow(subscription_group).to receive(:kafka).and_return(kafka_config)
         allow(eof_error).to receive(:details).and_return({ topic: "test", partition: 0 })
         allow(kafka).to receive(:poll).and_raise(eof_error)
       end
