@@ -113,139 +113,16 @@ module Karafka
 
         events_poll
 
-        # Tracks the last recoverable error seen across the full batch_poll invocation.
-        # Used to raise for escalation after MAX_POLL_RETRIES consecutive error-only batches.
-        recoverable_error = nil
-
-        loop do
-          time_poll.start
-
-          # Don't fetch more messages if we do not have any time left
-          break if time_poll.exceeded?
-          # Don't fetch more messages if we've fetched max that we've wanted
-          break if @buffer.size >= @subscription_group.max_messages
-
-          remaining_capacity = @subscription_group.max_messages - @buffer.size
-          poll_tick = [time_poll.remaining, tick_interval].min
-          # Set when max_poll_exceeded is returned inline. The consumer has already sent
-          # LeaveGroup; we instrument the error but must not raise - raising would trigger a
-          # full listener reset that discards coordinator state needed for proper
-          # post-revocation handling. Instead we break gracefully and let the normal
-          # rebalance path process the revocation on this or the next batch_poll cycle.
-          graceful_break = false
-
-          # poll_batch returns Array<Message, RdkafkaError> - errors are inline, never raised.
-          # We always iterate the full batch so messages from other partitions after an error are
-          # not silently dropped. Fatal non-EARLY errors are the only case where we raise: the
-          # consumer is dead and no recovery is possible. All other errors are instrumented and
-          # skipped - librdkafka has already exhausted its internal retry budget and will continue
-          # to recover on subsequent polls, matching the behaviour of the old poll retry loop.
-          kafka.poll_batch(poll_tick, max_items: remaining_capacity).each do |result|
-            unless result.is_a?(Rdkafka::RdkafkaError)
-              @buffer << result
-              next
-            end
-
-            case result.code
-            when :partition_eof
-              @buffer.eof(result.details[:topic], result.details[:partition])
-            when :unknown_topic_or_part, :unknown_topic, :unknown_partition
-              next if @subscription_group.kafka[:"allow.auto.create.topics"]
-
-              # Instrument but do not raise and do not feed the safety valve. A missing topic
-              # is a configuration issue - resetting the consumer won't fix it and would only
-              # generate pointless rebalances. Messages from other topics must still be returned.
-              Karafka.monitor.instrument(
-                "error.occurred",
-                caller: self,
-                error: result,
-                type: "connection.client.poll.error"
-              )
-            when :max_poll_exceeded, *EARLY_REPORT_ERRORS
-              # Instrument and break gracefully regardless of fatality. Some of these errors
-              # (e.g., unreleased_instance_id from KIP-848 fencing) are marked fatal by
-              # librdkafka, but their recovery path is the rebalance callback, not a listener
-              # reset. Raising here would destroy coordinator state and suppress the revocation
-              # flow. The listener will see the rebalance on the next batch_poll cycle.
-              Karafka.monitor.instrument(
-                "error.occurred",
-                caller: self,
-                error: result,
-                type: "connection.client.poll.error"
-              )
-              graceful_break = true
-            else
-              # For any other fatal error the consumer is permanently dead - raise immediately.
-              # Non-fatal errors are transient; librdkafka retries internally and the
-              # @consecutive_poll_errors counter escalates after MAX_POLL_RETRIES if stuck.
-              if result.fatal?
-                Karafka.monitor.instrument(
-                  "error.occurred",
-                  caller: self,
-                  error: result,
-                  type: "connection.client.poll.error"
-                )
-                raise result
-              end
-
-              recoverable_error = result
-              Karafka.monitor.instrument(
-                "error.occurred",
-                caller: self,
-                error: result,
-                type: "connection.client.poll.error"
-              )
-            end
-          end
-
-          # We track when last polling happened so we can provide means to detect upcoming
-          # `max.poll.interval.ms` limit
-          @buffer.polled
-
-          # Upon polling rebalance manager might have been updated.
-          # If partition revocation happens, we need to remove messages from revoked partitions
-          # as well as ensure we do not have duplicated due to the offset reset for partitions
-          # that we got assigned
-          #
-          # We also do early break, so the information about rebalance is used as soon as possible
-          if @rebalance_manager.changed?
-            # Since rebalances do not occur often, we can run events polling as well without
-            # any throttling
-            events_poll
-
-            break
-          end
-
-          if graceful_break
-            # After max_poll_exceeded or other EARLY_REPORT_ERRORS, the revocation callback
-            # arrives asynchronously via the librdkafka heartbeat background thread. Polling
-            # here releases the GVL so that thread can acquire it, fire the rebalance callback,
-            # and update the rebalance manager before we return to the listener. Without this
-            # poll the revocation arrives only after the shutdown sequence starts, too late for
-            # the listener to schedule revoke jobs on the current cycle.
-            kafka.poll_batch(tick_interval, max_items: remaining_capacity).each do |result|
-              @buffer << result unless result.is_a?(Rdkafka::RdkafkaError)
-            end
-
-            events_poll if @rebalance_manager.changed?
-
-            break
-          end
-
-          # If we were signaled from the outside to break the loop, we should
-          break if @interval_runner.call == :stop
-
-          # Track time spent on all of the processing and polling
-          time_poll.checkpoint
-
-          # Propagate EOF as soon as it arrives so the consumer can act on it immediately.
-          # When there were no results at all, time_poll.exceeded? at the top of the next
-          # iteration handles the exit; no explicit nil-break is needed because poll_batch
-          # always blocks for the full poll_tick before returning empty.
-          break if @buffer.eof?
+        # When enable.partition.eof is on, consumers rely on the EOF signal for low-latency
+        # yielding. poll_batch does not return early on EOF - rd_kafka_consume_batch_queue
+        # keeps waiting for max_items until abs_timeout even after an EOF arrives. The old
+        # single-poll path returns immediately on any event including EOF, so we use it here
+        # to preserve that latency characteristic.
+        if @subscription_group.kafka[:"enable.partition.eof"]
+          batch_poll_eof(time_poll)
+        else
+          batch_poll_batch(time_poll)
         end
-
-        @consecutive_errors_tracker.call(recoverable_error, with_messages: !@buffer.empty?)
 
         @buffer
       end
@@ -543,6 +420,183 @@ module Karafka
       end
 
       private
+
+      # Inner poll loop used when enable.partition.eof is set. Uses the single-message poll
+      # path which returns immediately on any event including EOF, preserving low-latency
+      # yielding for consumers that rely on the EOF signal.
+      def batch_poll_eof(time_poll)
+        loop do
+          time_poll.start
+
+          break if time_poll.exceeded?
+          break if @buffer.size >= @subscription_group.max_messages
+
+          response = poll(time_poll.remaining)
+
+          @buffer.polled
+
+          case response
+          when :tick_time
+            nil
+          when Hash
+            @buffer.eof(response[:topic], response[:partition])
+          when nil
+            nil
+          else
+            @buffer << response
+          end
+
+          if @rebalance_manager.changed?
+            events_poll
+            break
+          end
+
+          break if @interval_runner.call == :stop
+
+          time_poll.checkpoint
+
+          break if response.nil? || response.is_a?(Hash)
+        end
+      end
+
+      # Inner poll loop used when enable.partition.eof is not set. Uses poll_batch for
+      # maximum throughput: collects up to max_messages in one C call per tick.
+      #
+      # poll_batch returns Array<Message, RdkafkaError> - errors are inline, never raised.
+      # We always iterate the full batch so messages from other partitions after an error are
+      # not silently dropped. Fatal non-EARLY errors are the only case where we raise: the
+      # consumer is dead and no recovery is possible. All other errors are instrumented and
+      # skipped - librdkafka has already exhausted its internal retry budget and will continue
+      # to recover on subsequent polls, matching the behaviour of the old poll retry loop.
+      def batch_poll_batch(time_poll)
+        # Tracks the last recoverable error seen across the full batch_poll invocation.
+        # Used to raise for escalation after MAX_POLL_RETRIES consecutive error-only batches.
+        recoverable_error = nil
+
+        loop do
+          time_poll.start
+
+          # Don't fetch more messages if we do not have any time left
+          break if time_poll.exceeded?
+          # Don't fetch more messages if we've fetched max that we've wanted
+          break if @buffer.size >= @subscription_group.max_messages
+
+          remaining_capacity = @subscription_group.max_messages - @buffer.size
+          poll_tick = [time_poll.remaining, tick_interval].min
+          # Set when max_poll_exceeded is returned inline. The consumer has already sent
+          # LeaveGroup; we instrument the error but must not raise - raising would trigger a
+          # full listener reset that discards coordinator state needed for proper
+          # post-revocation handling. Instead we break gracefully and let the normal
+          # rebalance path process the revocation on this or the next batch_poll cycle.
+          graceful_break = false
+
+          kafka.poll_batch(poll_tick, max_items: remaining_capacity).each do |result|
+            unless result.is_a?(Rdkafka::RdkafkaError)
+              @buffer << result
+              next
+            end
+
+            case result.code
+            when :partition_eof
+              @buffer.eof(result.details[:topic], result.details[:partition])
+            when :unknown_topic_or_part, :unknown_topic, :unknown_partition
+              next if @subscription_group.kafka[:"allow.auto.create.topics"]
+
+              # Instrument but do not raise and do not feed the safety valve. A missing topic
+              # is a configuration issue - resetting the consumer won't fix it and would only
+              # generate pointless rebalances. Messages from other topics must still be returned.
+              Karafka.monitor.instrument(
+                "error.occurred",
+                caller: self,
+                error: result,
+                type: "connection.client.poll.error"
+              )
+            when :max_poll_exceeded, *EARLY_REPORT_ERRORS
+              # Instrument and break gracefully regardless of fatality. Some of these errors
+              # (e.g., unreleased_instance_id from KIP-848 fencing) are marked fatal by
+              # librdkafka, but their recovery path is the rebalance callback, not a listener
+              # reset. Raising here would destroy coordinator state and suppress the revocation
+              # flow. The listener will see the rebalance on the next batch_poll cycle.
+              Karafka.monitor.instrument(
+                "error.occurred",
+                caller: self,
+                error: result,
+                type: "connection.client.poll.error"
+              )
+              graceful_break = true
+            else
+              # For any other fatal error the consumer is permanently dead - raise immediately.
+              # Non-fatal errors are transient; librdkafka retries internally and the
+              # @consecutive_poll_errors counter escalates after MAX_POLL_RETRIES if stuck.
+              if result.fatal?
+                Karafka.monitor.instrument(
+                  "error.occurred",
+                  caller: self,
+                  error: result,
+                  type: "connection.client.poll.error"
+                )
+                raise result
+              end
+
+              recoverable_error = result
+              Karafka.monitor.instrument(
+                "error.occurred",
+                caller: self,
+                error: result,
+                type: "connection.client.poll.error"
+              )
+            end
+          end
+
+          # We track when last polling happened so we can provide means to detect upcoming
+          # `max.poll.interval.ms` limit
+          @buffer.polled
+
+          # Upon polling rebalance manager might have been updated.
+          # If partition revocation happens, we need to remove messages from revoked partitions
+          # as well as ensure we do not have duplicated due to the offset reset for partitions
+          # that we got assigned
+          #
+          # We also do early break, so the information about rebalance is used as soon as possible
+          if @rebalance_manager.changed?
+            # Since rebalances do not occur often, we can run events polling as well without
+            # any throttling
+            events_poll
+
+            break
+          end
+
+          if graceful_break
+            # After max_poll_exceeded or other EARLY_REPORT_ERRORS, the revocation callback
+            # arrives asynchronously via the librdkafka heartbeat background thread. Polling
+            # here releases the GVL so that thread can acquire it, fire the rebalance callback,
+            # and update the rebalance manager before we return to the listener. Without this
+            # poll the revocation arrives only after the shutdown sequence starts, too late for
+            # the listener to schedule revoke jobs on the current cycle.
+            kafka.poll_batch(tick_interval, max_items: remaining_capacity).each do |result|
+              @buffer << result unless result.is_a?(Rdkafka::RdkafkaError)
+            end
+
+            events_poll if @rebalance_manager.changed?
+
+            break
+          end
+
+          # If we were signaled from the outside to break the loop, we should
+          break if @interval_runner.call == :stop
+
+          # Track time spent on all of the processing and polling
+          time_poll.checkpoint
+
+          # Propagate EOF as soon as it arrives so the consumer can act on it immediately.
+          # When there were no results at all, time_poll.exceeded? at the top of the next
+          # iteration handles the exit; no explicit nil-break is needed because poll_batch
+          # always blocks for the full poll_tick before returning empty.
+          break if @buffer.eof?
+        end
+
+        @consecutive_errors_tracker.call(recoverable_error, with_messages: !@buffer.empty?)
+      end
 
       # When we cannot store an offset, it means we no longer own the partition
       #

@@ -341,5 +341,23 @@ RSpec.describe_current do
         expect { client.batch_poll }.to raise_error(Rdkafka::RdkafkaError)
       end
     end
+
+    context "when enable.partition.eof is set" do
+      let(:eof_error) { make_error(-191) }
+      let(:kafka_config) { { :"enable.partition.eof" => true } }
+
+      before do
+        allow(subscription_group).to receive(:kafka).and_return(kafka_config)
+        allow(eof_error).to receive(:details).and_return({ topic: "test", partition: 0 })
+        allow(kafka).to receive(:poll).and_raise(eof_error)
+      end
+
+      it "uses the single-poll path: marks EOF and does not call poll_batch" do
+        allow(kafka).to receive(:poll_batch)
+        expect { client.batch_poll }.not_to raise_error
+        expect(client.instance_variable_get(:@buffer).eof?).to be(true)
+        expect(kafka).not_to have_received(:poll_batch)
+      end
+    end
   end
 end
