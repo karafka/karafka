@@ -424,6 +424,7 @@ module Karafka
       # Inner poll loop used when enable.partition.eof is set. Uses the single-message poll
       # path which returns immediately on any event including EOF, preserving low-latency
       # yielding for consumers that rely on the EOF signal.
+      # @param time_poll [Karafka::TimeTrackers::Poll] poll time tracker
       def batch_poll_eof(time_poll)
         loop do
           time_poll.start
@@ -468,6 +469,7 @@ module Karafka
       # consumer is dead and no recovery is possible. All other errors are instrumented and
       # skipped - librdkafka has already exhausted its internal retry budget and will continue
       # to recover on subsequent polls, matching the behaviour of the old poll retry loop.
+      # @param time_poll [Karafka::TimeTrackers::Poll] poll time tracker
       def batch_poll_batch(time_poll)
         # Tracks the last recoverable error seen across the full batch_poll invocation.
         # Used to raise for escalation after MAX_POLL_RETRIES consecutive error-only batches.

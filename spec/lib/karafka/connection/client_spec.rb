@@ -344,7 +344,7 @@ RSpec.describe_current do
 
     context "when enable.partition.eof is set" do
       let(:eof_error) { make_error(-191) }
-      let(:kafka_config) { { :"enable.partition.eof" => true } }
+      let(:kafka_config) { { "enable.partition.eof": true } }
 
       before do
         allow(subscription_group).to receive(:kafka).and_return(kafka_config)
