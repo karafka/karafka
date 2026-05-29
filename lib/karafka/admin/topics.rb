@@ -247,7 +247,7 @@ module Karafka
         result = Hash.new { |h, k| h[k] = {} }
         topics_with_partitions.each do |topic, partitions|
           partitions.each do |partition_id|
-            result[topic][partition_id] = [lows.dig(topic, partition_id), highs.dig(topic, partition_id)]
+            result[topic][partition_id] = [lows.dig(topic.to_s, partition_id), highs.dig(topic.to_s, partition_id)]
           end
         end
 

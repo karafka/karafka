@@ -170,8 +170,9 @@ module Karafka
             # Collect all partitions where the timestamp is beyond the last message
             # (negative offset returned) so we can fetch their HWMs in a single batch
             # admin call instead of one per-partition consumer call
+            real_offsets_by_topic = real_offsets.to_h
             hwm_specs = {}
-            real_offsets.to_h.each do |name, results|
+            real_offsets_by_topic.each do |name, results|
               results.each do |result|
                 raise(Errors::InvalidTimeBasedOffsetError) unless result
                 next unless result.offset.negative?
@@ -189,7 +190,7 @@ module Karafka
               end
             end
 
-            real_offsets.to_h.each do |name, results|
+            real_offsets_by_topic.each do |name, results|
               results.each do |result|
                 partition = result.partition
                 # If offset is negative the timestamp was beyond the last message; use HWM
