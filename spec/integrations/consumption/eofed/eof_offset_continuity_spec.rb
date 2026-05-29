@@ -1,14 +1,16 @@
 # frozen_string_literal: true
 
 # Regression test to ensure correct offset handling when EOF is reached and subsequent
-# messages are produced.
+# messages are produced, using the Eof polling strategy (enable.partition.eof = true).
 #
-# Note: While librdkafka has a bug in rd_kafka_consume_batch() where offsets can be
-# incorrectly advanced by 2 after EOF (see https://github.com/confluentinc/librdkafka/pull/5213),
-# this bug does NOT affect Karafka as we use different APIs (rd_kafka_consumer_poll).
+# There is a known librdkafka bug in rd_kafka_consume_batch() where rd_kafka_position()
+# can be incorrectly advanced by 2 after an EOF event:
+# https://github.com/confluentinc/librdkafka/pull/5213
 #
-# However, the bug affects rd_kafka_position(), which we use. This test verifies that
-# position tracking remains correct after EOF.
+# The Eof polling strategy uses rd_kafka_consumer_poll (not rd_kafka_consume_batch).
+# A companion test (consumption/offset_continuity_spec.rb) covers the Batch polling strategy
+# path (rd_kafka_consume_batch_queue). This test verifies position tracking is correct
+# in the Eof strategy path.
 #
 # Test scenario:
 # 1. Produce 5 messages (offsets 0-4)
