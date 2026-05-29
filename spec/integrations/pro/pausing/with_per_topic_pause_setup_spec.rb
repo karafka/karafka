@@ -72,12 +72,17 @@ end
 3.times { |i| produce(DT.topics[i], "0") }
 
 start_karafka_and_wait_until do
-  DT.data.size >= 3 && DT.data.all? { |_, v| v.size >= 5 }
+  DT.data.size >= 3 &&
+    DT[DT.topics[0]].size >= 6 &&
+    DT[DT.topics[1]].size >= 6 &&
+    DT[DT.topics[2]].size >= 5
 end
 
 previous = nil
 
-DT[DT.topics[0]].each do |time|
+# Use first(6) (5 diffs) to avoid CI timing artifacts: late-collected entries near
+# teardown can have large gaps unrelated to the configured pause value
+DT[DT.topics[0]].first(6).each do |time|
   unless previous
     previous = time
     next
@@ -93,7 +98,8 @@ end
 
 previous = nil
 
-DT[DT.topics[1]].each do |time|
+# Same first(6) limit as topic[0] — guaranteed by the wait condition above
+DT[DT.topics[1]].first(6).each do |time|
   unless previous
     previous = time
     next

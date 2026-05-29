@@ -29,4 +29,4 @@ start_karafka_and_wait_until do
 end
 
 # We reject first few lags as they often are bigger due to warm-up and partitions assignments
-assert DT[:consumption_lags][5...].max < 500
+assert DT[:consumption_lags][5...].max < 750

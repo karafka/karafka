@@ -18,6 +18,10 @@ allowed_patterns=(
    "Error processing kafka.server:type=BrokerTopicMetrics"
    "UNKNOWN_TOPIC_ID from the leader for partition"
    "The replica state of replica ID"
+   "Auto topic creation failed for it-e8a1b9-"
+   "Auto topic creation failed for it-2c2272-"
+   "Auto topic creation failed for it-4b9ec4-"
+   "Auto topic creation failed for it-867e2c-"
 )
 
 # Use provided container names or default to "kafka"

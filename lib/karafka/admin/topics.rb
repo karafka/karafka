@@ -52,6 +52,13 @@ module Karafka
         def info(topic_name)
           new.info(topic_name)
         end
+
+        # @param topic_partition_offsets [Hash{String => Array<Hash>}] topics with partition specs
+        # @param isolation_level [Integer, nil] optional isolation level constant
+        # @see #read_partition_offsets
+        def read_partition_offsets(topic_partition_offsets, isolation_level: nil)
+          new.read_partition_offsets(topic_partition_offsets, isolation_level: isolation_level)
+        end
       end
 
       # Allows us to read messages from the topic
@@ -217,18 +224,107 @@ module Karafka
         # Normalize input to hash format
         topics_with_partitions = partition ? { name_or_hash => [partition] } : name_or_hash
 
-        result = Hash.new { |h, k| h[k] = {} }
+        low_specs = {}
+        high_specs = {}
 
-        with_consumer do |consumer|
-          topics_with_partitions.each do |topic, partitions|
-            partitions.each do |partition_id|
-              result[topic][partition_id] = consumer.query_watermark_offsets(topic, partition_id)
-            end
+        topics_with_partitions.each do |topic, partitions|
+          low_specs[topic] = partitions.map { |p| { partition: p, offset: :earliest } }
+          high_specs[topic] = partitions.map { |p| { partition: p, offset: :latest } }
+        end
+
+        lows = {}
+        highs = {}
+
+        with_admin do |admin|
+          admin.list_offsets(low_specs).wait(max_wait_timeout_ms: max_wait_time_ms).offsets.each do |r|
+            (lows[r[:topic]] ||= {})[r[:partition]] = r[:offset]
+          end
+          admin.list_offsets(high_specs).wait(max_wait_timeout_ms: max_wait_time_ms).offsets.each do |r|
+            (highs[r[:topic]] ||= {})[r[:partition]] = r[:offset]
+          end
+        end
+
+        result = Hash.new { |h, k| h[k] = {} }
+        topics_with_partitions.each do |topic, partitions|
+          partitions.each do |partition_id|
+            result[topic][partition_id] = [lows.dig(topic.to_s, partition_id), highs.dig(topic.to_s, partition_id)]
           end
         end
 
         # Return single array for single partition query, hash for multiple
         partition ? result.dig(name_or_hash, partition) : result
+      end
+
+      # Queries partition offsets by specification using the Kafka ListOffsets admin API.
+      #
+      # This is a lower-level, more flexible alternative to `#read_watermark_offsets`. The key
+      # differences are:
+      #
+      # - Transactional correctness: `read_watermark_offsets` always returns the high-watermark
+      #   offset, which includes messages from uncommitted or in-flight transactions. A
+      #   `READ_COMMITTED` consumer will never see those messages, so lag calculated from the
+      #   high-watermark is overstated on transactionally-produced topics. Passing
+      #   `isolation_level: Karafka::Admin::IsolationLevels::READ_COMMITTED` here
+      #   returns the Last Stable Offset (LSO) — the highest offset a `READ_COMMITTED` consumer
+      #   would actually reach — giving accurate lag figures.
+      #
+      # - `:max_timestamp` spec: returns the offset of the message with the highest timestamp
+      #   in the partition. Not available via watermarks.
+      #
+      # - Leader epoch: the response includes `leader_epoch`, which can be used to detect
+      #   stale metadata or fencing conditions.
+      #
+      # - Admin API: operates through the admin client rather than a consumer connection.
+      #
+      # For non-transactional topics, `:latest` here and `read_watermark_offsets` high-watermark
+      # return the same value.
+      #
+      # @param topic_partition_offsets [Hash{String => Array<Hash>}] hash with topic names as keys
+      #   and arrays of partition specs as values. Each spec must have:
+      #   - `:partition` [Integer] the partition number
+      #   - `:offset` [Symbol, Integer] `:earliest`, `:latest`, `:max_timestamp`, or an Integer
+      #     timestamp in milliseconds (returns the first offset at or after that timestamp)
+      #   Each partition may appear at most once per call.
+      # @param isolation_level [Integer, nil] optional isolation level constant. Pass
+      #   `Karafka::Admin::IsolationLevels::READ_COMMITTED` to get the LSO instead of the
+      #   high-watermark for `:latest` queries on transactionally-produced topics.
+      #
+      # @return [Array<Hash>] array of result hashes, each containing:
+      #   - `:topic` [String]
+      #   - `:partition` [Integer]
+      #   - `:offset` [Integer]
+      #   - `:timestamp` [Integer] (-1 when not applicable)
+      #   - `:leader_epoch` [Integer, nil]
+      #
+      # @raise [Rdkafka::RdkafkaError] on per-partition errors or connection issues
+      #
+      # @example Query earliest offset for partition 0 and latest for partition 1
+      #   Karafka::Admin::Topics.read_partition_offsets(
+      #     'events' => [
+      #       { partition: 0, offset: :earliest },
+      #       { partition: 1, offset: :latest }
+      #     ]
+      #   )
+      #   # => [
+      #   #   { topic: 'events', partition: 0, offset: 0, timestamp: -1, leader_epoch: nil },
+      #   #   { topic: 'events', partition: 1, offset: 100, timestamp: -1, leader_epoch: nil }
+      #   # ]
+      #
+      # @example Get LSO (Last Stable Offset) for accurate lag on transactional topics
+      #   Karafka::Admin::Topics.read_partition_offsets(
+      #     'events' => [{ partition: 0, offset: :latest }],
+      #     isolation_level: Karafka::Admin::IsolationLevels::READ_COMMITTED
+      #   )
+      #
+      # @example Find offset at a specific point in time
+      #   Karafka::Admin::Topics.read_partition_offsets(
+      #     'events' => [{ partition: 0, offset: 1_700_000_000_000 }]
+      #   )
+      def read_partition_offsets(topic_partition_offsets, isolation_level: nil)
+        with_admin do |admin|
+          handle = admin.list_offsets(topic_partition_offsets, isolation_level: isolation_level)
+          handle.wait(max_wait_timeout_ms: max_wait_time_ms).offsets
+        end
       end
 
       # Returns basic topic metadata

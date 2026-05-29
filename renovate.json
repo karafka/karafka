@@ -27,10 +27,24 @@
         "ruby/setup-ruby",
         "ruby"
       ],
-      "groupName": "ruby setup"
+      "groupName": "ruby setup",
+      "internalChecksFilter": "strict"
+    },
+    {
+      "description": "Let setup-ruby pass age gate before ruby so it is ready when the group PR is created",
+      "matchPackageNames": [
+        "ruby/setup-ruby"
+      ],
+      "minimumReleaseAge": "5 days"
     }
   ],
   "labels": [
     "dependencies"
-  ]
+  ],
+  "lockFileMaintenance": {
+    "enabled": true,
+    "schedule": [
+      "before 4am on the first day of the month"
+    ]
+  }
 }

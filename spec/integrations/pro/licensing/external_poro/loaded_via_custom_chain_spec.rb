@@ -67,7 +67,7 @@ raise unless Karafka::Pro::Processing::ConsumerGroups::StrategySelector
 raise unless Karafka::Pro::Processing::ConsumerGroups::Coordinator
 raise unless Karafka::Pro::Processing::ConsumerGroups::Partitioner
 raise unless Karafka::BaseConsumer
-raise unless Karafka::Pro::Processing::JobsBuilder
+raise unless Karafka::Pro::Processing::ConsumerGroups::JobsBuilder
 raise unless Karafka::Pro::Processing::Schedulers::Default
 raise unless Karafka::Pro::Routing::Features::ConsumerGroups::LongRunningJob::Topic
 raise unless Karafka::Pro::Routing::Features::ConsumerGroups::LongRunningJob::Contracts

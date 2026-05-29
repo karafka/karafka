@@ -41,6 +41,10 @@ module Karafka
                 declaration.config(details) unless details.empty?
                 declaration
               end
+            end.tap do |declaration|
+              # Set bootstrap servers from the routing topic's kafka config so the CLI can
+              # filter by cluster. This runs on every call but is idempotent.
+              declaration.bootstrap_servers ||= kafka[:"bootstrap.servers"]
             end
           end
 

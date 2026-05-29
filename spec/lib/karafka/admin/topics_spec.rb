@@ -411,6 +411,69 @@ RSpec.describe_current do
     end
   end
 
+  describe "#read_partition_offsets" do
+    subject(:result) do
+      described_class.read_partition_offsets({ name => [{ partition: 0, offset: :earliest }] })
+    end
+
+    context "when topic does not exist" do
+      it { expect { result }.to raise_error(Rdkafka::RdkafkaError) }
+    end
+
+    context "when topic exists and is empty" do
+      before { described_class.create(name, 1, 1) }
+
+      it { expect(result).to be_an(Array) }
+      it { expect(result.size).to eq(1) }
+      it { expect(result.first[:topic]).to eq(name) }
+      it { expect(result.first[:partition]).to eq(0) }
+      it { expect(result.first[:offset]).to eq(0) }
+    end
+
+    context "when topic exists and has messages" do
+      before do
+        described_class.create(name, 1, 1)
+        PRODUCERS.regular.produce_many_sync(Array.new(5) { { topic: name, payload: "x" } })
+      end
+
+      context "with :earliest" do
+        subject(:result) do
+          described_class.read_partition_offsets({ name => [{ partition: 0, offset: :earliest }] })
+        end
+
+        it { expect(result.first[:offset]).to eq(0) }
+      end
+
+      context "with :latest" do
+        subject(:result) do
+          described_class.read_partition_offsets({ name => [{ partition: 0, offset: :latest }] })
+        end
+
+        it { expect(result.first[:offset]).to eq(5) }
+      end
+
+      context "with multiple partitions in one call" do
+        let(:name2) { generate_topic_name }
+
+        before do
+          described_class.create(name2, 1, 1)
+          PRODUCERS.regular.produce_many_sync(Array.new(3) { { topic: name2, payload: "x" } })
+        end
+
+        subject(:result) do
+          described_class.read_partition_offsets(
+            { name => [{ partition: 0, offset: :latest }],
+              name2 => [{ partition: 0, offset: :latest }] }
+          )
+        end
+
+        it { expect(result.size).to eq(2) }
+        it { expect(result.find { |r| r[:topic] == name }[:offset]).to eq(5) }
+        it { expect(result.find { |r| r[:topic] == name2 }[:offset]).to eq(3) }
+      end
+    end
+  end
+
   describe "#read_watermark_offsets" do
     subject(:offsets) { described_class.read_watermark_offsets(name, partition) }
 
