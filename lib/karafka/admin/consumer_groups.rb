@@ -167,21 +167,33 @@ module Karafka
           unless time_tpl.empty?
             real_offsets = consumer.offsets_for_times(time_tpl)
 
+            # Collect all partitions where the timestamp is beyond the last message
+            # (negative offset returned) so we can fetch their HWMs in a single batch
+            # admin call instead of one per-partition consumer call
+            hwm_specs = {}
             real_offsets.to_h.each do |name, results|
               results.each do |result|
                 raise(Errors::InvalidTimeBasedOffsetError) unless result
+                next unless result.offset.negative?
 
-                partition = result.partition
+                (hwm_specs[name] ||= []) << { partition: result.partition, offset: :latest }
+              end
+            end
 
-                # Negative offset means we're beyond last message and we need to query for the
-                # high watermark offset to get the most recent offset and move there
-                if result.offset.negative?
-                  _, offset = consumer.query_watermark_offsets(name, result.partition)
-                else
-                  # If we get an offset, it means there existed a message close to this time
-                  # location
-                  offset = result.offset
+            hwms = {}
+            unless hwm_specs.empty?
+              with_admin do |admin|
+                admin.list_offsets(hwm_specs).wait(max_wait_timeout_ms: max_wait_time_ms).offsets.each do |r|
+                  (hwms[r[:topic]] ||= {})[r[:partition]] = r[:offset]
                 end
+              end
+            end
+
+            real_offsets.to_h.each do |name, results|
+              results.each do |result|
+                partition = result.partition
+                # If offset is negative the timestamp was beyond the last message; use HWM
+                offset = result.offset.negative? ? hwms.dig(name, partition) : result.offset
 
                 # Since now we have proper offsets, we can add this to the final tpl for commit
                 tpl.to_h[name] ||= []

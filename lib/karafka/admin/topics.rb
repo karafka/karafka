@@ -224,13 +224,30 @@ module Karafka
         # Normalize input to hash format
         topics_with_partitions = partition ? { name_or_hash => [partition] } : name_or_hash
 
-        result = Hash.new { |h, k| h[k] = {} }
+        low_specs = {}
+        high_specs = {}
 
-        with_consumer do |consumer|
-          topics_with_partitions.each do |topic, partitions|
-            partitions.each do |partition_id|
-              result[topic][partition_id] = consumer.query_watermark_offsets(topic, partition_id)
-            end
+        topics_with_partitions.each do |topic, partitions|
+          low_specs[topic] = partitions.map { |p| { partition: p, offset: :earliest } }
+          high_specs[topic] = partitions.map { |p| { partition: p, offset: :latest } }
+        end
+
+        lows = {}
+        highs = {}
+
+        with_admin do |admin|
+          admin.list_offsets(low_specs).wait(max_wait_timeout_ms: max_wait_time_ms).offsets.each do |r|
+            (lows[r[:topic]] ||= {})[r[:partition]] = r[:offset]
+          end
+          admin.list_offsets(high_specs).wait(max_wait_timeout_ms: max_wait_time_ms).offsets.each do |r|
+            (highs[r[:topic]] ||= {})[r[:partition]] = r[:offset]
+          end
+        end
+
+        result = Hash.new { |h, k| h[k] = {} }
+        topics_with_partitions.each do |topic, partitions|
+          partitions.each do |partition_id|
+            result[topic][partition_id] = [lows.dig(topic, partition_id), highs.dig(topic, partition_id)]
           end
         end
 
