@@ -84,6 +84,11 @@ class Consumer < Karafka::BaseConsumer
       mark_as_consumed(messages.last)
     end
 
+    # Set before handlers.each so wait_until can fire once targets catch up; handlers finish
+    # during graceful shutdown. Setting it after caused 4-min timeouts when handler.wait
+    # blocked on slow delivery callbacks under CPU contention.
+    DT[:done] = true if DT[:processed_offsets].size >= 100
+
     handlers.each do |handler_info|
       result = handler_info[:handler].wait
 
@@ -94,8 +99,6 @@ class Consumer < Karafka::BaseConsumer
         topic_index: handler_info[:topic_index]
       }
     end
-
-    DT[:done] = true if DT[:processed_offsets].size >= 100
   end
 end
 
