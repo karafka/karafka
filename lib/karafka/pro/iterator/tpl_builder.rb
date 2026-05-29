@@ -108,31 +108,52 @@ module Karafka
         # heavily compacted topics, this may return less than the desired number but it is a
         # limitation that is documented.
         def resolve_partitions_with_negative_offsets
+          # Collect all integer-offset partitions (positive and negative) and the subset
+          # that actually need LWM/HWM resolution
+          warm_up_partitions = {}
+          negative_partitions = {}
+
           @expanded_topics.each do |name, partitions|
             next unless partitions.is_a?(Hash)
 
             partitions.each do |partition, offset|
-              # Care only about numerical offsets
-              #
-              # For time based we already resolve them via librdkafka lookup API
               next unless offset.is_a?(Integer)
 
-              low_offset, high_offset = @consumer.query_watermark_offsets(name, partition)
+              (warm_up_partitions[name] ||= []) << partition
+              (negative_partitions[name] ||= {})[partition] = offset if offset.negative?
+            end
+          end
 
-              # Care only about negative offsets (last n messages)
-              #
-              # We reject the above results but we **NEED** to run the `#query_watermark_offsets`
-              # for each topic partition nonetheless. Without this, librdkafka fetches a lot more
-              # metadata about each topic and each partition and this takes much more time than
-              # just getting watermarks. If we do not run watermark, at least an extra second
-              # is added at the beginning of iterator flow
-              #
-              # This may not be significant when this runs in the background but in case of
-              # using iterator in thins like Puma, it heavily impacts the end user experience
-              next unless offset.negative?
+          return if warm_up_partitions.empty?
 
+          # A single batched offsets_for_times call on the consumer handle warms up
+          # librdkafka's per-partition metadata cache for all integer-offset partitions in
+          # one roundtrip. Without this pre-fetch, librdkafka triggers a much broader
+          # metadata refresh when assign is called later, adding at least a second to
+          # iterator startup — noticeable in latency-sensitive contexts like Puma.
+          # The epoch timestamp ensures every partition returns its LWM; the result is
+          # intentionally discarded since we only need the warm-up side effect here.
+          warm_up_tpl = Rdkafka::Consumer::TopicPartitionList.new
+          warm_up_partitions.each do |name, part_ids|
+            warm_up_tpl.add_topic_and_partitions_with_offsets(
+              name, part_ids.to_h { |p| [p, Time.at(0)] }
+            )
+          end
+          @consumer.offsets_for_times(warm_up_tpl)
+
+          return if negative_partitions.empty?
+
+          # Batch-fetch LWM and HWM for all negative-offset partitions in two admin calls
+          # (one for :earliest, one for :latest) instead of N per-partition consumer calls
+          watermarks = Karafka::Admin::Topics.read_watermark_offsets(
+            negative_partitions.transform_values(&:keys)
+          )
+
+          negative_partitions.each do |name, partitions|
+            partitions.each do |partition, offset|
               # We add because this offset is negative
-              @mapped_topics[name][partition] = [high_offset + offset, low_offset].max
+              low, high = watermarks.dig(name, partition) || [0, 0]
+              @mapped_topics[name][partition] = [high + offset, low].max
             end
           end
         end
