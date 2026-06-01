@@ -108,11 +108,6 @@ module Karafka
       #   we save ourselves some objects allocations. We cannot clear the underlying arrays as they
       #   may be used in other threads for data processing, thus if we would clear it, we could
       #   potentially clear a raw messages array for a job that is in the jobs queue.
-      #
-      # @note We do not clear the eof assignments because they can span across batch pollings.
-      #   Since eof is not raised non-stop and is silenced after an eof poll, if we would clean it
-      #   here we would loose the notion of it. The reset state for it should happen when we do
-      #   discover new messages for given topic partition.
       def clear
         @size = 0
         @groups.each_value(&:clear)

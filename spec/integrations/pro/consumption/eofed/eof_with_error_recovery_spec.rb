@@ -46,6 +46,9 @@ class Consumer < Karafka::BaseConsumer
       DT[:raised] << true
       raise StandardError
     end
+
+    # When EOF is signaled together with messages, #eofed is not triggered automatically.
+    eofed if eofed?
   end
 
   def eofed
