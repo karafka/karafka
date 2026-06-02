@@ -142,6 +142,31 @@ RSpec.describe_current do
         info_cli.call
         expect(Karafka.logger).to have_received(:info).with(/Kafka Config =/)
       end
+
+      context "when kafka config contains sensitive keys" do
+        before do
+          allow(Karafka::App.config).to receive(:kafka).and_return(
+            "bootstrap.servers": "localhost:9092",
+            "sasl.password": "s3cr3t",
+            "ssl.key.password": "keypass",
+            "sasl.oauthbearer.client.secret": "oauth_secret",
+            "security.protocol": "sasl_ssl"
+          )
+        end
+
+        it "expect to redact sensitive values" do
+          info_cli.call
+          expect(Karafka.logger).to have_received(:info).with(/sasl\.password: \[REDACTED\]/)
+          expect(Karafka.logger).to have_received(:info).with(/ssl\.key\.password: \[REDACTED\]/)
+          expect(Karafka.logger).to have_received(:info).with(/sasl\.oauthbearer\.client\.secret: \[REDACTED\]/)
+        end
+
+        it "expect not to redact non-sensitive values" do
+          info_cli.call
+          expect(Karafka.logger).to have_received(:info).with(/bootstrap\.servers: localhost:9092/)
+          expect(Karafka.logger).to have_received(:info).with(/security\.protocol: sasl_ssl/)
+        end
+      end
     end
 
     context "when running with --extended and multiple consumer groups" do

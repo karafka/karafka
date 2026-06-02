@@ -57,6 +57,12 @@ module Karafka
         topics
       ].freeze
 
+      # Kafka config keys whose values must be redacted in log output.
+      # Matches librdkafka keys that carry passwords, tokens, or key material.
+      SENSITIVE_KAFKA_CONFIG_PATTERN = /password|secret|token|sasl\.oauthbearer\.client/i.freeze
+
+      private_constant :SENSITIVE_KAFKA_CONFIG_PATTERN
+
       private_constant :CORE_TOPIC_ATTRIBUTES, :CORE_CONSUMER_GROUP_ATTRIBUTES
 
       # Print configuration details and other options of your application
@@ -259,7 +265,8 @@ module Karafka
         lines = [green("========== Kafka Config ==========")]
 
         Karafka::App.config.kafka.each do |key, value|
-          lines << "#{key}: #{value}"
+          display_value = key.to_s.match?(SENSITIVE_KAFKA_CONFIG_PATTERN) ? "[REDACTED]" : value
+          lines << "#{key}: #{display_value}"
         end
 
         lines
