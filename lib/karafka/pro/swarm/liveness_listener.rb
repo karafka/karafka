@@ -57,18 +57,26 @@ module Karafka
         #   given process as hanging
         # @param polling_ttl [Integer] max time in ms for polling. If polling (any) does not
         #   happen that often, process should be considered dead.
+        # @param initializing_ttl [Integer] max time in ms a subscription group consumer can
+        #   spend in a non-"steady" librdkafka join state before the node is considered unhealthy.
+        #   Requires `statistics.interval.ms` to be configured; without it this check has no effect.
         # @note The default TTL matches the default `max.poll.interval.ms`
         def initialize(
           memory_limit: Float::INFINITY,
           consuming_ttl: 5 * 60 * 1_000,
-          polling_ttl: 5 * 60 * 1_000
+          polling_ttl: 5 * 60 * 1_000,
+          initializing_ttl: 5 * 60 * 1_000
         )
           @polling_ttl = polling_ttl
           @consuming_ttl = consuming_ttl
+          @initializing_ttl = initializing_ttl
           # We cast it just in case someone would provide '10MB' or something similar
           @memory_limit = memory_limit.is_a?(String) ? memory_limit.to_i : memory_limit
           @pollings = {}
           @consumptions = {}
+          # Tracks subscription groups stuck in a non-steady librdkafka join state.
+          # Maps subscription_group_id => monotonic_now of when we first saw non-steady.
+          @initializations = {}
 
           super()
         end
@@ -115,6 +123,25 @@ module Karafka
               clear_consumption_tick
             end
           RUBY
+        end
+
+        # Track when each subscription group's consumer enters or leaves a non-steady join
+        # state. A prolonged non-steady state indicates a stuck consumer (e.g., broker stuck
+        # in CompletingRebalance due to KAFKA-19862).
+        # @param event [Karafka::Core::Monitoring::Event]
+        def on_statistics_emitted(event)
+          cgrp = event[:statistics]["cgrp"]
+          return unless cgrp
+
+          sg_id = event[:subscription_group_id]
+
+          synchronize do
+            if cgrp["join_state"] == "steady"
+              @initializations.delete(sg_id)
+            else
+              @initializations[sg_id] ||= monotonic_now
+            end
+          end
         end
 
         # @param _event [Karafka::Core::Monitoring::Event]
@@ -195,13 +222,18 @@ module Karafka
         end
 
         # Did we exceed any of the ttls
-        # @return [String] 204 string if ok, 500 otherwise
+        # @return [Integer] 0 if healthy, positive error code otherwise:
+        #   1 - polling TTL exceeded
+        #   2 - consuming TTL exceeded
+        #   3 - memory limit exceeded
+        #   4 - initializing TTL exceeded (stuck in non-steady join state)
         def status
           time = monotonic_now
 
           return 1 if @pollings.values.any? { |tick| (time - tick) > @polling_ttl }
           return 2 if @consumptions.values.any? { |tick| (time - tick) > @consuming_ttl }
           return 3 if rss_mb > @memory_limit
+          return 4 if @initializations.values.any? { |start| (time - start) > @initializing_ttl }
 
           0
         end

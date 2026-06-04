@@ -47,6 +47,11 @@ RSpec.describe_current do
   let(:listener_polling_ttl) { listener.instance_variable_get(:@polling_ttl) }
   let(:listener_pollings) { listener.instance_variable_get(:@pollings) }
   let(:listener_consumptions) { listener.instance_variable_get(:@consumptions) }
+  let(:listener_initializations) { listener.instance_variable_get(:@initializations) }
+
+  def stats_event(join_state:, sg_id: "sg1")
+    { subscription_group_id: sg_id, statistics: { "cgrp" => { "join_state" => join_state } } }
+  end
 
   before do
     allow(listener).to receive(:node).and_return(node)
@@ -60,6 +65,10 @@ RSpec.describe_current do
       expect(listener_memory_limit).to eq(memory_limit)
       expect(listener_consuming_ttl).to eq(consuming_ttl)
       expect(listener_polling_ttl).to eq(polling_ttl)
+    end
+
+    it "initializes initializations as an empty hash" do
+      expect(listener_initializations).to eq({})
     end
   end
 
@@ -176,6 +185,68 @@ RSpec.describe_current do
       # Only f1 clears its entry
       f1.resume
       expect(listener_consumptions.size).to eq(1)
+    end
+  end
+
+  describe "#on_statistics_emitted" do
+    context "when join_state is steady" do
+      it "clears any existing non-steady tracking for that subscription group" do
+        listener.on_statistics_emitted(stats_event(join_state: "wait-assn"))
+        expect(listener_initializations).not_to be_empty
+
+        listener.on_statistics_emitted(stats_event(join_state: "steady"))
+        expect(listener_initializations).to be_empty
+      end
+    end
+
+    context "when join_state is non-steady" do
+      it "records when the group first became non-steady" do
+        listener.on_statistics_emitted(stats_event(join_state: "wait-join"))
+        expect(listener_initializations["sg1"]).to be_a(Numeric)
+      end
+
+      it "does not overwrite the start time on subsequent non-steady ticks" do
+        listener.on_statistics_emitted(stats_event(join_state: "wait-join"))
+        first_tick = listener_initializations["sg1"]
+
+        sleep(0.01)
+        listener.on_statistics_emitted(stats_event(join_state: "wait-assn"))
+        expect(listener_initializations["sg1"]).to eq(first_tick)
+      end
+    end
+
+    context "when statistics have no cgrp key" do
+      it "ignores the event" do
+        event_without_cgrp = { subscription_group_id: "sg1", statistics: {} }
+        listener.on_statistics_emitted(event_without_cgrp)
+        expect(listener_initializations).to be_empty
+      end
+    end
+  end
+
+  describe "#status" do
+    context "when initializing_ttl is exceeded" do
+      subject(:listener) do
+        described_class.new(
+          memory_limit: memory_limit,
+          consuming_ttl: consuming_ttl,
+          polling_ttl: polling_ttl,
+          initializing_ttl: 0
+        )
+      end
+
+      before { allow(listener).to receive(:node).and_return(node) }
+
+      it "returns status code 4" do
+        listener.on_statistics_emitted(stats_event(join_state: "wait-assn"))
+        expect(listener.send(:status)).to eq(4)
+      end
+    end
+
+    context "when nothing is exceeded" do
+      it "returns 0" do
+        expect(listener.send(:status)).to eq(0)
+      end
     end
   end
 

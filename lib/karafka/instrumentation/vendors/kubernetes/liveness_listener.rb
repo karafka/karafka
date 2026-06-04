@@ -33,12 +33,17 @@ module Karafka
           #   process as hanging
           # @param polling_ttl [Integer] max time in ms for polling. If polling (any) does not
           #   happen that often, process should be considered dead.
+          # @param initializing_ttl [Integer] max time in ms a subscription group consumer can
+          #   spend in a non-"steady" librdkafka join state (e.g. wait-join, wait-assn) before
+          #   the process is considered unhealthy. Requires `statistics.interval.ms` to be
+          #   configured in the Kafka client settings; without it this check has no effect.
           # @note The default TTL matches the default `max.poll.interval.ms`
           def initialize(
             hostname: nil,
             port: 3000,
             consuming_ttl: 5 * 60 * 1_000,
-            polling_ttl: 5 * 60 * 1_000
+            polling_ttl: 5 * 60 * 1_000,
+            initializing_ttl: 5 * 60 * 1_000
           )
             # If this is set to a symbol, it indicates unrecoverable error like fencing
             # While fencing can be partial (for one of the SGs), we still should consider this
@@ -47,9 +52,13 @@ module Karafka
             @unrecoverable = false
             @polling_ttl = polling_ttl
             @consuming_ttl = consuming_ttl
+            @initializing_ttl = initializing_ttl
             @mutex = Mutex.new
             @pollings = {}
             @consumptions = {}
+            # Tracks subscription groups stuck in a non-steady librdkafka join state.
+            # Maps subscription_group_id => monotonic_now of when we first saw non-steady.
+            @initializations = {}
             super(hostname: hostname, port: port)
           end
 
@@ -68,6 +77,25 @@ module Karafka
           # @param _event [Karafka::Core::Monitoring::Event]
           def on_connection_listener_fetch_loop(_event)
             mark_polling_tick
+          end
+
+          # Track when each subscription group's consumer enters or leaves a non-steady join
+          # state. A prolonged non-steady state (e.g., wait-join, wait-assn caused by a broker
+          # stuck in CompletingRebalance) is reported as unhealthy.
+          # @param event [Karafka::Core::Monitoring::Event]
+          def on_statistics_emitted(event)
+            cgrp = event[:statistics]["cgrp"]
+            return unless cgrp
+
+            sg_id = event[:subscription_group_id]
+
+            synchronize do
+              if cgrp["join_state"] == "steady"
+                @initializations.delete(sg_id)
+              else
+                @initializations[sg_id] ||= monotonic_now
+              end
+            end
           end
 
           {
@@ -133,6 +161,7 @@ module Karafka
             return false if @unrecoverable
             return false if polling_ttl_exceeded?
             return false if consuming_ttl_exceeded?
+            return false if initializing_ttl_exceeded?
 
             true
           end
@@ -151,6 +180,14 @@ module Karafka
             time = monotonic_now
 
             @consumptions.values.any? { |tick| (time - tick) > @consuming_ttl }
+          end
+
+          # @return [Boolean] true if any subscription group has been stuck in a non-steady
+          #   librdkafka join state for longer than the configured initializing TTL
+          def initializing_ttl_exceeded?
+            time = monotonic_now
+
+            @initializations.values.any? { |start| (time - start) > @initializing_ttl }
           end
 
           # Wraps the logic with a mutex
@@ -200,6 +237,7 @@ module Karafka
               errors: {
                 polling_ttl_exceeded: polling_ttl_exceeded?,
                 consumption_ttl_exceeded: consuming_ttl_exceeded?,
+                initializing_ttl_exceeded: initializing_ttl_exceeded?,
                 unrecoverable: @unrecoverable
               }
             )

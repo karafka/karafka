@@ -9,6 +9,11 @@ RSpec.describe_current do
   let(:event) { {} }
   let(:pollings) { listener.instance_variable_get(:@pollings) }
   let(:consumptions) { listener.instance_variable_get(:@consumptions) }
+  let(:initializations) { listener.instance_variable_get(:@initializations) }
+
+  def stats_event(join_state:, sg_id: "sg1")
+    { subscription_group_id: sg_id, statistics: { "cgrp" => { "join_state" => join_state } } }
+  end
 
   describe "events mapping" do
     it { expect(NotificationsChecker.valid?(listener)).to be(true) }
@@ -74,6 +79,97 @@ RSpec.describe_current do
       # Only f1 clears its entry
       f1.resume
       expect(consumptions.size).to eq(1)
+    end
+  end
+
+  describe "#on_statistics_emitted" do
+    context "when join_state is steady" do
+      it "does not add an entry to initializations" do
+        listener.on_statistics_emitted(stats_event(join_state: "steady"))
+        expect(initializations).to be_empty
+      end
+
+      it "removes a pre-existing entry when the consumer recovers" do
+        listener.on_statistics_emitted(stats_event(join_state: "wait-assn"))
+        expect(initializations).not_to be_empty
+
+        listener.on_statistics_emitted(stats_event(join_state: "steady"))
+        expect(initializations).to be_empty
+      end
+    end
+
+    context "when join_state is non-steady" do
+      it "records a start timestamp for the subscription group" do
+        listener.on_statistics_emitted(stats_event(join_state: "wait-join"))
+        expect(initializations["sg1"]).to be_a(Numeric)
+      end
+
+      it "does not overwrite the start timestamp on subsequent non-steady ticks" do
+        listener.on_statistics_emitted(stats_event(join_state: "wait-join"))
+        first_tick = initializations["sg1"]
+
+        sleep(0.01)
+        listener.on_statistics_emitted(stats_event(join_state: "wait-assn"))
+        expect(initializations["sg1"]).to eq(first_tick)
+      end
+
+      it "tracks each subscription group independently" do
+        listener.on_statistics_emitted(stats_event(join_state: "wait-join", sg_id: "sg1"))
+        listener.on_statistics_emitted(stats_event(join_state: "wait-join", sg_id: "sg2"))
+        listener.on_statistics_emitted(stats_event(join_state: "steady", sg_id: "sg1"))
+
+        expect(initializations.key?("sg1")).to be(false)
+        expect(initializations.key?("sg2")).to be(true)
+      end
+    end
+
+    context "when statistics have no cgrp key (producer-side stats)" do
+      it "ignores the event" do
+        listener.on_statistics_emitted(subscription_group_id: "sg1", statistics: {})
+        expect(initializations).to be_empty
+      end
+    end
+  end
+
+  describe "#healthy?" do
+    context "when initializing_ttl is exceeded" do
+      subject(:listener) { described_class.new(initializing_ttl: 0) }
+
+      it "returns false" do
+        listener.on_statistics_emitted(stats_event(join_state: "wait-assn"))
+        expect(listener.healthy?).to be(false)
+      end
+    end
+
+    context "when initializing_ttl is not exceeded" do
+      it "returns true when no non-steady state is tracked" do
+        expect(listener.healthy?).to be(true)
+      end
+
+      it "returns true when join_state recovers to steady before TTL expires" do
+        listener.on_statistics_emitted(stats_event(join_state: "wait-assn"))
+        listener.on_statistics_emitted(stats_event(join_state: "steady"))
+        expect(listener.healthy?).to be(true)
+      end
+    end
+  end
+
+  describe "#status_body" do
+    it "includes the initializing_ttl_exceeded key" do
+      body = listener.send(:status_body)
+      expect(body[:errors]).to have_key(:initializing_ttl_exceeded)
+    end
+
+    it "reports false when no subscription group is stuck" do
+      body = listener.send(:status_body)
+      expect(body[:errors][:initializing_ttl_exceeded]).to be(false)
+    end
+
+    it "reports true when a subscription group exceeds the TTL" do
+      fast_listener = described_class.new(initializing_ttl: 0)
+      fast_listener.on_statistics_emitted(stats_event(join_state: "wait-join"))
+      body = fast_listener.send(:status_body)
+      expect(body[:errors][:initializing_ttl_exceeded]).to be(true)
     end
   end
 end
