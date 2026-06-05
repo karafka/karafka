@@ -59,11 +59,13 @@ module Karafka
         # @param polling_ttl [Integer] max time in ms for polling. If polling (any) does not
         #   happen that often, process should be considered dead.
         # @param stability_ttl [Integer] max time in ms a subscription group can remain in the
-        #   same non-"steady" librdkafka `cgrp.join_state` (e.g. `wait-join`, `wait-assn`,
-        #   `wait-sync`) before the node is considered unhealthy. The timer resets on every
-        #   join_state transition - even between non-steady states - because any state change
-        #   indicates the group join protocol is still making progress. Only a consumer frozen in
-        #   the identical state continuously for this duration triggers the alarm. Should be set to
+        #   same tracked non-"steady" librdkafka `cgrp.join_state` (e.g. `wait-join`, `wait-assn`,
+        #   `wait-sync`) before the node is considered unhealthy. The pre-join states `init` and
+        #   `wait-metadata` are excluded from tracking entirely and neither start nor reset the
+        #   timer. Among tracked states the timer resets on every transition - even between
+        #   non-steady states - because any change indicates the join protocol is still progressing.
+        #   Only a consumer frozen in the identical state continuously for this duration triggers
+        #   the alarm. Should be set to
         #   at least your `max.poll.interval.ms` value (default 300,000 ms) to avoid false
         #   positives during slow but legitimate instabilities. The default of 10 minutes provides
         #   headroom above the Kafka default. Requires `statistics.interval.ms` to be configured;
@@ -142,9 +144,11 @@ module Karafka
         # state. A prolonged non-steady state indicates a stuck consumer (e.g., broker stuck
         # in CompletingRebalance due to KAFKA-19862).
         #
-        # The stuck timer resets on every join_state transition, including transitions between
-        # non-steady states, because any state change indicates the protocol is still progressing.
-        # Only a consumer frozen in the same state for longer than stability_ttl is flagged.
+        # The stuck timer resets on every transition between tracked states, including between
+        # non-steady states, because any change indicates the join protocol is still progressing.
+        # The pre-join states `init` and `wait-metadata` are excluded from tracking entirely and
+        # neither start nor reset the timer. Only a consumer frozen in the same tracked state for
+        # longer than stability_ttl is flagged.
         # @param event [Karafka::Core::Monitoring::Event]
         def on_statistics_emitted(event)
           cgrp = event[:statistics]["cgrp"]

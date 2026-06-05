@@ -67,9 +67,10 @@ assert DT[:join_states].none? { |s| s == "steady" },
   "Expected consumer to never reach steady for non-existent topic (no auto-create), " \
   "got: #{DT[:join_states].uniq}"
 
-# librdkafka cycles "init" <-> "wait-metadata", resetting the stability timer on each
-# transition. stability_ttl_exceeded must not fire (no false positive), but also gives
-# no signal here - cycling states are outside the detection scope of stability_ttl.
+# librdkafka cycles "init" <-> "wait-metadata". Both are pre-join states that are excluded
+# from stability tracking entirely - they never start or reset the timer, so
+# stability_ttl_exceeded must not fire. Cycling in these states is outside the detection
+# scope of stability_ttl; polling_ttl covers the case where the broker is unreachable.
 assert DT[:bodies].none? { |body| JSON.parse(body)["errors"]["stability_ttl_exceeded"] },
   "stability_ttl_exceeded fired for a cycling consumer (non-existent topic, no auto-create). " \
   "join_states: #{DT[:join_states].uniq}"
