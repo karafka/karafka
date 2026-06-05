@@ -152,6 +152,7 @@ module Karafka
 
           sg_id = event[:subscription_group_id]
           join_state = cgrp["join_state"]
+          return unless join_state
 
           synchronize do
             if join_state == "steady"
