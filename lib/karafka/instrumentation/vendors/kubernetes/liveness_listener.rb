@@ -33,17 +33,20 @@ module Karafka
           #   process as hanging
           # @param polling_ttl [Integer] max time in ms for polling. If polling (any) does not
           #   happen that often, process should be considered dead.
-          # @param initializing_ttl [Integer] max time in ms a subscription group consumer can
-          #   spend in a non-"steady" librdkafka join state (e.g. wait-join, wait-assn) before
-          #   the process is considered unhealthy. Requires `statistics.interval.ms` to be
-          #   configured in the Kafka client settings; without it this check has no effect.
-          # @note The default TTL matches the default `max.poll.interval.ms`
+          # @param rebalance_ttl [Integer] max time in ms a subscription group can spend in a
+          #   non-"steady" librdkafka `cgrp.join_state` (e.g. `wait-join`, `wait-assn`,
+          #   `wait-sync`) before the process is considered unhealthy. This covers both the
+          #   initial consumer group join and subsequent rebalances. Should be set to at least
+          #   your `max.poll.interval.ms` value (default 300,000 ms) to avoid false positives
+          #   during slow but legitimate rebalances. The default of 10 minutes provides headroom
+          #   above the Kafka default. Requires `statistics.interval.ms` to be configured in
+          #   the Kafka client settings; without it this check has no effect.
           def initialize(
             hostname: nil,
             port: 3000,
             consuming_ttl: 5 * 60 * 1_000,
             polling_ttl: 5 * 60 * 1_000,
-            initializing_ttl: 5 * 60 * 1_000
+            rebalance_ttl: 10 * 60 * 1_000
           )
             # If this is set to a symbol, it indicates unrecoverable error like fencing
             # While fencing can be partial (for one of the SGs), we still should consider this
@@ -52,7 +55,7 @@ module Karafka
             @unrecoverable = false
             @polling_ttl = polling_ttl
             @consuming_ttl = consuming_ttl
-            @initializing_ttl = initializing_ttl
+            @rebalance_ttl = rebalance_ttl
             @mutex = Mutex.new
             @pollings = {}
             @consumptions = {}
@@ -161,7 +164,7 @@ module Karafka
             return false if @unrecoverable
             return false if polling_ttl_exceeded?
             return false if consuming_ttl_exceeded?
-            return false if initializing_ttl_exceeded?
+            return false if rebalance_ttl_exceeded?
 
             true
           end
@@ -183,11 +186,11 @@ module Karafka
           end
 
           # @return [Boolean] true if any subscription group has been stuck in a non-steady
-          #   librdkafka join state for longer than the configured initializing TTL
-          def initializing_ttl_exceeded?
+          #   librdkafka join state for longer than the configured rebalance TTL
+          def rebalance_ttl_exceeded?
             time = monotonic_now
 
-            @initializations.values.any? { |start| (time - start) > @initializing_ttl }
+            @initializations.values.any? { |start| (time - start) > @rebalance_ttl }
           end
 
           # Wraps the logic with a mutex
@@ -237,7 +240,7 @@ module Karafka
               errors: {
                 polling_ttl_exceeded: polling_ttl_exceeded?,
                 consumption_ttl_exceeded: consuming_ttl_exceeded?,
-                initializing_ttl_exceeded: initializing_ttl_exceeded?,
+                rebalance_ttl_exceeded: rebalance_ttl_exceeded?,
                 unrecoverable: @unrecoverable
               }
             )

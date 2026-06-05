@@ -132,8 +132,8 @@ RSpec.describe_current do
   end
 
   describe "#healthy?" do
-    context "when initializing_ttl is exceeded" do
-      subject(:listener) { described_class.new(initializing_ttl: 0) }
+    context "when rebalance_ttl is exceeded" do
+      subject(:listener) { described_class.new(rebalance_ttl: 0) }
 
       it "returns false" do
         listener.on_statistics_emitted(stats_event(join_state: "wait-assn"))
@@ -141,7 +141,7 @@ RSpec.describe_current do
       end
     end
 
-    context "when initializing_ttl is not exceeded" do
+    context "when rebalance_ttl is not exceeded" do
       it "returns true when no non-steady state is tracked" do
         expect(listener.healthy?).to be(true)
       end
@@ -155,21 +155,21 @@ RSpec.describe_current do
   end
 
   describe "#status_body" do
-    it "includes the initializing_ttl_exceeded key" do
+    it "includes the rebalance_ttl_exceeded key" do
       body = listener.send(:status_body)
-      expect(body[:errors]).to have_key(:initializing_ttl_exceeded)
+      expect(body[:errors]).to have_key(:rebalance_ttl_exceeded)
     end
 
     it "reports false when no subscription group is stuck" do
       body = listener.send(:status_body)
-      expect(body[:errors][:initializing_ttl_exceeded]).to be(false)
+      expect(body[:errors][:rebalance_ttl_exceeded]).to be(false)
     end
 
     it "reports true when a subscription group exceeds the TTL" do
-      fast_listener = described_class.new(initializing_ttl: 0)
+      fast_listener = described_class.new(rebalance_ttl: 0)
       fast_listener.on_statistics_emitted(stats_event(join_state: "wait-join"))
       body = fast_listener.send(:status_body)
-      expect(body[:errors][:initializing_ttl_exceeded]).to be(true)
+      expect(body[:errors][:rebalance_ttl_exceeded]).to be(true)
     end
   end
 end

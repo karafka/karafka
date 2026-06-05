@@ -225,13 +225,13 @@ RSpec.describe_current do
   end
 
   describe "#status" do
-    context "when initializing_ttl is exceeded" do
+    context "when rebalance_ttl is exceeded" do
       subject(:listener) do
         described_class.new(
           memory_limit: memory_limit,
           consuming_ttl: consuming_ttl,
           polling_ttl: polling_ttl,
-          initializing_ttl: 0
+          rebalance_ttl: 0
         )
       end
 
