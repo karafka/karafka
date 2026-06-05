@@ -2,7 +2,7 @@
 
 # When subscribing to a topic that does not exist and allow.auto.create.topics is false,
 # librdkafka cannot complete the consumer group join protocol. The cgrp.join_state cycles
-# through "init" and "wait-metadata" indefinitely — it never reaches "steady". This IS
+# through "init" and "wait-metadata" indefinitely - it never reaches "steady". This IS
 # genuinely stuck behavior: if it persists long enough, stability_ttl_exceeded will trigger.
 #
 # This test verifies that within a short observation window (well below stability_ttl),
@@ -59,7 +59,7 @@ end
 
 # The consumer stays non-steady when the topic doesn't exist and auto-creation is disabled.
 # Without a topic to join, librdkafka cycles between "init" and "wait-metadata" indefinitely.
-# Eventually (after stability_ttl ms) this would be reported as unhealthy — that is correct.
+# Eventually (after stability_ttl ms) this would be reported as unhealthy - that is correct.
 assert DT[:join_states].none? { |s| s == "steady" },
   "Expected consumer to stay non-steady for non-existent topic, got: #{DT[:join_states]}"
 

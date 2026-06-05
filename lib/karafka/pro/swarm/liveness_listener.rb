@@ -61,7 +61,7 @@ module Karafka
         # @param stability_ttl [Integer] max time in ms a subscription group can remain in the
         #   same non-"steady" librdkafka `cgrp.join_state` (e.g. `wait-join`, `wait-assn`,
         #   `wait-sync`) before the node is considered unhealthy. The timer resets on every
-        #   join_state transition — even between non-steady states — because any state change
+        #   join_state transition - even between non-steady states - because any state change
         #   indicates the group join protocol is still making progress. Only a consumer frozen in
         #   the identical state continuously for this duration triggers the alarm. Should be set to
         #   at least your `max.poll.interval.ms` value (default 300,000 ms) to avoid false
@@ -86,7 +86,7 @@ module Karafka
           # Used to detect state changes so the stuck timer resets on any transition.
           # Both hashes are only populated by on_statistics_emitted, which requires
           # statistics.interval.ms to be set. Without it they remain empty and
-          # status returns 0 for the stability check — no misreporting.
+          # status returns 0 for the stability check - no misreporting.
           @join_states = {}
           # Maps subscription_group_id => monotonic_now when the current non-steady state began.
           @instabilities = {}

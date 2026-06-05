@@ -31,7 +31,7 @@
 # When using a pattern subscription that matches no existing topics, the consumer group join
 # may not reach "steady" immediately (librdkafka waits for metadata that returns no matches).
 # This test verifies that within a short observation window (well below stability_ttl), the
-# process remains healthy — stability_ttl is not exceeded.
+# process remains healthy - stability_ttl is not exceeded.
 #
 # Note: with an empty topic match, librdkafka may cycle through "init"/"wait-metadata"
 # states or may complete the join with an empty assignment (reaching "steady"). Either way,
