@@ -154,6 +154,12 @@ module Karafka
           join_state = cgrp["join_state"]
           return unless join_state
 
+          # "init" means the consumer has not yet issued its first JoinGroup request -
+          # it has not started the join protocol at all. Unmatched pattern subscriptions
+          # stay in "init" indefinitely. Tracking it would cause false positives since
+          # polling_ttl already covers the case where the consumer cannot reach the broker.
+          return if join_state == "init"
+
           synchronize do
             if join_state == "steady"
               @instabilities.delete(sg_id)

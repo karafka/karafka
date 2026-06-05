@@ -28,14 +28,12 @@
 # License: https://karafka.io/docs/Pro-License-Comm/
 # Contact: contact@karafka.io
 
-# When using a pattern subscription that matches no existing topics, this test observes
-# the actual librdkafka cgrp.join_state behaviour over a window long enough for any
-# stability_ttl to fire.
+# When using a pattern subscription that matches no existing topics, librdkafka stays in
+# the "init" join_state indefinitely (it never issues a JoinGroup request when there are
+# no matching topics). Because the stability check skips "init" (it is not a stuck-join
+# state), stability_ttl_exceeded must never fire - no false positive.
 #
-# We use a short stability_ttl (5 s) and observe for 20 s. If librdkafka never reaches
-# "steady" when no topics match the regex, stability_ttl_exceeded will fire and we get
-# HTTP 500 - confirming a false-positive risk that needs to be documented or mitigated.
-# If "steady" is reached (empty assignment), HTTP stays 200 throughout - no false positive.
+# This test uses a short stability_ttl (5 s) over a 20 s window to confirm that.
 
 require "net/http"
 require "karafka/instrumentation/vendors/kubernetes/liveness_listener"
@@ -86,21 +84,13 @@ start_karafka_and_wait_until do
   DT[:probing].size >= 20
 end
 
-# If librdkafka reaches "steady" with an empty assignment (no matching topics), the
-# stability timer never starts and the probe stays healthy throughout - no false positive.
-#
-# If librdkafka stays non-steady cycling through "init"/"wait-metadata" indefinitely,
-# stability_ttl (5 s) fires and we see HTTP 500 - false positive confirmed.
-reached_steady = DT[:join_states].include?("steady")
+# librdkafka stays in "init" when no topics match the regex. The stability check skips
+# "init" entirely, so stability_ttl_exceeded must never fire.
 stability_fired = DT[:bodies].any? { |body| JSON.parse(body)["errors"]["stability_ttl_exceeded"] }
-
-assert reached_steady,
-  "Expected librdkafka to reach steady with empty assignment for no-match pattern, " \
-  "but only saw: #{DT[:join_states].uniq}. " \
-  "stability_ttl_exceeded fired: #{stability_fired}. " \
-  "This confirms a false-positive risk - stability_ttl must not be used with pattern " \
-  "subscriptions when no topics match, or the feature needs to skip pattern-based groups."
 
 assert !stability_fired,
   "stability_ttl_exceeded fired for a pattern subscription with no matching topics - " \
   "this is a false positive. join_states seen: #{DT[:join_states].uniq}"
+
+assert DT[:probing].none? { |code| code == "500" },
+  "Got HTTP 500 during pattern no-match observation. join_states: #{DT[:join_states].uniq}"
