@@ -61,7 +61,7 @@ module Karafka
             @consumptions = {}
             # Tracks subscription groups stuck in a non-steady librdkafka join state.
             # Maps subscription_group_id => monotonic_now of when we first saw non-steady.
-            @initializations = {}
+            @rebalances = {}
             super(hostname: hostname, port: port)
           end
 
@@ -94,9 +94,9 @@ module Karafka
 
             synchronize do
               if cgrp["join_state"] == "steady"
-                @initializations.delete(sg_id)
+                @rebalances.delete(sg_id)
               else
-                @initializations[sg_id] ||= monotonic_now
+                @rebalances[sg_id] ||= monotonic_now
               end
             end
           end
@@ -190,7 +190,7 @@ module Karafka
           def rebalance_ttl_exceeded?
             time = monotonic_now
 
-            @initializations.values.any? { |start| (time - start) > @rebalance_ttl }
+            @rebalances.values.any? { |start| (time - start) > @rebalance_ttl }
           end
 
           # Wraps the logic with a mutex

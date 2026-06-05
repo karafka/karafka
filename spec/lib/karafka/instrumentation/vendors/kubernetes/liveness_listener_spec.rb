@@ -9,7 +9,7 @@ RSpec.describe_current do
   let(:event) { {} }
   let(:pollings) { listener.instance_variable_get(:@pollings) }
   let(:consumptions) { listener.instance_variable_get(:@consumptions) }
-  let(:initializations) { listener.instance_variable_get(:@initializations) }
+  let(:rebalances) { listener.instance_variable_get(:@rebalances) }
 
   def stats_event(join_state:, sg_id: "sg1")
     { subscription_group_id: sg_id, statistics: { "cgrp" => { "join_state" => join_state } } }
@@ -84,33 +84,33 @@ RSpec.describe_current do
 
   describe "#on_statistics_emitted" do
     context "when join_state is steady" do
-      it "does not add an entry to initializations" do
+      it "does not add an entry to rebalances" do
         listener.on_statistics_emitted(stats_event(join_state: "steady"))
-        expect(initializations).to be_empty
+        expect(rebalances).to be_empty
       end
 
       it "removes a pre-existing entry when the consumer recovers" do
         listener.on_statistics_emitted(stats_event(join_state: "wait-assn"))
-        expect(initializations).not_to be_empty
+        expect(rebalances).not_to be_empty
 
         listener.on_statistics_emitted(stats_event(join_state: "steady"))
-        expect(initializations).to be_empty
+        expect(rebalances).to be_empty
       end
     end
 
     context "when join_state is non-steady" do
       it "records a start timestamp for the subscription group" do
         listener.on_statistics_emitted(stats_event(join_state: "wait-join"))
-        expect(initializations["sg1"]).to be_a(Numeric)
+        expect(rebalances["sg1"]).to be_a(Numeric)
       end
 
       it "does not overwrite the start timestamp on subsequent non-steady ticks" do
         listener.on_statistics_emitted(stats_event(join_state: "wait-join"))
-        first_tick = initializations["sg1"]
+        first_tick = rebalances["sg1"]
 
         sleep(0.01)
         listener.on_statistics_emitted(stats_event(join_state: "wait-assn"))
-        expect(initializations["sg1"]).to eq(first_tick)
+        expect(rebalances["sg1"]).to eq(first_tick)
       end
 
       it "tracks each subscription group independently" do
@@ -118,15 +118,15 @@ RSpec.describe_current do
         listener.on_statistics_emitted(stats_event(join_state: "wait-join", sg_id: "sg2"))
         listener.on_statistics_emitted(stats_event(join_state: "steady", sg_id: "sg1"))
 
-        expect(initializations.key?("sg1")).to be(false)
-        expect(initializations.key?("sg2")).to be(true)
+        expect(rebalances.key?("sg1")).to be(false)
+        expect(rebalances.key?("sg2")).to be(true)
       end
     end
 
     context "when statistics have no cgrp key (producer-side stats)" do
       it "ignores the event" do
         listener.on_statistics_emitted(subscription_group_id: "sg1", statistics: {})
-        expect(initializations).to be_empty
+        expect(rebalances).to be_empty
       end
     end
   end
