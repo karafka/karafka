@@ -58,14 +58,17 @@ module Karafka
         #   given process as hanging
         # @param polling_ttl [Integer] max time in ms for polling. If polling (any) does not
         #   happen that often, process should be considered dead.
-        # @param stability_ttl [Integer] max time in ms a subscription group can spend in a
-        #   non-"steady" librdkafka `cgrp.join_state` (e.g. `wait-join`, `wait-assn`,
-        #   `wait-sync`) before the node is considered unhealthy. This covers both the initial
-        #   consumer group join and subsequent instabilities. Should be set to at least your
-        #   `max.poll.interval.ms` value (default 300,000 ms) to avoid false positives during
-        #   slow but legitimate instabilities. The default of 10 minutes provides headroom above
-        #   the Kafka default. Requires `statistics.interval.ms` to be configured; without it
-        #   this check has no effect.
+        # @param stability_ttl [Integer] max time in ms a subscription group can remain in the
+        #   same non-"steady" librdkafka `cgrp.join_state` (e.g. `wait-join`, `wait-assn`,
+        #   `wait-sync`) before the node is considered unhealthy. The timer resets on every
+        #   join_state transition — even between non-steady states — because any state change
+        #   indicates the group join protocol is still making progress. Only a consumer frozen in
+        #   the identical state continuously for this duration triggers the alarm. Should be set to
+        #   at least your `max.poll.interval.ms` value (default 300,000 ms) to avoid false
+        #   positives during slow but legitimate instabilities. The default of 10 minutes provides
+        #   headroom above the Kafka default. Requires `statistics.interval.ms` to be configured;
+        #   without it `statistics.emitted` never fires, the tracking hashes remain empty, and
+        #   this check has no effect (no misreporting).
         def initialize(
           memory_limit: Float::INFINITY,
           consuming_ttl: 5 * 60 * 1_000,
@@ -80,10 +83,12 @@ module Karafka
           @pollings = {}
           @consumptions = {}
           # Maps subscription_group_id => last observed cgrp.join_state string.
-          # Used to detect when the state changes so the stuck timer can be reset.
+          # Used to detect state changes so the stuck timer resets on any transition.
+          # Both hashes are only populated by on_statistics_emitted, which requires
+          # statistics.interval.ms to be set. Without it they remain empty and
+          # status returns 0 for the stability check — no misreporting.
           @join_states = {}
           # Maps subscription_group_id => monotonic_now when the current non-steady state began.
-          # Reset on every join_state transition (including between non-steady states).
           @instabilities = {}
 
           super()
