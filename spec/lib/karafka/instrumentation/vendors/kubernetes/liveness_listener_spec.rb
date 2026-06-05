@@ -9,7 +9,7 @@ RSpec.describe_current do
   let(:event) { {} }
   let(:pollings) { listener.instance_variable_get(:@pollings) }
   let(:consumptions) { listener.instance_variable_get(:@consumptions) }
-  let(:rebalances) { listener.instance_variable_get(:@rebalances) }
+  let(:instabilities) { listener.instance_variable_get(:@instabilities) }
 
   def stats_event(join_state:, sg_id: "sg1")
     { subscription_group_id: sg_id, statistics: { "cgrp" => { "join_state" => join_state } } }
@@ -84,33 +84,33 @@ RSpec.describe_current do
 
   describe "#on_statistics_emitted" do
     context "when join_state is steady" do
-      it "does not add an entry to rebalances" do
+      it "does not add an entry to instabilities" do
         listener.on_statistics_emitted(stats_event(join_state: "steady"))
-        expect(rebalances).to be_empty
+        expect(instabilities).to be_empty
       end
 
       it "removes a pre-existing entry when the consumer recovers" do
         listener.on_statistics_emitted(stats_event(join_state: "wait-assn"))
-        expect(rebalances).not_to be_empty
+        expect(instabilities).not_to be_empty
 
         listener.on_statistics_emitted(stats_event(join_state: "steady"))
-        expect(rebalances).to be_empty
+        expect(instabilities).to be_empty
       end
     end
 
     context "when join_state is non-steady" do
       it "records a start timestamp for the subscription group" do
         listener.on_statistics_emitted(stats_event(join_state: "wait-join"))
-        expect(rebalances["sg1"]).to be_a(Numeric)
+        expect(instabilities["sg1"]).to be_a(Numeric)
       end
 
       it "does not overwrite the start timestamp on subsequent non-steady ticks" do
         listener.on_statistics_emitted(stats_event(join_state: "wait-join"))
-        first_tick = rebalances["sg1"]
+        first_tick = instabilities["sg1"]
 
         sleep(0.01)
         listener.on_statistics_emitted(stats_event(join_state: "wait-assn"))
-        expect(rebalances["sg1"]).to eq(first_tick)
+        expect(instabilities["sg1"]).to eq(first_tick)
       end
 
       it "tracks each subscription group independently" do
@@ -118,22 +118,22 @@ RSpec.describe_current do
         listener.on_statistics_emitted(stats_event(join_state: "wait-join", sg_id: "sg2"))
         listener.on_statistics_emitted(stats_event(join_state: "steady", sg_id: "sg1"))
 
-        expect(rebalances.key?("sg1")).to be(false)
-        expect(rebalances.key?("sg2")).to be(true)
+        expect(instabilities.key?("sg1")).to be(false)
+        expect(instabilities.key?("sg2")).to be(true)
       end
     end
 
     context "when statistics have no cgrp key (producer-side stats)" do
       it "ignores the event" do
         listener.on_statistics_emitted(subscription_group_id: "sg1", statistics: {})
-        expect(rebalances).to be_empty
+        expect(instabilities).to be_empty
       end
     end
   end
 
   describe "#healthy?" do
-    context "when rebalance_ttl is exceeded" do
-      subject(:listener) { described_class.new(rebalance_ttl: 0) }
+    context "when stability_ttl is exceeded" do
+      subject(:listener) { described_class.new(stability_ttl: 0) }
 
       it "returns false" do
         listener.on_statistics_emitted(stats_event(join_state: "wait-assn"))
@@ -141,7 +141,7 @@ RSpec.describe_current do
       end
     end
 
-    context "when rebalance_ttl is not exceeded" do
+    context "when stability_ttl is not exceeded" do
       it "returns true when no non-steady state is tracked" do
         expect(listener.healthy?).to be(true)
       end
@@ -155,21 +155,21 @@ RSpec.describe_current do
   end
 
   describe "#status_body" do
-    it "includes the rebalance_ttl_exceeded key" do
+    it "includes the stability_ttl_exceeded key" do
       body = listener.send(:status_body)
-      expect(body[:errors]).to have_key(:rebalance_ttl_exceeded)
+      expect(body[:errors]).to have_key(:stability_ttl_exceeded)
     end
 
     it "reports false when no subscription group is stuck" do
       body = listener.send(:status_body)
-      expect(body[:errors][:rebalance_ttl_exceeded]).to be(false)
+      expect(body[:errors][:stability_ttl_exceeded]).to be(false)
     end
 
     it "reports true when a subscription group exceeds the TTL" do
-      fast_listener = described_class.new(rebalance_ttl: 0)
+      fast_listener = described_class.new(stability_ttl: 0)
       fast_listener.on_statistics_emitted(stats_event(join_state: "wait-join"))
       body = fast_listener.send(:status_body)
-      expect(body[:errors][:rebalance_ttl_exceeded]).to be(true)
+      expect(body[:errors][:stability_ttl_exceeded]).to be(true)
     end
   end
 end

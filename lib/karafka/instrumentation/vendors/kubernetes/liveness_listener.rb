@@ -33,12 +33,12 @@ module Karafka
           #   process as hanging
           # @param polling_ttl [Integer] max time in ms for polling. If polling (any) does not
           #   happen that often, process should be considered dead.
-          # @param rebalance_ttl [Integer] max time in ms a subscription group can spend in a
+          # @param stability_ttl [Integer] max time in ms a subscription group can spend in a
           #   non-"steady" librdkafka `cgrp.join_state` (e.g. `wait-join`, `wait-assn`,
           #   `wait-sync`) before the process is considered unhealthy. This covers both the
-          #   initial consumer group join and subsequent rebalances. Should be set to at least
+          #   initial consumer group join and subsequent instabilities. Should be set to at least
           #   your `max.poll.interval.ms` value (default 300,000 ms) to avoid false positives
-          #   during slow but legitimate rebalances. The default of 10 minutes provides headroom
+          #   during slow but legitimate instabilities. The default of 10 minutes provides headroom
           #   above the Kafka default. Requires `statistics.interval.ms` to be configured in
           #   the Kafka client settings; without it this check has no effect.
           def initialize(
@@ -46,7 +46,7 @@ module Karafka
             port: 3000,
             consuming_ttl: 5 * 60 * 1_000,
             polling_ttl: 5 * 60 * 1_000,
-            rebalance_ttl: 10 * 60 * 1_000
+            stability_ttl: 10 * 60 * 1_000
           )
             # If this is set to a symbol, it indicates unrecoverable error like fencing
             # While fencing can be partial (for one of the SGs), we still should consider this
@@ -55,13 +55,13 @@ module Karafka
             @unrecoverable = false
             @polling_ttl = polling_ttl
             @consuming_ttl = consuming_ttl
-            @rebalance_ttl = rebalance_ttl
+            @stability_ttl = stability_ttl
             @mutex = Mutex.new
             @pollings = {}
             @consumptions = {}
             # Tracks subscription groups stuck in a non-steady librdkafka join state.
             # Maps subscription_group_id => monotonic_now of when we first saw non-steady.
-            @rebalances = {}
+            @instabilities = {}
             super(hostname: hostname, port: port)
           end
 
@@ -94,9 +94,9 @@ module Karafka
 
             synchronize do
               if cgrp["join_state"] == "steady"
-                @rebalances.delete(sg_id)
+                @instabilities.delete(sg_id)
               else
-                @rebalances[sg_id] ||= monotonic_now
+                @instabilities[sg_id] ||= monotonic_now
               end
             end
           end
@@ -164,7 +164,7 @@ module Karafka
             return false if @unrecoverable
             return false if polling_ttl_exceeded?
             return false if consuming_ttl_exceeded?
-            return false if rebalance_ttl_exceeded?
+            return false if stability_ttl_exceeded?
 
             true
           end
@@ -186,11 +186,11 @@ module Karafka
           end
 
           # @return [Boolean] true if any subscription group has been stuck in a non-steady
-          #   librdkafka join state for longer than the configured rebalance TTL
-          def rebalance_ttl_exceeded?
+          #   librdkafka join state for longer than the configured stability TTL
+          def stability_ttl_exceeded?
             time = monotonic_now
 
-            @rebalances.values.any? { |start| (time - start) > @rebalance_ttl }
+            @instabilities.values.any? { |start| (time - start) > @stability_ttl }
           end
 
           # Wraps the logic with a mutex
@@ -240,7 +240,7 @@ module Karafka
               errors: {
                 polling_ttl_exceeded: polling_ttl_exceeded?,
                 consumption_ttl_exceeded: consuming_ttl_exceeded?,
-                rebalance_ttl_exceeded: rebalance_ttl_exceeded?,
+                stability_ttl_exceeded: stability_ttl_exceeded?,
                 unrecoverable: @unrecoverable
               }
             )

@@ -47,7 +47,7 @@ RSpec.describe_current do
   let(:listener_polling_ttl) { listener.instance_variable_get(:@polling_ttl) }
   let(:listener_pollings) { listener.instance_variable_get(:@pollings) }
   let(:listener_consumptions) { listener.instance_variable_get(:@consumptions) }
-  let(:listener_rebalances) { listener.instance_variable_get(:@rebalances) }
+  let(:listener_instabilities) { listener.instance_variable_get(:@instabilities) }
 
   def stats_event(join_state:, sg_id: "sg1")
     { subscription_group_id: sg_id, statistics: { "cgrp" => { "join_state" => join_state } } }
@@ -67,8 +67,8 @@ RSpec.describe_current do
       expect(listener_polling_ttl).to eq(polling_ttl)
     end
 
-    it "initializes rebalances as an empty hash" do
-      expect(listener_rebalances).to eq({})
+    it "initializes instabilities as an empty hash" do
+      expect(listener_instabilities).to eq({})
     end
   end
 
@@ -192,26 +192,26 @@ RSpec.describe_current do
     context "when join_state is steady" do
       it "clears any existing non-steady tracking for that subscription group" do
         listener.on_statistics_emitted(stats_event(join_state: "wait-assn"))
-        expect(listener_rebalances).not_to be_empty
+        expect(listener_instabilities).not_to be_empty
 
         listener.on_statistics_emitted(stats_event(join_state: "steady"))
-        expect(listener_rebalances).to be_empty
+        expect(listener_instabilities).to be_empty
       end
     end
 
     context "when join_state is non-steady" do
       it "records when the group first became non-steady" do
         listener.on_statistics_emitted(stats_event(join_state: "wait-join"))
-        expect(listener_rebalances["sg1"]).to be_a(Numeric)
+        expect(listener_instabilities["sg1"]).to be_a(Numeric)
       end
 
       it "does not overwrite the start time on subsequent non-steady ticks" do
         listener.on_statistics_emitted(stats_event(join_state: "wait-join"))
-        first_tick = listener_rebalances["sg1"]
+        first_tick = listener_instabilities["sg1"]
 
         sleep(0.01)
         listener.on_statistics_emitted(stats_event(join_state: "wait-assn"))
-        expect(listener_rebalances["sg1"]).to eq(first_tick)
+        expect(listener_instabilities["sg1"]).to eq(first_tick)
       end
     end
 
@@ -219,19 +219,19 @@ RSpec.describe_current do
       it "ignores the event" do
         event_without_cgrp = { subscription_group_id: "sg1", statistics: {} }
         listener.on_statistics_emitted(event_without_cgrp)
-        expect(listener_rebalances).to be_empty
+        expect(listener_instabilities).to be_empty
       end
     end
   end
 
   describe "#status" do
-    context "when rebalance_ttl is exceeded" do
+    context "when stability_ttl is exceeded" do
       subject(:listener) do
         described_class.new(
           memory_limit: memory_limit,
           consuming_ttl: consuming_ttl,
           polling_ttl: polling_ttl,
-          rebalance_ttl: 0
+          stability_ttl: 0
         )
       end
 

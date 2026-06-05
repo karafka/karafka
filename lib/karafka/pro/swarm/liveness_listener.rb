@@ -47,7 +47,7 @@ module Karafka
       #   - 1 - polling ttl exceeded
       #   - 2 - consuming ttl exceeded
       #   - 3 - memory limit exceeded
-      #   - 4 - rebalance ttl exceeded (stuck in non-steady librdkafka join state)
+      #   - 4 - stability ttl exceeded (stuck in non-steady librdkafka join state)
       #
       # @note This listener should not break anything if subscribed in the supervisor prior to
       #   forking as it relies on server events for operations.
@@ -58,30 +58,30 @@ module Karafka
         #   given process as hanging
         # @param polling_ttl [Integer] max time in ms for polling. If polling (any) does not
         #   happen that often, process should be considered dead.
-        # @param rebalance_ttl [Integer] max time in ms a subscription group can spend in a
+        # @param stability_ttl [Integer] max time in ms a subscription group can spend in a
         #   non-"steady" librdkafka `cgrp.join_state` (e.g. `wait-join`, `wait-assn`,
         #   `wait-sync`) before the node is considered unhealthy. This covers both the initial
-        #   consumer group join and subsequent rebalances. Should be set to at least your
+        #   consumer group join and subsequent instabilities. Should be set to at least your
         #   `max.poll.interval.ms` value (default 300,000 ms) to avoid false positives during
-        #   slow but legitimate rebalances. The default of 10 minutes provides headroom above
+        #   slow but legitimate instabilities. The default of 10 minutes provides headroom above
         #   the Kafka default. Requires `statistics.interval.ms` to be configured; without it
         #   this check has no effect.
         def initialize(
           memory_limit: Float::INFINITY,
           consuming_ttl: 5 * 60 * 1_000,
           polling_ttl: 5 * 60 * 1_000,
-          rebalance_ttl: 10 * 60 * 1_000
+          stability_ttl: 10 * 60 * 1_000
         )
           @polling_ttl = polling_ttl
           @consuming_ttl = consuming_ttl
-          @rebalance_ttl = rebalance_ttl
+          @stability_ttl = stability_ttl
           # We cast it just in case someone would provide '10MB' or something similar
           @memory_limit = memory_limit.is_a?(String) ? memory_limit.to_i : memory_limit
           @pollings = {}
           @consumptions = {}
           # Tracks subscription groups stuck in a non-steady librdkafka join state.
           # Maps subscription_group_id => monotonic_now of when we first saw non-steady.
-          @rebalances = {}
+          @instabilities = {}
 
           super()
         end
@@ -142,9 +142,9 @@ module Karafka
 
           synchronize do
             if cgrp["join_state"] == "steady"
-              @rebalances.delete(sg_id)
+              @instabilities.delete(sg_id)
             else
-              @rebalances[sg_id] ||= monotonic_now
+              @instabilities[sg_id] ||= monotonic_now
             end
           end
         end
@@ -231,14 +231,14 @@ module Karafka
         #   1 - polling TTL exceeded
         #   2 - consuming TTL exceeded
         #   3 - memory limit exceeded
-        #   4 - rebalance TTL exceeded (stuck in non-steady join state)
+        #   4 - stability TTL exceeded (stuck in non-steady join state)
         def status
           time = monotonic_now
 
           return 1 if @pollings.values.any? { |tick| (time - tick) > @polling_ttl }
           return 2 if @consumptions.values.any? { |tick| (time - tick) > @consuming_ttl }
           return 3 if rss_mb > @memory_limit
-          return 4 if @rebalances.values.any? { |start| (time - start) > @rebalance_ttl }
+          return 4 if @instabilities.values.any? { |start| (time - start) > @stability_ttl }
 
           0
         end

@@ -1,15 +1,14 @@
 # frozen_string_literal: true
 
-# When subscribing to a topic that does not exist and allow.auto.create.topics is false,
-# librdkafka still completes the consumer group join protocol with an empty partition
-# assignment. The cgrp.join_state should reach "steady" and remain there, meaning the
-# rebalance_ttl should never be exceeded despite the UNKNOWN_TOPIC_OR_PART poll errors.
+# When subscribing to a topic that does not exist and allow.auto.create.topics is true,
+# the broker auto-creates the topic and the consumer receives an assignment. The
+# cgrp.join_state should reach "steady" and the stability_ttl should never be exceeded.
 
 require "net/http"
 require "karafka/instrumentation/vendors/kubernetes/liveness_listener"
 
-setup_karafka(allow_errors: true) do |config|
-  config.kafka[:"allow.auto.create.topics"] = false
+setup_karafka do |config|
+  config.kafka[:"allow.auto.create.topics"] = true
   config.kafka[:"statistics.interval.ms"] = 1_000
 end
 
@@ -26,8 +25,8 @@ end
 
 listener = Karafka::Instrumentation::Vendors::Kubernetes::LivenessListener.new(
   hostname: "127.0.0.1",
-  port: 9016,
-  rebalance_ttl: 30_000
+  port: 9017,
+  stability_ttl: 30_000
 )
 
 Karafka.monitor.subscribe(listener)
@@ -43,7 +42,7 @@ Thread.new do
 
   until Karafka::App.stopping?
     sleep(1)
-    uri = URI.parse("http://127.0.0.1:9016/")
+    uri = URI.parse("http://127.0.0.1:9017/")
     response = Net::HTTP.get_response(uri)
     DT[:probing] << response.code
     DT[:bodies] << response.body
@@ -54,14 +53,12 @@ start_karafka_and_wait_until do
   DT[:join_states].size >= 5
 end
 
-# librdkafka completes the join protocol with an empty assignment even when the topic
-# does not exist - the consumer group join and topic partition existence are independent
+# The broker auto-creates the topic and the consumer group join completes normally
 assert DT[:join_states].last(3).all? { |s| s == "steady" },
   "Expected last join_states to be steady, got: #{DT[:join_states].last(3)}"
 
-# The rebalance_ttl should never be exceeded
-assert DT[:bodies].none? { |body| JSON.parse(body)["errors"]["rebalance_ttl_exceeded"] },
-  "Expected rebalance_ttl_exceeded to never be true"
+assert DT[:bodies].none? { |body| JSON.parse(body)["errors"]["stability_ttl_exceeded"] },
+  "Expected stability_ttl_exceeded to never be true"
 
 assert DT[:probing].include?("200")
 assert !DT[:probing].include?("500")

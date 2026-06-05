@@ -30,7 +30,7 @@
 
 # When using a pattern subscription that matches no existing topics, librdkafka still
 # completes the consumer group join with an empty partition assignment. The
-# cgrp.join_state should reach "steady" and the rebalance_ttl should never be exceeded.
+# cgrp.join_state should reach "steady" and the stability_ttl should never be exceeded.
 
 require "net/http"
 require "karafka/instrumentation/vendors/kubernetes/liveness_listener"
@@ -54,7 +54,7 @@ end
 listener = Karafka::Instrumentation::Vendors::Kubernetes::LivenessListener.new(
   hostname: "127.0.0.1",
   port: 9018,
-  rebalance_ttl: 30_000
+  stability_ttl: 30_000
 )
 
 Karafka.monitor.subscribe(listener)
@@ -86,8 +86,8 @@ end
 assert DT[:join_states].last(3).all? { |s| s == "steady" },
   "Expected last join_states to be steady, got: #{DT[:join_states].last(3)}"
 
-assert DT[:bodies].none? { |body| JSON.parse(body)["errors"]["rebalance_ttl_exceeded"] },
-  "Expected rebalance_ttl_exceeded to never be true"
+assert DT[:bodies].none? { |body| JSON.parse(body)["errors"]["stability_ttl_exceeded"] },
+  "Expected stability_ttl_exceeded to never be true"
 
 assert DT[:probing].include?("200")
 assert !DT[:probing].include?("500")
