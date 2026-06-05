@@ -10,6 +10,7 @@ RSpec.describe_current do
   let(:pollings) { listener.instance_variable_get(:@pollings) }
   let(:consumptions) { listener.instance_variable_get(:@consumptions) }
   let(:instabilities) { listener.instance_variable_get(:@instabilities) }
+  let(:join_states) { listener.instance_variable_get(:@join_states) }
 
   def stats_event(join_state:, sg_id: "sg1")
     { subscription_group_id: sg_id, statistics: { "cgrp" => { "join_state" => join_state } } }
@@ -89,12 +90,20 @@ RSpec.describe_current do
         expect(instabilities).to be_empty
       end
 
-      it "removes a pre-existing entry when the consumer recovers" do
+      it "removes a pre-existing instability entry when the consumer recovers" do
         listener.on_statistics_emitted(stats_event(join_state: "wait-assn"))
         expect(instabilities).not_to be_empty
 
         listener.on_statistics_emitted(stats_event(join_state: "steady"))
         expect(instabilities).to be_empty
+      end
+
+      it "removes a pre-existing join_states entry when the consumer recovers" do
+        listener.on_statistics_emitted(stats_event(join_state: "wait-assn"))
+        expect(join_states).not_to be_empty
+
+        listener.on_statistics_emitted(stats_event(join_state: "steady"))
+        expect(join_states).to be_empty
       end
     end
 
@@ -104,13 +113,22 @@ RSpec.describe_current do
         expect(instabilities["sg1"]).to be_a(Numeric)
       end
 
-      it "does not overwrite the start timestamp on subsequent non-steady ticks" do
+      it "does not reset the start timestamp when the same non-steady state repeats" do
+        listener.on_statistics_emitted(stats_event(join_state: "wait-join"))
+        first_tick = instabilities["sg1"]
+
+        sleep(0.01)
+        listener.on_statistics_emitted(stats_event(join_state: "wait-join"))
+        expect(instabilities["sg1"]).to eq(first_tick)
+      end
+
+      it "resets the start timestamp when the non-steady state changes" do
         listener.on_statistics_emitted(stats_event(join_state: "wait-join"))
         first_tick = instabilities["sg1"]
 
         sleep(0.01)
         listener.on_statistics_emitted(stats_event(join_state: "wait-assn"))
-        expect(instabilities["sg1"]).to eq(first_tick)
+        expect(instabilities["sg1"]).to be > first_tick
       end
 
       it "tracks each subscription group independently" do

@@ -79,8 +79,11 @@ module Karafka
           @memory_limit = memory_limit.is_a?(String) ? memory_limit.to_i : memory_limit
           @pollings = {}
           @consumptions = {}
-          # Tracks subscription groups stuck in a non-steady librdkafka join state.
-          # Maps subscription_group_id => monotonic_now of when we first saw non-steady.
+          # Maps subscription_group_id => last observed cgrp.join_state string.
+          # Used to detect when the state changes so the stuck timer can be reset.
+          @join_states = {}
+          # Maps subscription_group_id => monotonic_now when the current non-steady state began.
+          # Reset on every join_state transition (including between non-steady states).
           @instabilities = {}
 
           super()
@@ -133,18 +136,25 @@ module Karafka
         # Track when each subscription group's consumer enters or leaves a non-steady join
         # state. A prolonged non-steady state indicates a stuck consumer (e.g., broker stuck
         # in CompletingRebalance due to KAFKA-19862).
+        #
+        # The stuck timer resets on every join_state transition, including transitions between
+        # non-steady states, because any state change indicates the protocol is still progressing.
+        # Only a consumer frozen in the same state for longer than stability_ttl is flagged.
         # @param event [Karafka::Core::Monitoring::Event]
         def on_statistics_emitted(event)
           cgrp = event[:statistics]["cgrp"]
           return unless cgrp
 
           sg_id = event[:subscription_group_id]
+          join_state = cgrp["join_state"]
 
           synchronize do
-            if cgrp["join_state"] == "steady"
+            if join_state == "steady"
               @instabilities.delete(sg_id)
-            else
-              @instabilities[sg_id] ||= monotonic_now
+              @join_states.delete(sg_id)
+            elsif @join_states[sg_id] != join_state
+              @join_states[sg_id] = join_state
+              @instabilities[sg_id] = monotonic_now
             end
           end
         end
