@@ -4,16 +4,14 @@
 # the consumer group join never completes. librdkafka cycles between "init" and
 # "wait-metadata" indefinitely - it never reaches "steady".
 #
-# Because the stability timer resets on every state transition, stability_ttl_exceeded
-# does NOT fire even though the consumer is genuinely stuck. This is a known design
-# boundary: stability_ttl detects consumers frozen in a single non-steady state (e.g.
-# stuck in "wait-assn" due to a broker-side hang like KAFKA-19862) but not consumers
-# that cycle between non-steady states fast enough to keep the timer from accumulating.
+# Both "init" and "wait-metadata" are pre-join states (the consumer has not yet issued
+# a JoinGroup request), so stability tracking skips them. stability_ttl_exceeded does
+# NOT fire, which means this stuck state goes undetected by stability_ttl.
 #
-# This is NOT a false positive - the probe stays healthy (200) - but it means
-# stability_ttl gives no signal for non-existent-topic situations. Users relying on
-# stability_ttl should be aware that the feature targets single-state freezes, not
-# cycling states.
+# This is a known design boundary: stability_ttl targets consumers frozen in a mid-join
+# state (e.g. stuck in "wait-assn" due to KAFKA-19862), not consumers that never start
+# the join protocol because the topic is missing. This is NOT a false positive - the
+# probe stays healthy (200) - but users should be aware of this scope limitation.
 
 require "net/http"
 require "karafka/instrumentation/vendors/kubernetes/liveness_listener"

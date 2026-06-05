@@ -162,6 +162,13 @@ RSpec.describe_current do
         expect(instabilities).to be_empty
       end
     end
+
+    context "when join_state is wait-metadata" do
+      it "ignores the event without starting an instability timer" do
+        listener.on_statistics_emitted(stats_event(join_state: "wait-metadata"))
+        expect(instabilities).to be_empty
+      end
+    end
   end
 
   describe "#healthy?" do

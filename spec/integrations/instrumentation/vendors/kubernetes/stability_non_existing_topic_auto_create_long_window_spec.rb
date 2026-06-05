@@ -2,13 +2,10 @@
 
 # When subscribing to a topic that does not exist and allow.auto.create.topics is true,
 # librdkafka cycles between "init" and "wait-metadata" until the topic is auto-created.
-# Each state transition resets the stability timer, so stability_ttl_exceeded never fires
-# for a cycling consumer - only a consumer stuck in a single non-steady state for longer
-# than stability_ttl would trigger it.
+# Both states are pre-join (the consumer has not yet issued a JoinGroup request), so
+# stability tracking skips them entirely - stability_ttl_exceeded must never fire.
 #
 # This test verifies no false positive over a 20 s window with a 5 s stability_ttl.
-# Whether "steady" is ultimately reached depends on broker auto-create timing, but the
-# absence of stability_ttl_exceeded is the invariant we care about here.
 
 require "net/http"
 require "karafka/instrumentation/vendors/kubernetes/liveness_listener"

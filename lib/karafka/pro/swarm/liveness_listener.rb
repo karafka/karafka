@@ -154,11 +154,11 @@ module Karafka
           join_state = cgrp["join_state"]
           return unless join_state
 
-          # "init" means the consumer has not yet issued its first JoinGroup request -
-          # it has not started the join protocol at all. Unmatched pattern subscriptions
-          # stay in "init" indefinitely. Tracking it would cause false positives since
-          # polling_ttl already covers the case where the consumer cannot reach the broker.
-          return if join_state == "init"
+          # "init" and "wait-metadata" are pre-join states: the consumer has not yet
+          # issued its first JoinGroup request. Tracking them causes false positives for
+          # unmatched patterns ("init") and slow metadata refreshes ("wait-metadata").
+          # polling_ttl covers the case where the consumer cannot reach the broker at all.
+          return if join_state == "init" || join_state == "wait-metadata"
 
           synchronize do
             if join_state == "steady"
