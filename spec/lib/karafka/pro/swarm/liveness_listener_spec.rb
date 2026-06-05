@@ -240,6 +240,14 @@ RSpec.describe_current do
         expect(listener_instabilities).to be_empty
       end
     end
+
+    context "when cgrp is present but join_state is nil" do
+      it "ignores the event without starting an instability timer" do
+        event = { subscription_group_id: "sg1", statistics: { "cgrp" => { "join_state" => nil } } }
+        listener.on_statistics_emitted(event)
+        expect(listener_instabilities).to be_empty
+      end
+    end
   end
 
   describe "#status" do
