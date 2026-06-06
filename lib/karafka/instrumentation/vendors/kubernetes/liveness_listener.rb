@@ -36,16 +36,17 @@ module Karafka
           # @param stability_ttl [Integer] max time in ms a subscription group can remain in the
           #   same tracked non-"steady" librdkafka `cgrp.join_state` (e.g. `wait-join`, `wait-assn`,
           #   `wait-sync`) before the process is considered unhealthy. The pre-join states `init`
-          #   and `wait-metadata` are excluded from tracking entirely and neither start nor reset
-          #   the timer. Among tracked states the timer resets on every transition - even between
-          #   non-steady states - because any change indicates the join protocol is still progressing.
-          #   Only a consumer frozen in the identical state continuously for this duration triggers
-          #   the alarm. Should be set to
-          #   at least your `max.poll.interval.ms` value (default 300,000 ms) to avoid false
-          #   positives during slow but legitimate instabilities. The default of 10 minutes provides
-          #   headroom above the Kafka default. Requires `statistics.interval.ms` to be configured
-          #   in the Kafka client settings; without it `statistics.emitted` never fires, the
-          #   tracking hashes remain empty, and this check has no effect (no misreporting).
+          #   and `wait-metadata` are excluded - they appear during normal startup, unmatched
+          #   patterns, and topic auto-creation waits, not during a stuck rebalance. Covered by
+          #   `polling_ttl` instead. Among tracked states the timer resets on every join_state
+          #   transition - even between non-steady states - because any change indicates the join
+          #   protocol is still progressing. Only a consumer stuck in the same tracked state
+          #   continuously triggers the alarm. Should be set to at least your
+          #   `max.poll.interval.ms` (default 300,000 ms) to avoid false positives during slow but
+          #   legitimate instabilities. The default of 10 minutes provides headroom above the Kafka
+          #   default. Requires `statistics.interval.ms` to be configured in the Kafka client
+          #   settings; without it `statistics.emitted` never fires, tracking hashes remain empty,
+          #   and this check has no effect (no misreporting).
           def initialize(
             hostname: nil,
             port: 3000,
@@ -92,15 +93,15 @@ module Karafka
             mark_polling_tick
           end
 
-          # Track when each subscription group's consumer enters or leaves a non-steady join
-          # state. A prolonged non-steady state (e.g., wait-join, wait-assn caused by a broker
-          # stuck in CompletingRebalance) is reported as unhealthy.
+          # Track when each subscription group's consumer enters or leaves a non-steady join state.
+          # A prolonged non-steady state (e.g., wait-join, wait-assn caused by a broker stuck in
+          # CompletingRebalance) is reported as unhealthy. The pre-join states `init` and
+          # `wait-metadata` are excluded - they appear during normal startup, unmatched patterns,
+          # and topic auto-creation waits, not during a stuck rebalance; `polling_ttl` covers those.
           #
           # The stuck timer resets on every transition between tracked states, including between
           # non-steady states, because any change indicates the join protocol is still progressing.
-          # The pre-join states `init` and `wait-metadata` are excluded from tracking entirely and
-          # neither start nor reset the timer. Only a consumer frozen in the same tracked state for
-          # longer than stability_ttl is flagged.
+          # Only a consumer stuck in the same state for longer than stability_ttl is flagged.
           # @param event [Karafka::Core::Monitoring::Event]
           def on_statistics_emitted(event)
             cgrp = event[:statistics]["cgrp"]
@@ -110,10 +111,10 @@ module Karafka
             join_state = cgrp["join_state"]
             return unless join_state
 
-            # "init" and "wait-metadata" are pre-join states: the consumer has not yet
-            # issued its first JoinGroup request. Tracking them causes false positives for
-            # unmatched patterns ("init") and slow metadata refreshes ("wait-metadata").
-            # polling_ttl covers the case where the consumer cannot reach the broker at all.
+            # "init" and "wait-metadata" are pre-join states - the consumer has not yet issued its
+            # first JoinGroup request. They appear during normal startup, unmatched pattern subs,
+            # and topic auto-creation waits, not during a stuck rebalance. Those cases are covered
+            # by `polling_ttl` instead.
             return if join_state == "init" || join_state == "wait-metadata"
 
             synchronize do
