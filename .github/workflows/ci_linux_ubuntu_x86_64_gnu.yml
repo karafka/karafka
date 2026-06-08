@@ -115,7 +115,12 @@ jobs:
 
       - name: Start Kafka with docker compose
         run: |
-          docker compose up -d || (sleep 5 && docker compose up -d)
+          for attempt in 1 2 3 4 5; do
+            docker compose up -d && break
+            echo "Attempt $attempt/5 failed."
+            docker compose down -v 2>/dev/null || true
+            [ $attempt -lt 5 ] && echo "Retrying in $((attempt * 15))s..." && sleep $((attempt * 15)) || exit 1
+          done
 
       - name: Remove Gemfile.lock for Ruby dev/preview versions
         if: contains(matrix.ruby, 'dev') || contains(matrix.ruby, 'preview') || contains(matrix.ruby, 'rc')
@@ -167,7 +172,12 @@ jobs:
 
       - name: Start Kafka with docker compose
         run: |
-          docker compose up -d || (sleep 5 && docker compose up -d)
+          for attempt in 1 2 3 4 5; do
+            docker compose up -d && break
+            echo "Attempt $attempt/5 failed."
+            docker compose down -v 2>/dev/null || true
+            [ $attempt -lt 5 ] && echo "Retrying in $((attempt * 15))s..." && sleep $((attempt * 15)) || exit 1
+          done
 
       - name: Set up Ruby
         uses: ruby/setup-ruby@afeafc3d1ab54a631816aba4c914a0081c12ff2f # v1.310.0
@@ -236,7 +246,12 @@ jobs:
 
       - name: Start Kafka with docker compose
         run: |
-          docker compose up -d || (sleep 5 && docker compose up -d)
+          for attempt in 1 2 3 4 5; do
+            docker compose up -d && break
+            echo "Attempt $attempt/5 failed."
+            docker compose down -v 2>/dev/null || true
+            [ $attempt -lt 5 ] && echo "Retrying in $((attempt * 15))s..." && sleep $((attempt * 15)) || exit 1
+          done
 
       - name: Set up Ruby
         uses: ruby/setup-ruby@afeafc3d1ab54a631816aba4c914a0081c12ff2f # v1.310.0

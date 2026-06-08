@@ -48,8 +48,12 @@ jobs:
 
       - name: Start Multi-Broker Kafka cluster
         run: |
-          docker compose -f docker-compose.multi-broker.yml up -d || \
-            (sleep 5 && docker compose -f docker-compose.multi-broker.yml up -d)
+          for attempt in 1 2 3 4 5; do
+            docker compose -f docker-compose.multi-broker.yml up -d && break
+            echo "Attempt $attempt/5 failed."
+            docker compose -f docker-compose.multi-broker.yml down -v 2>/dev/null || true
+            [ $attempt -lt 5 ] && echo "Retrying in $((attempt * 15))s..." && sleep $((attempt * 15)) || exit 1
+          done
 
           echo "Waiting for Kafka brokers to initialize..."
           sleep 30
