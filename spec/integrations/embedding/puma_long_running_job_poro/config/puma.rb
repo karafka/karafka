@@ -16,7 +16,7 @@ require "karafka"
 require "securerandom"
 require "digest"
 
-SPEC_HASH = Digest::MD5.hexdigest($PROGRAM_NAME)[0, 6]
+SPEC_HASH = Digest::MD5.hexdigest(ENV.fetch("KARAFKA_SPEC_PATH", $PROGRAM_NAME))[0, 6]
 TOPIC = "it-#{SPEC_HASH}-#{SecureRandom.hex(6)}".freeze
 PID = Process.pid
 RESULT_FILE = File.join(__dir__, "..", "result.txt")
