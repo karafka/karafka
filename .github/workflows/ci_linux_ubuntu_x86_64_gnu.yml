@@ -117,9 +117,9 @@ jobs:
         run: |
           for attempt in 1 2 3 4 5; do
             docker compose up -d && break
-            echo "Attempt $attempt/5 failed, retrying in $((attempt * 15))s..."
+            echo "Attempt $attempt/5 failed."
             docker compose down -v 2>/dev/null || true
-            sleep $((attempt * 15))
+            [ $attempt -lt 5 ] && echo "Retrying in $((attempt * 15))s..." && sleep $((attempt * 15)) || exit 1
           done
 
       - name: Remove Gemfile.lock for Ruby dev/preview versions
@@ -174,9 +174,9 @@ jobs:
         run: |
           for attempt in 1 2 3 4 5; do
             docker compose up -d && break
-            echo "Attempt $attempt/5 failed, retrying in $((attempt * 15))s..."
+            echo "Attempt $attempt/5 failed."
             docker compose down -v 2>/dev/null || true
-            sleep $((attempt * 15))
+            [ $attempt -lt 5 ] && echo "Retrying in $((attempt * 15))s..." && sleep $((attempt * 15)) || exit 1
           done
 
       - name: Set up Ruby
@@ -248,9 +248,9 @@ jobs:
         run: |
           for attempt in 1 2 3 4 5; do
             docker compose up -d && break
-            echo "Attempt $attempt/5 failed, retrying in $((attempt * 15))s..."
+            echo "Attempt $attempt/5 failed."
             docker compose down -v 2>/dev/null || true
-            sleep $((attempt * 15))
+            [ $attempt -lt 5 ] && echo "Retrying in $((attempt * 15))s..." && sleep $((attempt * 15)) || exit 1
           done
 
       - name: Set up Ruby
