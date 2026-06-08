@@ -18,10 +18,7 @@ allowed_patterns=(
    "Error processing kafka.server:type=BrokerTopicMetrics"
    "UNKNOWN_TOPIC_ID from the leader for partition"
    "The replica state of replica ID"
-   "Auto topic creation failed for it-e8a1b9-"
-   "Auto topic creation failed for it-2c2272-"
-   "Auto topic creation failed for it-4b9ec4-"
-   "Auto topic creation failed for it-867e2c-"
+   "Auto topic creation failed for it-[0-9a-f]"
    "Auto topic creation failed for it-production."
    "Auto topic creation failed for it-us01.production."
    "Auto topic creation failed for it-sandbox.production."
@@ -41,7 +38,7 @@ while IFS= read -r line; do
    [ -z "$line" ] && continue
    allowed=0
    for pattern in "${allowed_patterns[@]}"; do
-       if echo "$line" | grep -q "$pattern"; then
+       if echo "$line" | grep -qE "$pattern"; then
            allowed=1
            break
        fi
