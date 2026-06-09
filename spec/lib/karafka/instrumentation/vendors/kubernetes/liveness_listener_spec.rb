@@ -157,9 +157,25 @@ RSpec.describe_current do
     end
 
     context "when join_state is init" do
-      it "ignores the event without starting an instability timer" do
+      it "does not start an instability timer for a fresh subscription group" do
         listener.on_statistics_emitted(stats_event(join_state: "init"))
         expect(instabilities).to be_empty
+      end
+
+      it "clears any existing instability entry on rdkafka client reset" do
+        listener.on_statistics_emitted(stats_event(join_state: "wait-assn"))
+        expect(instabilities).not_to be_empty
+
+        listener.on_statistics_emitted(stats_event(join_state: "init"))
+        expect(instabilities).to be_empty
+      end
+
+      it "clears the join_states entry on rdkafka client reset" do
+        listener.on_statistics_emitted(stats_event(join_state: "wait-assn"))
+        expect(join_states).not_to be_empty
+
+        listener.on_statistics_emitted(stats_event(join_state: "init"))
+        expect(join_states).to be_empty
       end
     end
 

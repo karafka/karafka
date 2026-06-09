@@ -35,18 +35,22 @@ module Karafka
           #   happen that often, process should be considered dead.
           # @param stability_ttl [Integer] max time in ms a subscription group can remain in the
           #   same tracked non-"steady" librdkafka `cgrp.join_state` (e.g. `wait-join`, `wait-assn`,
-          #   `wait-sync`) before the process is considered unhealthy. The pre-join states `init`
-          #   and `wait-metadata` are excluded - they appear during normal startup, unmatched
-          #   patterns, and topic auto-creation waits, not during a stuck rebalance. Covered by
-          #   `polling_ttl` instead. Among tracked states the timer resets on every join_state
-          #   transition - even between non-steady states - because any change indicates the join
-          #   protocol is still progressing. Only a consumer stuck in the same tracked state
-          #   continuously triggers the alarm. Should be set to at least your
-          #   `max.poll.interval.ms` (default 300,000 ms) to avoid false positives during slow but
-          #   legitimate instabilities. The default of 10 minutes provides headroom above the Kafka
-          #   default. Requires `statistics.interval.ms` to be configured in the Kafka client
-          #   settings; without it `statistics.emitted` never fires, tracking hashes remain empty,
-          #   and this check has no effect (no misreporting).
+          #   `wait-sync`) before the process is considered unhealthy. `wait-metadata` is excluded
+          #   because it appears in normal scenarios (auto-create waits, unmatched pattern
+          #   subscriptions, and as the group leader's post-JoinGroup state while fetching cluster
+          #   metadata to compute the partition assignment) — not only during stuck rebalances.
+          #   `init` is handled by clearing stale tracking on client reset rather than by
+          #   skipping. Both states are covered by `polling_ttl` for genuine freezes.
+          #   The timer resets on every join_state transition between tracked states because any
+          #   change indicates the join protocol is still progressing; only a consumer frozen in
+          #   the same non-steady state continuously triggers the alarm. Note that a consumer
+          #   cycling rapidly between non-steady states (e.g. wait-join → wait-assn → wait-join)
+          #   will not trip this check — it only catches consumers stuck in one state.
+          #   Should be set to at least your `max.poll.interval.ms` (default 300,000 ms) to avoid
+          #   false positives during slow but legitimate instabilities. The default of 10 minutes
+          #   provides headroom above the Kafka default. Requires `statistics.interval.ms` to be
+          #   configured in the Kafka client settings; without it `statistics.emitted` never fires,
+          #   tracking hashes remain empty, and this check has no effect (no misreporting).
           def initialize(
             hostname: nil,
             port: 3000,
@@ -95,13 +99,21 @@ module Karafka
 
           # Track when each subscription group's consumer enters or leaves a non-steady join state.
           # A prolonged non-steady state (e.g., wait-join, wait-assn caused by a broker stuck in
-          # CompletingRebalance) is reported as unhealthy. The pre-join states `init` and
-          # `wait-metadata` are excluded - they appear during normal startup, unmatched patterns,
-          # and topic auto-creation waits, not during a stuck rebalance; `polling_ttl` covers those.
+          # CompletingRebalance) is reported as unhealthy.
           #
-          # The stuck timer resets on every transition between tracked states, including between
-          # non-steady states, because any change indicates the join protocol is still progressing.
-          # Only a consumer stuck in the same state for longer than stability_ttl is flagged.
+          # `wait-metadata` is skipped: it appears in normal scenarios (auto-create waits, unmatched
+          # pattern subscriptions, and as the group leader's post-JoinGroup state while fetching
+          # cluster metadata to compute the partition assignment), not only during stuck rebalances.
+          # `polling_ttl` covers genuine freezes in that state.
+          #
+          # `init` clears stale tracking so that a client reset or subscription-group removal
+          # (e.g., dynamic multiplexing scale-down) does not leave a persistent false-positive entry.
+          #
+          # The stuck timer resets on every transition between tracked states because any change
+          # indicates the join protocol is still progressing. Only a consumer frozen in the same
+          # non-steady state continuously for stability_ttl is flagged. Note that a consumer
+          # cycling rapidly between non-steady states (e.g. wait-join → wait-assn → wait-join)
+          # will not trip this alarm — only a frozen-in-one-state consumer is caught.
           # @param event [Karafka::Core::Monitoring::Event]
           def on_statistics_emitted(event)
             cgrp = event[:statistics]["cgrp"]
@@ -111,14 +123,17 @@ module Karafka
             join_state = cgrp["join_state"]
             return unless join_state
 
-            # "init" and "wait-metadata" are pre-join states - the consumer has not yet issued its
-            # first JoinGroup request. They appear during normal startup, unmatched pattern subs,
-            # and topic auto-creation waits, not during a stuck rebalance. Those cases are covered
-            # by `polling_ttl` instead.
-            return if join_state == "init" || join_state == "wait-metadata"
+            # "wait-metadata" appears in multiple normal scenarios (auto-create waits, unmatched
+            # pattern subscriptions, and as the group leader's post-JoinGroup state while fetching
+            # cluster metadata to compute assignments). Skip it to avoid false positives;
+            # polling_ttl covers genuine freezes in this state.
+            return if join_state == "wait-metadata"
 
             synchronize do
-              if join_state == "steady"
+              if join_state == "steady" || join_state == "init"
+                # "init" clears any stale entry when the subscription group's rdkafka client
+                # resets (e.g., after a scale-down or pattern unsubscribe), preventing a
+                # persistent false positive for entries that would otherwise only clear on "steady".
                 @instabilities.delete(sg_id)
                 @join_states.delete(sg_id)
               elsif @join_states[sg_id] != join_state
@@ -201,23 +216,20 @@ module Karafka
           # @return [Boolean] true if the consumer exceeded the polling ttl
           def polling_ttl_exceeded?
             time = monotonic_now
-
-            @pollings.values.any? { |tick| (time - tick) > @polling_ttl }
+            synchronize { @pollings.values.any? { |tick| (time - tick) > @polling_ttl } }
           end
 
           # @return [Boolean] true if the consumer exceeded the consuming ttl
           def consuming_ttl_exceeded?
             time = monotonic_now
-
-            @consumptions.values.any? { |tick| (time - tick) > @consuming_ttl }
+            synchronize { @consumptions.values.any? { |tick| (time - tick) > @consuming_ttl } }
           end
 
           # @return [Boolean] true if any subscription group has been stuck in a non-steady
           #   librdkafka join state for longer than the configured stability TTL
           def stability_ttl_exceeded?
             time = monotonic_now
-
-            @instabilities.values.any? { |start| (time - start) > @stability_ttl }
+            synchronize { @instabilities.values.any? { |start| (time - start) > @stability_ttl } }
           end
 
           # Wraps the logic with a mutex
