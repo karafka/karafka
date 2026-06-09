@@ -815,8 +815,7 @@ module Karafka
       # Decides whether or not we should unsubscribe prior to closing.
       #
       # We cannot do it when there is a static group membership assignment as it would be
-      # reassigned.
-      # We cannot do it also for assign mode because then there are no subscriptions
+      # reassigned. We cannot do it also for assign mode because then there are no subscriptions
       # We also do not do it if there are no assignments at all as it does not make sense
       #
       # @return [Boolean] should we unsubscribe prior to shutdown

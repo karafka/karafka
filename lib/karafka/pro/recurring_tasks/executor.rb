@@ -93,8 +93,7 @@ module Karafka
 
           @replaying = false
 
-          # When there is nothing to replay and synchronize, we can just save the state and
-          # proceed
+          # When there is nothing to replay and synchronize, we can just save the state and proceed
           if @catchup_commands.empty? && @catchup_schedule.nil?
             snapshot
 

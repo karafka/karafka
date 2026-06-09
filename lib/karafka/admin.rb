@@ -163,8 +163,7 @@ module Karafka
         new.trigger_rebalance(group_id)
       end
 
-      # Reads lags and offsets for given topics in the context of groups defined in the
-      #   routing
+      # Reads lags and offsets for given topics in the context of groups defined in the routing
       # @param groups_with_topics [Hash{String => Array<String>}] hash with group
       #   names with array of topics to query per group inside
       # @param active_topics_only [Boolean] if set to false, when we use routing topics, will

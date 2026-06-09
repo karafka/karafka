@@ -36,8 +36,7 @@ module Karafka
       # lands.
       module ConsumerGroups
         module Filters
-          # Base for all the filters.
-          # All filters (including custom) need to use this API.
+          # Base for all the filters. All filters (including custom) need to use this API.
           #
           # Due to the fact, that filters can limit data in such a way, that we need to pause or
           # seek (throttling for example), the api is not just "remove some things from batch" but
