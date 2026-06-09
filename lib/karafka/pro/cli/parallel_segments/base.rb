@@ -83,8 +83,7 @@ module Karafka
 
           # Collects the offsets for the segment origin consumer group and the parallel segments
           # consumers groups. We use segment origin group offsets as a baseline for the
-          # distribution and use existing (if any) parallel segments groups offsets for
-          # validations.
+          # distribution and use existing (if any) parallel segments groups offsets for validations.
           #
           # @param segment_origin [String] name of the origin consumer group
           # @param segments [Array<Karafka::Routing::ConsumerGroup>]

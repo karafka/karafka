@@ -94,8 +94,7 @@ module Karafka
               # Skip negative and time based offsets
               next unless offset.is_a?(Integer) && offset >= 0
 
-              # Exact offsets can be used as they are
-              # No need for extra operations
+              # Exact offsets can be used as they are No need for extra operations
               @mapped_topics[name][partition] = offset
             end
           end

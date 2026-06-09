@@ -66,8 +66,7 @@ module Karafka
               @applied = false
               @cursor = messages.first
 
-              # Nothing to do if there were no messages
-              # This can happen when we chain filters
+              # Nothing to do if there were no messages This can happen when we chain filters
               return unless @cursor
 
               insights = Karafka::Processing::ConsumerGroups::InlineInsights::Tracker.find(

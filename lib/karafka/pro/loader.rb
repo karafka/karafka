@@ -49,8 +49,7 @@ module Karafka
         cli/topics
       ].freeze
 
-      # Zeitwerk pro loader
-      # We need to have one per process, that's why it's set as a constant
+      # Zeitwerk pro loader We need to have one per process, that's why it's set as a constant
       PRO_LOADER = Zeitwerk::Loader.new
 
       private_constant :PRO_LOADER
