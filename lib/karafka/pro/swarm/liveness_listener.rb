@@ -56,26 +56,30 @@ module Karafka
         DEFAULT_CONSUMING_TTL = 5 * 60 * 1_000
         # Default max time in ms between polls before the node is considered dead (5 minutes)
         DEFAULT_POLLING_TTL = 5 * 60 * 1_000
-        # Default max time in ms a subscription group may stay in a non-steady join state
-        # (10 minutes - headroom above the Kafka default max.poll.interval.ms of 5 minutes)
-        DEFAULT_STABILITY_TTL = 10 * 60 * 1_000
+        # Multiplier applied to max.poll.interval.ms when deriving the default stability_ttl.
+        STABILITY_TTL_MAX_POLL_MULTIPLIER = 2
 
-        private_constant :DEFAULT_CONSUMING_TTL, :DEFAULT_POLLING_TTL, :DEFAULT_STABILITY_TTL
+        private_constant(
+          :DEFAULT_CONSUMING_TTL,
+          :DEFAULT_POLLING_TTL,
+          :STABILITY_TTL_MAX_POLL_MULTIPLIER
+        )
 
         # @param memory_limit [Integer] max memory in MB for this process to be considered healthy
         # @param consuming_ttl [Integer] see Kubernetes::LivenessListener for full documentation.
         # @param polling_ttl [Integer] see Kubernetes::LivenessListener for full documentation.
-        # @param stability_ttl [Integer] see Kubernetes::LivenessListener for full documentation.
-        #   Same semantics apply here; the node is reported unhealthy instead of returning HTTP 500.
+        # @param stability_ttl [Integer, nil] see Kubernetes::LivenessListener for full
+        #   documentation. Same semantics apply here; the node is reported unhealthy with status
+        #   code 4 instead of returning HTTP 500.
         def initialize(
           memory_limit: Float::INFINITY,
           consuming_ttl: DEFAULT_CONSUMING_TTL,
           polling_ttl: DEFAULT_POLLING_TTL,
-          stability_ttl: DEFAULT_STABILITY_TTL
+          stability_ttl: nil
         )
           @polling_ttl = polling_ttl
           @consuming_ttl = consuming_ttl
-          @stability_ttl = stability_ttl
+          @stability_ttl = stability_ttl || default_stability_ttl
           # We cast it just in case someone would provide '10MB' or something similar
           @memory_limit = memory_limit.is_a?(String) ? memory_limit.to_i : memory_limit
           @pollings = {}
@@ -133,17 +137,15 @@ module Karafka
         # @see Karafka::Instrumentation::Vendors::Kubernetes::LivenessListener#on_statistics_emitted
         # @param event [Karafka::Core::Monitoring::Event]
         def on_statistics_emitted(event)
-          cgrp = event[:statistics]["cgrp"]
+          cgrp = event[:statistics]&.dig("cgrp")
           return unless cgrp
 
           sg_id = event[:subscription_group_id]
           join_state = cgrp["join_state"]
           return unless join_state
 
-          return if join_state == "wait-metadata"
-
           synchronize do
-            if join_state == "steady" || join_state == "init"
+            if join_state == "steady" || join_state == "init" || join_state == "wait-metadata"
               @instabilities.delete(sg_id)
               @join_states.delete(sg_id)
             elsif @join_states[sg_id] != join_state
@@ -233,6 +235,14 @@ module Karafka
         #   2 - consuming TTL exceeded
         #   3 - memory limit exceeded
         #   4 - stability TTL exceeded (stuck in non-steady join state)
+        # @note Reads `@pollings`, `@consumptions` and `@instabilities` without acquiring the
+        #   mutex. This is intentional and consistent across all three: `status` is called from
+        #   inside `periodically`, which already holds `@mutex` for scheduling, so re-entering
+        #   `synchronize` here would deadlock. Concurrent writes from `mark_*` / `clear_*` /
+        #   `on_statistics_emitted` are safe to observe partially on MRI (GVL atomises Hash ops).
+        #   This is the asymmetry vs `Kubernetes::LivenessListener`, which can lock its reads
+        #   because it has no equivalent periodic-scheduling lock. Do not "fix" this without
+        #   resolving the periodic-scheduling lock first - JRuby is not a supported runtime.
         def status
           time = monotonic_now
 
@@ -242,6 +252,16 @@ module Karafka
           return 4 if @instabilities.values.any? { |start| (time - start) > @stability_ttl }
 
           0
+        end
+
+        # @return [Integer] default stability_ttl derived from the configured
+        #   max.poll.interval.ms (with librdkafka's default applied by `DefaultsInjector` when
+        #   the user has not set it), multiplied by 2 for headroom above the slowest legitimate
+        #   rebalance phase.
+        def default_stability_ttl
+          kafka_config = Karafka::App.config.kafka.dup
+          Karafka::Setup::DefaultsInjector.consumer(kafka_config)
+          kafka_config.fetch(:"max.poll.interval.ms") * STABILITY_TTL_MAX_POLL_MULTIPLIER
         end
 
         # @return [Integer] RSS in MB for the current process

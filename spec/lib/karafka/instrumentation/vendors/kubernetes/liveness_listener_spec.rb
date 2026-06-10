@@ -180,8 +180,33 @@ RSpec.describe_current do
     end
 
     context "when join_state is wait-metadata" do
-      it "ignores the event without starting an instability timer" do
+      it "does not start an instability timer for a fresh subscription group" do
         listener.on_statistics_emitted(stats_event(join_state: "wait-metadata"))
+        expect(instabilities).to be_empty
+      end
+
+      it "clears any existing instability entry so the prior timer cannot fire later" do
+        listener.on_statistics_emitted(stats_event(join_state: "wait-assn"))
+        expect(instabilities).not_to be_empty
+
+        listener.on_statistics_emitted(stats_event(join_state: "wait-metadata"))
+        expect(instabilities).to be_empty
+      end
+
+      it "clears the join_states entry when the consumer moves into wait-metadata" do
+        listener.on_statistics_emitted(stats_event(join_state: "wait-assn"))
+        expect(join_states).not_to be_empty
+
+        listener.on_statistics_emitted(stats_event(join_state: "wait-metadata"))
+        expect(join_states).to be_empty
+      end
+    end
+
+    context "when event[:statistics] is nil (defensive)" do
+      it "does not raise" do
+        expect do
+          listener.on_statistics_emitted(subscription_group_id: "sg1", statistics: nil)
+        end.not_to raise_error
         expect(instabilities).to be_empty
       end
     end
