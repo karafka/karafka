@@ -34,6 +34,8 @@ module Karafka
           # (10 minutes - headroom above the Kafka default max.poll.interval.ms of 5 minutes)
           DEFAULT_STABILITY_TTL = 10 * 60 * 1_000
 
+          private_constant :DEFAULT_CONSUMING_TTL, :DEFAULT_POLLING_TTL, :DEFAULT_STABILITY_TTL
+
           # @param hostname [String, nil] hostname or nil to bind on all
           # @param port [Integer] TCP port on which we want to run our HTTP status server
           # @param consuming_ttl [Integer] time in ms after which we consider consumption hanging.

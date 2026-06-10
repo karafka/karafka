@@ -60,6 +60,8 @@ module Karafka
         # (10 minutes - headroom above the Kafka default max.poll.interval.ms of 5 minutes)
         DEFAULT_STABILITY_TTL = 10 * 60 * 1_000
 
+        private_constant :DEFAULT_CONSUMING_TTL, :DEFAULT_POLLING_TTL, :DEFAULT_STABILITY_TTL
+
         # @param memory_limit [Integer] max memory in MB for this process to be considered healthy
         # @param consuming_ttl [Integer] time in ms after which we consider consumption hanging.
         #   It allows us to define max consumption time after which supervisor should consider
