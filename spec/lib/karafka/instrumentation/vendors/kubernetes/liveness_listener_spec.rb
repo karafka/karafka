@@ -280,11 +280,12 @@ RSpec.describe_current do
       end
 
       context "when DefaultsInjector fills in the librdkafka default" do
+        # An empty kafka config gets max.poll.interval.ms=300_000 injected by DefaultsInjector
+        # which the listener then doubles.
+        before { allow(Karafka::App.config).to receive(:kafka).and_return({}) }
+
         it "results in 600_000 ms (5 min * 2) when the user hasn't set the key" do
-          # Verifies the dependency on DefaultsInjector.consumer: an empty kafka config gets
-          # max.poll.interval.ms=300_000 injected, which the listener then doubles.
-          allow(Karafka::App.config).to receive(:kafka).and_return({})
-          expect(described_class.new.instance_variable_get(:@stability_ttl)).to eq(600_000)
+          expect(stability_ttl).to eq(600_000)
         end
       end
     end

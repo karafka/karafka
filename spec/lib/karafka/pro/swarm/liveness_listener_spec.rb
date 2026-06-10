@@ -332,46 +332,56 @@ RSpec.describe_current do
   end
 
   describe "default stability_ttl derivation" do
-    # Build the listener inside each example so config stubs can be applied first - the outer
-    # `before` accesses `listener`, which would memoize it before any per-example stubs run.
-    def build_listener(stability_ttl: nil)
+    # The outer `before` accesses `listener`, which would memoize it before any per-example
+    # config stubs apply. We use a separate `fresh_listener` let so it is realized lazily
+    # in the it block (after any inner-context `before` stubs run).
+    let(:fresh_listener) do
       described_class.new(
         memory_limit: memory_limit,
         consuming_ttl: consuming_ttl,
         polling_ttl: polling_ttl,
-        **(stability_ttl ? { stability_ttl: stability_ttl } : {})
+        **provided_stability_ttl_kwarg
       )
     end
+    let(:provided_stability_ttl_kwarg) { {} }
+    let(:fresh_listener_stability_ttl) { fresh_listener.instance_variable_get(:@stability_ttl) }
 
     context "when stability_ttl is not provided" do
       it "derives the default as max.poll.interval.ms * 2 using librdkafka's default" do
-        expect(build_listener.instance_variable_get(:@stability_ttl)).to eq(300_000 * 2)
+        expect(fresh_listener_stability_ttl).to eq(300_000 * 2)
       end
 
-      it "uses a user-configured max.poll.interval.ms from Karafka::App.config.kafka" do
-        allow(Karafka::App.config).to receive(:kafka).and_return(
-          :"max.poll.interval.ms" => 900_000
-        )
-        expect(build_listener.instance_variable_get(:@stability_ttl)).to eq(900_000 * 2)
+      context "when Karafka::App.config.kafka explicitly sets max.poll.interval.ms" do
+        before do
+          allow(Karafka::App.config).to receive(:kafka).and_return(
+            :"max.poll.interval.ms" => 900_000
+          )
+        end
+
+        it "uses the configured value times 2" do
+          expect(fresh_listener_stability_ttl).to eq(900_000 * 2)
+        end
       end
 
-      it "falls back via DefaultsInjector when the key is not configured" do
-        # Verifies the dependency on DefaultsInjector.consumer: an empty kafka config gets
-        # max.poll.interval.ms=300_000 injected, which the listener then doubles.
-        allow(Karafka::App.config).to receive(:kafka).and_return({})
-        expect(build_listener.instance_variable_get(:@stability_ttl)).to eq(600_000)
+      context "when DefaultsInjector fills in the librdkafka default" do
+        before { allow(Karafka::App.config).to receive(:kafka).and_return({}) }
+
+        it "results in 600_000 ms (5 min * 2) when the user hasn't set the key" do
+          expect(fresh_listener_stability_ttl).to eq(600_000)
+        end
       end
     end
 
     context "when stability_ttl is explicitly provided" do
+      let(:provided_stability_ttl_kwarg) { { stability_ttl: 12_345 } }
+
       it "uses the provided value verbatim and does not derive" do
-        expect(build_listener(stability_ttl: 12_345).instance_variable_get(:@stability_ttl))
-          .to eq(12_345)
+        expect(fresh_listener_stability_ttl).to eq(12_345)
       end
 
       it "does not invoke DefaultsInjector for the derivation path" do
         expect(Karafka::Setup::DefaultsInjector).not_to receive(:consumer)
-        build_listener(stability_ttl: 1)
+        fresh_listener
       end
     end
   end
