@@ -26,6 +26,14 @@ module Karafka
         #
         # @note Please use `Kubernetes::SwarmLivenessListener` when operating in the swarm mode
         class LivenessListener < BaseListener
+          # Default time in ms after which we consider consumption hanging (5 minutes)
+          DEFAULT_CONSUMING_TTL = 5 * 60 * 1_000
+          # Default max time in ms between polls before the process is considered dead (5 minutes)
+          DEFAULT_POLLING_TTL = 5 * 60 * 1_000
+          # Default max time in ms a subscription group may stay in a non-steady join state
+          # (10 minutes - headroom above the Kafka default max.poll.interval.ms of 5 minutes)
+          DEFAULT_STABILITY_TTL = 10 * 60 * 1_000
+
           # @param hostname [String, nil] hostname or nil to bind on all
           # @param port [Integer] TCP port on which we want to run our HTTP status server
           # @param consuming_ttl [Integer] time in ms after which we consider consumption hanging.
@@ -54,9 +62,9 @@ module Karafka
           def initialize(
             hostname: nil,
             port: 3000,
-            consuming_ttl: 5 * 60 * 1_000,
-            polling_ttl: 5 * 60 * 1_000,
-            stability_ttl: 10 * 60 * 1_000
+            consuming_ttl: DEFAULT_CONSUMING_TTL,
+            polling_ttl: DEFAULT_POLLING_TTL,
+            stability_ttl: DEFAULT_STABILITY_TTL
           )
             # If this is set to a symbol, it indicates unrecoverable error like fencing
             # While fencing can be partial (for one of the SGs), we still should consider this

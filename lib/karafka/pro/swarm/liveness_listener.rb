@@ -52,35 +52,27 @@ module Karafka
       # @note This listener should not break anything if subscribed in the supervisor prior to
       #   forking as it relies on server events for operations.
       class LivenessListener < Karafka::Swarm::LivenessListener
+        # Default time in ms after which we consider consumption hanging (5 minutes)
+        DEFAULT_CONSUMING_TTL = 5 * 60 * 1_000
+        # Default max time in ms between polls before the node is considered dead (5 minutes)
+        DEFAULT_POLLING_TTL = 5 * 60 * 1_000
+        # Default max time in ms a subscription group may stay in a non-steady join state
+        # (10 minutes - headroom above the Kafka default max.poll.interval.ms of 5 minutes)
+        DEFAULT_STABILITY_TTL = 10 * 60 * 1_000
+
         # @param memory_limit [Integer] max memory in MB for this process to be considered healthy
         # @param consuming_ttl [Integer] time in ms after which we consider consumption hanging.
         #   It allows us to define max consumption time after which supervisor should consider
         #   given process as hanging
         # @param polling_ttl [Integer] max time in ms for polling. If polling (any) does not
         #   happen that often, process should be considered dead.
-        # @param stability_ttl [Integer] max time in ms a subscription group can remain in the
-        #   same tracked non-"steady" librdkafka `cgrp.join_state` (e.g. `wait-join`, `wait-assn`,
-        #   `wait-sync`) before the node is considered unhealthy. `wait-metadata` is excluded
-        #   because it appears in normal scenarios (auto-create waits, unmatched pattern
-        #   subscriptions, and as the group leader's post-JoinGroup state while fetching cluster
-        #   metadata to compute the partition assignment) - not only during stuck rebalances.
-        #   `init` is handled by clearing stale tracking on client reset rather than by
-        #   skipping. Both states are covered by `polling_ttl` for genuine freezes.
-        #   The timer resets on every join_state transition between tracked states because any
-        #   change indicates the join protocol is still progressing; only a consumer frozen in
-        #   the same non-steady state continuously triggers the alarm. Note that a consumer
-        #   cycling rapidly between non-steady states (e.g. wait-join → wait-assn → wait-join)
-        #   will not trip this check - it only catches consumers stuck in one state.
-        #   Should be set to at least your `max.poll.interval.ms` (default 300,000 ms) to avoid
-        #   false positives during slow but legitimate instabilities. The default of 10 minutes
-        #   provides headroom above the Kafka default. Requires `statistics.interval.ms` to be
-        #   configured; without it `statistics.emitted` never fires, tracking hashes remain
-        #   empty, and this check has no effect (no misreporting).
+        # @param stability_ttl [Integer] see Kubernetes::LivenessListener for full documentation.
+        #   Same semantics apply here; the node is reported unhealthy instead of returning HTTP 500.
         def initialize(
           memory_limit: Float::INFINITY,
-          consuming_ttl: 5 * 60 * 1_000,
-          polling_ttl: 5 * 60 * 1_000,
-          stability_ttl: 10 * 60 * 1_000
+          consuming_ttl: DEFAULT_CONSUMING_TTL,
+          polling_ttl: DEFAULT_POLLING_TTL,
+          stability_ttl: DEFAULT_STABILITY_TTL
         )
           @polling_ttl = polling_ttl
           @consuming_ttl = consuming_ttl
