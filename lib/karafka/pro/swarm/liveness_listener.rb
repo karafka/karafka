@@ -63,11 +63,8 @@ module Karafka
         private_constant :DEFAULT_CONSUMING_TTL, :DEFAULT_POLLING_TTL, :DEFAULT_STABILITY_TTL
 
         # @param memory_limit [Integer] max memory in MB for this process to be considered healthy
-        # @param consuming_ttl [Integer] time in ms after which we consider consumption hanging.
-        #   It allows us to define max consumption time after which supervisor should consider
-        #   given process as hanging
-        # @param polling_ttl [Integer] max time in ms for polling. If polling (any) does not
-        #   happen that often, process should be considered dead.
+        # @param consuming_ttl [Integer] see Kubernetes::LivenessListener for full documentation.
+        # @param polling_ttl [Integer] see Kubernetes::LivenessListener for full documentation.
         # @param stability_ttl [Integer] see Kubernetes::LivenessListener for full documentation.
         #   Same semantics apply here; the node is reported unhealthy instead of returning HTTP 500.
         def initialize(
@@ -83,13 +80,7 @@ module Karafka
           @memory_limit = memory_limit.is_a?(String) ? memory_limit.to_i : memory_limit
           @pollings = {}
           @consumptions = {}
-          # Maps subscription_group_id => last observed cgrp.join_state string.
-          # Used to detect state changes so the stuck timer resets on any transition.
-          # Both hashes are only populated by on_statistics_emitted, which requires
-          # statistics.interval.ms to be set. Without it they remain empty and
-          # status returns 0 for the stability check - no misreporting.
           @join_states = {}
-          # Maps subscription_group_id => monotonic_now when the current non-steady state began.
           @instabilities = {}
 
           super()
@@ -139,23 +130,7 @@ module Karafka
           RUBY
         end
 
-        # Track when each subscription group's consumer enters or leaves a non-steady join state.
-        # A prolonged non-steady state indicates a stuck consumer (e.g., broker stuck in
-        # CompletingRebalance due to KAFKA-19862).
-        #
-        # `wait-metadata` is skipped: it appears in normal scenarios (auto-create waits, unmatched
-        # pattern subscriptions, and as the group leader's post-JoinGroup state while fetching
-        # cluster metadata to compute the partition assignment), not only during stuck rebalances.
-        # `polling_ttl` covers genuine freezes in that state.
-        #
-        # `init` clears stale tracking so that a client reset or subscription-group removal
-        # (e.g., dynamic multiplexing scale-down) does not leave a persistent false-positive entry.
-        #
-        # The stuck timer resets on every transition between tracked states because any change
-        # indicates the join protocol is still progressing. Only a consumer frozen in the same
-        # non-steady state continuously for stability_ttl is flagged. Note that a consumer
-        # cycling rapidly between non-steady states (e.g. wait-join → wait-assn → wait-join)
-        # will not trip this alarm - only a frozen-in-one-state consumer is caught.
+        # @see Karafka::Instrumentation::Vendors::Kubernetes::LivenessListener#on_statistics_emitted
         # @param event [Karafka::Core::Monitoring::Event]
         def on_statistics_emitted(event)
           cgrp = event[:statistics]["cgrp"]
@@ -165,17 +140,10 @@ module Karafka
           join_state = cgrp["join_state"]
           return unless join_state
 
-          # "wait-metadata" appears in multiple normal scenarios (auto-create waits, unmatched
-          # pattern subscriptions, and as the group leader's post-JoinGroup state while fetching
-          # cluster metadata to compute assignments). Skip it to avoid false positives;
-          # polling_ttl covers genuine freezes in this state.
           return if join_state == "wait-metadata"
 
           synchronize do
             if join_state == "steady" || join_state == "init"
-              # "init" clears any stale entry when the subscription group's rdkafka client
-              # resets (e.g., after a scale-down or pattern unsubscribe), preventing a
-              # persistent false positive for entries that would otherwise only clear on "steady".
               @instabilities.delete(sg_id)
               @join_states.delete(sg_id)
             elsif @join_states[sg_id] != join_state
@@ -226,10 +194,7 @@ module Karafka
           end
         end
 
-        # @return [Integer] object id of the current fiber
-        # @note We use fiber object id instead of thread object id to ensure fiber-safety.
-        #   Multiple fibers can run on the same thread, and using thread id would cause them
-        #   to overwrite each other's timestamps.
+        # @see Karafka::Instrumentation::Vendors::Kubernetes::LivenessListener#fiber_id
         def fiber_id
           Fiber.current.object_id
         end
