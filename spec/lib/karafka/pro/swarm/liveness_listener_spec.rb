@@ -354,7 +354,7 @@ RSpec.describe_current do
       context "when Karafka::App.config.kafka explicitly sets max.poll.interval.ms" do
         before do
           allow(Karafka::App.config).to receive(:kafka).and_return(
-            :"max.poll.interval.ms" => 900_000
+            "max.poll.interval.ms": 900_000
           )
         end
 
