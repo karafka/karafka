@@ -63,14 +63,14 @@ module Karafka
         #   `wait-sync`) before the node is considered unhealthy. `wait-metadata` is excluded
         #   because it appears in normal scenarios (auto-create waits, unmatched pattern
         #   subscriptions, and as the group leader's post-JoinGroup state while fetching cluster
-        #   metadata to compute the partition assignment) — not only during stuck rebalances.
+        #   metadata to compute the partition assignment) - not only during stuck rebalances.
         #   `init` is handled by clearing stale tracking on client reset rather than by
         #   skipping. Both states are covered by `polling_ttl` for genuine freezes.
         #   The timer resets on every join_state transition between tracked states because any
         #   change indicates the join protocol is still progressing; only a consumer frozen in
         #   the same non-steady state continuously triggers the alarm. Note that a consumer
         #   cycling rapidly between non-steady states (e.g. wait-join → wait-assn → wait-join)
-        #   will not trip this check — it only catches consumers stuck in one state.
+        #   will not trip this check - it only catches consumers stuck in one state.
         #   Should be set to at least your `max.poll.interval.ms` (default 300,000 ms) to avoid
         #   false positives during slow but legitimate instabilities. The default of 10 minutes
         #   provides headroom above the Kafka default. Requires `statistics.interval.ms` to be
@@ -161,7 +161,7 @@ module Karafka
         # indicates the join protocol is still progressing. Only a consumer frozen in the same
         # non-steady state continuously for stability_ttl is flagged. Note that a consumer
         # cycling rapidly between non-steady states (e.g. wait-join → wait-assn → wait-join)
-        # will not trip this alarm — only a frozen-in-one-state consumer is caught.
+        # will not trip this alarm - only a frozen-in-one-state consumer is caught.
         # @param event [Karafka::Core::Monitoring::Event]
         def on_statistics_emitted(event)
           cgrp = event[:statistics]["cgrp"]
