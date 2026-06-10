@@ -331,6 +331,51 @@ RSpec.describe_current do
     end
   end
 
+  describe "default stability_ttl derivation" do
+    # Build the listener inside each example so config stubs can be applied first - the outer
+    # `before` accesses `listener`, which would memoize it before any per-example stubs run.
+    def build_listener(stability_ttl: nil)
+      described_class.new(
+        memory_limit: memory_limit,
+        consuming_ttl: consuming_ttl,
+        polling_ttl: polling_ttl,
+        **(stability_ttl ? { stability_ttl: stability_ttl } : {})
+      )
+    end
+
+    context "when stability_ttl is not provided" do
+      it "derives the default as max.poll.interval.ms * 2 using librdkafka's default" do
+        expect(build_listener.instance_variable_get(:@stability_ttl)).to eq(300_000 * 2)
+      end
+
+      it "uses a user-configured max.poll.interval.ms from Karafka::App.config.kafka" do
+        allow(Karafka::App.config).to receive(:kafka).and_return(
+          :"max.poll.interval.ms" => 900_000
+        )
+        expect(build_listener.instance_variable_get(:@stability_ttl)).to eq(900_000 * 2)
+      end
+
+      it "falls back via DefaultsInjector when the key is not configured" do
+        # Verifies the dependency on DefaultsInjector.consumer: an empty kafka config gets
+        # max.poll.interval.ms=300_000 injected, which the listener then doubles.
+        allow(Karafka::App.config).to receive(:kafka).and_return({})
+        expect(build_listener.instance_variable_get(:@stability_ttl)).to eq(600_000)
+      end
+    end
+
+    context "when stability_ttl is explicitly provided" do
+      it "uses the provided value verbatim and does not derive" do
+        expect(build_listener(stability_ttl: 12_345).instance_variable_get(:@stability_ttl))
+          .to eq(12_345)
+      end
+
+      it "does not invoke DefaultsInjector for the derivation path" do
+        expect(Karafka::Setup::DefaultsInjector).not_to receive(:consumer)
+        build_listener(stability_ttl: 1)
+      end
+    end
+  end
+
   describe "#rss_mb" do
     it "delegates to platform-specific method based on RUBY_PLATFORM" do
       allow(listener).to receive_messages(rss_mb_linux: 50, rss_mb_macos: 60)

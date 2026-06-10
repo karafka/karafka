@@ -51,9 +51,15 @@ module Karafka
           # @param stability_ttl [Integer, nil] max time in ms a subscription group can remain in
           #   the same tracked non-"steady" librdkafka `cgrp.join_state` (e.g. `wait-join`,
           #   `wait-assn`, `wait-sync`) before the process is considered unhealthy. When nil
-          #   (default), it is derived from `Karafka::App.config.kafka[:'max.poll.interval.ms']` as
-          #   `max.poll.interval.ms * 2`, which keeps the threshold safe relative to the user's
-          #   actual poll interval rather than a fixed constant. `wait-metadata` and `init` are
+          #   (default), it is derived at initialize time from
+          #   `Karafka::App.config.kafka[:'max.poll.interval.ms']` as `max.poll.interval.ms * 2`,
+          #   which keeps the threshold safe relative to the user's actual poll interval rather
+          #   than a fixed constant. The derivation reads only the root kafka config; per
+          #   subscription group overrides of `max.poll.interval.ms` set via the routing DSL are
+          #   not considered, so if any SG bumps it above the root value, pass an explicit
+          #   `stability_ttl` here. Because the value is computed in `#initialize`, the listener
+          #   must be constructed after `Karafka.setup` has populated the config. `wait-metadata`
+          #   and `init` are
           #   excluded from tracking and additionally clear any stale prior tracking for the
           #   subscription group: `wait-metadata` appears in normal scenarios (auto-create waits,
           #   unmatched pattern subscriptions, and as the group leader's post-JoinGroup state while
@@ -209,10 +215,13 @@ module Karafka
 
           # Did we exceed any of the ttls
           # @return [Boolean] true if all TTLs are within bounds and no unrecoverable error
+          # @note When called from inside `status_body`, reuses the cached snapshot so the
+          #   per-request HTTP response stays internally consistent. When called standalone,
+          #   takes its own snapshot.
           def healthy?
             return false if @unrecoverable
 
-            flags = evaluate_ttl_flags
+            flags = @evaluation_snapshot || evaluate_ttl_flags
             !flags[:polling] && !flags[:consuming] && !flags[:stability]
           end
 
@@ -287,27 +296,26 @@ module Karafka
             end
           end
 
-          # @return [Hash] response body status. The healthy/unhealthy decision and the per-flag
-          #   error details are derived from a single locked snapshot so the HTTP status and
-          #   body always agree (avoids the previous pattern of taking the lock six times per
-          #   response which could observe state changes between acquisitions).
+          # @return [Hash] response body status. Takes a single locked snapshot of all three TTL
+          #   flags and caches it for the duration of this call so that `super` (which calls
+          #   `healthy?` to populate the status field) and the merged `errors` hash see the same
+          #   values. Avoids the previous pattern of taking the lock six times per response, where
+          #   state could change between acquisitions and leave the status field disagreeing with
+          #   the errors hash. The base envelope (timestamp, port, process_id, ...) still comes
+          #   from `super` so any future field added to `BaseListener#status_body` is preserved.
           def status_body
-            unrecoverable = @unrecoverable
-            flags = evaluate_ttl_flags
-            is_healthy = !unrecoverable && !flags[:polling] && !flags[:consuming] && !flags[:stability]
+            @evaluation_snapshot = evaluate_ttl_flags
 
-            {
-              status: is_healthy ? "healthy" : "unhealthy",
-              timestamp: Time.now.to_i,
-              port: @port,
-              process_id: ::Process.pid,
+            super.merge!(
               errors: {
-                polling_ttl_exceeded: flags[:polling],
-                consumption_ttl_exceeded: flags[:consuming],
-                stability_ttl_exceeded: flags[:stability],
-                unrecoverable: unrecoverable
+                polling_ttl_exceeded: @evaluation_snapshot[:polling],
+                consumption_ttl_exceeded: @evaluation_snapshot[:consuming],
+                stability_ttl_exceeded: @evaluation_snapshot[:stability],
+                unrecoverable: @unrecoverable
               }
-            }
+            )
+          ensure
+            @evaluation_snapshot = nil
           end
         end
       end

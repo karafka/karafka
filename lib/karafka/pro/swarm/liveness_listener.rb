@@ -69,8 +69,9 @@ module Karafka
         # @param consuming_ttl [Integer] see Kubernetes::LivenessListener for full documentation.
         # @param polling_ttl [Integer] see Kubernetes::LivenessListener for full documentation.
         # @param stability_ttl [Integer, nil] see Kubernetes::LivenessListener for full
-        #   documentation. Same semantics apply here; the node is reported unhealthy with status
-        #   code 4 instead of returning HTTP 500.
+        #   documentation, including the derivation rules and the per-subscription-group
+        #   override caveat. Same semantics apply here; the node is reported unhealthy with
+        #   status code 4 instead of returning HTTP 500.
         def initialize(
           memory_limit: Float::INFINITY,
           consuming_ttl: DEFAULT_CONSUMING_TTL,

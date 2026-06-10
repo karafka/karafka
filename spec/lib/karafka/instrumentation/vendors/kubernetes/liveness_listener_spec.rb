@@ -252,5 +252,54 @@ RSpec.describe_current do
       body = fast_listener.send(:status_body)
       expect(body[:errors][:stability_ttl_exceeded]).to be(true)
     end
+
+    it "preserves the base envelope fields from BaseListener#status_body" do
+      body = listener.send(:status_body)
+      expect(body).to include(:status, :timestamp, :port, :process_id, :errors)
+    end
+  end
+
+  describe "default stability_ttl derivation" do
+    let(:stability_ttl) { listener.instance_variable_get(:@stability_ttl) }
+
+    context "when stability_ttl is not provided" do
+      it "derives the default as max.poll.interval.ms * 2 using librdkafka's default" do
+        expect(stability_ttl).to eq(300_000 * 2)
+      end
+
+      context "when Karafka::App.config.kafka explicitly sets max.poll.interval.ms" do
+        before do
+          allow(Karafka::App.config).to receive(:kafka).and_return(
+            :"max.poll.interval.ms" => 900_000
+          )
+        end
+
+        it "uses the configured value times 2" do
+          expect(stability_ttl).to eq(900_000 * 2)
+        end
+      end
+
+      context "when DefaultsInjector fills in the librdkafka default" do
+        it "results in 600_000 ms (5 min * 2) when the user hasn't set the key" do
+          # Verifies the dependency on DefaultsInjector.consumer: an empty kafka config gets
+          # max.poll.interval.ms=300_000 injected, which the listener then doubles.
+          allow(Karafka::App.config).to receive(:kafka).and_return({})
+          expect(described_class.new.instance_variable_get(:@stability_ttl)).to eq(600_000)
+        end
+      end
+    end
+
+    context "when stability_ttl is explicitly provided" do
+      subject(:listener) { described_class.new(stability_ttl: 12_345) }
+
+      it "uses the provided value verbatim and does not derive" do
+        expect(stability_ttl).to eq(12_345)
+      end
+
+      it "does not invoke DefaultsInjector for the derivation path" do
+        expect(Karafka::Setup::DefaultsInjector).not_to receive(:consumer)
+        described_class.new(stability_ttl: 1)
+      end
+    end
   end
 end
