@@ -19,6 +19,9 @@ RSpec.describe_current do
     allow(Thread).to receive(:new) do |&block|
       Thread.start(&block).join
     end
+
+    # The listener is a one-shot singleton - re-arm it so examples are independent
+    listener.on_app_running(nil)
   end
 
   context "when the error is process-critical" do
@@ -89,6 +92,33 @@ RSpec.describe_current do
 
     it "expect not to let the error escape into the reporting flow" do
       expect { listener.on_error_occurred(event) }.not_to raise_error
+    end
+
+    it "expect to leave a best-effort fatal trace" do
+      allow(Karafka.logger).to receive(:fatal)
+
+      listener.on_error_occurred(event)
+
+      expect(Karafka.logger).to have_received(:fatal)
+    end
+  end
+
+  context "when critical errors are reported multiple times" do
+    it "expect to initiate the stop exactly once" do
+      listener.on_error_occurred(event)
+      listener.on_error_occurred(event)
+
+      expect(Karafka::Server).to have_received(:stop).once
+    end
+  end
+
+  context "when the app restarts in-process after an initiated stop" do
+    it "expect to re-arm and escalate again" do
+      listener.on_error_occurred(event)
+      listener.on_app_running(nil)
+      listener.on_error_occurred(event)
+
+      expect(Karafka::Server).to have_received(:stop).twice
     end
   end
 end

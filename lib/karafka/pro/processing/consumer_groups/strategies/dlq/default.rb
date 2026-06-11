@@ -237,7 +237,12 @@ module Karafka
               def apply_dlq_flow
                 # Process-critical errors are never dispatched or skipped regardless of the
                 # strategy outcome: the retry pause protects the partition during the critical
-                # shutdown and the failed batch is redelivered after the restart
+                # shutdown and the failed batch is redelivered after the restart.
+                # We consult `errors_tracker.last` (not the per-consumer consumption cause used
+                # by the OSS strategies, which have no tracker) because it is exactly what the
+                # DLQ strategy callable below receives - this guard judges the same evidence as
+                # the strategy it overrides. The tracker is cleared at attempt zero, so `last`
+                # is always the most recent failure of the current failure streak
                 if critical_error?(errors_tracker.last)
                   retry_after_pause
 
