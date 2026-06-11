@@ -76,6 +76,10 @@ Karafka::App.routes.draw do
 end
 
 on_worker_boot do
+  # Pre-create the topic so producing and the embedded consumer subscription do not race on
+  # broker-side auto-creation (TOPIC_ALREADY_EXISTS broker warnings)
+  Karafka::Admin.create_topic(TOPIC, 1, 1)
+
   # Produce a message that will trigger the long-running consumer
   Karafka.producer.produce_sync(topic: TOPIC, payload: "big-log-drop-s3-event")
 
