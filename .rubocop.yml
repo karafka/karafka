@@ -138,6 +138,7 @@ Lint/RaiseException:
 Lint/RescueException:
   Exclude:
     - lib/karafka/base_consumer.rb
+    - lib/karafka/instrumentation/critical_errors_listener.rb
     - lib/karafka/processing/worker.rb
     - lib/karafka/processing/consumer_groups/strategies/default.rb
     - lib/karafka/pro/processing/consumer_groups/strategies/default.rb

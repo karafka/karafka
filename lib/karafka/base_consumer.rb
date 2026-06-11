@@ -111,9 +111,10 @@ module Karafka
     # failed batch - a silent at-least-once violation. Errors like SystemStackError or the
     # ScriptError family (e.g. LoadError surfacing from a Rails autoload hiccup) are per-message
     # failures and go through the regular retry flow like any other processing error.
-    # Process-critical errors additionally trigger a graceful shutdown - the recorded failure
-    # plus the retry pause keep this partition protected during the shutdown window and the
-    # batch is redelivered after restart.
+    # Process-critical errors additionally trigger a graceful shutdown via the auto-subscribed
+    # `Instrumentation::CriticalErrorsListener` watching this very instrumentation - the
+    # recorded failure plus the retry pause keep this partition protected during the shutdown
+    # window and the batch is redelivered after restart.
     rescue Exception => e
       monitor.instrument(
         "error.occurred",
@@ -122,8 +123,6 @@ module Karafka
         seek_offset: seek_offset,
         type: "consumer.consume.error"
       )
-
-      stop_due_to_critical_error if critical_error?(e)
     end
 
     # @private
@@ -150,8 +149,6 @@ module Karafka
       )
 
       retry_after_pause
-
-      stop_due_to_critical_error if critical_error?(e)
     end
 
     # Can be used to run code prior to scheduling of eofed execution
@@ -463,29 +460,6 @@ module Karafka
         timeout: coordinator.pause_tracker.current_timeout,
         attempt: attempt
       )
-    end
-
-    # Initiates a graceful shutdown in reaction to a process-critical error raised from the user
-    # code. See the `internal.processing.critical_errors` setting docs for the rationale.
-    #
-    # @note `Karafka::Server.stop` supervises the whole shutdown (including the forceful timeout
-    #   path), so it runs from a dedicated thread: this worker thread must return so the job flow
-    #   can finish and engage the pause that protects this partition during the shutdown window.
-    def stop_due_to_critical_error
-      # No need to initiate the stop if one is already in motion (e.g. critical errors raised
-      # by multiple consumers at the same time or shutdown already requested). We deliberately
-      # do not use `App.done?` here: it includes the quieting/quiet states, in which the
-      # process is parked but alive - a critical error raised by in-flight work during quiet
-      # must still escalate to a full stop
-      return if Karafka::App.stopping?
-      return if Karafka::App.stopped?
-      return if Karafka::App.terminated?
-
-      Thread.new do
-        Thread.current.name = "karafka.critical_shutdown"
-
-        Karafka::Server.stop
-      end
     end
 
     # @param error [Exception, nil] error to check or nil when none was recorded
