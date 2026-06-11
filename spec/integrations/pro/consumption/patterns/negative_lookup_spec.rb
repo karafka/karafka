@@ -70,6 +70,12 @@ draw_routes(create_topics: false) do
   end
 end
 
+# Pre-create the topics so producing and the pattern subscription metadata refreshes do not
+# race broker-side auto-creation (TOPIC_ALREADY_EXISTS broker warnings)
+["it-test.#{ENDING}", "it-activities.#{ENDING}", "it-active.#{ENDING}"].each do |name|
+  Karafka::Admin.create_topic(name, 1, 1)
+end
+
 produce_many("it-test.#{ENDING}", DT.uuids(1))
 produce_many("it-activities.#{ENDING}", DT.uuids(1))
 produce_many("it-active.#{ENDING}", DT.uuids(1))
