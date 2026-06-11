@@ -2,10 +2,15 @@
 
 require "karafka"
 require "securerandom"
+require "digest"
 
-# The spec name is embedded in the topic name directly, so any broker-side log entry or
-# warning mentioning this topic is traceable to this spec by a plain grep - no hashing needed
-TOPIC = "it-puma_single_poro-#{SecureRandom.hex(6)}".freeze
+# Topic prefix follows the suite-wide it-<hash>- convention. The hash is computed from this
+# spec's path given as a literal (not from runtime state), so it is environment-independent,
+# unique per spec and discoverable via bin/tests_topics_hashes
+SPEC_HASH = Digest::MD5.hexdigest(
+  "spec/integrations/embedding/puma_single_poro/flow_spec.rb"
+)[0, 6]
+TOPIC = "it-#{SPEC_HASH}-#{SecureRandom.hex(6)}".freeze
 PID = Process.pid
 
 preload_app!
