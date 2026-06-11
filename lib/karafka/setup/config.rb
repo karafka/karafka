@@ -466,12 +466,13 @@ module Karafka
           # are also configured
           Pro::Loader.post_setup_all(config) if Karafka.pro?
 
+          # Subscribe the critical errors listener so process-critical errors reported anywhere
+          # in the framework escalate to a graceful shutdown. Subscribed first so it reacts
+          # before any other internal listener
+          config.monitor.subscribe(Instrumentation::CriticalErrorsListener.instance)
+
           # Subscribe the assignments tracker so we can always query all current assignments
           config.monitor.subscribe(Instrumentation::AssignmentsTracker.instance)
-
-          # Subscribe the critical errors listener so process-critical errors reported anywhere
-          # in the framework escalate to a graceful shutdown
-          config.monitor.subscribe(Instrumentation::CriticalErrorsListener.instance)
 
           Karafka::App.initialized!
         end
