@@ -16,7 +16,15 @@ require "karafka"
 require "securerandom"
 require "digest"
 
-SPEC_HASH = Digest::MD5.hexdigest(ENV.fetch("KARAFKA_SPEC_PATH", $PROGRAM_NAME))[0, 6]
+# Relativize against the gem root (exported by bin/integrations as KARAFKA_GEM_DIR) so the
+# hash matches DataCollector::SPEC_HASH semantics: stable across environments (CI vs local
+# absolute paths) and discoverable via bin/tests_topics_hashes
+SPEC_HASH = begin
+  spec_path = ENV.fetch("KARAFKA_SPEC_PATH", $PROGRAM_NAME)
+  gem_dir = ENV["KARAFKA_GEM_DIR"]
+  spec_path = spec_path.sub("#{gem_dir}/", "") if gem_dir
+  Digest::MD5.hexdigest(spec_path)[0, 6]
+end
 TOPIC = "it-#{SPEC_HASH}-#{SecureRandom.hex(6)}".freeze
 PID = Process.pid
 RESULT_FILE = File.join(__dir__, "..", "result.txt")
