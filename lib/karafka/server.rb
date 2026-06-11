@@ -224,5 +224,9 @@ module Karafka
     self.execution_mode = ExecutionMode.new(:standalone)
 
     self.id = SecureRandom.hex(6)
+
+    # We need to have it set always for cases where it would be references outside of the Karafka
+    # process
+    self.workers = Processing::WorkersPool.new
   end
 end
