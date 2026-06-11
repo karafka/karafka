@@ -34,11 +34,7 @@ module Karafka
 
                 @status = :#{state}
                 conductor.signal
-                monitor.instrument(
-                  "connection.listener.#{state}",
-                  caller: self,
-                  subscription_group: @subscription_group
-                )
+                monitor.instrument("connection.listener.#{state}", caller: self)
               end
             end
           end
@@ -51,13 +47,7 @@ module Karafka
       end
 
       # Initializes the connection status and sets it to pending
-      #
-      # @param subscription_group [Karafka::Routing::SubscriptionGroup, nil] subscription group
-      #   of the listener this status belongs to. Included in the `connection.listener.*` event
-      #   payloads so subscribers (e.g. liveness listeners) can map lifecycle events back to the
-      #   subscription group without having to reach into the caller.
-      def initialize(subscription_group: nil)
-        @subscription_group = subscription_group
+      def initialize
         @mutex = Mutex.new
         pending!
       end
@@ -69,11 +59,7 @@ module Karafka
         if pending?
           @status = :stopping
           conductor.signal
-          monitor.instrument(
-            "connection.listener.stopping",
-            caller: self,
-            subscription_group: @subscription_group
-          )
+          monitor.instrument("connection.listener.stopping", caller: self)
 
           stopped!
         elsif stopped?
@@ -83,11 +69,7 @@ module Karafka
         else
           @status = :stopping
           conductor.signal
-          monitor.instrument(
-            "connection.listener.stopping",
-            caller: self,
-            subscription_group: @subscription_group
-          )
+          monitor.instrument("connection.listener.stopping", caller: self)
         end
       end
 

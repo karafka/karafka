@@ -196,15 +196,8 @@ module Karafka
           end
 
           # Deregister the polling tracker for given listener
-          # @param event [Karafka::Core::Monitoring::Event]
-          def on_connection_listener_stopping(event)
-            # A stopping listener's client is being closed, so no further statistics will arrive
-            # for its subscription group. A lingering non-steady join_state entry could never
-            # resolve back to steady and would guarantee a false positive once stability_ttl
-            # elapses, so we clear it regardless of the process state (downscaling and shutdown
-            # alike). Genuine shutdown freezes remain covered by polling_ttl below.
-            clear_instability_tracking(event[:subscription_group])
-
+          # @param _event [Karafka::Core::Monitoring::Event]
+          def on_connection_listener_stopping(_event)
             # We are interested in disabling tracking for given listener only if it was requested
             # when karafka was running. If we would always clear, it would not catch the shutdown
             # polling requirements. The "running" listener shutdown operations happen only when
@@ -215,13 +208,23 @@ module Karafka
           end
 
           # Deregister the polling tracker for given listener
-          # @param event [Karafka::Core::Monitoring::Event]
-          def on_connection_listener_stopped(event)
-            clear_instability_tracking(event[:subscription_group])
-
+          # @param _event [Karafka::Core::Monitoring::Event]
+          def on_connection_listener_stopped(_event)
             return if Karafka::App.done?
 
             clear_polling_tick
+          end
+
+          # Clear instability tracking for a subscription group whose listener finished its fetch
+          # loop (dynamic downscale or shutdown). This event fires after the listener's client has
+          # already been stopped, so no further statistics can move the join_state back to steady
+          # and no late statistics callback can re-create the entry. Without this cleanup a
+          # lingering non-steady entry (e.g. a downscale mid-rebalance) would guarantee a false
+          # positive once stability_ttl elapses. Genuine shutdown freezes remain covered by
+          # polling_ttl.
+          # @param event [Karafka::Core::Monitoring::Event]
+          def on_connection_listener_after_fetch_loop(event)
+            clear_instability_tracking(event[:subscription_group])
           end
 
           # Did we exceed any of the ttls

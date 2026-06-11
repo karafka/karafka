@@ -167,25 +167,30 @@ module Karafka
         end
 
         # Deregister the polling tracker for given listener
-        # @param event [Karafka::Core::Monitoring::Event]
-        def on_connection_listener_stopping(event)
-          # See Kubernetes::LivenessListener#on_connection_listener_stopping for details on why
-          # instability tracking is cleared unconditionally while polling clearing is guarded
-          clear_instability_tracking(event[:subscription_group])
-
+        # @param _event [Karafka::Core::Monitoring::Event]
+        def on_connection_listener_stopping(_event)
+          # We are interested in disabling tracking for given listener only if it was requested
+          # when karafka was running. If we would always clear, it would not catch the shutdown
+          # polling requirements. The "running" listener shutdown operations happen only when
+          # the manager requests it for downscaling.
           return if Karafka::App.done?
 
           clear_polling_tick
         end
 
         # Deregister the polling tracker for given listener
-        # @param event [Karafka::Core::Monitoring::Event]
-        def on_connection_listener_stopped(event)
-          clear_instability_tracking(event[:subscription_group])
-
+        # @param _event [Karafka::Core::Monitoring::Event]
+        def on_connection_listener_stopped(_event)
           return if Karafka::App.done?
 
           clear_polling_tick
+        end
+
+        # @see Karafka::Instrumentation::Vendors::Kubernetes::LivenessListener
+        #   #on_connection_listener_after_fetch_loop
+        # @param event [Karafka::Core::Monitoring::Event]
+        def on_connection_listener_after_fetch_loop(event)
+          clear_instability_tracking(event[:subscription_group])
         end
 
         private
