@@ -51,14 +51,13 @@ module Karafka
           # @param stability_ttl [Integer, nil] max time in ms a subscription group can remain in
           #   the same tracked non-"steady" librdkafka `cgrp.join_state` (e.g. `wait-join`,
           #   `wait-assn`, `wait-sync`) before the process is considered unhealthy. When nil
-          #   (default), it is derived at initialize time from
-          #   `Karafka::App.config.kafka[:'max.poll.interval.ms']` as `max.poll.interval.ms * 2`,
-          #   which keeps the threshold safe relative to the user's actual poll interval rather
-          #   than a fixed constant. The derivation reads only the root kafka config; per
-          #   subscription group overrides of `max.poll.interval.ms` set via the routing DSL are
-          #   not considered, so if any SG bumps it above the root value, pass an explicit
-          #   `stability_ttl` here. Because the value is computed in `#initialize`, the listener
-          #   must be constructed after `Karafka.setup` has populated the config. `wait-metadata`
+          #   (default), it is derived lazily on first health evaluation as the maximum
+          #   `max.poll.interval.ms` across all active subscription groups, multiplied by 2,
+          #   which keeps the threshold safe relative to the user's actual poll intervals rather
+          #   than a fixed constant. Per subscription group overrides of `max.poll.interval.ms`
+          #   set via the routing DSL are respected - the largest value wins. When no subscription
+          #   groups are available (routes not drawn), the root `Karafka::App.config.kafka` value
+          #   is used instead (with librdkafka's default applied). `wait-metadata`
           #   and `init` are
           #   excluded from tracking and additionally clear any stale prior tracking for the
           #   subscription group: `wait-metadata` appears in normal scenarios (auto-create waits,
@@ -87,7 +86,10 @@ module Karafka
             @unrecoverable = false
             @polling_ttl = polling_ttl
             @consuming_ttl = consuming_ttl
-            @stability_ttl = stability_ttl || default_stability_ttl
+            # When nil, resolved lazily via #stability_ttl on first health evaluation because
+            # the default derives from the routing subscription groups, which may not be drawn
+            # yet when the listener is constructed in karafka.rb
+            @stability_ttl = stability_ttl
             @mutex = Mutex.new
             @pollings = {}
             @consumptions = {}
@@ -237,22 +239,43 @@ module Karafka
               {
                 polling: @pollings.values.any? { |tick| (time - tick) > @polling_ttl },
                 consuming: @consumptions.values.any? { |tick| (time - tick) > @consuming_ttl },
-                stability: @instabilities.values.any? { |start| (time - start) > @stability_ttl }
+                stability: @instabilities.values.any? { |start| (time - start) > stability_ttl }
               }
             end
           end
 
+          # @return [Integer] effective stability ttl in ms. Resolved lazily (instead of in
+          #   `#initialize`) because the default derives from the routing subscription groups,
+          #   which may not be drawn yet when the listener is constructed in karafka.rb. By the
+          #   time health is evaluated, routing is final.
+          def stability_ttl
+            @stability_ttl ||= default_stability_ttl
+          end
+
           # @return [Integer] default stability_ttl derived from the configured
-          #   max.poll.interval.ms (with librdkafka's default applied by `DefaultsInjector`
-          #   when the user has not set it), multiplied by 2 for headroom above the slowest
-          #   legitimate rebalance phase.
+          #   max.poll.interval.ms, multiplied by 2 for headroom above the slowest legitimate
+          #   rebalance phase. Uses the maximum value across all active subscription groups
+          #   (their kafka configs already have librdkafka defaults injected), so per
+          #   subscription group overrides set via the routing DSL are respected. Falls back to
+          #   the root kafka config when no subscription groups are available.
           def default_stability_ttl
-            # DefaultsInjector#consumer mutates a kafka config hash to ensure
-            # max.poll.interval.ms is set (using the same librdkafka default Karafka injects per
-            # subscription group). We dup so we don't mutate the global config.
-            kafka_config = Karafka::App.config.kafka.dup
-            Karafka::Setup::DefaultsInjector.consumer(kafka_config)
-            kafka_config.fetch(:"max.poll.interval.ms") * STABILITY_TTL_MAX_POLL_MULTIPLIER
+            max_poll_interval = Karafka::App
+              .subscription_groups
+              .values
+              .flatten
+              .map { |sg| sg.kafka.fetch(:"max.poll.interval.ms") }
+              .max
+
+            max_poll_interval ||= begin
+              # DefaultsInjector#consumer mutates a kafka config hash to ensure
+              # max.poll.interval.ms is set (using the same librdkafka default Karafka injects
+              # per subscription group). We dup so we don't mutate the global config.
+              kafka_config = Karafka::App.config.kafka.dup
+              Karafka::Setup::DefaultsInjector.consumer(kafka_config)
+              kafka_config.fetch(:"max.poll.interval.ms")
+            end
+
+            max_poll_interval * STABILITY_TTL_MAX_POLL_MULTIPLIER
           end
 
           # Wraps the logic with a mutex

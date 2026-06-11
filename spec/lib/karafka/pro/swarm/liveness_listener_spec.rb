@@ -344,30 +344,63 @@ RSpec.describe_current do
       )
     end
     let(:provided_stability_ttl_kwarg) { {} }
-    let(:fresh_listener_stability_ttl) { fresh_listener.instance_variable_get(:@stability_ttl) }
+    let(:fresh_listener_stability_ttl) { fresh_listener.send(:stability_ttl) }
+
+    def sg_with(max_poll_interval)
+      instance_double(
+        Karafka::Routing::SubscriptionGroup,
+        kafka: { "max.poll.interval.ms": max_poll_interval }
+      )
+    end
 
     context "when stability_ttl is not provided" do
-      it "derives the default as max.poll.interval.ms * 2 using librdkafka's default" do
-        expect(fresh_listener_stability_ttl).to eq(300_000 * 2)
+      it "is not resolved at initialize time" do
+        expect(fresh_listener.instance_variable_get(:@stability_ttl)).to be_nil
       end
 
-      context "when Karafka::App.config.kafka explicitly sets max.poll.interval.ms" do
+      context "when subscription groups are available" do
         before do
-          allow(Karafka::App.config).to receive(:kafka).and_return(
-            "max.poll.interval.ms": 900_000
+          allow(Karafka::App).to receive(:subscription_groups).and_return(
+            cg1: [sg_with(300_000), sg_with(900_000)],
+            cg2: [sg_with(600_000)]
           )
         end
 
-        it "uses the configured value times 2" do
+        it "derives the default as the max max.poll.interval.ms across all groups times 2" do
           expect(fresh_listener_stability_ttl).to eq(900_000 * 2)
+        end
+
+        it "does not fall back to the root kafka config" do
+          expect(Karafka::Setup::DefaultsInjector).not_to receive(:consumer)
+          fresh_listener_stability_ttl
         end
       end
 
-      context "when DefaultsInjector fills in the librdkafka default" do
-        before { allow(Karafka::App.config).to receive(:kafka).and_return({}) }
+      context "when no subscription groups are available" do
+        before { allow(Karafka::App).to receive(:subscription_groups).and_return({}) }
 
-        it "results in 600_000 ms (5 min * 2) when the user hasn't set the key" do
-          expect(fresh_listener_stability_ttl).to eq(600_000)
+        it "falls back to the root config max.poll.interval.ms times 2 (librdkafka default)" do
+          expect(fresh_listener_stability_ttl).to eq(300_000 * 2)
+        end
+
+        context "when Karafka::App.config.kafka explicitly sets max.poll.interval.ms" do
+          before do
+            allow(Karafka::App.config).to receive(:kafka).and_return(
+              "max.poll.interval.ms": 900_000
+            )
+          end
+
+          it "uses the configured value times 2" do
+            expect(fresh_listener_stability_ttl).to eq(900_000 * 2)
+          end
+        end
+
+        context "when DefaultsInjector fills in the librdkafka default" do
+          before { allow(Karafka::App.config).to receive(:kafka).and_return({}) }
+
+          it "results in 600_000 ms (5 min * 2) when the user hasn't set the key" do
+            expect(fresh_listener_stability_ttl).to eq(600_000)
+          end
         end
       end
     end
@@ -379,9 +412,10 @@ RSpec.describe_current do
         expect(fresh_listener_stability_ttl).to eq(12_345)
       end
 
-      it "does not invoke DefaultsInjector for the derivation path" do
+      it "does not consult routing or DefaultsInjector for the derivation path" do
+        expect(Karafka::App).not_to receive(:subscription_groups)
         expect(Karafka::Setup::DefaultsInjector).not_to receive(:consumer)
-        fresh_listener
+        fresh_listener_stability_ttl
       end
     end
   end

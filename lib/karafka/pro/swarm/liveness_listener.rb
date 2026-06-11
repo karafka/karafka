@@ -69,8 +69,9 @@ module Karafka
         # @param consuming_ttl [Integer] see Kubernetes::LivenessListener for full documentation.
         # @param polling_ttl [Integer] see Kubernetes::LivenessListener for full documentation.
         # @param stability_ttl [Integer, nil] see Kubernetes::LivenessListener for full
-        #   documentation, including the derivation rules and the per-subscription-group
-        #   override caveat. Same semantics apply here; the node is reported unhealthy with
+        #   documentation, including the derivation rules (max `max.poll.interval.ms` across
+        #   all active subscription groups, times 2, resolved lazily on first health
+        #   evaluation). Same semantics apply here; the node is reported unhealthy with
         #   status code 4 instead of returning HTTP 500.
         def initialize(
           memory_limit: Float::INFINITY,
@@ -80,7 +81,10 @@ module Karafka
         )
           @polling_ttl = polling_ttl
           @consuming_ttl = consuming_ttl
-          @stability_ttl = stability_ttl || default_stability_ttl
+          # When nil, resolved lazily via #stability_ttl on first health evaluation because
+          # the default derives from the routing subscription groups, which may not be drawn
+          # yet when the listener is constructed in karafka.rb
+          @stability_ttl = stability_ttl
           # We cast it just in case someone would provide '10MB' or something similar
           @memory_limit = memory_limit.is_a?(String) ? memory_limit.to_i : memory_limit
           @pollings = {}
@@ -250,19 +254,40 @@ module Karafka
           return 1 if @pollings.values.any? { |tick| (time - tick) > @polling_ttl }
           return 2 if @consumptions.values.any? { |tick| (time - tick) > @consuming_ttl }
           return 3 if rss_mb > @memory_limit
-          return 4 if @instabilities.values.any? { |start| (time - start) > @stability_ttl }
+          return 4 if @instabilities.values.any? { |start| (time - start) > stability_ttl }
 
           0
         end
 
+        # @return [Integer] effective stability ttl in ms. Resolved lazily (instead of in
+        #   `#initialize`) because the default derives from the routing subscription groups,
+        #   which may not be drawn yet when the listener is constructed in karafka.rb. By the
+        #   time status is evaluated, routing is final.
+        def stability_ttl
+          @stability_ttl ||= default_stability_ttl
+        end
+
         # @return [Integer] default stability_ttl derived from the configured
-        #   max.poll.interval.ms (with librdkafka's default applied by `DefaultsInjector` when
-        #   the user has not set it), multiplied by 2 for headroom above the slowest legitimate
-        #   rebalance phase.
+        #   max.poll.interval.ms, multiplied by 2 for headroom above the slowest legitimate
+        #   rebalance phase. Uses the maximum value across all active subscription groups
+        #   (their kafka configs already have librdkafka defaults injected), so per
+        #   subscription group overrides set via the routing DSL are respected. Falls back to
+        #   the root kafka config when no subscription groups are available.
         def default_stability_ttl
-          kafka_config = Karafka::App.config.kafka.dup
-          Karafka::Setup::DefaultsInjector.consumer(kafka_config)
-          kafka_config.fetch(:"max.poll.interval.ms") * STABILITY_TTL_MAX_POLL_MULTIPLIER
+          max_poll_interval = Karafka::App
+            .subscription_groups
+            .values
+            .flatten
+            .map { |sg| sg.kafka.fetch(:"max.poll.interval.ms") }
+            .max
+
+          max_poll_interval ||= begin
+            kafka_config = Karafka::App.config.kafka.dup
+            Karafka::Setup::DefaultsInjector.consumer(kafka_config)
+            kafka_config.fetch(:"max.poll.interval.ms")
+          end
+
+          max_poll_interval * STABILITY_TTL_MAX_POLL_MULTIPLIER
         end
 
         # @return [Integer] RSS in MB for the current process
