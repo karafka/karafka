@@ -167,20 +167,22 @@ module Karafka
         end
 
         # Deregister the polling tracker for given listener
-        # @param _event [Karafka::Core::Monitoring::Event]
-        def on_connection_listener_stopping(_event)
-          # We are interested in disabling tracking for given listener only if it was requested
-          # when karafka was running. If we would always clear, it would not catch the shutdown
-          # polling requirements. The "running" listener shutdown operations happen only when
-          # the manager requests it for downscaling.
+        # @param event [Karafka::Core::Monitoring::Event]
+        def on_connection_listener_stopping(event)
+          # See Kubernetes::LivenessListener#on_connection_listener_stopping for details on why
+          # instability tracking is cleared unconditionally while polling clearing is guarded
+          clear_instability_tracking(event[:subscription_group])
+
           return if Karafka::App.done?
 
           clear_polling_tick
         end
 
         # Deregister the polling tracker for given listener
-        # @param _event [Karafka::Core::Monitoring::Event]
-        def on_connection_listener_stopped(_event)
+        # @param event [Karafka::Core::Monitoring::Event]
+        def on_connection_listener_stopped(event)
+          clear_instability_tracking(event[:subscription_group])
+
           return if Karafka::App.done?
 
           clear_polling_tick
@@ -198,6 +200,20 @@ module Karafka
             current_status = status
 
             current_status.positive? ? node.unhealthy(current_status) : node.healthy
+          end
+        end
+
+        # @see Karafka::Instrumentation::Vendors::Kubernetes::LivenessListener
+        #   #clear_instability_tracking
+        # @param subscription_group [Karafka::Routing::SubscriptionGroup, nil]
+        def clear_instability_tracking(subscription_group)
+          return unless subscription_group
+
+          sg_id = subscription_group.id
+
+          synchronize do
+            @instabilities.delete(sg_id)
+            @join_states.delete(sg_id)
           end
         end
 

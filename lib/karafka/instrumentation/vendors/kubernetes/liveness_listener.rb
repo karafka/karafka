@@ -196,8 +196,15 @@ module Karafka
           end
 
           # Deregister the polling tracker for given listener
-          # @param _event [Karafka::Core::Monitoring::Event]
-          def on_connection_listener_stopping(_event)
+          # @param event [Karafka::Core::Monitoring::Event]
+          def on_connection_listener_stopping(event)
+            # A stopping listener's client is being closed, so no further statistics will arrive
+            # for its subscription group. A lingering non-steady join_state entry could never
+            # resolve back to steady and would guarantee a false positive once stability_ttl
+            # elapses, so we clear it regardless of the process state (downscaling and shutdown
+            # alike). Genuine shutdown freezes remain covered by polling_ttl below.
+            clear_instability_tracking(event[:subscription_group])
+
             # We are interested in disabling tracking for given listener only if it was requested
             # when karafka was running. If we would always clear, it would not catch the shutdown
             # polling requirements. The "running" listener shutdown operations happen only when
@@ -208,8 +215,10 @@ module Karafka
           end
 
           # Deregister the polling tracker for given listener
-          # @param _event [Karafka::Core::Monitoring::Event]
-          def on_connection_listener_stopped(_event)
+          # @param event [Karafka::Core::Monitoring::Event]
+          def on_connection_listener_stopped(event)
+            clear_instability_tracking(event[:subscription_group])
+
             return if Karafka::App.done?
 
             clear_polling_tick
@@ -276,6 +285,22 @@ module Karafka
             end
 
             max_poll_interval * STABILITY_TTL_MAX_POLL_MULTIPLIER
+          end
+
+          # Removes join_state tracking for the given subscription group. Used when its listener
+          # stops, since no further statistics events will arrive to move the state back to
+          # steady.
+          # @param subscription_group [Karafka::Routing::SubscriptionGroup, nil] subscription
+          #   group from the event payload (nil-safe for events emitted without one)
+          def clear_instability_tracking(subscription_group)
+            return unless subscription_group
+
+            sg_id = subscription_group.id
+
+            synchronize do
+              @instabilities.delete(sg_id)
+              @join_states.delete(sg_id)
+            end
           end
 
           # Wraps the logic with a mutex

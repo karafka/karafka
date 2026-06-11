@@ -212,6 +212,45 @@ RSpec.describe_current do
     end
   end
 
+  describe "instability tracking cleanup on listener stop" do
+    let(:sg1) { instance_double(Karafka::Routing::SubscriptionGroup, id: "sg1") }
+
+    before { listener.on_statistics_emitted(stats_event(join_state: "wait-join")) }
+
+    %i[on_connection_listener_stopping on_connection_listener_stopped].each do |handler|
+      describe "##{handler}" do
+        it "clears instability tracking for the stopped subscription group" do
+          listener.public_send(handler, subscription_group: sg1)
+
+          expect(instabilities).to be_empty
+          expect(join_states).to be_empty
+        end
+
+        it "clears instability tracking even when the app is done (shutdown)" do
+          allow(Karafka::App).to receive(:done?).and_return(true)
+          listener.public_send(handler, subscription_group: sg1)
+
+          expect(instabilities).to be_empty
+          expect(join_states).to be_empty
+        end
+
+        it "does not affect other subscription groups" do
+          listener.on_statistics_emitted(stats_event(join_state: "wait-join", sg_id: "sg2"))
+          listener.public_send(handler, subscription_group: sg1)
+
+          expect(instabilities.keys).to eq(["sg2"])
+          expect(join_states.keys).to eq(["sg2"])
+        end
+
+        it "is a no-op when the event carries no subscription group" do
+          listener.public_send(handler, {})
+
+          expect(instabilities.keys).to eq(["sg1"])
+        end
+      end
+    end
+  end
+
   describe "#healthy?" do
     context "when stability_ttl is exceeded" do
       subject(:listener) { described_class.new(stability_ttl: 0) }

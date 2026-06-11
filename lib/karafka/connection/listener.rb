@@ -56,7 +56,7 @@ module Karafka
         # fetch another batch.
         @messages_buffer = MessagesBuffer.new(subscription_group)
         @mutex = Mutex.new
-        @status = Status.new
+        @status = Status.new(subscription_group: @subscription_group)
 
         @jobs_queue.register(@subscription_group.id)
 

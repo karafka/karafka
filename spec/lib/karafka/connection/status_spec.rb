@@ -83,6 +83,42 @@ RSpec.describe_current do
     end
   end
 
+  describe "lifecycle events payload" do
+    subject(:status_manager) { described_class.new(subscription_group: subscription_group) }
+
+    let(:subscription_group) { instance_double(Karafka::Routing::SubscriptionGroup) }
+    let(:captured) { [] }
+
+    before do
+      allow(Karafka.monitor).to receive(:instrument) do |name, **payload|
+        captured << [name, payload]
+      end
+    end
+
+    it "includes the subscription group in transition events" do
+      status_manager.running!
+
+      expect(captured).to include(
+        [
+          "connection.listener.running",
+          { caller: status_manager, subscription_group: subscription_group }
+        ]
+      )
+    end
+
+    it "includes the subscription group in the stopping event" do
+      status_manager.running!
+      status_manager.stop!
+
+      expect(captured).to include(
+        [
+          "connection.listener.stopping",
+          { caller: status_manager, subscription_group: subscription_group }
+        ]
+      )
+    end
+  end
+
   describe "#reset!" do
     context "when trying to reset from active" do
       before { status_manager.running! }
