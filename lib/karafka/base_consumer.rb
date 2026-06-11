@@ -12,6 +12,17 @@ module Karafka
 
     extend Forwardable
 
+    # Errors that indicate that the process integrity is compromised or that termination was
+    # explicitly requested. They are not retried in-process like other processing errors:
+    # SystemExit means someone called `exit` and retrying would invert that intent (and loop
+    # forever on a deterministic raise), while NoMemoryError means the VM cannot be trusted to
+    # execute a retry. Their failure is still recorded (so nothing gets marked and the retry
+    # pause protects the partition) and a graceful shutdown is initiated instead - redelivery
+    # after restart preserves the processing guarantees through the process death.
+    CRITICAL_ERRORS = [SystemExit, SignalException, NoMemoryError].freeze
+
+    private_constant :CRITICAL_ERRORS
+
     def_delegators :@coordinator, :topic, :partition, :eofed?, :seek_offset, :seek_offset=
 
     def_delegators(
@@ -104,7 +115,16 @@ module Karafka
     #   message.
     def on_consume
       handle_consume
-    rescue => e
+    # Containment is intentionally broader than StandardError: any error escaping this method
+    # would bypass `#on_after_consume` in the worker, skipping the retry/pause flow entirely.
+    # The next successful batch would then auto-mark its offsets, durably committing past the
+    # failed batch - a silent at-least-once violation. Errors like SystemStackError or the
+    # ScriptError family (e.g. LoadError surfacing from a Rails autoload hiccup) are per-message
+    # failures and go through the regular retry flow like any other processing error.
+    # Process-critical errors additionally trigger a graceful shutdown - the recorded failure
+    # plus the retry pause keep this partition protected during the shutdown window and the
+    # batch is redelivered after restart.
+    rescue Exception => e
       monitor.instrument(
         "error.occurred",
         error: e,
@@ -112,6 +132,8 @@ module Karafka
         seek_offset: seek_offset,
         type: "consumer.consume.error"
       )
+
+      stop_due_to_critical_error if CRITICAL_ERRORS.any? { |type| e.is_a?(type) }
     end
 
     # @private
@@ -445,6 +467,21 @@ module Karafka
         timeout: coordinator.pause_tracker.current_timeout,
         attempt: attempt
       )
+    end
+
+    # Initiates a graceful shutdown in reaction to a process-critical error raised from the user
+    # code. See `CRITICAL_ERRORS` for the rationale.
+    #
+    # @note `Karafka::Server.stop` supervises the whole shutdown (including the forceful timeout
+    #   path), so it runs from a dedicated thread: this worker thread must return so the job flow
+    #   can finish and engage the pause that protects this partition during the shutdown window.
+    def stop_due_to_critical_error
+      # No need to initiate the stop if it is already in motion (e.g. critical errors raised by
+      # multiple consumers at the same time or shutdown already requested)
+      return if Karafka::App.done?
+
+      thread = Thread.new { Karafka::Server.stop }
+      thread.name = "karafka.critical_shutdown"
     end
   end
 end

@@ -139,6 +139,96 @@ RSpec.describe_current do
       end
     end
 
+    context "when there was a non-StandardError on consume" do
+      before { consumer.singleton_class.include(Karafka::Processing::ConsumerGroups::Strategies::Mom) }
+
+      let(:working_class) do
+        ClassBuilder.inherit(described_class) do
+          def consume
+            # Descends from ScriptError, not StandardError
+            raise NotImplementedError
+          end
+        end
+      end
+
+      it { expect { consume_with_after.call }.not_to raise_error }
+
+      it "expect to record the failure and engage the retry pause" do
+        consume_with_after.call
+
+        expect(client)
+          .to have_received(:pause)
+          .with(topic.name, first_message.partition, offset, 500)
+      end
+
+      it "expect to track this with an instrumentation" do
+        errors = []
+        Karafka.monitor.subscribe("error.occurred") { |event| errors << event }
+
+        consume_with_after.call
+
+        expect(errors.last.payload[:error]).to be_a(NotImplementedError)
+        expect(errors.last.payload[:type]).to eq("consumer.consume.error")
+      end
+
+      it "expect not to initiate a shutdown" do
+        allow(Karafka::Server).to receive(:stop)
+
+        consume_with_after.call
+        sleep(0.1)
+
+        expect(Karafka::Server).not_to have_received(:stop)
+      end
+    end
+
+    context "when there was a process-critical error on consume" do
+      before do
+        consumer.singleton_class.include(Karafka::Processing::ConsumerGroups::Strategies::Mom)
+        allow(Karafka::Server).to receive(:stop)
+        # Other examples may leave the app status in a done state - the guard must see a
+        # running process for the stop initiation to be testable
+        allow(Karafka::App).to receive(:done?).and_return(false)
+      end
+
+      let(:working_class) do
+        ClassBuilder.inherit(described_class) do
+          def consume
+            raise SystemExit
+          end
+        end
+      end
+
+      it { expect { consume_with_after.call }.not_to raise_error }
+
+      it "expect to record the failure and engage the retry pause" do
+        consume_with_after.call
+
+        expect(client)
+          .to have_received(:pause)
+          .with(topic.name, first_message.partition, offset, 500)
+      end
+
+      it "expect to initiate a graceful shutdown" do
+        consume_with_after.call
+
+        # Stop runs from a dedicated thread, give it a moment to start
+        sleep(0.1)
+
+        expect(Karafka::Server).to have_received(:stop)
+      end
+
+      context "when shutdown is already in motion" do
+        before { allow(Karafka::App).to receive(:done?).and_return(true) }
+
+        it "expect not to initiate another stop" do
+          consume_with_after.call
+          sleep(0.1)
+
+          expect(Karafka::Server).not_to have_received(:stop)
+        end
+      end
+    end
+
     context "when everything went ok on consume with automatic offset management" do
       before do
         topic.manual_offset_management false
