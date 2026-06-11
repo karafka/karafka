@@ -175,7 +175,6 @@ RSpec.describe_current do
         allow(Karafka::Server).to receive(:stop)
 
         consume_with_after.call
-        sleep(0.1)
 
         expect(Karafka::Server).not_to have_received(:stop)
       end
@@ -185,9 +184,20 @@ RSpec.describe_current do
       before do
         consumer.singleton_class.include(Karafka::Processing::ConsumerGroups::Strategies::Mom)
         allow(Karafka::Server).to receive(:stop)
-        # Other examples may leave the app status in a done state - the guard must see a
+        # Other examples may leave the app status in a stopped state - the guard must see a
         # running process for the stop initiation to be testable
-        allow(Karafka::App).to receive(:done?).and_return(false)
+        allow(Karafka::App).to receive_messages(
+          stopping?: false,
+          stopped?: false,
+          terminated?: false
+        )
+
+        # Make the shutdown thread deterministic and leak-free: run the block in a real thread
+        # that we join within the example, so it never outlives the stubs and we never need
+        # time-based synchronization
+        allow(Thread).to receive(:new) do |&block|
+          Thread.start(&block).join
+        end
       end
 
       let(:working_class) do
@@ -211,21 +221,54 @@ RSpec.describe_current do
       it "expect to initiate a graceful shutdown" do
         consume_with_after.call
 
-        # Stop runs from a dedicated thread, give it a moment to start
-        sleep(0.1)
-
         expect(Karafka::Server).to have_received(:stop)
       end
 
       context "when shutdown is already in motion" do
-        before { allow(Karafka::App).to receive(:done?).and_return(true) }
+        before { allow(Karafka::App).to receive(:stopping?).and_return(true) }
 
         it "expect not to initiate another stop" do
           consume_with_after.call
-          sleep(0.1)
 
           expect(Karafka::Server).not_to have_received(:stop)
         end
+      end
+
+      context "when the app is quieting" do
+        # Quiet states park the process but do not stop it - a critical error there must still
+        # escalate, which is why the guard does not use the broader `App.done?`
+        before { allow(Karafka::App).to receive_messages(quieting?: true, quiet?: true) }
+
+        it "expect to still initiate a graceful shutdown" do
+          consume_with_after.call
+
+          expect(Karafka::Server).to have_received(:stop)
+        end
+      end
+    end
+
+    context "when there was a non-StandardError in the after-consume flow" do
+      before do
+        consumer.singleton_class.include(Karafka::Processing::ConsumerGroups::Strategies::Mom)
+        allow(consumer).to receive(:handle_after_consume).and_raise(NotImplementedError)
+      end
+
+      it { expect { consume_with_after.call }.not_to raise_error }
+
+      it "expect to engage the retry pause" do
+        consume_with_after.call
+
+        expect(client).to have_received(:pause)
+      end
+
+      it "expect to track this with an instrumentation" do
+        errors = []
+        Karafka.monitor.subscribe("error.occurred") { |event| errors << event }
+
+        consume_with_after.call
+
+        expect(errors.last.payload[:error]).to be_a(NotImplementedError)
+        expect(errors.last.payload[:type]).to eq("consumer.after_consume.error")
       end
     end
 

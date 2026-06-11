@@ -235,6 +235,15 @@ module Karafka
               # In case of `:skip` and `:dispatch` will run the exact flow provided in a block
               # In case of `:retry` always `#retry_after_pause` is applied
               def apply_dlq_flow
+                # Process-critical errors are never dispatched or skipped regardless of the
+                # strategy outcome: the retry pause protects the partition during the critical
+                # shutdown and the failed batch is redelivered after the restart
+                if critical_error?(errors_tracker.last)
+                  retry_after_pause
+
+                  return
+                end
+
                 flow, target_topic = topic.dead_letter_queue.strategy.call(errors_tracker, attempt)
 
                 case flow

@@ -64,7 +64,11 @@ module Karafka
               return if coordinator.manual_pause?
 
               mark_as_consumed(messages.last)
-            elsif coordinator.pause_tracker.attempt <= topic.dead_letter_queue.max_retries
+            # Process-critical errors are never dispatched to the DLQ regardless of the retries
+            # state: the retry pause protects the partition during the critical shutdown and
+            # the failed batch is redelivered after the restart
+            elsif coordinator.pause_tracker.attempt <= topic.dead_letter_queue.max_retries ||
+                critical_error?(coordinator.consumption(self).cause)
               retry_after_pause
             # If we've reached number of retries that we could, we need to skip the first message
             # that was not marked as consumed, pause and continue, while also moving this message

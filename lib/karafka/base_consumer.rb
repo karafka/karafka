@@ -133,7 +133,7 @@ module Karafka
         type: "consumer.consume.error"
       )
 
-      stop_due_to_critical_error if CRITICAL_ERRORS.any? { |type| e.is_a?(type) }
+      stop_due_to_critical_error if critical_error?(e)
     end
 
     # @private
@@ -146,7 +146,11 @@ module Karafka
     #   flows do not interact with external systems and their errors are expected to bubble up
     def on_after_consume
       handle_after_consume
-    rescue => e
+    # Same containment rationale as in `#on_consume`: an error escaping this method would skip
+    # the retry below and the next successful batch would auto-mark its offsets, committing
+    # past the failed batch. The after-consume flow runs user-extensible code as well (DLQ
+    # strategies, dispatch enhancements), so it needs the same class-agnostic protection
+    rescue Exception => e
       monitor.instrument(
         "error.occurred",
         error: e,
@@ -156,6 +160,8 @@ module Karafka
       )
 
       retry_after_pause
+
+      stop_due_to_critical_error if critical_error?(e)
     end
 
     # Can be used to run code prior to scheduling of eofed execution
@@ -476,12 +482,28 @@ module Karafka
     #   path), so it runs from a dedicated thread: this worker thread must return so the job flow
     #   can finish and engage the pause that protects this partition during the shutdown window.
     def stop_due_to_critical_error
-      # No need to initiate the stop if it is already in motion (e.g. critical errors raised by
-      # multiple consumers at the same time or shutdown already requested)
-      return if Karafka::App.done?
+      # No need to initiate the stop if one is already in motion (e.g. critical errors raised
+      # by multiple consumers at the same time or shutdown already requested). We deliberately
+      # do not use `App.done?` here: it includes the quieting/quiet states, in which the
+      # process is parked but alive - a critical error raised by in-flight work during quiet
+      # must still escalate to a full stop
+      return if Karafka::App.stopping?
+      return if Karafka::App.stopped?
+      return if Karafka::App.terminated?
 
-      thread = Thread.new { Karafka::Server.stop }
-      thread.name = "karafka.critical_shutdown"
+      Thread.new do
+        Thread.current.name = "karafka.critical_shutdown"
+
+        Karafka::Server.stop
+      end
+    end
+
+    # @param error [Exception, nil] error to check or nil when none was recorded
+    # @return [Boolean] is the error one of the process-critical ones
+    def critical_error?(error)
+      return false unless error
+
+      CRITICAL_ERRORS.any? { |type| error.is_a?(type) }
     end
   end
 end
