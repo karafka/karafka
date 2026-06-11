@@ -74,7 +74,12 @@ module Karafka
 
         @total_partitions = @topics_with_partitions.map(&:last).sum(&:count)
 
-        @stopped_partitions = 0
+        # Set of [topic, partition] that have reached EOF or were explicitly stopped. We track
+        # identities instead of counting EOF events because librdkafka re-emits EOF for the same
+        # partition every time it reaches the end again after new data arrived. Counting events
+        # would let a single live partition exhaust the whole EOF budget and terminate iteration
+        # while other partitions still had a backlog.
+        @stopped_partitions = Set.new
 
         @settings = settings
         @yield_nil = yield_nil
@@ -116,8 +121,9 @@ module Karafka
           @current_consumer = nil
         end
 
-        # Reset so we can use the same iterator again if needed
-        @stopped_partitions = 0
+        # Reset so we can use the same iterator again if needed (including after a `#stop`)
+        @stopped_partitions = Set.new
+        @stopped = false
       end
 
       # Stops the partition we're currently yielded into
@@ -138,7 +144,7 @@ module Karafka
       # @param name [String] topic name of which partition we want to stop
       # @param partition [Integer] partition we want to stop processing
       def stop_partition(name, partition)
-        @stopped_partitions += 1
+        @stopped_partitions << [name, partition]
 
         @current_consumer.pause(
           Rdkafka::Consumer::TopicPartitionList.new(
@@ -178,7 +184,12 @@ module Karafka
       rescue Rdkafka::RdkafkaError => e
         # End of partition
         if e.code == :partition_eof
-          @stopped_partitions += 1
+          # The error details carry the topic and partition of the EOF-ed partition. We track
+          # them instead of counting events: librdkafka re-emits EOF for the same partition
+          # whenever it reaches the end again after new data arrived, and an explicitly stopped
+          # partition can also EOF - either would inflate a plain counter and end the iteration
+          # before other partitions were fully consumed
+          @stopped_partitions << [e.details[:topic], e.details[:partition]]
 
           retry
         end
@@ -201,7 +212,7 @@ module Karafka
       # Do we have all the data we wanted or did every topic partition has reached eof.
       # @return [Boolean]
       def done?
-        (@stopped_partitions >= @total_partitions) || @stopped
+        (@stopped_partitions.size >= @total_partitions) || @stopped
       end
     end
   end
