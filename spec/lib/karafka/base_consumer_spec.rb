@@ -48,6 +48,22 @@ RSpec.describe_current do
     it { expect { consumer.send(:consume) }.to raise_error NotImplementedError }
   end
 
+  describe "#critical_error?" do
+    it { expect(consumer.send(:critical_error?, nil)).to be(false) }
+    it { expect(consumer.send(:critical_error?, StandardError.new)).to be(false) }
+    it { expect(consumer.send(:critical_error?, SystemExit.new)).to be(true) }
+    it { expect(consumer.send(:critical_error?, NoMemoryError.new)).to be(true) }
+
+    context "when a user-defined class is configured as critical" do
+      let(:custom_error) { Class.new(StandardError) }
+
+      before { allow(consumer).to receive(:critical_errors).and_return([custom_error]) }
+
+      it { expect(consumer.send(:critical_error?, custom_error.new)).to be(true) }
+      it { expect(consumer.send(:critical_error?, SystemExit.new)).to be(false) }
+    end
+  end
+
   describe "#messages" do
     before { consumer.messages = messages }
 

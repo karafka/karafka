@@ -7,21 +7,11 @@ module Karafka
     # Allow for consumer instance tagging for instrumentation
     include Karafka::Core::Taggable
     include Helpers::ConfigImporter.new(
-      monitor: %i[monitor]
+      monitor: %i[monitor],
+      critical_errors: %i[internal processing critical_errors]
     )
 
     extend Forwardable
-
-    # Errors that indicate that the process integrity is compromised or that termination was
-    # explicitly requested. They are not retried in-process like other processing errors:
-    # SystemExit means someone called `exit` and retrying would invert that intent (and loop
-    # forever on a deterministic raise), while NoMemoryError means the VM cannot be trusted to
-    # execute a retry. Their failure is still recorded (so nothing gets marked and the retry
-    # pause protects the partition) and a graceful shutdown is initiated instead - redelivery
-    # after restart preserves the processing guarantees through the process death.
-    CRITICAL_ERRORS = [SystemExit, SignalException, NoMemoryError].freeze
-
-    private_constant :CRITICAL_ERRORS
 
     def_delegators :@coordinator, :topic, :partition, :eofed?, :seek_offset, :seek_offset=
 
@@ -476,7 +466,7 @@ module Karafka
     end
 
     # Initiates a graceful shutdown in reaction to a process-critical error raised from the user
-    # code. See `CRITICAL_ERRORS` for the rationale.
+    # code. See the `internal.processing.critical_errors` setting docs for the rationale.
     #
     # @note `Karafka::Server.stop` supervises the whole shutdown (including the forceful timeout
     #   path), so it runs from a dedicated thread: this worker thread must return so the job flow
@@ -499,11 +489,12 @@ module Karafka
     end
 
     # @param error [Exception, nil] error to check or nil when none was recorded
-    # @return [Boolean] is the error one of the process-critical ones
+    # @return [Boolean] is the error one of the process-critical ones (configurable via the
+    #   `internal.processing.critical_errors` setting)
     def critical_error?(error)
       return false unless error
 
-      CRITICAL_ERRORS.any? { |type| error.is_a?(type) }
+      critical_errors.any? { |type| error.is_a?(type) }
     end
   end
 end
