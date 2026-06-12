@@ -310,6 +310,11 @@ RSpec/Output:
   Exclude:
     - spec/benchmarks_helper.rb
 
+# Integration specs are plain scripts (not RSpec), so stub_const is not available there
+RSpec/RemoveConst:
+  Exclude:
+    - spec/integrations/pro/scheduled_messages/older_multi_digit_schema_version_spec.rb
+
 # ThreadSafety
 ThreadSafety/ClassAndModuleAttributes:
   Enabled: false
