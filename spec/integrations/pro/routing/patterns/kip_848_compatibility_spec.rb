@@ -61,8 +61,6 @@ draw_routes(create_topics: false) do
   end
 end
 
-# Pre-create the topic so producing and the pattern subscriptions do not race broker-side
-# auto-creation (TOPIC_ALREADY_EXISTS broker warnings)
 Karafka::Admin.create_topic(DT.topic, 1, 1)
 
 start_karafka_and_wait_until do

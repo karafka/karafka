@@ -35,8 +35,6 @@ Karafka::App.routes.draw do
 end
 
 on_booted do
-  # Pre-create the topic so the consumer subscription does not trigger racing broker-side
-  # auto-creation (TOPIC_ALREADY_EXISTS broker warnings)
   Karafka::Admin.create_topic(TOPIC, 1, 1)
 
   Karafka::Embedded.start

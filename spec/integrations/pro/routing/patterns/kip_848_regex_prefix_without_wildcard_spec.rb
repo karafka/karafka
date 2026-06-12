@@ -66,9 +66,6 @@ draw_routes(create_topics: false) do
   end
 end
 
-# Pre-create the topics: the spec's fixture is "only <prefix>-1 and <prefix>-2 exist" and
-# creating them explicitly avoids racing client-triggered broker-side auto-creation
-# (TOPIC_ALREADY_EXISTS broker warnings)
 Karafka::Admin.create_topic(TOPIC1, 1, 1)
 Karafka::Admin.create_topic(TOPIC2, 1, 1)
 
