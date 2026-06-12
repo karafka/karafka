@@ -41,8 +41,7 @@ module Karafka
         class StrategySelector
           attr_reader :strategies
 
-          # Strategies that we support in the Pro offering
-          # They can be combined
+          # Strategies that we support in the Pro offering They can be combined
           SUPPORTED_FEATURES = %i[
             active_job
             long_running_job

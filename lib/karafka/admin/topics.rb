@@ -193,8 +193,7 @@ module Karafka
         end
       end
 
-      # Fetches the watermark offsets for a given topic partition or multiple topics and
-      # partitions
+      # Fetches the watermark offsets for a given topic partition or multiple topics and partitions
       #
       # @param name_or_hash [String, Symbol, Hash] topic name or hash with topics and partitions
       # @param partition [Integer, nil] partition number

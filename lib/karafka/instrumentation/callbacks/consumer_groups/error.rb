@@ -26,8 +26,7 @@ module Karafka
           # @param error [Rdkafka::Error] error that occurred
           # @note It will only instrument on errors of the client of our consumer
           def call(client_name, error)
-            # Emit only errors related to our client
-            # Same as with statistics (mor explanation there)
+            # Emit only errors related to our client Same as with statistics (mor explanation there)
             return unless @client_name == client_name
 
             monitor.instrument(

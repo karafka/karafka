@@ -37,6 +37,7 @@ en:
         internal.processing.jobs_queue_class_format: cannot be nil
         internal.processing.scheduler_class_format: cannot be nil
         internal.processing.worker_job_call_wrapper_format: 'needs to be false or respond to #wrap'
+        internal.processing.critical_errors_format: 'needs to be an array of Exception subclasses'
         internal.processing.consumer_groups.jobs_builder_format: cannot be nil
         internal.processing.consumer_groups.coordinator_class_format: cannot be nil
         internal.processing.consumer_groups.errors_tracker_class_format: 'needs to be nil or a class'

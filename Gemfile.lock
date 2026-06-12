@@ -1,9 +1,9 @@
 PATH
   remote: .
   specs:
-    karafka (2.5.10.rc1)
-      karafka-core (>= 2.5.13, < 2.6.0)
-      karafka-rdkafka (>= 0.27.1)
+    karafka (2.6.0.beta1)
+      karafka-core (>= 2.6.0, < 2.7.0)
+      karafka-rdkafka (>= 0.27.2)
       waterdrop (>= 2.10.1, < 3.0.0)
       zeitwerk (~> 2.3)
 
@@ -51,7 +51,7 @@ GEM
     ffi (1.17.4-x86_64-darwin)
     ffi (1.17.4-x86_64-linux-gnu)
     ffi (1.17.4-x86_64-linux-musl)
-    fugit (1.12.1)
+    fugit (1.12.2)
       et-orbi (~> 1.4)
       raabro (~> 1.4)
     globalid (1.3.0)
@@ -59,8 +59,8 @@ GEM
     i18n (1.14.8)
       concurrent-ruby (~> 1.0)
     io-console (0.8.2)
-    json (2.19.5)
-    karafka-core (2.5.13)
+    json (2.19.7)
+    karafka-core (2.6.0)
       karafka-rdkafka (>= 0.20.0)
       logger (>= 1.6.0)
     karafka-rdkafka (0.27.2)
@@ -99,14 +99,14 @@ GEM
       logger
       mini_portile2 (~> 2.6)
       rake (> 12)
-    karafka-testing (2.5.6)
+    karafka-testing (2.6.0)
       karafka (>= 2.5.0, < 2.6.0)
       waterdrop (>= 2.8.0)
-    karafka-web (0.11.6)
+    karafka-web (1.0.0.beta1)
       erubi (~> 1.4)
-      karafka (>= 2.5.2, < 2.6.0)
-      karafka-core (>= 2.5.0, < 2.6.0)
-      roda (~> 3.69, >= 3.69)
+      karafka (>= 2.5.10.rc1, < 2.7.0)
+      karafka-core (>= 2.5.0, < 2.7.0)
+      roda (>= 3.100, < 4.0)
       tilt (~> 2.0)
     logger (1.7.0)
     mini_portile2 (2.8.9)
@@ -173,8 +173,8 @@ DEPENDENCIES
   factory_bot
   fugit
   karafka!
-  karafka-testing (>= 2.5.0)
-  karafka-web (>= 0.11.1)
+  karafka-testing (>= 2.6.0)
+  karafka-web (>= 1.0.0.beta1)
   ostruct
   rspec
   simplecov
@@ -206,21 +206,21 @@ CHECKSUMS
   ffi (1.17.4-x86_64-darwin) sha256=aa70390523cf3235096cf64962b709b4cfbd5c082a2cb2ae714eb0fe2ccda496
   ffi (1.17.4-x86_64-linux-gnu) sha256=9d3db14c2eae074b382fa9c083fe95aec6e0a1451da249eab096c34002bc752d
   ffi (1.17.4-x86_64-linux-musl) sha256=3fdf9888483de005f8ef8d1cf2d3b20d86626af206cbf780f6a6a12439a9c49e
-  fugit (1.12.1) sha256=5898f478ede9b415f0804e42b8f3fd53f814bd85eebffceebdbc34e1107aaf68
+  fugit (1.12.2) sha256=643f2bf28db263bd400cbf8e0dd8b76b2c9b94bdb130e12d2394de04d9c20e5e
   globalid (1.3.0) sha256=05c639ad6eb4594522a0b07983022f04aa7254626ab69445a0e493aa3786ff11
   i18n (1.14.8) sha256=285778639134865c5e0f6269e0b818256017e8cde89993fdfcbfb64d088824a5
   io-console (0.8.2) sha256=d6e3ae7a7cc7574f4b8893b4fca2162e57a825b223a177b7afa236c5ef9814cc
-  json (2.19.5) sha256=218a18553e4801d579ca7e0f5bc72bafd776d7397238a1fb4e74db5b0a812c59
-  karafka (2.5.10.rc1)
-  karafka-core (2.5.13) sha256=0acec083043bb6166c4b647a7458091cc7b08066d3b92a026932925ec7e07f61
+  json (2.19.7) sha256=fe432c8639f6efff69f9d73b518a3705d9581ab93156f981ea72806e1e5bcc3e
+  karafka (2.6.0.beta1)
+  karafka-core (2.6.0) sha256=c8471c5e5aebbfed23a49c6f66f82436cc94293a89556ad84f14322aef6a8020
   karafka-rdkafka (0.27.2) sha256=3ccce96306642be70bff8168e4e737fc10f2ffae20bc0ff0a43d88dbb7452d31
   karafka-rdkafka (0.27.2-aarch64-linux-gnu) sha256=5cf19b3038e66e58d4028f3dec75e2e9f817e5cc67162df482c15ea774559425
   karafka-rdkafka (0.27.2-aarch64-linux-musl) sha256=7f6a4caf8fa05c522b974a3cc47edd141fc7dacaf4087d64256bfe7bc6b3399d
   karafka-rdkafka (0.27.2-arm64-darwin) sha256=b6fa0972ef3b8095f0c21569206585f80e1961a05d48b7a70b81d2864afc95fc
   karafka-rdkafka (0.27.2-x86_64-linux-gnu) sha256=3e7aceebec61661bbb6d9e60650d9b373c1e0d74c40935eebcd401f9f36f47ca
   karafka-rdkafka (0.27.2-x86_64-linux-musl) sha256=b0f9fa4b7e65f8f92ae5fb859ff5c5b3b5a90c7eebc13e299bce0a5892724ff7
-  karafka-testing (2.5.6) sha256=b950fc542e6a596a0c4efee1d2983b6c999f2191b25ac1edda06dbdd4dcf2859
-  karafka-web (0.11.6) sha256=a257d631d544dfe7dedbb3cfd0c8312228d60147b69016a6876c386ec229785a
+  karafka-testing (2.6.0) sha256=22df47adbee5e85db5771421b937e5adf6007e499066537547d0c5260790a361
+  karafka-web (1.0.0.beta1) sha256=5ae06fad9cc2a016c05b09781474c7d3607330be5063557b6ec939161296cd8a
   logger (1.7.0) sha256=196edec7cc44b66cfb40f9755ce11b392f21f7967696af15d274dde7edff0203
   mini_portile2 (2.8.9) sha256=0cd7c7f824e010c072e33f68bc02d85a00aeb6fce05bb4819c03dfd3c140c289
   minitest (6.0.6) sha256=153ea36d1d987a62942382b61075745042a2b3123b1cd48f4c3675af9cc7d6f1

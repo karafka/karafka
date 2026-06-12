@@ -16,7 +16,12 @@ require "karafka"
 require "securerandom"
 require "digest"
 
-SPEC_HASH = Digest::MD5.hexdigest($PROGRAM_NAME)[0, 6]
+# Topic prefix follows the suite-wide it-<hash>- convention. The hash is computed from this
+# spec's path given as a literal (not from runtime state), so it is environment-independent,
+# unique per spec and discoverable via bin/tests_topics_hashes
+SPEC_HASH = Digest::MD5.hexdigest(
+  "spec/integrations/embedding/puma_long_running_job_poro/flow_spec.rb"
+)[0, 6]
 TOPIC = "it-#{SPEC_HASH}-#{SecureRandom.hex(6)}".freeze
 PID = Process.pid
 RESULT_FILE = File.join(__dir__, "..", "result.txt")
@@ -68,6 +73,8 @@ Karafka::App.routes.draw do
 end
 
 on_worker_boot do
+  Karafka::Admin.create_topic(TOPIC, 1, 1)
+
   # Produce a message that will trigger the long-running consumer
   Karafka.producer.produce_sync(topic: TOPIC, payload: "big-log-drop-s3-event")
 

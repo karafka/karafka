@@ -188,8 +188,7 @@ module Karafka
             when :brokers
               statistics.fetch("brokers").each_value do |broker_statistics|
                 # Skip bootstrap nodes
-                # Bootstrap nodes have nodeid -1, other nodes have positive
-                # node ids
+                # Bootstrap nodes have nodeid -1, other nodes have positive node ids
                 next if broker_statistics["nodeid"] == -1
 
                 public_send(
