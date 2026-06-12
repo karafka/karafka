@@ -50,7 +50,10 @@ offset = 0
 30.times do
   break if offset >= 199
 
-  offset = Karafka::Admin.read_topic(DT.topic, 0, 1, SEEK_TIME).first.offset
+  # Mid-cleanup (compaction + retention) the time lookup can transiently resolve to nothing,
+  # in which case the read is empty - keep polling
+  message = Karafka::Admin.read_topic(DT.topic, 0, 1, SEEK_TIME).first
+  offset = message.offset if message
   sleep(5)
 end
 
