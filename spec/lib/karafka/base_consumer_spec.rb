@@ -92,8 +92,7 @@ RSpec.describe_current do
     describe "#commit_offsets!" do
       context "when the client commit fails due to ownership loss" do
         before do
-          allow(client).to receive(:commit_offsets).and_return(false)
-          allow(client).to receive(:assignment_lost?).and_return(true)
+          allow(client).to receive_messages(commit_offsets: false, assignment_lost?: true)
         end
 
         it "expect false (never the revocation status) and a revoked coordinator" do
@@ -105,8 +104,7 @@ RSpec.describe_current do
       context "when the client commit fails but the partition was retained" do
         # Cooperative rebalance generation bump: commit rejected, assignment kept
         before do
-          allow(client).to receive(:commit_offsets).and_return(false)
-          allow(client).to receive(:assignment_lost?).and_return(false)
+          allow(client).to receive_messages(commit_offsets: false, assignment_lost?: false)
         end
 
         it "expect false - a failed commit must never report fencing success" do

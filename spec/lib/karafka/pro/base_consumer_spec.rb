@@ -596,6 +596,7 @@ RSpec.describe Karafka::BaseConsumer, type: :pro do
       end
     end
   end
+
   describe "ownership result contracts" do
     let(:marking_message) { instance_double(Karafka::Messages::Message, offset: 200) }
 
