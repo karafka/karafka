@@ -43,23 +43,21 @@ end
   produce_many(DT.topic, Array.new(1) { nil }, key: "test#{i}")
 end
 
-offset = 0
+expired = false
 
 # Compacting may not kick in immediately, hence we have to wait for it
-# This can happen slowly especially on CI
+# This can happen slowly especially on CI. Once the cleanup progresses far enough, the broker
+# no longer resolves the old timestamp to any offset and the time-based read becomes empty -
+# that is the state this spec needs before seeking
 30.times do
-  break if offset >= 199
+  expired = Karafka::Admin.read_topic(DT.topic, 0, 1, SEEK_TIME).empty?
 
-  # Mid-cleanup (compaction + retention) the time lookup can transiently resolve to nothing,
-  # in which case the read is empty - keep polling
-  message = Karafka::Admin.read_topic(DT.topic, 0, 1, SEEK_TIME).first
-  offset = message.offset if message
+  break if expired
+
   sleep(5)
 end
 
-if offset < 199
-  exit 1
-end
+exit 1 unless expired
 
 start_karafka_and_wait_until do
   DT[:seeks].count { |seek| seek == -1 } >= 1
