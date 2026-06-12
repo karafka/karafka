@@ -596,4 +596,43 @@ RSpec.describe Karafka::BaseConsumer, type: :pro do
       end
     end
   end
+  describe "ownership result contracts" do
+    let(:marking_message) { instance_double(Karafka::Messages::Message, offset: 200) }
+
+    before do
+      coordinator.seek_offset = 100
+      allow(Karafka.producer).to receive(:transactional?).and_return(false)
+    end
+
+    %i[mark_as_consumed mark_as_consumed!].each do |method|
+      describe "##{method}" do
+        context "when the client marking fails due to ownership loss" do
+          before do
+            allow(client).to receive(method).and_return(false)
+            allow(client).to receive(:assignment_lost?).and_return(true)
+          end
+
+          it "expect false (never the revocation status) and a revoked coordinator" do
+            expect(consumer.public_send(method, marking_message)).to be(false)
+            expect(coordinator.revoked?).to be(true)
+          end
+
+          it "expect not to advance the seek offset" do
+            consumer.public_send(method, marking_message)
+
+            expect(consumer.seek_offset).to eq(100)
+          end
+        end
+
+        context "when the client marking succeeds" do
+          before { allow(client).to receive(method).and_return(true) }
+
+          it "expect true and an advanced seek offset" do
+            expect(consumer.public_send(method, marking_message)).to be(true)
+            expect(consumer.seek_offset).to eq(201)
+          end
+        end
+      end
+    end
+  end
 end

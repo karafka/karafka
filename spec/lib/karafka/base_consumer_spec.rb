@@ -48,6 +48,92 @@ RSpec.describe_current do
     it { expect { consumer.send(:consume) }.to raise_error NotImplementedError }
   end
 
+  describe "ownership result contracts" do
+    let(:marking_message) { instance_double(Karafka::Messages::Message, offset: 200) }
+
+    before do
+      coordinator.seek_offset = 100
+      consumer.coordinator = coordinator
+      consumer.client = client
+      consumer.messages = messages
+    end
+
+    %i[mark_as_consumed mark_as_consumed!].each do |method|
+      describe "##{method}" do
+        context "when the client marking fails due to ownership loss" do
+          before do
+            allow(client).to receive(method).and_return(false)
+            allow(client).to receive(:assignment_lost?).and_return(true)
+          end
+
+          it "expect false (never the revocation status) and a revoked coordinator" do
+            expect(consumer.public_send(method, marking_message)).to be(false)
+            expect(coordinator.revoked?).to be(true)
+          end
+
+          it "expect not to advance the seek offset" do
+            consumer.public_send(method, marking_message)
+
+            expect(consumer.seek_offset).to eq(100)
+          end
+        end
+
+        context "when the client marking succeeds" do
+          before { allow(client).to receive(method).and_return(true) }
+
+          it "expect true and an advanced seek offset" do
+            expect(consumer.public_send(method, marking_message)).to be(true)
+            expect(consumer.seek_offset).to eq(201)
+          end
+        end
+      end
+    end
+
+    describe "#commit_offsets!" do
+      context "when the client commit fails due to ownership loss" do
+        before do
+          allow(client).to receive(:commit_offsets).and_return(false)
+          allow(client).to receive(:assignment_lost?).and_return(true)
+        end
+
+        it "expect false (never the revocation status) and a revoked coordinator" do
+          expect(consumer.commit_offsets!).to be(false)
+          expect(coordinator.revoked?).to be(true)
+        end
+      end
+
+      context "when the client commit fails but the partition was retained" do
+        # Cooperative rebalance generation bump: commit rejected, assignment kept
+        before do
+          allow(client).to receive(:commit_offsets).and_return(false)
+          allow(client).to receive(:assignment_lost?).and_return(false)
+        end
+
+        it "expect false - a failed commit must never report fencing success" do
+          expect(consumer.commit_offsets!).to be(false)
+        end
+      end
+
+      context "when the client commit succeeds" do
+        before { allow(client).to receive(:commit_offsets).and_return(true) }
+
+        it { expect(consumer.commit_offsets!).to be(true) }
+      end
+
+      context "when the partition was already revoked" do
+        before do
+          coordinator.revoke
+          allow(client).to receive(:commit_offsets)
+        end
+
+        it "expect false without a commit attempt" do
+          expect(consumer.commit_offsets!).to be(false)
+          expect(client).not_to have_received(:commit_offsets)
+        end
+      end
+    end
+  end
+
   describe "#critical_error?" do
     it { expect(consumer.send(:critical_error?, nil)).to be(false) }
     it { expect(consumer.send(:critical_error?, StandardError.new)).to be(false) }
