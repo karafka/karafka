@@ -68,7 +68,8 @@ module Karafka
       # @param count [Integer] how many messages we want to get at most
       # @param start_offset [Integer, Time] offset from which we should start. If -1 is provided
       #   (default) we will start from the latest offset. If time is provided, the appropriate
-      #   offset will be resolved. If negative beyond -1 is provided, we move backwards more.
+      #   offset will be resolved. A time beyond the last message yields no messages. If
+      #   negative beyond -1 is provided, we move backwards more.
       # @param settings [Hash] kafka extra settings (optional)
       #
       # @return [Array<Karafka::Messages::Message>] array with messages
@@ -76,6 +77,7 @@ module Karafka
         messages = []
         tpl = Rdkafka::Consumer::TopicPartitionList.new
         low_offset, high_offset = nil
+        time_based = start_offset.is_a?(Time)
 
         with_consumer(settings) do |consumer|
           # Convert the time offset (if needed)
@@ -83,9 +85,20 @@ module Karafka
 
           low_offset, high_offset = consumer.query_watermark_offsets(name, partition)
 
-          # Select offset dynamically if -1 or less and move backwards with the negative
-          # offset, allowing to start from N messages back from high-watermark
-          start_offset = high_offset - count - start_offset.abs + 1 if start_offset.negative?
+          if start_offset.negative?
+            start_offset = if time_based
+              # A negative result of time resolution means there is no message at or after the
+              # requested time. It must not fall into the numeric relative form below (which
+              # would return the newest messages, all older than requested): starting at the
+              # high watermark yields the correct empty result
+              high_offset
+            else
+              # Select offset dynamically if -1 or less and move backwards with the negative
+              # offset, allowing to start from N messages back from high-watermark
+              high_offset - count - start_offset.abs + 1
+            end
+          end
+
           start_offset = low_offset if start_offset.negative?
 
           # Build the requested range - since first element is on the start offset we need to
