@@ -45,8 +45,7 @@ module Karafka
     # Without the proxy, we'd have two problems:
     #
     # 1. **Permanent API pollution**: Adding a `producer` method to config that accepts blocks
-    #    would change its permanent API, even though this functionality is only needed during
-    #    setup.
+    #    would change its permanent API, even though this functionality is only needed during setup.
     #
     # 2. **Timing issues**: The producer doesn't exist yet when the user's setup block runs.
     #    The producer is created in `configure_components` after all user configuration is

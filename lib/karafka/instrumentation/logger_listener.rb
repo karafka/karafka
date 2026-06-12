@@ -494,8 +494,7 @@ module Karafka
       def error_details(event)
         caller_ref = event[:caller]
 
-        # Collect extra info if it was a consumer related error.
-        # Those come from user code
+        # Collect extra info if it was a consumer related error. Those come from user code
         details = case caller_ref
         when Karafka::BaseConsumer
           extract_consumer_info(caller_ref)

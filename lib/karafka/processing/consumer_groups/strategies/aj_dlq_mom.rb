@@ -28,6 +28,11 @@ module Karafka
             if coordinator.success?
               # Do NOT commit offsets, they are comitted after each job in the AJ consumer.
               coordinator.pause_tracker.reset
+            # Process-critical errors are never dispatched to the DLQ regardless of the retries
+            # state: the retry pause protects the partition during the critical shutdown and
+            # the failed batch is redelivered after the restart
+            elsif critical_error?(coordinator.consumption(self).cause)
+              retry_after_pause
             elsif coordinator.pause_tracker.attempt <= topic.dead_letter_queue.max_retries
               retry_after_pause
             else

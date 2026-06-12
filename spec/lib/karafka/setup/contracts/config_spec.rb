@@ -93,6 +93,7 @@ RSpec.describe_current do
           scheduler_class: Karafka::Processing::Schedulers::Default,
           jobs_queue_class: Karafka::Processing::JobsQueue,
           worker_job_call_wrapper: false,
+          critical_errors: [SystemExit, SignalException, NoMemoryError],
           consumer_groups: {
             jobs_builder: Karafka::Processing::ConsumerGroups::JobsBuilder.new,
             coordinator_class: Karafka::Processing::ConsumerGroups::Coordinator,
@@ -740,6 +741,7 @@ RSpec.describe_current do
       jobs_queue_class
       scheduler_class
       worker_job_call_wrapper
+      critical_errors
     ].each do |key|
       context "when processing #{key} is missing" do
         before { config[:internal][:processing].delete(key) }

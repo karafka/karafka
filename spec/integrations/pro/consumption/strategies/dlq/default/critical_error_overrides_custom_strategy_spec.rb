@@ -28,41 +28,62 @@
 # License: https://karafka.io/docs/Pro-License-Comm/
 # Contact: contact@karafka.io
 
-# When using virtual partitions, we should easily consume data with the same instances on many
-# batches and until there is a rebalance or critical error, the consumer instances should not change
+# A process-critical error (SystemExit via `exit`) must never be dispatched to the DLQ even
+# when a custom DLQ strategy explicitly requests dispatch. The critical guard overrides the
+# strategy outcome: the partition stays paused during the self-initiated shutdown and the
+# failed batch is redelivered after the restart.
 
-setup_karafka do |config|
-  config.concurrency = 10
+setup_karafka(allow_errors: %w[consumer.consume.error]) do |config|
+  config.max_messages = 1
+end
+
+# Always requests an immediate dispatch - the guard must win anyway
+class AlwaysDispatchStrategy
+  def call(_errors_tracker, _attempt)
+    :dispatch
+  end
 end
 
 class Consumer < Karafka::BaseConsumer
   def consume
     messages.each do |message|
-      DT[object_id] << message
+      exit(1) if message.offset == 2 && !DT.key?(:second_run)
+
+      DT[:consumed] << message.offset
     end
   end
 end
 
 draw_routes do
-  topic DT.topic do
+  topic DT.topics[0] do
     consumer Consumer
-    virtual_partitions(
-      partitioner: ->(msg) { msg.raw_payload }
+    dead_letter_queue(
+      topic: DT.topics[1],
+      max_retries: 5,
+      strategy: AlwaysDispatchStrategy.new
     )
   end
 end
 
-start_karafka_and_wait_until do
-  if DT.data.values.sum(&:size) < 1000
-    produce_many(DT.topic, DT.uuids(100))
-    sleep(1)
-    false
-  else
-    true
-  end
+Karafka.monitor.subscribe("dead_letter_queue.dispatched") do |_event|
+  DT[:dispatched] << 1
 end
 
-# It should distribute work
-assert DT.data.size >= 8
-# But overall number of consumer instances should be tops the concurrency
-assert DT.data.size <= 10
+produce_many(DT.topics[0], DT.uuids(5))
+
+start_karafka_and_wait_until(reset_status: true) do
+  DT[:consumed].size >= 2 && Karafka::App.done?
+end
+
+assert_equal [], DT[:dispatched]
+assert_equal [0, 1], DT[:consumed].uniq.sort
+assert_equal 2, fetch_next_offset(DT.topics[0])
+
+DT[:second_run] = true
+
+start_karafka_and_wait_until do
+  ((0..4).to_a - DT[:consumed].uniq).empty?
+end
+
+assert_equal (0..4).to_a, DT[:consumed].uniq.sort
+assert_equal [], DT[:dispatched]

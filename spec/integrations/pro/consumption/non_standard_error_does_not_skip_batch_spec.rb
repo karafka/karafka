@@ -28,41 +28,52 @@
 # License: https://karafka.io/docs/Pro-License-Comm/
 # Contact: contact@karafka.io
 
-# When using virtual partitions, we should easily consume data with the same instances on many
-# batches and until there is a rebalance or critical error, the consumer instances should not change
+# A batch whose processing raises a non-StandardError must not be silently skipped also when
+# running with the Pro strategies: the failure is recorded class-agnostically, the regular
+# retry flow engages and the batch is redelivered instead of the next successful batch
+# committing offsets past it.
 
-setup_karafka do |config|
-  config.concurrency = 10
+setup_karafka(allow_errors: %w[consumer.consume.error]) do |config|
+  config.max_messages = 1
+end
+
+Karafka.monitor.subscribe("error.occurred") do |event|
+  DT[:errors] << event[:type]
 end
 
 class Consumer < Karafka::BaseConsumer
   def consume
     messages.each do |message|
-      DT[object_id] << message
+      # Fail only on the first encounter so that when the batch is redelivered (expected
+      # at-least-once behavior) it processes fine and the spec can complete
+      if message.offset == 2 && !DT.key?(:poisoned)
+        DT[:poisoned] = true
+
+        # Descends from ScriptError, not StandardError
+        raise NotImplementedError, "non-StandardError raised mid-consume"
+      end
+
+      DT[:consumed] << message.offset
     end
   end
 end
 
-draw_routes do
-  topic DT.topic do
-    consumer Consumer
-    virtual_partitions(
-      partitioner: ->(msg) { msg.raw_payload }
-    )
-  end
-end
+draw_routes(Consumer)
+
+produce_many(DT.topic, DT.uuids(5))
+
+started_at = Time.now
 
 start_karafka_and_wait_until do
-  if DT.data.values.sum(&:size) < 1000
-    produce_many(DT.topic, DT.uuids(100))
-    sleep(1)
-    false
-  else
-    true
-  end
+  ((0..4).to_a - DT[:consumed]).empty? || (Time.now - started_at) > 30
 end
 
-# It should distribute work
-assert DT.data.size >= 8
-# But overall number of consumer instances should be tops the concurrency
-assert DT.data.size <= 10
+assert DT[:errors].include?("consumer.consume.error"), DT[:errors]
+
+assert(
+  DT[:consumed].include?(2),
+  "offset 2 was never consumed - batch silently skipped " \
+  "(consumed: #{DT[:consumed].sort}, committed next offset: #{fetch_next_offset})"
+)
+
+assert_equal (0..4).to_a, DT[:consumed].uniq.sort

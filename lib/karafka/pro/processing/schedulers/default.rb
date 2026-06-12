@@ -86,8 +86,7 @@ module Karafka
           alias_method :on_schedule_periodic, :schedule_fifo
           alias_method :on_schedule_eofed, :schedule_fifo
 
-          # This scheduler does not have anything to manage as it is a pass through and has no
-          # state
+          # This scheduler does not have anything to manage as it is a pass through and has no state
           def on_manage
             nil
           end
