@@ -350,7 +350,11 @@ module Karafka
 
               # Mark job as successful
               coordinator.success!(self)
-            rescue => e
+            # Failure recording must be class-agnostic: an unrecorded non-StandardError would
+            # leave the consumption result in its default (successful) state and the
+            # after-consume flow would mark the failed batch as consumed instead of engaging
+            # the retry
+            rescue Exception => e
               # If failed, mark as failed
               coordinator.failure!(self, e)
 

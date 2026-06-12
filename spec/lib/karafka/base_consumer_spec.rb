@@ -48,6 +48,22 @@ RSpec.describe_current do
     it { expect { consumer.send(:consume) }.to raise_error NotImplementedError }
   end
 
+  describe "#critical_error?" do
+    it { expect(consumer.send(:critical_error?, nil)).to be(false) }
+    it { expect(consumer.send(:critical_error?, StandardError.new)).to be(false) }
+    it { expect(consumer.send(:critical_error?, SystemExit.new)).to be(true) }
+    it { expect(consumer.send(:critical_error?, NoMemoryError.new)).to be(true) }
+
+    context "when a user-defined class is configured as critical" do
+      let(:custom_error) { Class.new(StandardError) }
+
+      before { allow(consumer).to receive(:critical_errors).and_return([custom_error]) }
+
+      it { expect(consumer.send(:critical_error?, custom_error.new)).to be(true) }
+      it { expect(consumer.send(:critical_error?, SystemExit.new)).to be(false) }
+    end
+  end
+
   describe "#messages" do
     before { consumer.messages = messages }
 
@@ -136,6 +152,98 @@ RSpec.describe_current do
           expect(event.payload[:error]).to eq(StandardError)
           expect(event.payload[:type]).to eq("consumer.consume.error")
         end
+      end
+    end
+
+    context "when there was a non-StandardError on consume" do
+      before { consumer.singleton_class.include(Karafka::Processing::ConsumerGroups::Strategies::Mom) }
+
+      let(:working_class) do
+        ClassBuilder.inherit(described_class) do
+          def consume
+            # Descends from ScriptError, not StandardError
+            raise NotImplementedError
+          end
+        end
+      end
+
+      it { expect { consume_with_after.call }.not_to raise_error }
+
+      it "expect to record the failure and engage the retry pause" do
+        consume_with_after.call
+
+        expect(client)
+          .to have_received(:pause)
+          .with(topic.name, first_message.partition, offset, 500)
+      end
+
+      it "expect to track this with an instrumentation" do
+        errors = []
+        Karafka.monitor.subscribe("error.occurred") { |event| errors << event }
+
+        consume_with_after.call
+
+        expect(errors.last.payload[:error]).to be_a(NotImplementedError)
+        expect(errors.last.payload[:type]).to eq("consumer.consume.error")
+      end
+    end
+
+    context "when there was a process-critical error on consume" do
+      before { consumer.singleton_class.include(Karafka::Processing::ConsumerGroups::Strategies::Mom) }
+
+      let(:working_class) do
+        ClassBuilder.inherit(described_class) do
+          def consume
+            raise SystemExit
+          end
+        end
+      end
+
+      it { expect { consume_with_after.call }.not_to raise_error }
+
+      it "expect to record the failure and engage the retry pause" do
+        consume_with_after.call
+
+        expect(client)
+          .to have_received(:pause)
+          .with(topic.name, first_message.partition, offset, 500)
+      end
+
+      # The shutdown escalation itself is handled by the auto-subscribed
+      # CriticalErrorsListener (tested in its own spec) reacting to this very event
+      it "expect to emit the error on the bus for the critical errors listener" do
+        errors = []
+        Karafka.monitor.subscribe("error.occurred") { |event| errors << event }
+
+        consume_with_after.call
+
+        expect(errors.last.payload[:error]).to be_a(SystemExit)
+        expect(errors.last.payload[:type]).to eq("consumer.consume.error")
+      end
+    end
+
+    context "when there was a non-StandardError in the after-consume flow" do
+      before do
+        consumer.singleton_class.include(Karafka::Processing::ConsumerGroups::Strategies::Mom)
+        allow(consumer).to receive(:handle_after_consume).and_raise(NotImplementedError)
+      end
+
+      it { expect { consume_with_after.call }.not_to raise_error }
+
+      it "expect to engage the retry pause" do
+        consume_with_after.call
+
+        expect(client).to have_received(:pause)
+      end
+
+      it "expect to track this with an instrumentation" do
+        errors = []
+        Karafka.monitor.subscribe("error.occurred") { |event| errors << event }
+
+        consume_with_after.call
+
+        expect(errors.last.payload[:error]).to be_a(NotImplementedError)
+        expect(errors.last.payload[:type]).to eq("consumer.after_consume.error")
       end
     end
 

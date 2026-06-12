@@ -1,7 +1,9 @@
 # frozen_string_literal: true
 
-# Karafka should recover from critical errors that happened in the workers while consuming
-# jobs. It should notify on a proper channel and do other stuff
+# Karafka should recover from critical (non-StandardError) errors raised in user consumption
+# code. Such errors are contained at the consumer level (so the regular retry flow engages and
+# the failed batch is not skipped) and reported on the error bus. Because the failing batch is
+# retried, the error may be reported more than once.
 #
 # @note This test is a bit special as due to how Karafka operates, when unexpected issue happens
 #   in particular moments, it can bubble up and exit 2
@@ -42,6 +44,8 @@ rescue SuperException
 end
 
 assert_equal false, raised
-assert_equal 1, DT[:errors].size
+# The failing batch is retried, so by the time we stop, the error may have been reported more
+# than once
+assert DT[:errors].size >= 1
 assert_equal "error.occurred", DT[:errors].first.id
-assert_equal "worker.process.error", DT[:errors].first.payload[:type]
+assert_equal "consumer.consume.error", DT[:errors].first.payload[:type]

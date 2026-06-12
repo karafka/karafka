@@ -28,56 +28,62 @@
 # License: https://karafka.io/docs/Pro-License-Comm/
 # Contact: contact@karafka.io
 
-# We should be able to use posix negative lookup regexps to match all except certain topics
+# A process-critical error (SystemExit via `exit`) must never be dispatched to the DLQ even
+# when a custom DLQ strategy explicitly requests dispatch. The critical guard overrides the
+# strategy outcome: the partition stays paused during the self-initiated shutdown and the
+# failed batch is redelivered after the restart.
 
-setup_karafka
+setup_karafka(allow_errors: %w[consumer.consume.error]) do |config|
+  config.max_messages = 1
+end
 
-DT[0] = Set.new
+# Always requests an immediate dispatch - the guard must win anyway
+class AlwaysDispatchStrategy
+  def call(_errors_tracker, _attempt)
+    :dispatch
+  end
+end
 
 class Consumer < Karafka::BaseConsumer
   def consume
-    raise "#{topic.name} matched" if topic.name.include?("activities")
+    messages.each do |message|
+      exit(1) if message.offset == 2 && !DT.key?(:second_run)
 
-    DT[0] << topic
+      DT[:consumed] << message.offset
+    end
   end
 end
 
-ENDING = SecureRandom.uuid
-NEGATIVE_MATCHING = <<~PATTERN.gsub(/\s+/, "")
-  ^(
-    [^i]|
-    i[^t]|
-    it[^-]|
-    it-[^a]|
-    it-a[^c]|
-    it-ac[^t]|
-    it-act[^i]|
-    it-acti[^v]|
-    it-activ[^i]|
-    it-activi[^t]|
-    it-activit[^i]|
-    it-activiti[^e]|
-    it-activitie[^s]|
-    it-activities[^.]
-  )
-PATTERN
-
-NEGATIVE_PATTERN = Regexp.new(NEGATIVE_MATCHING + ".*#{Regexp.escape(ENDING)}$")
-
-draw_routes(create_topics: false) do
-  pattern(NEGATIVE_PATTERN) do
+draw_routes do
+  topic DT.topics[0] do
     consumer Consumer
+    dead_letter_queue(
+      topic: DT.topics[1],
+      max_retries: 5,
+      strategy: AlwaysDispatchStrategy.new
+    )
   end
 end
 
-["it-test.#{ENDING}", "it-activities.#{ENDING}", "it-active.#{ENDING}"].each do |name|
-  Karafka::Admin.create_topic(name, 1, 1)
+Karafka.monitor.subscribe("dead_letter_queue.dispatched") do |_event|
+  DT[:dispatched] << 1
 end
 
-produce_many("it-test.#{ENDING}", DT.uuids(1))
-produce_many("it-activities.#{ENDING}", DT.uuids(1))
-produce_many("it-active.#{ENDING}", DT.uuids(1))
+produce_many(DT.topics[0], DT.uuids(5))
+
+start_karafka_and_wait_until(reset_status: true) do
+  DT[:consumed].size >= 2 && Karafka::App.done?
+end
+
+assert_equal [], DT[:dispatched]
+assert_equal [0, 1], DT[:consumed].uniq.sort
+assert_equal 2, fetch_next_offset(DT.topics[0])
+
+DT[:second_run] = true
 
 start_karafka_and_wait_until do
-  DT[0].size >= 2
+  ((0..4).to_a - DT[:consumed].uniq).empty?
 end
+
+assert_equal (0..4).to_a, DT[:consumed].uniq.sort
+assert_equal [], DT[:dispatched]

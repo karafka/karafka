@@ -4,7 +4,12 @@ require "karafka"
 require "securerandom"
 require "digest"
 
-SPEC_HASH = Digest::MD5.hexdigest(ENV.fetch("KARAFKA_SPEC_PATH", $PROGRAM_NAME))[0, 6]
+# Topic prefix follows the suite-wide it-<hash>- convention. The hash is computed from this
+# spec's path given as a literal (not from runtime state), so it is environment-independent,
+# unique per spec and discoverable via bin/tests_topics_hashes
+SPEC_HASH = Digest::MD5.hexdigest(
+  "spec/integrations/embedding/puma_single_poro/flow_spec.rb"
+)[0, 6]
 TOPIC = "it-#{SPEC_HASH}-#{SecureRandom.hex(6)}".freeze
 PID = Process.pid
 
@@ -30,6 +35,8 @@ Karafka::App.routes.draw do
 end
 
 on_booted do
+  Karafka::Admin.create_topic(TOPIC, 1, 1)
+
   Karafka::Embedded.start
   sleep(1)
   Process.kill("TERM", PID)
