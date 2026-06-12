@@ -58,7 +58,6 @@ offset = 0
 end
 
 if offset < 199
-
   exit 1
 end
 
