@@ -71,9 +71,13 @@ module Karafka
                     # want to mark all but until the expected location
                     manager.mark_until(message, offset_metadata) if coordinator.finished?
 
-                    return revoked? unless manager.markable?
+                    # When there is no continuous stream of virtually marked offsets from the
+                    # lowest registered one, there is no real offset to commit yet. This is not
+                    # a failure, hence we need to report ownership truthfully: true as long as
+                    # the assignment is still owned
+                    return !revoked? unless manager.markable?
 
-                    manager.markable? ? super(*manager.markable) : revoked?
+                    super(*manager.markable)
                   end
                 end
               ensure
@@ -93,7 +97,11 @@ module Karafka
                   coordinator.synchronize do
                     manager.mark(message, offset_metadata)
                     manager.mark_until(message, offset_metadata) if coordinator.finished?
-                    manager.markable? ? super(*manager.markable) : revoked?
+
+                    # No real offset to commit yet is not a failure, see `#mark_as_consumed`
+                    return !revoked? unless manager.markable?
+
+                    super(*manager.markable)
                   end
                 end
               ensure
