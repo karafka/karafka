@@ -249,6 +249,19 @@ module Karafka
                   return
                 end
 
+                # With virtual partitions, a dispatch/skip decision is never made on a
+                # non-collapsed (parallel) run. The deciding consumer operates only on its own
+                # virtual partition subset there: the skippable message would be selected from
+                # an arbitrary subset and the dispatch marking would commit offsets of messages
+                # other virtual partitions never processed. The failure already requested a
+                # collapse, so we retry and let the decision happen on the collapsed, linear
+                # flow where it is deterministic
+                if topic.virtual_partitions? && !collapsed?
+                  retry_after_pause
+
+                  return
+                end
+
                 flow, target_topic = topic.dead_letter_queue.strategy.call(errors_tracker, attempt)
 
                 case flow
