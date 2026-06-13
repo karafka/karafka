@@ -25,6 +25,21 @@ module Karafka
         )
       end
 
+      # Resets the attempt count of a given topic partition pause tracker.
+      #
+      # Used on revocation so that a later reclaim of the same partition starts counting retry
+      # attempts from zero instead of carrying the stale count across the rebalance. We reset
+      # rather than remove the tracker because the pause itself may still need to be resumed after
+      # the reclaim (the partition can be re-paused via the retained paused offsets on rebalance).
+      #
+      # @param topic [::Karafka::Routing::Topic] topic
+      # @param partition [Integer] partition number
+      def revoke(topic, partition)
+        return unless @pauses.key?(topic)
+
+        @pauses[topic][partition]&.reset
+      end
+
       # Resumes processing of partitions for which pause time has ended.
       #
       # @yieldparam [Karafka::Routing::Topic] topic
