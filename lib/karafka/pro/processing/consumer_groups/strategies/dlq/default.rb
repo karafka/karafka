@@ -157,11 +157,7 @@ module Karafka
                 dispatch = lambda do
                   dispatch_to_dlq(skippable_message) if dispatch_to_dlq?
 
-                  if mark_after_dispatch?
-                    mark_dispatched_to_dlq(skippable_message)
-                  else
-                    self.seek_offset = skippable_message.offset + 1
-                  end
+                  mark_dispatched_to_dlq(skippable_message) if mark_after_dispatch?
                 end
 
                 if dispatch_in_a_transaction?
@@ -169,6 +165,12 @@ module Karafka
                 else
                   dispatch.call
                 end
+
+                # When not marking after dispatch, the seek offset is advanced manually. This must
+                # happen only after the dispatch (and its transaction) succeeded - advancing it
+                # inside the transaction would let the mutation survive an abort, skipping the
+                # broken message which would then be neither in the DLQ nor reprocessed
+                self.seek_offset = skippable_message.offset + 1 unless mark_after_dispatch?
               end
 
               # @param skippable_message [Array<Karafka::Messages::Message>]
