@@ -30,36 +30,45 @@
 
 # Long-running ActiveJob jobs run concurrently with partition revocation. When a failed LRJ batch
 # reaches its after-consume DLQ flow after the partition was already revoked, it must not dispatch
-# to the DLQ: the new owner will reprocess and dispatch. The non-AJ LRJ DLQ strategies guard this
-# with `return resume if revoked?`; the AJ LRJ DLQ variants lacked the guard and dispatched on the
-# lost partition, producing a DLQ entry that the new owner then duplicates.
+# to the DLQ: the new owner will reprocess and dispatch. Without the guard the revoked owner also
+# dispatches, producing a duplicate DLQ entry on a partition it no longer owns.
+#
+# This uses a REAL revocation (no stubbing of `#revoked?`): two partitions each carry one failing
+# job, both run concurrently as LRJ, and a second consumer joins the same group and keeps polling
+# so it permanently holds the partition rebalanced away from Karafka. Both failed jobs then reach
+# their after-consume DLQ flow - one still owned, one revoked. The property we assert is precise
+# and immune to the retained partition reprocessing under the rebalance: Karafka must never
+# dispatch a DLQ message for a partition it no longer owns (the one the second consumer holds).
 
 setup_active_job
-setup_karafka(allow_errors: true)
 
-# Simulate the partition being revoked from the moment the job fails, so the after-consume DLQ
-# flow runs while we no longer own the partition
-module SimulatedRevocation
-  def revoked?
-    DT.key?(:simulate_revoked) || super
-  end
+setup_karafka(allow_errors: true) do |config|
+  # Both partitions' jobs must run at the same time so both are in-flight LRJ when the rebalance
+  # revokes one of them
+  config.concurrency = 2
 end
 
-Karafka::BaseConsumer.prepend(SimulatedRevocation)
-
-Karafka.monitor.subscribe("dead_letter_queue.dispatched") do
-  DT[:dlq_dispatched] = true
-end
-
-Karafka.monitor.subscribe("error.occurred") do |event|
-  DT[:errored_at] = Time.now.to_f if event[:type] == "consumer.consume.error"
+Karafka.monitor.subscribe("dead_letter_queue.dispatched") do |event|
+  DT[:dispatched] << event[:message].partition
 end
 
 class Job < ActiveJob::Base
   queue_as DT.topic
 
-  def perform
-    DT[:simulate_revoked] = true
+  # Route each job to the partition passed as its argument so we deterministically place one
+  # failing job on each of the two partitions
+  karafka_options(
+    dispatch_method: :produce_sync,
+    partitioner: ->(job) { job.arguments.first },
+    partition_key_type: :partition
+  )
+
+  def perform(partition)
+    DT[:started] << partition
+
+    # Hold the long-running job open until the test has forced the rebalance, so the after-consume
+    # DLQ flow runs after one of the two partitions has been revoked
+    sleep(0.5) while DT[:rebalanced].empty?
 
     raise(StandardError, "poison")
   end
@@ -67,6 +76,7 @@ end
 
 draw_routes do
   active_job_topic DT.topic do
+    config(partitions: 2)
     dead_letter_queue topic: DT.topics[1], max_retries: 0
     long_running_job true
     # mom is enabled automatically
@@ -77,15 +87,59 @@ draw_routes do
   end
 end
 
-Job.perform_later
+Job.perform_later(0)
+Job.perform_later(1)
 
-# Wait until the job has failed, then give the (now revoked) after-consume DLQ flow ample time to
-# run before asserting whether it dispatched
+# Partitions held by the second consumer (i.e. revoked from Karafka). Captured inside the poll
+# thread because an rdkafka consumer must only be touched from one thread.
+held_partitions = []
+holder = nil
+holder_thread = nil
+
 start_karafka_and_wait_until do
-  DT.key?(:errored_at) && (Time.now.to_f - DT[:errored_at]) > 8
+  # Wait until both partitions are actively being processed (both LRJ jobs in-flight and blocked)
+  if DT[:started].uniq.size >= 2 && DT[:rebalanced].empty?
+    # Join a second consumer to the same group and keep it polling so it permanently holds the
+    # partition it is assigned - that partition is revoked from Karafka and never reclaimed
+    holder = setup_rdkafka_consumer
+    holder.subscribe(DT.topic)
+    holder_thread = Thread.new do
+      until DT.key?(:stop_holder)
+        holder.poll(1_000)
+        current = holder.assignment.to_h.values.flatten.map(&:partition)
+        held_partitions = current unless current.empty?
+      end
+    end
+
+    # Give the rebalance time to settle so one partition is genuinely revoked from Karafka
+    sleep(10)
+
+    # Release the blocked jobs - both now run their after-consume DLQ flow, one owned, one revoked
+    DT[:rebalanced] << true
+
+    # Give both after-consume flows time to run before asserting
+    sleep(8)
+
+    true
+  else
+    false
+  end
 end
 
+DT[:stop_holder] = true
+holder_thread&.join
+holder&.close
+
+# The rebalance must actually have moved a partition to the second consumer, otherwise there was
+# no revocation to test
+assert held_partitions.size >= 1, "second consumer got no partition - no revocation happened"
+
+# Karafka must not dispatch a DLQ message for any partition it no longer owns. With the guard the
+# revoked partition stays silent; without it the revoked owner dispatches too.
+leaked = DT[:dispatched] & held_partitions
+
 assert(
-  !DT.key?(:dlq_dispatched),
-  "failed message dispatched to the DLQ while the partition was revoked"
+  leaked.empty?,
+  "DLQ dispatch happened on revoked partition(s) #{leaked} (dispatched: #{DT[:dispatched]}, " \
+  "held by new owner: #{held_partitions})"
 )
