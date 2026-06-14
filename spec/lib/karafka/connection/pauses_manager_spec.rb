@@ -45,4 +45,23 @@ RSpec.describe_current do
       end
     end
   end
+
+  describe "#revoke" do
+    context "when a pause is present" do
+      before do
+        fetched_pause.increment
+        fetched_pause.increment
+      end
+
+      it "expect to reset its attempt count" do
+        manager.revoke(topic, partition)
+        expect(fetched_pause.attempt).to eq(0)
+      end
+
+      it "expect to keep the same tracker instance (not remove it)" do
+        manager.revoke(topic, partition)
+        expect(manager.fetch(topic, partition)).to eq(fetched_pause)
+      end
+    end
+  end
 end
