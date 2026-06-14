@@ -39,11 +39,17 @@ module Karafka
 
         class << self
           # Snapshots to Kafka current schedule state
+          #
+          # @note Dispatched synchronously: the schedule snapshot persists each task's
+          #   `previous_time` after it runs, so it must be durably stored before we move on. With
+          #   an async dispatch a crash after a task executed but before the snapshot was delivered
+          #   would lose the `previous_time` update and re-run the task on the next replay.
           def schedule
             produce(
               topics.schedules.name,
               "state:schedule",
-              serializer.schedule(::Karafka::Pro::RecurringTasks.schedule)
+              serializer.schedule(::Karafka::Pro::RecurringTasks.schedule),
+              sync: true
             )
           end
 
@@ -89,8 +95,13 @@ module Karafka
           # @param topic [String] target topic
           # @param key [String]
           # @param payload [Hash] hash with payload
-          def produce(topic, key, payload)
-            producer.produce_async(
+          # @param sync [Boolean] should we dispatch synchronously. Used for the schedule state
+          #   snapshot, which must be durably stored before we proceed
+          def produce(topic, key, payload, sync: false)
+            dispatch = sync ? :produce_sync : :produce_async
+
+            producer.public_send(
+              dispatch,
               topic: topic,
               key: key,
               partition: 0,

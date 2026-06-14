@@ -48,6 +48,7 @@ RSpec.describe_current do
   before do
     allow(Karafka::Pro::RecurringTasks::Serializer).to receive(:new).and_return(serializer)
     allow(producer).to receive(:produce_async)
+    allow(producer).to receive(:produce_sync)
     allow(serializer).to receive_messages(
       schedule: schedule_payload,
       command: command_payload,
@@ -56,10 +57,10 @@ RSpec.describe_current do
   end
 
   describe ".schedule" do
-    it "produces a schedule snapshot to Kafka" do
+    it "produces a schedule snapshot to Kafka synchronously" do
       described_class.schedule
 
-      expect(producer).to have_received(:produce_async).with(
+      expect(producer).to have_received(:produce_sync).with(
         topic: schedules_topic,
         key: "state:schedule",
         partition: 0,
