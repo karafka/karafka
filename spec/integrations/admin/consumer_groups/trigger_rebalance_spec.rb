@@ -32,11 +32,17 @@ produce_many(DT.topic, messages)
 rebalance_thread = Thread.new do
   sleep(0.5) until DT.key?(:consumed)
 
-  Karafka::Admin.trigger_rebalance(DT.group)
+  # A single trigger only briefly joins and leaves the group; under load the coordinator can
+  # collapse that into a generation change the running consumer never observes as a revoke. Keep
+  # triggering until the running consumer actually reports one, instead of relying on a single
+  # attempt and hanging until the global fail-safe timeout when it gets coalesced.
+  until DT.key?(:rebalances)
+    Karafka::Admin.trigger_rebalance(DT.group)
+    sleep(1)
+  end
 end
 
-# Start consumer and wait for initial consumption
-# If no rebalance on admin, this will hang and spec will timeout
+# Start consumer and wait until the admin-triggered rebalance is observed as a revoke
 start_karafka_and_wait_until do
   DT.key?(:rebalances)
 end
