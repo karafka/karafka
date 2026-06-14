@@ -63,9 +63,5 @@ RSpec.describe_current do
         expect(manager.fetch(topic, partition)).to eq(fetched_pause)
       end
     end
-
-    context "when there is no pause for the given topic" do
-      it { expect { manager.revoke(topic, partition) }.not_to raise_error }
-    end
   end
 end

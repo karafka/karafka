@@ -32,12 +32,14 @@ module Karafka
       # rather than remove the tracker because the pause itself may still need to be resumed after
       # the reclaim (the partition can be re-paused via the retained paused offsets on rebalance).
       #
+      # A coordinator and its pause tracker are created together in
+      # `CoordinatorsBuffer#find_or_create`, and `CoordinatorsBuffer#revoke` only calls us once it
+      # has confirmed the coordinator exists - so the tracker is always present here.
+      #
       # @param topic [::Karafka::Routing::Topic] topic
       # @param partition [Integer] partition number
       def revoke(topic, partition)
-        return unless @pauses.key?(topic)
-
-        @pauses[topic][partition]&.reset
+        @pauses[topic][partition].reset
       end
 
       # Resumes processing of partitions for which pause time has ended.
