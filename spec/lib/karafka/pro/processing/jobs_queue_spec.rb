@@ -124,6 +124,24 @@ RSpec.describe_current do
     it "expect to clear a given group only" do
       expect { queue.clear(job1.group_id) }.not_to change(queue, :statistics)
     end
+
+    context "when another subscription group holds an async lock" do
+      let(:group_a) { SecureRandom.uuid }
+      let(:group_b) { SecureRandom.uuid }
+
+      before do
+        queue.register(group_a)
+        queue.register(group_b)
+        queue.lock_async(group_a, SecureRandom.uuid)
+        queue.lock_async(group_b, SecureRandom.uuid)
+      end
+
+      it "expect clearing one group to keep the other group's async lock in effect" do
+        queue.clear(group_a)
+
+        expect(queue.empty?(group_b)).to be(false)
+      end
+    end
   end
 
   describe "#lock" do
