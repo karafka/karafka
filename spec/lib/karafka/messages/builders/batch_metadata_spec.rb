@@ -55,5 +55,13 @@ RSpec.describe_current do
         expect(result.created_at).to eq(now)
       end
     end
+
+    context "when the last message has no timestamp (no broker timestamp)" do
+      before { allow(message2).to receive(:timestamp).and_return(nil) }
+
+      it "expect to fall back to the current machine now instead of crashing" do
+        expect(result.created_at).to eq(now)
+      end
+    end
   end
 end

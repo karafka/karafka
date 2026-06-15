@@ -53,6 +53,11 @@ module Karafka
             return now unless last_message
 
             timestamp = last_message.timestamp
+
+            # A message may carry no broker timestamp (for example `NoTimestampType`), which rdkafka
+            # exposes as `nil`. Fall back to now instead of crashing on the comparison below.
+            return now unless timestamp
+
             [timestamp, now].min
           end
         end
