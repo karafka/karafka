@@ -78,10 +78,6 @@ draw_routes do
   end
 end
 
-# The consumed topic is only referenced through a routing pattern (regex), so draw_routes never
-# creates it. Pre-create it explicitly - otherwise producing to it auto-creates it on the broker
-# and races with concurrent metadata requests, emitting TOPIC_ALREADY_EXISTS warnings that fail
-# the build's Kafka warning check.
 Karafka::Admin.create_topic(DT.topic, 1, 1)
 
 produce_many(DT.topic, DT.uuids(100))
