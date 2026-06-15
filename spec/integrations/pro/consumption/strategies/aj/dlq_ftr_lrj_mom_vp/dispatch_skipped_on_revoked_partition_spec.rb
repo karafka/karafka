@@ -97,6 +97,7 @@ Job.perform_later(1)
 # Partitions held by the second consumer (i.e. revoked from Karafka). Captured inside the poll
 # thread because an rdkafka consumer must only be touched from one thread.
 held_partitions = []
+held_snapshot = []
 holder = nil
 holder_thread = nil
 
@@ -121,23 +122,28 @@ start_karafka_and_wait_until do
 
     sleep(8)
 
+    # Freeze the holder's assignment while Karafka is still running. Returning true below stops
+    # Karafka, whose shutdown rebalance hands its still-owned partition to the holder - capturing
+    # that post-shutdown state would wrongly flag a partition that was dispatched while owned.
+    held_snapshot = held_partitions.dup
+    DT[:stop_holder] = true
+
     true
   else
     false
   end
 end
 
-DT[:stop_holder] = true
 holder_thread&.join
 holder&.close
 
-assert held_partitions.size >= 1, "second consumer got no partition - no revocation happened"
+assert held_snapshot.size >= 1, "second consumer got no partition - no revocation happened"
 
 # Karafka must not dispatch a DLQ message for any partition it no longer owns
-leaked = DT[:dispatched] & held_partitions
+leaked = DT[:dispatched] & held_snapshot
 
 assert(
   leaked.empty?,
   "DLQ dispatch happened on revoked partition(s) #{leaked} (dispatched: #{DT[:dispatched]}, " \
-  "held by new owner: #{held_partitions})"
+  "held by new owner: #{held_snapshot})"
 )
