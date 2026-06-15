@@ -50,6 +50,12 @@ module Karafka
         def revoke(topic_name, partition)
           return unless @coordinators[topic_name].key?(partition)
 
+          # Reset the partition's pause tracker attempt count. The tracker lives in the pauses
+          # manager keyed by topic-partition and would otherwise be reused as-is if we reclaim this
+          # partition, carrying a stale retry attempt count across the rebalance (which, with DLQ,
+          # would send the next failure straight to the dead letter queue, skipping the retries)
+          @pauses_manager.revoke(@topics.find(topic_name), partition)
+
           # The fact that we delete here does not change the fact that the executor still holds the
           # reference to this coordinator. We delete it here, as we will no longer process any
           # new stuff with it and we may need a new coordinator if we regain this partition, but the

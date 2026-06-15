@@ -76,6 +76,14 @@ module Karafka
           end
         end
 
+        # Buffers a command received during replay, so it can be applied once the in-memory
+        # state is synchronized with the last stored schedule state. Commands applied directly
+        # during replay would have their effects overwritten by this synchronization
+        # @param command_hash [Hash] deserialized command data
+        def replay_command(command_hash)
+          @catchup_commands << command_hash
+        end
+
         # Updates the catchup state
         # @param schedule_hash [Hash] deserialized schedule hash hash
         def update_state(schedule_hash)
@@ -93,32 +101,35 @@ module Karafka
 
           @replaying = false
 
-          # When there is nothing to replay and synchronize, we can just save the state and
-          # proceed
+          # When there is nothing to replay and synchronize, we can just save the state and proceed
           if @catchup_commands.empty? && @catchup_schedule.nil?
             snapshot
 
             return
           end
 
-          # If the schedule version we have in Kafka is higher than ours, we cannot proceed
-          # This prevents us from applying older changes to a new schedule
-          if @catchup_schedule[:schedule_version] > schedule.version
-            @incompatible = true
+          # Commands may have been received without any schedule state stored in Kafka. In such
+          # cases there is nothing to synchronize and only the commands are applied
+          if @catchup_schedule
+            # If the schedule version we have in Kafka is higher than ours, we cannot proceed
+            # This prevents us from applying older changes to a new schedule
+            if @catchup_schedule[:schedule_version] > schedule.version
+              @incompatible = true
 
-            return
-          end
+              return
+            end
 
-          # Now we can synchronize the in-memory state based on the last state stored in Kafka
-          schedule.each do |task|
-            stored_task = @catchup_schedule[:tasks][task.id.to_sym]
+            # Now we can synchronize the in-memory state based on the last state stored in Kafka
+            schedule.each do |task|
+              stored_task = @catchup_schedule[:tasks][task.id.to_sym]
 
-            next unless stored_task
+              next unless stored_task
 
-            stored_previous_time = stored_task[:previous_time]
-            task.previous_time = stored_previous_time.zero? ? 0 : Time.at(stored_previous_time)
+              stored_previous_time = stored_task[:previous_time]
+              task.previous_time = stored_previous_time.zero? ? 0 : Time.at(stored_previous_time)
 
-            stored_task[:enabled] ? task.enable : task.disable
+              stored_task[:enabled] ? task.enable : task.disable
+            end
           end
 
           @catchup_commands.each do |cmd|

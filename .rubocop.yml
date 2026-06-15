@@ -132,6 +132,17 @@ Lint/RaiseException:
   Exclude:
     - "spec/integrations/**/*.rb"
 
+# Containment of non-StandardError errors in the processing flow is deliberate: errors escaping
+# the consumer would bypass the after-consume retry/pause flow and offsets would be committed
+# past unprocessed batches
+Lint/RescueException:
+  Exclude:
+    - lib/karafka/base_consumer.rb
+    - lib/karafka/instrumentation/critical_errors_listener.rb
+    - lib/karafka/processing/worker.rb
+    - lib/karafka/processing/consumer_groups/strategies/default.rb
+    - lib/karafka/pro/processing/consumer_groups/strategies/default.rb
+
 Lint/SuppressedException:
   Exclude:
     - spec/lib/karafka/pro/routing/features/patterns/detector_spec.rb
@@ -298,6 +309,11 @@ RSpec/SpecFilePathSuffix:
 RSpec/Output:
   Exclude:
     - spec/benchmarks_helper.rb
+
+# Integration specs are plain scripts (not RSpec), so stub_const is not available there
+RSpec/RemoveConst:
+  Exclude:
+    - spec/integrations/pro/scheduled_messages/older_multi_digit_schema_version_spec.rb
 
 # ThreadSafety
 ThreadSafety/ClassAndModuleAttributes:

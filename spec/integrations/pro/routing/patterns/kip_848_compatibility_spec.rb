@@ -61,6 +61,8 @@ draw_routes(create_topics: false) do
   end
 end
 
+Karafka::Admin.create_topic(DT.topic, 1, 1)
+
 start_karafka_and_wait_until do
   unless @created
     sleep(5)

@@ -101,7 +101,14 @@ module Karafka
                   client.mark_as_consumed(message, offset_metadata)
                 end
 
-                return revoked? unless stored
+                unless stored
+                  # Evaluate ownership for its coordinator-revoking side effect - all marking
+                  # failure causes are ownership related. The failure itself always reports
+                  # false: the offset was not stored, regardless of the ownership state
+                  revoked?
+
+                  return false
+                end
 
                 self.seek_offset = message.offset + 1
               end
@@ -143,7 +150,14 @@ module Karafka
                   client.mark_as_consumed!(message, offset_metadata)
                 end
 
-                return revoked? unless stored
+                unless stored
+                  # Evaluate ownership for its coordinator-revoking side effect - all marking
+                  # failure causes are ownership related. The failure itself always reports
+                  # false: the offset was not stored, regardless of the ownership state
+                  revoked?
+
+                  return false
+                end
 
                 self.seek_offset = message.offset + 1
               end
@@ -350,7 +364,11 @@ module Karafka
 
               # Mark job as successful
               coordinator.success!(self)
-            rescue => e
+            # Failure recording must be class-agnostic: an unrecorded non-StandardError would
+            # leave the consumption result in its default (successful) state and the
+            # after-consume flow would mark the failed batch as consumed instead of engaging
+            # the retry
+            rescue Exception => e
               # If failed, mark as failed
               coordinator.failure!(self, e)
 

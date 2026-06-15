@@ -48,8 +48,7 @@ module Karafka
             break if revoked?
 
             # We cannot early stop when running virtual partitions because the intermediate state
-            # would force us not to commit the offsets. This would cause extensive
-            # double-processing
+            # would force us not to commit the offsets. This would cause extensive double-processing
             break if ::Karafka::App.stopping? && !topic.virtual_partitions?
 
             consume_job(message)

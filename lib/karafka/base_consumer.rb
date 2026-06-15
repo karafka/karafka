@@ -7,7 +7,8 @@ module Karafka
     # Allow for consumer instance tagging for instrumentation
     include Karafka::Core::Taggable
     include Helpers::ConfigImporter.new(
-      monitor: %i[monitor]
+      monitor: %i[monitor],
+      critical_errors: %i[internal processing critical_errors]
     )
 
     extend Forwardable
@@ -104,7 +105,17 @@ module Karafka
     #   message.
     def on_consume
       handle_consume
-    rescue => e
+    # Containment is intentionally broader than StandardError: any error escaping this method
+    # would bypass `#on_after_consume` in the worker, skipping the retry/pause flow entirely.
+    # The next successful batch would then auto-mark its offsets, durably committing past the
+    # failed batch - a silent at-least-once violation. Errors like SystemStackError or the
+    # ScriptError family (e.g. LoadError surfacing from a Rails autoload hiccup) are per-message
+    # failures and go through the regular retry flow like any other processing error.
+    # Process-critical errors additionally trigger a graceful shutdown via the auto-subscribed
+    # `Instrumentation::CriticalErrorsListener` watching this very instrumentation - the
+    # recorded failure plus the retry pause keep this partition protected during the shutdown
+    # window and the batch is redelivered after restart.
+    rescue Exception => e
       monitor.instrument(
         "error.occurred",
         error: e,
@@ -124,7 +135,11 @@ module Karafka
     #   flows do not interact with external systems and their errors are expected to bubble up
     def on_after_consume
       handle_after_consume
-    rescue => e
+    # Same containment rationale as in `#on_consume`: an error escaping this method would skip
+    # the retry below and the next successful batch would auto-mark its offsets, committing
+    # past the failed batch. The after-consume flow runs user-extensible code as well (DLQ
+    # strategies, dispatch enhancements), so it needs the same class-agnostic protection
+    rescue Exception => e
       monitor.instrument(
         "error.occurred",
         error: e,
@@ -380,7 +395,6 @@ module Karafka
     # @note Please note, that if you are seeking to a time offset, getting the offset is blocking
     def seek(offset, manual_seek = true, reset_offset: true)
       coordinator.manual_seek if manual_seek
-      self.seek_offset = nil if reset_offset
 
       message = Karafka::Messages::Seek.new(
         topic.name,
@@ -398,6 +412,12 @@ module Karafka
         reset_offset: reset_offset
       ) do
         client.seek(message)
+
+        # We reset the seek offset only after the seek actually succeeded. Resetting it before the
+        # seek would, on a raising seek (for example an unresolvable time-based offset), leave
+        # seek_offset nil so the failure-driven retry would pause without seeking back and skip the
+        # rest of the batch.
+        self.seek_offset = nil if reset_offset
       end
     end
 
@@ -445,6 +465,15 @@ module Karafka
         timeout: coordinator.pause_tracker.current_timeout,
         attempt: attempt
       )
+    end
+
+    # @param error [Exception, nil] error to check or nil when none was recorded
+    # @return [Boolean] is the error one of the process-critical ones (configurable via the
+    #   `internal.processing.critical_errors` setting)
+    def critical_error?(error)
+      return false unless error
+
+      critical_errors.any? { |type| error.is_a?(type) }
     end
   end
 end

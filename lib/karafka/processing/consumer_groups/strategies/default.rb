@@ -61,7 +61,14 @@ module Karafka
             # Ignore double markings of the same offset
             return true if (seek_offset - 1) == message.offset
             return false if revoked?
-            return revoked? unless client.mark_as_consumed(message)
+            unless client.mark_as_consumed(message)
+              # Evaluate ownership for its coordinator-revoking side effect - all marking
+              # failure causes are ownership related. The failure itself always reports false:
+              # the offset was not stored, regardless of the current ownership state
+              revoked?
+
+              return false
+            end
 
             self.seek_offset = message.offset + 1
 
@@ -81,7 +88,14 @@ module Karafka
             return true if (seek_offset - 1) == message.offset
             return false if revoked?
 
-            return revoked? unless client.mark_as_consumed!(message)
+            unless client.mark_as_consumed!(message)
+              # Evaluate ownership for its coordinator-revoking side effect - all marking
+              # failure causes are ownership related. The failure itself always reports false:
+              # the offset was not committed, regardless of the current ownership state
+              revoked?
+
+              return false
+            end
 
             self.seek_offset = message.offset + 1
 
@@ -91,17 +105,27 @@ module Karafka
           # Triggers an async offset commit
           #
           # @param async [Boolean] should we use async (default) or sync commit
-          # @return [Boolean] true if we still own the partition.
+          # @return [Boolean] true if the commit went through and we still owned the partition
+          #   at that time, false otherwise. False means the offsets were not committed - the
+          #   caller can retry (the offsets stay stored client-side) or treat the partition as
+          #   fenced.
           # @note Due to its async nature, this may not fully represent the offset state in some
           #   edge cases (like for example going beyond max.poll.interval)
+          # @note A commit with no offsets pending is a client-side no-op reported as success
+          #   without broker validation - the marking result is the fence for that case.
           def commit_offsets(async: true)
             # Do not commit if we already lost the assignment
             return false if revoked?
             return true if client.commit_offsets(async: async)
 
-            # This will once more check the librdkafka revocation status and will revoke the
-            # coordinator in case it was not revoked
+            # Evaluate ownership once more for its coordinator-revoking side effect: all
+            # commit failure causes the client reports as false are ownership related. The
+            # failed commit itself always reports false - its value must not depend on the
+            # revocation state, which may not yet be locally visible (or may indicate a
+            # retained partition under a cooperative rebalance generation bump)
             revoked?
+
+            false
           end
 
           # Triggers a synchronous offsets commit to Kafka
@@ -138,7 +162,10 @@ module Karafka
 
             # Mark job as successful
             coordinator.success!(self)
-          rescue => e
+          # Failure recording must be class-agnostic: an unrecorded non-StandardError would
+          # leave the consumption result in its default (successful) state and the after-consume
+          # flow would mark the failed batch as consumed instead of engaging the retry
+          rescue Exception => e
             coordinator.failure!(self, e)
 
             # Re-raise so reported in the consumer

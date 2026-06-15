@@ -29,8 +29,7 @@ module Karafka
           data.each do |group|
             group[:topics].each do |topic|
               pat = topic[:patterns]
-              # Ignore pattern topics because they won't exist and should not be declarative
-              # managed
+              # Ignore pattern topics because they won't exist and should not be declarative managed
               topics << topic[:name] if !pat || !pat[:active]
 
               dlq = topic[:dead_letter_queue]

@@ -6,6 +6,10 @@
 setup_karafka
 setup_web
 
+# Older version of Karafka did not set this for non-Karafka processes but this can be also used
+# by the Web UI and few other things, thus we check it.
+assert_equal 0, Karafka::Server.workers.size
+
 # This will "fake" drift of five seconds of the cluster, so cluster is in the future
 module Karafka
   module Messages

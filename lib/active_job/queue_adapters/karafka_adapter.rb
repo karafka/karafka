@@ -28,8 +28,7 @@ module ActiveJob
       Object
     end
 
-    # Karafka adapter for enqueuing jobs
-    # This is here for ease of integration with ActiveJob.
+    # Karafka adapter for enqueuing jobs This is here for ease of integration with ActiveJob.
     class KarafkaAdapter < base
       include ::Karafka::Helpers::ConfigImporter.new(
         dispatcher: %i[internal active_job dispatcher]

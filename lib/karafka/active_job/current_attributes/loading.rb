@@ -26,7 +26,7 @@ module Karafka
             end
 
             yield(job)
-
+          ensure
             resetable.each(&:reset)
           end
         end

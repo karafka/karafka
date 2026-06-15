@@ -26,6 +26,21 @@ module Karafka
         #
         # @note Please use `Kubernetes::SwarmLivenessListener` when operating in the swarm mode
         class LivenessListener < BaseListener
+          # Default time in ms after which we consider consumption hanging (5 minutes)
+          DEFAULT_CONSUMING_TTL = 5 * 60 * 1_000
+          # Default max time in ms between polls before the process is considered dead (5 minutes)
+          DEFAULT_POLLING_TTL = 5 * 60 * 1_000
+          # Multiplier applied to max.poll.interval.ms when deriving the default stability_ttl.
+          # 2x gives headroom above the slowest legitimate rebalance phase (cooperative
+          # `wait-unassign-to-complete` can approach max.poll.interval.ms).
+          STABILITY_TTL_MAX_POLL_MULTIPLIER = 2
+
+          private_constant(
+            :DEFAULT_CONSUMING_TTL,
+            :DEFAULT_POLLING_TTL,
+            :STABILITY_TTL_MAX_POLL_MULTIPLIER
+          )
+
           # @param hostname [String, nil] hostname or nil to bind on all
           # @param port [Integer] TCP port on which we want to run our HTTP status server
           # @param consuming_ttl [Integer] time in ms after which we consider consumption hanging.
@@ -33,12 +48,36 @@ module Karafka
           #   process as hanging
           # @param polling_ttl [Integer] max time in ms for polling. If polling (any) does not
           #   happen that often, process should be considered dead.
-          # @note The default TTL matches the default `max.poll.interval.ms`
+          # @param stability_ttl [Integer, nil] max time in ms a subscription group can remain in
+          #   the same tracked non-"steady" librdkafka `cgrp.join_state` (e.g. `wait-join`,
+          #   `wait-assn`, `wait-sync`) before the process is considered unhealthy. When nil
+          #   (default), it is derived lazily on first health evaluation as the maximum
+          #   `max.poll.interval.ms` across all active subscription groups, multiplied by 2,
+          #   which keeps the threshold safe relative to the user's actual poll intervals rather
+          #   than a fixed constant. Per subscription group overrides of `max.poll.interval.ms`
+          #   set via the routing DSL are respected - the largest value wins. When no subscription
+          #   groups are available (routes not drawn), the root `Karafka::App.config.kafka` value
+          #   is used instead (with librdkafka's default applied). `wait-metadata`
+          #   and `init` are
+          #   excluded from tracking and additionally clear any stale prior tracking for the
+          #   subscription group: `wait-metadata` appears in normal scenarios (auto-create waits,
+          #   unmatched pattern subscriptions, and as the group leader's post-JoinGroup state while
+          #   fetching cluster metadata to compute the partition assignment); `init` indicates a
+          #   client reset. Both states are covered by `polling_ttl` for genuine freezes.
+          #   The timer resets on every join_state transition between tracked states because any
+          #   change indicates the join protocol is still progressing; only a consumer frozen in
+          #   the same non-steady state continuously triggers the alarm. A consumer cycling
+          #   rapidly between non-steady states (e.g. wait-join -> wait-assn -> wait-join) will
+          #   not trip this check - it only catches consumers frozen in a single join state.
+          #   Requires `statistics.interval.ms` to be configured in the Kafka client settings;
+          #   without it `statistics.emitted` never fires, tracking hashes remain empty, and this
+          #   check has no effect (no misreporting).
           def initialize(
             hostname: nil,
             port: 3000,
-            consuming_ttl: 5 * 60 * 1_000,
-            polling_ttl: 5 * 60 * 1_000
+            consuming_ttl: DEFAULT_CONSUMING_TTL,
+            polling_ttl: DEFAULT_POLLING_TTL,
+            stability_ttl: nil
           )
             # If this is set to a symbol, it indicates unrecoverable error like fencing
             # While fencing can be partial (for one of the SGs), we still should consider this
@@ -47,9 +86,21 @@ module Karafka
             @unrecoverable = false
             @polling_ttl = polling_ttl
             @consuming_ttl = consuming_ttl
+            # When nil, resolved lazily via #stability_ttl on first health evaluation because
+            # the default derives from the routing subscription groups, which may not be drawn
+            # yet when the listener is constructed in karafka.rb
+            @stability_ttl = stability_ttl
             @mutex = Mutex.new
             @pollings = {}
             @consumptions = {}
+            # Maps subscription_group_id => last observed cgrp.join_state string.
+            # Used to detect state changes so the stuck timer resets on any transition.
+            # Both hashes are only populated by on_statistics_emitted, which requires
+            # statistics.interval.ms to be set. Without it they remain empty and the
+            # stability flag in evaluate_ttl_flags is always false - no misreporting.
+            @join_states = {}
+            # Maps subscription_group_id => monotonic_now when the current non-steady state began.
+            @instabilities = {}
             super(hostname: hostname, port: port)
           end
 
@@ -68,6 +119,43 @@ module Karafka
           # @param _event [Karafka::Core::Monitoring::Event]
           def on_connection_listener_fetch_loop(_event)
             mark_polling_tick
+          end
+
+          # Track when each subscription group's consumer enters or leaves a non-steady join state.
+          # A prolonged non-steady state (e.g., wait-join, wait-assn caused by a broker stuck in
+          # CompletingRebalance) is reported as unhealthy.
+          #
+          # `steady`, `init`, and `wait-metadata` all clear any stale tracking for the subscription
+          # group rather than skip the event. Clearing on `wait-metadata` matters because the
+          # state legitimately appears mid-join (leader fetching cluster metadata to compute
+          # assignment), during auto-create waits, and on unmatched pattern subscriptions - if we
+          # only `return` from these the previous non-steady timer keeps running and eventually
+          # trips a false positive. Clearing on `init` covers client resets / subscription-group
+          # removal. Genuine freezes in these states are covered by `polling_ttl`.
+          #
+          # The stuck timer resets on every transition between tracked states because any change
+          # indicates the join protocol is still progressing. Only a consumer frozen in the same
+          # non-steady state continuously for stability_ttl is flagged. A consumer cycling
+          # rapidly between non-steady states (e.g. wait-join -> wait-assn -> wait-join) will not
+          # trip this alarm - only a frozen-in-one-state consumer is caught.
+          # @param event [Karafka::Core::Monitoring::Event]
+          def on_statistics_emitted(event)
+            cgrp = event[:statistics]&.dig("cgrp")
+            return unless cgrp
+
+            sg_id = event[:subscription_group_id]
+            join_state = cgrp["join_state"]
+            return unless join_state
+
+            synchronize do
+              if join_state == "steady" || join_state == "init" || join_state == "wait-metadata"
+                @instabilities.delete(sg_id)
+                @join_states.delete(sg_id)
+              elsif @join_states[sg_id] != join_state
+                @join_states[sg_id] = join_state
+                @instabilities[sg_id] = monotonic_now
+              end
+            end
           end
 
           {
@@ -127,30 +215,95 @@ module Karafka
             clear_polling_tick
           end
 
+          # Clear instability tracking for a subscription group whose listener finished its fetch
+          # loop (dynamic downscale or shutdown). This event fires after the listener's client has
+          # already been stopped, so no further statistics can move the join_state back to steady
+          # and no late statistics callback can re-create the entry. Without this cleanup a
+          # lingering non-steady entry (e.g. a downscale mid-rebalance) would guarantee a false
+          # positive once stability_ttl elapses. Genuine shutdown freezes remain covered by
+          # polling_ttl.
+          # @param event [Karafka::Core::Monitoring::Event]
+          def on_connection_listener_after_fetch_loop(event)
+            clear_instability_tracking(event[:subscription_group])
+          end
+
           # Did we exceed any of the ttls
-          # @return [String] 204 string if ok, 500 otherwise
+          # @return [Boolean] true if all TTLs are within bounds and no unrecoverable error
+          # @note When called from inside `status_body`, reuses the cached snapshot so the
+          #   per-request HTTP response stays internally consistent. When called standalone,
+          #   takes its own snapshot.
           def healthy?
             return false if @unrecoverable
-            return false if polling_ttl_exceeded?
-            return false if consuming_ttl_exceeded?
 
-            true
+            flags = @evaluation_snapshot || evaluate_ttl_flags
+            !flags[:polling] && !flags[:consuming] && !flags[:stability]
           end
 
           private
 
-          # @return [Boolean] true if the consumer exceeded the polling ttl
-          def polling_ttl_exceeded?
+          # Single-snapshot evaluation of all three TTL flags under one lock. Used by both
+          # `healthy?` and `status_body` so the HTTP status code (derived from healthy?) and the
+          # error details in the response body are always derived from the same atomic snapshot.
+          # @return [Hash{Symbol => Boolean}] flags for polling, consuming and stability
+          def evaluate_ttl_flags
             time = monotonic_now
-
-            @pollings.values.any? { |tick| (time - tick) > @polling_ttl }
+            synchronize do
+              {
+                polling: @pollings.values.any? { |tick| (time - tick) > @polling_ttl },
+                consuming: @consumptions.values.any? { |tick| (time - tick) > @consuming_ttl },
+                stability: @instabilities.values.any? { |start| (time - start) > stability_ttl }
+              }
+            end
           end
 
-          # @return [Boolean] true if the consumer exceeded the consuming ttl
-          def consuming_ttl_exceeded?
-            time = monotonic_now
+          # @return [Integer] effective stability ttl in ms. Resolved lazily (instead of in
+          #   `#initialize`) because the default derives from the routing subscription groups,
+          #   which may not be drawn yet when the listener is constructed in karafka.rb. By the
+          #   time health is evaluated, routing is final.
+          def stability_ttl
+            @stability_ttl ||= default_stability_ttl
+          end
 
-            @consumptions.values.any? { |tick| (time - tick) > @consuming_ttl }
+          # @return [Integer] default stability_ttl derived from the configured
+          #   max.poll.interval.ms, multiplied by 2 for headroom above the slowest legitimate
+          #   rebalance phase. Uses the maximum value across all active subscription groups
+          #   (their kafka configs already have librdkafka defaults injected), so per
+          #   subscription group overrides set via the routing DSL are respected. Falls back to
+          #   the root kafka config when no subscription groups are available.
+          def default_stability_ttl
+            max_poll_interval = Karafka::App
+              .subscription_groups
+              .values
+              .flatten
+              .map { |sg| sg.kafka.fetch(:"max.poll.interval.ms") }
+              .max
+
+            max_poll_interval ||= begin
+              # DefaultsInjector#consumer mutates a kafka config hash to ensure
+              # max.poll.interval.ms is set (using the same librdkafka default Karafka injects
+              # per subscription group). We dup so we don't mutate the global config.
+              kafka_config = Karafka::App.config.kafka.dup
+              Karafka::Setup::DefaultsInjector.consumer(kafka_config)
+              kafka_config.fetch(:"max.poll.interval.ms")
+            end
+
+            max_poll_interval * STABILITY_TTL_MAX_POLL_MULTIPLIER
+          end
+
+          # Removes join_state tracking for the given subscription group. Used when its listener
+          # stops, since no further statistics events will arrive to move the state back to
+          # steady.
+          # @param subscription_group [Karafka::Routing::SubscriptionGroup, nil] subscription
+          #   group from the event payload (nil-safe for events emitted without one)
+          def clear_instability_tracking(subscription_group)
+            return unless subscription_group
+
+            sg_id = subscription_group.id
+
+            synchronize do
+              @instabilities.delete(sg_id)
+              @join_states.delete(sg_id)
+            end
           end
 
           # Wraps the logic with a mutex
@@ -194,15 +347,26 @@ module Karafka
             end
           end
 
-          # @return [Hash] response body status
+          # @return [Hash] response body status. Takes a single locked snapshot of all three TTL
+          #   flags and caches it for the duration of this call so that `super` (which calls
+          #   `healthy?` to populate the status field) and the merged `errors` hash see the same
+          #   values. Avoids the previous pattern of taking the lock six times per response, where
+          #   state could change between acquisitions and leave the status field disagreeing with
+          #   the errors hash. The base envelope (timestamp, port, process_id, ...) still comes
+          #   from `super` so any future field added to `BaseListener#status_body` is preserved.
           def status_body
+            @evaluation_snapshot = evaluate_ttl_flags
+
             super.merge!(
               errors: {
-                polling_ttl_exceeded: polling_ttl_exceeded?,
-                consumption_ttl_exceeded: consuming_ttl_exceeded?,
+                polling_ttl_exceeded: @evaluation_snapshot[:polling],
+                consumption_ttl_exceeded: @evaluation_snapshot[:consuming],
+                stability_ttl_exceeded: @evaluation_snapshot[:stability],
                 unrecoverable: @unrecoverable
               }
             )
+          ensure
+            @evaluation_snapshot = nil
           end
         end
       end

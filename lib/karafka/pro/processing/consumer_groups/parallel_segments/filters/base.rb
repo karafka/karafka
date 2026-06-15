@@ -77,8 +77,7 @@ module Karafka
               # @param message_segment_key [String, Numeric] segment key to pass to the reducer
               # @return [Integer] segment assignment of a given message
               def reduce(message_segment_key)
-                # Assign to segment 0 always in case of failures in partitioner
-                # This is a fail-safe
+                # Assign to segment 0 always in case of failures in partitioner This is a fail-safe
                 return 0 if message_segment_key == :failure
 
                 @reducer.call(message_segment_key)

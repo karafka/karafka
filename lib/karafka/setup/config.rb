@@ -314,6 +314,17 @@ module Karafka
           # option worker_job_call_wrapper [Proc, false] callable object that will be used to wrap
           #   the worker execution of a job or false if no wrapper needed
           setting :worker_job_call_wrapper, default: false
+          # option critical_errors [Array<Class>] errors that indicate that the process integrity
+          #   is compromised or that termination was explicitly requested. They are not retried
+          #   in-process when raised from the consumption flow: SystemExit means someone called
+          #   `exit` and retrying would invert that intent (and loop forever on a deterministic
+          #   raise), while NoMemoryError means the VM cannot be trusted to execute a retry.
+          #   Their failure is still recorded (so nothing gets marked, they are never dispatched
+          #   to a DLQ and the retry pause protects the partition) and a graceful shutdown is
+          #   initiated instead - redelivery after restart preserves the processing guarantees
+          #   through the process death. Can be extended with user-specific fatal error classes
+          #   that should terminate the process rather than be retried.
+          setting :critical_errors, default: [SystemExit, SignalException, NoMemoryError].freeze
 
           # Consumer-group-specific processing defaults. When share groups land, a parallel
           # `share_groups` namespace will hold their equivalents.
@@ -450,6 +461,11 @@ module Karafka
 
           # Post-setup configure all routing features that would need this
           Routing::Features::Base.post_setup_all(config)
+
+          # Subscribe the critical errors listener so process-critical errors reported anywhere
+          # in the framework escalate to a graceful shutdown. Subscribed before any other
+          # internal listener (including the Pro post-setup subscriptions) so it reacts first
+          config.monitor.subscribe(Instrumentation::CriticalErrorsListener.instance)
 
           # Runs things that need to be executed after config is defined and all the components
           # are also configured

@@ -19,8 +19,7 @@ module Karafka
       def karafka_options(new_options = {})
         return _karafka_options if new_options.empty?
 
-        # Make sure, that karafka options that someone wants to use are valid before assigning
-        # them
+        # Make sure, that karafka options that someone wants to use are valid before assigning them
         App.config.internal.active_job.job_options_contract.validate!(
           new_options,
           scope: %w[active_job]

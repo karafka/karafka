@@ -44,7 +44,23 @@ RSpec.describe_current do
       let(:permission_type) { :allow }
 
       it { expect { creation }.not_to raise_error }
-      it { expect { creation }.to change { described_class.all.size }.by(1) }
+
+      it "expect to add the acl" do
+        before_count = described_class.all.size
+
+        creation
+
+        # ACL changes propagate asynchronously in the broker - wait for visibility instead of
+        # asserting immediately after the create call returns
+        50.times do
+          break if described_class.all.size > before_count
+
+          sleep(0.1)
+        end
+
+        expect(described_class.all.size).to eq(before_count + 1)
+      end
+
       it { expect(creation.last.resource_name).to eq(resource_name) }
       it { expect(creation.last.resource_type).to eq(resource_type) }
     end
@@ -54,7 +70,23 @@ RSpec.describe_current do
       let(:permission_type) { :allow }
 
       it { expect { creation }.not_to raise_error }
-      it { expect { creation }.to change { described_class.all.size }.by(1) }
+
+      it "expect to add the acl" do
+        before_count = described_class.all.size
+
+        creation
+
+        # ACL changes propagate asynchronously in the broker - wait for visibility instead of
+        # asserting immediately after the create call returns
+        50.times do
+          break if described_class.all.size > before_count
+
+          sleep(0.1)
+        end
+
+        expect(described_class.all.size).to eq(before_count + 1)
+      end
+
       it { expect(creation.last.resource_name).to eq(resource_name) }
       it { expect(creation.last.resource_type).to eq(resource_type) }
     end
@@ -64,7 +96,23 @@ RSpec.describe_current do
       let(:permission_type) { :allow }
 
       it { expect { creation }.not_to raise_error }
-      it { expect { creation }.to change { described_class.all.size }.by(1) }
+
+      it "expect to add the acl" do
+        before_count = described_class.all.size
+
+        creation
+
+        # ACL changes propagate asynchronously in the broker - wait for visibility instead of
+        # asserting immediately after the create call returns
+        50.times do
+          break if described_class.all.size > before_count
+
+          sleep(0.1)
+        end
+
+        expect(described_class.all.size).to eq(before_count + 1)
+      end
+
       it { expect(creation.last.resource_name).to eq(resource_name) }
       it { expect(creation.last.resource_type).to eq(resource_type) }
     end
