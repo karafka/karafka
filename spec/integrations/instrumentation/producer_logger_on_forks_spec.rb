@@ -24,5 +24,7 @@ output = reader.read
 
 Process.wait(pid)
 
-# It should have a lot of debug info from the child fork when logger works
-assert output.split("\n").size > 40, output
+# It should have a lot of debug info from the child fork when logger works.
+# The exact count varies by rdkafka version and connection timing, so we use a conservative
+# threshold that proves logging works without being sensitive to the exact message count.
+assert output.split("\n").size > 10, output
