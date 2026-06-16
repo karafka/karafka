@@ -248,9 +248,9 @@ RSpec.describe_current do
         PRODUCERS.regular.produce_sync(topic: name, payload: "1")
       end
 
-      it { expect(reading.size).to eq(1) }
-      it { expect(reading.first.offset).to eq(0) }
-      it { expect(reading.first.raw_payload).to eq("1") }
+      # No message exists at or after the requested time, so nothing matches - the existing
+      # (older) messages must not be returned as if they did
+      it { expect(reading.size).to eq(0) }
     end
 
     context "when reading from far in the past" do

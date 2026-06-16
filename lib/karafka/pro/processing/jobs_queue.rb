@@ -151,7 +151,10 @@ module Karafka
             @statistics[:waiting] -= @in_waiting[group_id].size
             @in_waiting[group_id].clear
             @locks[group_id].clear
-            @async_locking = false
+            # Recompute the async-locking fast-path flag from the remaining groups rather than
+            # forcing it off: this clear is per subscription group (run on that group's recovery)
+            # and must not disable async locks still held by other groups
+            @async_locking = @locks.any? { |_group_id, locks| locks.any? }
 
             # We unlock it just in case it was blocked when clearing started
             tick(group_id)

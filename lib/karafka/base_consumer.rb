@@ -395,7 +395,6 @@ module Karafka
     # @note Please note, that if you are seeking to a time offset, getting the offset is blocking
     def seek(offset, manual_seek = true, reset_offset: true)
       coordinator.manual_seek if manual_seek
-      self.seek_offset = nil if reset_offset
 
       message = Karafka::Messages::Seek.new(
         topic.name,
@@ -413,6 +412,12 @@ module Karafka
         reset_offset: reset_offset
       ) do
         client.seek(message)
+
+        # We reset the seek offset only after the seek actually succeeded. Resetting it before the
+        # seek would, on a raising seek (for example an unresolvable time-based offset), leave
+        # seek_offset nil so the failure-driven retry would pause without seeking back and skip the
+        # rest of the batch.
+        self.seek_offset = nil if reset_offset
       end
     end
 
