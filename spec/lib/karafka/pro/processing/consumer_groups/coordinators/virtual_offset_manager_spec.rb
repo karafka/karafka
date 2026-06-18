@@ -254,6 +254,28 @@ RSpec.describe_current do
     it { expect(manager.marked).to eq([7, 8, 9, 10]) }
   end
 
+  # Same shape as above (lowest group unmarked, batch not starting at 0, so the materialized real
+  # offset falls back to min - 1 = 2) but under the :exact strategy. That fallback offset was never
+  # registered in the metadata map, so `markable` used to raise KeyError (F05).
+  context "when marking first one higher than first offset with the exact strategy" do
+    let(:offset_metadata_strategy) { :exact }
+
+    before do
+      manager.register([3, 4, 5, 6])
+      manager.register([7, 8, 9, 10])
+
+      manager.mark(OpenStruct.new(offset: 10), "10")
+    end
+
+    it { expect(manager.markable?).to be(true) }
+
+    it "does not raise and falls back to the current offset metadata" do
+      seek, metadata = manager.markable
+      expect(seek.offset).to eq(2)
+      expect(metadata).to eq("10")
+    end
+  end
+
   context "when marking higher than start on 0" do
     before do
       manager.register([0, 1, 2, 4, 5, 6])
