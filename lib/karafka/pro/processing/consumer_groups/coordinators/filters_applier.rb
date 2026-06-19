@@ -94,10 +94,18 @@ module Karafka
               :skip
             end
 
-            # @return [Integer] minimum timeout we need to pause. This is the minimum for all the
-            #   filters to satisfy all of them.
+            # @return [Integer] how long (in ms) we should pause for. This value is used only when
+            #   the resolved `action` is `:pause`, so we derive it solely from the filters that
+            #   actually want to pause and take their maximum - long enough to satisfy the longest
+            #   backoff. A coexisting filter that resolved to `:seek` reports a `0` timeout (per the
+            #   filter contract non-pausing filters should not, but the built-in throttler/delayer
+            #   do when seeking); taking the global minimum let that `0` collapse the pause to `0`,
+            #   which expires immediately and busy-spins instead of backing off (F16).
             def timeout
-              applied.filter_map(&:timeout).min || 0
+              applied
+                .select { |filter| filter.action == :pause }
+                .filter_map(&:timeout)
+                .max || 0
             end
 
             # The first message we do need to get next time we poll. We use the minimum not to jump

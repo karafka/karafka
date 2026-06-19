@@ -231,6 +231,43 @@ RSpec.describe_current do
     end
   end
 
+  context "when a pausing filter and a seeking 0-timeout filter both apply" do
+    # The resolved action is :pause (a pausing filter has the highest priority), but the seeking
+    # filter reports a 0 timeout. The combined timeout must come from the pausing filter only and
+    # must not be collapsed to 0 by the seek filter's 0 (F16).
+    let(:pausing) do
+      instance_double(
+        Karafka::Pro::Processing::ConsumerGroups::Filters::Base,
+        apply!: nil,
+        applied?: true,
+        action: :pause,
+        timeout: 5_000
+      )
+    end
+
+    let(:seeking) do
+      instance_double(
+        Karafka::Pro::Processing::ConsumerGroups::Filters::Base,
+        apply!: nil,
+        applied?: true,
+        action: :seek,
+        timeout: 0
+      )
+    end
+
+    let(:factories) { [->(*) { pausing }, ->(*) { seeking }] }
+
+    before { applier.apply!(messages) }
+
+    it "expect pause as the highest priority action" do
+      expect(applier.action).to eq(:pause)
+    end
+
+    it "expect the timeout to be the pausing filter's backoff, not collapsed to 0" do
+      expect(applier.timeout).to eq(5_000)
+    end
+  end
+
   context "when there are messages and multiple filters applied but none pauses" do
     let(:factories) do
       [
