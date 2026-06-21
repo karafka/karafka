@@ -45,9 +45,17 @@ module Karafka
         include Core::Helpers::Time
 
         # Creates new manager instance
+        #
+        # @note `@changes` is written from listener threads (`#notice`, the statistics callback) and
+        #   read/written from the Runner thread (`#touch`, `#stable?`). We intentionally do not lock
+        #   it: `#register` preloads every subscription group key, so we only ever mutate existing
+        #   entries (never insert), which avoids the "can't add a new key into hash during iteration"
+        #   crash. The remaining field-level interleavings are benign - at worst a single scaling
+        #   decision is deferred or advanced by one control-loop iteration and self-corrects on the
+        #   next statistics tick. Locking here was removed in #1851 (it caused a worse race), so we
+        #   do not reintroduce a mutex.
         def initialize
           super
-          @mutex = Mutex.new
           @changes = Hash.new do |h, k|
             h[k] = {
               state: "",
