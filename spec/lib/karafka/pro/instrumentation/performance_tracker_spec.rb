@@ -89,6 +89,63 @@ RSpec.describe_current do
     end
   end
 
+  describe "#on_rebalance_partitions_revoked" do
+    let(:times) { tracker.instance_variable_get(:@processing_times) }
+
+    def consume(topic, partition)
+      metadata = build(:messages_metadata, topic: topic, partition: partition)
+      message = build(:messages_message, metadata: metadata)
+      messages = instance_double(m_class, metadata: message.metadata, size: 1)
+      payload = { caller: instance_double(c_class, messages: messages), time: 20 }
+      tracker.on_consumer_consumed(Karafka::Core::Monitoring::Event.new(rand.to_s, payload))
+    end
+
+    def revoke(topic, *partition_ids)
+      tpl = Rdkafka::Consumer::TopicPartitionList.new
+      tpl.add_topic(topic, partition_ids)
+      tracker.on_rebalance_partitions_revoked(
+        Karafka::Core::Monitoring::Event.new(rand.to_s, { tpl: tpl })
+      )
+    end
+
+    context "when the revoked partition was the only one tracked for its topic" do
+      let(:topic) { SecureRandom.hex(6) }
+
+      before { consume(topic, 0) }
+
+      it "drops the topic entry entirely" do
+        expect(times.key?(topic)).to be(true)
+        revoke(topic, 0)
+        expect(times.key?(topic)).to be(false)
+      end
+    end
+
+    context "when the topic still has other tracked partitions" do
+      let(:topic) { SecureRandom.hex(6) }
+
+      before do
+        consume(topic, 0)
+        consume(topic, 1)
+      end
+
+      it "evicts only the revoked partition and keeps the topic" do
+        revoke(topic, 0)
+        expect(times.key?(topic)).to be(true)
+        expect(times[topic].key?(0)).to be(false)
+        expect(times[topic].key?(1)).to be(true)
+      end
+    end
+
+    context "when the revoked topic was never tracked" do
+      let(:topic) { SecureRandom.hex(6) }
+
+      it "does not auto-vivify an entry for it" do
+        revoke(topic, 0)
+        expect(times.key?(topic)).to be(false)
+      end
+    end
+  end
+
   describe "events mapping" do
     it { expect(NotificationsChecker.valid?(tracker)).to be(true) }
   end

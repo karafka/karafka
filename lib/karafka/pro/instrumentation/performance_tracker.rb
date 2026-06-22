@@ -82,6 +82,24 @@ module Karafka
           samples.shift
         end
 
+        # @private
+        # @param event [Karafka::Core::Monitoring::Event] rebalance revoked event details
+        # Evicts the processing time samples of revoked partitions so the tracker does not retain
+        # them for the whole process lifetime. Without this every (topic, partition) ever consumed
+        # keeps its samples array forever - unbounded under regex pattern subscriptions that keep
+        # discovering new topic names. Mirrors the offset metadata fetcher, which also clears on
+        # revoke.
+        def on_rebalance_partitions_revoked(event)
+          event[:tpl].to_h.each do |topic, partitions|
+            # Do not auto-vivify a branch for a topic we have never tracked
+            next unless @processing_times.key?(topic)
+
+            topic_times = @processing_times[topic]
+            partitions.each { |partition| topic_times.delete(partition.partition) }
+            @processing_times.delete(topic) if topic_times.empty?
+          end
+        end
+
         private
 
         # Computers the requested percentile out of provided values

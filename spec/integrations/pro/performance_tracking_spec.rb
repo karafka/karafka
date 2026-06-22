@@ -66,12 +66,19 @@ TOPICS.each do |topic_name|
 end
 
 start_karafka_and_wait_until do
-  DT[0].size >= 50
+  next false unless DT[0].size >= 50
+
+  # Capture p95 while the partitions are still assigned. The samples are per-partition runtime
+  # metrics that are evicted when a partition is revoked (including on shutdown), so they must be
+  # read during processing rather than after the consumer has stopped.
+  tracker = Karafka::Pro::Instrumentation::PerformanceTracker.instance
+  DT[:p95] = TOPICS.map { |topic_name| [topic_name, tracker.processing_time_p95(topic_name, 0)] }.to_h
+
+  true
 end
 
 TOPICS.each do |topic_name|
-  tracker = Karafka::Pro::Instrumentation::PerformanceTracker.instance
-  p95 = tracker.processing_time_p95(topic_name, 0)
+  p95 = DT[:p95].fetch(topic_name)
 
   message_speed = MESSAGE_SPEED.fetch(topic_name)
 
