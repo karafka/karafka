@@ -32,10 +32,10 @@ Tracker.run(messages_count: MAX_MESSAGES) do
   $start = false
   $stop = false
 
-  Karafka::App.config.internal.status.reset!
+  reset_karafka_state!
   Karafka::Server.run
   $stop - $start
 end
 
-# Time taken: 1.1387533107539638
-# Messages per second: 87815.33195612878
+# Time taken: 0.6313714240677655
+# Messages per second: 158385.3753717985
