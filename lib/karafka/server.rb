@@ -168,6 +168,23 @@ module Karafka
         # otherwise we would overwrite the shutdown process of the process that started Karafka
         return unless process.supervised?
 
+        # The `Kernel.exit!` below terminates the process immediately and does NOT run the `ensure`
+        # block, so the producer close there never executes. We flush/close the producer here first
+        # (time-boxed, in case a broker is unreachable) so async-buffered messages - DLQ
+        # `produce_async` copies and user `produce_async` - are not discarded while their source
+        # offsets have already been committed by the listener shutdown above.
+        Thread.new do
+          Karafka::App.producer.close
+          WaterDrop::ConnectionPool.close
+        rescue => e
+          Karafka.monitor.instrument(
+            "error.occurred",
+            caller: self,
+            error: e,
+            type: "app.forceful_stopping.error"
+          )
+        end.join(forceful_shutdown_wait / 1_000.0)
+
         # exit! is not within the instrumentation as it would not trigger due to exit
         Kernel.exit!(forceful_exit_code)
       ensure
