@@ -152,6 +152,18 @@ RSpec.describe_current do
       listener.on_connection_listener_fetch_loop(fetch_loop_event("sg_b"))
       expect(listener.send(:status_body)[:status]).to eq("healthy")
     end
+
+    it "derives status and the ready field from a single snapshot (they always agree)" do
+      listener.on_connection_listener_fetch_loop(fetch_loop_event("sg_a"))
+      listener.on_connection_listener_fetch_loop(fetch_loop_event("sg_b"))
+      body = listener.send(:status_body)
+      expect(body[:ready]).to be(body[:status] == "healthy")
+    end
+
+    it "does not leak the per-request health snapshot after the call" do
+      listener.send(:status_body)
+      expect(listener.instance_variable_get(:@health_snapshot)).to be_nil
+    end
   end
 
   describe "thread safety (no-deadlock smoke check)" do

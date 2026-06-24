@@ -54,6 +54,9 @@ module Karafka
             # false -> true; readiness then also depends on the process not being `done?` (see
             # #healthy?), which is what lets the probe report not-ready again during shutdown.
             @all_groups_polled = false
+            # Holds a single healthy? snapshot for the duration of a #status_body call so the HTTP
+            # status code and the body's `ready` field agree; nil at all other times.
+            @health_snapshot = nil
             super
           end
 
@@ -78,7 +81,8 @@ module Karafka
 
             synchronize do
               @polled_groups << group_id
-              @all_groups_polled = true if all_active_groups_polled?
+              # Once latched, skip recomputing the expected set on every subsequent poll.
+              @all_groups_polled ||= all_active_groups_polled?
             end
           end
 
@@ -86,13 +90,22 @@ module Karafka
           #   and the process is not shutting down or quieting. The first condition latches; the
           #   second (`Karafka::App.done?`) is re-checked on each call, so the probe reports
           #   not-ready as soon as the process starts draining.
+          # @note When called from inside `#status_body`, reuses the cached value taken there so the
+          #   HTTP status code and the `ready` field in the body come from the same snapshot.
           def healthy?
+            return @health_snapshot unless @health_snapshot.nil?
+
+            evaluate_healthy
+          end
+
+          private
+
+          # @return [Boolean] the actual readiness evaluation (not the cached snapshot).
+          def evaluate_healthy
             return false if Karafka::App.done?
 
             synchronize { @all_groups_polled }
           end
-
-          private
 
           # @return [Boolean] whether every active subscription group has polled at least once.
           # @note Caller must hold `@mutex` (reads `@polled_groups`).
@@ -129,14 +142,20 @@ module Karafka
 
           # @return [Hash] response body status, extending the base envelope with readiness details
           #   so an operator inspecting the endpoint can see how many groups have polled.
+          # @note Takes a single readiness snapshot and caches it for the duration of the call so
+          #   the base envelope's `status` (and the HTTP status code derived from it) and the
+          #   merged `ready` field are computed from the same value.
           def status_body
+            @health_snapshot = evaluate_healthy
             polled, expected = synchronize { [@polled_groups.size, expected_group_ids&.size] }
 
             super.merge!(
-              ready: healthy?,
+              ready: @health_snapshot,
               polled_subscription_groups: polled,
               expected_subscription_groups: expected
             )
+          ensure
+            @health_snapshot = nil
           end
         end
       end
