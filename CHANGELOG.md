@@ -50,6 +50,7 @@
 - [Maintenance] Use namespaced topic naming format in all integration specs for consistent traceability.
 - [Maintenance] Add `bin/tests_topics_hashes` script for looking up spec files by their topic name hash prefix.
 - [Maintenance] Fix flaky `pro/admin/recovery/coordinator_for_spec.rb` by warming up the `__consumer_offsets` internal topic with a produce + `seek_consumer_group` and retrying the first `Recovery.coordinator_for` call with exponential backoff on `MetadataError`.
+- [Refactor] Remove the unused `@mutex` from `Pro::Connection::Manager`. It was left dead after #1851 replaced lock-based `@changes` eviction with key preloading; the cross-thread `@changes` access (statistics callback on listener threads vs. `touch`/`stable?` on the Runner thread) is intentionally lock-free - only existing keys are mutated, so there is no insert-during-iteration, and the remaining field-level interleavings are benign and self-correcting. The threading model is now documented so the absence of a lock is explicit (Pro).
 - [Change] Require `karafka-rdkafka` `>=` `0.27.1` to pick up the fix for `poll_batch` and `poll_batch_nb` raising `RdkafkaError` with only the integer error code, which discarded topic/partition/offset context from `e.details` and caused `partition_eof` handling to call `@buffer.eof(nil, nil)`, resulting in a `TopicNotFoundError` crash.
 
 ## 2.5.9 (2026-03-30)
