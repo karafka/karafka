@@ -115,6 +115,11 @@ start_karafka_and_wait_until do
     # Create second dynamically matched topic
     topic2 = "#{pattern_base}-second-topic"
 
+    # Explicitly create the topic to avoid auto-creation race that triggers
+    # TOPIC_ALREADY_EXISTS warnings when multiple produce requests hit Kafka
+    # simultaneously before the topic exists.
+    Karafka::Admin.create_topic(topic2, 1, 1)
+
     # Create and send messages to second topic
     messages2 = topic2_group0_keys.map do |key|
       { topic: topic2, key: key, payload: "topic2-#{key}" }
