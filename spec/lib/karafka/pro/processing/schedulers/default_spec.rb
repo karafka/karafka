@@ -33,6 +33,11 @@ RSpec.describe_current do
 
   let(:queue) { [] }
   let(:jobs_array) { [] }
+  let(:group_id) { "group-#{rand}" }
+  # Samples are scoped per subscription group; the scheduler reads the id off `job.group_id`
+  let(:executor) do
+    instance_double(Karafka::Processing::ConsumerGroups::Executor, group_id: group_id)
+  end
 
   describe "#schedule_consumption" do
     subject(:schedule) { scheduler.on_schedule_consumption(jobs_array) }
@@ -46,7 +51,7 @@ RSpec.describe_current do
       before do
         4.times do |i|
           jobs_array << Karafka::Processing::ConsumerGroups::Jobs::Consume.new(
-            nil,
+            executor,
             [public_send("message#{i}")]
           )
         end
@@ -71,7 +76,13 @@ RSpec.describe_current do
         end
 
         let("payload#{i}") do
-          { caller: OpenStruct.new(messages: public_send("messages#{i}")), time: times[i] }
+          {
+            caller: OpenStruct.new(
+              messages: public_send("messages#{i}"),
+              topic: OpenStruct.new(subscription_group: OpenStruct.new(id: group_id))
+            ),
+            time: times[i]
+          }
         end
 
         let("event#{i}") do
@@ -82,7 +93,7 @@ RSpec.describe_current do
       before do
         4.times do |i|
           jobs_array << Karafka::Processing::ConsumerGroups::Jobs::Consume.new(
-            nil,
+            executor,
             [public_send("message#{i}")]
           )
           tracker.on_consumer_consumed(public_send("event#{i}"))
@@ -106,7 +117,13 @@ RSpec.describe_current do
         end
 
         let("payload#{i}") do
-          { caller: OpenStruct.new(messages: public_send("messages#{i}")), time: times[i] }
+          {
+            caller: OpenStruct.new(
+              messages: public_send("messages#{i}"),
+              topic: OpenStruct.new(subscription_group: OpenStruct.new(id: group_id))
+            ),
+            time: times[i]
+          }
         end
 
         let("event#{i}") do
@@ -117,7 +134,7 @@ RSpec.describe_current do
       before do
         4.times do |i|
           jobs_array << Karafka::Processing::ConsumerGroups::Jobs::Consume.new(
-            nil,
+            executor,
             [public_send("message#{i}")]
           )
           tracker.on_consumer_consumed(public_send("event#{i}"))
