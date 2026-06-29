@@ -43,6 +43,10 @@ MESSAGE_SPEED = TOPICS.map.with_index { |topic, index| [topic, index] }.to_h
 
 class Consumer < Karafka::BaseConsumer
   def consume
+    # Samples are scoped by subscription group id, so we capture the one backing this topic to
+    # read the matching p95 later
+    DT[:sg_ids][messages.metadata.topic] = topic.subscription_group.id
+
     # We add 10ms per message to make sure that the metrics tracking track it as expected
     messages.each do
       DT[0] << true
@@ -61,6 +65,8 @@ draw_routes do
   end
 end
 
+DT[:sg_ids] = {}
+
 TOPICS.each do |topic_name|
   produce_many(topic_name, DT.uuids(10))
 end
@@ -72,7 +78,9 @@ start_karafka_and_wait_until do
   # metrics that are evicted when a partition is revoked (including on shutdown), so they must be
   # read during processing rather than after the consumer has stopped.
   tracker = Karafka::Pro::Instrumentation::PerformanceTracker.instance
-  DT[:p95] = TOPICS.map { |topic_name| [topic_name, tracker.processing_time_p95(topic_name, 0)] }.to_h
+  DT[:p95] = TOPICS.map do |topic_name|
+    [topic_name, tracker.processing_time_p95(DT[:sg_ids].fetch(topic_name), topic_name, 0)]
+  end.to_h
 
   true
 end

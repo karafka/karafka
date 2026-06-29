@@ -40,6 +40,7 @@ setup_karafka
 
 class Consumer < Karafka::BaseConsumer
   def consume
+    DT[:sg_id] = topic.subscription_group.id
     DT[:consumed] << true
   end
 end
@@ -52,12 +53,21 @@ def tracked_times
   Karafka::Pro::Instrumentation::PerformanceTracker.instance.instance_variable_get(:@processing_times)
 end
 
+# Reads the tracked entry without auto-vivifying the default-proc hashes
+def tracked?(group_id, topic)
+  group = tracked_times.fetch(group_id, nil)
+  return false unless group
+
+  topic_times = group.fetch(topic, nil)
+  topic_times ? !topic_times.empty? : false
+end
+
 start_karafka_and_wait_until do
   next false if DT[:consumed].empty?
 
   # Sanity: the tracker recorded samples for our partition during consumption (without auto-
   # vivifying anything if it has not).
-  DT[:populated] = tracked_times.key?(DT.topic) && !tracked_times[DT.topic].empty?
+  DT[:populated] = tracked?(DT[:sg_id], DT.topic)
 
   true
 end
@@ -69,6 +79,6 @@ assert(DT[:populated], "performance tracker never recorded the consumed partitio
 # After the partition was revoked (on shutdown), the tracker must have dropped its entry. Without
 # the fix it retains it for the whole process lifetime.
 assert(
-  !tracked_times.key?(DT.topic),
+  !tracked?(DT[:sg_id], DT.topic),
   "performance tracker did not evict the revoked partition: #{tracked_times.keys}"
 )

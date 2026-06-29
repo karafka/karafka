@@ -109,7 +109,8 @@ module Karafka
               messages = job.messages
               message = messages.first
 
-              perf_tracker.processing_time_p95(message.topic, message.partition) * messages.size
+              perf_tracker.processing_time_p95(job.group_id, message.topic, message.partition) *
+                messages.size
             else
               # LJF will set first the most expensive, but we want to run the zero cost jobs
               # related to the lifecycle always first. That is why we "emulate" that they
