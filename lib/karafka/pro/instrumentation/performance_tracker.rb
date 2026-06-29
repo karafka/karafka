@@ -82,7 +82,6 @@ module Karafka
           samples.shift
         end
 
-        # @private
         # @param event [Karafka::Core::Monitoring::Event] rebalance revoked event details
         # Evicts the processing time samples of revoked partitions so the tracker does not retain
         # them for the whole process lifetime. Without this every (topic, partition) ever consumed
