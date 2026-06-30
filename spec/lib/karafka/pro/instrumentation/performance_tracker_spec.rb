@@ -127,19 +127,10 @@ RSpec.describe_current do
 
   describe "#on_rebalance_partitions_revoked" do
     let(:group_id) { SecureRandom.hex(6) }
-    let(:times) { tracker.instance_variable_get(:@processing_times) }
 
-    # Reads the tracked entry without auto-vivifying the default-proc hashes
-    def tracked?(group_id, topic, partition = :__any__)
-      group = times.fetch(group_id, nil)
-      return false unless group
-
-      topic_times = group.fetch(topic, nil)
-      return false unless topic_times
-
-      (partition == :__any__) ? true : topic_times.key?(partition)
-    end
-
+    # Records a single sample of cost 20 for the given group/topic/partition. With one sample the
+    # public p95 reports that value, so it doubles as a "tracked?" probe: 20 when tracked, 0 once
+    # evicted (or never tracked).
     def consume(group_id, topic, partition)
       metadata = build(:messages_metadata, topic: topic, partition: partition)
       message = build(:messages_message, metadata: metadata)
@@ -166,10 +157,10 @@ RSpec.describe_current do
 
       before { consume(group_id, topic, 0) }
 
-      it "drops the topic entry entirely" do
-        expect(tracked?(group_id, topic)).to be(true)
+      it "drops the recorded samples" do
+        expect(tracker.processing_time_p95(group_id, topic, 0)).to eq(20)
         revoke(group_id, topic, 0)
-        expect(tracked?(group_id, topic)).to be(false)
+        expect(tracker.processing_time_p95(group_id, topic, 0)).to eq(0)
       end
     end
 
@@ -181,20 +172,22 @@ RSpec.describe_current do
         consume(group_id, topic, 1)
       end
 
-      it "evicts only the revoked partition and keeps the topic" do
+      it "evicts only the revoked partition and keeps the rest" do
         revoke(group_id, topic, 0)
-        expect(tracked?(group_id, topic)).to be(true)
-        expect(tracked?(group_id, topic, 0)).to be(false)
-        expect(tracked?(group_id, topic, 1)).to be(true)
+        expect(tracker.processing_time_p95(group_id, topic, 0)).to eq(0)
+        expect(tracker.processing_time_p95(group_id, topic, 1)).to eq(20)
       end
     end
 
     context "when the revoked group was never tracked" do
+      let(:other_group_id) { SecureRandom.hex(6) }
       let(:topic) { SecureRandom.hex(6) }
 
-      it "does not auto-vivify an entry for it" do
-        revoke(group_id, topic, 0)
-        expect(times.key?(group_id)).to be(false)
+      before { consume(group_id, topic, 0) }
+
+      it "is a no-op that leaves tracked groups intact" do
+        expect { revoke(other_group_id, topic, 0) }.not_to raise_error
+        expect(tracker.processing_time_p95(group_id, topic, 0)).to eq(20)
       end
     end
 
@@ -209,8 +202,8 @@ RSpec.describe_current do
 
       it "evicts only the revoked group and leaves the other group untouched" do
         revoke(group_id, topic, 0)
-        expect(tracked?(group_id, topic, 0)).to be(false)
-        expect(tracked?(other_group_id, topic, 0)).to be(true)
+        expect(tracker.processing_time_p95(group_id, topic, 0)).to eq(0)
+        expect(tracker.processing_time_p95(other_group_id, topic, 0)).to eq(20)
       end
     end
   end
