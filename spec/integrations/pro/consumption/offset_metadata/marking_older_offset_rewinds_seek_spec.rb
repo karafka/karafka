@@ -28,60 +28,54 @@
 # License: https://karafka.io/docs/Pro-License-Comm/
 # Contact: contact@karafka.io
 
-# Manual seek per user request should super-seed the automatic LRJ movement.
-# Filter that would require seek, should use the user requested offset over its own
+# Pro-strategy counterpart of the OSS `marking_older_offset_rewinds_seek` spec. The
+# `manual_offset_management` feature routes this topic through the Pro strategy, so this guards the
+# Pro `Strategies::Default#mark_as_consumed!` guard (which is a separate copy of the same logic).
+#
+# Marking an offset older than the one already marked is supported and intentional (#2432 - "allow
+# marking older offsets to support advanced rewind capabilities"): it rewinds the in-memory seek
+# offset, so the error-triggered seek-back reprocesses from the older offset instead of only ever
+# moving forward. Only re-marking the exact current offset is ignored (to protect stored metadata).
 
 setup_karafka(allow_errors: true) do |config|
   config.max_messages = 10
-  config.kafka[:"max.poll.interval.ms"] = 10_000
-  config.kafka[:"session.timeout.ms"] = 10_000
 end
 
 class Consumer < Karafka::BaseConsumer
   def consume
-    DT[0] << messages.first.offset
+    messages.each { |message| DT[:offsets] << message.offset }
 
-    seek(0)
-  end
-end
+    # Rewind only once; after the retry we let processing settle
+    return if DT.key?(:rewound)
 
-class Filter < Karafka::Pro::Processing::ConsumerGroups::Filters::Base
-  def apply!(messages)
-    @applied = true
+    mark_as_consumed!(messages.last)
 
-    messages
-  end
+    # Mark an offset older than the one we just marked - this must rewind the seek offset
+    older = messages.find { |message| message.offset == 4 }
+    mark_as_consumed!(older)
 
-  def action
-    :seek
-  end
+    DT[:rewound] = true
 
-  def applied?
-    true
-  end
-
-  def timeout
-    0
-  end
-
-  def cursor
-    raise
+    # Forces a pause and a seek back to the (now rewound) seek offset
+    raise StandardError
   end
 end
 
 draw_routes do
-  topic DT.topics[0] do
+  topic DT.topic do
     consumer Consumer
-    long_running_job true
-    manual_offset_management true
-    filter(->(*) { Filter.new })
+    manual_offset_management(true)
   end
 end
 
-produce_many(DT.topics[0], DT.uuids(10))
+produce_many(DT.topic, DT.uuids(10))
 
 start_karafka_and_wait_until do
-  DT[0].size >= 10
+  DT[:offsets].size >= 15
 end
 
-assert_equal [0], DT[0].uniq
+# First pass processed the whole batch
+assert_equal((0..9).to_a, DT[:offsets].first(10))
+
+# Marking offset 4 rewound the seek offset to 5, so the error retry reprocessed 5..9
+assert_equal((5..9).to_a, DT[:offsets][10, 5])
