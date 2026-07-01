@@ -4,7 +4,11 @@
 # Kafka can sometimes ship few messages in first fetch and this makes things complicated to test
 # parallel operations on VPs with reproducible env. This filter ensures we wait until we get all
 # that we needed
-class VpStabilizer < Karafka::Pro::Processing::ConsumerGroups::Filters::Base
+#
+# @note This filter is loaded by `spec_helper` before `Karafka::Pro` is required, so it cannot
+#   inherit `Filters::Base`. It therefore defines the `#pause?` / `#seek?` / `#skip?` predicates
+#   (that the applier resolves actions through) inline instead of getting them from the base.
+class VpStabilizer
   class << self
     # Builds the stabilizer
     def call(*)
@@ -48,6 +52,21 @@ class VpStabilizer < Karafka::Pro::Processing::ConsumerGroups::Filters::Base
   # @return [Symbol]
   def action
     applied? ? :seek : :skip
+  end
+
+  # @return [Boolean]
+  def pause?
+    action == :pause
+  end
+
+  # @return [Boolean]
+  def seek?
+    action == :seek
+  end
+
+  # @return [Boolean]
+  def skip?
+    action == :skip
   end
 
   # @return [Boolean]
