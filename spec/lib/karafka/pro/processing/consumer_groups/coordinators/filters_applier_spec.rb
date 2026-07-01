@@ -231,29 +231,27 @@ RSpec.describe_current do
     end
   end
 
+  # Builds a filter double resolving to the given action. The applier depends on the `#pause?` /
+  # `#seek?` predicates (not the raw `#action` symbol), so we derive them here to keep the doubles
+  # in sync with a single action value.
+  def filter_double(action:, timeout:)
+    instance_double(
+      Karafka::Pro::Processing::ConsumerGroups::Filters::Base,
+      apply!: nil,
+      applied?: true,
+      timeout: timeout,
+      skip?: action == :skip,
+      pause?: action == :pause,
+      seek?: action == :seek
+    )
+  end
+
   context "when a pausing filter and a seeking 0-timeout filter both apply" do
     # The resolved action is :pause (a pausing filter has the highest priority), but the seeking
     # filter reports a 0 timeout. The combined timeout must come from the pausing filter only and
     # must not be collapsed to 0 by the seek filter's 0.
-    let(:pausing) do
-      instance_double(
-        Karafka::Pro::Processing::ConsumerGroups::Filters::Base,
-        apply!: nil,
-        applied?: true,
-        action: :pause,
-        timeout: 5_000
-      )
-    end
-
-    let(:seeking) do
-      instance_double(
-        Karafka::Pro::Processing::ConsumerGroups::Filters::Base,
-        apply!: nil,
-        applied?: true,
-        action: :seek,
-        timeout: 0
-      )
-    end
+    let(:pausing) { filter_double(action: :pause, timeout: 5_000) }
+    let(:seeking) { filter_double(action: :seek, timeout: 0) }
 
     let(:factories) { [->(*) { pausing }, ->(*) { seeking }] }
 
@@ -271,35 +269,9 @@ RSpec.describe_current do
   context "when several pausing filters and a seeking 0-timeout filter all apply" do
     # We pause for the shortest pausing backoff (the minimum), re-poll and re-apply, so the longer
     # filters pause again on the next cycle. The seek filter's 0 timeout must be ignored entirely.
-    let(:short_pause) do
-      instance_double(
-        Karafka::Pro::Processing::ConsumerGroups::Filters::Base,
-        apply!: nil,
-        applied?: true,
-        action: :pause,
-        timeout: 2_000
-      )
-    end
-
-    let(:long_pause) do
-      instance_double(
-        Karafka::Pro::Processing::ConsumerGroups::Filters::Base,
-        apply!: nil,
-        applied?: true,
-        action: :pause,
-        timeout: 5_000
-      )
-    end
-
-    let(:seeking) do
-      instance_double(
-        Karafka::Pro::Processing::ConsumerGroups::Filters::Base,
-        apply!: nil,
-        applied?: true,
-        action: :seek,
-        timeout: 0
-      )
-    end
+    let(:short_pause) { filter_double(action: :pause, timeout: 2_000) }
+    let(:long_pause) { filter_double(action: :pause, timeout: 5_000) }
+    let(:seeking) { filter_double(action: :seek, timeout: 0) }
 
     let(:factories) { [->(*) { short_pause }, ->(*) { long_pause }, ->(*) { seeking }] }
 

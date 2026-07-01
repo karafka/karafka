@@ -43,6 +43,10 @@ module Karafka
           # This means that this is the API we expose as a single filter, allowing us to control
           # the filtering via many filters easily.
           class FiltersApplier
+            # Provides `#skip?`, `#pause?` and `#seek?` predicates built on top of `#action`, the
+            # same API individual filters expose
+            include Filters::Actions
+
             # @return [Array] registered filters array. Useful if we want to inject internal context
             #   aware filters.
             attr_reader :filters
@@ -79,17 +83,18 @@ module Karafka
               !applied.empty?
             end
 
-            # @return [Symbol] consumer post-filtering action that should be taken
+            # @return [Symbol] consumer post-filtering action that should be taken. One of
+            #   {Filters::Actions::ALL}.
             def action
               return :skip unless applied?
 
               # The highest priority is on a potential backoff from any of the filters because it is
               # the less risky (delay and continue later)
-              return :pause if applied.any? { |filter| filter.action == :pause }
+              return :pause if applied.any?(&:pause?)
 
               # If none of the filters wanted to pause, we can check for any that would want to seek
               # and if there is any, we can go with this strategy
-              return :seek if applied.any? { |filter| filter.action == :seek }
+              return :seek if applied.any?(&:seek?)
 
               :skip
             end
@@ -103,7 +108,7 @@ module Karafka
             #   `0`, which expires immediately and busy-spins instead of backing off.
             def timeout
               applied
-                .select { |filter| filter.action == :pause }
+                .select(&:pause?)
                 .filter_map(&:timeout)
                 .min || 0
             end
