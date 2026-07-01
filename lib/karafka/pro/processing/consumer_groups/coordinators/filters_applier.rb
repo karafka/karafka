@@ -43,6 +43,10 @@ module Karafka
           # This means that this is the API we expose as a single filter, allowing us to control
           # the filtering via many filters easily.
           class FiltersApplier
+            # Provides `#skip?`, `#pause?` and `#seek?` predicates built on top of `#action`, the
+            # same API individual filters expose
+            include Filters::Actions
+
             # @return [Array] registered filters array. Useful if we want to inject internal context
             #   aware filters.
             attr_reader :filters
@@ -79,25 +83,34 @@ module Karafka
               !applied.empty?
             end
 
-            # @return [Symbol] consumer post-filtering action that should be taken
+            # @return [Symbol] consumer post-filtering action that should be taken. One of
+            #   {Filters::Actions::ALL}.
             def action
-              return :skip unless applied?
+              return Filters::Actions.skip unless applied?
 
               # The highest priority is on a potential backoff from any of the filters because it is
               # the less risky (delay and continue later)
-              return :pause if applied.any? { |filter| filter.action == :pause }
+              return Filters::Actions.pause if applied.any?(&:pause?)
 
               # If none of the filters wanted to pause, we can check for any that would want to seek
               # and if there is any, we can go with this strategy
-              return :seek if applied.any? { |filter| filter.action == :seek }
+              return Filters::Actions.seek if applied.any?(&:seek?)
 
-              :skip
+              Filters::Actions.skip
             end
 
             # @return [Integer] minimum timeout we need to pause. This is the minimum for all the
-            #   filters to satisfy all of them.
+            #   pausing filters to satisfy all of them: we pause for the shortest requested backoff,
+            #   re-poll and re-apply, and any filter that still needs more time pauses again.
+            #   We consider only filters that actually resolved to `:pause`. Per the filter contract
+            #   non-pausing filters should report a `nil` timeout, but the built-in throttler/delayer
+            #   report `0` when seeking; including such a filter let that `0` collapse the pause to
+            #   `0`, which expires immediately and busy-spins instead of backing off.
             def timeout
-              applied.filter_map(&:timeout).min || 0
+              applied
+                .select(&:pause?)
+                .filter_map(&:timeout)
+                .min || 0
             end
 
             # The first message we do need to get next time we poll. We use the minimum not to jump
