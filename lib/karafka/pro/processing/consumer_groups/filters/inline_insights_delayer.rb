@@ -89,7 +89,7 @@ module Karafka
 
             # Pause when we had to back-off or skip if delay is not needed
             def action
-              applied? ? :pause : :skip
+              applied? ? Actions.pause : Actions.skip
             end
           end
         end

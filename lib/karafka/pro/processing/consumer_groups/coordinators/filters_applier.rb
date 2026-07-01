@@ -86,17 +86,17 @@ module Karafka
             # @return [Symbol] consumer post-filtering action that should be taken. One of
             #   {Filters::Actions::ALL}.
             def action
-              return :skip unless applied?
+              return Filters::Actions.skip unless applied?
 
               # The highest priority is on a potential backoff from any of the filters because it is
               # the less risky (delay and continue later)
-              return :pause if applied.any?(&:pause?)
+              return Filters::Actions.pause if applied.any?(&:pause?)
 
               # If none of the filters wanted to pause, we can check for any that would want to seek
               # and if there is any, we can go with this strategy
-              return :seek if applied.any?(&:seek?)
+              return Filters::Actions.seek if applied.any?(&:seek?)
 
-              :skip
+              Filters::Actions.skip
             end
 
             # @return [Integer] minimum timeout we need to pause. This is the minimum for all the

@@ -42,9 +42,29 @@ RSpec.describe_current do
     end
   end
 
+  describe "action values" do
+    it "exposes :skip via .skip" do
+      expect(described_class.skip).to eq(:skip)
+    end
+
+    it "exposes :pause via .pause" do
+      expect(described_class.pause).to eq(:pause)
+    end
+
+    it "exposes :seek via .seek" do
+      expect(described_class.seek).to eq(:seek)
+    end
+  end
+
   describe "ALL" do
     it "lists every supported action" do
       expect(described_class::ALL).to eq(%i[skip pause seek])
+    end
+
+    it "is built from the action value methods" do
+      expect(described_class::ALL).to eq(
+        [described_class.skip, described_class.pause, described_class.seek]
+      )
     end
 
     it "is frozen" do

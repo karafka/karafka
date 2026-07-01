@@ -33,27 +33,48 @@ module Karafka
     module Processing
       module ConsumerGroups
         module Filters
-          # Single source of truth for the post-filtering actions plus the predicate helpers built
-          # on top of `#action`. Mixed into both individual filters (`Filters::Base`) and the
-          # `Coordinators::FiltersApplier` that aggregates them, so both expose the same predicate
-          # API instead of comparing the `#action` symbol directly.
+          # Single source of truth for the post-filtering actions. Exposes each action as a method
+          # (so filters and internal code can return `Actions.pause` instead of the raw `:pause`
+          # symbol), the full `ALL` list, and the `#skip?` / `#pause?` / `#seek?` predicate helpers
+          # built on top of `#action`. The predicates are mixed into both individual filters
+          # (`Filters::Base`) and the aggregating `Coordinators::FiltersApplier`, so both expose the
+          # same API instead of comparing the `#action` symbol directly. The returned values are the
+          # plain symbols, so filters that still return `:skip`/`:pause`/`:seek` directly keep
+          # working.
           module Actions
+            class << self
+              # @return [Symbol] the filter did not alter the consumption flow
+              def skip
+                :skip
+              end
+
+              # @return [Symbol] back off the partition and continue later
+              def pause
+                :pause
+              end
+
+              # @return [Symbol] move the partition offset without pausing
+              def seek
+                :seek
+              end
+            end
+
             # All the actions a filter's `#action` (or the aggregated applier `#action`) can return
-            ALL = %i[skip pause seek].freeze
+            ALL = [skip, pause, seek].freeze
 
             # @return [Boolean] should we skip without pausing or seeking
             def skip?
-              action == :skip
+              action == Actions.skip
             end
 
             # @return [Boolean] should we pause the partition
             def pause?
-              action == :pause
+              action == Actions.pause
             end
 
             # @return [Boolean] should we seek the partition
             def seek?
-              action == :seek
+              action == Actions.seek
             end
           end
         end

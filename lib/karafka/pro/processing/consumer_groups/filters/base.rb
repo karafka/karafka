@@ -63,9 +63,9 @@ module Karafka
             end
 
             # @return [Symbol] filter post-execution action on consumer. One of {Actions::ALL}
-            #   (`:skip`, `:pause` or `:seek`).
+            #   (`Actions.skip`, `Actions.pause` or `Actions.seek`).
             def action
-              :skip
+              Actions.skip
             end
 
             # @return [Boolean] did this filter change messages in any way
