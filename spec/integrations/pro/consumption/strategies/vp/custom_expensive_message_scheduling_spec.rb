@@ -96,7 +96,9 @@ class ExpensiveFirstScheduler < Karafka::Pro::Processing::Schedulers::Base
       message = messages.first
 
       # Estimate processing cost based on historical data
-      cost = perf_tracker.processing_time_p95(message.topic, message.partition) * messages.size
+      cost = perf_tracker.processing_time_p95(
+        job.group_id, message.topic, message.partition
+      ) * messages.size
 
       [job, cost]
     end
