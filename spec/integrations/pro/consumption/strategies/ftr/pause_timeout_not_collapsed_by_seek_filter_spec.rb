@@ -28,11 +28,12 @@
 # License: https://karafka.io/docs/Pro-License-Comm/
 # Contact: contact@karafka.io
 
-# F16: `FiltersApplier#action` resolves to `:pause` if ANY applied filter wants to pause, but the
+# `FiltersApplier#action` resolves to `:pause` if ANY applied filter wants to pause, but the
 # combined `#timeout` used to take the MINIMUM across all applied filters. A filter that resolved to
-# `:seek` reports a `0` timeout (the built-in throttler/delayer do this on seek), so combining it
-# with a pausing filter produced action `:pause` with timeout `min(5000, 0) == 0`. The partition
-# then paused with timeout 0, expired immediately and busy-spun, defeating the backoff.
+# `:seek` reports a `0` timeout (the built-in throttler/delayer do this on seek, though the contract
+# is to return `nil`), so combining it with a pausing filter produced action `:pause` with timeout
+# `min(5000, 0) == 0`. The partition then paused with timeout 0, expired immediately and busy-spun,
+# defeating the backoff.
 #
 # Reproduced with two coexisting filters on one topic: a pausing filter requesting a 5s backoff and
 # a seeking filter reporting a 0 timeout. The resolved action is `:pause`; we capture the pause
