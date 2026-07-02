@@ -42,11 +42,16 @@
 
 setup_karafka
 
+draw_topics do
+  topic DT.topics[1] do
+    partitions 1
+  end
+end
+
 draw_routes do
   scheduled_messages(DT.topics[0])
 
   topic DT.topics[1] do
-    config(partitions: 1)
     active(false)
   end
 end

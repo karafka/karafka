@@ -38,9 +38,14 @@ end
 
 setup_active_job
 
+draw_topics do
+  topic DT.topic do
+    partitions 3
+  end
+end
+
 draw_routes do
   active_job_topic DT.topic do
-    config(partitions: 3)
   end
 end
 

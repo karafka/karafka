@@ -87,9 +87,14 @@ class Job < ActiveJob::Base
   end
 end
 
+draw_topics do
+  topic DT.topic do
+    partitions ERRORS.size
+  end
+end
+
 draw_routes do
   active_job_topic DT.topic do
-    config(partitions: ERRORS.size)
     dead_letter_queue(
       topic: DT.topics[1],
       strategy: DqlErrorStrategy.new
