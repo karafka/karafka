@@ -256,7 +256,7 @@ module Karafka
           # Must stay a local, not a memoized `@scale_delay`: this manager is a single process-wide
           # instance shared by every subscription-group family, so memoizing here would freeze the
           # first family's `scale_delay` and apply it to all the others, making them ignore their
-          # own configured value (F31).
+          # own configured value.
           scale_delay = sg_listeners.first.subscription_group.multiplexing.scale_delay
 
           sg_listeners.all? do |sg_listener|

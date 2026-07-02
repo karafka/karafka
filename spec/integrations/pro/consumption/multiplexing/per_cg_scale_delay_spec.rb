@@ -28,7 +28,7 @@
 # License: https://karafka.io/docs/Pro-License-Comm/
 # Contact: contact@karafka.io
 
-# F31: `Pro::Connection::Manager#stable?` memoized the multiplexing `scale_delay` with `@scale_delay
+# `Pro::Connection::Manager#stable?` memoized the multiplexing `scale_delay` with `@scale_delay
 # ||= ...` on the single process-wide manager. Whichever subscription-group family was evaluated
 # first permanently fixed the stability window for ALL families, so every other family ignored its
 # own configured `scale_delay`.
