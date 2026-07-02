@@ -168,6 +168,15 @@ module Karafka
         # otherwise we would overwrite the shutdown process of the process that started Karafka
         return unless process.supervised?
 
+        # We intentionally do NOT flush or close the producer before the `Kernel.exit!` below.
+        # Forceful shutdown is a last resort - a job already exceeded `shutdown_timeout` - and it
+        # is expected that in-flight, async-buffered data (user `produce_async` calls and DLQ
+        # `produce_async` copies) may be lost. Flushing here would be risky precisely when it
+        # matters: the producer (or its connection pool) may itself be the resource that is blocked
+        # (e.g. an unreachable broker), so waiting on it could stall or hang the very forceful exit
+        # that must guarantee the process terminates. On a normal (graceful) shutdown the producer
+        # is still closed via the `ensure` block below, which `exit!` deliberately skips here.
+        #
         # exit! is not within the instrumentation as it would not trigger due to exit
         Kernel.exit!(forceful_exit_code)
       ensure
