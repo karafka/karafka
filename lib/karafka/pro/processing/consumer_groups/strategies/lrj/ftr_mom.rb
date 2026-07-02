@@ -67,7 +67,7 @@ module Karafka
 
                       # :seek and :pause are fully handled by handle_post_filtering
                       # For :skip we still need to resume the LRJ MAX_PAUSE_TIME pause
-                      return unless coordinator.filter.action == :skip
+                      return unless coordinator.filter.skip?
                     elsif !revoked? && !coordinator.manual_seek?
                       # If not revoked and not throttled, we move to where we were suppose to and
                       # resume

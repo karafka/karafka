@@ -88,6 +88,8 @@ module Karafka
                 # We ignore second marking because it changes nothing and in case of people using
                 # metadata storage but with automatic offset marking, this would cause metadata to be
                 # erased by automatic marking
+                # Only this exact re-mark is skipped - marking genuinely older offsets is intentionally
+                # allowed and rewinds the seek offset for reprocessing (see #2432)
                 return true if (seek_offset - 1) == message.offset
                 return false if revoked?
 
@@ -137,6 +139,8 @@ module Karafka
                 # We ignore second marking because it changes nothing and in case of people using
                 # metadata storage but with automatic offset marking, this would cause metadata to be
                 # erased by automatic marking
+                # Only this exact re-mark is skipped - marking genuinely older offsets is intentionally
+                # allowed and rewinds the seek offset for reprocessing (see #2432)
                 return true if (seek_offset - 1) == message.offset
                 return false if revoked?
 
@@ -324,6 +328,8 @@ module Karafka
               # We ignore second marking because it changes nothing and in case of people using
               # metadata storage but with automatic offset marking, this would cause metadata to be
               # erased by automatic marking
+              # Only this exact re-mark is skipped - marking genuinely older offsets is intentionally
+              # allowed and rewinds the seek offset for reprocessing (see #2432)
               return true if (seek_offset - 1) == message.offset
               return false if revoked?
 
