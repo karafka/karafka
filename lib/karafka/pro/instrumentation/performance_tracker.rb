@@ -45,19 +45,26 @@ module Karafka
         private_constant :SAMPLES_COUNT
 
         # Builds up nested concurrent hash for data tracking
+        #
+        # @note Samples are scoped by subscription group id so that two groups consuming the same
+        #   topic name keep independent measurements - and so revoking a partition in one group
+        #   never drops samples another group is still using.
         def initialize
-          @processing_times = Hash.new do |topics_hash, topic|
-            topics_hash[topic] = Hash.new do |partitions_hash, partition|
-              partitions_hash[partition] = []
+          @processing_times = Hash.new do |groups_hash, group_id|
+            groups_hash[group_id] = Hash.new do |topics_hash, topic|
+              topics_hash[topic] = Hash.new do |partitions_hash, partition|
+                partitions_hash[partition] = []
+              end
             end
           end
         end
 
+        # @param group_id [String] subscription group id the topic partition belongs to
         # @param topic [String]
         # @param partition [Integer]
         # @return [Float] p95 processing time of a single message from a single topic partition
-        def processing_time_p95(topic, partition)
-          values = @processing_times[topic][partition]
+        def processing_time_p95(group_id, topic, partition)
+          values = @processing_times[group_id][topic][partition]
 
           return 0 if values.empty?
           return values.first if values.size == 1
@@ -71,15 +78,42 @@ module Karafka
         def on_consumer_consumed(event)
           consumer = event[:caller]
           messages = consumer.messages
+          group_id = consumer.topic.subscription_group.id
           topic = messages.metadata.topic
           partition = messages.metadata.partition
 
-          samples = @processing_times[topic][partition]
+          samples = @processing_times[group_id][topic][partition]
           samples << (event[:time] / messages.size)
 
           return unless samples.size > SAMPLES_COUNT
 
           samples.shift
+        end
+
+        # @param event [Karafka::Core::Monitoring::Event] rebalance revoked event details
+        # Evicts the processing time samples of revoked partitions so the tracker does not retain
+        # them for the whole process lifetime. Without this every (topic, partition) ever consumed
+        # keeps its samples array forever - unbounded under regex pattern subscriptions that keep
+        # discovering new topic names. Mirrors the offset metadata fetcher, which also clears on
+        # revoke. Samples are scoped by subscription group, so we only ever evict the revoked
+        # group's data and never another group consuming the same topic.
+        def on_rebalance_partitions_revoked(event)
+          group_id = event[:subscription_group_id]
+
+          # Do not auto-vivify a branch for a group we have never tracked
+          return unless @processing_times.key?(group_id)
+
+          group_times = @processing_times[group_id]
+
+          event[:tpl].to_h.each do |topic, partitions|
+            next unless group_times.key?(topic)
+
+            topic_times = group_times[topic]
+            partitions.each { |partition| topic_times.delete(partition.partition) }
+            group_times.delete(topic) if topic_times.empty?
+          end
+
+          @processing_times.delete(group_id) if group_times.empty?
         end
 
         private
