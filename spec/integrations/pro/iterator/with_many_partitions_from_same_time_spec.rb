@@ -33,9 +33,14 @@
 
 setup_karafka
 
+draw_topics do
+  topic DT.topic do
+    partitions 5
+  end
+end
+
 draw_routes do
   topic DT.topic do
-    config(partitions: 5)
     active false
   end
 end

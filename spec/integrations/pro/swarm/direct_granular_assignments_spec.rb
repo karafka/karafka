@@ -43,10 +43,15 @@ class Consumer < Karafka::BaseConsumer
   end
 end
 
+draw_topics do
+  topic DT.topic do
+    partitions 2
+  end
+end
+
 draw_routes do
   topic DT.topic do
     # Setup this topic with 2 partitions
-    config(partitions: 2)
     # Use direct assignment mode and operate on two partitions
     assign(0, 1)
     # Assign proper partitions to proper nodes

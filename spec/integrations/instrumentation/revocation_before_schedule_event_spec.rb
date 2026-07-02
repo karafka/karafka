@@ -28,10 +28,15 @@ class Consumer < Karafka::BaseConsumer
   end
 end
 
+draw_topics do
+  topic DT.topic do
+    partitions 3
+  end
+end
+
 draw_routes do
   consumer_group DT.topic do
     topic DT.topic do
-      config(partitions: 3)
       consumer Consumer
       manual_offset_management true
     end

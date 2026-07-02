@@ -7,6 +7,16 @@ setup_karafka
 CG1 = DT.topics[0]
 CG2 = DT.topics[1]
 
+draw_topics do
+  topic DT.topics[2] do
+    partitions 2
+  end
+
+  topic DT.topics[4] do
+    partitions 2
+  end
+end
+
 draw_routes do
   consumer_group CG1 do
     topic DT.topics[0] do
@@ -19,7 +29,6 @@ draw_routes do
     end
 
     topic DT.topics[2] do
-      config(partitions: 2)
       consumer Class.new
     end
   end
@@ -36,7 +45,6 @@ draw_routes do
     end
 
     topic DT.topics[4] do
-      config(partitions: 2)
       consumer Class.new
     end
   end

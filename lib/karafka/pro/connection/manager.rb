@@ -252,7 +252,11 @@ module Karafka
         #   are also stable. This is a strong indicator that no rebalances or other operations are
         #   happening at a given moment.
         def stable?(sg_listeners)
-          @scale_delay ||= sg_listeners.first.subscription_group.multiplexing.scale_delay
+          # Must stay a local, not a memoized `@scale_delay`: this manager is a single process-wide
+          # instance shared by every subscription-group family, so memoizing here would freeze the
+          # first family's `scale_delay` and apply it to all the others, making them ignore their
+          # own configured value.
+          scale_delay = sg_listeners.first.subscription_group.multiplexing.scale_delay
 
           sg_listeners.all? do |sg_listener|
             # If a listener is not active, we do not take it into consideration when looking at
@@ -261,8 +265,8 @@ module Karafka
 
             state = @changes[sg_listener.subscription_group.id]
 
-            state[:state_age] >= @scale_delay &&
-              (monotonic_now - state[:changed_at]) >= @scale_delay &&
+            state[:state_age] >= scale_delay &&
+              (monotonic_now - state[:changed_at]) >= scale_delay &&
               state[:state] == "up" &&
               state[:join_state] == "steady"
           end

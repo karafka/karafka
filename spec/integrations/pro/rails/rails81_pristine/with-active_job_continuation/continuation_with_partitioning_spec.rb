@@ -107,10 +107,15 @@ class TrackedActiveJobConsumer < Karafka::Pro::ActiveJob::Consumer
   end
 end
 
+draw_topics do
+  topic DT.topics[0] do
+    partitions 3
+  end
+end
+
 draw_routes do
   active_job_topic DT.topics[0] do
     consumer TrackedActiveJobConsumer
-    config(partitions: 3)
   end
   scheduled_messages(DT.topics[1])
 end

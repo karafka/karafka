@@ -15,10 +15,15 @@ class Consumer < Karafka::BaseConsumer
   end
 end
 
+draw_topics do
+  topic DT.topic do
+    partitions 10
+  end
+end
+
 draw_routes do
   topic DT.topic do
     # We use a lot of partitions to make sure we never revoke part of them on rebalances
-    config(partitions: 10)
     consumer Consumer
   end
 end
