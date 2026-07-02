@@ -37,8 +37,10 @@ segment2 = "#{DT.group}-parallel-1"
 topics = [DT.topic, "#{DT.topic}_2", "#{DT.topic}_3"]
 
 draw_topics do
-  topic topic_name do
-    partitions 2
+  topics.each do |topic_name|
+    topic topic_name do
+      partitions 2
+    end
   end
 end
 

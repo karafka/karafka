@@ -46,8 +46,10 @@ class Consumer < Karafka::BaseConsumer
 end
 
 draw_topics do
-  topic DT.topics[i] do
-    partitions 10
+  10.times do |i|
+    topic DT.topics[i] do
+      partitions 10
+    end
   end
 end
 
