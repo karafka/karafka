@@ -173,6 +173,14 @@ module Karafka
         # (time-boxed, in case a broker is unreachable) so async-buffered messages - DLQ
         # `produce_async` copies and user `produce_async` - are not discarded while their source
         # offsets have already been committed by the listener shutdown above.
+        #
+        # This is a separate, sequential time-box from the listener shutdown above, so a fully
+        # stuck forceful shutdown can wait up to 2x `forceful_shutdown_wait` in total. That is
+        # intentional and not folded into a single shared deadline: the producer close must run
+        # last and needs its own full window, because the still-terminating workers can keep
+        # buffering async messages right up until `exit!`. Sharing one deadline could starve this
+        # flush to ~0ms and drop exactly those late messages. As a last-resort path (we are already
+        # past `shutdown_timeout` and about to `exit!`) we accept the extra wait over that risk.
         Thread.new do
           Karafka::App.producer.close
           WaterDrop::ConnectionPool.close
