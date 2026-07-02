@@ -112,11 +112,7 @@ module Karafka
           # cases there is nothing to synchronize and only the commands are applied
           if @catchup_schedule
             # If the schedule version we have in Kafka is higher than ours, we cannot proceed
-            # This prevents us from applying older changes to a new schedule.
-            # We compare with `Gem::Version` rather than as plain strings so multi-segment versions
-            # order semantically (otherwise `"1.9.0" > "1.10.0"` is true lexicographically and a
-            # valid upgrade would be wrongly rejected as incompatible). Mirrors the schema version
-            # comparison in the scheduled messages schema validator.
+            # This prevents us from applying older changes to a new schedule
             if Gem::Version.new(@catchup_schedule[:schedule_version]) > Gem::Version.new(schedule.version)
               @incompatible = true
 
