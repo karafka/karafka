@@ -113,7 +113,7 @@ module Karafka
           if @catchup_schedule
             # If the schedule version we have in Kafka is higher than ours, we cannot proceed
             # This prevents us from applying older changes to a new schedule
-            if @catchup_schedule[:schedule_version] > schedule.version
+            if Gem::Version.new(@catchup_schedule[:schedule_version]) > Gem::Version.new(schedule.version)
               @incompatible = true
 
               return
