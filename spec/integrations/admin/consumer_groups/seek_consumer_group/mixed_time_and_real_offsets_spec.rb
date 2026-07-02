@@ -5,10 +5,15 @@
 
 setup_karafka
 
+draw_topics do
+  topic DT.topic do
+    partitions 2
+  end
+end
+
 draw_routes do
   topic DT.topic do
     consumer Karafka::BaseConsumer
-    config(partitions: 2)
   end
 end
 

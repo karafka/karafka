@@ -45,6 +45,12 @@ class Consumer < Karafka::BaseConsumer
   end
 end
 
+draw_topics do
+  topic DT.topics[i] do
+    partitions 10
+  end
+end
+
 draw_routes do
   subscription_group do
     multiplexing(max: 2, min: 1, boot: 1)
@@ -52,7 +58,6 @@ draw_routes do
     10.times do |i|
       topic DT.topics[i] do
         consumer Consumer
-        config(partitions: 10)
         non_blocking_job true
         manual_offset_management true
 
