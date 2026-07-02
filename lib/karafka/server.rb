@@ -168,31 +168,15 @@ module Karafka
         # otherwise we would overwrite the shutdown process of the process that started Karafka
         return unless process.supervised?
 
-        # The `Kernel.exit!` below terminates the process immediately and does NOT run the `ensure`
-        # block, so the producer close there never executes. We flush/close the producer here first
-        # (time-boxed, in case a broker is unreachable) so async-buffered messages - DLQ
-        # `produce_async` copies and user `produce_async` - are not discarded while their source
-        # offsets have already been committed by the listener shutdown above.
+        # We intentionally do NOT flush or close the producer before the `Kernel.exit!` below.
+        # Forceful shutdown is a last resort - a job already exceeded `shutdown_timeout` - and it
+        # is expected that in-flight, async-buffered data (user `produce_async` calls and DLQ
+        # `produce_async` copies) may be lost. Flushing here would be risky precisely when it
+        # matters: the producer (or its connection pool) may itself be the resource that is blocked
+        # (e.g. an unreachable broker), so waiting on it could stall or hang the very forceful exit
+        # that must guarantee the process terminates. On a normal (graceful) shutdown the producer
+        # is still closed via the `ensure` block below, which `exit!` deliberately skips here.
         #
-        # This is a separate, sequential time-box from the listener shutdown above, so a fully
-        # stuck forceful shutdown can wait up to 2x `forceful_shutdown_wait` in total. That is
-        # intentional and not folded into a single shared deadline: the producer close must run
-        # last and needs its own full window, because the still-terminating workers can keep
-        # buffering async messages right up until `exit!`. Sharing one deadline could starve this
-        # flush to ~0ms and drop exactly those late messages. As a last-resort path (we are already
-        # past `shutdown_timeout` and about to `exit!`) we accept the extra wait over that risk.
-        Thread.new do
-          Karafka::App.producer.close
-          WaterDrop::ConnectionPool.close
-        rescue => e
-          Karafka.monitor.instrument(
-            "error.occurred",
-            caller: self,
-            error: e,
-            type: "app.forceful_stopping.error"
-          )
-        end.join(forceful_shutdown_wait / 1_000.0)
-
         # exit! is not within the instrumentation as it would not trigger due to exit
         Kernel.exit!(forceful_exit_code)
       ensure
