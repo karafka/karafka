@@ -54,23 +54,29 @@ module Karafka
 
                 # Declarative topic definitions live independently of routing. We declare the
                 # broker-side structure here so it is managed by the CLI topics commands without
-                # relying on the (to be retired) routing `config(...)` bridge.
+                # relying on the (to be retired) routing `config(...)` bridge. We skip topics that
+                # were already declared (e.g. by the user via `App.declaratives.draw`) to preserve
+                # first-declaration-wins and avoid clobbering user-provided customizations.
                 App.declaratives.draw do
                   # Keep older data for a day and compact to the last state available
-                  topic(topics_cfg.schedules.name) do
-                    config(
-                      "cleanup.policy": "compact,delete",
-                      "retention.ms": 86_400_000
-                    )
+                  unless find_topic(topics_cfg.schedules.name)
+                    topic(topics_cfg.schedules.name) do
+                      config(
+                        "cleanup.policy": "compact,delete",
+                        "retention.ms": 86_400_000
+                      )
+                    end
                   end
 
                   # Keep cron logs of executions for a week and after that remove. Week should be
                   # enough and should not produce too much data.
-                  topic(topics_cfg.logs.name) do
-                    config(
-                      "cleanup.policy": "delete",
-                      "retention.ms": 604_800_000
-                    )
+                  unless find_topic(topics_cfg.logs.name)
+                    topic(topics_cfg.logs.name) do
+                      config(
+                        "cleanup.policy": "delete",
+                        "retention.ms": 604_800_000
+                      )
+                    end
                   end
                 end
 
