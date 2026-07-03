@@ -52,6 +52,28 @@ module Karafka
                 tasks_cfg = App.config.recurring_tasks
                 topics_cfg = tasks_cfg.topics
 
+                # Declarative topic definitions live independently of routing. We declare the
+                # broker-side structure here so it is managed by the CLI topics commands without
+                # relying on the (to be retired) routing `config(...)` bridge.
+                App.declaratives.draw do
+                  # Keep older data for a day and compact to the last state available
+                  topic(topics_cfg.schedules.name) do
+                    config(
+                      "cleanup.policy": "compact,delete",
+                      "retention.ms": 86_400_000
+                    )
+                  end
+
+                  # Keep cron logs of executions for a week and after that remove. Week should be
+                  # enough and should not produce too much data.
+                  topic(topics_cfg.logs.name) do
+                    config(
+                      "cleanup.policy": "delete",
+                      "retention.ms": 604_800_000
+                    )
+                  end
+                end
+
                 consumer_group tasks_cfg.group_id do
                   # Registers the primary topic that we use to control schedules execution. This is
                   # the one that we use to trigger recurring tasks.
@@ -87,12 +109,6 @@ module Karafka
                     pause_timeout(60 * 1_000)
                     pause_max_timeout(60 * 1_000)
 
-                    # Keep older data for a day and compact to the last state available
-                    config(
-                      "cleanup.policy": "compact,delete",
-                      "retention.ms": 86_400_000
-                    )
-
                     # This is the core of execution. Since we're producers of states, we need a way
                     # to tick without having new data
                     periodic(
@@ -113,13 +129,6 @@ module Karafka
                     active(false)
                     deserializer tasks_cfg.deserializer
                     target.recurring_tasks(true)
-
-                    # Keep cron logs of executions for a week and after that remove. Week should be
-                    # enough and should not produce too much data.
-                    config(
-                      "cleanup.policy": "delete",
-                      "retention.ms": 604_800_000
-                    )
                   end
 
                   yield(schedules_topic, logs_topic) if block && block.arity.positive?
