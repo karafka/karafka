@@ -22,6 +22,7 @@ allowed_patterns=(
    "Auto topic creation failed for it-2c2272-"
    "Auto topic creation failed for it-4b9ec4-"
    "Auto topic creation failed for it-867e2c-"
+   "Auto topic creation failed for it-b0c959-"
    "Auto topic creation failed for it-production."
    "Auto topic creation failed for it-us01.production."
    "Auto topic creation failed for it-sandbox.production."
