@@ -297,13 +297,14 @@ assert thread_usage.size >= 3, "Should utilize multiple threads for parallel pro
 # With custom scheduler, expensive message runs in parallel, so total time should be around 3-4s
 # Without optimization, it could take longer if expensive message blocks other processing
 #
-# The bound is intentionally generous (not ~4s) because the 119 normal messages have a
-# randomized per-message duration (50-200ms) and are spread across 15 VPs processed by only
-# 5 workers (3 rounds). The busiest worker's share of that random work, combined with the
-# cold-start PerformanceTracker (no prior samples on the first run, so LJF ordering of normal
-# jobs is effectively arbitrary) and normal CI scheduling jitter, can occasionally push the
-# busiest thread's load close to the previous 7s threshold on its own, without any actual
-# scheduling regression. A tight bound here just measures VM noise, not correctness.
+# The bound is intentionally generous (not ~4s). Simulating this exact list-scheduling (5
+# workers, expensive VP queued first, cold-start LJF for the rest) over 20k random trials
+# never exceeds ~4.6s from message-timing alone -- so the gap between that and a real CI
+# failure at 7.09s is not scheduler variance, it's Kafka/consumer-loop overhead (polling,
+# offset commits, GC, thread scheduling) under a loaded CI runner, which varies run to run.
+# 12s keeps a comfortable multiple of headroom over that ~4.6s ceiling while still failing
+# hard if VP concurrency regresses towards fully serial execution (the same simulation puts
+# that floor at ~17s).
 max = DT[:processed].map { |p| p[:end_time] }.max
 min = DT[:processed].map { |p| p[:start_time] }.min
 test_duration = max - min
