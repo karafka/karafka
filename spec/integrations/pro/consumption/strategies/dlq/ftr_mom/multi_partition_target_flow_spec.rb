@@ -47,6 +47,12 @@ class DlqConsumer < Karafka::BaseConsumer
   end
 end
 
+draw_topics do
+  topic DT.topics[1] do
+    partitions 10
+  end
+end
+
 draw_routes do
   topic DT.topics[0] do
     consumer Consumer
@@ -56,7 +62,6 @@ draw_routes do
   end
 
   topic DT.topics[1] do
-    config(partitions: 10)
     consumer DlqConsumer
     manual_offset_management true
     throttling(limit: 50, interval: 5_000)

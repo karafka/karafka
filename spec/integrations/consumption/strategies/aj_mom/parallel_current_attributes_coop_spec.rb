@@ -10,9 +10,14 @@ setup_active_job
 
 require "karafka/active_job/current_attributes"
 
+draw_topics do
+  topic DT.topic do
+    partitions 50
+  end
+end
+
 draw_routes do
   active_job_topic DT.topic do
-    config(partitions: 50)
   end
 end
 

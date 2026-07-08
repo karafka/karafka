@@ -30,10 +30,15 @@ class Consumer < Karafka::BaseConsumer
   end
 end
 
+draw_topics do
+  topic DT.topics[1] do
+    partitions 2
+  end
+end
+
 draw_routes do
   # Special topic with 2 partitions available
   topic DT.topics[1] do
-    config(partitions: 2)
     consumer Consumer
   end
 end

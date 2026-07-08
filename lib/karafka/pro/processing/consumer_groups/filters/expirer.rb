@@ -38,7 +38,7 @@ module Karafka
         module Filters
           # Expirer for removing too old messages.
           # It never moves offsets in any way and does not impact the processing flow. It always
-          # runs `:skip` action.
+          # runs the `Actions.skip` action.
           class Expirer < Base
             # @param ttl [Integer] maximum age of a message (in ms)
             def initialize(ttl)

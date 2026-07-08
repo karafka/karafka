@@ -93,12 +93,17 @@ class Consumer < Karafka::BaseConsumer
   end
 end
 
+draw_topics do
+  topic DT.topic do
+    partitions 5
+  end
+end
+
 draw_routes do
   consumer_group DT.group do
     multiplexing(max: 5)
 
     topic DT.topic do
-      config(partitions: 5)
       consumer Consumer
     end
   end

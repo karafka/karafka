@@ -86,9 +86,9 @@ module Karafka
             # @return [Symbol] action to take upon throttler reaching certain state
             def action
               if applied?
-                timeout.zero? ? :seek : :pause
+                timeout.zero? ? Actions.seek : Actions.pause
               else
-                :skip
+                Actions.skip
               end
             end
 

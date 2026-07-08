@@ -14,6 +14,16 @@ module Karafka
     class AssignmentsTracker
       include Singleton
 
+      # Upper bound on the number of distinct topics tracked in `@generations`. Generations are
+      # intentionally retained after revocation (so they can keep incrementing across
+      # reassignments), which means the map only ever grows. With static topologies that is
+      # bounded by the routing topic count, but pattern subscriptions inject a fresh, permanent
+      # `Routing::Topic` per discovered name, so without a bound the map (and the frozen deep copy
+      # built in `#generations`) would grow for the whole process lifetime. When the bound is
+      # exceeded we evict the least-recently-assigned topics. It is high enough never to be reached
+      # by realistic static or even large dynamic topologies.
+      GENERATIONS_TOPICS_LIMIT = 100_000
+
       class << self
         # @return [Hash{Karafka::Routing::Topic => Array<Integer>}]
         # @see #current
@@ -74,6 +84,10 @@ module Karafka
       #   reassignment. Revoked partitions remain in the hash with their last generation value.
       #
       # @note Returns a frozen deep copy to prevent external mutation
+      #
+      # @note The map is bounded to `GENERATIONS_TOPICS_LIMIT` topics; once exceeded, the
+      #   least-recently-assigned topics are evicted. This only ever matters for very large dynamic
+      #   (pattern-subscribed) topologies - static ones never reach the bound.
       def generations
         result = {}
 
@@ -188,10 +202,30 @@ module Karafka
               @generations[topic][partition_id] += 1
             end
 
+            # Move this topic to the end of the insertion-ordered map so it counts as
+            # most-recently-assigned for the bounded eviction below (keeps actively reassigned
+            # topics, drops genuinely stale ones first).
+            @generations[topic] = @generations.delete(topic)
+
             @assignments[topic] += partition_ids
             @assignments[topic].sort!
           end
+
+          evict_stale_generations
         end
+      end
+
+      private
+
+      # Keeps `@generations` bounded by evicting the least-recently-assigned topics once the limit
+      # is exceeded. Without this, pattern subscriptions (which keep injecting new permanent topics)
+      # would grow the map without bound for the whole process lifetime.
+      def evict_stale_generations
+        excess = @generations.size - GENERATIONS_TOPICS_LIMIT
+
+        return unless excess.positive?
+
+        @generations.keys.first(excess).each { |topic| @generations.delete(topic) }
       end
     end
   end

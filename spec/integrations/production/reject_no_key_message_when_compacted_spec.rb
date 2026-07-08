@@ -4,12 +4,15 @@
 
 setup_karafka
 
+draw_topics do
+  topic DT.topic do
+    partitions 1
+    config("cleanup.policy": "compact")
+  end
+end
+
 draw_routes do
   topic DT.topic do
-    config(
-      partitions: 1,
-      "cleanup.policy": "compact"
-    )
     active false
   end
 end

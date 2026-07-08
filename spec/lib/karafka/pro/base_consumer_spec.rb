@@ -41,12 +41,14 @@ RSpec.describe Karafka::BaseConsumer, type: :pro do
   end
 
   let(:strategy) { Karafka::Pro::Processing::ConsumerGroups::Strategies::Default }
-  let(:coordinator) { build(:processing_coordinator_pro, seek_offset: nil) }
+  let(:coordinator) { build(:processing_coordinator_pro, topic: topic, seek_offset: nil) }
   let(:client) { instance_double(Karafka::Connection::Client, pause: true, seek: true) }
   let(:first_message) { instance_double(Karafka::Messages::Message, offset: offset, partition: 0) }
   let(:last_message) { instance_double(Karafka::Messages::Message, offset: offset, partition: 0) }
   let(:offset) { 123 }
-  let(:topic) { build(:routing_topic) }
+  # The topic carries a subscription group so the globally-subscribed PerformanceTracker (which
+  # scopes samples per subscription group) can read `topic.subscription_group.id` on consume
+  let(:topic) { build(:routing_subscription_group).topics.first }
 
   let(:messages) do
     instance_double(

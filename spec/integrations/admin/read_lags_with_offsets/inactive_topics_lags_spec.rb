@@ -4,6 +4,12 @@
 
 setup_karafka
 
+draw_topics do
+  topic DT.topics[1] do
+    partitions 2
+  end
+end
+
 draw_routes do
   topic DT.topics[0] do
     active(false)
@@ -12,7 +18,6 @@ draw_routes do
 
   topic DT.topics[1] do
     active(false)
-    config(partitions: 2)
     consumer Class.new
   end
 end
