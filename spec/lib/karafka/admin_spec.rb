@@ -206,6 +206,78 @@ RSpec.describe_current do
     end
   end
 
+  describe "#with_consumer" do
+    context "when operating on a borrowed client" do
+      subject(:admin) { described_class.new(borrowed_client: borrowed_client) }
+
+      let(:borrowed_client) { instance_double(Rdkafka::Consumer) }
+
+      it "yields a proxy wrapping the borrowed client" do
+        admin.with_consumer do |proxy|
+          expect(proxy).to be_a(Karafka::Connection::Proxy)
+          expect(proxy.wrapped).to eq(borrowed_client)
+        end
+      end
+
+      it "does not wrap an already proxied borrowed client with another proxy level" do
+        proxied = Karafka::Connection::Proxy.new(borrowed_client)
+
+        described_class.new(borrowed_client: proxied).with_consumer do |proxy|
+          expect(proxy.wrapped).to eq(borrowed_client)
+        end
+      end
+
+      it "does not manage the borrowed client lifecycle" do
+        # Verifying double raises on any unexpected message, so lack of errors proves that no
+        # start, unsubscribe or close was invoked on the borrowed client
+        expect { admin.with_consumer { nil } }.not_to raise_error
+      end
+
+      it "does not manage the borrowed client lifecycle also when the block raises" do
+        expect { admin.with_consumer { raise ArgumentError } }.to raise_error(ArgumentError)
+      end
+
+      it "ignores provided settings" do
+        admin.with_consumer("group.id": "whatever") do |proxy|
+          expect(proxy.wrapped).to eq(borrowed_client)
+        end
+      end
+
+      it "returns the block result" do
+        expect(admin.with_consumer { 42 }).to eq(42)
+      end
+    end
+  end
+
+  describe "borrowed client delegations" do
+    subject(:admin) { described_class.new(borrowed_client: borrowed_client) }
+
+    let(:borrowed_client) { instance_double(Rdkafka::Consumer) }
+
+    it "carries the borrowed client over to consumer groups operations" do
+      expect(Karafka::Admin::ConsumerGroups)
+        .to receive(:new)
+        .with(kafka: {}, borrowed_client: borrowed_client)
+        .and_call_original
+
+      allow_any_instance_of(Karafka::Admin::ConsumerGroups)
+        .to receive(:read_lags_with_offsets)
+
+      admin.read_lags_with_offsets
+    end
+
+    it "carries the borrowed client over to topics operations" do
+      expect(Karafka::Admin::Topics)
+        .to receive(:new)
+        .with(kafka: {}, borrowed_client: borrowed_client)
+        .and_call_original
+
+      allow_any_instance_of(Karafka::Admin::Topics).to receive(:info)
+
+      admin.topic_info(name)
+    end
+  end
+
   describe "#close" do
     subject(:admin) { described_class.new }
 

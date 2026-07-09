@@ -26,16 +26,34 @@ module Karafka
     # @return [Hash] custom kafka settings to merge with defaults
     attr_reader :custom_kafka
 
+    # Borrowed client used for consumer-based operations instead of dedicated instances
+    # @return [Object, nil] borrowed client or nil when dedicated instances are used
+    attr_reader :borrowed_client
+
     # Creates a new Admin instance
     #
     # @param kafka [Hash] custom kafka configuration to merge with app defaults.
     #   Useful for multi-cluster operations where you want to target a different cluster.
+    # @param borrowed_client [Object, nil] active rdkafka client (raw or wrapped with
+    #   `Karafka::Connection::Proxy`) on which admin operations should run, instead of each
+    #   operation creating its own short-lived instance. Currently used by consumer-based
+    #   operations (`with_consumer` and everything built on top of it). The lifecycle of a
+    #   borrowed client belongs fully to its owner: it is never configured, started or closed
+    #   here and all operations run within its identity, including its `group.id`. This is a
+    #   low-level internal API: the caller is responsible for providing a client capable of
+    #   the invoked operations and for invoking only operations that are safe to run on a
+    #   live client.
     #
     # @example Create admin for a different cluster
     #   admin = Karafka::Admin.new(kafka: { 'bootstrap.servers': 'other-cluster:9092' })
     #   admin.cluster_info
-    def initialize(kafka: {})
+    #
+    # @example Read lags of a running consumer via its own client connection
+    #   admin = Karafka::Admin.new(borrowed_client: client)
+    #   admin.read_lags_with_offsets({ 'my-group' => ['events'] })
+    def initialize(kafka: {}, borrowed_client: nil)
       @custom_kafka = kafka
+      @borrowed_client = borrowed_client
     end
 
     # No-op close to normalize the API surface.
@@ -257,7 +275,7 @@ module Karafka
     # @param settings [Hash] kafka extra settings (optional)
     # @see Topics#read
     def read_topic(name, partition, count, start_offset = -1, settings = {})
-      Topics.new(kafka: @custom_kafka).read(name, partition, count, start_offset, settings)
+      topics_admin.read(name, partition, count, start_offset, settings)
     end
 
     # @param name [String] topic name
@@ -266,47 +284,47 @@ module Karafka
     # @param topic_config [Hash] topic config details
     # @see Topics#create
     def create_topic(name, partitions, replication_factor, topic_config = {})
-      Topics.new(kafka: @custom_kafka).create(name, partitions, replication_factor, topic_config)
+      topics_admin.create(name, partitions, replication_factor, topic_config)
     end
 
     # @param name [String] topic name
     # @see Topics#delete
     def delete_topic(name)
-      Topics.new(kafka: @custom_kafka).delete(name)
+      topics_admin.delete(name)
     end
 
     # @param name [String] topic name
     # @param partitions [Integer] total number of partitions we expect to end up with
     # @see Topics#create_partitions
     def create_partitions(name, partitions)
-      Topics.new(kafka: @custom_kafka).create_partitions(name, partitions)
+      topics_admin.create_partitions(name, partitions)
     end
 
     # @param name_or_hash [String, Symbol, Hash] topic name or hash with topics and partitions
     # @param partition [Integer, nil] partition (nil when using hash format)
     # @see Topics#read_watermark_offsets
     def read_watermark_offsets(name_or_hash, partition = nil)
-      Topics.new(kafka: @custom_kafka).read_watermark_offsets(name_or_hash, partition)
+      topics_admin.read_watermark_offsets(name_or_hash, partition)
     end
 
     # @param topic_partition_offsets [Hash{String => Array<Hash>}] topics with partition specs
     # @param isolation_level [Integer, nil] optional isolation level constant
     # @see Topics#read_partition_offsets
     def read_partition_offsets(topic_partition_offsets, isolation_level: nil)
-      Topics.new(kafka: @custom_kafka).read_partition_offsets(topic_partition_offsets, isolation_level: isolation_level)
+      topics_admin.read_partition_offsets(topic_partition_offsets, isolation_level: isolation_level)
     end
 
     # @param topic_name [String] name of the topic we're interested in
     # @see Topics#info
     def topic_info(topic_name)
-      Topics.new(kafka: @custom_kafka).info(topic_name)
+      topics_admin.info(topic_name)
     end
 
     # @param group_id [String] group for which we want to move offsets
     # @param topics_with_partitions_and_offsets [Hash] hash with topics and settings
     # @see ConsumerGroups#seek
     def seek_consumer_group(group_id, topics_with_partitions_and_offsets)
-      ConsumerGroups.new(kafka: @custom_kafka).seek(
+      consumer_groups_admin.seek(
         group_id,
         topics_with_partitions_and_offsets
       )
@@ -317,7 +335,7 @@ module Karafka
     # @param topics [Array<String>] topics for which we want to copy offsets
     # @see ConsumerGroups#copy
     def copy_consumer_group(previous_name, new_name, topics)
-      ConsumerGroups.new(kafka: @custom_kafka).copy(previous_name, new_name, topics)
+      consumer_groups_admin.copy(previous_name, new_name, topics)
     end
 
     # @param previous_name [String] old consumer group name
@@ -326,7 +344,7 @@ module Karafka
     # @param delete_previous [Boolean] should we delete previous consumer group after rename
     # @see ConsumerGroups#rename
     def rename_consumer_group(previous_name, new_name, topics, delete_previous: true)
-      ConsumerGroups.new(kafka: @custom_kafka).rename(
+      consumer_groups_admin.rename(
         previous_name,
         new_name,
         topics,
@@ -337,13 +355,13 @@ module Karafka
     # @param group_id [String] group name
     # @see ConsumerGroups#delete
     def delete_consumer_group(group_id)
-      ConsumerGroups.new(kafka: @custom_kafka).delete(group_id)
+      consumer_groups_admin.delete(group_id)
     end
 
     # @param group_id [String] group id to trigger rebalance for
     # @see ConsumerGroups#trigger_rebalance
     def trigger_rebalance(group_id)
-      ConsumerGroups.new(kafka: @custom_kafka).trigger_rebalance(group_id)
+      consumer_groups_admin.trigger_rebalance(group_id)
     end
 
     # @param groups_with_topics [Hash{String => Array<String>}] hash with group
@@ -351,7 +369,7 @@ module Karafka
     # @param active_topics_only [Boolean] if set to false, will select also inactive topics
     # @see ConsumerGroups#read_lags_with_offsets
     def read_lags_with_offsets(groups_with_topics = {}, active_topics_only: true)
-      ConsumerGroups.new(kafka: @custom_kafka).read_lags_with_offsets(
+      consumer_groups_admin.read_lags_with_offsets(
         groups_with_topics,
         active_topics_only: active_topics_only
       )
@@ -381,7 +399,14 @@ module Karafka
     #
     # @note We always ship and yield a proxied consumer because admin API performance is not
     #   that relevant. That is, there are no high frequency calls that would have to be delegated
+    #
+    # @note When a borrowed client is present, it is yielded directly and its lifecycle is not
+    #   managed here in any way: no oauth binding, no start and no closing. `settings` are
+    #   ignored as the borrowed instance is already configured and operations run within its
+    #   identity, including its `group.id`.
     def with_consumer(settings = {})
+      return yield(Karafka::Connection::Proxy.new(@borrowed_client)) if @borrowed_client
+
       bind_id = SecureRandom.uuid
 
       consumer = config(:consumer, settings).consumer(native_kafka_auto_start: false)
@@ -391,19 +416,23 @@ module Karafka
       proxy = Karafka::Connection::Proxy.new(consumer)
       yield(proxy)
     ensure
-      # Always unsubscribe consumer just to be sure, that no metadata requests are running
-      # when we close the consumer. This in theory should prevent from some race-conditions
-      # that originate from librdkafka
-      begin
-        consumer&.unsubscribe
-      # Ignore any errors and continue to close consumer despite them
-      rescue Rdkafka::RdkafkaError
-        nil
+      # Nothing to clean up when we operated on a borrowed client as its owner manages its
+      # lifecycle
+      unless @borrowed_client
+        # Always unsubscribe consumer just to be sure, that no metadata requests are running
+        # when we close the consumer. This in theory should prevent from some race-conditions
+        # that originate from librdkafka
+        begin
+          consumer&.unsubscribe
+        # Ignore any errors and continue to close consumer despite them
+        rescue Rdkafka::RdkafkaError
+          nil
+        end
+
+        consumer&.close
+
+        unbind_oauth(bind_id)
       end
-
-      consumer&.close
-
-      unbind_oauth(bind_id)
     end
 
     # Creates admin instance and yields it. After usage it closes the admin instance
@@ -427,6 +456,18 @@ module Karafka
     end
 
     private
+
+    # @return [Topics] topics admin operating within this instance context (custom kafka and
+    #   borrowed client carried over)
+    def topics_admin
+      Topics.new(kafka: @custom_kafka, borrowed_client: @borrowed_client)
+    end
+
+    # @return [ConsumerGroups] consumer groups admin operating within this instance context
+    #   (custom kafka and borrowed client carried over)
+    def consumer_groups_admin
+      ConsumerGroups.new(kafka: @custom_kafka, borrowed_client: @borrowed_client)
+    end
 
     # @return [Integer] max wait time in ms
     def max_wait_time_ms
