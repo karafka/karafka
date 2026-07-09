@@ -249,6 +249,67 @@ RSpec.describe_current do
     end
   end
 
+  describe "#with_admin" do
+    context "when the borrowed client is an rdkafka admin instance" do
+      subject(:admin) { described_class.new(borrowed_client: borrowed_client) }
+
+      let(:borrowed_client) do
+        Rdkafka::Config.new("bootstrap.servers": "127.0.0.1:9092").admin
+      end
+
+      after { borrowed_client.close }
+
+      it "yields a proxy wrapping the borrowed admin and leaves it open" do
+        admin.with_admin do |proxy|
+          expect(proxy).to be_a(Karafka::Connection::Proxy)
+          expect(proxy.wrapped).to eq(borrowed_client)
+        end
+
+        expect(borrowed_client.closed?).to be(false)
+      end
+
+      it "does not wrap an already proxied borrowed admin with another proxy level" do
+        proxied = Karafka::Connection::Proxy.new(borrowed_client)
+
+        described_class.new(borrowed_client: proxied).with_admin do |proxy|
+          expect(proxy.wrapped).to eq(borrowed_client)
+        end
+      end
+
+      it "leaves the borrowed admin open also when the block raises" do
+        expect { admin.with_admin { raise ArgumentError } }.to raise_error(ArgumentError)
+        expect(borrowed_client.closed?).to be(false)
+      end
+
+      it "is not used for consumer-based operations" do
+        admin.with_consumer do |proxy|
+          expect(proxy.wrapped).not_to eq(borrowed_client)
+        end
+      end
+
+      it "serves cluster_info without a dedicated admin instance" do
+        # Materialize the borrowed admin upfront so only operational usage is guarded
+        admin.borrowed_client
+
+        expect(Rdkafka::Config).not_to receive(:new)
+
+        expect(admin.cluster_info.topics).to be_a(Array)
+      end
+    end
+
+    context "when the borrowed client is a consumer" do
+      subject(:admin) { described_class.new(borrowed_client: borrowed_client) }
+
+      let(:borrowed_client) { instance_double(Rdkafka::Consumer) }
+
+      it "is not used and a dedicated admin instance operates" do
+        admin.with_admin do |proxy|
+          expect(proxy.wrapped).not_to eq(borrowed_client)
+        end
+      end
+    end
+  end
+
   describe "borrowed client delegations" do
     subject(:admin) { described_class.new(borrowed_client: borrowed_client) }
 

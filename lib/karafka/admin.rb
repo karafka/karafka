@@ -36,7 +36,9 @@ module Karafka
     #   Useful for multi-cluster operations where you want to target a different cluster.
     # @param borrowed_client [Object, nil] active rdkafka client (raw or wrapped with
     #   `Karafka::Connection::Proxy`) on which admin operations should run, instead of each
-    #   operation creating its own short-lived instance. Currently used by consumer-based
+    #   operation creating its own short-lived instance. Routing is capability based: rdkafka
+    #   admin instances are used by admin-based operations (`with_admin` and everything built
+    #   on top of it, e.g. `cluster_info`), any other borrowed client is used by consumer-based
     #   operations (`with_consumer` and everything built on top of it). The lifecycle of a
     #   borrowed client belongs fully to its owner: it is never configured, started or closed
     #   here and all operations run within its identity, including its `group.id`. This is a
@@ -403,22 +405,22 @@ module Karafka
     # @note When a borrowed client is present, it is yielded directly and its lifecycle is not
     #   managed here in any way: no oauth binding, no start and no closing. `settings` are
     #   ignored as the borrowed instance is already configured and operations run within its
-    #   identity, including its `group.id`.
+    #   identity, including its `group.id`. Borrowed rdkafka admin instances are not used here
+    #   as they are not capable of consumer operations - they are used by `#with_admin` instead.
     def with_consumer(settings = {})
-      return yield(Karafka::Connection::Proxy.new(@borrowed_client)) if @borrowed_client
+      return yield(Karafka::Connection::Proxy.new(@borrowed_client)) if borrowed_consumer?
 
       bind_id = SecureRandom.uuid
+      consumer = nil
 
-      consumer = config(:consumer, settings).consumer(native_kafka_auto_start: false)
-      bind_oauth(bind_id, consumer)
+      begin
+        consumer = config(:consumer, settings).consumer(native_kafka_auto_start: false)
+        bind_oauth(bind_id, consumer)
 
-      consumer.start
-      proxy = Karafka::Connection::Proxy.new(consumer)
-      yield(proxy)
-    ensure
-      # Nothing to clean up when we operated on a borrowed client as its owner manages its
-      # lifecycle
-      unless @borrowed_client
+        consumer.start
+        proxy = Karafka::Connection::Proxy.new(consumer)
+        yield(proxy)
+      ensure
         # Always unsubscribe consumer just to be sure, that no metadata requests are running
         # when we close the consumer. This in theory should prevent from some race-conditions
         # that originate from librdkafka
@@ -436,26 +438,55 @@ module Karafka
     end
 
     # Creates admin instance and yields it. After usage it closes the admin instance
+    #
+    # @note When the borrowed client is an rdkafka admin instance, it is yielded directly and
+    #   its lifecycle is not managed here in any way, same as with `#with_consumer`. Borrowed
+    #   clients of other types (consumers, producers) are not capable of admin operations, thus
+    #   a dedicated admin instance is created for them as usual.
     def with_admin
+      return yield(Karafka::Connection::Proxy.new(@borrowed_client)) if borrowed_admin?
+
       bind_id = SecureRandom.uuid
+      admin = nil
 
-      admin = config(:producer, {}).admin(
-        native_kafka_auto_start: false,
-        native_kafka_poll_timeout_ms: self.class.poll_timeout
-      )
+      begin
+        admin = config(:producer, {}).admin(
+          native_kafka_auto_start: false,
+          native_kafka_poll_timeout_ms: self.class.poll_timeout
+        )
 
-      bind_oauth(bind_id, admin)
+        bind_oauth(bind_id, admin)
 
-      admin.start
-      proxy = Karafka::Connection::Proxy.new(admin)
-      yield(proxy)
-    ensure
-      admin&.close
+        admin.start
+        proxy = Karafka::Connection::Proxy.new(admin)
+        yield(proxy)
+      ensure
+        admin&.close
 
-      unbind_oauth(bind_id)
+        unbind_oauth(bind_id)
+      end
     end
 
     private
+
+    # @return [Boolean] true when the borrowed client is an rdkafka admin instance (raw or
+    #   proxied) capable of admin operations
+    def borrowed_admin?
+      return false unless @borrowed_client
+
+      client = @borrowed_client
+      client = client.wrapped if client.is_a?(Karafka::Connection::Proxy)
+
+      client.is_a?(Rdkafka::Admin)
+    end
+
+    # @return [Boolean] true when the borrowed client should be used for consumer operations.
+    #   Any borrowed client that is not an rdkafka admin instance is assumed to be consumer
+    #   capable - it is the caller responsibility to provide a client that can handle the
+    #   invoked operations
+    def borrowed_consumer?
+      !@borrowed_client.nil? && !borrowed_admin?
+    end
 
     # @return [Topics] topics admin operating within this instance context (custom kafka and
     #   borrowed client carried over)
