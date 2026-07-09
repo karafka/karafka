@@ -74,6 +74,21 @@ RSpec.describe_current do
     it { expect(event[:statistics]["val_d"]).to eq(0) }
   end
 
+  describe "decorator_class" do
+    let(:custom_decorator_class) { Class.new(Karafka::Core::Monitoring::StatisticsDecorator) }
+
+    before do
+      allow(Karafka::App.config.internal.statistics)
+        .to receive(:decorator_class)
+        .and_return(custom_decorator_class)
+    end
+
+    it "instantiates the decorator configured via config.internal.statistics.decorator_class" do
+      expect(callback.instance_variable_get(:@statistics_decorator))
+        .to be_an_instance_of(custom_decorator_class)
+    end
+  end
+
   describe "behavior on errors" do
     context "when an error occurs in the call" do
       let(:events) { [] }

@@ -9,7 +9,8 @@ module Karafka
         #   those statistics
         class Statistics
           include Helpers::ConfigImporter.new(
-            monitor: %i[monitor]
+            monitor: %i[monitor],
+            decorator_class: %i[internal statistics decorator_class]
           )
 
           # @param subscription_group_id [String]
@@ -19,7 +20,7 @@ module Karafka
             @subscription_group_id = subscription_group_id
             @group_id = group_id
             @client_name = client_name
-            @statistics_decorator = Karafka::Core::Monitoring::StatisticsDecorator.new
+            @statistics_decorator = decorator_class.new
           end
 
           # Emits decorated statistics to the monitor
