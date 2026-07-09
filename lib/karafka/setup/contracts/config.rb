@@ -139,6 +139,10 @@ module Karafka
             end
           end
 
+          nested(:statistics) do
+            required(:decorator_class) { |val| !val.nil? }
+          end
+
           nested(:active_job) do
             required(:dispatcher) { |val| !val.nil? }
             required(:job_options_contract) { |val| !val.nil? }

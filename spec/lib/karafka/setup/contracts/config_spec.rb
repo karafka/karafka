@@ -104,6 +104,9 @@ RSpec.describe_current do
             executor_class: Karafka::Processing::ConsumerGroups::Executor
           }
         },
+        statistics: {
+          decorator_class: Karafka::Instrumentation::Callbacks::ConsumerGroups::Decorator
+        },
         active_job: {
           dispatcher: Karafka::ActiveJob::Dispatcher.new,
           job_options_contract: Karafka::ActiveJob::JobOptionsContract.new,
@@ -815,6 +818,20 @@ RSpec.describe_current do
 
     context "when processing jobs_queue_class is missing" do
       before { config[:internal][:processing].delete(:jobs_queue_class) }
+
+      it { expect(contract.call(config)).not_to be_success }
+    end
+  end
+
+  context "when we validate internal statistics components" do
+    context "when statistics settings are missing" do
+      before { config[:internal].delete(:statistics) }
+
+      it { expect(contract.call(config)).not_to be_success }
+    end
+
+    context "when statistics decorator_class is missing" do
+      before { config[:internal][:statistics].delete(:decorator_class) }
 
       it { expect(contract.call(config)).not_to be_success }
     end
