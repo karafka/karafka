@@ -65,10 +65,8 @@ class Consumer < Karafka::BaseConsumer
       # Process a batch with abort - it should abort the transaction
       transaction do
         messages.each do |message|
-          # Try to produce something (should be rolled back). We produce synchronously so the
-          # transaction is fully registered at the coordinator before we abort - aborting with
-          # the very first produce still in flight is the exact race behind librdkafka#4849
-          produce_sync(
+          # Try to produce something (should be rolled back)
+          produce_async(
             topic: DT.topics[1],
             key: message.key,
             payload: "processed-#{message.raw_payload}"
@@ -80,6 +78,11 @@ class Consumer < Karafka::BaseConsumer
             key: message.key,
             segment_id: segment_id
           }
+
+          # Give the async produce a moment to register the transaction at the coordinator
+          # before we abort - aborting with the very first produce still in flight is the exact
+          # race behind librdkafka#4849 that can fail the abort EndTxn with INVALID_TXN_STATE
+          sleep(1)
 
           raise WaterDrop::AbortTransaction
         end
