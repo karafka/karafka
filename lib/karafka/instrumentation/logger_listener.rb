@@ -444,6 +444,10 @@ module Karafka
         when "callbacks.statistics.error"
           error "callbacks.statistics processing failed due to an error: #{details}"
           error backtrace
+        # Best-effort paused partitions lags refreshing failed (Pro); it will back off and retry
+        when "paused_lags.refresher.error"
+          error "Paused partitions lags refreshing failed due to an error: #{details}"
+          error backtrace
         when "callbacks.error.error"
           error "callbacks.error processing failed due to an error: #{details}"
           error backtrace

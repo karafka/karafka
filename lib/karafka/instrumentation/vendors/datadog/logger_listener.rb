@@ -129,6 +129,8 @@ module Karafka
               error "librdkafka internal error occurred: #{error}"
             when "callbacks.statistics.error"
               error "callbacks.statistics processing failed due to an error: #{error}"
+            when "paused_lags.refresher.error"
+              error "Paused partitions lags refreshing failed due to an error: #{error}"
             when "callbacks.error.error"
               error "callbacks.error processing failed due to an error: #{error}"
             # Those will only occur when retries in the client fail and when they did not stop
