@@ -105,7 +105,10 @@ RSpec.describe_current do
           }
         },
         statistics: {
-          decorator_class: Karafka::Instrumentation::Callbacks::ConsumerGroups::Decorator
+          decorator_class: Karafka::Instrumentation::Callbacks::ConsumerGroups::Decorator,
+          paused_refresh: {
+            interval: 0
+          }
         },
         active_job: {
           dispatcher: Karafka::ActiveJob::Dispatcher.new,
@@ -834,6 +837,30 @@ RSpec.describe_current do
       before { config[:internal][:statistics].delete(:decorator_class) }
 
       it { expect(contract.call(config)).not_to be_success }
+    end
+
+    context "when statistics paused_refresh interval is missing" do
+      before { config[:internal][:statistics][:paused_refresh].delete(:interval) }
+
+      it { expect(contract.call(config)).not_to be_success }
+    end
+
+    context "when statistics paused_refresh interval is negative" do
+      before { config[:internal][:statistics][:paused_refresh][:interval] = -1 }
+
+      it { expect(contract.call(config)).not_to be_success }
+    end
+
+    context "when statistics paused_refresh interval is not an integer" do
+      before { config[:internal][:statistics][:paused_refresh][:interval] = 1.5 }
+
+      it { expect(contract.call(config)).not_to be_success }
+    end
+
+    context "when statistics paused_refresh interval is a positive integer" do
+      before { config[:internal][:statistics][:paused_refresh][:interval] = 30_000 }
+
+      it { expect(contract.call(config)).to be_success }
     end
   end
 

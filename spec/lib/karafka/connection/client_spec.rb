@@ -47,6 +47,27 @@ RSpec.describe_current do
     end
   end
 
+  describe "#paused" do
+    it "expect to return empty hash when nothing was paused" do
+      expect(client.paused).to eq({})
+    end
+
+    context "when there are paused partitions" do
+      before do
+        paused_tpls = Hash.new { |h, k| h[k] = {} }
+        paused_tpls["topic1"][0] = instance_double(Rdkafka::Consumer::TopicPartitionList)
+        paused_tpls["topic1"][2] = instance_double(Rdkafka::Consumer::TopicPartitionList)
+        paused_tpls["topic2"] = {}
+
+        client.instance_variable_set(:@paused_tpls, paused_tpls)
+      end
+
+      it "expect to return a snapshot of paused topics with partitions skipping empty topics" do
+        expect(client.paused).to eq("topic1" => [0, 2])
+      end
+    end
+  end
+
   describe "#assignment_lost?" do
     let(:kafka) { instance_double(Rdkafka::Consumer) }
 

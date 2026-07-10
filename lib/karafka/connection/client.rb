@@ -312,6 +312,17 @@ module Karafka
         end
       end
 
+      # @return [Hash{String => Array<Integer>}] snapshot of the currently paused topics with
+      #   their paused partitions
+      # @note Low-level internal API used by the Pro paused partitions lags refreshing
+      def paused
+        @mutex.synchronize do
+          @paused_tpls.each_with_object({}) do |(topic, partitions), snapshot|
+            snapshot[topic] = partitions.keys unless partitions.empty?
+          end
+        end
+      end
+
       # Gracefully stops topic consumption.
       def stop
         # librdkafka has several constant issues when shutting down during rebalance. This is

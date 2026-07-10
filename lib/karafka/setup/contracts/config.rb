@@ -141,6 +141,10 @@ module Karafka
 
           nested(:statistics) do
             required(:decorator_class) { |val| !val.nil? }
+
+            nested(:paused_refresh) do
+              required(:interval) { |val| val.is_a?(Integer) && val >= 0 }
+            end
           end
 
           nested(:active_job) do
