@@ -48,6 +48,21 @@ module Karafka
     def initialize(kafka: {}, external_client: nil)
       @custom_kafka = kafka
       @external_client = external_client
+      @external_admin = false
+      @external_consumer = false
+
+      return unless external_client
+
+      client = external_client
+      client = client.wrapped if client.is_a?(Karafka::Connection::Proxy)
+
+      # Capability based routing resolved once upfront: rdkafka admin instances serve
+      # admin-based operations, any other external client is assumed consumer capable
+      if client.is_a?(Rdkafka::Admin)
+        @external_admin = true
+      else
+        @external_consumer = true
+      end
     end
 
     # No-op close to normalize the API surface.
@@ -400,7 +415,7 @@ module Karafka
     #   identity, including its `group.id`. External rdkafka admin instances are not used here
     #   as they are not capable of consumer operations - they are used by `#with_admin` instead.
     def with_consumer(settings = {})
-      return yield(Karafka::Connection::Proxy.new(@external_client)) if external_consumer?
+      return yield(Karafka::Connection::Proxy.new(@external_client)) if @external_consumer
 
       bind_id = SecureRandom.uuid
       consumer = nil
@@ -436,7 +451,7 @@ module Karafka
     #   clients of other types (consumers, producers) are not capable of admin operations, thus
     #   a dedicated admin instance is created for them as usual.
     def with_admin
-      return yield(Karafka::Connection::Proxy.new(@external_client)) if external_admin?
+      return yield(Karafka::Connection::Proxy.new(@external_client)) if @external_admin
 
       bind_id = SecureRandom.uuid
       admin = nil
@@ -460,25 +475,6 @@ module Karafka
     end
 
     private
-
-    # @return [Boolean] true when the external client is an rdkafka admin instance (raw or
-    #   proxied) capable of admin operations
-    def external_admin?
-      return false unless @external_client
-
-      client = @external_client
-      client = client.wrapped if client.is_a?(Karafka::Connection::Proxy)
-
-      client.is_a?(Rdkafka::Admin)
-    end
-
-    # @return [Boolean] true when the external client should be used for consumer operations.
-    #   Any external client that is not an rdkafka admin instance is assumed to be consumer
-    #   capable - it is the caller responsibility to provide a client that can handle the
-    #   invoked operations
-    def external_consumer?
-      !@external_client.nil? && !external_admin?
-    end
 
     # @return [Topics] topics admin operating within this instance context (custom kafka and
     #   external client carried over)
