@@ -41,10 +41,10 @@ module Karafka
           # Refreshes offsets and lags data of partitions that stayed paused for at least the
           # configured pause age, at most once per interval.
           #
-          # Runs on the listener threads via the `client.events_poll` event, so the committed
-          # offsets query happens on the thread that owns the client connection within its
-          # group identity. Pause state is tracked via the `client.pause` and `client.resume`
-          # instrumentation events, which fire on the same thread.
+          # Runs on the listener threads via the `client.events_poll` event, so the fetching
+          # happens on the thread that owns the client connection within its group identity.
+          # Pause state is tracked via the `client.pause` and `client.resume` instrumentation
+          # events, which fire on the same thread.
           #
           # On resume or revocation the partition data is dropped immediately, so stale values
           # never overlay live statistics and revoked partitions are never queried again.
@@ -59,6 +59,7 @@ module Karafka
             )
 
             def initialize
+              @fetcher = Fetcher.new
               @mutex = Mutex.new
               @states = Hash.new do |states, subscription_group_id|
                 states[subscription_group_id] = {
@@ -165,7 +166,7 @@ module Karafka
 
               return if long_paused.empty?
 
-              Registry.instance.update(client.name, refresh(client, long_paused))
+              Registry.instance.update(client.name, @fetcher.call(client, long_paused))
             end
 
             # @param state [Hash] subscription group state with pause timestamps
@@ -181,40 +182,6 @@ module Karafka
               end
 
               result
-            end
-
-            # Fetches committed offsets (one batched query) and end offsets (per partition) of
-            # given partitions, all via the client own connection: no dedicated instances and
-            # no extra Kafka connections are ever created.
-            #
-            # The end offset comes from the watermark query, which honors the consumer
-            # isolation level: under the default read_committed it is the last stable offset,
-            # the same reference the native librdkafka consumer lag derives from, so the
-            # compensated lags match the fetch-based ones also on transactional topics
-            #
-            # @param client [Karafka::Connection::Client]
-            # @param paused [Hash{String => Array<Integer>}]
-            # @return [Hash{String => Hash{Integer => Hash}}] refreshed data
-            def refresh(client, paused)
-              tpl = Rdkafka::Consumer::TopicPartitionList.new
-              paused.each { |topic, partitions| tpl.add_topic(topic, partitions) }
-
-              committed = client.committed(tpl)
-
-              data = {}
-
-              committed.to_h.each do |topic, partitions|
-                partitions.each do |partition|
-                  _, end_offset = client.query_watermark_offsets(topic, partition.partition)
-
-                  (data[topic] ||= {})[partition.partition] = {
-                    end_offset: end_offset,
-                    committed_offset: partition.offset || -1
-                  }
-                end
-              end
-
-              data
             end
           end
         end
