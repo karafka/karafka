@@ -108,7 +108,8 @@ RSpec.describe_current do
           consumer_groups: {
             decorator_class: Karafka::Instrumentation::Callbacks::ConsumerGroups::Decorator,
             lag_compensation: {
-              interval: 0
+              interval: 0,
+              pause_age: 30_000
             }
           }
         },
@@ -861,6 +862,24 @@ RSpec.describe_current do
 
     context "when statistics lag_compensation interval is a positive integer" do
       before { config[:internal][:statistics][:consumer_groups][:lag_compensation][:interval] = 30_000 }
+
+      it { expect(contract.call(config)).to be_success }
+    end
+
+    context "when statistics lag_compensation pause_age is missing" do
+      before { config[:internal][:statistics][:consumer_groups][:lag_compensation].delete(:pause_age) }
+
+      it { expect(contract.call(config)).not_to be_success }
+    end
+
+    context "when statistics lag_compensation pause_age is negative" do
+      before { config[:internal][:statistics][:consumer_groups][:lag_compensation][:pause_age] = -1 }
+
+      it { expect(contract.call(config)).not_to be_success }
+    end
+
+    context "when statistics lag_compensation pause_age is zero" do
+      before { config[:internal][:statistics][:consumer_groups][:lag_compensation][:pause_age] = 0 }
 
       it { expect(contract.call(config)).to be_success }
     end

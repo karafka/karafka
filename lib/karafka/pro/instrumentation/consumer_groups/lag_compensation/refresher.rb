@@ -38,8 +38,8 @@ module Karafka
         # report frozen statistics. The refresher periodically fetches fresh values and the
         # decorator overlays them onto the emitted statistics.
         module LagCompensation
-          # Refreshes offsets and lags data of partitions that stayed paused for at least one
-          # full interval, at most once per interval.
+          # Refreshes offsets and lags data of partitions that stayed paused for at least the
+          # configured pause age, at most once per interval.
           #
           # Runs on the listener threads via the `client.events_poll` event, so the committed
           # offsets query happens on the thread that owns the client connection within its
@@ -54,7 +54,8 @@ module Karafka
             include Karafka::Core::Helpers::Time
             include Helpers::ConfigImporter.new(
               monitor: %i[monitor],
-              interval: %i[internal statistics consumer_groups lag_compensation interval]
+              interval: %i[internal statistics consumer_groups lag_compensation interval],
+              pause_age: %i[internal statistics consumer_groups lag_compensation pause_age]
             )
 
             def initialize
@@ -102,7 +103,7 @@ module Karafka
             end
 
             # Once per interval refreshes the data of all the partitions that stayed paused
-            # for at least one full interval
+            # for at least the configured pause age
             #
             # @param event [Karafka::Core::Monitoring::Event] event with the client
             def on_client_events_poll(event)
@@ -169,9 +170,9 @@ module Karafka
 
             # @param state [Hash] subscription group state with pause timestamps
             # @return [Hash{String => Array<Integer>}] partitions that stayed paused for at
-            #   least one full refresh interval
+            #   least the configured pause age
             def long_paused_for(state)
-              threshold = monotonic_now - interval
+              threshold = monotonic_now - pause_age
               result = {}
 
               state[:paused].each do |topic, partitions|

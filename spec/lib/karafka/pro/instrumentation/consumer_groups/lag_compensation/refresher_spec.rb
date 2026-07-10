@@ -72,6 +72,7 @@ RSpec.describe_current do
 
   before do
     Karafka::App.config.internal.statistics.consumer_groups.lag_compensation.interval = 1
+    Karafka::App.config.internal.statistics.consumer_groups.lag_compensation.pause_age = 1
 
     allow(Karafka::Admin::Topics).to receive(:read_partition_offsets) do |specs, isolation_level: nil|
       specs.flat_map do |topic, partition_specs|
@@ -84,6 +85,7 @@ RSpec.describe_current do
 
   after do
     Karafka::App.config.internal.statistics.consumer_groups.lag_compensation.interval = 0
+    Karafka::App.config.internal.statistics.consumer_groups.lag_compensation.pause_age = 30_000
     registry.evict(client_name)
   end
 
@@ -122,7 +124,7 @@ RSpec.describe_current do
       end
     end
 
-    context "when a partition was paused for less than the interval" do
+    context "when a partition was paused for less than the pause age" do
       it "does not store anything" do
         # First tick makes the follow-up tick due-gated, so age the state first
         refresher.on_client_events_poll(tick_event)
@@ -135,7 +137,7 @@ RSpec.describe_current do
       end
     end
 
-    context "when a partition stayed paused for at least the interval" do
+    context "when a partition stayed paused for at least the pause age" do
       it "queries and stores refreshed data" do
         refresher.on_client_pause(pause_event)
         age_pause
@@ -148,7 +150,10 @@ RSpec.describe_current do
     end
 
     context "when the refresh is not due yet" do
-      before { Karafka::App.config.internal.statistics.consumer_groups.lag_compensation.interval = 10_000 }
+      before do
+        Karafka::App.config.internal.statistics.consumer_groups.lag_compensation.interval = 10_000
+        Karafka::App.config.internal.statistics.consumer_groups.lag_compensation.pause_age = 10_000
+      end
 
       it "does not store anything despite a long-paused partition" do
         refresher.on_client_pause(pause_event)

@@ -145,6 +145,7 @@ module Karafka
 
               nested(:lag_compensation) do
                 required(:interval) { |val| val.is_a?(Integer) && val >= 0 }
+                required(:pause_age) { |val| val.is_a?(Integer) && val >= 0 }
               end
             end
           end

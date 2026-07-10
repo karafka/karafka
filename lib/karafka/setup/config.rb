@@ -374,6 +374,11 @@ module Karafka
               # option interval [Integer] how often (ms) at most to refresh watermarks and lags
               #   of long-paused partitions. 0 disables the feature entirely.
               setting :interval, default: 0
+
+              # option pause_age [Integer] how long (ms) a partition needs to stay paused to
+              #   qualify for the compensation. Short pause/resume cycles reset the clock and
+              #   never qualify. 0 means any paused partition qualifies on the nearest refresh.
+              setting :pause_age, default: 30_000
             end
           end
         end
