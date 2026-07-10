@@ -38,18 +38,30 @@ module Karafka
         # dedicated instances are created.
         #
         # A partition is considered long-paused when it was paused during two consecutive
-        # refresh ticks, so no timestamps tracking is needed. Errors are ignored (values stay
-        # stale until the next successful refresh) with an exponentially backed off retry.
+        # refresh ticks, so no per-partition pause timestamps tracking is needed. Errors never
+        # propagate (values stay stale until the next successful refresh) but are instrumented
+        # and retried with an exponentially backed off delay.
+        #
+        # A single tick refreshes at most `MAX_PARTITIONS_PER_TICK` partitions, cycling through
+        # the remaining ones round-robin on the following ticks, so a refresh can never stall
+        # the listener thread for an extended time regardless of how many partitions are paused.
         class Refresher
           include Karafka::Core::Helpers::Time
           include Helpers::ConfigImporter.new(
+            monitor: %i[monitor],
             interval: %i[internal statistics paused_refresh interval]
           )
 
-          # Max multiplier of the interval used for the errors backoff
-          MAX_BACKOFF_MULTIPLIER = 8
+          # Max exponent of the interval based errors backoff (2^3 => up to 8x the interval).
+          # The counter itself is capped at this value so it cannot grow unbounded
+          MAX_BACKOFF_EXPONENT = 3
 
-          private_constant :MAX_BACKOFF_MULTIPLIER
+          # Max number of partitions queried during a single tick. The watermark queries are
+          # sequential blocking broker roundtrips on the listener thread, so we bound the per
+          # tick work and round-robin the remainder across the following ticks
+          MAX_PARTITIONS_PER_TICK = 20
+
+          private_constant :MAX_BACKOFF_EXPONENT, :MAX_PARTITIONS_PER_TICK
 
           def initialize
             @mutex = Mutex.new
@@ -61,6 +73,10 @@ module Karafka
           #
           # @param event [Karafka::Core::Monitoring::Event] event with the client
           def on_client_events_poll(event)
+            # Never run during shutdown or quieting: blocking broker queries at that time would
+            # eat into the shutdown time budget for no benefit
+            return if Karafka::App.done?
+
             client = event[:caller]
             state = state_for(event[:subscription_group].id)
 
@@ -73,19 +89,41 @@ module Karafka
             state[:next_at] = monotonic_now + interval
             state[:client_name] = client.name
 
-            return if long_paused.empty?
+            # Drop data of partitions that are no longer paused so stale values never overlay
+            # live librdkafka statistics of partitions that resumed and are actively consumed
+            Registry.instance.retain(client.name, paused_now)
 
-            Registry.instance.update(client.name, refresh(client, long_paused))
+            if long_paused.empty?
+              # A completed tick with nothing to refresh means previous errors are not relevant
+              # anymore and the next error should start the backoff ladder from the beginning
+              state[:failures] = 0
+
+              return
+            end
+
+            Registry.instance.update(
+              client.name,
+              refresh(client, batch_for(state, long_paused))
+            )
 
             state[:failures] = 0
-          rescue
+          rescue => e
             return unless state
 
             # Refreshing is a best-effort operation: values stay stale until the next successful
-            # run, so we only back off to not hammer an unhealthy cluster
-            state[:failures] += 1
-            backoff = interval * [2**state[:failures], MAX_BACKOFF_MULTIPLIER].min
-            state[:next_at] = monotonic_now + backoff
+            # run, so we only back off to not hammer an unhealthy cluster. The counter is capped
+            # so it cannot grow unbounded across a long process lifetime
+            state[:failures] = [state[:failures] + 1, MAX_BACKOFF_EXPONENT].min
+            state[:next_at] = monotonic_now + (interval * (2**state[:failures]))
+
+            # We swallow and back off but errors are still instrumented, so persistent failures
+            # (missing ACLs, removed topics, etc) remain observable
+            monitor.instrument(
+              "error.occurred",
+              caller: self,
+              error: e,
+              type: "paused_lags.refresher.error"
+            )
           end
 
           # Expires all the refreshed data and pause tracking of a client on a rebalance, as
@@ -112,9 +150,30 @@ module Karafka
                 next_at: 0,
                 previous_paused: {},
                 failures: 0,
+                cursor: 0,
                 client_name: nil
               }
             end
+          end
+
+          # Selects at most `MAX_PARTITIONS_PER_TICK` partitions to refresh during this tick,
+          # cycling through all the long-paused partitions round-robin across consecutive ticks
+          #
+          # @param state [Hash] subscription group state (cursor tracking)
+          # @param long_paused [Hash{String => Array<Integer>}] all long-paused partitions
+          # @return [Hash{String => Array<Integer>}] partitions to refresh in this tick
+          def batch_for(state, long_paused)
+            pairs = long_paused.flat_map do |topic, partitions|
+              partitions.map { |partition| [topic, partition] }
+            end
+
+            if pairs.size > MAX_PARTITIONS_PER_TICK
+              start = state[:cursor] % pairs.size
+              state[:cursor] = (start + MAX_PARTITIONS_PER_TICK) % pairs.size
+              pairs = pairs.rotate(start).first(MAX_PARTITIONS_PER_TICK)
+            end
+
+            pairs.group_by(&:first).transform_values { |group| group.map(&:last) }
           end
 
           # @param previous [Hash{String => Array<Integer>}] paused during the previous tick

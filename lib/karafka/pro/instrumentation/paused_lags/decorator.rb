@@ -44,6 +44,16 @@ module Karafka
             interval: %i[internal statistics paused_refresh interval]
           )
 
+          # Multiplier of the interval after which stored data is considered expired. It must
+          # exceed the refresher max errors backoff (8x the interval) plus the events polling
+          # tick granularity slack, otherwise a single transient refresh error would make the
+          # overlay flap between refreshed and stale librdkafka values, producing bogus delta
+          # spikes downstream. Expiry here is only a safety net: entries are actively removed
+          # on resume and on rebalances
+          TTL_INTERVAL_MULTIPLIER = 10
+
+          private_constant :TTL_INTERVAL_MULTIPLIER
+
           # @param statistics [Hash] raw librdkafka statistics
           # @return [Hash] decorated statistics with refreshed paused partitions data
           def call(statistics)
@@ -59,8 +69,7 @@ module Karafka
           #
           # @param statistics [Hash] raw librdkafka statistics
           def overlay(statistics)
-            # Entries older than two intervals are considered expired (missed refresh)
-            data = Registry.instance.fetch(statistics["name"], interval * 2)
+            data = Registry.instance.fetch(statistics["name"], interval * TTL_INTERVAL_MULTIPLIER)
 
             return unless data
 

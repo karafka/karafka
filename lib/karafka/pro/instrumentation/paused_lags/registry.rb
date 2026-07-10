@@ -43,19 +43,70 @@ module Karafka
           include Singleton
           include Karafka::Core::Helpers::Time
 
+          # Used to compare against without allocations when a topic has no paused partitions
+          EMPTY_ARRAY = [].freeze
+
+          private_constant :EMPTY_ARRAY
+
           def initialize
             @mutex = Mutex.new
             @clients = {}
           end
 
-          # Stores refreshed data for a given client
+          # Stores refreshed data for a given client, merging it with any previously stored
+          # partitions data. Merging (instead of replacing) is required because the refresher
+          # queries at most a batch of partitions per tick, round-robining through the rest.
+          # Data of partitions that resumed is removed via `#retain`.
           #
           # @param client_name [String] rdkafka client name (matches statistics `name` field)
           # @param data [Hash{String => Hash{Integer => Hash}}] topics with partitions with
           #   `:lo_offset`, `:hi_offset` and `:committed_offset` values
           def update(client_name, data)
             @mutex.synchronize do
-              @clients[client_name] = { at: monotonic_now, data: data }
+              existing = @clients[client_name]
+
+              # Always rebuild into fresh hashes: readers hold references to previously fetched
+              # data, so stored structures are never mutated in place
+              merged = {}
+
+              existing&.fetch(:data)&.each do |topic, partitions|
+                merged[topic] = partitions.dup
+              end
+
+              data.each do |topic, partitions|
+                merged[topic] = (merged[topic] || {}).merge(partitions)
+              end
+
+              @clients[client_name] = { at: monotonic_now, data: merged }
+            end
+          end
+
+          # Removes stored data of all the partitions that are not in the given paused set, so
+          # values of partitions that resumed never overlay their live statistics
+          #
+          # @param client_name [String] rdkafka client name
+          # @param paused [Hash{String => Array<Integer>}] currently paused topics with
+          #   partitions
+          def retain(client_name, paused)
+            @mutex.synchronize do
+              entry = @clients[client_name]
+
+              return unless entry
+
+              filtered = {}
+
+              entry.fetch(:data).each do |topic, partitions|
+                paused_partitions = paused[topic] || EMPTY_ARRAY
+                kept = partitions.slice(*paused_partitions)
+
+                filtered[topic] = kept unless kept.empty?
+              end
+
+              if filtered.empty?
+                @clients.delete(client_name)
+              else
+                @clients[client_name] = { at: entry.fetch(:at), data: filtered }
+              end
             end
           end
 

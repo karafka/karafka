@@ -154,6 +154,109 @@ RSpec.describe_current do
         expect { refresher.on_client_events_poll(event) }.not_to raise_error
         expect(registry.fetch(client_name, 1_000)).to be_nil
       end
+
+      it "instruments the error with a dedicated type" do
+        refresher.on_client_events_poll(event)
+        next_tick
+
+        expect(Karafka.monitor)
+          .to receive(:instrument)
+          .with(
+            "error.occurred",
+            hash_including(type: "paused_lags.refresher.error")
+          )
+
+        refresher.on_client_events_poll(event)
+      end
+    end
+
+    context "when the process is done" do
+      before { allow(Karafka::App).to receive(:done?).and_return(true) }
+
+      it "does not query nor store anything" do
+        refresher.on_client_events_poll(event)
+        next_tick
+        refresher.on_client_events_poll(event)
+
+        expect(registry.fetch(client_name, 1_000)).to be_nil
+      end
+    end
+
+    context "when a previously refreshed partition resumes" do
+      it "evicts its data on the next due tick" do
+        refresher.on_client_events_poll(event)
+        next_tick
+        refresher.on_client_events_poll(event)
+
+        expect(registry.fetch(client_name, 1_000)).not_to be_nil
+
+        allow(client).to receive(:paused).and_return({})
+        next_tick
+        refresher.on_client_events_poll(event)
+
+        expect(registry.fetch(client_name, 1_000)).to be_nil
+      end
+    end
+
+    context "when there was a failure followed by a tick with nothing long-paused" do
+      before { allow(client).to receive(:committed).and_raise(StandardError) }
+
+      it "resets the failures counter" do
+        refresher.on_client_events_poll(event)
+        next_tick
+        refresher.on_client_events_poll(event)
+
+        allow(client).to receive(:paused).and_return({})
+        # First failure backoff is 2x the 1ms interval, so this makes the next tick due
+        next_tick
+        refresher.on_client_events_poll(event)
+
+        state = refresher.instance_variable_get(:@states).fetch(sg_id)
+
+        expect(state.fetch(:failures)).to eq(0)
+      end
+    end
+
+    context "when more partitions are long-paused than the per tick cap" do
+      let(:partitions) { (0...25).to_a }
+      let(:paused) { { "topic" => partitions } }
+
+      let(:committed_tpl) do
+        instance_double(Rdkafka::Consumer::TopicPartitionList).tap do |tpl|
+          allow(tpl).to receive(:to_h) do
+            { "topic" => @last_tpl_partitions.map { |p| committed_partition_for(p) } }
+          end
+        end
+      end
+
+      before do
+        allow(client).to receive(:committed) do |tpl|
+          @last_tpl_partitions = tpl.to_h.fetch("topic").map(&:partition)
+          committed_tpl
+        end
+      end
+
+      def committed_partition_for(partition)
+        instance_double(Rdkafka::Consumer::Partition, partition: partition, offset: 5)
+      end
+
+      it "caps a single tick and covers the remainder on the following ticks" do
+        refresher.on_client_events_poll(event)
+        next_tick
+        refresher.on_client_events_poll(event)
+
+        stored = registry.fetch(client_name, 1_000).fetch("topic")
+
+        expect(stored.size).to eq(20)
+
+        next_tick
+        refresher.on_client_events_poll(event)
+
+        stored = registry.fetch(client_name, 1_000).fetch("topic")
+
+        expect(stored.size).to eq(25)
+        expect(stored.keys.sort).to eq(partitions)
+      end
     end
   end
 

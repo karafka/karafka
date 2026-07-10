@@ -55,13 +55,60 @@ RSpec.describe_current do
       expect(registry.fetch(client_name, 1)).to be_nil
     end
 
-    it "replaces previously stored data" do
+    it "merges new data with previously stored partitions" do
+      registry.update(client_name, data)
+
+      other = { "topic" => { 1 => { lo_offset: 0, hi_offset: 20, committed_offset: 15 } } }
+      registry.update(client_name, other)
+
+      expect(registry.fetch(client_name, 1_000)).to eq(
+        "topic" => {
+          0 => { lo_offset: 0, hi_offset: 10, committed_offset: 5 },
+          1 => { lo_offset: 0, hi_offset: 20, committed_offset: 15 }
+        }
+      )
+    end
+
+    it "overwrites data of the same partition on merge" do
       registry.update(client_name, data)
 
       newer = { "topic" => { 0 => { lo_offset: 0, hi_offset: 20, committed_offset: 15 } } }
       registry.update(client_name, newer)
 
       expect(registry.fetch(client_name, 1_000)).to eq(newer)
+    end
+  end
+
+  describe "#retain" do
+    before { registry.update(client_name, data) }
+
+    it "keeps data of partitions that are still paused" do
+      registry.retain(client_name, { "topic" => [0] })
+
+      expect(registry.fetch(client_name, 1_000)).to eq(data)
+    end
+
+    it "removes data of partitions that are no longer paused" do
+      registry.update(
+        client_name,
+        { "topic" => { 1 => { lo_offset: 0, hi_offset: 20, committed_offset: 15 } } }
+      )
+
+      registry.retain(client_name, { "topic" => [1] })
+
+      expect(registry.fetch(client_name, 1_000)).to eq(
+        "topic" => { 1 => { lo_offset: 0, hi_offset: 20, committed_offset: 15 } }
+      )
+    end
+
+    it "removes the whole client entry when nothing remains paused" do
+      registry.retain(client_name, {})
+
+      expect(registry.fetch(client_name, 1_000)).to be_nil
+    end
+
+    it "does not raise when the client has no data" do
+      expect { registry.retain(SecureRandom.hex(6), { "topic" => [0] }) }.not_to raise_error
     end
   end
 
