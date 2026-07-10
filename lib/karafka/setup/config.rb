@@ -354,6 +354,15 @@ module Karafka
           setting :parser, default: Messages::Parser.new
         end
 
+        # Things related to librdkafka statistics decoration prior to their emission
+        setting :statistics do
+          # option decorator_class [Class] class used to decorate raw librdkafka statistics
+          #   (adds delta/freeze-duration values) before `statistics.emitted` is instrumented.
+          #   Exposed so it can be replaced with a custom decorator (e.g. one that also enriches
+          #   or corrects specific values) without touching the callback that uses it.
+          setting :decorator_class, default: Instrumentation::Callbacks::ConsumerGroups::Decorator
+        end
+
         # Karafka components for ActiveJob
         setting :active_job do
           # option dispatcher [Karafka::ActiveJob::Dispatcher] default dispatcher for ActiveJob

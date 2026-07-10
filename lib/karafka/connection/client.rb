@@ -28,6 +28,12 @@ module Karafka
       # @return [String] id of the client
       attr_reader :id
 
+      # @return [Karafka::Connection::Proxy, nil] proxy wrapping the underlying rdkafka consumer
+      #   instance or nil when the connection was not yet established. Used by the admin APIs
+      #   external client support to run admin operations on top of a running consumer
+      #   connection. Low-level internal API.
+      attr_reader :wrapped_kafka
+
       # How many times should we retry polling in case of a failure
       MAX_POLL_RETRIES = 20
 
