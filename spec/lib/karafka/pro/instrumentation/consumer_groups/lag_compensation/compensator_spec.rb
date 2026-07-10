@@ -70,20 +70,15 @@ RSpec.describe_current do
   end
 
   context "when refreshed end offset is newer than the statistics one" do
-    before do
-      registry.update(
-        client_name,
-        { "topic" => { 0 => { end_offset: 95, committed_offset: 40 } } }
-      )
-    end
+    before { registry.update(client_name, { "topic" => { 0 => 95 } }) }
 
-    it "compensates offsets, committed offset and derived lags" do
+    it "compensates offsets and lags derived from the statistics own committed and stored" do
       compensate
 
       expect(partition_stats["ls_offset"]).to eq(95)
       expect(partition_stats["hi_offset"]).to eq(95)
-      expect(partition_stats["committed_offset"]).to eq(40)
-      expect(partition_stats["consumer_lag"]).to eq(55)
+      expect(partition_stats["committed_offset"]).to eq(5)
+      expect(partition_stats["consumer_lag"]).to eq(90)
       expect(partition_stats["consumer_lag_stored"]).to eq(90)
     end
   end
@@ -92,10 +87,7 @@ RSpec.describe_current do
     before do
       partition_stats["hi_offset"] = 20
 
-      registry.update(
-        client_name,
-        { "topic" => { 0 => { end_offset: 15, committed_offset: 7 } } }
-      )
+      registry.update(client_name, { "topic" => { 0 => 15 } })
     end
 
     it "compensates the ls offset and lags without lowering the high watermark" do
@@ -103,34 +95,23 @@ RSpec.describe_current do
 
       expect(partition_stats["ls_offset"]).to eq(15)
       expect(partition_stats["hi_offset"]).to eq(20)
-      expect(partition_stats["consumer_lag"]).to eq(8)
+      expect(partition_stats["consumer_lag"]).to eq(10)
     end
   end
 
   context "when refreshed end offset equals the one from the statistics" do
-    before do
-      registry.update(
-        client_name,
-        { "topic" => { 0 => { end_offset: 10, committed_offset: 7 } } }
-      )
-    end
+    before { registry.update(client_name, { "topic" => { 0 => 10 } }) }
 
     it "does not change anything as there is no new data in the topic" do
       compensate
 
-      expect(partition_stats["committed_offset"]).to eq(5)
       expect(partition_stats["consumer_lag"]).to eq(5)
       expect(partition_stats["ls_offset"]).to eq(10)
     end
   end
 
   context "when refreshed end offset is lower than the one from the statistics" do
-    before do
-      registry.update(
-        client_name,
-        { "topic" => { 0 => { end_offset: 8, committed_offset: 7 } } }
-      )
-    end
+    before { registry.update(client_name, { "topic" => { 0 => 8 } }) }
 
     it "does not change anything as the statistics are more fresh" do
       compensate
@@ -140,19 +121,18 @@ RSpec.describe_current do
     end
   end
 
-  context "when refreshed committed offset is -1" do
+  context "when the statistics committed offset is negative" do
     before do
-      registry.update(
-        client_name,
-        { "topic" => { 0 => { end_offset: 95, committed_offset: -1 } } }
-      )
+      partition_stats["committed_offset"] = -1_001
+
+      registry.update(client_name, { "topic" => { 0 => 95 } })
     end
 
-    it "compensates offsets but leaves committed offset and committed based lag untouched" do
+    it "compensates offsets but leaves the committed based lag untouched" do
       compensate
 
       expect(partition_stats["ls_offset"]).to eq(95)
-      expect(partition_stats["committed_offset"]).to eq(5)
+      expect(partition_stats["committed_offset"]).to eq(-1_001)
       expect(partition_stats["consumer_lag"]).to eq(5)
       expect(partition_stats["consumer_lag_stored"]).to eq(90)
     end
@@ -162,10 +142,7 @@ RSpec.describe_current do
     before do
       partition_stats["stored_offset"] = -1
 
-      registry.update(
-        client_name,
-        { "topic" => { 0 => { end_offset: 95, committed_offset: 40 } } }
-      )
+      registry.update(client_name, { "topic" => { 0 => 95 } })
     end
 
     it "does not compensate the stored based lag" do
@@ -176,12 +153,7 @@ RSpec.describe_current do
   end
 
   context "when refreshed data references a partition absent in statistics" do
-    before do
-      registry.update(
-        client_name,
-        { "topic" => { 5 => { end_offset: 95, committed_offset: 40 } } }
-      )
-    end
+    before { registry.update(client_name, { "topic" => { 5 => 95 } }) }
 
     it "does not raise nor change anything" do
       expect { compensate }.not_to raise_error

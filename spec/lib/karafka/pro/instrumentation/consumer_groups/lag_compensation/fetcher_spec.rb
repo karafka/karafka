@@ -33,24 +33,7 @@ RSpec.describe_current do
 
   let(:fetcher) { described_class.new }
   let(:paused) { { "topic" => [0, 1] } }
-
-  let(:committed_partitions) do
-    [
-      instance_double(Rdkafka::Consumer::Partition, partition: 0, offset: 5),
-      instance_double(Rdkafka::Consumer::Partition, partition: 1, offset: nil)
-    ]
-  end
-
-  let(:committed_tpl) do
-    instance_double(
-      Rdkafka::Consumer::TopicPartitionList,
-      to_h: { "topic" => committed_partitions }
-    )
-  end
-
-  let(:client) do
-    instance_double(Karafka::Connection::Client, committed: committed_tpl)
-  end
+  let(:client) { instance_double(Karafka::Connection::Client) }
 
   before do
     allow(client).to receive(:query_watermark_offsets) do |_topic, partition|
@@ -58,20 +41,13 @@ RSpec.describe_current do
     end
   end
 
-  it "fetches end offsets per partition and committed offsets in one batched query" do
-    expect(fetched).to eq(
-      "topic" => {
-        0 => { end_offset: 90, committed_offset: 5 },
-        1 => { end_offset: 91, committed_offset: -1 }
-      }
-    )
+  it "fetches end offsets of all the requested partitions" do
+    expect(fetched).to eq("topic" => { 0 => 90, 1 => 91 })
   end
 
-  it "queries committed offsets with a tpl covering all the paused partitions" do
+  it "does not query anything else than the watermarks" do
     fetched
 
-    expect(client).to have_received(:committed) do |tpl|
-      expect(tpl.to_h.fetch("topic").map(&:partition)).to eq([0, 1])
-    end
+    expect(client).to have_received(:query_watermark_offsets).twice
   end
 end

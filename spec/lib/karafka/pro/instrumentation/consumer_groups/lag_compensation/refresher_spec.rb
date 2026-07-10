@@ -36,22 +36,10 @@ RSpec.describe_current do
   let(:registry) { Karafka::Pro::Instrumentation::ConsumerGroups::LagCompensation::Registry.instance }
   let(:subscription_group) { instance_double(Karafka::Routing::SubscriptionGroup, id: sg_id) }
 
-  let(:committed_partition) do
-    instance_double(Rdkafka::Consumer::Partition, partition: 0, offset: 5)
-  end
-
-  let(:committed_tpl) do
-    instance_double(
-      Rdkafka::Consumer::TopicPartitionList,
-      to_h: { "topic" => [committed_partition] }
-    )
-  end
-
   let(:client) do
     instance_double(
       Karafka::Connection::Client,
       name: client_name,
-      committed: committed_tpl,
       query_watermark_offsets: [1, 95]
     )
   end
@@ -137,7 +125,7 @@ RSpec.describe_current do
         refresher.on_client_events_poll(tick_event)
 
         expect(registry.fetch(client_name)).to eq(
-          "topic" => { 0 => { end_offset: 95, committed_offset: 5 } }
+          "topic" => { 0 => 95 }
         )
       end
     end
@@ -168,24 +156,8 @@ RSpec.describe_current do
       end
     end
 
-    context "when committed offset is not present" do
-      let(:committed_partition) do
-        instance_double(Rdkafka::Consumer::Partition, partition: 0, offset: nil)
-      end
-
-      it "stores -1 as the committed offset" do
-        refresher.on_client_pause(pause_event)
-        age_pause
-        refresher.on_client_events_poll(tick_event)
-
-        expect(registry.fetch(client_name)).to eq(
-          "topic" => { 0 => { end_offset: 95, committed_offset: -1 } }
-        )
-      end
-    end
-
     context "when querying fails" do
-      before { allow(client).to receive(:committed).and_raise(StandardError) }
+      before { allow(client).to receive(:query_watermark_offsets).and_raise(StandardError) }
 
       it "does not raise and does not store anything" do
         refresher.on_client_pause(pause_event)
@@ -241,18 +213,11 @@ RSpec.describe_current do
       refresher.on_client_pause(pause_event(partition: 1))
       age_pause
 
-      allow(committed_tpl).to receive(:to_h).and_return(
-        "topic" => [
-          instance_double(Rdkafka::Consumer::Partition, partition: 0, offset: 5),
-          instance_double(Rdkafka::Consumer::Partition, partition: 1, offset: 7)
-        ]
-      )
-
       refresher.on_client_events_poll(tick_event)
       refresher.on_client_resume(resume_event(partition: 0))
 
       expect(registry.fetch(client_name)).to eq(
-        "topic" => { 1 => { end_offset: 95, committed_offset: 7 } }
+        "topic" => { 1 => 95 }
       )
     end
 

@@ -67,7 +67,7 @@ RSpec.describe_current do
     before do
       registry.update(
         client_name,
-        { "topic" => { 0 => { end_offset: 95, committed_offset: 40 } } }
+        { "topic" => { 0 => 95 } }
       )
     end
 
@@ -75,7 +75,7 @@ RSpec.describe_current do
       partition = decorated["topics"]["topic"]["partitions"]["0"]
 
       expect(partition["ls_offset"]).to eq(95)
-      expect(partition["consumer_lag"]).to eq(55)
+      expect(partition["consumer_lag"]).to eq(90)
     end
   end
 end

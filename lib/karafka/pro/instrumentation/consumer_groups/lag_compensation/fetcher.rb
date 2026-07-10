@@ -34,10 +34,13 @@ module Karafka
       # Instrumentation components for consumer groups based operation
       module ConsumerGroups
         module LagCompensation
-          # Fetches the offsets data needed for the lag compensation of given partitions, all
-          # via the client own connection: no dedicated instances and no extra Kafka
-          # connections are ever created. Committed offsets come in one batched query and the
-          # end offset per partition via the watermark query.
+          # Fetches the end offsets of given partitions via the client own connection: no
+          # dedicated instances and no extra Kafka connections are ever created.
+          #
+          # End offsets are the only thing the compensation needs from the broker: committed
+          # and stored offsets of paused partitions are maintained by the client commits (not
+          # by fetches), so their statistics values stay accurate while paused and lags can be
+          # derived from them at compensation time.
           #
           # The end offset honors the consumer isolation level: under the default
           # read_committed it is the last stable offset, the same reference the native
@@ -46,24 +49,16 @@ module Karafka
           class Fetcher
             # @param client [Karafka::Connection::Client]
             # @param paused [Hash{String => Array<Integer>}] paused topics with partitions
-            # @return [Hash{String => Hash{Integer => Hash}}] fetched data with `:end_offset`
-            #   and `:committed_offset` per partition
+            # @return [Hash{String => Hash{Integer => Integer}}] end offsets of the requested
+            #   partitions
             def call(client, paused)
-              tpl = Rdkafka::Consumer::TopicPartitionList.new
-              paused.each { |topic, partitions| tpl.add_topic(topic, partitions) }
-
-              committed = client.committed(tpl)
-
               data = {}
 
-              committed.to_h.each do |topic, partitions|
+              paused.each do |topic, partitions|
                 partitions.each do |partition|
-                  _, end_offset = client.query_watermark_offsets(topic, partition.partition)
+                  _, end_offset = client.query_watermark_offsets(topic, partition)
 
-                  (data[topic] ||= {})[partition.partition] = {
-                    end_offset: end_offset,
-                    committed_offset: partition.offset || -1
-                  }
+                  (data[topic] ||= {})[partition] = end_offset
                 end
               end
 
