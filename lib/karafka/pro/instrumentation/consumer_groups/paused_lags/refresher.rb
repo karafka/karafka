@@ -178,8 +178,10 @@ module Karafka
               result
             end
 
-            # Fetches committed offsets (one batched query) and watermarks (per partition) for
-            # given partitions via the client own connection
+            # Fetches committed offsets and watermarks of given partitions, each in a batched
+            # query: committed offsets via the client own connection (group scoped) and
+            # watermarks via the batched admin API, so the number of broker roundtrips stays
+            # constant regardless of how many partitions are paused
             #
             # @param client [Karafka::Connection::Client]
             # @param paused [Hash{String => Array<Integer>}]
@@ -188,15 +190,20 @@ module Karafka
               tpl = Rdkafka::Consumer::TopicPartitionList.new
               paused.each { |topic, partitions| tpl.add_topic(topic, partitions) }
 
+              committed = client.committed(tpl)
+              watermarks = ::Karafka::Admin::Topics.read_watermark_offsets(paused)
+
               data = {}
 
-              client.committed(tpl).to_h.each do |topic, partitions|
+              committed.to_h.each do |topic, partitions|
                 partitions.each do |partition|
-                  low, high = client.query_watermark_offsets(topic, partition.partition)
+                  watermark = watermarks.dig(topic, partition.partition)
+
+                  next unless watermark
 
                   (data[topic] ||= {})[partition.partition] = {
-                    lo_offset: low,
-                    hi_offset: high,
+                    lo_offset: watermark.first,
+                    hi_offset: watermark.last,
                     committed_offset: partition.offset || -1
                   }
                 end

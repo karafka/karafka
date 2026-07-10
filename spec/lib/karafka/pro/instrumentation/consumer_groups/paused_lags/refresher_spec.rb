@@ -51,8 +51,7 @@ RSpec.describe_current do
     instance_double(
       Karafka::Connection::Client,
       name: client_name,
-      committed: committed_tpl,
-      query_watermark_offsets: [1, 100]
+      committed: committed_tpl
     )
   end
 
@@ -71,7 +70,13 @@ RSpec.describe_current do
     )
   end
 
-  before { Karafka::App.config.internal.statistics.consumer_groups.paused_refresh.interval = 1 }
+  before do
+    Karafka::App.config.internal.statistics.consumer_groups.paused_refresh.interval = 1
+
+    allow(Karafka::Admin::Topics)
+      .to receive(:read_watermark_offsets)
+      .and_return("topic" => { 0 => [1, 100], 1 => [1, 100] })
+  end
 
   after do
     Karafka::App.config.internal.statistics.consumer_groups.paused_refresh.interval = 0
