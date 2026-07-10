@@ -50,8 +50,11 @@ module Karafka
     #   admin.read_lags_with_offsets({ 'my-group' => ['events'] })
     def initialize(kafka: {}, external_client: nil)
       @custom_kafka = kafka
+      @external_client = nil
       @external_admin = false
       @external_consumer = false
+
+      return unless external_client
 
       # Resolve the raw rdkafka handle upfront: a running consumer connection client exposes it
       # via its wrapping proxy and a proxy via #wrapped. This way any of those forms can be
@@ -65,8 +68,6 @@ module Karafka
       end
 
       @external_client = external_client
-
-      return unless external_client
 
       # Capability based routing resolved once upfront: rdkafka admin instances serve
       # admin-based operations, any other external client is assumed consumer capable
