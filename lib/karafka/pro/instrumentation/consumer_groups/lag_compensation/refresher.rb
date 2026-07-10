@@ -183,11 +183,14 @@ module Karafka
               result
             end
 
-            # Fetches committed offsets, high watermarks and last stable offsets of given
-            # partitions, each in a single batched query: committed offsets via the client own
-            # connection (group scoped) and the offsets via the batched admin API, so the
-            # number of broker roundtrips stays constant regardless of how many partitions are
-            # paused
+            # Fetches committed offsets (one batched query) and end offsets (per partition) of
+            # given partitions, all via the client own connection: no dedicated instances and
+            # no extra Kafka connections are ever created.
+            #
+            # The end offset comes from the watermark query, which honors the consumer
+            # isolation level: under the default read_committed it is the last stable offset,
+            # the same reference the native librdkafka consumer lag derives from, so the
+            # compensated lags match the fetch-based ones also on transactional topics
             #
             # @param client [Karafka::Connection::Client]
             # @param paused [Hash{String => Array<Integer>}]
@@ -198,52 +201,20 @@ module Karafka
 
               committed = client.committed(tpl)
 
-              specs = paused.transform_values do |partitions|
-                partitions.map { |partition| { partition: partition, offset: :latest } }
-              end
-
-              hwms = index_offsets(::Karafka::Admin::Topics.read_partition_offsets(specs))
-
-              # Last stable offsets match the native librdkafka consumer lag semantics on
-              # transactionally produced topics under the default read_committed isolation
-              lsos = index_offsets(
-                ::Karafka::Admin::Topics.read_partition_offsets(
-                  specs,
-                  isolation_level: ::Karafka::Admin::IsolationLevels::READ_COMMITTED
-                )
-              )
-
               data = {}
 
               committed.to_h.each do |topic, partitions|
                 partitions.each do |partition|
-                  hi_offset = hwms.dig(topic, partition.partition)
-                  ls_offset = lsos.dig(topic, partition.partition)
-
-                  next unless hi_offset && ls_offset
+                  _, end_offset = client.query_watermark_offsets(topic, partition.partition)
 
                   (data[topic] ||= {})[partition.partition] = {
-                    hi_offset: hi_offset,
-                    ls_offset: ls_offset,
+                    end_offset: end_offset,
                     committed_offset: partition.offset || -1
                   }
                 end
               end
 
               data
-            end
-
-            # @param offsets [Array<Hash>] batched offsets query results
-            # @return [Hash{String => Hash{Integer => Integer}}] offsets indexed by topic and
-            #   partition
-            def index_offsets(offsets)
-              result = {}
-
-              offsets.each do |offset|
-                (result[offset[:topic]] ||= {})[offset[:partition]] = offset[:offset]
-              end
-
-              result
             end
           end
         end

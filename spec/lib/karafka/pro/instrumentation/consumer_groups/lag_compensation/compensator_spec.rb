@@ -65,34 +65,53 @@ RSpec.describe_current do
       compensate
 
       expect(partition_stats["consumer_lag"]).to eq(5)
-      expect(partition_stats["hi_offset"]).to eq(10)
+      expect(partition_stats["ls_offset"]).to eq(10)
     end
   end
 
-  context "when refreshed data is newer than the statistics" do
+  context "when refreshed end offset is newer than the statistics one" do
     before do
       registry.update(
         client_name,
-        { "topic" => { 0 => { hi_offset: 100, ls_offset: 95, committed_offset: 40 } } }
+        { "topic" => { 0 => { end_offset: 95, committed_offset: 40 } } }
       )
     end
 
-    it "compensates offsets, committed offset and last stable offset derived lags" do
+    it "compensates offsets, committed offset and derived lags" do
       compensate
 
-      expect(partition_stats["hi_offset"]).to eq(100)
       expect(partition_stats["ls_offset"]).to eq(95)
+      expect(partition_stats["hi_offset"]).to eq(95)
       expect(partition_stats["committed_offset"]).to eq(40)
       expect(partition_stats["consumer_lag"]).to eq(55)
       expect(partition_stats["consumer_lag_stored"]).to eq(90)
     end
   end
 
-  context "when refreshed high watermark equals the one from the statistics" do
+  context "when refreshed end offset is between the statistics ls and hi offsets" do
+    before do
+      partition_stats["hi_offset"] = 20
+
+      registry.update(
+        client_name,
+        { "topic" => { 0 => { end_offset: 15, committed_offset: 7 } } }
+      )
+    end
+
+    it "compensates the ls offset and lags without lowering the high watermark" do
+      compensate
+
+      expect(partition_stats["ls_offset"]).to eq(15)
+      expect(partition_stats["hi_offset"]).to eq(20)
+      expect(partition_stats["consumer_lag"]).to eq(8)
+    end
+  end
+
+  context "when refreshed end offset equals the one from the statistics" do
     before do
       registry.update(
         client_name,
-        { "topic" => { 0 => { hi_offset: 10, ls_offset: 9, committed_offset: 7 } } }
+        { "topic" => { 0 => { end_offset: 10, committed_offset: 7 } } }
       )
     end
 
@@ -105,18 +124,18 @@ RSpec.describe_current do
     end
   end
 
-  context "when refreshed high watermark is lower than the one from the statistics" do
+  context "when refreshed end offset is lower than the one from the statistics" do
     before do
       registry.update(
         client_name,
-        { "topic" => { 0 => { hi_offset: 8, ls_offset: 8, committed_offset: 7 } } }
+        { "topic" => { 0 => { end_offset: 8, committed_offset: 7 } } }
       )
     end
 
     it "does not change anything as the statistics are more fresh" do
       compensate
 
-      expect(partition_stats["hi_offset"]).to eq(10)
+      expect(partition_stats["ls_offset"]).to eq(10)
       expect(partition_stats["consumer_lag"]).to eq(5)
     end
   end
@@ -125,14 +144,13 @@ RSpec.describe_current do
     before do
       registry.update(
         client_name,
-        { "topic" => { 0 => { hi_offset: 100, ls_offset: 95, committed_offset: -1 } } }
+        { "topic" => { 0 => { end_offset: 95, committed_offset: -1 } } }
       )
     end
 
     it "compensates offsets but leaves committed offset and committed based lag untouched" do
       compensate
 
-      expect(partition_stats["hi_offset"]).to eq(100)
       expect(partition_stats["ls_offset"]).to eq(95)
       expect(partition_stats["committed_offset"]).to eq(5)
       expect(partition_stats["consumer_lag"]).to eq(5)
@@ -146,7 +164,7 @@ RSpec.describe_current do
 
       registry.update(
         client_name,
-        { "topic" => { 0 => { hi_offset: 100, ls_offset: 95, committed_offset: 40 } } }
+        { "topic" => { 0 => { end_offset: 95, committed_offset: 40 } } }
       )
     end
 
@@ -161,7 +179,7 @@ RSpec.describe_current do
     before do
       registry.update(
         client_name,
-        { "topic" => { 5 => { hi_offset: 100, ls_offset: 95, committed_offset: 40 } } }
+        { "topic" => { 5 => { end_offset: 95, committed_offset: 40 } } }
       )
     end
 

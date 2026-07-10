@@ -77,18 +77,20 @@ module Karafka
             # @param p_stats [Hash] single partition raw statistics
             # @param refreshed [Hash] refreshed partition data
             def compensate(p_stats, refreshed)
-              hi_offset = refreshed.fetch(:hi_offset)
+              end_offset = refreshed.fetch(:end_offset)
 
-              # The high watermark only grows, so refreshed data older or equal to what
-              # librdkafka reports means there is nothing to compensate: equal means no new
-              # data in the topic since the last fetch and lower means the partition resumed
-              # and its fetches are fresher than our refreshed snapshot
-              return unless hi_offset > (p_stats["hi_offset"] || -1)
+              # The end offset only grows, so refreshed data older or equal to what librdkafka
+              # reports means there is nothing to compensate: equal means no new data in the
+              # topic since the last fetch and lower means the partition resumed and its
+              # fetches are fresher than our refreshed snapshot. We compare against the last
+              # stable offset as the refreshed end offset honors the consumer isolation level.
+              return unless end_offset > (p_stats["ls_offset"] || p_stats["hi_offset"] || -1)
 
-              ls_offset = refreshed.fetch(:ls_offset)
-
-              p_stats["hi_offset"] = hi_offset
-              p_stats["ls_offset"] = ls_offset
+              p_stats["ls_offset"] = end_offset
+              # The real high watermark is always at least the last stable offset, so we bump
+              # it when needed to keep the statistics internally consistent, never overstating
+              hi_offset = p_stats["hi_offset"]
+              p_stats["hi_offset"] = end_offset if hi_offset.nil? || end_offset > hi_offset
 
               committed = refreshed.fetch(:committed_offset)
 
@@ -97,9 +99,8 @@ module Karafka
               if committed >= 0
                 p_stats["committed_offset"] = committed
 
-                # Lags derive from the last stable offset, matching the native librdkafka
-                # semantics on transactionally produced topics
-                lag = ls_offset - committed
+                # Lags derive from the same reference the native librdkafka consumer lag does
+                lag = end_offset - committed
                 p_stats["consumer_lag"] = lag if lag >= 0
               end
 
@@ -107,7 +108,7 @@ module Karafka
 
               return unless stored && stored >= 0
 
-              lag_stored = ls_offset - stored
+              lag_stored = end_offset - stored
               p_stats["consumer_lag_stored"] = lag_stored if lag_stored >= 0
             end
           end

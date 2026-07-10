@@ -67,14 +67,14 @@ RSpec.describe_current do
     before do
       registry.update(
         client_name,
-        { "topic" => { 0 => { hi_offset: 100, ls_offset: 95, committed_offset: 40 } } }
+        { "topic" => { 0 => { end_offset: 95, committed_offset: 40 } } }
       )
     end
 
     it "applies the lag compensation prior to the standard decoration" do
       partition = decorated["topics"]["topic"]["partitions"]["0"]
 
-      expect(partition["hi_offset"]).to eq(100)
+      expect(partition["ls_offset"]).to eq(95)
       expect(partition["consumer_lag"]).to eq(55)
     end
   end
