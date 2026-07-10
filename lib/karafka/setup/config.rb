@@ -377,7 +377,8 @@ module Karafka
 
               # option pause_age [Integer] how long (ms) a partition needs to stay paused to
               #   qualify for the compensation. Short pause/resume cycles reset the clock and
-              #   never qualify. 0 means any paused partition qualifies on the nearest refresh.
+              #   never qualify. Minimum accepted value is 5 seconds as statistics of partitions
+              #   paused shorter are fresh enough to make compensating them pointless.
               setting :pause_age, default: 30_000
             end
           end
