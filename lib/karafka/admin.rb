@@ -26,10 +26,6 @@ module Karafka
     # @return [Hash] custom kafka settings to merge with defaults
     attr_reader :custom_kafka
 
-    # External client used for consumer-based operations instead of dedicated instances
-    # @return [Object, nil] external client or nil when dedicated instances are used
-    attr_reader :external_client
-
     # Creates a new Admin instance
     #
     # @param kafka [Hash] custom kafka configuration to merge with app defaults.

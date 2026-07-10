@@ -288,8 +288,10 @@ RSpec.describe_current do
       end
 
       it "serves cluster_info without a dedicated admin instance" do
-        # Materialize the external admin upfront so only operational usage is guarded
-        admin.external_client
+        # Materialize the external admin and the subject upfront so only operational usage is
+        # guarded
+        external_client
+        admin
 
         expect(Rdkafka::Config).not_to receive(:new)
 
