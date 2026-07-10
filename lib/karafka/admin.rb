@@ -22,10 +22,6 @@ module Karafka
       admin_kafka: %i[admin kafka]
     )
 
-    # Custom kafka configuration for this admin instance
-    # @return [Hash] custom kafka settings to merge with defaults
-    attr_reader :custom_kafka
-
     # Creates a new Admin instance
     #
     # @param kafka [Hash] custom kafka configuration to merge with app defaults.

@@ -28,11 +28,13 @@ DT[:tests] << {
 # Test 2: Create admin instance with custom kafka config pointing to working cluster
 custom_admin = Karafka::Admin.new(kafka: working_kafka_config)
 
+custom_admin_kafka = custom_admin.instance_variable_get(:@custom_kafka)
+
 DT[:tests] << {
   test: "custom_admin_created",
-  custom_kafka_set: !custom_admin.custom_kafka.empty?,
-  has_bootstrap_servers: custom_admin.custom_kafka.key?(:"bootstrap.servers") ||
-    custom_admin.custom_kafka.key?("bootstrap.servers")
+  custom_kafka_set: !custom_admin_kafka.empty?,
+  has_bootstrap_servers: custom_admin_kafka.key?(:"bootstrap.servers") ||
+    custom_admin_kafka.key?("bootstrap.servers")
 }
 
 # Test 3: Verify custom admin can fetch cluster info
