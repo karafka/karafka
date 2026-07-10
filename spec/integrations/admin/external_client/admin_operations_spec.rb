@@ -8,8 +8,10 @@ setup_karafka
 
 TOPIC = DT.topics[0]
 
+# Derive the brokers from the app config that setup_karafka already resolved so there is one
+# source of truth for the cluster location
 external_admin = Rdkafka::Config.new(
-  "bootstrap.servers": ENV.fetch("KAFKA_BOOTSTRAP_SERVERS", "127.0.0.1:9092")
+  "bootstrap.servers": Karafka::App.config.kafka[:"bootstrap.servers"]
 ).admin
 
 admin = Karafka::Admin.new(external_client: external_admin)

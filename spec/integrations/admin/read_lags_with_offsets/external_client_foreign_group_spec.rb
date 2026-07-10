@@ -14,8 +14,8 @@ setup_karafka
 TOPIC1 = DT.topics[0]
 TOPIC2 = DT.topics[1]
 
-OWN_CG = DT.topics[2]
-FOREIGN_CG = DT.topics[3]
+OWN_CG = DT.groups[2]
+FOREIGN_CG = DT.groups[3]
 
 draw_topics do
   topic TOPIC1 do

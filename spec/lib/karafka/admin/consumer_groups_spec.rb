@@ -151,8 +151,7 @@ RSpec.describe Karafka::Admin::ConsumerGroups do
 
       let(:external_client) do
         Rdkafka::Config.new(
-          "bootstrap.servers": "127.0.0.1:9092",
-          "group.id": "doesnotexist"
+          Karafka::App.config.kafka.merge("group.id": "doesnotexist")
         ).consumer
       end
 

@@ -277,7 +277,7 @@ RSpec.describe_current do
       subject(:admin) { described_class.new(external_client: external_client) }
 
       let(:external_client) do
-        Rdkafka::Config.new("bootstrap.servers": "127.0.0.1:9092").admin
+        Rdkafka::Config.new(Karafka::App.config.kafka).admin
       end
 
       after { external_client.close }
