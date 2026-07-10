@@ -56,22 +56,18 @@ module Karafka
 
       return unless external_client
 
-      # Resolve the raw rdkafka handle upfront: a running consumer connection client exposes it
-      # via its wrapping proxy and a proxy via #wrapped. This way any of those forms can be
-      # provided
+      # Resolve and proxy the provided client upfront: a running consumer connection client
+      # exposes its handle via its wrapping proxy and the proxy itself prevents double wrapping,
+      # so raw, proxied and connection client forms can all be provided
       if external_client.is_a?(Karafka::Connection::Client)
         external_client = external_client.wrapped_kafka
       end
 
-      if external_client.is_a?(Karafka::Connection::Proxy)
-        external_client = external_client.wrapped
-      end
-
-      @external_client = external_client
+      @external_client = Karafka::Connection::Proxy.new(external_client)
 
       # Capability based routing resolved once upfront: rdkafka admin instances serve
       # admin-based operations, any other external client is assumed consumer capable
-      if external_client.is_a?(Rdkafka::Admin)
+      if @external_client.wrapped.is_a?(Rdkafka::Admin)
         @external_admin = true
       else
         @external_consumer = true
@@ -430,7 +426,7 @@ module Karafka
     #   identity, including its `group.id`. External rdkafka admin instances are not used here
     #   as they are not capable of consumer operations - they are used by `#with_admin` instead.
     def with_consumer(settings = {})
-      return yield(Karafka::Connection::Proxy.new(@external_client)) if @external_consumer
+      return yield(@external_client) if @external_consumer
 
       bind_id = SecureRandom.uuid
       consumer = nil
@@ -468,7 +464,7 @@ module Karafka
     #   clients of other types (consumers, producers) are not capable of admin operations, thus
     #   a dedicated admin instance is created for them as usual.
     def with_admin
-      return yield(Karafka::Connection::Proxy.new(@external_client)) if @external_admin
+      return yield(@external_client) if @external_admin
 
       bind_id = SecureRandom.uuid
       admin = nil
