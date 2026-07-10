@@ -65,7 +65,7 @@ module Karafka
             #
             # @param client_name [String] rdkafka client name (matches statistics `name` field)
             # @param data [Hash{String => Hash{Integer => Hash}}] topics with partitions with
-            #   `:lo_offset`, `:hi_offset` and `:committed_offset` values
+            #   `:hi_offset`, `:ls_offset` and `:committed_offset` values
             def update(client_name, data)
               @mutex.synchronize do
                 @clients[client_name] = data

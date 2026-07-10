@@ -86,8 +86,16 @@ module Karafka
 
                   hi_offset = refreshed.fetch(:hi_offset)
 
-                  p_stats["lo_offset"] = refreshed.fetch(:lo_offset)
+                  # The high watermark only grows, so refreshed data older or equal to what
+                  # librdkafka reports means there is nothing to compensate: equal means no new
+                  # data in the topic since the last fetch and lower means the partition
+                  # resumed and its fetches are fresher than our refreshed snapshot
+                  next unless hi_offset > (p_stats["hi_offset"] || -1)
+
+                  ls_offset = refreshed.fetch(:ls_offset)
+
                   p_stats["hi_offset"] = hi_offset
+                  p_stats["ls_offset"] = ls_offset
 
                   committed = refreshed.fetch(:committed_offset)
 
@@ -96,7 +104,9 @@ module Karafka
                   if committed >= 0
                     p_stats["committed_offset"] = committed
 
-                    lag = hi_offset - committed
+                    # Lags derive from the last stable offset, matching the native librdkafka
+                    # semantics on transactionally produced topics
+                    lag = ls_offset - committed
                     p_stats["consumer_lag"] = lag if lag >= 0
                   end
 
@@ -104,7 +114,7 @@ module Karafka
 
                   next unless stored && stored >= 0
 
-                  lag_stored = hi_offset - stored
+                  lag_stored = ls_offset - stored
                   p_stats["consumer_lag_stored"] = lag_stored if lag_stored >= 0
                 end
               end

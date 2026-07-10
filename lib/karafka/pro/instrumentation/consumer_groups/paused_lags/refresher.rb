@@ -35,17 +35,16 @@ module Karafka
       module ConsumerGroups
         # Active refreshing of watermarks and lags for long-paused partitions. librdkafka only
         # updates those values from fetch responses, so partitions paused for a long time
-        # report frozen statistics. The refresher periodically fetches fresh values via the
-        # running consumer connection and the decorator overlays them onto the emitted
-        # statistics.
+        # report frozen statistics. The refresher periodically fetches fresh values and the
+        # decorator overlays them onto the emitted statistics.
         module PausedLags
-          # Refreshes watermarks and lags of partitions that stayed paused for at least one
+          # Refreshes offsets and lags data of partitions that stayed paused for at least one
           # full interval, at most once per interval.
           #
-          # Runs on the listener threads via the `client.events_poll` event, so all the broker
-          # queries happen on the thread that owns the client connection and no dedicated
-          # instances are created. Pause state is tracked via the `client.pause` and
-          # `client.resume` instrumentation events, which fire on the same thread.
+          # Runs on the listener threads via the `client.events_poll` event, so the committed
+          # offsets query happens on the thread that owns the client connection within its
+          # group identity. Pause state is tracked via the `client.pause` and `client.resume`
+          # instrumentation events, which fire on the same thread.
           #
           # On resume or revocation the partition data is dropped immediately, so stale values
           # never overlay live statistics and revoked partitions are never queried again.
@@ -101,21 +100,9 @@ module Karafka
               # would eat into the shutdown time budget for no benefit
               return if Karafka::App.done?
 
-              client = event[:caller]
               state = state_for(event[:subscription_group].id)
-              tracker = state[:tracker]
 
-              return unless tracker.expired?
-
-              tracker.pause
-
-              state[:client_name] = client.name
-
-              long_paused = long_paused_for(state)
-
-              return if long_paused.empty?
-
-              Registry.instance.update(client.name, refresh(client, long_paused))
+              state[:runner].call(event[:caller], state)
             rescue => e
               # Refreshing is a best-effort operation: values stay stale until the next
               # successful run on one of the following intervals. Errors are still
@@ -152,15 +139,27 @@ module Karafka
               @mutex.synchronize do
                 @states[subscription_group_id] ||= {
                   # Gates the refreshing to run at most once per interval
-                  tracker: TimeTrackers::Pause.new(
-                    timeout: interval,
-                    max_timeout: interval,
-                    exponential_backoff: false
-                  ),
+                  runner: Helpers::IntervalRunner.new(interval: interval) do |client, state|
+                    refresh_tick(client, state)
+                  end,
                   paused: {},
                   client_name: nil
                 }
               end
+            end
+
+            # Refreshes and stores the data of all the long-paused partitions (if any)
+            #
+            # @param client [Karafka::Connection::Client]
+            # @param state [Hash] subscription group state
+            def refresh_tick(client, state)
+              state[:client_name] = client.name
+
+              long_paused = long_paused_for(state)
+
+              return if long_paused.empty?
+
+              Registry.instance.update(client.name, refresh(client, long_paused))
             end
 
             # @param state [Hash] subscription group state with pause timestamps
@@ -178,10 +177,11 @@ module Karafka
               result
             end
 
-            # Fetches committed offsets and watermarks of given partitions, each in a batched
-            # query: committed offsets via the client own connection (group scoped) and
-            # watermarks via the batched admin API, so the number of broker roundtrips stays
-            # constant regardless of how many partitions are paused
+            # Fetches committed offsets, high watermarks and last stable offsets of given
+            # partitions, each in a single batched query: committed offsets via the client own
+            # connection (group scoped) and the offsets via the batched admin API, so the
+            # number of broker roundtrips stays constant regardless of how many partitions are
+            # paused
             #
             # @param client [Karafka::Connection::Client]
             # @param paused [Hash{String => Array<Integer>}]
@@ -191,25 +191,53 @@ module Karafka
               paused.each { |topic, partitions| tpl.add_topic(topic, partitions) }
 
               committed = client.committed(tpl)
-              watermarks = ::Karafka::Admin::Topics.read_watermark_offsets(paused)
+
+              specs = paused.transform_values do |partitions|
+                partitions.map { |partition| { partition: partition, offset: :latest } }
+              end
+
+              hwms = index_offsets(::Karafka::Admin::Topics.read_partition_offsets(specs))
+
+              # Last stable offsets match the native librdkafka consumer lag semantics on
+              # transactionally produced topics under the default read_committed isolation
+              lsos = index_offsets(
+                ::Karafka::Admin::Topics.read_partition_offsets(
+                  specs,
+                  isolation_level: ::Karafka::Admin::IsolationLevels::READ_COMMITTED
+                )
+              )
 
               data = {}
 
               committed.to_h.each do |topic, partitions|
                 partitions.each do |partition|
-                  watermark = watermarks.dig(topic, partition.partition)
+                  hi_offset = hwms.dig(topic, partition.partition)
+                  ls_offset = lsos.dig(topic, partition.partition)
 
-                  next unless watermark
+                  next unless hi_offset && ls_offset
 
                   (data[topic] ||= {})[partition.partition] = {
-                    lo_offset: watermark.first,
-                    hi_offset: watermark.last,
+                    hi_offset: hi_offset,
+                    ls_offset: ls_offset,
                     committed_offset: partition.offset || -1
                   }
                 end
               end
 
               data
+            end
+
+            # @param offsets [Array<Hash>] batched offsets query results
+            # @return [Hash{String => Hash{Integer => Integer}}] offsets indexed by topic and
+            #   partition
+            def index_offsets(offsets)
+              result = {}
+
+              offsets.each do |offset|
+                (result[offset[:topic]] ||= {})[offset[:partition]] = offset[:offset]
+              end
+
+              result
             end
           end
         end

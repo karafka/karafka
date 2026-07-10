@@ -32,7 +32,7 @@ RSpec.describe_current do
   subject(:registry) { described_class.instance }
 
   let(:client_name) { SecureRandom.hex(6) }
-  let(:data) { { "topic" => { 0 => { lo_offset: 0, hi_offset: 10, committed_offset: 5 } } } }
+  let(:data) { { "topic" => { 0 => { hi_offset: 10, ls_offset: 9, committed_offset: 5 } } } }
 
   after { registry.evict(client_name) }
 
@@ -50,7 +50,7 @@ RSpec.describe_current do
     it "replaces previously stored data" do
       registry.update(client_name, data)
 
-      newer = { "topic" => { 0 => { lo_offset: 0, hi_offset: 20, committed_offset: 15 } } }
+      newer = { "topic" => { 0 => { hi_offset: 20, ls_offset: 19, committed_offset: 15 } } }
       registry.update(client_name, newer)
 
       expect(registry.fetch(client_name)).to eq(newer)
@@ -69,13 +69,13 @@ RSpec.describe_current do
     it "removes data of partitions that are no longer paused" do
       registry.update(
         client_name,
-        { "topic" => { 1 => { lo_offset: 0, hi_offset: 20, committed_offset: 15 } } }
+        { "topic" => { 1 => { hi_offset: 20, ls_offset: 19, committed_offset: 15 } } }
       )
 
       registry.retain(client_name, { "topic" => [1] })
 
       expect(registry.fetch(client_name)).to eq(
-        "topic" => { 1 => { lo_offset: 0, hi_offset: 20, committed_offset: 15 } }
+        "topic" => { 1 => { hi_offset: 20, ls_offset: 19, committed_offset: 15 } }
       )
     end
 

@@ -73,9 +73,13 @@ RSpec.describe_current do
   before do
     Karafka::App.config.internal.statistics.consumer_groups.paused_refresh.interval = 1
 
-    allow(Karafka::Admin::Topics)
-      .to receive(:read_watermark_offsets)
-      .and_return("topic" => { 0 => [1, 100], 1 => [1, 100] })
+    allow(Karafka::Admin::Topics).to receive(:read_partition_offsets) do |specs, isolation_level: nil|
+      specs.flat_map do |topic, partition_specs|
+        partition_specs.map do |spec|
+          { topic: topic, partition: spec[:partition], offset: isolation_level ? 95 : 100 }
+        end
+      end
+    end
   end
 
   after do
@@ -138,7 +142,7 @@ RSpec.describe_current do
         refresher.on_client_events_poll(tick_event)
 
         expect(registry.fetch(client_name)).to eq(
-          "topic" => { 0 => { lo_offset: 1, hi_offset: 100, committed_offset: 5 } }
+          "topic" => { 0 => { hi_offset: 100, ls_offset: 95, committed_offset: 5 } }
         )
       end
     end
@@ -177,7 +181,7 @@ RSpec.describe_current do
         refresher.on_client_events_poll(tick_event)
 
         expect(registry.fetch(client_name)).to eq(
-          "topic" => { 0 => { lo_offset: 1, hi_offset: 100, committed_offset: -1 } }
+          "topic" => { 0 => { hi_offset: 100, ls_offset: 95, committed_offset: -1 } }
         )
       end
     end
@@ -250,7 +254,7 @@ RSpec.describe_current do
       refresher.on_client_resume(resume_event(partition: 0))
 
       expect(registry.fetch(client_name)).to eq(
-        "topic" => { 1 => { lo_offset: 1, hi_offset: 100, committed_offset: 7 } }
+        "topic" => { 1 => { hi_offset: 100, ls_offset: 95, committed_offset: 7 } }
       )
     end
 

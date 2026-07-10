@@ -39,6 +39,7 @@ RSpec.describe_current do
     {
       "lo_offset" => 0,
       "hi_offset" => 10,
+      "ls_offset" => 10,
       "committed_offset" => 5,
       "stored_offset" => 5,
       "consumer_lag" => 5,
@@ -66,23 +67,55 @@ RSpec.describe_current do
     end
   end
 
-  context "when there is refreshed data" do
+  context "when refreshed data is newer than the statistics" do
     before do
       registry.update(
         client_name,
-        { "topic" => { 0 => { lo_offset: 1, hi_offset: 100, committed_offset: 40 } } }
+        { "topic" => { 0 => { hi_offset: 100, ls_offset: 95, committed_offset: 40 } } }
       )
     end
 
-    it "overlays watermarks, committed offset and derived lags" do
+    it "overlays offsets, committed offset and last stable offset derived lags" do
       partition = decorated["topics"]["topic"]["partitions"]["0"]
 
-      expect(partition["lo_offset"]).to eq(1)
       expect(partition["hi_offset"]).to eq(100)
+      expect(partition["ls_offset"]).to eq(95)
       expect(partition["committed_offset"]).to eq(40)
-      expect(partition["consumer_lag"]).to eq(60)
-      # Derived from the locally known stored offset and the refreshed high watermark
-      expect(partition["consumer_lag_stored"]).to eq(95)
+      expect(partition["consumer_lag"]).to eq(55)
+      expect(partition["consumer_lag_stored"]).to eq(90)
+    end
+  end
+
+  context "when refreshed high watermark equals the one from the statistics" do
+    before do
+      registry.update(
+        client_name,
+        { "topic" => { 0 => { hi_offset: 10, ls_offset: 9, committed_offset: 7 } } }
+      )
+    end
+
+    it "does not change anything as there is no new data in the topic" do
+      partition = decorated["topics"]["topic"]["partitions"]["0"]
+
+      expect(partition["committed_offset"]).to eq(5)
+      expect(partition["consumer_lag"]).to eq(5)
+      expect(partition["ls_offset"]).to eq(10)
+    end
+  end
+
+  context "when refreshed high watermark is lower than the one from the statistics" do
+    before do
+      registry.update(
+        client_name,
+        { "topic" => { 0 => { hi_offset: 8, ls_offset: 8, committed_offset: 7 } } }
+      )
+    end
+
+    it "does not change anything as the statistics are more fresh" do
+      partition = decorated["topics"]["topic"]["partitions"]["0"]
+
+      expect(partition["hi_offset"]).to eq(10)
+      expect(partition["consumer_lag"]).to eq(5)
     end
   end
 
@@ -90,17 +123,18 @@ RSpec.describe_current do
     before do
       registry.update(
         client_name,
-        { "topic" => { 0 => { lo_offset: 1, hi_offset: 100, committed_offset: -1 } } }
+        { "topic" => { 0 => { hi_offset: 100, ls_offset: 95, committed_offset: -1 } } }
       )
     end
 
-    it "overlays watermarks but leaves committed offset and committed based lag untouched" do
+    it "overlays offsets but leaves committed offset and committed based lag untouched" do
       partition = decorated["topics"]["topic"]["partitions"]["0"]
 
       expect(partition["hi_offset"]).to eq(100)
+      expect(partition["ls_offset"]).to eq(95)
       expect(partition["committed_offset"]).to eq(5)
       expect(partition["consumer_lag"]).to eq(5)
-      expect(partition["consumer_lag_stored"]).to eq(95)
+      expect(partition["consumer_lag_stored"]).to eq(90)
     end
   end
 
@@ -110,7 +144,7 @@ RSpec.describe_current do
 
       registry.update(
         client_name,
-        { "topic" => { 0 => { lo_offset: 1, hi_offset: 100, committed_offset: 40 } } }
+        { "topic" => { 0 => { hi_offset: 100, ls_offset: 95, committed_offset: 40 } } }
       )
     end
 
@@ -123,7 +157,7 @@ RSpec.describe_current do
     before do
       registry.update(
         client_name,
-        { "topic" => { 5 => { lo_offset: 1, hi_offset: 100, committed_offset: 40 } } }
+        { "topic" => { 5 => { hi_offset: 100, ls_offset: 95, committed_offset: 40 } } }
       )
     end
 
