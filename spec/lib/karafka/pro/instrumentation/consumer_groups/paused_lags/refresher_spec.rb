@@ -109,7 +109,7 @@ RSpec.describe_current do
       it "does not store anything" do
         refresher.on_client_events_poll(tick_event)
 
-        expect(registry.fetch(client_name, 1_000)).to be_nil
+        expect(registry.fetch(client_name)).to be_nil
       end
     end
 
@@ -122,7 +122,7 @@ RSpec.describe_current do
         refresher.on_client_pause(pause_event)
         refresher.on_client_events_poll(tick_event)
 
-        expect(registry.fetch(client_name, 1_000)).to be_nil
+        expect(registry.fetch(client_name)).to be_nil
       end
     end
 
@@ -132,7 +132,7 @@ RSpec.describe_current do
         age_pause
         refresher.on_client_events_poll(tick_event)
 
-        expect(registry.fetch(client_name, 1_000)).to eq(
+        expect(registry.fetch(client_name)).to eq(
           "topic" => { 0 => { lo_offset: 1, hi_offset: 100, committed_offset: 5 } }
         )
       end
@@ -150,14 +150,14 @@ RSpec.describe_current do
 
         refresher.on_client_events_poll(tick_event)
 
-        expect(registry.fetch(client_name, 1_000)).not_to be_nil
+        expect(registry.fetch(client_name)).not_to be_nil
 
         registry.evict(client_name)
 
         # Immediate follow-up tick is within the interval window and must do nothing
         refresher.on_client_events_poll(tick_event)
 
-        expect(registry.fetch(client_name, 1_000)).to be_nil
+        expect(registry.fetch(client_name)).to be_nil
       end
     end
 
@@ -171,7 +171,7 @@ RSpec.describe_current do
         age_pause
         refresher.on_client_events_poll(tick_event)
 
-        expect(registry.fetch(client_name, 1_000)).to eq(
+        expect(registry.fetch(client_name)).to eq(
           "topic" => { 0 => { lo_offset: 1, hi_offset: 100, committed_offset: -1 } }
         )
       end
@@ -185,7 +185,7 @@ RSpec.describe_current do
         age_pause
 
         expect { refresher.on_client_events_poll(tick_event) }.not_to raise_error
-        expect(registry.fetch(client_name, 1_000)).to be_nil
+        expect(registry.fetch(client_name)).to be_nil
       end
 
       it "instruments the error with a dedicated type" do
@@ -211,68 +211,7 @@ RSpec.describe_current do
         age_pause
         refresher.on_client_events_poll(tick_event)
 
-        expect(registry.fetch(client_name, 1_000)).to be_nil
-      end
-    end
-
-    context "when there was a failure followed by a tick with nothing long-paused" do
-      before { allow(client).to receive(:committed).and_raise(StandardError) }
-
-      it "resets the failures counter" do
-        refresher.on_client_pause(pause_event)
-        age_pause
-        refresher.on_client_events_poll(tick_event)
-        refresher.on_client_resume(resume_event)
-
-        # First failure backoff is 2x the 1ms interval, so this makes the next tick due
-        age_pause
-        refresher.on_client_events_poll(tick_event)
-
-        state = refresher.instance_variable_get(:@states).fetch(sg_id)
-
-        expect(state.fetch(:failures)).to eq(0)
-      end
-    end
-
-    context "when more partitions are long-paused than the per tick cap" do
-      let(:partitions) { (0...25).to_a }
-
-      let(:committed_tpl) do
-        instance_double(Rdkafka::Consumer::TopicPartitionList).tap do |tpl|
-          allow(tpl).to receive(:to_h) do
-            { "topic" => @last_tpl_partitions.map { |p| committed_partition_for(p) } }
-          end
-        end
-      end
-
-      before do
-        allow(client).to receive(:committed) do |tpl|
-          @last_tpl_partitions = tpl.to_h.fetch("topic").map(&:partition)
-          committed_tpl
-        end
-      end
-
-      def committed_partition_for(partition)
-        instance_double(Rdkafka::Consumer::Partition, partition: partition, offset: 5)
-      end
-
-      it "caps a single tick and covers the remainder on the following ticks" do
-        partitions.each { |partition| refresher.on_client_pause(pause_event(partition: partition)) }
-        age_pause
-
-        refresher.on_client_events_poll(tick_event)
-
-        stored = registry.fetch(client_name, 1_000).fetch("topic")
-
-        expect(stored.size).to eq(20)
-
-        age_pause
-        refresher.on_client_events_poll(tick_event)
-
-        stored = registry.fetch(client_name, 1_000).fetch("topic")
-
-        expect(stored.size).to eq(25)
-        expect(stored.keys.sort).to eq(partitions)
+        expect(registry.fetch(client_name)).to be_nil
       end
     end
   end
@@ -283,11 +222,11 @@ RSpec.describe_current do
       age_pause
       refresher.on_client_events_poll(tick_event)
 
-      expect(registry.fetch(client_name, 1_000)).not_to be_nil
+      expect(registry.fetch(client_name)).not_to be_nil
 
       refresher.on_client_resume(resume_event)
 
-      expect(registry.fetch(client_name, 1_000)).to be_nil
+      expect(registry.fetch(client_name)).to be_nil
     end
 
     it "keeps data of other partitions that remain paused" do
@@ -305,7 +244,7 @@ RSpec.describe_current do
       refresher.on_client_events_poll(tick_event)
       refresher.on_client_resume(resume_event(partition: 0))
 
-      expect(registry.fetch(client_name, 1_000)).to eq(
+      expect(registry.fetch(client_name)).to eq(
         "topic" => { 1 => { lo_offset: 1, hi_offset: 100, committed_offset: 7 } }
       )
     end
@@ -321,17 +260,17 @@ RSpec.describe_current do
       age_pause
       refresher.on_client_events_poll(tick_event)
 
-      expect(registry.fetch(client_name, 1_000)).not_to be_nil
+      expect(registry.fetch(client_name)).not_to be_nil
 
       refresher.on_rebalance_partitions_revoked(revocation_event)
 
-      expect(registry.fetch(client_name, 1_000)).to be_nil
+      expect(registry.fetch(client_name)).to be_nil
 
       # Without new pause events, nothing must be refreshed again even after aging
       age_pause
       refresher.on_client_events_poll(tick_event)
 
-      expect(registry.fetch(client_name, 1_000)).to be_nil
+      expect(registry.fetch(client_name)).to be_nil
     end
 
     it "does not raise when nothing was tracked for a given subscription group" do

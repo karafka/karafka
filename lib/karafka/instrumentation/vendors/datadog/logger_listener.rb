@@ -146,7 +146,7 @@ module Karafka
             when "virtual_partitions.partitioner.error"
               error "Virtual partitions partitioner error occurred: #{error}"
             when "paused_lags.refresher.error"
-              error "Paused partitions lags refreshing failed due to an error: #{error}"
+              warn "Paused partitions lags refreshing failed due to an error: #{error}"
             else
               error "#{event[:type]} error occurred: #{error}"
             end

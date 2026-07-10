@@ -40,42 +40,20 @@ RSpec.describe_current do
     it "returns stored data when fresh" do
       registry.update(client_name, data)
 
-      expect(registry.fetch(client_name, 1_000)).to eq(data)
+      expect(registry.fetch(client_name)).to eq(data)
     end
 
     it "returns nil when there is no data for a given client" do
-      expect(registry.fetch(client_name, 1_000)).to be_nil
+      expect(registry.fetch(client_name)).to be_nil
     end
 
-    it "returns nil when data is expired" do
-      registry.update(client_name, data)
-
-      sleep(0.01)
-
-      expect(registry.fetch(client_name, 1)).to be_nil
-    end
-
-    it "merges new data with previously stored partitions" do
-      registry.update(client_name, data)
-
-      other = { "topic" => { 1 => { lo_offset: 0, hi_offset: 20, committed_offset: 15 } } }
-      registry.update(client_name, other)
-
-      expect(registry.fetch(client_name, 1_000)).to eq(
-        "topic" => {
-          0 => { lo_offset: 0, hi_offset: 10, committed_offset: 5 },
-          1 => { lo_offset: 0, hi_offset: 20, committed_offset: 15 }
-        }
-      )
-    end
-
-    it "overwrites data of the same partition on merge" do
+    it "replaces previously stored data" do
       registry.update(client_name, data)
 
       newer = { "topic" => { 0 => { lo_offset: 0, hi_offset: 20, committed_offset: 15 } } }
       registry.update(client_name, newer)
 
-      expect(registry.fetch(client_name, 1_000)).to eq(newer)
+      expect(registry.fetch(client_name)).to eq(newer)
     end
   end
 
@@ -85,7 +63,7 @@ RSpec.describe_current do
     it "keeps data of partitions that are still paused" do
       registry.retain(client_name, { "topic" => [0] })
 
-      expect(registry.fetch(client_name, 1_000)).to eq(data)
+      expect(registry.fetch(client_name)).to eq(data)
     end
 
     it "removes data of partitions that are no longer paused" do
@@ -96,7 +74,7 @@ RSpec.describe_current do
 
       registry.retain(client_name, { "topic" => [1] })
 
-      expect(registry.fetch(client_name, 1_000)).to eq(
+      expect(registry.fetch(client_name)).to eq(
         "topic" => { 1 => { lo_offset: 0, hi_offset: 20, committed_offset: 15 } }
       )
     end
@@ -104,7 +82,7 @@ RSpec.describe_current do
     it "removes the whole client entry when nothing remains paused" do
       registry.retain(client_name, {})
 
-      expect(registry.fetch(client_name, 1_000)).to be_nil
+      expect(registry.fetch(client_name)).to be_nil
     end
 
     it "does not raise when the client has no data" do
@@ -117,7 +95,7 @@ RSpec.describe_current do
       registry.update(client_name, data)
       registry.evict(client_name)
 
-      expect(registry.fetch(client_name, 1_000)).to be_nil
+      expect(registry.fetch(client_name)).to be_nil
     end
 
     it "does not raise when the client has no data" do

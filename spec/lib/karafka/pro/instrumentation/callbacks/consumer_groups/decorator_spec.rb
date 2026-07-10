@@ -34,7 +34,6 @@ RSpec.describe_current do
   let(:decorator) { described_class.new }
   let(:client_name) { SecureRandom.hex(6) }
   let(:registry) { Karafka::Pro::Instrumentation::ConsumerGroups::PausedLags::Registry.instance }
-  let(:interval) { 30_000 }
 
   let(:partition_stats) do
     {
@@ -58,12 +57,7 @@ RSpec.describe_current do
     }
   end
 
-  before { Karafka::App.config.internal.statistics.consumer_groups.paused_refresh.interval = interval }
-
-  after do
-    Karafka::App.config.internal.statistics.consumer_groups.paused_refresh.interval = 0
-    registry.evict(client_name)
-  end
+  after { registry.evict(client_name) }
 
   context "when there is no refreshed data for a given client" do
     it "does not change any of the values" do
@@ -134,21 +128,6 @@ RSpec.describe_current do
     end
 
     it "does not raise nor change anything" do
-      expect(decorated["topics"]["topic"]["partitions"]["0"]["consumer_lag"]).to eq(5)
-    end
-  end
-
-  context "when the feature is disabled" do
-    let(:interval) { 0 }
-
-    before do
-      registry.update(
-        client_name,
-        { "topic" => { 0 => { lo_offset: 1, hi_offset: 100, committed_offset: 40 } } }
-      )
-    end
-
-    it "does not overlay anything even when data exists" do
       expect(decorated["topics"]["topic"]["partitions"]["0"]["consumer_lag"]).to eq(5)
     end
   end

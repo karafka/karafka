@@ -45,24 +45,14 @@ module Karafka
           # It is pure and instant: all the broker queries happen in the paused lags refresher
           # on the listener threads, never on the librdkafka callbacks path.
           class Decorator < Karafka::Instrumentation::Callbacks::ConsumerGroups::Decorator
-            include Helpers::ConfigImporter.new(
-              interval: %i[internal statistics consumer_groups paused_refresh interval]
-            )
-
-            # Multiplier of the interval after which stored data is considered expired. It must
-            # exceed the refresher max errors backoff (8x the interval) plus the events polling
-            # tick granularity slack, otherwise a single transient refresh error would make the
-            # overlay flap between refreshed and stale librdkafka values, producing bogus delta
-            # spikes downstream. Expiry here is only a safety net: entries are actively removed
-            # on resume and on rebalances
-            TTL_INTERVAL_MULTIPLIER = 10
-
-            private_constant :TTL_INTERVAL_MULTIPLIER
-
             # @param statistics [Hash] raw librdkafka statistics
             # @return [Hash] decorated statistics with refreshed paused partitions data
+            #
+            # @note When the paused lags refreshing is disabled, the refresher is not
+            #   subscribed and the registry stays empty, so the overlay is a pass-through by
+            #   itself
             def call(statistics)
-              overlay(statistics) unless interval.zero?
+              overlay(statistics)
 
               super
             end
@@ -74,10 +64,9 @@ module Karafka
             #
             # @param statistics [Hash] raw librdkafka statistics
             def overlay(statistics)
-              data = Pro::Instrumentation::ConsumerGroups::PausedLags::Registry.instance.fetch(
-                statistics["name"],
-                interval * TTL_INTERVAL_MULTIPLIER
-              )
+              data = Pro::Instrumentation::ConsumerGroups::PausedLags::Registry
+                .instance
+                .fetch(statistics["name"])
 
               return unless data
 

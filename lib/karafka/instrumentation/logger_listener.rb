@@ -467,10 +467,8 @@ module Karafka
         when "virtual_partitions.partitioner.error"
           error "Virtual partitions partitioner error occurred: #{details}"
           error backtrace
-        # Best-effort paused partitions lags refreshing failed (Pro); it will back off and retry
         when "paused_lags.refresher.error"
-          error "Paused partitions lags refreshing failed due to an error: #{details}"
-          error backtrace
+          warn "Paused partitions lags refreshing failed due to an error: #{details}"
         # This handles any custom errors coming from places like Web-UI, etc
         else
           error "#{type} error occurred: #{error.class} - #{details}"
