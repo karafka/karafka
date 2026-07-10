@@ -59,7 +59,16 @@ module Karafka
 
             def initialize
               @mutex = Mutex.new
-              @states = {}
+              @states = Hash.new do |states, subscription_group_id|
+                states[subscription_group_id] = {
+                  # Gates the refreshing to run at most once per interval
+                  runner: Helpers::IntervalRunner.new(interval: interval) do |client, state|
+                    refresh_tick(client, state)
+                  end,
+                  paused: Hash.new { |paused, topic| paused[topic] = {} },
+                  client_name: nil
+                }
+              end
             end
 
             # Tracks when a given partition got paused
@@ -68,7 +77,7 @@ module Karafka
             def on_client_pause(event)
               state = state_for(event[:subscription_group].id)
 
-              (state[:paused][event[:topic]] ||= {})[event[:partition]] = monotonic_now
+              state[:paused][event[:topic]][event[:partition]] = monotonic_now
               state[:client_name] = event[:caller].name
             end
 
@@ -78,7 +87,8 @@ module Karafka
             # @param event [Karafka::Core::Monitoring::Event] resume event
             def on_client_resume(event)
               state = state_for(event[:subscription_group].id)
-              partitions = state[:paused][event[:topic]]
+              # Fetch with a fallback not to auto-build tracking of an untracked topic
+              partitions = state[:paused].fetch(event[:topic], nil)
 
               return unless partitions
               return unless partitions.delete(event[:partition])
@@ -123,7 +133,8 @@ module Karafka
             # @param event [Karafka::Core::Monitoring::Event] revocation event
             def on_rebalance_partitions_revoked(event)
               state = state_for(event[:subscription_group].id)
-              state[:paused] = {}
+              # Clear (instead of a reassignment) preserves the auto-building behavior
+              state[:paused].clear
 
               client_name = state[:client_name]
 
@@ -133,18 +144,12 @@ module Karafka
             private
 
             # @param subscription_group_id [String]
-            # @return [Hash] mutable state of a given subscription group. Aside from creation,
-            #   accessed only from the subscription group own listener thread.
+            # @return [Hash] mutable state of a given subscription group. The mutex guards the
+            #   cross-thread auto-building; aside from creation, the state is accessed only
+            #   from the subscription group own listener thread.
             def state_for(subscription_group_id)
               @mutex.synchronize do
-                @states[subscription_group_id] ||= {
-                  # Gates the refreshing to run at most once per interval
-                  runner: Helpers::IntervalRunner.new(interval: interval) do |client, state|
-                    refresh_tick(client, state)
-                  end,
-                  paused: {},
-                  client_name: nil
-                }
+                @states[subscription_group_id]
               end
             end
 
