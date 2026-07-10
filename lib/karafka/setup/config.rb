@@ -356,8 +356,7 @@ module Karafka
 
         # Things related to librdkafka statistics decoration prior to their emission
         setting :statistics do
-          # Consumer groups related statistics settings. Scoped so share groups (KIP-932) can
-          # get their own parallel scope once they land.
+          # Consumer groups related statistics settings
           setting :consumer_groups do
             # option decorator_class [Class] class used to decorate raw librdkafka statistics
             #   (adds delta/freeze-duration values) before `statistics.emitted` is instrumented.

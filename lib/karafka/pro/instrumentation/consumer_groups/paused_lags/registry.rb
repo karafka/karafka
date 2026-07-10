@@ -31,8 +31,7 @@
 module Karafka
   module Pro
     module Instrumentation
-      # Instrumentation components for consumer groups based operation. Share groups
-      # (KIP-932) will have their own parallel scope once they land.
+      # Instrumentation components for consumer groups based operation
       module ConsumerGroups
         # Active refreshing of watermarks and lags for long-paused partitions. librdkafka only
         # updates those values from fetch responses, so partitions paused for a long time report

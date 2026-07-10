@@ -31,8 +31,7 @@
 module Karafka
   module Pro
     module Instrumentation
-      # Instrumentation components for consumer groups based operation. Share groups
-      # (KIP-932) will have their own parallel scope once they land.
+      # Instrumentation components for consumer groups based operation
       module ConsumerGroups
         module PausedLags
           # Periodically refreshes watermarks and lags of long-paused partitions using the running
