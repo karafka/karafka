@@ -25,19 +25,12 @@ DT[:tests] << {
   is_unreachable: Karafka::App.config.admin.kafka[:"bootstrap.servers"] == "unreachable-broker:9092"
 }
 
-# Test 2: Create admin instance with custom kafka config pointing to working cluster
+# Create admin instance with custom kafka config pointing to working cluster. Since the
+# default config points at an unreachable broker, any successful operation below proves the
+# custom config reached the connection
 custom_admin = Karafka::Admin.new(kafka: working_kafka_config)
 
-custom_admin_kafka = custom_admin.instance_variable_get(:@custom_kafka)
-
-DT[:tests] << {
-  test: "custom_admin_created",
-  custom_kafka_set: !custom_admin_kafka.empty?,
-  has_bootstrap_servers: custom_admin_kafka.key?(:"bootstrap.servers") ||
-    custom_admin_kafka.key?("bootstrap.servers")
-}
-
-# Test 3: Verify custom admin can fetch cluster info
+# Test 2: Verify custom admin can fetch cluster info
 begin
   cluster_info = custom_admin.cluster_info
 
@@ -141,13 +134,6 @@ unreachable_test = DT[:tests].find { |t| t[:test] == "default_config_unreachable
 assert(
   unreachable_test[:is_unreachable],
   "Default admin config should be set to unreachable broker"
-)
-
-# Verify custom admin was created correctly
-custom_admin_test = DT[:tests].find { |t| t[:test] == "custom_admin_created" }
-assert(
-  custom_admin_test[:custom_kafka_set],
-  "Custom admin should have custom kafka config set"
 )
 
 # Verify custom admin can fetch cluster info
