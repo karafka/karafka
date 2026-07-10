@@ -143,7 +143,7 @@ module Karafka
             nested(:consumer_groups) do
               required(:decorator_class) { |val| !val.nil? }
 
-              nested(:paused_refresh) do
+              nested(:lag_compensation) do
                 required(:interval) { |val| val.is_a?(Integer) && val >= 0 }
               end
             end

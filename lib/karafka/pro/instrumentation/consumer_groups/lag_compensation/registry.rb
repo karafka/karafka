@@ -38,7 +38,7 @@ module Karafka
         # report frozen statistics. The refresher periodically fetches fresh values via the
         # running consumer connection and the decorator overlays them onto the emitted
         # statistics.
-        module PausedLags
+        module LagCompensation
           # Thread-safe storage for actively refreshed watermarks and lags of long-paused
           # partitions. Written by the refresher on listener threads, read by the statistics
           # decorator on the librdkafka callbacks thread.

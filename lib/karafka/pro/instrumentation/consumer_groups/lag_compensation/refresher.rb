@@ -37,7 +37,7 @@ module Karafka
         # updates those values from fetch responses, so partitions paused for a long time
         # report frozen statistics. The refresher periodically fetches fresh values and the
         # decorator overlays them onto the emitted statistics.
-        module PausedLags
+        module LagCompensation
           # Refreshes offsets and lags data of partitions that stayed paused for at least one
           # full interval, at most once per interval.
           #
@@ -54,7 +54,7 @@ module Karafka
             include Karafka::Core::Helpers::Time
             include Helpers::ConfigImporter.new(
               monitor: %i[monitor],
-              interval: %i[internal statistics consumer_groups paused_refresh interval]
+              interval: %i[internal statistics consumer_groups lag_compensation interval]
             )
 
             def initialize
@@ -122,7 +122,7 @@ module Karafka
                 "error.occurred",
                 caller: self,
                 error: e,
-                type: "paused_lags.refresher.error"
+                type: "lag_compensation.refresher.error"
               )
             end
 

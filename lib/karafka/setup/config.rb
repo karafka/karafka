@@ -370,7 +370,7 @@ module Karafka
             # partitions paused for a long time report frozen values in statistics. When
             # enabled, they are refreshed via the running consumer connection and overlaid onto
             # the emitted statistics.
-            setting :paused_refresh do
+            setting :lag_compensation do
               # option interval [Integer] how often (ms) at most to refresh watermarks and lags
               #   of long-paused partitions. 0 disables the feature entirely.
               setting :interval, default: 0

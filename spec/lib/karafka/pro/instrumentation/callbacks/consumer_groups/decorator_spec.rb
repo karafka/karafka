@@ -33,7 +33,7 @@ RSpec.describe_current do
 
   let(:decorator) { described_class.new }
   let(:client_name) { SecureRandom.hex(6) }
-  let(:registry) { Karafka::Pro::Instrumentation::ConsumerGroups::PausedLags::Registry.instance }
+  let(:registry) { Karafka::Pro::Instrumentation::ConsumerGroups::LagCompensation::Registry.instance }
 
   let(:partition_stats) do
     {

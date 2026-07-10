@@ -107,7 +107,7 @@ RSpec.describe_current do
         statistics: {
           consumer_groups: {
             decorator_class: Karafka::Instrumentation::Callbacks::ConsumerGroups::Decorator,
-            paused_refresh: {
+            lag_compensation: {
               interval: 0
             }
           }
@@ -841,26 +841,26 @@ RSpec.describe_current do
       it { expect(contract.call(config)).not_to be_success }
     end
 
-    context "when statistics paused_refresh interval is missing" do
-      before { config[:internal][:statistics][:consumer_groups][:paused_refresh].delete(:interval) }
+    context "when statistics lag_compensation interval is missing" do
+      before { config[:internal][:statistics][:consumer_groups][:lag_compensation].delete(:interval) }
 
       it { expect(contract.call(config)).not_to be_success }
     end
 
-    context "when statistics paused_refresh interval is negative" do
-      before { config[:internal][:statistics][:consumer_groups][:paused_refresh][:interval] = -1 }
+    context "when statistics lag_compensation interval is negative" do
+      before { config[:internal][:statistics][:consumer_groups][:lag_compensation][:interval] = -1 }
 
       it { expect(contract.call(config)).not_to be_success }
     end
 
-    context "when statistics paused_refresh interval is not an integer" do
-      before { config[:internal][:statistics][:consumer_groups][:paused_refresh][:interval] = 1.5 }
+    context "when statistics lag_compensation interval is not an integer" do
+      before { config[:internal][:statistics][:consumer_groups][:lag_compensation][:interval] = 1.5 }
 
       it { expect(contract.call(config)).not_to be_success }
     end
 
-    context "when statistics paused_refresh interval is a positive integer" do
-      before { config[:internal][:statistics][:consumer_groups][:paused_refresh][:interval] = 30_000 }
+    context "when statistics lag_compensation interval is a positive integer" do
+      before { config[:internal][:statistics][:consumer_groups][:lag_compensation][:interval] = 30_000 }
 
       it { expect(contract.call(config)).to be_success }
     end

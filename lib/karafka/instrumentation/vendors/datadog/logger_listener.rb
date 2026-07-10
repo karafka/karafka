@@ -145,8 +145,8 @@ module Karafka
               error "Parallel segments partitioner error occurred: #{error}"
             when "virtual_partitions.partitioner.error"
               error "Virtual partitions partitioner error occurred: #{error}"
-            when "paused_lags.refresher.error"
-              warn "Paused partitions lags refreshing failed due to an error: #{error}"
+            when "lag_compensation.refresher.error"
+              warn "Lag compensation refresher error occurred: #{error}"
             else
               error "#{event[:type]} error occurred: #{error}"
             end

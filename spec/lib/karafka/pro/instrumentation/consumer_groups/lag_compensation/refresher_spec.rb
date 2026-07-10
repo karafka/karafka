@@ -33,7 +33,7 @@ RSpec.describe_current do
 
   let(:client_name) { SecureRandom.hex(6) }
   let(:sg_id) { SecureRandom.hex(6) }
-  let(:registry) { Karafka::Pro::Instrumentation::ConsumerGroups::PausedLags::Registry.instance }
+  let(:registry) { Karafka::Pro::Instrumentation::ConsumerGroups::LagCompensation::Registry.instance }
   let(:subscription_group) { instance_double(Karafka::Routing::SubscriptionGroup, id: sg_id) }
 
   let(:committed_partition) do
@@ -71,7 +71,7 @@ RSpec.describe_current do
   end
 
   before do
-    Karafka::App.config.internal.statistics.consumer_groups.paused_refresh.interval = 1
+    Karafka::App.config.internal.statistics.consumer_groups.lag_compensation.interval = 1
 
     allow(Karafka::Admin::Topics).to receive(:read_partition_offsets) do |specs, isolation_level: nil|
       specs.flat_map do |topic, partition_specs|
@@ -83,7 +83,7 @@ RSpec.describe_current do
   end
 
   after do
-    Karafka::App.config.internal.statistics.consumer_groups.paused_refresh.interval = 0
+    Karafka::App.config.internal.statistics.consumer_groups.lag_compensation.interval = 0
     registry.evict(client_name)
   end
 
@@ -148,7 +148,7 @@ RSpec.describe_current do
     end
 
     context "when the refresh is not due yet" do
-      before { Karafka::App.config.internal.statistics.consumer_groups.paused_refresh.interval = 10_000 }
+      before { Karafka::App.config.internal.statistics.consumer_groups.lag_compensation.interval = 10_000 }
 
       it "does not store anything despite a long-paused partition" do
         refresher.on_client_pause(pause_event)
@@ -205,7 +205,7 @@ RSpec.describe_current do
           .to receive(:instrument)
           .with(
             "error.occurred",
-            hash_including(type: "paused_lags.refresher.error")
+            hash_including(type: "lag_compensation.refresher.error")
           )
 
         refresher.on_client_events_poll(tick_event)

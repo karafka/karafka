@@ -87,9 +87,9 @@ module Karafka
 
           # Subscribe the paused partitions lags refresher only when the feature is enabled.
           # It is checked post setup as the interval is user-configurable during setup
-          unless config.internal.statistics.consumer_groups.paused_refresh.interval.zero?
+          unless config.internal.statistics.consumer_groups.lag_compensation.interval.zero?
             config.monitor.subscribe(
-              Instrumentation::ConsumerGroups::PausedLags::Refresher.new
+              Instrumentation::ConsumerGroups::LagCompensation::Refresher.new
             )
           end
         end

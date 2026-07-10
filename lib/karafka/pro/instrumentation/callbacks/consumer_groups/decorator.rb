@@ -42,13 +42,13 @@ module Karafka
           # refreshed data for a given client, topic or partition, it does nothing, so values
           # from librdkafka remain untouched.
           #
-          # It is pure and instant: all the broker queries happen in the paused lags refresher
+          # It is pure and instant: all the broker queries happen in the lag compensation refresher
           # on the listener threads, never on the librdkafka callbacks path.
           class Decorator < Karafka::Instrumentation::Callbacks::ConsumerGroups::Decorator
             # @param statistics [Hash] raw librdkafka statistics
             # @return [Hash] decorated statistics with refreshed paused partitions data
             #
-            # @note When the paused lags refreshing is disabled, the refresher is not
+            # @note When the lag compensation is disabled, the refresher is not
             #   subscribed and the registry stays empty, so the overlay is a pass-through by
             #   itself
             def call(statistics)
@@ -64,7 +64,7 @@ module Karafka
             #
             # @param statistics [Hash] raw librdkafka statistics
             def overlay(statistics)
-              data = Pro::Instrumentation::ConsumerGroups::PausedLags::Registry
+              data = Pro::Instrumentation::ConsumerGroups::LagCompensation::Registry
                 .instance
                 .fetch(statistics["name"])
 
