@@ -358,7 +358,9 @@ module Karafka
           sleep(0.1)
 
           # Unsubscribe - this will trigger the second rebalance when the consumer closes
-          # The ensure block in with_consumer will handle the unsubscribe and close
+          # The ensure block in with_consumer will handle the unsubscribe and close for the
+          # dedicated consumer created here. This operation subscribes and must never run on
+          # an external client as nothing would restore its subscription
         end
       end
 
