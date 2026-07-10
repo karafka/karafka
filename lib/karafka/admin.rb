@@ -3,8 +3,10 @@
 module Karafka
   # Admin actions that we can perform via Karafka on our Kafka cluster
   #
-  # @note It always initializes a new admin instance as we want to ensure it is always closed
-  #   Since admin actions are not performed that often, that should be ok.
+  # @note Each operation initializes its own dedicated instance as we want to ensure it is
+  #   always closed. Since admin actions are not performed that often, that should be ok. When
+  #   an external client is provided, it is reused instead and its lifecycle stays fully with
+  #   its owner.
   #
   # @note By default it uses the primary defined cluster. For multi-cluster operations, create
   #   an Admin instance with custom kafka configuration:
@@ -38,8 +40,10 @@ module Karafka
     #   internal API: the caller is responsible for providing a client capable of the invoked
     #   operations and for invoking only operations that are safe to run on a live client.
     #
-    # @note The external client handle is resolved once at construction, so the admin instance
-    #   should not outlive the provided client.
+    # @note Raw and proxied rdkafka instances are resolved once at construction, so the admin
+    #   instance should not outlive them. `Karafka::Connection::Client` instances are resolved
+    #   on each use instead, so the admin instance follows such a client across the underlying
+    #   connection recovery resets.
     #
     # @example Create admin for a different cluster
     #   admin = Karafka::Admin.new(kafka: { 'bootstrap.servers': 'other-cluster:9092' })
@@ -56,13 +60,19 @@ module Karafka
 
       return unless external_client
 
-      # Resolve and proxy the provided client upfront: a running consumer connection client
-      # exposes its handle via its wrapping proxy and the proxy itself prevents double wrapping,
-      # so raw, proxied and connection client forms can all be provided
+      # A running consumer connection client is kept as-is and its current handle is resolved
+      # on each use: such clients swap their underlying rdkafka instance across recovery
+      # resets, so a handle resolved once at construction could go stale while the client
+      # itself remains fully operational
       if external_client.is_a?(Karafka::Connection::Client)
-        external_client = external_client.wrapped_kafka
+        @external_client = external_client
+        @external_consumer = true
+
+        return
       end
 
+      # Raw and proxied rdkafka instances are wrapped upfront - the proxy itself prevents
+      # double wrapping
       @external_client = Karafka::Connection::Proxy.new(external_client)
 
       # Capability based routing resolved once upfront: rdkafka admin instances serve
@@ -76,16 +86,18 @@ module Karafka
 
     # No-op close to normalize the API surface.
     #
-    # Each admin operation currently opens and closes its own underlying rdkafka admin instance
-    # internally, so there is nothing to release at the `Karafka::Admin` level right now. This
-    # method exists so that callers who hold an instance and call `#close` on it (matching the
-    # pattern of other closeable resources) do not raise `NoMethodError`.
+    # Each admin operation opens and closes its own dedicated rdkafka instance internally,
+    # while external clients are owned and closed by their providers, so there is nothing to
+    # release at the `Karafka::Admin` level right now. This method exists so that callers who
+    # hold an instance and call `#close` on it (matching the pattern of other closeable
+    # resources) do not raise `NoMethodError`.
     #
-    # In the future, `Karafka::Admin` is planned to be refactored to reuse a single rdkafka admin
-    # instance across multiple operations rather than creating and tearing one down per call. When
-    # that happens, this method will need to release that shared instance. The no-op is here now
-    # so that all callers are already written against the correct API and require no changes when
-    # the real implementation lands.
+    # In the future, `Karafka::Admin` is planned to be refactored to reuse a single owned
+    # rdkafka admin instance across multiple operations rather than creating and tearing one
+    # down per call. When that happens, this method will need to release that shared owned
+    # instance - though never an external client. The no-op is here now so that all callers are
+    # already written against the correct API and require no changes when the real
+    # implementation lands.
     def close
     end
 
@@ -426,7 +438,7 @@ module Karafka
     #   identity, including its `group.id`. External rdkafka admin instances are not used here
     #   as they are not capable of consumer operations - they are used by `#with_admin` instead.
     def with_consumer(settings = {})
-      return yield(@external_client) if @external_consumer
+      return yield(external_client_proxy) if @external_consumer
 
       bind_id = SecureRandom.uuid
       consumer = nil
@@ -464,7 +476,7 @@ module Karafka
     #   clients of other types (consumers, producers) are not capable of admin operations, thus
     #   a dedicated admin instance is created for them as usual.
     def with_admin
-      return yield(@external_client) if @external_admin
+      return yield(external_client_proxy) if @external_admin
 
       bind_id = SecureRandom.uuid
       admin = nil
@@ -488,6 +500,17 @@ module Karafka
     end
 
     private
+
+    # @return [Karafka::Connection::Proxy] proxy wrapping the current external client handle.
+    #   For connection clients the handle is resolved on each use as they swap their underlying
+    #   rdkafka instance across recovery resets while remaining operational
+    def external_client_proxy
+      if @external_client.is_a?(Karafka::Connection::Client)
+        @external_client.wrapped_kafka
+      else
+        @external_client
+      end
+    end
 
     # @return [Topics] topics admin operating within this instance context (custom kafka and
     #   external client carried over)

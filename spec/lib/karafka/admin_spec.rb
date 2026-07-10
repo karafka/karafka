@@ -247,6 +247,29 @@ RSpec.describe_current do
         expect(admin.with_consumer { 42 }).to eq(42)
       end
     end
+
+    context "when the external client is a connection client" do
+      subject(:admin) { described_class.new(external_client: connection_client) }
+
+      let(:subscription_group) { build(:routing_subscription_group) }
+      let(:connection_client) do
+        Karafka::Connection::Client.new(subscription_group, -> { true })
+      end
+      let(:initial_handle) { instance_double(Rdkafka::Consumer) }
+      let(:rebuilt_handle) { instance_double(Rdkafka::Consumer) }
+
+      it "resolves the current handle on each use so it follows the client across resets" do
+        allow(connection_client)
+          .to receive(:wrapped_kafka)
+          .and_return(
+            Karafka::Connection::Proxy.new(initial_handle),
+            Karafka::Connection::Proxy.new(rebuilt_handle)
+          )
+
+        admin.with_consumer { |proxy| expect(proxy.wrapped).to eq(initial_handle) }
+        admin.with_consumer { |proxy| expect(proxy.wrapped).to eq(rebuilt_handle) }
+      end
+    end
   end
 
   describe "#with_admin" do
