@@ -362,6 +362,17 @@ RSpec.describe_current do
 
       admin.topic_info(name)
     end
+
+    it "carries the external client over to replication planning" do
+      expect(Karafka::Admin::Replication)
+        .to receive(:new)
+        .with(kafka: {}, external_client: external_client)
+        .and_call_original
+
+      allow_any_instance_of(Karafka::Admin::Replication).to receive(:plan)
+
+      admin.plan_topic_replication(topic: name, replication_factor: 2)
+    end
   end
 
   describe "#close" do

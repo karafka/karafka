@@ -84,6 +84,8 @@ module Karafka
       # 2. As a plan result object when called with topic and plan parameters
       #
       # @param kafka [Hash] custom kafka configuration for admin operations (optional)
+      # @param external_client [Object, nil] external client for admin operations (optional)
+      #   @see Karafka::Admin#initialize
       # @param topic [String] topic name (for plan result)
       # @param current_replication_factor [Integer] current replication factor (for plan result)
       # @param target_replication_factor [Integer] target replication factor (for plan result)
@@ -91,13 +93,14 @@ module Karafka
       # @param cluster_info [Hash] broker information (for plan result)
       def initialize(
         kafka: nil,
+        external_client: nil,
         topic: nil,
         current_replication_factor: nil,
         target_replication_factor: nil,
         partitions_assignment: nil,
         cluster_info: nil
       )
-        super(kafka: kafka || {})
+        super(kafka: kafka || {}, external_client: external_client)
 
         # If topic is provided, this is a plan result object
         return unless topic
@@ -293,7 +296,7 @@ module Karafka
       # @param topic [String] name of the topic
       # @return [Hash] topic information with partitions metadata
       def fetch_topic_info(topic)
-        Topics.new(kafka: @custom_kafka).info(topic)
+        topics_admin.info(topic)
       end
 
       # Fetches cluster broker information from Kafka metadata

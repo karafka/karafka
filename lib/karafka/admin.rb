@@ -410,7 +410,7 @@ module Karafka
     # @param brokers [Hash, nil] optional manual broker assignments per partition
     # @see Replication#plan
     def plan_topic_replication(topic:, replication_factor:, brokers: nil)
-      Replication.new(kafka: @custom_kafka).plan(
+      Replication.new(kafka: @custom_kafka, external_client: @external_client).plan(
         topic: topic,
         to: replication_factor,
         brokers: brokers
