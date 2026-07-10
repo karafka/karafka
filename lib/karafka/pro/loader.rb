@@ -87,8 +87,10 @@ module Karafka
 
           # Subscribe the paused partitions lags refresher only when the feature is enabled.
           # It is checked post setup as the interval is user-configurable during setup
-          unless config.internal.statistics.paused_refresh.interval.zero?
-            config.monitor.subscribe(Instrumentation::PausedLags::Refresher.new)
+          unless config.internal.statistics.consumer_groups.paused_refresh.interval.zero?
+            config.monitor.subscribe(
+              Instrumentation::ConsumerGroups::PausedLags::Refresher.new
+            )
           end
         end
 
@@ -143,7 +145,7 @@ module Karafka
 
           # The decorator is swapped unconditionally as it is a pass-through when the paused
           # partitions lags refreshing is disabled or when there is no refreshed data
-          icfg.statistics.decorator_class = Instrumentation::PausedLags::Decorator
+          icfg.statistics.consumer_groups.decorator_class = Instrumentation::Callbacks::ConsumerGroups::Decorator
 
           config.monitor.subscribe(Instrumentation::PerformanceTracker.instance)
         end

@@ -78,12 +78,12 @@ RSpec.describe_current do
     let(:custom_decorator_class) { Class.new(Karafka::Core::Monitoring::StatisticsDecorator) }
 
     before do
-      allow(Karafka::App.config.internal.statistics)
+      allow(Karafka::App.config.internal.statistics.consumer_groups)
         .to receive(:decorator_class)
         .and_return(custom_decorator_class)
     end
 
-    it "instantiates the decorator configured via config.internal.statistics.decorator_class" do
+    it "instantiates the decorator configured via config.internal.statistics.consumer_groups.decorator_class" do
       expect(callback.instance_variable_get(:@statistics_decorator))
         .to be_an_instance_of(custom_decorator_class)
     end

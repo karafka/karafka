@@ -33,7 +33,7 @@ RSpec.describe_current do
 
   let(:decorator) { described_class.new }
   let(:client_name) { SecureRandom.hex(6) }
-  let(:registry) { Karafka::Pro::Instrumentation::PausedLags::Registry.instance }
+  let(:registry) { Karafka::Pro::Instrumentation::ConsumerGroups::PausedLags::Registry.instance }
   let(:interval) { 30_000 }
 
   let(:partition_stats) do
@@ -58,10 +58,10 @@ RSpec.describe_current do
     }
   end
 
-  before { Karafka::App.config.internal.statistics.paused_refresh.interval = interval }
+  before { Karafka::App.config.internal.statistics.consumer_groups.paused_refresh.interval = interval }
 
   after do
-    Karafka::App.config.internal.statistics.paused_refresh.interval = 0
+    Karafka::App.config.internal.statistics.consumer_groups.paused_refresh.interval = 0
     registry.evict(client_name)
   end
 

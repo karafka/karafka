@@ -33,7 +33,7 @@ RSpec.describe_current do
 
   let(:client_name) { SecureRandom.hex(6) }
   let(:sg_id) { SecureRandom.hex(6) }
-  let(:registry) { Karafka::Pro::Instrumentation::PausedLags::Registry.instance }
+  let(:registry) { Karafka::Pro::Instrumentation::ConsumerGroups::PausedLags::Registry.instance }
   let(:subscription_group) { instance_double(Karafka::Routing::SubscriptionGroup, id: sg_id) }
 
   let(:committed_partition) do
@@ -71,10 +71,10 @@ RSpec.describe_current do
     )
   end
 
-  before { Karafka::App.config.internal.statistics.paused_refresh.interval = 1 }
+  before { Karafka::App.config.internal.statistics.consumer_groups.paused_refresh.interval = 1 }
 
   after do
-    Karafka::App.config.internal.statistics.paused_refresh.interval = 0
+    Karafka::App.config.internal.statistics.consumer_groups.paused_refresh.interval = 0
     registry.evict(client_name)
   end
 
@@ -139,7 +139,7 @@ RSpec.describe_current do
     end
 
     context "when the refresh is not due yet" do
-      before { Karafka::App.config.internal.statistics.paused_refresh.interval = 10_000 }
+      before { Karafka::App.config.internal.statistics.consumer_groups.paused_refresh.interval = 10_000 }
 
       it "does not store anything despite a long-paused partition" do
         refresher.on_client_pause(pause_event)

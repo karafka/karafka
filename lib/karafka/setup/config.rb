@@ -356,20 +356,26 @@ module Karafka
 
         # Things related to librdkafka statistics decoration prior to their emission
         setting :statistics do
-          # option decorator_class [Class] class used to decorate raw librdkafka statistics
-          #   (adds delta/freeze-duration values) before `statistics.emitted` is instrumented.
-          #   Exposed so it can be replaced with a custom decorator (e.g. one that also enriches
-          #   or corrects specific values) without touching the callback that uses it.
-          setting :decorator_class, default: Instrumentation::Callbacks::ConsumerGroups::Decorator
+          # Consumer groups related statistics settings. Scoped so share groups (KIP-932) can
+          # get their own parallel scope once they land.
+          setting :consumer_groups do
+            # option decorator_class [Class] class used to decorate raw librdkafka statistics
+            #   (adds delta/freeze-duration values) before `statistics.emitted` is instrumented.
+            #   Exposed so it can be replaced with a custom decorator (e.g. one that also
+            #   enriches or corrects specific values) without touching the callback that uses
+            #   it.
+            setting :decorator_class, default: Instrumentation::Callbacks::ConsumerGroups::Decorator
 
-          # Active refreshing of watermarks and lags for long-paused partitions (Pro). librdkafka
-          # only updates watermark offsets and lags from fetch responses, so partitions paused
-          # for a long time report frozen values in statistics. When enabled, they are refreshed
-          # via the running consumer connection and overlaid onto the emitted statistics.
-          setting :paused_refresh do
-            # option interval [Integer] how often (ms) at most to refresh watermarks and lags of
-            #   long-paused partitions. 0 disables the feature entirely.
-            setting :interval, default: 0
+            # Active refreshing of watermarks and lags for long-paused partitions (Pro).
+            # librdkafka only updates watermark offsets and lags from fetch responses, so
+            # partitions paused for a long time report frozen values in statistics. When
+            # enabled, they are refreshed via the running consumer connection and overlaid onto
+            # the emitted statistics.
+            setting :paused_refresh do
+              # option interval [Integer] how often (ms) at most to refresh watermarks and lags
+              #   of long-paused partitions. 0 disables the feature entirely.
+              setting :interval, default: 0
+            end
           end
         end
 
