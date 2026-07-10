@@ -26,21 +26,21 @@ module Karafka
     # @return [Hash] custom kafka settings to merge with defaults
     attr_reader :custom_kafka
 
-    # Borrowed client used for consumer-based operations instead of dedicated instances
-    # @return [Object, nil] borrowed client or nil when dedicated instances are used
-    attr_reader :borrowed_client
+    # External client used for consumer-based operations instead of dedicated instances
+    # @return [Object, nil] external client or nil when dedicated instances are used
+    attr_reader :external_client
 
     # Creates a new Admin instance
     #
     # @param kafka [Hash] custom kafka configuration to merge with app defaults.
     #   Useful for multi-cluster operations where you want to target a different cluster.
-    # @param borrowed_client [Object, nil] active rdkafka client (raw or wrapped with
+    # @param external_client [Object, nil] active rdkafka client (raw or wrapped with
     #   `Karafka::Connection::Proxy`) on which admin operations should run, instead of each
     #   operation creating its own short-lived instance. Routing is capability based: rdkafka
     #   admin instances are used by admin-based operations (`with_admin` and everything built
-    #   on top of it, e.g. `cluster_info`), any other borrowed client is used by consumer-based
+    #   on top of it, e.g. `cluster_info`), any other external client is used by consumer-based
     #   operations (`with_consumer` and everything built on top of it). The lifecycle of a
-    #   borrowed client belongs fully to its owner: it is never configured, started or closed
+    #   external client belongs fully to its owner: it is never configured, started or closed
     #   here and all operations run within its identity, including its `group.id`. This is a
     #   low-level internal API: the caller is responsible for providing a client capable of
     #   the invoked operations and for invoking only operations that are safe to run on a
@@ -51,11 +51,11 @@ module Karafka
     #   admin.cluster_info
     #
     # @example Read lags of a running consumer via its own client connection
-    #   admin = Karafka::Admin.new(borrowed_client: client)
+    #   admin = Karafka::Admin.new(external_client: client)
     #   admin.read_lags_with_offsets({ 'my-group' => ['events'] })
-    def initialize(kafka: {}, borrowed_client: nil)
+    def initialize(kafka: {}, external_client: nil)
       @custom_kafka = kafka
-      @borrowed_client = borrowed_client
+      @external_client = external_client
     end
 
     # No-op close to normalize the API surface.
@@ -402,13 +402,13 @@ module Karafka
     # @note We always ship and yield a proxied consumer because admin API performance is not
     #   that relevant. That is, there are no high frequency calls that would have to be delegated
     #
-    # @note When a borrowed client is present, it is yielded directly and its lifecycle is not
+    # @note When an external client is present, it is yielded directly and its lifecycle is not
     #   managed here in any way: no oauth binding, no start and no closing. `settings` are
-    #   ignored as the borrowed instance is already configured and operations run within its
-    #   identity, including its `group.id`. Borrowed rdkafka admin instances are not used here
+    #   ignored as the external instance is already configured and operations run within its
+    #   identity, including its `group.id`. External rdkafka admin instances are not used here
     #   as they are not capable of consumer operations - they are used by `#with_admin` instead.
     def with_consumer(settings = {})
-      return yield(Karafka::Connection::Proxy.new(@borrowed_client)) if borrowed_consumer?
+      return yield(Karafka::Connection::Proxy.new(@external_client)) if external_consumer?
 
       bind_id = SecureRandom.uuid
       consumer = nil
@@ -439,12 +439,12 @@ module Karafka
 
     # Creates admin instance and yields it. After usage it closes the admin instance
     #
-    # @note When the borrowed client is an rdkafka admin instance, it is yielded directly and
-    #   its lifecycle is not managed here in any way, same as with `#with_consumer`. Borrowed
+    # @note When the external client is an rdkafka admin instance, it is yielded directly and
+    #   its lifecycle is not managed here in any way, same as with `#with_consumer`. External
     #   clients of other types (consumers, producers) are not capable of admin operations, thus
     #   a dedicated admin instance is created for them as usual.
     def with_admin
-      return yield(Karafka::Connection::Proxy.new(@borrowed_client)) if borrowed_admin?
+      return yield(Karafka::Connection::Proxy.new(@external_client)) if external_admin?
 
       bind_id = SecureRandom.uuid
       admin = nil
@@ -469,35 +469,35 @@ module Karafka
 
     private
 
-    # @return [Boolean] true when the borrowed client is an rdkafka admin instance (raw or
+    # @return [Boolean] true when the external client is an rdkafka admin instance (raw or
     #   proxied) capable of admin operations
-    def borrowed_admin?
-      return false unless @borrowed_client
+    def external_admin?
+      return false unless @external_client
 
-      client = @borrowed_client
+      client = @external_client
       client = client.wrapped if client.is_a?(Karafka::Connection::Proxy)
 
       client.is_a?(Rdkafka::Admin)
     end
 
-    # @return [Boolean] true when the borrowed client should be used for consumer operations.
-    #   Any borrowed client that is not an rdkafka admin instance is assumed to be consumer
+    # @return [Boolean] true when the external client should be used for consumer operations.
+    #   Any external client that is not an rdkafka admin instance is assumed to be consumer
     #   capable - it is the caller responsibility to provide a client that can handle the
     #   invoked operations
-    def borrowed_consumer?
-      !@borrowed_client.nil? && !borrowed_admin?
+    def external_consumer?
+      !@external_client.nil? && !external_admin?
     end
 
     # @return [Topics] topics admin operating within this instance context (custom kafka and
-    #   borrowed client carried over)
+    #   external client carried over)
     def topics_admin
-      Topics.new(kafka: @custom_kafka, borrowed_client: @borrowed_client)
+      Topics.new(kafka: @custom_kafka, external_client: @external_client)
     end
 
     # @return [ConsumerGroups] consumer groups admin operating within this instance context
-    #   (custom kafka and borrowed client carried over)
+    #   (custom kafka and external client carried over)
     def consumer_groups_admin
-      ConsumerGroups.new(kafka: @custom_kafka, borrowed_client: @borrowed_client)
+      ConsumerGroups.new(kafka: @custom_kafka, external_client: @external_client)
     end
 
     # @return [Integer] max wait time in ms

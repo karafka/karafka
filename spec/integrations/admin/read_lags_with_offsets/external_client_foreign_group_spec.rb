@@ -1,13 +1,13 @@
 # frozen_string_literal: true
 
-# When read_lags_with_offsets runs on a borrowed client, committed offsets are always fetched
-# within the borrowed consumer group.id identity. Group names from the query are never sent to
+# When read_lags_with_offsets runs on an external client, committed offsets are always fetched
+# within the external consumer group.id identity. Group names from the query are never sent to
 # Kafka - they are only used as result keys. Querying a foreign group is silently wrong in two
-# flavors: topics the borrowed group consumed come back with the borrowed group offsets and lags
+# flavors: topics the external group consumed come back with the external group offsets and lags
 # mislabeled under the foreign group name, and topics it never consumed backfill to -1/-1 even
-# when the foreign group has real committed offsets there. No error is raised and the borrowed
+# when the foreign group has real committed offsets there. No error is raised and the external
 # consumer state is not affected in any way (no join, no assignment, no close). This is why
-# borrowed clients should be queried only about their own group.
+# external clients should be queried only about their own group.
 
 setup_karafka
 
@@ -50,38 +50,38 @@ assert_equal(
   )
 )
 
-borrowed = Rdkafka::Config.new(
+external = Rdkafka::Config.new(
   "bootstrap.servers": ENV.fetch("KAFKA_BOOTSTRAP_SERVERS", "127.0.0.1:9092"),
   "group.id": OWN_CG
 ).consumer
 
-borrowed_admin = Karafka::Admin::ConsumerGroups.new(borrowed_client: borrowed)
+external_admin = Karafka::Admin::ConsumerGroups.new(external_client: external)
 
-# Case 1 - borrowed client queried about its own group gives correct data
+# Case 1 - external client queried about its own group gives correct data
 assert_equal(
   { OWN_CG => { TOPIC1 => OWN_T1 } },
-  borrowed_admin.read_lags_with_offsets({ OWN_CG => [TOPIC1] })
+  external_admin.read_lags_with_offsets({ OWN_CG => [TOPIC1] })
 )
 
-# Case 2 - foreign group query on a topic the borrowed group consumed silently returns the
-# borrowed group offsets and lags mislabeled under the foreign group name
-misattributed = borrowed_admin.read_lags_with_offsets({ FOREIGN_CG => [TOPIC1] })
+# Case 2 - foreign group query on a topic the external group consumed silently returns the
+# external group offsets and lags mislabeled under the foreign group name
+misattributed = external_admin.read_lags_with_offsets({ FOREIGN_CG => [TOPIC1] })
 
 assert_equal({ FOREIGN_CG => { TOPIC1 => OWN_T1 } }, misattributed)
 assert_not_equal(FOREIGN_T1, misattributed.fetch(FOREIGN_CG).fetch(TOPIC1))
 
-# Case 3 - foreign group query on a topic the borrowed group never consumed backfills to -1/-1
+# Case 3 - foreign group query on a topic the external group never consumed backfills to -1/-1
 # despite the foreign group having real committed offsets there, indistinguishable from a group
 # that never consumed
 assert_equal(
   { FOREIGN_CG => { TOPIC2 => NA } },
-  borrowed_admin.read_lags_with_offsets({ FOREIGN_CG => [TOPIC2] })
+  external_admin.read_lags_with_offsets({ FOREIGN_CG => [TOPIC2] })
 )
 
-# All of the above is read-only within the borrowed identity - the borrowed consumer was not
+# All of the above is read-only within the external identity - the external consumer was not
 # joined to the group, assigned, subscribed or closed
-assert_equal({}, borrowed.assignment.to_h)
-assert_equal({}, borrowed.subscription.to_h)
-assert !borrowed.closed?
+assert_equal({}, external.assignment.to_h)
+assert_equal({}, external.subscription.to_h)
+assert !external.closed?
 
-borrowed.close
+external.close

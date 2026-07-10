@@ -207,39 +207,39 @@ RSpec.describe_current do
   end
 
   describe "#with_consumer" do
-    context "when operating on a borrowed client" do
-      subject(:admin) { described_class.new(borrowed_client: borrowed_client) }
+    context "when operating on an external client" do
+      subject(:admin) { described_class.new(external_client: external_client) }
 
-      let(:borrowed_client) { instance_double(Rdkafka::Consumer) }
+      let(:external_client) { instance_double(Rdkafka::Consumer) }
 
-      it "yields a proxy wrapping the borrowed client" do
+      it "yields a proxy wrapping the external client" do
         admin.with_consumer do |proxy|
           expect(proxy).to be_a(Karafka::Connection::Proxy)
-          expect(proxy.wrapped).to eq(borrowed_client)
+          expect(proxy.wrapped).to eq(external_client)
         end
       end
 
-      it "does not wrap an already proxied borrowed client with another proxy level" do
-        proxied = Karafka::Connection::Proxy.new(borrowed_client)
+      it "does not wrap an already proxied external client with another proxy level" do
+        proxied = Karafka::Connection::Proxy.new(external_client)
 
-        described_class.new(borrowed_client: proxied).with_consumer do |proxy|
-          expect(proxy.wrapped).to eq(borrowed_client)
+        described_class.new(external_client: proxied).with_consumer do |proxy|
+          expect(proxy.wrapped).to eq(external_client)
         end
       end
 
-      it "does not manage the borrowed client lifecycle" do
+      it "does not manage the external client lifecycle" do
         # Verifying double raises on any unexpected message, so lack of errors proves that no
-        # start, unsubscribe or close was invoked on the borrowed client
+        # start, unsubscribe or close was invoked on the external client
         expect { admin.with_consumer { nil } }.not_to raise_error
       end
 
-      it "does not manage the borrowed client lifecycle also when the block raises" do
+      it "does not manage the external client lifecycle also when the block raises" do
         expect { admin.with_consumer { raise ArgumentError } }.to raise_error(ArgumentError)
       end
 
       it "ignores provided settings" do
         admin.with_consumer("group.id": "whatever") do |proxy|
-          expect(proxy.wrapped).to eq(borrowed_client)
+          expect(proxy.wrapped).to eq(external_client)
         end
       end
 
@@ -250,46 +250,46 @@ RSpec.describe_current do
   end
 
   describe "#with_admin" do
-    context "when the borrowed client is an rdkafka admin instance" do
-      subject(:admin) { described_class.new(borrowed_client: borrowed_client) }
+    context "when the external client is an rdkafka admin instance" do
+      subject(:admin) { described_class.new(external_client: external_client) }
 
-      let(:borrowed_client) do
+      let(:external_client) do
         Rdkafka::Config.new("bootstrap.servers": "127.0.0.1:9092").admin
       end
 
-      after { borrowed_client.close }
+      after { external_client.close }
 
-      it "yields a proxy wrapping the borrowed admin and leaves it open" do
+      it "yields a proxy wrapping the external admin and leaves it open" do
         admin.with_admin do |proxy|
           expect(proxy).to be_a(Karafka::Connection::Proxy)
-          expect(proxy.wrapped).to eq(borrowed_client)
+          expect(proxy.wrapped).to eq(external_client)
         end
 
-        expect(borrowed_client.closed?).to be(false)
+        expect(external_client.closed?).to be(false)
       end
 
-      it "does not wrap an already proxied borrowed admin with another proxy level" do
-        proxied = Karafka::Connection::Proxy.new(borrowed_client)
+      it "does not wrap an already proxied external admin with another proxy level" do
+        proxied = Karafka::Connection::Proxy.new(external_client)
 
-        described_class.new(borrowed_client: proxied).with_admin do |proxy|
-          expect(proxy.wrapped).to eq(borrowed_client)
+        described_class.new(external_client: proxied).with_admin do |proxy|
+          expect(proxy.wrapped).to eq(external_client)
         end
       end
 
-      it "leaves the borrowed admin open also when the block raises" do
+      it "leaves the external admin open also when the block raises" do
         expect { admin.with_admin { raise ArgumentError } }.to raise_error(ArgumentError)
-        expect(borrowed_client.closed?).to be(false)
+        expect(external_client.closed?).to be(false)
       end
 
       it "is not used for consumer-based operations" do
         admin.with_consumer do |proxy|
-          expect(proxy.wrapped).not_to eq(borrowed_client)
+          expect(proxy.wrapped).not_to eq(external_client)
         end
       end
 
       it "serves cluster_info without a dedicated admin instance" do
-        # Materialize the borrowed admin upfront so only operational usage is guarded
-        admin.borrowed_client
+        # Materialize the external admin upfront so only operational usage is guarded
+        admin.external_client
 
         expect(Rdkafka::Config).not_to receive(:new)
 
@@ -297,28 +297,28 @@ RSpec.describe_current do
       end
     end
 
-    context "when the borrowed client is a consumer" do
-      subject(:admin) { described_class.new(borrowed_client: borrowed_client) }
+    context "when the external client is a consumer" do
+      subject(:admin) { described_class.new(external_client: external_client) }
 
-      let(:borrowed_client) { instance_double(Rdkafka::Consumer) }
+      let(:external_client) { instance_double(Rdkafka::Consumer) }
 
       it "is not used and a dedicated admin instance operates" do
         admin.with_admin do |proxy|
-          expect(proxy.wrapped).not_to eq(borrowed_client)
+          expect(proxy.wrapped).not_to eq(external_client)
         end
       end
     end
   end
 
-  describe "borrowed client delegations" do
-    subject(:admin) { described_class.new(borrowed_client: borrowed_client) }
+  describe "external client delegations" do
+    subject(:admin) { described_class.new(external_client: external_client) }
 
-    let(:borrowed_client) { instance_double(Rdkafka::Consumer) }
+    let(:external_client) { instance_double(Rdkafka::Consumer) }
 
-    it "carries the borrowed client over to consumer groups operations" do
+    it "carries the external client over to consumer groups operations" do
       expect(Karafka::Admin::ConsumerGroups)
         .to receive(:new)
-        .with(kafka: {}, borrowed_client: borrowed_client)
+        .with(kafka: {}, external_client: external_client)
         .and_call_original
 
       allow_any_instance_of(Karafka::Admin::ConsumerGroups)
@@ -327,10 +327,10 @@ RSpec.describe_current do
       admin.read_lags_with_offsets
     end
 
-    it "carries the borrowed client over to topics operations" do
+    it "carries the external client over to topics operations" do
       expect(Karafka::Admin::Topics)
         .to receive(:new)
-        .with(kafka: {}, borrowed_client: borrowed_client)
+        .with(kafka: {}, external_client: external_client)
         .and_call_original
 
       allow_any_instance_of(Karafka::Admin::Topics).to receive(:info)

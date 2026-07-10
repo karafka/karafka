@@ -381,8 +381,8 @@ module Karafka
       # @note This lag reporting is for committed lags and is "Kafka-centric", meaning that this
       #   represents lags from Kafka perspective and not the consumer. They may differ.
       #
-      # @note When this instance operates on a borrowed client, every queried group runs
-      #   through that single consumer identity, so query it only about the borrowed client
+      # @note When this instance operates on an external client, every queried group runs
+      #   through that single consumer identity, so query it only about the external client
       #   own group.
       def read_lags_with_offsets(groups_with_topics = {}, active_topics_only: true)
         # We first fetch all the topics with partitions count that exist in the cluster so we
