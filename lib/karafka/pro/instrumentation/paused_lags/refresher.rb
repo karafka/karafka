@@ -37,10 +37,15 @@ module Karafka
         # so all the broker queries happen on the thread that owns the client connection and no
         # dedicated instances are created.
         #
-        # A partition is considered long-paused when it was paused during two consecutive
-        # refresh ticks, so no per-partition pause timestamps tracking is needed. Errors never
-        # propagate (values stay stale until the next successful refresh) but are instrumented
-        # and retried with an exponentially backed off delay.
+        # Pause state is tracked via the `client.pause` and `client.resume` instrumentation
+        # events (which fire on the same listener thread), so no client internals are polled.
+        # A partition is considered long-paused when it stayed paused for at least one full
+        # refresh interval; short pause/resume cycles reset its clock and never qualify. On
+        # resume or revocation the partition data is dropped immediately, so stale values never
+        # overlay live statistics and revoked partitions are never queried again.
+        #
+        # Errors never propagate (values stay stale until the next successful refresh) but are
+        # instrumented and retried with an exponentially backed off delay.
         #
         # A single tick refreshes at most `MAX_PARTITIONS_PER_TICK` partitions, cycling through
         # the remaining ones round-robin on the following ticks, so a refresh can never stall
@@ -68,6 +73,35 @@ module Karafka
             @states = {}
           end
 
+          # Tracks when a given partition got paused
+          #
+          # @param event [Karafka::Core::Monitoring::Event] pause event
+          def on_client_pause(event)
+            state = state_for(event[:subscription_group].id)
+
+            (state[:paused][event[:topic]] ||= {})[event[:partition]] = monotonic_now
+            state[:client_name] = event[:caller].name
+          end
+
+          # Stops tracking a resumed partition and drops its refreshed data immediately, so
+          # stale values never overlay the live statistics of an actively consumed partition
+          #
+          # @param event [Karafka::Core::Monitoring::Event] resume event
+          def on_client_resume(event)
+            state = state_for(event[:subscription_group].id)
+            partitions = state[:paused][event[:topic]]
+
+            return unless partitions
+            return unless partitions.delete(event[:partition])
+
+            state[:paused].delete(event[:topic]) if partitions.empty?
+
+            Registry.instance.retain(
+              event[:caller].name,
+              state[:paused].transform_values(&:keys)
+            )
+          end
+
           # Refreshes long-paused partitions data if the refresh is due for a given
           # subscription group
           #
@@ -82,16 +116,10 @@ module Karafka
 
             return if monotonic_now < state[:next_at]
 
-            paused_now = client.paused
-            long_paused = intersect(state[:previous_paused], paused_now)
-
-            state[:previous_paused] = paused_now
             state[:next_at] = monotonic_now + interval
             state[:client_name] = client.name
 
-            # Drop data of partitions that are no longer paused so stale values never overlay
-            # live librdkafka statistics of partitions that resumed and are actively consumed
-            Registry.instance.retain(client.name, paused_now)
+            long_paused = long_paused_for(state)
 
             if long_paused.empty?
               # A completed tick with nothing to refresh means previous errors are not relevant
@@ -126,13 +154,14 @@ module Karafka
             )
           end
 
-          # Expires all the refreshed data and pause tracking of a client on a rebalance, as
-          # its paused partitions may no longer belong to it
+          # Expires all the refreshed data and pause tracking of a client on a rebalance. Its
+          # paused partitions may no longer belong to it and tracking will refill only via real
+          # pause events of partitions this client still owns.
           #
           # @param event [Karafka::Core::Monitoring::Event] revocation event
           def on_rebalance_partitions_revoked(event)
             state = state_for(event[:subscription_group].id)
-            state[:previous_paused] = {}
+            state[:paused] = {}
 
             client_name = state[:client_name]
 
@@ -148,7 +177,7 @@ module Karafka
             @mutex.synchronize do
               @states[subscription_group_id] ||= {
                 next_at: 0,
-                previous_paused: {},
+                paused: {},
                 failures: 0,
                 cursor: 0,
                 client_name: nil
@@ -176,15 +205,16 @@ module Karafka
             pairs.group_by(&:first).transform_values { |group| group.map(&:last) }
           end
 
-          # @param previous [Hash{String => Array<Integer>}] paused during the previous tick
-          # @param current [Hash{String => Array<Integer>}] paused now
-          # @return [Hash{String => Array<Integer>}] partitions paused during both ticks
-          def intersect(previous, current)
+          # @param state [Hash] subscription group state with pause timestamps
+          # @return [Hash{String => Array<Integer>}] partitions that stayed paused for at least
+          #   one full refresh interval
+          def long_paused_for(state)
+            threshold = monotonic_now - interval
             result = {}
 
-            current.each do |topic, partitions|
-              both = partitions & (previous[topic] || [])
-              result[topic] = both unless both.empty?
+            state[:paused].each do |topic, partitions|
+              old_enough = partitions.select { |_, at| at <= threshold }.keys
+              result[topic] = old_enough unless old_enough.empty?
             end
 
             result

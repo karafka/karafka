@@ -35,7 +35,6 @@ RSpec.describe_current do
   let(:sg_id) { SecureRandom.hex(6) }
   let(:registry) { Karafka::Pro::Instrumentation::PausedLags::Registry.instance }
   let(:subscription_group) { instance_double(Karafka::Routing::SubscriptionGroup, id: sg_id) }
-  let(:paused) { { "topic" => [0] } }
 
   let(:committed_partition) do
     instance_double(Rdkafka::Consumer::Partition, partition: 0, offset: 5)
@@ -52,13 +51,12 @@ RSpec.describe_current do
     instance_double(
       Karafka::Connection::Client,
       name: client_name,
-      paused: paused,
       committed: committed_tpl,
       query_watermark_offsets: [1, 100]
     )
   end
 
-  let(:event) do
+  let(:tick_event) do
     Karafka::Core::Monitoring::Event.new(
       "client.events_poll",
       caller: client,
@@ -80,25 +78,59 @@ RSpec.describe_current do
     registry.evict(client_name)
   end
 
-  # Interval is 1ms in these specs, so a tiny sleep makes the next tick due
-  def next_tick
+  def pause_event(topic: "topic", partition: 0)
+    Karafka::Core::Monitoring::Event.new(
+      "client.pause",
+      caller: client,
+      subscription_group: subscription_group,
+      topic: topic,
+      partition: partition
+    )
+  end
+
+  def resume_event(topic: "topic", partition: 0)
+    Karafka::Core::Monitoring::Event.new(
+      "client.resume",
+      caller: client,
+      subscription_group: subscription_group,
+      topic: topic,
+      partition: partition
+    )
+  end
+
+  # Interval is 1ms in these specs, so a tiny sleep exceeds both the pause age threshold and
+  # makes the next tick due
+  def age_pause
     sleep(0.005)
   end
 
   describe "#on_client_events_poll" do
-    context "when a partition is paused only during a single tick" do
+    context "when nothing is paused" do
       it "does not store anything" do
-        refresher.on_client_events_poll(event)
+        refresher.on_client_events_poll(tick_event)
 
         expect(registry.fetch(client_name, 1_000)).to be_nil
       end
     end
 
-    context "when a partition is paused during two consecutive ticks" do
+    context "when a partition was paused for less than the interval" do
+      it "does not store anything" do
+        # First tick makes the follow-up tick due-gated, so age the state first
+        refresher.on_client_events_poll(tick_event)
+        age_pause
+
+        refresher.on_client_pause(pause_event)
+        refresher.on_client_events_poll(tick_event)
+
+        expect(registry.fetch(client_name, 1_000)).to be_nil
+      end
+    end
+
+    context "when a partition stayed paused for at least the interval" do
       it "queries and stores refreshed data" do
-        refresher.on_client_events_poll(event)
-        next_tick
-        refresher.on_client_events_poll(event)
+        refresher.on_client_pause(pause_event)
+        age_pause
+        refresher.on_client_events_poll(tick_event)
 
         expect(registry.fetch(client_name, 1_000)).to eq(
           "topic" => { 0 => { lo_offset: 1, hi_offset: 100, committed_offset: 5 } }
@@ -106,23 +138,24 @@ RSpec.describe_current do
       end
     end
 
-    context "when a partition is no longer paused on the second tick" do
-      it "does not store anything" do
-        refresher.on_client_events_poll(event)
-        next_tick
-
-        allow(client).to receive(:paused).and_return({})
-        refresher.on_client_events_poll(event)
-
-        expect(registry.fetch(client_name, 1_000)).to be_nil
-      end
-    end
-
     context "when the refresh is not due yet" do
-      it "does not store anything despite two paused observations" do
-        refresher.on_client_events_poll(event)
-        # Immediate second call - not due (no sleep between the calls)
-        refresher.on_client_events_poll(event)
+      before { Karafka::App.config.internal.statistics.paused_refresh.interval = 10_000 }
+
+      it "does not store anything despite a long-paused partition" do
+        refresher.on_client_pause(pause_event)
+
+        # Backdate the pause so it qualifies as long-paused despite the large interval
+        state = refresher.instance_variable_get(:@states).fetch(sg_id)
+        state[:paused]["topic"][0] -= 20_000
+
+        refresher.on_client_events_poll(tick_event)
+
+        expect(registry.fetch(client_name, 1_000)).not_to be_nil
+
+        registry.evict(client_name)
+
+        # Immediate follow-up tick is within the interval window and must do nothing
+        refresher.on_client_events_poll(tick_event)
 
         expect(registry.fetch(client_name, 1_000)).to be_nil
       end
@@ -134,9 +167,9 @@ RSpec.describe_current do
       end
 
       it "stores -1 as the committed offset" do
-        refresher.on_client_events_poll(event)
-        next_tick
-        refresher.on_client_events_poll(event)
+        refresher.on_client_pause(pause_event)
+        age_pause
+        refresher.on_client_events_poll(tick_event)
 
         expect(registry.fetch(client_name, 1_000)).to eq(
           "topic" => { 0 => { lo_offset: 1, hi_offset: 100, committed_offset: -1 } }
@@ -148,16 +181,16 @@ RSpec.describe_current do
       before { allow(client).to receive(:committed).and_raise(StandardError) }
 
       it "does not raise and does not store anything" do
-        refresher.on_client_events_poll(event)
-        next_tick
+        refresher.on_client_pause(pause_event)
+        age_pause
 
-        expect { refresher.on_client_events_poll(event) }.not_to raise_error
+        expect { refresher.on_client_events_poll(tick_event) }.not_to raise_error
         expect(registry.fetch(client_name, 1_000)).to be_nil
       end
 
       it "instruments the error with a dedicated type" do
-        refresher.on_client_events_poll(event)
-        next_tick
+        refresher.on_client_pause(pause_event)
+        age_pause
 
         expect(Karafka.monitor)
           .to receive(:instrument)
@@ -166,7 +199,7 @@ RSpec.describe_current do
             hash_including(type: "paused_lags.refresher.error")
           )
 
-        refresher.on_client_events_poll(event)
+        refresher.on_client_events_poll(tick_event)
       end
     end
 
@@ -174,25 +207,9 @@ RSpec.describe_current do
       before { allow(Karafka::App).to receive(:done?).and_return(true) }
 
       it "does not query nor store anything" do
-        refresher.on_client_events_poll(event)
-        next_tick
-        refresher.on_client_events_poll(event)
-
-        expect(registry.fetch(client_name, 1_000)).to be_nil
-      end
-    end
-
-    context "when a previously refreshed partition resumes" do
-      it "evicts its data on the next due tick" do
-        refresher.on_client_events_poll(event)
-        next_tick
-        refresher.on_client_events_poll(event)
-
-        expect(registry.fetch(client_name, 1_000)).not_to be_nil
-
-        allow(client).to receive(:paused).and_return({})
-        next_tick
-        refresher.on_client_events_poll(event)
+        refresher.on_client_pause(pause_event)
+        age_pause
+        refresher.on_client_events_poll(tick_event)
 
         expect(registry.fetch(client_name, 1_000)).to be_nil
       end
@@ -202,14 +219,14 @@ RSpec.describe_current do
       before { allow(client).to receive(:committed).and_raise(StandardError) }
 
       it "resets the failures counter" do
-        refresher.on_client_events_poll(event)
-        next_tick
-        refresher.on_client_events_poll(event)
+        refresher.on_client_pause(pause_event)
+        age_pause
+        refresher.on_client_events_poll(tick_event)
+        refresher.on_client_resume(resume_event)
 
-        allow(client).to receive(:paused).and_return({})
         # First failure backoff is 2x the 1ms interval, so this makes the next tick due
-        next_tick
-        refresher.on_client_events_poll(event)
+        age_pause
+        refresher.on_client_events_poll(tick_event)
 
         state = refresher.instance_variable_get(:@states).fetch(sg_id)
 
@@ -219,7 +236,6 @@ RSpec.describe_current do
 
     context "when more partitions are long-paused than the per tick cap" do
       let(:partitions) { (0...25).to_a }
-      let(:paused) { { "topic" => partitions } }
 
       let(:committed_tpl) do
         instance_double(Rdkafka::Consumer::TopicPartitionList).tap do |tpl|
@@ -241,16 +257,17 @@ RSpec.describe_current do
       end
 
       it "caps a single tick and covers the remainder on the following ticks" do
-        refresher.on_client_events_poll(event)
-        next_tick
-        refresher.on_client_events_poll(event)
+        partitions.each { |partition| refresher.on_client_pause(pause_event(partition: partition)) }
+        age_pause
+
+        refresher.on_client_events_poll(tick_event)
 
         stored = registry.fetch(client_name, 1_000).fetch("topic")
 
         expect(stored.size).to eq(20)
 
-        next_tick
-        refresher.on_client_events_poll(event)
+        age_pause
+        refresher.on_client_events_poll(tick_event)
 
         stored = registry.fetch(client_name, 1_000).fetch("topic")
 
@@ -260,11 +277,49 @@ RSpec.describe_current do
     end
   end
 
+  describe "#on_client_resume" do
+    it "stops tracking and drops refreshed data of the resumed partition immediately" do
+      refresher.on_client_pause(pause_event)
+      age_pause
+      refresher.on_client_events_poll(tick_event)
+
+      expect(registry.fetch(client_name, 1_000)).not_to be_nil
+
+      refresher.on_client_resume(resume_event)
+
+      expect(registry.fetch(client_name, 1_000)).to be_nil
+    end
+
+    it "keeps data of other partitions that remain paused" do
+      refresher.on_client_pause(pause_event(partition: 0))
+      refresher.on_client_pause(pause_event(partition: 1))
+      age_pause
+
+      allow(committed_tpl).to receive(:to_h).and_return(
+        "topic" => [
+          instance_double(Rdkafka::Consumer::Partition, partition: 0, offset: 5),
+          instance_double(Rdkafka::Consumer::Partition, partition: 1, offset: 7)
+        ]
+      )
+
+      refresher.on_client_events_poll(tick_event)
+      refresher.on_client_resume(resume_event(partition: 0))
+
+      expect(registry.fetch(client_name, 1_000)).to eq(
+        "topic" => { 1 => { lo_offset: 1, hi_offset: 100, committed_offset: 7 } }
+      )
+    end
+
+    it "does not raise when the partition was not tracked" do
+      expect { refresher.on_client_resume(resume_event) }.not_to raise_error
+    end
+  end
+
   describe "#on_rebalance_partitions_revoked" do
-    it "evicts stored data and resets pause tracking" do
-      refresher.on_client_events_poll(event)
-      next_tick
-      refresher.on_client_events_poll(event)
+    it "evicts stored data and stops tracking all pauses" do
+      refresher.on_client_pause(pause_event)
+      age_pause
+      refresher.on_client_events_poll(tick_event)
 
       expect(registry.fetch(client_name, 1_000)).not_to be_nil
 
@@ -272,9 +327,9 @@ RSpec.describe_current do
 
       expect(registry.fetch(client_name, 1_000)).to be_nil
 
-      # After revocation the pause tracking restarts, so a single tick must not store again
-      next_tick
-      refresher.on_client_events_poll(event)
+      # Without new pause events, nothing must be refreshed again even after aging
+      age_pause
+      refresher.on_client_events_poll(tick_event)
 
       expect(registry.fetch(client_name, 1_000)).to be_nil
     end
