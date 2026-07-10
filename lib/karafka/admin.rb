@@ -26,17 +26,20 @@ module Karafka
     #
     # @param kafka [Hash] custom kafka configuration to merge with app defaults.
     #   Useful for multi-cluster operations where you want to target a different cluster.
-    # @param external_client [Object, nil] active rdkafka client (raw or wrapped with
-    #   `Karafka::Connection::Proxy`) on which admin operations should run, instead of each
-    #   operation creating its own short-lived instance. Routing is capability based: rdkafka
-    #   admin instances are used by admin-based operations (`with_admin` and everything built
-    #   on top of it, e.g. `cluster_info`), any other external client is used by consumer-based
-    #   operations (`with_consumer` and everything built on top of it). The lifecycle of a
-    #   external client belongs fully to its owner: it is never configured, started or closed
-    #   here and all operations run within its identity, including its `group.id`. This is a
-    #   low-level internal API: the caller is responsible for providing a client capable of
-    #   the invoked operations and for invoking only operations that are safe to run on a
-    #   live client.
+    # @param external_client [Object, nil] active rdkafka client (raw, wrapped with
+    #   `Karafka::Connection::Proxy` or a `Karafka::Connection::Client` of a running consumer)
+    #   on which admin operations should run, instead of each operation creating its own
+    #   short-lived instance. Routing is capability based: rdkafka admin instances are used by
+    #   admin-based operations (`with_admin` and everything built on top of it, e.g.
+    #   `cluster_info`), any other external client is used by consumer-based operations
+    #   (`with_consumer` and everything built on top of it). The lifecycle of an external
+    #   client belongs fully to its owner: it is never configured, started or closed here and
+    #   all operations run within its identity, including its `group.id`. This is a low-level
+    #   internal API: the caller is responsible for providing a client capable of the invoked
+    #   operations and for invoking only operations that are safe to run on a live client.
+    #
+    # @note The external client handle is resolved once at construction, so the admin instance
+    #   should not outlive the provided client.
     #
     # @example Create admin for a different cluster
     #   admin = Karafka::Admin.new(kafka: { 'bootstrap.servers': 'other-cluster:9092' })
@@ -47,18 +50,27 @@ module Karafka
     #   admin.read_lags_with_offsets({ 'my-group' => ['events'] })
     def initialize(kafka: {}, external_client: nil)
       @custom_kafka = kafka
-      @external_client = external_client
       @external_admin = false
       @external_consumer = false
 
-      return unless external_client
+      # Resolve the raw rdkafka handle upfront: a running consumer connection client exposes it
+      # via its wrapping proxy and a proxy via #wrapped. This way any of those forms can be
+      # provided
+      if external_client.is_a?(Karafka::Connection::Client)
+        external_client = external_client.wrapped_kafka
+      end
 
-      client = external_client
-      client = client.wrapped if client.is_a?(Karafka::Connection::Proxy)
+      if external_client.is_a?(Karafka::Connection::Proxy)
+        external_client = external_client.wrapped
+      end
+
+      @external_client = external_client
+
+      return unless external_client
 
       # Capability based routing resolved once upfront: rdkafka admin instances serve
       # admin-based operations, any other external client is assumed consumer capable
-      if client.is_a?(Rdkafka::Admin)
+      if external_client.is_a?(Rdkafka::Admin)
         @external_admin = true
       else
         @external_consumer = true
@@ -409,8 +421,10 @@ module Karafka
     # @note We always ship and yield a proxied consumer because admin API performance is not
     #   that relevant. That is, there are no high frequency calls that would have to be delegated
     #
-    # @note When an external client is present, it is yielded directly and its lifecycle is not
-    #   managed here in any way: no oauth binding, no start and no closing. `settings` are
+    # @note When an external client is present, it is yielded wrapped with
+    #   `Karafka::Connection::Proxy` (which unwraps pre-proxied clients, so no double wrapping
+    #   occurs) and its lifecycle is not managed here in any way: no oauth binding, no start and
+    #   no closing. `settings` are
     #   ignored as the external instance is already configured and operations run within its
     #   identity, including its `group.id`. External rdkafka admin instances are not used here
     #   as they are not capable of consumer operations - they are used by `#with_admin` instead.
@@ -446,8 +460,10 @@ module Karafka
 
     # Creates admin instance and yields it. After usage it closes the admin instance
     #
-    # @note When the external client is an rdkafka admin instance, it is yielded directly and
-    #   its lifecycle is not managed here in any way, same as with `#with_consumer`. External
+    # @note When the external client is an rdkafka admin instance, it is yielded wrapped with
+    #   `Karafka::Connection::Proxy` (which unwraps pre-proxied clients, so no double wrapping
+    #   occurs) and its lifecycle is not managed here in any way, same as with `#with_consumer`.
+    #   External
     #   clients of other types (consumers, producers) are not capable of admin operations, thus
     #   a dedicated admin instance is created for them as usual.
     def with_admin
