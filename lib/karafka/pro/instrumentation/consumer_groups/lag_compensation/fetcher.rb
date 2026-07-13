@@ -37,6 +37,10 @@ module Karafka
           # Fetches the end offsets of given partitions via the client own connection: no
           # dedicated instances and no extra Kafka connections are ever created.
           #
+          # All partitions are resolved with one batched request that librdkafka fans out to the
+          # involved partition leaders internally, so the cost does not grow with the number of
+          # paused partitions.
+          #
           # End offsets are the only thing the compensation needs from the broker: committed
           # and stored offsets of paused partitions are maintained by the client commits (not
           # by fetches), so their statistics values stay accurate while paused and lags can be
@@ -52,14 +56,16 @@ module Karafka
             # @return [Hash{String => Hash{Integer => Integer}}] end offsets of the requested
             #   partitions
             def call(client, paused)
+              request = paused.transform_values do |partitions|
+                partitions.map { |partition| { partition: partition, offset: :latest } }
+              end
+
+              return {} if request.empty?
+
               data = {}
 
-              paused.each do |topic, partitions|
-                partitions.each do |partition|
-                  _, end_offset = client.query_watermark_offsets(topic, partition)
-
-                  (data[topic] ||= {})[partition] = end_offset
-                end
+              client.read_partition_offsets(request).each do |result|
+                (data[result[:topic]] ||= {})[result[:partition]] = result[:offset]
               end
 
               data

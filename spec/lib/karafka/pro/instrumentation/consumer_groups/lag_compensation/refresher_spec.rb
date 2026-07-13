@@ -39,8 +39,7 @@ RSpec.describe_current do
   let(:client) do
     instance_double(
       Karafka::Connection::Client,
-      name: client_name,
-      query_watermark_offsets: [1, 95]
+      name: client_name
     )
   end
 
@@ -62,6 +61,12 @@ RSpec.describe_current do
   before do
     Karafka::App.config.internal.statistics.consumer_groups.lag_compensation.interval = 1
     Karafka::App.config.internal.statistics.consumer_groups.lag_compensation.pause_age = 1
+
+    allow(client).to receive(:read_partition_offsets) do |request|
+      request.flat_map do |topic, specs|
+        specs.map { |spec| { topic: topic, partition: spec[:partition], offset: 95 } }
+      end
+    end
   end
 
   after do
@@ -157,7 +162,7 @@ RSpec.describe_current do
     end
 
     context "when querying fails" do
-      before { allow(client).to receive(:query_watermark_offsets).and_raise(StandardError) }
+      before { allow(client).to receive(:read_partition_offsets).and_raise(StandardError) }
 
       it "does not raise and does not store anything" do
         refresher.on_client_pause(pause_event)

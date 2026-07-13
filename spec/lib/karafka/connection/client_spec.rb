@@ -85,6 +85,58 @@ RSpec.describe_current do
     end
   end
 
+  describe "#read_partition_offsets" do
+    let(:specs) { { "test_topic" => [{ partition: 0, offset: :latest }] } }
+    let(:offsets) { [{ topic: "test_topic", partition: 0, offset: 10 }] }
+    let(:kafka) { instance_double(Rdkafka::Consumer) }
+    let(:handle) { instance_double(Rdkafka::Admin::ListOffsetsHandle) }
+    let(:report) { instance_double(Rdkafka::Admin::ListOffsetsReport, offsets: offsets) }
+
+    before do
+      allow(client).to receive(:build_consumer).and_return(kafka)
+      allow(kafka).to receive_messages(
+        start: nil,
+        name: "test-consumer",
+        list_offsets: handle
+      )
+      allow(handle).to receive(:wait).and_return(report)
+
+      client.send(:kafka)
+    end
+
+    it "expect to return the resolved offsets" do
+      expect(client.read_partition_offsets(specs)).to eq(offsets)
+    end
+
+    context "when the isolation level is not configured" do
+      it "expect to resolve them with the librdkafka default of read_committed" do
+        client.read_partition_offsets(specs)
+
+        expect(kafka)
+          .to have_received(:list_offsets)
+          .with(specs, isolation_level: Karafka::Admin::IsolationLevels::READ_COMMITTED)
+      end
+    end
+
+    context "when the consumer reads uncommitted" do
+      let(:subscription_group) do
+        build(:routing_subscription_group).tap do |sub_group|
+          allow(sub_group)
+            .to receive(:kafka)
+            .and_return(sub_group.kafka.merge("isolation.level": "read_uncommitted"))
+        end
+      end
+
+      it "expect to resolve them with the read_uncommitted level" do
+        client.read_partition_offsets(specs)
+
+        expect(kafka)
+          .to have_received(:list_offsets)
+          .with(specs, isolation_level: Karafka::Admin::IsolationLevels::READ_UNCOMMITTED)
+      end
+    end
+  end
+
   describe "#events_poll" do
     let(:kafka) { instance_double(Rdkafka::Consumer) }
 

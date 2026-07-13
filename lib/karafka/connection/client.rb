@@ -460,6 +460,23 @@ module Karafka
         @wrapped_kafka.query_watermark_offsets(topic, partition)
       end
 
+      # Resolves offsets of many partitions with one batched request instead of one broker
+      # roundtrip per partition.
+      #
+      # @param topic_partition_offsets [Hash{String => Array<Hash>}] topics with arrays of
+      #   partition offset specs, each with a `:partition` and an `:offset` (`:earliest`,
+      #   `:latest`, `:max_timestamp` or an integer timestamp in ms)
+      # @return [Array<Hash>] resolved offsets, each with `:topic`, `:partition` and `:offset`
+      # @note Offsets are resolved with this consumer own isolation level, so `:latest` yields
+      #   the same reference this consumer fetches against: the last stable offset under the
+      #   default read_committed.
+      def read_partition_offsets(topic_partition_offsets)
+        @wrapped_kafka.read_partition_offsets(
+          topic_partition_offsets,
+          isolation_level: isolation_level
+        )
+      end
+
       # @return [String] safe inspection string that is causing circular dependencies and other
       #   issues
       def inspect
@@ -468,6 +485,17 @@ module Karafka
       end
 
       private
+
+      # @return [Integer] isolation level of this consumer mapped to the constant expected by the
+      #   offsets queries. It cannot change after the client is created, hence memoized.
+      # @note When not configured, librdkafka reads committed, so we mirror that default here.
+      def isolation_level
+        @isolation_level ||=
+          case @subscription_group.kafka.fetch(:"isolation.level", "read_committed").to_s
+          when "read_uncommitted" then Admin::IsolationLevels::READ_UNCOMMITTED
+          else Admin::IsolationLevels::READ_COMMITTED
+          end
+      end
 
       # When we cannot store an offset, it means we no longer own the partition
       #
