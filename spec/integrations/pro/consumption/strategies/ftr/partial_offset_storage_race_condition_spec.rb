@@ -78,7 +78,7 @@ class CursorRaceFilter < Karafka::Pro::Processing::ConsumerGroups::Filters::Base
     # Apply filtering once, on the first batch that actually carries messages.
     #
     # This used to count invocations (`@processed_batches == 1`) instead of checking content,
-    # but `apply!` runs on every poll, including ones `VpStabilizer` (registered before this
+    # but `apply!` runs on every poll, including ones `FlowStabilizer` (registered before this
     # filter) clears down to empty when Kafka's fetch under-delivers. Those swallowed-empty
     # polls still counted as "batch 1", so once the real (>= 10 messages) batch arrived it was
     # already "batch 2" or later and this filter silently never fired, leaving `DT[:removed]`
@@ -134,7 +134,7 @@ draw_routes do
   topic DT.topic do
     consumer Consumer
     manual_offset_management true
-    filter ->(*) { VpStabilizer.new(10) }
+    filter ->(*) { FlowStabilizer.new(10) }
     filter ->(*) { CursorRaceFilter.new }
   end
 end

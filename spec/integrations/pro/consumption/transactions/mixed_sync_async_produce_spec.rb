@@ -36,7 +36,7 @@
 # expected 5 sync + 5 async when all 10 source messages are delivered in a single batch.
 # Kafka does not guarantee that: a cold fetch may hand them over in several smaller batches
 # (e.g. 1 + 9), and because in-batch index 0 is always "sync", any odd-sized partial batch
-# skews the split, starves the async consumer and hangs the wait condition. The VpStabilizer
+# skews the split, starves the async consumer and hangs the wait condition. The FlowStabilizer
 # filter removes this nondeterminism by seeking back until the whole batch arrives in one
 # poll, so the 5 sync + 5 async always happen together within a single transaction.
 
@@ -95,7 +95,7 @@ draw_routes do
   topic DT.topics[0] do
     consumer Consumer
     manual_offset_management true
-    filter ->(*_args) { VpStabilizer.new(10) }
+    filter ->(*_args) { FlowStabilizer.new(10) }
   end
 
   topic DT.topics[1] do
