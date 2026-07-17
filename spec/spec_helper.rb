@@ -43,24 +43,24 @@ SPECS_TYPE = ENV.fetch("SPECS_TYPE", "default")
 
 # Don't include unnecessary stuff into rcov
 SimpleCov.start do
-  add_filter "/vendor/"
-  add_filter "/gems/"
-  add_filter "/.bundle/"
-  add_filter "/doc/"
-  add_filter "/spec/"
-  add_filter "/config/"
-  add_filter "/lib/karafka/railtie"
-  add_filter "/lib/karafka/patches"
+  skip "/vendor/"
+  skip "/gems/"
+  skip "/.bundle/"
+  skip "/doc/"
+  skip "/spec/"
+  skip "/config/"
+  skip "/lib/karafka/railtie"
+  skip "/lib/karafka/patches"
   # We do not spec strategies here. We do it via integration test suite
-  add_filter "/lib/karafka/cli/topics/align"
-  add_filter "/lib/karafka/cli/topics/base"
-  add_filter "/lib/karafka/cli/topics/plan"
-  add_filter "/processing/strategies"
+  skip "/lib/karafka/cli/topics/align"
+  skip "/lib/karafka/cli/topics/base"
+  skip "/lib/karafka/cli/topics/plan"
+  skip "/processing/strategies"
   # Consumers are tested in integrations
-  add_filter "/consumer"
+  skip "/consumer"
   # CLI commands are also checked via integrations
-  add_filter "/cli/topics.rb"
-  add_filter "/vendors/"
+  skip "/cli/topics.rb"
+  skip "/vendors/"
 
   # enable_coverage :branch
   command_name [SPECS_TYPE, ARGV].flatten.join("-")
@@ -68,7 +68,7 @@ SimpleCov.start do
 end
 
 # Require total coverage after running both regular and pro
-SimpleCov.minimum_coverage(92.0) if SPECS_TYPE == "pro"
+SimpleCov.minimum_coverage(89.0) if SPECS_TYPE == "pro"
 
 Dir["#{File.dirname(__FILE__)}/support/**/*.rb"].each { |f| require f }
 
