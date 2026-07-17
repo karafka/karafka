@@ -1,14 +1,18 @@
 # frozen_string_literal: true
 
-# Makes sure we get 100 messages in VPs just not to deal with edge cases
-# Kafka can sometimes ship few messages in first fetch and this makes things complicated to test
-# parallel operations on VPs with reproducible env. This filter ensures we wait until we get all
-# that we needed
+# Makes sure a `#consume` call sees the whole expected batch at once, just not to deal with edge
+# cases. Kafka can ship only a few messages in the first fetch, which makes any test whose logic
+# depends on batch composition (virtual partitions distribution, in-batch sync/async split, single
+# large transaction, ...) non-reproducible. This filter seeks back until at least `min` messages are
+# available in a single poll, so the batch always arrives whole.
+#
+# @note Originally written for virtual partition specs (hence the historical `VpStabilizer` name),
+#   it is now used by any spec that needs a full, deterministic batch.
 #
 # @note This filter is loaded by `spec_helper` before `Karafka::Pro` is required, so it cannot
 #   inherit `Filters::Base`. It therefore defines the `#pause?` / `#seek?` / `#skip?` predicates
 #   (that the applier resolves actions through) inline instead of getting them from the base.
-class VpStabilizer
+class FlowStabilizer
   class << self
     # Builds the stabilizer
     def call(*)
