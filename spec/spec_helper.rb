@@ -55,7 +55,7 @@ SimpleCov.start do
   skip "/lib/karafka/cli/topics/align"
   skip "/lib/karafka/cli/topics/base"
   skip "/lib/karafka/cli/topics/plan"
-  skip "/processing/strategies"
+  skip "/processing/consumer_groups/strategies"
   # Consumers are tested in integrations
   skip "/consumer"
   # CLI commands are also checked via integrations
@@ -68,7 +68,7 @@ SimpleCov.start do
 end
 
 # Require total coverage after running both regular and pro
-SimpleCov.minimum_coverage(89.0) if SPECS_TYPE == "pro"
+SimpleCov.minimum_coverage(91.0) if SPECS_TYPE == "pro"
 
 Dir["#{File.dirname(__FILE__)}/support/**/*.rb"].each { |f| require f }
 
