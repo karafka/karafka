@@ -42,23 +42,35 @@ end
 
 class Consumer < Karafka::BaseConsumer
   def consume
-    unless DT.key?(:job_running)
-      DT[:job_running] = true
-      # A single job that runs well past the pause age; the partition stays paused throughout
-      sleep(10)
-    end
-
+    # Commit first so there is a committed offset to derive the lag from: with nothing committed
+    # librdkafka reports consumer_lag as -1 and the compensator has no base to compute against
     mark_as_consumed!(messages.last)
     DT[:consumed] << messages.last.offset
+
+    return if DT.key?(:job_running)
+
+    DT[:job_running] = true
+    # A single job that runs well past the pause age; the partition stays paused throughout. Mark
+    # its end so we stop sampling: once the job finishes the partition resumes and librdkafka
+    # reports the real (live) lag on its own, which must not be mistaken for compensation.
+    sleep(12)
+    DT[:job_done] = true
   end
 end
 
 Karafka::App.monitor.subscribe("statistics.emitted") do |event|
+  # Only sample while the job holds the partition paused. This is the whole point: without
+  # compensation the lag would stay frozen for the entire job (it only jumps once the job ends and
+  # the partition resumes and fetches), so sampling past the job would pass even with the feature
+  # off.
+  next unless DT.key?(:job_running)
+  next if DT.key?(:job_done)
+
   event[:statistics]["topics"].each do |_, topic_values|
     topic_values["partitions"].each do |partition_name, partition_values|
       next if partition_name == "-1"
 
-      DT[:lags] << partition_values["consumer_lag"]
+      DT[:job_lags] << partition_values["consumer_lag"]
     end
   end
 end
@@ -72,7 +84,7 @@ end
 
 produce_many(DT.topic, DT.uuids(1))
 
-# Keep producing while the job runs; the producer stops a few emissions before the server
+# Keep producing while the job runs; the producer stops a few samples before the server does
 Thread.new do
   sleep(0.1) until DT.key?(:job_running)
 
@@ -80,14 +92,16 @@ Thread.new do
     produce_many(DT.topic, DT.uuids(1))
     sleep(0.3)
 
-    break if DT[:lags].size >= 20
+    break if DT[:job_lags].size >= 12 || DT.key?(:job_done)
   end
 end
 
 start_karafka_and_wait_until do
-  DT[:lags].size >= 25
+  # Enough in-job samples to have crossed the pause age (the job still runs, so all of these are
+  # from the paused window)
+  DT[:job_lags].size >= 15
 end
 
 # While the long-running job holds the partition paused past the pause age, the lag is compensated
-# to reflect the backlog produced in the meantime instead of freezing
-assert DT[:lags].max >= 15, "expected compensated lag during the long-running job, got max #{DT[:lags].max}"
+# to reflect the backlog produced in the meantime instead of freezing at the job's start
+assert DT[:job_lags].max >= 15, "expected compensated lag during the long-running job, got max #{DT[:job_lags].max}"
