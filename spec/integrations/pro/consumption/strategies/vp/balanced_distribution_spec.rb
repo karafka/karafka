@@ -60,7 +60,7 @@ end
 draw_routes do
   topic DT.topic do
     consumer Consumer
-    filter ->(*_args) { VpStabilizer.new(11) }
+    filter ->(*_args) { FlowStabilizer.new(11) }
     virtual_partitions(
       max_partitions: 3,
       partitioner: ->(msg) { msg.raw_key },

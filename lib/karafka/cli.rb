@@ -50,7 +50,7 @@ end
 # so this method is only available when the Karafka console is running
 #
 # We skip this because this should exist and be only valid in the console
-# :nocov:
+# simplecov:disable
 if ENV["KARAFKA_CONSOLE"]
   # Reloads Karafka irb console session
   def reload!
@@ -58,4 +58,4 @@ if ENV["KARAFKA_CONSOLE"]
     Kernel.exec Karafka::Cli::Console.command
   end
 end
-# :nocov:
+# simplecov:enable
