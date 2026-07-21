@@ -83,8 +83,12 @@ module Karafka
               state[:client_name] = event[:caller].name
             end
 
-            # Stops tracking a resumed partition and drops its refreshed data immediately, so
-            # stale values never overlay the live statistics of an actively consumed partition
+            # Stops refreshing a resumed partition but keeps its last refreshed values in the
+            # registry. The compensator keeps overlaying them (its guard applies them only while
+            # still fresher than the live statistics), so the emitted statistics do not snap back
+            # to the frozen pre-resume values during the gap before librdkafka post-resume
+            # fetches update the offsets. Once the live values catch up the compensator stops
+            # using them, and the kept entries are dropped in bulk on the next rebalance.
             #
             # @param event [Karafka::Core::Monitoring::Event] resume event
             def on_client_resume(event)
@@ -96,11 +100,6 @@ module Karafka
               return unless partitions.delete(event[:partition])
 
               state[:paused].delete(event[:topic]) if partitions.empty?
-
-              Registry.instance.retain(
-                event[:caller].name,
-                state[:paused].transform_values(&:keys)
-              )
             end
 
             # Once per interval refreshes the data of all the partitions that stayed paused

@@ -43,60 +43,37 @@ module Karafka
           # partitions. Written by the refresher on listener threads, read by the statistics
           # decorator on the librdkafka callbacks thread.
           #
-          # No age based expiry is needed: entries are actively removed on resume and on
-          # rebalances and replaced on refresh, so their lifecycle mirrors the pause tracking.
+          # No age based expiry is needed: entries are refreshed while a partition stays paused,
+          # kept (but no longer refreshed) once it resumes so the compensator can hand over to
+          # the live statistics, and dropped in bulk on rebalances. Within an assignment the
+          # stored set is therefore bounded by the partitions the client paused.
           class Registry
             include Singleton
-
-            # Used to compare against without allocations when a topic has no paused partitions
-            EMPTY_ARRAY = [].freeze
-
-            private_constant :EMPTY_ARRAY
 
             def initialize
               @mutex = Mutex.new
               @clients = {}
             end
 
-            # Stores refreshed data for a given client, replacing any previously stored one.
-            # Each refresh covers all the long-paused partitions of a client, so a plain
-            # replacement is always complete. Data of partitions that resumed is removed via
-            # `#retain`.
+            # Merges the freshly refreshed offsets into the stored data of a client, overwriting
+            # the values of the refreshed partitions and keeping the previously stored ones.
+            #
+            # A refresh covers only the currently long-paused partitions, so a partition that
+            # resumed is absent here and its last value is kept rather than dropped: the
+            # compensator keeps overlaying it (its guard applies it only while still fresher than
+            # the live statistics) until librdkafka post-resume fetches catch up, avoiding a
+            # snap back to the frozen pre-resume values in the meantime. Stale entries are
+            # dropped in bulk on the next rebalance.
             #
             # @param client_name [String] rdkafka client name (matches statistics `name` field)
             # @param data [Hash{String => Hash{Integer => Integer}}] topics with partitions
             #   with their end offsets
             def update(client_name, data)
               @mutex.synchronize do
-                @clients[client_name] = data
-              end
-            end
-
-            # Removes stored data of all the partitions that are not in the given paused set,
-            # so values of partitions that resumed never overlay their live statistics
-            #
-            # @param client_name [String] rdkafka client name
-            # @param paused [Hash{String => Array<Integer>}] currently paused topics with
-            #   partitions
-            def retain(client_name, paused)
-              @mutex.synchronize do
-                data = @clients[client_name]
-
-                return unless data
-
-                filtered = {}
+                stored = (@clients[client_name] ||= {})
 
                 data.each do |topic, partitions|
-                  paused_partitions = paused[topic] || EMPTY_ARRAY
-                  kept = partitions.slice(*paused_partitions)
-
-                  filtered[topic] = kept unless kept.empty?
-                end
-
-                if filtered.empty?
-                  @clients.delete(client_name)
-                else
-                  @clients[client_name] = filtered
+                  (stored[topic] ||= {}).merge!(partitions)
                 end
               end
             end

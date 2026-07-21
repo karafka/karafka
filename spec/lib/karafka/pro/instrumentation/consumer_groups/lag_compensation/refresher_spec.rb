@@ -214,19 +214,34 @@ RSpec.describe_current do
   end
 
   describe "#on_client_resume" do
-    it "stops tracking and drops refreshed data of the resumed partition immediately" do
+    it "keeps the refreshed values of a resumed partition" do
       refresher.on_client_pause(pause_event)
       age_pause
       refresher.on_client_events_poll(tick_event)
 
-      expect(registry.fetch(client_name)).not_to be_nil
+      expect(registry.fetch(client_name)).to eq("topic" => { 0 => 95 })
 
       refresher.on_client_resume(resume_event)
 
-      expect(registry.fetch(client_name)).to be_nil
+      # Kept, so the compensator can hand over to the live statistics instead of the emitted
+      # values snapping back to the frozen pre-resume ones
+      expect(registry.fetch(client_name)).to eq("topic" => { 0 => 95 })
     end
 
-    it "keeps data of other partitions that remain paused" do
+    it "stops refreshing a resumed partition" do
+      refresher.on_client_pause(pause_event)
+      age_pause
+      refresher.on_client_events_poll(tick_event)
+      refresher.on_client_resume(resume_event)
+
+      # Nothing stays paused, so the follow-up tick must not query the resumed partition again
+      age_pause
+      refresher.on_client_events_poll(tick_event)
+
+      expect(client).to have_received(:read_partition_offsets).once
+    end
+
+    it "keeps the data of both resumed and still paused partitions" do
       refresher.on_client_pause(pause_event(partition: 0))
       refresher.on_client_pause(pause_event(partition: 1))
       age_pause
@@ -235,7 +250,7 @@ RSpec.describe_current do
       refresher.on_client_resume(resume_event(partition: 0))
 
       expect(registry.fetch(client_name)).to eq(
-        "topic" => { 1 => 95 }
+        "topic" => { 0 => 95, 1 => 95 }
       )
     end
 

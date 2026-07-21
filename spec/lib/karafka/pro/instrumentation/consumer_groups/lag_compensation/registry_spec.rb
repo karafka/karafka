@@ -47,7 +47,7 @@ RSpec.describe_current do
       expect(registry.fetch(client_name)).to be_nil
     end
 
-    it "replaces previously stored data" do
+    it "overwrites the values of refreshed partitions" do
       registry.update(client_name, data)
 
       newer = { "topic" => { 0 => { hi_offset: 20, ls_offset: 19, committed_offset: 15 } } }
@@ -55,38 +55,33 @@ RSpec.describe_current do
 
       expect(registry.fetch(client_name)).to eq(newer)
     end
-  end
 
-  describe "#retain" do
-    before { registry.update(client_name, data) }
-
-    it "keeps data of partitions that are still paused" do
-      registry.retain(client_name, { "topic" => [0] })
-
-      expect(registry.fetch(client_name)).to eq(data)
-    end
-
-    it "removes data of partitions that are no longer paused" do
+    it "keeps previously stored partitions absent from the refresh" do
+      registry.update(client_name, data)
       registry.update(
         client_name,
         { "topic" => { 1 => { hi_offset: 20, ls_offset: 19, committed_offset: 15 } } }
       )
 
-      registry.retain(client_name, { "topic" => [1] })
-
       expect(registry.fetch(client_name)).to eq(
-        "topic" => { 1 => { hi_offset: 20, ls_offset: 19, committed_offset: 15 } }
+        "topic" => {
+          0 => { hi_offset: 10, ls_offset: 9, committed_offset: 5 },
+          1 => { hi_offset: 20, ls_offset: 19, committed_offset: 15 }
+        }
       )
     end
 
-    it "removes the whole client entry when nothing remains paused" do
-      registry.retain(client_name, {})
+    it "keeps previously stored topics absent from the refresh" do
+      registry.update(client_name, data)
+      registry.update(
+        client_name,
+        { "other" => { 0 => { hi_offset: 7, ls_offset: 7, committed_offset: 3 } } }
+      )
 
-      expect(registry.fetch(client_name)).to be_nil
-    end
-
-    it "does not raise when the client has no data" do
-      expect { registry.retain(SecureRandom.hex(6), { "topic" => [0] }) }.not_to raise_error
+      expect(registry.fetch(client_name)).to eq(
+        "topic" => { 0 => { hi_offset: 10, ls_offset: 9, committed_offset: 5 } },
+        "other" => { 0 => { hi_offset: 7, ls_offset: 7, committed_offset: 3 } }
+      )
     end
   end
 
