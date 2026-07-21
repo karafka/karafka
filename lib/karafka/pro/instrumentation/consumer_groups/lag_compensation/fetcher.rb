@@ -62,14 +62,13 @@ module Karafka
 
               return {} if request.empty?
 
-              data = {}
+              # Auto-initializes the per-topic partitions hash on first access, same idiom as
+              # the refresher state. Only ever written to and iterated here, never read by a
+              # missing key, so the default block cannot insert a spurious entry.
+              data = Hash.new { |topics, topic| topics[topic] = {} }
 
               client.read_partition_offsets(request).each do |result|
-                topic = result[:topic]
-                partition = result[:partition]
-
-                data[topic] ||= {}
-                data[topic][partition] = result[:offset]
+                data[result[:topic]][result[:partition]] = result[:offset]
               end
 
               data
