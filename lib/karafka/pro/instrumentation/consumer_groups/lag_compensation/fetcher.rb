@@ -65,7 +65,11 @@ module Karafka
               data = {}
 
               client.read_partition_offsets(request).each do |result|
-                (data[result[:topic]] ||= {})[result[:partition]] = result[:offset]
+                topic = result[:topic]
+                partition = result[:partition]
+
+                data[topic] ||= {}
+                data[topic][partition] = result[:offset]
               end
 
               data
