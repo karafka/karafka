@@ -144,7 +144,10 @@ module Karafka
 
           # Batch-fetch LWM and HWM for all negative-offset partitions in two calls (one for
           # :earliest, one for :latest) instead of N per-partition watermark queries. Both run
-          # on the consumer own connection, so no dedicated admin client is ever created
+          # on the consumer own connection, so no dedicated admin client is ever created. The
+          # proxy passes no isolation level, so :latest resolves with the librdkafka default
+          # (read_uncommitted), i.e. the true high watermark - same as the previous
+          # read_watermark_offsets path this replaced
           low_specs = {}
           high_specs = {}
 
