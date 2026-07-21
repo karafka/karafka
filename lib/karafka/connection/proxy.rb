@@ -80,6 +80,11 @@ module Karafka
       # @param isolation_level [Integer, nil] isolation level with which the offsets should be
       #   resolved or nil for the librdkafka default (read_uncommitted)
       # @return [Array<Hash>] resolved offsets, each with `:topic`, `:partition` and `:offset`
+      # @note The `ListOffsets` admin API resolves `:latest` to the high watermark even with
+      #   `isolation_level` set to read_committed, unlike `#query_watermark_offsets`, which returns
+      #   the last stable offset for a read_committed consumer. On a topic with an in-flight
+      #   transaction `:latest` therefore includes the uncommitted messages. Non-transactional
+      #   topics are unaffected.
       # @note Specs given as a literal hash need explicit curly braces: a brace-less trailing
       #   hash is parsed by Ruby as keyword arguments, which this method (having the
       #   `isolation_level:` keyword) would reject as a missing positional argument

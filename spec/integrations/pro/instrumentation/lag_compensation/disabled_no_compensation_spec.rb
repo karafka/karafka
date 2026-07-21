@@ -36,8 +36,13 @@
 setup_karafka do |config|
   config.max_messages = 1
   config.kafka[:"statistics.interval.ms"] = 500
-  # Explicitly disabled (this is also the default)
+  # Explicitly disabled (this is also the default). The pause age is low and the run outlasts it,
+  # so the partition really does stay paused past the threshold - the only reason it is not
+  # compensated is that the feature is off. Flipping interval to a non-zero value must therefore
+  # break this spec, otherwise the assertion would pass for the wrong reason (never crossing the
+  # pause age).
   config.internal.statistics.consumer_groups.lag_compensation.interval = 0
+  config.internal.statistics.consumer_groups.lag_compensation.pause_age = 5_000
 end
 
 class Consumer < Karafka::BaseConsumer

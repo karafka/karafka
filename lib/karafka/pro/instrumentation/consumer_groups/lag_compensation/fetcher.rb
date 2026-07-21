@@ -46,10 +46,17 @@ module Karafka
           # by fetches), so their statistics values stay accurate while paused and lags can be
           # derived from them at compensation time.
           #
-          # The end offset honors the consumer isolation level: under the default
-          # read_committed it is the last stable offset, the same reference the native
-          # librdkafka consumer lag derives from, so the compensated lags match the fetch-based
-          # ones also on transactional topics.
+          # The consumer isolation level is forwarded to the query, so on topics without in-flight
+          # transactions the end offset matches the reference the native consumer lag derives from.
+          #
+          # Known edge case (transactional topics): the batched `ListOffsets` this uses resolves
+          # `:latest` to the high watermark regardless of the forwarded isolation level, unlike the
+          # per-partition `query_watermark_offsets` it replaced, which returned the last stable
+          # offset for a read_committed consumer. So while a transaction is IN FLIGHT on a paused
+          # partition, the compensated end offset (and the lag derived from it) reflects the high
+          # watermark and can overstate the read_committed lag by the number of uncommitted
+          # messages. It self-corrects once the transaction commits or aborts and the last stable
+          # offset advances. Non-transactional topics are unaffected (LSO == HWM there).
           class Fetcher
             # @param client [Karafka::Connection::Client]
             # @param paused [Hash{String => Array<Integer>}] paused topics with partitions

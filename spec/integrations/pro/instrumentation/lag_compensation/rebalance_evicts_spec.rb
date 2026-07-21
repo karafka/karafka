@@ -28,12 +28,12 @@
 # License: https://karafka.io/docs/Pro-License-Comm/
 # Contact: contact@karafka.io
 
-# Refreshed values are dropped in bulk on a rebalance: a partition may no longer belong to the
-# client after one, so its stored data must be evicted. This drives a real rebalance (a second
-# consumer joins the group) while a partition is paused and compensated, and confirms the feature
-# coexists with rebalancing - compensation happens, the revoke fires and the evict path runs
-# without disrupting the running consumer. The eviction of the registry itself is pinned in the
-# unit specs.
+# Refreshed values are dropped in bulk on a rebalance (a partition may no longer belong to the
+# client). This drives a real rebalance - a second consumer joins the group while a partition is
+# paused and compensated - and asserts the feature coexists with rebalancing: compensation happens,
+# the revoke fires and the evict path runs without disrupting the consumer. The rebalance is
+# triggered on a timer (not on the lag) so that if compensation were off this fails fast on the
+# assertion rather than hanging. The eviction of the registry itself is pinned in the unit specs.
 
 setup_karafka do |config|
   config.max_messages = 1
@@ -55,6 +55,8 @@ class Consumer < Karafka::BaseConsumer
 end
 
 Karafka::App.monitor.subscribe("statistics.emitted") do |event|
+  DT[:emits] << true
+
   event[:statistics]["topics"].each do |_, topic_values|
     topic_values["partitions"].each do |partition_name, partition_values|
       next if partition_name == "-1"
@@ -83,14 +85,16 @@ Thread.new do
     2.times { |partition| produce(DT.topic, DT.uuid, partition: partition) }
     sleep(0.3)
 
-    break if DT.key?(:revoked) || DT[:lags].size >= 60
+    break if DT.key?(:revoked) || DT[:emits].size >= 60
+  rescue WaterDrop::Errors::ProducerClosedError
+    break
   end
 end
 
-# Once compensation is clearly observed, a second consumer joins the same group and forces a
-# rebalance, revoking partitions from the running consumer
+# Join a second consumer on a time proxy (well past the pause age), independent of compensation, so
+# the rebalance fires whether or not compensation is working
 Thread.new do
-  sleep(0.1) until DT[:lags].max.to_i >= 15
+  sleep(0.1) until DT.key?(:paused_0) && DT.key?(:paused_1) && DT[:emits].size >= 16
 
   other = setup_rdkafka_consumer
   other.subscribe(DT.topic)
@@ -100,10 +104,10 @@ Thread.new do
 end
 
 start_karafka_and_wait_until do
-  DT[:lags].max.to_i >= 15 && DT.key?(:revoked)
+  DT.key?(:revoked)
 end
 
-# Compensation was active before the rebalance ...
+# Compensation was active before the rebalance (fails fast here if the feature were off) ...
 assert DT[:lags].max >= 15, "expected compensation before the rebalance, got max #{DT[:lags].max}"
 # ... and the rebalance revoke (which runs the eviction) fired while the feature was enabled
 assert DT.key?(:revoked), "expected a rebalance to revoke partitions"

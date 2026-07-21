@@ -28,17 +28,19 @@
 # License: https://karafka.io/docs/Pro-License-Comm/
 # Contact: contact@karafka.io
 
-# A partition only qualifies for compensation after staying paused for at least the pause age.
-# With a high pause age and a run shorter than it, the partition is paused the whole time yet never
-# long enough to qualify, so its lag must stay frozen despite a growing backlog. This guards the
-# pause_age threshold in long_paused_for (a partition that is merely paused is not enough).
+# A partition is compensated only after it has been paused for at least the pause age. This asserts
+# the threshold from BOTH sides on a single long pause: statistics emitted before the pause age is
+# reached must still be frozen, and statistics emitted after it must be compensated.
+#
+# This bites in both directions: if the pause age gate were dropped (compensate any paused
+# partition) the early window would already grow and fail; if the feature were off the late window
+# would stay frozen and fail.
 
 setup_karafka do |config|
   config.max_messages = 1
   config.kafka[:"statistics.interval.ms"] = 500
   config.internal.statistics.consumer_groups.lag_compensation.interval = 1_000
-  # High threshold: the spec runs for far less than this, so the pause never qualifies
-  config.internal.statistics.consumer_groups.lag_compensation.pause_age = 30_000
+  config.internal.statistics.consumer_groups.lag_compensation.pause_age = 5_000
 end
 
 class Consumer < Karafka::BaseConsumer
@@ -47,17 +49,30 @@ class Consumer < Karafka::BaseConsumer
 
     return if DT.key?(:paused)
 
+    DT[:paused_at] = Process.clock_gettime(Process::CLOCK_MONOTONIC)
     pause(messages.last.offset, 1_000_000)
     DT[:paused] = true
   end
 end
 
 Karafka::App.monitor.subscribe("statistics.emitted") do |event|
+  DT[:emits] << true
+  next unless DT.key?(:paused_at)
+
+  elapsed = Process.clock_gettime(Process::CLOCK_MONOTONIC) - DT[:paused_at]
+
   event[:statistics]["topics"].each do |_, topic_values|
     topic_values["partitions"].each do |partition_name, partition_values|
       next if partition_name == "-1"
 
-      DT[:lags] << partition_values["consumer_lag"]
+      lag = partition_values["consumer_lag"]
+
+      # Buckets straddle the 5s pause age with a gap around it to avoid boundary jitter
+      if elapsed < 4
+        DT[:before_age] << lag
+      elsif elapsed > 7
+        DT[:after_age] << lag
+      end
     end
   end
 end
@@ -66,7 +81,7 @@ draw_routes(Consumer)
 
 produce_many(DT.topic, DT.uuids(1))
 
-# Produce a backlog while paused; it must not surface as lag because the pause age is never reached
+# Keep producing across the whole window; producer stops a few emissions before the server
 Thread.new do
   sleep(0.1) until DT.key?(:paused)
 
@@ -74,14 +89,15 @@ Thread.new do
     produce_many(DT.topic, DT.uuids(1))
     sleep(0.3)
 
-    break if DT[:lags].size >= 15
+    break if DT[:emits].size >= 22
   end
 end
 
-# ~9s of samples, an order of magnitude below the 30s pause age
 start_karafka_and_wait_until do
-  DT[:lags].size >= 18
+  DT[:emits].size >= 26 && DT[:before_age].size >= 3 && DT[:after_age].size >= 3
 end
 
-# Paused but never long enough: the lag stays frozen, compensation does not kick in
-assert DT[:lags].max <= 2, "expected no compensation below pause_age, got max #{DT[:lags].max}"
+# Before the pause age: not yet eligible, so the lag is still frozen despite the growing backlog
+assert DT[:before_age].max <= 2, "compensated before pause_age, got max #{DT[:before_age].max}"
+# After the pause age: eligible, so the lag is compensated and reflects the backlog
+assert DT[:after_age].max >= 15, "not compensated after pause_age, got max #{DT[:after_age].max}"

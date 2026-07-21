@@ -84,8 +84,10 @@ module Karafka
               # librdkafka reports means there is nothing to compensate: equal means no new
               # data in the topic since the last fetch and lower means the partition resumed
               # and its fetches are fresher than our refreshed snapshot. We compare against the
-              # last stable offset as the refreshed end offset honors the consumer isolation
-              # level.
+              # last stable offset since that is what the statistics report for a read_committed
+              # consumer. Note the refreshed end offset itself is a high watermark (see
+              # `Fetcher`): on a topic with an in-flight transaction it can exceed the fetch-based
+              # last stable offset and briefly overstate the lag until the transaction resolves.
               return unless end_offset > (p_stats["ls_offset"] || p_stats["hi_offset"] || -1)
 
               p_stats["ls_offset"] = end_offset
