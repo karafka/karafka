@@ -62,6 +62,19 @@ RSpec.describe_current do
     Karafka::App.config.internal.statistics.consumer_groups.lag_compensation.interval = 1
     Karafka::App.config.internal.statistics.consumer_groups.lag_compensation.pause_age = 1
 
+    # A single controllable monotonic clock shared by the refresher (pause ages) and its
+    # internal IntervalRunner (tick gating), so time advances deterministically via #age_pause
+    # instead of real sleeps. Every non-monotonic clock reading falls through to the real one.
+    @now = 1_000_000.0
+    original_clock = ::Process.method(:clock_gettime)
+    allow(::Process).to receive(:clock_gettime) do |clock_id, *rest|
+      if clock_id == ::Process::CLOCK_MONOTONIC && rest == [:float_millisecond]
+        @now
+      else
+        original_clock.call(clock_id, *rest)
+      end
+    end
+
     allow(client).to receive(:read_partition_offsets) do |request|
       request.flat_map do |topic, specs|
         specs.map { |spec| { topic: topic, partition: spec[:partition], offset: 95 } }
@@ -95,10 +108,10 @@ RSpec.describe_current do
     )
   end
 
-  # Interval is 1ms in these specs, so a tiny sleep exceeds both the pause age threshold and
-  # makes the next tick due
+  # Advances the shared monotonic clock well past both the pause age threshold and the tick
+  # interval, deterministically and without touching real time
   def age_pause
-    sleep(0.005)
+    @now += 10_000
   end
 
   describe "#on_client_events_poll" do
