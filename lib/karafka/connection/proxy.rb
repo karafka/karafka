@@ -65,6 +65,51 @@ module Karafka
         end
       end
 
+      # Resolves offsets of many partitions with one batched `ListOffsets` request instead of one
+      # roundtrip per partition. This is the same broker query as `#query_watermark_offsets`,
+      # only batched, so it is sensitive to the same latencies and leader-election hiccups and we
+      # recover from them the same way and with the same settings.
+      #
+      # Named after `Admin::Topics#read_partition_offsets` (same specs in, same offsets out) and
+      # **not** after the underlying `#list_offsets`, so we do not shadow the rdkafka method of
+      # that name: it returns a handle to wait on, while we return the already resolved offsets.
+      #
+      # @param topic_partition_offsets [Hash{String => Array<Hash>}] topics with arrays of
+      #   partition offset specs, each with a `:partition` and an `:offset` (`:earliest`,
+      #   `:latest`, `:max_timestamp` or an integer timestamp in ms)
+      # @param isolation_level [Integer, nil] isolation level with which the offsets should be
+      #   resolved or nil for the librdkafka default (read_uncommitted)
+      # @return [Array<Hash>] resolved offsets, each with `:topic`, `:partition` and `:offset`
+      # @note The `ListOffsets` admin API resolves `:latest` to the high watermark even with
+      #   `isolation_level` set to read_committed, unlike `#query_watermark_offsets`, which returns
+      #   the last stable offset for a read_committed consumer. On a topic with an in-flight
+      #   transaction `:latest` therefore includes the uncommitted messages. Non-transactional
+      #   topics are unaffected.
+      # @note Specs given as a literal hash need explicit curly braces: a brace-less trailing
+      #   hash is parsed by Ruby as keyword arguments, which this method (having the
+      #   `isolation_level:` keyword) would reject as a missing positional argument
+      def read_partition_offsets(topic_partition_offsets, isolation_level: nil)
+        l_config = proxy_config.query_watermark_offsets
+
+        with_broker_errors_retry(
+          # required to be in seconds, not ms
+          wait_time: l_config.wait_time / 1_000.to_f,
+          max_attempts: l_config.max_attempts
+        ) do
+          @wrapped
+            .list_offsets(topic_partition_offsets, isolation_level: isolation_level)
+            .wait(max_wait_timeout_ms: l_config.timeout)
+            .offsets
+        rescue Rdkafka::AbstractHandle::WaitTimeoutError
+          # Align with the error contract of the per-partition watermark query, so a slow broker
+          # is retried here instead of escaping as a handle wait timeout
+          raise Rdkafka::RdkafkaError.new(
+            Rdkafka::Bindings::RD_KAFKA_RESP_ERR__TIMED_OUT,
+            "Error querying offsets of '#{topic_partition_offsets.keys.join(", ")}'"
+          )
+        end
+      end
+
       # Similar to `#query_watermark_offsets`, this method can be sensitive to latency. We handle
       # this the same way
       #

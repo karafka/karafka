@@ -10,7 +10,7 @@ module Karafka
         class Statistics
           include Helpers::ConfigImporter.new(
             monitor: %i[monitor],
-            decorator_class: %i[internal statistics decorator_class]
+            decorator_class: %i[internal statistics consumer_groups decorator_class]
           )
 
           # @param subscription_group_id [String]
