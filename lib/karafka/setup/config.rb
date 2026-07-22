@@ -356,11 +356,32 @@ module Karafka
 
         # Things related to librdkafka statistics decoration prior to their emission
         setting :statistics do
-          # option decorator_class [Class] class used to decorate raw librdkafka statistics
-          #   (adds delta/freeze-duration values) before `statistics.emitted` is instrumented.
-          #   Exposed so it can be replaced with a custom decorator (e.g. one that also enriches
-          #   or corrects specific values) without touching the callback that uses it.
-          setting :decorator_class, default: Instrumentation::Callbacks::ConsumerGroups::Decorator
+          # Consumer groups related statistics settings
+          setting :consumer_groups do
+            # option decorator_class [Class] class used to decorate raw librdkafka statistics
+            #   (adds delta/freeze-duration values) before `statistics.emitted` is instrumented.
+            #   Exposed so it can be replaced with a custom decorator (e.g. one that also
+            #   enriches or corrects specific values) without touching the callback that uses
+            #   it.
+            setting :decorator_class, default: Instrumentation::Callbacks::ConsumerGroups::Decorator
+
+            # Active refreshing of watermarks and lags for long-paused partitions (Pro).
+            # librdkafka only updates watermark offsets and lags from fetch responses, so
+            # partitions paused for a long time report frozen values in statistics. When
+            # enabled, they are refreshed via the running consumer connection and overlaid onto
+            # the emitted statistics.
+            setting :lag_compensation do
+              # option interval [Integer] how often (ms) at most to refresh watermarks and lags
+              #   of long-paused partitions. 0 disables the feature entirely.
+              setting :interval, default: 0
+
+              # option pause_age [Integer] how long (ms) a partition needs to stay paused to
+              #   qualify for the compensation. Short pause/resume cycles reset the clock and
+              #   never qualify. Minimum accepted value is 5 seconds as statistics of partitions
+              #   paused shorter are fresh enough to make compensating them pointless.
+              setting :pause_age, default: 30_000
+            end
+          end
         end
 
         # Karafka components for ActiveJob
