@@ -42,4 +42,16 @@ start_karafka_and_wait_until do
   DT.key?(:done)
 end
 
-assert_equal [0, 0, 1], DT[:offsets]
+# Two recovery paths are valid here and which one we hit is decided inside
+# librdkafka's KIP-848 ConsumerGroupHeartbeat state machine, not by us:
+#
+# - if our local max.poll.interval kick-in revokes the partition first, offset 0
+#   stays uncommitted and is replayed on recovery => [0, 0, 1]
+# - if the broker heartbeat evicts us first (fatal `Invalid request`), offset 0
+#   is not replayed and we resume from offset 1 => [0, 1]
+#
+# Both prove the thing this spec cares about: Karafka recovers from the expired
+# poll interval and processes every message to completion. The offset-0 replay is
+# a librdkafka-internal detail we cannot force deterministically, so asserting the
+# exact [0, 0, 1] sequence makes this spec flaky on CI.
+assert [[0, 1], [0, 0, 1]].include?(DT[:offsets])
