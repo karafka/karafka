@@ -36,6 +36,14 @@ segment1 = "#{DT.group}-parallel-0"
 segment2 = "#{DT.group}-parallel-1"
 topics = [DT.topic, "#{DT.topic}_2", "#{DT.topic}_3"]
 
+draw_topics do
+  topics.each do |topic_name|
+    topic topic_name do
+      partitions 2
+    end
+  end
+end
+
 draw_routes do
   consumer_group DT.group do
     parallel_segments(
@@ -45,7 +53,6 @@ draw_routes do
 
     topics.each do |topic_name|
       topic topic_name do
-        config(partitions: 2)
         consumer Class.new(Karafka::BaseConsumer)
       end
     end

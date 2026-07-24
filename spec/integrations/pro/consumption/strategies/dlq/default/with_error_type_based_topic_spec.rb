@@ -95,9 +95,14 @@ class ErrorsConsumer < Karafka::BaseConsumer
   end
 end
 
+draw_topics do
+  topic DT.topics[0] do
+    partitions ERRORS.size
+  end
+end
+
 draw_routes do
   topic DT.topics[0] do
-    config(partitions: ERRORS.size)
     consumer Consumer
     dead_letter_queue(
       topic: DT.topics[1],

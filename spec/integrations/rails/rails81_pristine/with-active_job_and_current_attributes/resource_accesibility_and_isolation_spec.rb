@@ -69,11 +69,16 @@ end
 
 Karafka::ActiveJob::CurrentAttributes.persist(Current)
 
+draw_topics do
+  topic DT.topic do
+    partitions 20
+  end
+end
+
 draw_routes do
   topic DT.topic do
     # Run many operations in many partitions to stress out
     # concurrency
-    config(partitions: 20)
     consumer Consumer
   end
 end

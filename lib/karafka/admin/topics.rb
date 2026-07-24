@@ -310,12 +310,19 @@ module Karafka
       #
       # @raise [Rdkafka::RdkafkaError] on per-partition errors or connection issues
       #
+      # @note The specs must be passed as an explicit hash (in curly braces). Ruby parses a
+      #   brace-less trailing hash as keyword arguments, and since this method takes an
+      #   `isolation_level:` keyword, such a call raises an `ArgumentError` about a missing
+      #   positional argument.
+      #
       # @example Query earliest offset for partition 0 and latest for partition 1
       #   Karafka::Admin::Topics.read_partition_offsets(
-      #     'events' => [
-      #       { partition: 0, offset: :earliest },
-      #       { partition: 1, offset: :latest }
-      #     ]
+      #     {
+      #       'events' => [
+      #         { partition: 0, offset: :earliest },
+      #         { partition: 1, offset: :latest }
+      #       ]
+      #     }
       #   )
       #   # => [
       #   #   { topic: 'events', partition: 0, offset: 0, timestamp: -1, leader_epoch: nil },
@@ -324,13 +331,13 @@ module Karafka
       #
       # @example Get LSO (Last Stable Offset) for accurate lag on transactional topics
       #   Karafka::Admin::Topics.read_partition_offsets(
-      #     'events' => [{ partition: 0, offset: :latest }],
+      #     { 'events' => [{ partition: 0, offset: :latest }] },
       #     isolation_level: Karafka::Admin::IsolationLevels::READ_COMMITTED
       #   )
       #
       # @example Find offset at a specific point in time
       #   Karafka::Admin::Topics.read_partition_offsets(
-      #     'events' => [{ partition: 0, offset: 1_700_000_000_000 }]
+      #     { 'events' => [{ partition: 0, offset: 1_700_000_000_000 }] }
       #   )
       def read_partition_offsets(topic_partition_offsets, isolation_level: nil)
         with_admin do |admin|

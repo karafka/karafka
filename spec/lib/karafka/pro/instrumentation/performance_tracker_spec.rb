@@ -35,8 +35,11 @@ RSpec.describe_current do
   let(:c_class) { Karafka::BaseConsumer }
 
   describe "#processing_time_p95 and #on_consumer_consumed" do
-    let(:p95) { tracker.processing_time_p95(topic, partition) }
+    let(:group_id) { SecureRandom.hex(6) }
+    let(:p95) { tracker.processing_time_p95(group_id, topic, partition) }
     let(:event) { Karafka::Core::Monitoring::Event.new(rand.to_s, payload) }
+    let(:sub_group) { instance_double(Karafka::Routing::SubscriptionGroup, id: group_id) }
+    let(:c_topic) { instance_double(Karafka::Routing::Topic, subscription_group: sub_group) }
 
     context "when given topic does not exist" do
       let(:topic) { SecureRandom.hex(6) }
@@ -48,7 +51,9 @@ RSpec.describe_current do
     context "when topic exists but not the partition" do
       let(:message) { build(:messages_message, metadata: build(:messages_metadata)) }
       let(:messages) { instance_double(m_class, metadata: message.metadata, size: 12) }
-      let(:payload) { { caller: instance_double(c_class, messages: messages), time: 200 } }
+      let(:payload) do
+        { caller: instance_double(c_class, messages: messages, topic: c_topic), time: 200 }
+      end
       let(:topic) { message.metadata.topic }
       let(:partition) { 1 }
 
@@ -61,7 +66,9 @@ RSpec.describe_current do
       context "when there is only one value" do
         let(:message) { build(:messages_message, metadata: build(:messages_metadata)) }
         let(:messages) { instance_double(m_class, metadata: message.metadata, size: 1) }
-        let(:payload) { { caller: instance_double(c_class, messages: messages), time: 20 } }
+        let(:payload) do
+          { caller: instance_double(c_class, messages: messages, topic: c_topic), time: 20 }
+        end
         let(:topic) { message.metadata.topic }
         let(:partition) { 0 }
 
@@ -73,7 +80,9 @@ RSpec.describe_current do
       context "when there are more values for a give partition" do
         let(:message) { build(:messages_message, metadata: build(:messages_metadata)) }
         let(:messages) { instance_double(m_class, metadata: message.metadata, size: 1) }
-        let(:payload) { { caller: instance_double(c_class, messages: messages), time: 20 } }
+        let(:payload) do
+          { caller: instance_double(c_class, messages: messages, topic: c_topic), time: 20 }
+        end
         let(:topic) { message.metadata.topic }
         let(:partition) { 0 }
 
@@ -85,6 +94,116 @@ RSpec.describe_current do
         end
 
         it { expect(p95).to eq(9) }
+      end
+    end
+
+    context "when two subscription groups consume the same topic partition" do
+      let(:other_group_id) { SecureRandom.hex(6) }
+      let(:other_sub_group) do
+        instance_double(Karafka::Routing::SubscriptionGroup, id: other_group_id)
+      end
+      let(:other_topic) { instance_double(Karafka::Routing::Topic, subscription_group: other_sub_group) }
+      let(:message) { build(:messages_message, metadata: build(:messages_metadata)) }
+      let(:messages) { instance_double(m_class, metadata: message.metadata, size: 1) }
+      let(:topic) { message.metadata.topic }
+      let(:partition) { 0 }
+
+      before do
+        consumed = lambda do |c_topic_double, time|
+          payload = { caller: instance_double(c_class, messages: messages, topic: c_topic_double), time: time }
+          tracker.on_consumer_consumed(Karafka::Core::Monitoring::Event.new(rand.to_s, payload))
+        end
+
+        consumed.call(c_topic, 10)
+        consumed.call(other_topic, 50)
+      end
+
+      it "keeps independent samples per subscription group" do
+        expect(tracker.processing_time_p95(group_id, topic, partition)).to eq(10)
+        expect(tracker.processing_time_p95(other_group_id, topic, partition)).to eq(50)
+      end
+    end
+  end
+
+  describe "#on_rebalance_partitions_revoked" do
+    let(:group_id) { SecureRandom.hex(6) }
+
+    # Records a single sample of cost 20 for the given group/topic/partition. With one sample the
+    # public p95 reports that value, so it doubles as a "tracked?" probe: 20 when tracked, 0 once
+    # evicted (or never tracked).
+    def consume(group_id, topic, partition)
+      metadata = build(:messages_metadata, topic: topic, partition: partition)
+      message = build(:messages_message, metadata: metadata)
+      messages = instance_double(m_class, metadata: message.metadata, size: 1)
+      sub_group = instance_double(Karafka::Routing::SubscriptionGroup, id: group_id)
+      c_topic = instance_double(Karafka::Routing::Topic, subscription_group: sub_group)
+      payload = { caller: instance_double(c_class, messages: messages, topic: c_topic), time: 20 }
+      tracker.on_consumer_consumed(Karafka::Core::Monitoring::Event.new(rand.to_s, payload))
+    end
+
+    def revoke(group_id, topic, *partition_ids)
+      tpl = Rdkafka::Consumer::TopicPartitionList.new
+      tpl.add_topic(topic, partition_ids)
+      tracker.on_rebalance_partitions_revoked(
+        Karafka::Core::Monitoring::Event.new(
+          rand.to_s,
+          { subscription_group_id: group_id, tpl: tpl }
+        )
+      )
+    end
+
+    context "when the revoked partition was the only one tracked for its topic" do
+      let(:topic) { SecureRandom.hex(6) }
+
+      before { consume(group_id, topic, 0) }
+
+      it "drops the recorded samples" do
+        expect(tracker.processing_time_p95(group_id, topic, 0)).to eq(20)
+        revoke(group_id, topic, 0)
+        expect(tracker.processing_time_p95(group_id, topic, 0)).to eq(0)
+      end
+    end
+
+    context "when the topic still has other tracked partitions" do
+      let(:topic) { SecureRandom.hex(6) }
+
+      before do
+        consume(group_id, topic, 0)
+        consume(group_id, topic, 1)
+      end
+
+      it "evicts only the revoked partition and keeps the rest" do
+        revoke(group_id, topic, 0)
+        expect(tracker.processing_time_p95(group_id, topic, 0)).to eq(0)
+        expect(tracker.processing_time_p95(group_id, topic, 1)).to eq(20)
+      end
+    end
+
+    context "when the revoked group was never tracked" do
+      let(:other_group_id) { SecureRandom.hex(6) }
+      let(:topic) { SecureRandom.hex(6) }
+
+      before { consume(group_id, topic, 0) }
+
+      it "is a no-op that leaves tracked groups intact" do
+        expect { revoke(other_group_id, topic, 0) }.not_to raise_error
+        expect(tracker.processing_time_p95(group_id, topic, 0)).to eq(20)
+      end
+    end
+
+    context "when another subscription group consumes the same topic partition" do
+      let(:other_group_id) { SecureRandom.hex(6) }
+      let(:topic) { SecureRandom.hex(6) }
+
+      before do
+        consume(group_id, topic, 0)
+        consume(other_group_id, topic, 0)
+      end
+
+      it "evicts only the revoked group and leaves the other group untouched" do
+        revoke(group_id, topic, 0)
+        expect(tracker.processing_time_p95(group_id, topic, 0)).to eq(0)
+        expect(tracker.processing_time_p95(other_group_id, topic, 0)).to eq(20)
       end
     end
   end

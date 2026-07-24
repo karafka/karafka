@@ -142,16 +142,36 @@ module Karafka
 
           return if negative_partitions.empty?
 
-          # Batch-fetch LWM and HWM for all negative-offset partitions in two admin calls
-          # (one for :earliest, one for :latest) instead of N per-partition consumer calls
-          watermarks = Karafka::Admin::Topics.read_watermark_offsets(
-            negative_partitions.transform_values(&:keys)
-          )
+          # Batch-fetch LWM and HWM for all negative-offset partitions in two calls (one for
+          # :earliest, one for :latest) instead of N per-partition watermark queries. Both run
+          # on the consumer own connection, so no dedicated admin client is ever created. The
+          # proxy passes no isolation level, so :latest resolves with the librdkafka default
+          # (read_uncommitted), i.e. the true high watermark - same as the previous
+          # read_watermark_offsets path this replaced
+          low_specs = {}
+          high_specs = {}
+
+          negative_partitions.each do |name, partitions|
+            low_specs[name] = partitions.keys.map { |p| { partition: p, offset: :earliest } }
+            high_specs[name] = partitions.keys.map { |p| { partition: p, offset: :latest } }
+          end
+
+          lows = {}
+          highs = {}
+
+          @consumer.read_partition_offsets(low_specs).each do |result|
+            (lows[result[:topic]] ||= {})[result[:partition]] = result[:offset]
+          end
+
+          @consumer.read_partition_offsets(high_specs).each do |result|
+            (highs[result[:topic]] ||= {})[result[:partition]] = result[:offset]
+          end
 
           negative_partitions.each do |name, partitions|
             partitions.each do |partition, offset|
+              low = lows.dig(name, partition) || 0
+              high = highs.dig(name, partition) || 0
               # We add because this offset is negative
-              low, high = watermarks.dig(name, partition) || [0, 0]
               @mapped_topics[name][partition] = [high + offset, low].max
             end
           end

@@ -261,7 +261,7 @@ def become_pro!
   Karafka.const_set(:License, mod) unless Karafka.const_defined?(:License)
   require "karafka/pro/loader"
   Karafka::Pro::Loader.require_all
-  require_relative "support/vp_stabilizer"
+  require_relative "support/flow_stabilizer"
 end
 
 # Configures ActiveJob stuff in a similar way as the Railtie does for full Rails setup
@@ -296,6 +296,31 @@ def clear_app_draws
   Karafka::App.declaratives.repository.clear
 end
 
+# Declares topic structure (partitions / replication_factor / config) independently from
+# routing, mirroring `Karafka::App.declaratives.draw`. This is the preferred way to declare
+# partition counts and Kafka-level config in specs; keep `draw_routes` for pure routing and
+# consumer wiring.
+#
+# @param create_topics [Boolean] should we create the declared topics (true by default)
+# @param block [Proc] block with topic declarations
+#
+# @note Call `draw_topics` BEFORE `draw_routes` when both reference the same topic, so the
+#   `draw_topics` config wins under the repository's first-declaration-wins semantics.
+#
+# @example
+#   draw_topics do
+#     topic DT.topic do
+#       partitions 2
+#     end
+#   end
+def draw_topics(create_topics: true, &block)
+  Karafka::App.declaratives.draw(&block)
+
+  return unless create_topics
+
+  create_declarative_topics
+end
+
 # Sets up default routes (mostly used in integration specs) or allows to configure custom routes
 # by providing a block
 # @param consumer_class [Class, nil] consumer class we want to use if going with defaults
@@ -316,7 +341,13 @@ def draw_routes(consumer_class = nil, create_topics: true, &block)
 
   return unless create_topics
 
-  create_routes_topics
+  # Ensure every routed topic has a declaration so it gets created. Already-declared topics
+  # (via `draw_topics` or an inline `config()`) are returned unchanged (first-declaration-wins);
+  # plain routed topics get the default 1-partition / RF-1 declaration, preserving the previous
+  # behaviour where iterating the routing tree auto-created these declarations.
+  fetch_routes_topics.each(&:declaratives)
+
+  create_declarative_topics
 end
 
 # Returns the next offset that we would consume if we would subscribe again
@@ -346,14 +377,24 @@ def fetch_routes_topics
   Karafka::App.routes.map { |route| route.topics.to_a }.flatten
 end
 
+# @return [Array<Karafka::Declaratives::Topic>] active declarations in the shared repository.
+#   Populated by `draw_topics` (DSL) and by the routing `config()` bridge alike.
+def fetch_declarative_topics
+  Karafka::App.declaratives.repository.active
+end
+
 # @return [Hash] hash with names of topics and configs as values or false for topics for which
-#   we should use the defaults
-def fetch_declarative_routes_topics_configs
-  fetch_routes_topics.each_with_object({}) do |topic, accu|
-    next unless topic.declaratives.active?
+#   we should use the defaults. Topic configs come from the declaratives repository (the single
+#   source of truth); implicit DLQ `it-*` topics are additionally discovered from routing since
+#   they are not declared anywhere.
+def fetch_declarative_topics_configs
+  accu = {}
 
-    accu[topic.name] ||= topic.declaratives
+  fetch_declarative_topics.each do |declaration|
+    accu[declaration.name] ||= declaration
+  end
 
+  fetch_routes_topics.each do |topic|
     next unless topic.dead_letter_queue?
     next unless topic.dead_letter_queue.topic
 
@@ -366,22 +407,24 @@ def fetch_declarative_routes_topics_configs
 
     accu[dlq_topic] ||= false
   end
+
+  accu
 end
 
-# Creates topics defined in the routes so they are available for the specs
-# Code below will auto-create all the routing based topics so we don't have to do it per spec
-# If a topic is already created for example with more partitions, this will do nothing
+# Creates all declared topics (via `draw_topics` and/or the routing `config()` bridge) so they
+# are available for the specs.
+# If a topic is already created for example with more partitions, this will do nothing.
 #
 # @note This code ensures that we do not create multiple topics from multiple tests at the same
 #   time because under heavy creation load, Kafka hangs sometimes. Keep in mind, this lowers number
 #   of topics created concurrently but some particular specs create topics on their own. The
 #   quantity however should be small enough for Kafka to handle.
-def create_routes_topics
+def create_declarative_topics
   lock = File.open(File.join(Dir.tmpdir, "create_routes_topics.lock"), File::CREAT | File::RDWR)
   lock.flock(File::LOCK_EX)
 
   # Create 3 topics in parallel to make specs bootstrapping faster
-  fetch_declarative_routes_topics_configs.each_slice(3).to_a.each do |slice|
+  fetch_declarative_topics_configs.each_slice(3).to_a.each do |slice|
     slice.map do |name, config|
       args = if config
         [config.partitions, config.replication_factor, config.details]

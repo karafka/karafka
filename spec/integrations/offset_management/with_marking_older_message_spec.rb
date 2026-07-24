@@ -1,9 +1,13 @@
 # frozen_string_literal: true
 
-# When older message then the one we already marked is marked as processed, this should be ignored.
-# We should only mark stuff moving forward.
+# Marking an offset older than the last one committed does not move the *committed* offset
+# backwards: Kafka offset commits only ever advance, so after a rebalance we resume from the
+# highest committed position and never reprocess (hence no duplicate offsets here).
 #
-# This aligns with librdkafka behaviour for offsets (see note):
+# Note this concerns the committed offset across a rebalance only. Marking an older offset DOES
+# rewind the in-memory seek offset for in-process reprocessing (seek / retry / pause-resume) - that
+# behaviour is covered by `marking_older_offset_rewinds_seek_spec`.
+#
 # https://github.com/edenhill/librdkafka/blob/master/INTRODUCTION.md#at-least-once-processing
 
 setup_karafka(

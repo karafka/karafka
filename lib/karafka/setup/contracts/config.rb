@@ -139,6 +139,17 @@ module Karafka
             end
           end
 
+          nested(:statistics) do
+            nested(:consumer_groups) do
+              required(:decorator_class) { |val| !val.nil? }
+
+              nested(:lag_compensation) do
+                required(:interval) { |val| val.is_a?(Integer) && val >= 0 }
+                required(:pause_age) { |val| val.is_a?(Integer) && val >= 5_000 }
+              end
+            end
+          end
+
           nested(:active_job) do
             required(:dispatcher) { |val| !val.nil? }
             required(:job_options_contract) { |val| !val.nil? }

@@ -59,6 +59,8 @@ module Karafka
             # In case like this we ignore marking
             return true if seek_offset.nil?
             # Ignore double markings of the same offset
+            # Only this exact re-mark is skipped - marking genuinely older offsets is intentionally
+            # allowed and rewinds the seek offset for reprocessing (see #2432)
             return true if (seek_offset - 1) == message.offset
             return false if revoked?
             unless client.mark_as_consumed(message)
@@ -85,6 +87,8 @@ module Karafka
             # In case like this we ignore marking
             return true if seek_offset.nil?
             # Ignore double markings of the same offset
+            # Only this exact re-mark is skipped - marking genuinely older offsets is intentionally
+            # allowed and rewinds the seek offset for reprocessing (see #2432)
             return true if (seek_offset - 1) == message.offset
             return false if revoked?
 

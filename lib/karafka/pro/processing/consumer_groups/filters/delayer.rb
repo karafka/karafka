@@ -80,9 +80,9 @@ module Karafka
 
             # @return [Symbol] action to take on post-filtering
             def action
-              return :skip unless applied?
+              return Actions.skip unless applied?
 
-              (timeout <= 0) ? :seek : :pause
+              (timeout <= 0) ? Actions.seek : Actions.pause
             end
           end
         end

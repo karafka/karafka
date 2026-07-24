@@ -110,7 +110,7 @@ module Karafka
           if partitions_with_offsets.is_a?(Hash)
             tpl_base[topic] = partitions_with_offsets
           else
-            topic_info = Topics.new(kafka: @custom_kafka).info(topic)
+            topic_info = topics_admin.info(topic)
             topic_info[:partition_count].times do |partition|
               tpl_base[topic][partition] = partitions_with_offsets
             end
@@ -358,7 +358,9 @@ module Karafka
           sleep(0.1)
 
           # Unsubscribe - this will trigger the second rebalance when the consumer closes
-          # The ensure block in with_consumer will handle the unsubscribe and close
+          # The ensure block in with_consumer will handle the unsubscribe and close for the
+          # dedicated consumer created here. This operation subscribes and must never run on
+          # an external client as nothing would restore its subscription
         end
       end
 
@@ -380,6 +382,10 @@ module Karafka
       #
       # @note This lag reporting is for committed lags and is "Kafka-centric", meaning that this
       #   represents lags from Kafka perspective and not the consumer. They may differ.
+      #
+      # @note When this instance operates on an external client, every queried group runs
+      #   through that single consumer identity, so query it only about the external client's
+      #   own group.
       def read_lags_with_offsets(groups_with_topics = {}, active_topics_only: true)
         # We first fetch all the topics with partitions count that exist in the cluster so we
         # do not query for topics that do not exist and so we can get partitions count for all

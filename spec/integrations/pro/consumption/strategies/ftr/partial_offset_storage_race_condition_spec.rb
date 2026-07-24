@@ -71,32 +71,41 @@ class CursorRaceFilter < Karafka::Pro::Processing::ConsumerGroups::Filters::Base
 
   def initialize
     super
-    @processed_batches = 0
+    @attempted = false
   end
 
   def apply!(messages)
-    @processed_batches += 1
+    # Apply filtering once, on the first batch that actually carries messages.
+    #
+    # This used to count invocations (`@processed_batches == 1`) instead of checking content,
+    # but `apply!` runs on every poll, including ones `FlowStabilizer` (registered before this
+    # filter) clears down to empty when Kafka's fetch under-delivers. Those swallowed-empty
+    # polls still counted as "batch 1", so once the real (>= 10 messages) batch arrived it was
+    # already "batch 2" or later and this filter silently never fired, leaving `DT[:removed]`
+    # at its default `[]`. Gating on `messages.any?` instead makes this immune to how many
+    # empty polls precede the first real one.
+    return if @attempted
+    return if messages.empty?
 
-    # Apply filtering on first batch
-    if @processed_batches == 1 && messages.any?
-      # Track original messages
-      DT[:original_batch1] = messages.map(&:offset)
+    @attempted = true
 
-      # Remove messages 4-6 from the first batch
-      to_remove = messages.select { |m| m.offset.between?(4, 6) }
+    # Track original messages
+    DT[:original_batch1] = messages.map(&:offset)
 
-      if to_remove.any?
-        # Set cursor to last removed message
-        @cursor = to_remove.last
-        DT[:cursor_offset] = @cursor.offset
-        DT[:removed] = to_remove.map(&:offset)
+    # Remove messages 4-6 from the first batch
+    to_remove = messages.select { |m| m.offset.between?(4, 6) }
 
-        # Remove the messages
-        to_remove.each { |msg| messages.delete(msg) }
+    return unless to_remove.any?
 
-        DT[:after_filtering] = messages.map(&:offset)
-      end
-    end
+    # Set cursor to last removed message
+    @cursor = to_remove.last
+    DT[:cursor_offset] = @cursor.offset
+    DT[:removed] = to_remove.map(&:offset)
+
+    # Remove the messages
+    to_remove.each { |msg| messages.delete(msg) }
+
+    DT[:after_filtering] = messages.map(&:offset)
   end
 
   def applied?
@@ -125,7 +134,7 @@ draw_routes do
   topic DT.topic do
     consumer Consumer
     manual_offset_management true
-    filter ->(*) { VpStabilizer.new(10) }
+    filter ->(*) { FlowStabilizer.new(10) }
     filter ->(*) { CursorRaceFilter.new }
   end
 end
