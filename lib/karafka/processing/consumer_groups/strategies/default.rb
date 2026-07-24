@@ -4,8 +4,11 @@ module Karafka
   module Processing
     module ConsumerGroups
       module Strategies
-        # No features enabled. No manual offset management No long running jobs Nothing. Just
-        # standard, automatic flow
+        # No features enabled:
+        # - No manual offset management
+        # - No long running jobs
+        #
+        # Nothing. Just standard, automatic flow
         module Default
           include Base
 

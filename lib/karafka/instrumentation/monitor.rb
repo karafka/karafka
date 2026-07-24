@@ -2,7 +2,7 @@
 
 module Karafka
   module Instrumentation
-    # Karafka instrumentation monitor that we use to publish events By default uses our internal
+    # Karafka instrumentation monitor that we use to publish events. By default uses our internal
     # notifications bus but can be used with `ActiveSupport::Notifications` as well
     class Monitor < Karafka::Core::Monitoring::Monitor
       attr_reader :notifications_bus
