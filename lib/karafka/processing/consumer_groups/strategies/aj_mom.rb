@@ -2,12 +2,9 @@
 
 module Karafka
   module Processing
-    # Consumer-group-specific processing components (driven by rebalance callbacks and partition
-    # ticks). Parallel `ShareGroups` will live next to this namespace once KIP-932 lands.
     module ConsumerGroups
       module Strategies
-        # ActiveJob enabled
-        # Manual offset management enabled
+        # ActiveJob enabled Manual offset management enabled
         #
         # This is the default AJ strategy since AJ cannot be used without MOM
         module AjMom

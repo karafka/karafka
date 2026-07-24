@@ -159,7 +159,9 @@ module Karafka
         #   )
         #
         # @example Read offsets from a specific point in time
-        #   Karafka::Admin::Recovery.read_committed_offsets('sync', last_committed_at: Time.new(2025, 3, 1))
+        #   Karafka::Admin::Recovery.read_committed_offsets(
+        #     'sync', last_committed_at: Time.new(2025, 3, 1)
+        #   )
         #
         # @example Migrate a stuck consumer group to a new name (two-step workflow)
         #   # Step 1: Read committed offsets from the broken group (bypasses coordinator)

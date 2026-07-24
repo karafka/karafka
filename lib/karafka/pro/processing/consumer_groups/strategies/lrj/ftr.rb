@@ -31,14 +31,10 @@
 module Karafka
   module Pro
     module Processing
-      # Consumer-group-specific Pro processing components (driven by rebalance callbacks and
-      # partition ticks). Parallel `ShareGroups` will live next to this namespace once KIP-932
-      # lands.
       module ConsumerGroups
         module Strategies
           module Lrj
-            # Filtering enabled
-            # Long-Running Job enabled
+            # Filtering enabled Long-Running Job enabled
             #
             # In general aside from throttling this one will behave the same way as the Lrj
             module Ftr

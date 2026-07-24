@@ -31,16 +31,13 @@
 module Karafka
   module Pro
     module Processing
-      # Consumer-group-specific Pro processing components (driven by rebalance callbacks and
-      # partition ticks). Parallel `ShareGroups` will live next to this namespace once KIP-932
-      # lands.
       module ConsumerGroups
         # Pro partitioner that can distribute work based on the virtual partitioner settings
         class Partitioner < Karafka::Processing::ConsumerGroups::Partitioner
           # @param topic [String] topic name
           # @param messages [Array<Karafka::Messages::Message>] karafka messages
-          # @param coordinator [Karafka::Pro::Processing::ConsumerGroups::Coordinator] processing coordinator that
-          #   will be used with those messages
+          # @param coordinator [Karafka::Pro::Processing::ConsumerGroups::Coordinator]
+          #   processing coordinator that will be used with those messages
           # @yieldparam [Integer] group id
           # @yieldparam [Array<Karafka::Messages::Message>] karafka messages
           def call(topic, messages, coordinator)

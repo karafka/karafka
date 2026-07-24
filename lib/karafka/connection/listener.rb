@@ -26,9 +26,9 @@ module Karafka
       # @return [Karafka::Routing::SubscriptionGroup] subscription group that this listener handles
       attr_reader :subscription_group
 
-      # @return [Processing::ConsumerGroups::CoordinatorsBuffer] coordinator buffers that can be used directly in
-      #   advanced cases of changes to the polling flow (like triggered seek back without messages
-      #   ahead in the topic)
+      # @return [Processing::ConsumerGroups::CoordinatorsBuffer] coordinator buffers that can be
+      #   used directly in advanced cases of changes to the polling flow (like triggered seek back
+      #   without messages ahead in the topic)
       attr_reader :coordinators
 
       # How long to wait in the initial events poll. Increases chances of having the initial events

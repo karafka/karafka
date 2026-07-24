@@ -36,8 +36,8 @@ module Karafka
           class Multiplexing < Base
             # Allows for multiplexing setup inside a consumer group definition
             module Proxy
-              # @param min [Integer, nil] min multiplexing count or nil to set it to max, effectively
-              #   disabling dynamic multiplexing
+              # @param min [Integer, nil] min multiplexing count or nil to set it to max,
+              #   effectively disabling dynamic multiplexing
               # @param max [Integer] max multiplexing count
               # @param boot [Integer] how many listeners should we start during boot by default
               # @param scale_delay [Integer] number of ms of delay before applying any scale

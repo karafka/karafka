@@ -45,16 +45,17 @@ module Karafka
                 super
               end
 
-              # @param max_partitions [Integer] max number of virtual partitions that can come out of
-              #   the single distribution flow. When set to more than the Karafka threading, will
+              # @param max_partitions [Integer] max number of virtual partitions that can come out
+              #   of the single distribution flow. When set to more than the Karafka threading, will
               #   create more work than workers. When less, can ensure we have spare resources to
               #   process other things in parallel.
               # @param partitioner [nil, #call] nil or callable partitioner
               # @param offset_metadata_strategy [Symbol] how we should match the metadata for the
-              #   offset. `:exact` will match the offset matching metadata and `:current` will select
-              #   the most recently reported metadata
+              #   offset. `:exact` will match the offset matching metadata and `:current` will
+              #   select the most recently reported metadata
               # @param reducer [nil, #call] reducer for VPs key. It allows for using a custom
-              #   reducer to achieve enhanced parallelization when the default reducer is not enough.
+              #   reducer to achieve enhanced parallelization when the default reducer is not
+              #   enough.
               # @param distribution [Symbol] the strategy to use for virtual partitioning. Can be
               #   either `:consistent` or `:balanced`. The `:balanced` strategy ensures balanced
               #   distribution of work across available workers while maintaining message order

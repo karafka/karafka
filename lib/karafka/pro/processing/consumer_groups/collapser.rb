@@ -31,16 +31,13 @@
 module Karafka
   module Pro
     module Processing
-      # Consumer-group-specific Pro processing components (driven by rebalance callbacks and
-      # partition ticks). Parallel `ShareGroups` will live next to this namespace once KIP-932
-      # lands.
       module ConsumerGroups
         # Manages the collapse of virtual partitions
         # Since any non-virtual partition is actually a virtual partition of size one, we can use
         # it in a generic manner without having to distinguish between those cases.
         #
-        # We need to have notion of the offset until we want to collapse because upon pause and retry
-        # rdkafka may purge the buffer. This means, that we may end up with smaller or bigger
+        # We need to have notion of the offset until we want to collapse because upon pause and
+        # retry rdkafka may purge the buffer. This means, that we may end up with smaller or bigger
         # (different) dataset and without tracking the end of collapse, there would be a chance for
         # things to flicker. Tracking allows us to ensure, that collapse is happening until all the
         # messages from the corrupted batch are processed.
@@ -57,8 +54,8 @@ module Karafka
             @collapsed
           end
 
-          # Collapse until given offset. Until given offset is encountered or offset bigger than that
-          # we keep collapsing.
+          # Collapse until given offset. Until given offset is encountered or offset bigger than
+          # that we keep collapsing.
           # @param offset [Integer] offset until which we keep the collapse
           def collapse_until!(offset)
             @mutex.synchronize do
@@ -69,8 +66,8 @@ module Karafka
             end
           end
 
-          # Sets the collapse state based on the first collective offset that we are going to process
-          # and makes the decision whether or not we need to still keep the collapse.
+          # Sets the collapse state based on the first collective offset that we are going to
+          # process and makes the decision whether or not we need to still keep the collapse.
           # @param first_offset [Integer] first offset from a collective batch
           def refresh!(first_offset)
             @mutex.synchronize do

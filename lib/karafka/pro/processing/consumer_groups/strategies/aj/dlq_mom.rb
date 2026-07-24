@@ -31,18 +31,13 @@
 module Karafka
   module Pro
     module Processing
-      # Consumer-group-specific Pro processing components (driven by rebalance callbacks and
-      # partition ticks). Parallel `ShareGroups` will live next to this namespace once KIP-932
-      # lands.
       module ConsumerGroups
         module Strategies
           module Aj
-            # ActiveJob enabled
-            # DLQ enabled
-            # Manual offset management enabled
+            # ActiveJob enabled DLQ enabled Manual offset management enabled
             #
-            # AJ has manual offset management on by default and the offset management is delegated to
-            # the AJ consumer. This means, we cannot mark as consumed always. We can only mark as
+            # AJ has manual offset management on by default and the offset management is delegated
+            # to the AJ consumer. This means, we cannot mark as consumed always. We can only mark as
             # consumed when we skip given job upon errors. In all the other scenarios marking as
             # consumed needs to happen in the AJ consumer on a per job basis.
             module DlqMom

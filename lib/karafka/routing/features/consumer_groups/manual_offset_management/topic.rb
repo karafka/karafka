@@ -16,8 +16,8 @@ module Karafka
               super
             end
 
-            # @param active [Boolean] should we stop managing the offset in Karafka and make the user
-            #   responsible for marking messages as consumed.
+            # @param active [Boolean] should we stop managing the offset in Karafka and make the
+            #   user responsible for marking messages as consumed.
             # @return [Config] defined config
             #
             # @note Since this feature supports only one setting (active), we can use the old API

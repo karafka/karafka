@@ -31,17 +31,11 @@
 module Karafka
   module Pro
     module Processing
-      # Consumer-group-specific Pro processing components (driven by rebalance callbacks and
-      # partition ticks). Parallel `ShareGroups` will live next to this namespace once KIP-932
-      # lands.
       module ConsumerGroups
         module Strategies
-          # Namespace for ActiveJob related strategies
           module Aj
-            # ActiveJob enabled
-            # Filtering enabled
-            # Manual Offset management enabled
-            # Virtual partitions enabled
+            # ActiveJob enabled Filtering enabled Manual Offset management enabled Virtual
+            # partitions enabled
             module FtrMomVp
               include Strategies::Aj::FtrMom
               include Strategies::Aj::MomVp

@@ -31,14 +31,10 @@
 module Karafka
   module Pro
     module Processing
-      # Consumer-group-specific Pro processing components (driven by rebalance callbacks and
-      # partition ticks). Parallel `ShareGroups` will live next to this namespace once KIP-932
-      # lands.
       module ConsumerGroups
         module Strategies
           module Dlq
-            # Dead Letter Queue enabled
-            # Virtual Partitions enabled
+            # Dead Letter Queue enabled Virtual Partitions enabled
             #
             # In general because we collapse processing in virtual partitions to one on errors,
             # there is no special action that needs to be taken because we warranty that even with

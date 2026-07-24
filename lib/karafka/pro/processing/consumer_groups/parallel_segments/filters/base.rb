@@ -31,15 +31,13 @@
 module Karafka
   module Pro
     module Processing
-      # Consumer-group-specific Pro processing components (driven by rebalance callbacks and
-      # partition ticks). Parallel `ShareGroups` will live next to this namespace once KIP-932
-      # lands.
       module ConsumerGroups
         module ParallelSegments
           # Module for filters injected into the processing pipeline of each of the topics used
           # within the parallel segmented consumer groups
           module Filters
-            # Base class for filters for parallel segments that deal with different feature scenarios
+            # Base class for filters for parallel segments that deal with different feature
+            # scenarios
             class Base < Pro::Processing::ConsumerGroups::Filters::Base
               # @param segment_id [Integer] numeric id of the parallel segment group to use with the
               #   partitioner and reducer for segment matching comparison
@@ -82,7 +80,7 @@ module Karafka
 
                 @reducer.call(message_segment_key)
               rescue => e
-                # @see `#partition` method error handling doc
+                # See `#partition` method error handling doc
                 Karafka.monitor.instrument(
                   "error.occurred",
                   caller: self,
