@@ -8,6 +8,10 @@ require_relative "current_attributes/persistence"
 module Karafka
   module ActiveJob
     # Module that allows to persist current attributes on Karafka jobs
+    #
+    # This code is based on Sidekiqs approach to persisting current attributes
+    #
+    # @see https://github.com/sidekiq/sidekiq/blob/main/lib/sidekiq/middleware/current_attributes.rb
     module CurrentAttributes
       # Allows for persistence of given current attributes via AJ + Karafka
       #

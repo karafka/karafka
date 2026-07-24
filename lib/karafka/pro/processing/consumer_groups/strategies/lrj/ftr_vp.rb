@@ -34,7 +34,9 @@ module Karafka
       module ConsumerGroups
         module Strategies
           module Lrj
-            # Long-Running Job enabled Filtering enabled Virtual Partitions enabled
+            # - Long-Running Job enabled
+            # - Filtering enabled
+            # - Virtual Partitions enabled
             #
             # Behaves same as non-VP because of the aggregated flow in the coordinator.
             module FtrVp

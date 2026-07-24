@@ -34,7 +34,9 @@ module Karafka
       module ConsumerGroups
         module Strategies
           module Dlq
-            # Dead-Letter Queue enabled Long-Running Job enabled Virtual Partitions enabled
+            # - Dead-Letter Queue enabled
+            # - Long-Running Job enabled
+            # - Virtual Partitions enabled
             module LrjVp
               # Same flow as the Dlq Lrj because VP collapses on errors, so DlqLrj can kick in
               include Strategies::Vp::Default

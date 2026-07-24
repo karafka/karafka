@@ -4,7 +4,8 @@ module Karafka
   module Processing
     module ConsumerGroups
       module Strategies
-        # ActiveJob enabled Manual offset management enabled
+        # - ActiveJob enabled
+        # - Manual offset management enabled
         #
         # This is the default AJ strategy since AJ cannot be used without MOM
         module AjMom

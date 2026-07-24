@@ -6,7 +6,7 @@ module Karafka
     module Vendors
       # Datadog specific instrumentation
       module Datadog
-        # A karafka's logger listener for Datadog It depends on the 'ddtrace' gem
+        # A karafka's logger listener for Datadog. It depends on the 'ddtrace' gem
         class LoggerListener
           include Karafka::Core::Configurable
           extend Forwardable

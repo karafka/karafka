@@ -12,7 +12,7 @@ module Karafka
         end
 
         # Ensures, that when declarative topics strict requirement is on, all topics have
-        # declarative definition (including DLQ topics) It will ignore routing pattern topics
+        # declarative definition (including DLQ topics). It will ignore routing pattern topics
         # because those topics are virtual
         virtual do |data, errors|
           next unless errors.empty?

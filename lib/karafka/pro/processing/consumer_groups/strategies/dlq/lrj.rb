@@ -34,7 +34,8 @@ module Karafka
       module ConsumerGroups
         module Strategies
           module Dlq
-            # DLQ enabled Long-Running Job enabled
+            # - DLQ enabled
+            # - Long-Running Job enabled
             module Lrj
               # Order here matters, lrj needs to be second
               include Strategies::Dlq::Default

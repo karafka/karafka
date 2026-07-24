@@ -34,7 +34,9 @@ module Karafka
       module ConsumerGroups
         module Strategies
           module Dlq
-            # Dead-Letter Queue enabled Filtering enabled Long-Running Job enabled
+            # - Dead-Letter Queue enabled
+            # - Filtering enabled
+            # - Long-Running Job enabled
             module FtrLrj
               include Strategies::Dlq::Lrj
               include Strategies::Lrj::Ftr

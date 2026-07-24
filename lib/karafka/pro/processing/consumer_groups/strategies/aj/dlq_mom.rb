@@ -34,7 +34,9 @@ module Karafka
       module ConsumerGroups
         module Strategies
           module Aj
-            # ActiveJob enabled DLQ enabled Manual offset management enabled
+            # - ActiveJob enabled
+            # - DLQ enabled
+            # - Manual offset management enabled
             #
             # AJ has manual offset management on by default and the offset management is delegated
             # to the AJ consumer. This means, we cannot mark as consumed always. We can only mark as

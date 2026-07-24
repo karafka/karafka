@@ -34,7 +34,8 @@ module Karafka
       module ConsumerGroups
         module Strategies
           module Lrj
-            # Filtering enabled Long-Running Job enabled
+            # - Filtering enabled
+            # - Long-Running Job enabled
             #
             # In general aside from throttling this one will behave the same way as the Lrj
             module Ftr

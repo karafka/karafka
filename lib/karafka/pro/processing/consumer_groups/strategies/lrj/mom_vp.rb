@@ -34,7 +34,9 @@ module Karafka
       module ConsumerGroups
         module Strategies
           module Lrj
-            # Long-Running Job enabled Manual offset management enabled Virtual Partitions enabled
+            # - Long-Running Job enabled
+            # - Manual offset management enabled
+            # - Virtual Partitions enabled
             module MomVp
               include Strategies::Mom::Vp
               include Strategies::Lrj::Mom

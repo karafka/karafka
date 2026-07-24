@@ -34,8 +34,11 @@ module Karafka
       module ConsumerGroups
         module Strategies
           module Aj
-            # ActiveJob enabled Filtering enabled Long-Running Job enabled Manual offset management
-            # enabled Virtual Partitions enabled
+            # - ActiveJob enabled
+            # - Filtering enabled
+            # - Long-Running Job enabled
+            # - Manual offset management enabled
+            # - Virtual Partitions enabled
             module FtrLrjMomVp
               include Strategies::Vp::Default
               include Strategies::Lrj::FtrMom

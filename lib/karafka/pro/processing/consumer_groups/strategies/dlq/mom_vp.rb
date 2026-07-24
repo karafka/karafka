@@ -34,7 +34,9 @@ module Karafka
       module ConsumerGroups
         module Strategies
           module Dlq
-            # Dead-Letter Queue enabled MoM enabled Virtual Partitions enabled
+            # - Dead-Letter Queue enabled
+            # - MoM enabled
+            # - Virtual Partitions enabled
             module MomVp
               include Strategies::Dlq::Vp
               include Strategies::Dlq::Mom

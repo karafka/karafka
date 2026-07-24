@@ -34,8 +34,10 @@ module Karafka
       module ConsumerGroups
         module Strategies
           module Aj
-            # ActiveJob enabled Filtering enabled Long-Running Job enabled Manual offset management
-            # enabled
+            # - ActiveJob enabled
+            # - Filtering enabled
+            # - Long-Running Job enabled
+            # - Manual offset management enabled
             module FtrLrjMom
               include Strategies::Lrj::FtrMom
 

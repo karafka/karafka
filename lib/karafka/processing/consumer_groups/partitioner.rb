@@ -3,7 +3,7 @@
 module Karafka
   module Processing
     module ConsumerGroups
-      # Basic partitioner for work division It does not divide any work.
+      # Basic partitioner for work division. It does not divide any work.
       class Partitioner
         # @param subscription_group [Karafka::Routing::SubscriptionGroup] subscription group
         def initialize(subscription_group)

@@ -34,7 +34,9 @@ module Karafka
       module ConsumerGroups
         module Strategies
           module Aj
-            # ActiveJob enabled Long-Running Job enabled Manual offset management enabled
+            # - ActiveJob enabled
+            # - Long-Running Job enabled
+            # - Manual offset management enabled
             module LrjMom
               # Same behaviour as Lrj::Mom
               include Strategies::Lrj::Mom

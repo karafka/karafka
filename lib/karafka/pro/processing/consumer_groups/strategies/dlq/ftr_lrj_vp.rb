@@ -34,8 +34,9 @@ module Karafka
       module ConsumerGroups
         module Strategies
           module Dlq
-            # Dead-Letter Queue enabled Filtering enabled Long-Running Job enabled Virtual
-            # Partitions
+            # - Dead-Letter Queue enabled
+            # - Filtering enabled
+            # - Long-Running Job enabled
             module FtrLrjVp
               include Strategies::Vp::Default
               include Strategies::Dlq::Vp

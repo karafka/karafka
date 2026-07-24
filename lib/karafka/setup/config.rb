@@ -163,7 +163,7 @@ module Karafka
       setting :internal do
         # option status [Karafka::Status] app status
         setting :status, default: Status.new
-        # option process [Karafka::Process] process status In the future, we need to have a single
+        # option process [Karafka::Process] process status. In the future, we need to have a single
         # process representation for all the karafka instances
         setting :process, default: Process.new
         # Interval of "ticking". This is used to define the maximum time between consecutive
@@ -405,8 +405,8 @@ module Karafka
       # Thanks to that we have an initial state out of the box.
       configure
 
-      # Backwards compatibility: Add old flat API methods to the config instance These delegate
-      # to the new nested pause config Deprecated: Will be removed in Karafka 2.6
+      # Backwards compatibility: Add old flat API methods to the config instance. These delegate
+      # to the new nested pause config. Deprecated: Will be removed in Karafka 2.6
       #
       # Prior to the introduction of nested pause configuration, pause-related settings were
       # accessed directly on the config object (e.g., `config.pause_timeout`). With the nested

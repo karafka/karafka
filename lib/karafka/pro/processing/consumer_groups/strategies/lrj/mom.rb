@@ -35,7 +35,8 @@ module Karafka
         module Strategies
           # Namespace for all the LRJ starting strategies
           module Lrj
-            # Long-Running Job enabled Manual offset management enabled
+            # - Long-Running Job enabled
+            # - Manual offset management enabled
             module Mom
               include Strategies::Default
 

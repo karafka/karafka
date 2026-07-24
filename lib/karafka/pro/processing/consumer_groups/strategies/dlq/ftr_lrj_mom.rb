@@ -34,7 +34,10 @@ module Karafka
       module ConsumerGroups
         module Strategies
           module Dlq
-            # DLQ enabled Ftr enabled LRJ enabled MoM enabled
+            # - DLQ enabled
+            # - Ftr enabled
+            # - LRJ enabled
+            # - MoM enabled
             module FtrLrjMom
               include Strategies::Ftr::Default
               include Strategies::Dlq::LrjMom

@@ -34,7 +34,8 @@ module Karafka
       module ConsumerGroups
         module Strategies
           module Lrj
-            # Long-Running Job enabled Virtual Partitions enabled
+            # - Long-Running Job enabled
+            # - Virtual Partitions enabled
             module Vp
               # Same flow as the standard Lrj
               include Strategies::Vp::Default

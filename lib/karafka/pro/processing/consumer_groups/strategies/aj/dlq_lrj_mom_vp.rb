@@ -34,8 +34,11 @@ module Karafka
       module ConsumerGroups
         module Strategies
           module Aj
-            # ActiveJob enabled DLQ enabled Long-Running Job enabled Manual offset management
-            # enabled Virtual Partitions enabled
+            # - ActiveJob enabled
+            # - DLQ enabled
+            # - Long-Running Job enabled
+            # - Manual offset management enabled
+            # - Virtual Partitions enabled
             #
             # This case is a bit of special. Please see the `Aj::DlqMom` for explanation on how the
             # offset management works in this case.

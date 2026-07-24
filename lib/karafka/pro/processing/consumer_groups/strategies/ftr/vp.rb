@@ -35,7 +35,8 @@ module Karafka
         module Strategies
           # Filtering related init strategies
           module Ftr
-            # Filtering enabled VPs enabled
+            # - Filtering enabled
+            # - VPs enabled
             #
             # VPs should operate without any problems with filtering because virtual partitioning
             # happens on the limited set of messages and collective filtering applies the same

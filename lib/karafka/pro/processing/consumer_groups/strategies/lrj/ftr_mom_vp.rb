@@ -34,7 +34,10 @@ module Karafka
       module ConsumerGroups
         module Strategies
           module Lrj
-            # Filtering enabled LRJ enabled MoM enabled VPs enabled
+            # - Filtering enabled
+            # - LRJ enabled
+            # - MoM enabled
+            # - VPs enabled
             module FtrMomVp
               # Filtering + LRJ + Mom + VPs
               FEATURES = %i[

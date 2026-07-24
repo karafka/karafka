@@ -35,7 +35,8 @@ module Karafka
         module Strategies
           # Namespace for ActiveJob related strategies
           module Aj
-            # ActiveJob enabled Manual Offset management enabled
+            # - ActiveJob enabled
+            # - Manual Offset management enabled
             module Mom
               # Standard ActiveJob strategy is the same one we use for Mom
               include Strategies::Mom::Default

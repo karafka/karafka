@@ -34,8 +34,10 @@ module Karafka
       module ConsumerGroups
         module Strategies
           module Aj
-            # ActiveJob enabled DLQ enabled Long-Running Job enabled Manual offset management
-            # enabled
+            # - ActiveJob enabled
+            # - DLQ enabled
+            # - Long-Running Job enabled
+            # - Manual offset management enabled
             #
             # This case is a bit of special. Please see the `AjDlqMom` for explanation on how the
             # offset management works in this case.

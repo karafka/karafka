@@ -34,7 +34,9 @@ module Karafka
       module ConsumerGroups
         module Strategies
           module Aj
-            # ActiveJob enabled Filtering enabled Manual Offset management enabled
+            # - ActiveJob enabled
+            # - Filtering enabled
+            # - Manual Offset management enabled
             module FtrMom
               # Same as standard Mom::Ftr
               include Strategies::Mom::Ftr

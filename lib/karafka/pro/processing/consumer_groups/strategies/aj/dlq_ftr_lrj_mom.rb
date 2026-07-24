@@ -34,8 +34,11 @@ module Karafka
       module ConsumerGroups
         module Strategies
           module Aj
-            # ActiveJob enabled DLQ enabled Filtering enabled Long-Running Job enabled Manual offset
-            # management enabled
+            # - ActiveJob enabled
+            # - DLQ enabled
+            # - Filtering enabled
+            # - Long-Running Job enabled
+            # - Manual offset management enabled
             module DlqFtrLrjMom
               include Strategies::Aj::FtrMom
               include Strategies::Aj::DlqMom

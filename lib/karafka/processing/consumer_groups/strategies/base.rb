@@ -3,7 +3,7 @@
 module Karafka
   module Processing
     module ConsumerGroups
-      # Our processing patterns differ depending on various features configurations In this
+      # Our processing patterns differ depending on various features configurations. In this
       # namespace we collect strategies for particular feature combinations to simplify the design.
       # Based on features combinations we can then select handling strategy for a given case.
       #
