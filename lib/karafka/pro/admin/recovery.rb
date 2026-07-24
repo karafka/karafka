@@ -168,7 +168,7 @@ module Karafka
         #   offsets = Karafka::Admin::Recovery.read_committed_offsets('sync')
         #   #=> { 'events' => { 0 => 1400, 1 => 1402 }, 'orders' => { 0 => 890 } }
         #
-        #   # Step 2: Inspect the recovered offsets — verify all expected topics and partitions
+        #   # Step 2: Inspect the recovered offsets - verify all expected topics and partitions
         #   # are present and the offset values look reasonable before committing them
         #
         #   # Step 3: Write the offsets to the target group using standard Admin APIs
@@ -195,11 +195,11 @@ module Karafka
             next unless parsed[:group] == group_id
 
             if parsed[:offset].nil?
-              # Tombstone — offset was deleted, remove from results
+              # Tombstone - offset was deleted, remove from results
               committed[parsed[:topic]].delete(parsed[:partition])
               committed.delete(parsed[:topic]) if committed[parsed[:topic]].empty?
             else
-              # Last write wins — scanning forward means we naturally end up with the most
+              # Last write wins - scanning forward means we naturally end up with the most
               # recent commit per partition
               committed[parsed[:topic]][parsed[:partition]] = parsed[:offset]
             end

@@ -467,7 +467,7 @@ module Karafka
       end
 
       # Builds the kafka-reassign-partitions.sh --generate command that asks Kafka to propose
-      # its own reassignment plan. This is optional — you can compare Kafka's suggestion against
+      # its own reassignment plan. This is optional - you can compare Kafka's suggestion against
       # the plan Karafka already computed, or skip this step and go straight to --execute.
       # @return [String] command template with placeholders for broker addresses and IDs
       def build_generate_command
