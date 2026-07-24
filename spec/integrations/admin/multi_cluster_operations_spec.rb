@@ -85,9 +85,14 @@ rescue => e
 end
 
 # Test 5: Verify Topics submodule also works with custom kafka config
+#
+# Reaching `__consumer_offsets` can hit transient leadership errors while the broker is still
+# electing the partition leader on startup, so we retry those via the shared helper.
 begin
   topics_admin = Karafka::Admin::Topics.new(kafka: working_kafka_config)
-  watermarks = topics_admin.read_watermark_offsets("__consumer_offsets", 0)
+  watermarks = with_transient_retry do
+    topics_admin.read_watermark_offsets("__consumer_offsets", 0)
+  end
 
   DT[:tests] << {
     test: "topics_submodule_custom_config",
@@ -107,7 +112,7 @@ end
 begin
   configs_admin = Karafka::Admin::Configs.new(kafka: working_kafka_config)
   resource = Karafka::Admin::Configs::Resource.new(type: :topic, name: "__consumer_offsets")
-  result = configs_admin.describe(resource)
+  result = with_transient_retry { configs_admin.describe(resource) }
 
   DT[:tests] << {
     test: "configs_submodule_custom_config",
