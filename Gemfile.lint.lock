@@ -71,7 +71,7 @@ GEM
       unicode-emoji (~> 4.1)
     unicode-emoji (4.2.0)
     yard (0.9.45)
-    yard-lint (1.10.0)
+    yard-lint (1.10.1)
       yard (~> 0.9)
       zeitwerk (~> 2.6)
     zeitwerk (2.8.2)
@@ -120,7 +120,7 @@ CHECKSUMS
   unicode-display_width (3.2.0) sha256=0cdd96b5681a5949cdbc2c55e7b420facae74c4aaf9a9815eee1087cb1853c42
   unicode-emoji (4.2.0) sha256=519e69150f75652e40bf736106cfbc8f0f73aa3fb6a65afe62fefa7f80b0f80f
   yard (0.9.45) sha256=52e211493f7cb8a3ebf7e104a25a1e73937a3103092545d34cb88fafebb3dc51
-  yard-lint (1.10.0) sha256=4af8b5aa8a5217393698d9036b1babfa663a8e7c1e337fa356c8d816ea890b6d
+  yard-lint (1.10.1) sha256=172ea1905304580bd515c093d82831ec4889e725100c49d5bf77e62101f49129
   zeitwerk (2.8.2) sha256=7212a61311083c604184b1ea2574b9aa05cd14f855a0841c06985cabe9181d12
 
 BUNDLED WITH
