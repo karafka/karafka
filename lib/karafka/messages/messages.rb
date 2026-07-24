@@ -88,9 +88,9 @@ module Karafka
       #
       # @return [Array<Karafka::Messages::Message>] the underlying messages array (not a copy)
       #
-      # @note This returns the actual internal array, not a copy. Do not modify it.
       # @see https://github.com/karafka/karafka/issues/2939
       #
+      # @note This returns the actual internal array, not a copy. Do not modify it.
       # @private
       def raw
         @messages_array

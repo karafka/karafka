@@ -45,16 +45,15 @@ module Karafka
 
       # Fetches a single job, processes it and marks as completed.
       #
-      # @note No user or framework errors should propagate this far. If they do, it is a critical
-      #   error that we instrument while keeping the worker alive.
-      #
-      # @note Upon closing the jobs queue, worker will close it's thread
-      #
       # @return [Boolean] should the worker keep running. False only when the jobs queue is
       #   closed (full shutdown) or a downscale sentinel was received. This decision is
       #   deliberately decoupled from the processing flow result: the flow passes through the
       #   user-redefinable `#wrap`, whose return value (or an error raised in user code or in an
       #   instrumentation subscriber) must never be able to silently kill the worker thread.
+      # @note No user or framework errors should propagate this far. If they do, it is a critical
+      #   error that we instrument while keeping the worker alive.
+      #
+      # @note Upon closing the jobs queue, worker will close it's thread
       def process
         job = @jobs_queue.pop
 

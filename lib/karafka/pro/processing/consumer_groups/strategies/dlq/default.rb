@@ -50,9 +50,9 @@ module Karafka
               # error is not due to the collective batch operations state but due to intermediate
               # "crawling" errors that move with it
               #
-              # @see `Strategies::Default#mark_as_consumed` for more details
               # @param message [Messages::Message]
               # @param offset_metadata [String, nil]
+              # @see `Strategies::Default#mark_as_consumed` for more details
               def mark_as_consumed(message, offset_metadata = @_current_offset_metadata)
                 return super unless retrying?
                 return super unless topic.dead_letter_queue.independent?
@@ -68,9 +68,9 @@ module Karafka
               # Override of the standard `#mark_as_consumed!`. Resets the pause tracker count in
               # case DLQ was configured with the `independent` flag.
               #
-              # @see `Strategies::Default#mark_as_consumed!` for more details
               # @param message [Messages::Message]
               # @param offset_metadata [String, nil]
+              # @see `Strategies::Default#mark_as_consumed!` for more details
               def mark_as_consumed!(message, offset_metadata = @_current_offset_metadata)
                 return super unless retrying?
                 return super unless topic.dead_letter_queue.independent?

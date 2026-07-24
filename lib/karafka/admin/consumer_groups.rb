@@ -75,9 +75,6 @@ module Karafka
       #
       # @return [void]
       #
-      # @note This method should **not** be executed on a running group as it creates a
-      #   "fake" consumer and uses it to move offsets.
-      #
       # @example Move a single topic partition nr 1 offset to 100
       #   Karafka::Admin::ConsumerGroups.seek('group-id', { 'topic' => { 1 => 100 } })
       #
@@ -98,6 +95,8 @@ module Karafka
       #
       # @example Move offset of a single partition to latest
       #   Karafka::Admin::ConsumerGroups.seek('group-id', { 'topic' => { 1 => 'latest' } })
+      # @note This method should **not** be executed on a running group as it creates a
+      #   "fake" consumer and uses it to move offsets.
       def seek(group_id, topics_with_partitions_and_offsets)
         tpl_base = {}
 
@@ -301,6 +300,8 @@ module Karafka
       # @raise [Karafka::Errors::InvalidConfigurationError] when group is not found in
       #   routing or has no topics
       #
+      # @example Trigger rebalance for a group
+      #   Karafka::Admin::ConsumerGroups.trigger_rebalance('my-group')
       # @note This method creates a temporary "fake" consumer that joins the group,
       #   triggering a rebalance when it joins and another when it leaves. This should only be
       #   used for operational/testing purposes as it causes two rebalances.
@@ -316,9 +317,6 @@ module Karafka
       # @note Topics are always detected from the routing configuration. The consumer settings
       #   (kafka config) are taken from the first topic in the group to ensure
       #   consistency with the actual consumer configuration.
-      #
-      # @example Trigger rebalance for a group
-      #   Karafka::Admin::ConsumerGroups.trigger_rebalance('my-group')
       def trigger_rebalance(group_id)
         group = Karafka::App.routes.find { |g| g.id == group_id }
 

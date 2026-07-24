@@ -310,11 +310,6 @@ module Karafka
       #
       # @raise [Rdkafka::RdkafkaError] on per-partition errors or connection issues
       #
-      # @note The specs must be passed as an explicit hash (in curly braces). Ruby parses a
-      #   brace-less trailing hash as keyword arguments, and since this method takes an
-      #   `isolation_level:` keyword, such a call raises an `ArgumentError` about a missing
-      #   positional argument.
-      #
       # @example Query earliest offset for partition 0 and latest for partition 1
       #   Karafka::Admin::Topics.read_partition_offsets(
       #     {
@@ -339,6 +334,10 @@ module Karafka
       #   Karafka::Admin::Topics.read_partition_offsets(
       #     { 'events' => [{ partition: 0, offset: 1_700_000_000_000 }] }
       #   )
+      # @note The specs must be passed as an explicit hash (in curly braces). Ruby parses a
+      #   brace-less trailing hash as keyword arguments, and since this method takes an
+      #   `isolation_level:` keyword, such a call raises an `ArgumentError` about a missing
+      #   positional argument.
       def read_partition_offsets(topic_partition_offsets, isolation_level: nil)
         with_admin do |admin|
           handle = admin.list_offsets(topic_partition_offsets, isolation_level: isolation_level)

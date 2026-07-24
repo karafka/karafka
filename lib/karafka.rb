@@ -119,14 +119,14 @@ module Karafka
     end
 
     # @return [String] path to a default file that contains booting procedure etc
-    # @note By default it is a file called 'karafka.rb' but it can be specified as you wish if you
-    #   have Karafka that is merged into a Sinatra/Rails app and karafka.rb is taken.
-    #   It will be used for console/consumers/etc
     # @example Standard only-Karafka case
     #   Karafka.boot_file #=> '/home/app_path/karafka.rb'
     # @example Non standard case
     #   KARAFKA_BOOT_FILE='/home/app_path/app.rb'
     #   Karafka.boot_file #=> '/home/app_path/app.rb'
+    # @note By default it is a file called 'karafka.rb' but it can be specified as you wish if you
+    #   have Karafka that is merged into a Sinatra/Rails app and karafka.rb is taken.
+    #   It will be used for console/consumers/etc
     def boot_file
       boot_file = Pathname.new(ENV["KARAFKA_BOOT_FILE"] || File.join(Karafka.root, "karafka.rb"))
 

@@ -64,9 +64,9 @@ module Karafka
         end
 
         # @return [Boolean] true if there was at least one rebalance
+        # @see https://github.com/confluentinc/librdkafka/issues/4312
         # @note This method is needed to make sure that when using cooperative-sticky, we do not
         #   close until first rebalance. Otherwise librdkafka may crash.
-        # @see https://github.com/confluentinc/librdkafka/issues/4312
         def active?
           @active
         end

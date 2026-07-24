@@ -4,15 +4,14 @@ module Karafka
   module Routing
     # Builder used as a DSL layer for building consumers and telling them which topics to consume
     #
-    # @note We lock the access just in case this is used in patterns. The locks here do not have
-    #   any impact on routing usage unless being expanded, so no race conditions risks.
-    #
     # @example Build a simple (most common) route
     #   consumers do
     #     topic :new_videos do
     #       consumer NewVideosConsumer
     #     end
     #   end
+    # @note We lock the access just in case this is used in patterns. The locks here do not have
+    #   any impact on routing usage unless being expanded, so no race conditions risks.
     class Builder < Array
       include Helpers::ConfigImporter.new(
         default_group_id: %i[group_id]
@@ -36,13 +35,13 @@ module Karafka
       # @yield Evaluates provided block in a builder context so we can describe routes
       # @raise [Karafka::Errors::InvalidConfigurationError] raised when configuration
       #   doesn't match with the config contract
-      # @note After it is done drawing it will store and validate all the routes to make sure that
-      #   they are correct and that there are no topic/group duplications (this is forbidden)
       # @example
       #   draw do
       #     topic :xyz do
       #     end
       #   end
+      # @note After it is done drawing it will store and validate all the routes to make sure that
+      #   they are correct and that there are no topic/group duplications (this is forbidden)
       def draw(&block)
         @mutex.synchronize do
           @draws << block

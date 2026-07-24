@@ -40,11 +40,6 @@ module Karafka
     #   internal API: the caller is responsible for providing a client capable of the invoked
     #   operations and for invoking only operations that are safe to run on a live client.
     #
-    # @note Raw and proxied rdkafka instances are resolved once at construction, so the admin
-    #   instance should not outlive them. `Karafka::Connection::Client` instances are resolved
-    #   on each use instead, so the admin instance follows such a client across the underlying
-    #   connection recovery resets.
-    #
     # @example Create admin for a different cluster
     #   admin = Karafka::Admin.new(kafka: { 'bootstrap.servers': 'other-cluster:9092' })
     #   admin.cluster_info
@@ -52,6 +47,10 @@ module Karafka
     # @example Read lags of a running consumer via its own client connection
     #   admin = Karafka::Admin.new(external_client: client)
     #   admin.read_lags_with_offsets({ 'my-group' => ['events'] })
+    # @note Raw and proxied rdkafka instances are resolved once at construction, so the admin
+    #   instance should not outlive them. `Karafka::Connection::Client` instances are resolved
+    #   on each use instead, so the admin instance follows such a client across the underlying
+    #   connection recovery resets.
     def initialize(kafka: {}, external_client: nil)
       @custom_kafka = kafka
       @external_client = nil
@@ -238,6 +237,7 @@ module Karafka
       #   assignments distribution will happen automatically.
       # @return [Replication] plan object with JSON, commands, and instructions
       #
+      # @see Replication.plan for more details
       # @example Plan replication increase with automatic broker distribution
       #   plan = Karafka::Admin.plan_topic_replication(topic: 'events', replication_factor: 3)
       #
@@ -264,8 +264,6 @@ module Karafka
       #   # The plan will use your exact broker specifications
       #   puts plan.partitions_assignment
       #   # => { 0=>[1, 2, 4], 1=>[2, 3, 4], 2=>[1, 3, 5] }
-      #
-      # @see Replication.plan for more details
       def plan_topic_replication(topic:, replication_factor:, brokers: nil)
         new.plan_topic_replication(
           topic: topic,

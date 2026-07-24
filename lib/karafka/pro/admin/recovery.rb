@@ -127,22 +127,6 @@ module Karafka
         # overwrite earlier ones so the result always reflects the most recent committed offset per
         # partition.
         #
-        # @note All consumers in this group should be fully stopped before calling this method.
-        #   While normally they would already be stopped due to a coordinator failure, if the
-        #   cluster recovers concurrently, active consumers may commit newer offsets that this scan
-        #   will not capture, resulting in stale data.
-        #
-        # @note This method may take a noticeable amount of time to complete because it scans
-        #   the raw __consumer_offsets log from last_committed_at forward to the end. The duration
-        #   depends on the volume of offset commits in the scan window across all consumer groups
-        #   that hash to the same __consumer_offsets partition.
-        #
-        # @note The result only contains topic-partitions that had offsets committed after
-        #   last_committed_at. If a partition never had an offset committed, or if the commit
-        #   happened before last_committed_at, it will be absent from the result. It is the
-        #   caller's responsibility to verify that all expected topic-partitions are present before
-        #   using the result for migration or other operations.
-        #
         # @param group_id [String] consumer group to read offsets for
         # @param last_committed_at [Time] approximate time of last successful offset commit
         #   (default: 1 hour ago). A good rule of thumb is the crash time minus 10 minutes
@@ -175,6 +159,21 @@ module Karafka
         #   Karafka::Admin::ConsumerGroups.seek('sync_v2', offsets)
         #
         #   # Now reconfigure your consumers to use 'sync_v2' and restart them
+        # @note All consumers in this group should be fully stopped before calling this method.
+        #   While normally they would already be stopped due to a coordinator failure, if the
+        #   cluster recovers concurrently, active consumers may commit newer offsets that this scan
+        #   will not capture, resulting in stale data.
+        #
+        # @note This method may take a noticeable amount of time to complete because it scans
+        #   the raw __consumer_offsets log from last_committed_at forward to the end. The duration
+        #   depends on the volume of offset commits in the scan window across all consumer groups
+        #   that hash to the same __consumer_offsets partition.
+        #
+        # @note The result only contains topic-partitions that had offsets committed after
+        #   last_committed_at. If a partition never had an offset committed, or if the commit
+        #   happened before last_committed_at, it will be absent from the result. It is the
+        #   caller's responsibility to verify that all expected topic-partitions are present before
+        #   using the result for migration or other operations.
         def read_committed_offsets(
           group_id,
           last_committed_at: Time.now - DEFAULT_LAST_COMMITTED_AT_OFFSET

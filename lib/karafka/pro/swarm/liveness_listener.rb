@@ -139,8 +139,8 @@ module Karafka
           RUBY
         end
 
-        # @see Karafka::Instrumentation::Vendors::Kubernetes::LivenessListener#on_statistics_emitted
         # @param event [Karafka::Core::Monitoring::Event]
+        # @see Karafka::Instrumentation::Vendors::Kubernetes::LivenessListener#on_statistics_emitted
         def on_statistics_emitted(event)
           cgrp = event[:statistics]&.dig("cgrp")
           return unless cgrp
@@ -186,9 +186,9 @@ module Karafka
           clear_polling_tick
         end
 
+        # @param event [Karafka::Core::Monitoring::Event]
         # @see Karafka::Instrumentation::Vendors::Kubernetes::LivenessListener
         #   #on_connection_listener_after_fetch_loop
-        # @param event [Karafka::Core::Monitoring::Event]
         def on_connection_listener_after_fetch_loop(event)
           clear_instability_tracking(event[:subscription_group])
         end
@@ -208,9 +208,9 @@ module Karafka
           end
         end
 
+        # @param subscription_group [Karafka::Routing::SubscriptionGroup, nil]
         # @see Karafka::Instrumentation::Vendors::Kubernetes::LivenessListener
         #   #clear_instability_tracking
-        # @param subscription_group [Karafka::Routing::SubscriptionGroup, nil]
         def clear_instability_tracking(subscription_group)
           return unless subscription_group
 

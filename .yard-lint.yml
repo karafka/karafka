@@ -98,9 +98,15 @@ Tags/Order:
   EnforcedOrder:
   - param
   - option
+  - yield
+  - yieldparam
+  - yieldreturn
   - return
   - raise
+  - see
   - example
+  - note
+  - todo
 
 Tags/InvalidTypes:
   Description: Validates type definitions in @param, @return, @option tags.

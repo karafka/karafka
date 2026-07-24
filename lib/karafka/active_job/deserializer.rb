@@ -4,13 +4,6 @@ module Karafka
   module ActiveJob
     # Default deserializer for ActiveJob jobs
     #
-    # @note Despite the name, this class handles both serialization (job to Kafka payload) and
-    #   deserialization (Kafka message to job). It's called "Deserializer" to align with Karafka's
-    #   naming conventions where message consumption is the primary concern.
-    #
-    # This class can be inherited and its methods can be overridden to support
-    # custom payload formats (e.g., Avro, Protobuf, MessagePack)
-    #
     # @example Wrapping jobs in a custom envelope with metadata
     #   class EnvelopedJobDeserializer < Karafka::ActiveJob::Deserializer
     #     def serialize(job)
@@ -38,6 +31,12 @@ module Karafka
     #
     #   # Configure in Karafka
     #   Karafka::App.config.internal.active_job.deserializer = EnvelopedJobDeserializer.new
+    # @note Despite the name, this class handles both serialization (job to Kafka payload) and
+    #   deserialization (Kafka message to job). It's called "Deserializer" to align with Karafka's
+    #   naming conventions where message consumption is the primary concern.
+    #
+    # This class can be inherited and its methods can be overridden to support
+    # custom payload formats (e.g., Avro, Protobuf, MessagePack)
     class Deserializer
       # Serializes an ActiveJob job into a string payload for Kafka
       #

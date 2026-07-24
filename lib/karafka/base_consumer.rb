@@ -278,10 +278,6 @@ module Karafka
     #   wrap the `:consume` action.
     # @yield Runs the execution block
     #
-    # @note User related errors should not leak to this level of execution. This should not be used
-    #   for anything consumption related but only for setting up state that that Karafka code
-    #   may need outside of user code.
-    #
     # @example Redefine to use a producer from a pool for consume
     #   def wrap(action)
     #     # Do not checkout producer for any other actions
@@ -296,6 +292,9 @@ module Karafka
     #
     #     self.producer = default_producer
     #   end
+    # @note User related errors should not leak to this level of execution. This should not be used
+    #   for anything consumption related but only for setting up state that that Karafka code
+    #   may need outside of user code.
     def wrap(_action)
       yield
     end

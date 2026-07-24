@@ -6,13 +6,12 @@ module Karafka
     # Encapsulates mode logic and provides a cleaner API for checking and setting connection modes,
     # removing the need for symbol comparisons throughout the connection management code.
     #
-    # @note This class is used internally by the Client and is not part of the public API
-    #
     # @example Check if client is in subscribe mode (internal usage)
     #   @mode.subscribe? #=> true
     #
     # @example Set the connection mode to assign (internal usage)
     #   @mode.assign!
+    # @note This class is used internally by the Client and is not part of the public API
     class Mode
       # Available connection modes for Kafka client
       # - :subscribe - client subscribes to topics and lets Kafka handle partition assignment

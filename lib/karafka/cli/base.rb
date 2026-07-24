@@ -76,8 +76,8 @@ module Karafka
         end
 
         # Allows to set options for Thor cli
-        # @see https://github.com/erikhuda/thor
         # @param option Single option details
+        # @see https://github.com/erikhuda/thor
         def option(*option)
           @options ||= []
           @options << option

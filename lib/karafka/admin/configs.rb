@@ -35,14 +35,13 @@ module Karafka
       #
       # @return [Array<Resource>] array with resources containing their configuration details
       #
-      # @note Even if you request one resource, result will always be an array with resources
-      #
       # @example Describe topic named "example" and print its config
       #   resource = Karafka::Admin::Configs::Resource.new(type: :topic, name: 'example')
       #   results = Karafka::Admin::Configs.describe(resource)
       #   results.first.configs.each do |config|
       #     puts "#{config.name} - #{config.value}"
       #   end
+      # @note Even if you request one resource, result will always be an array with resources
       def describe(*resources)
         operate_on_resources(
           :describe_configs,
@@ -56,16 +55,15 @@ module Karafka
       # @param resources [Resource, Array<Resource>] single resource we want to alter or
       #   list of resources.
       #
+      # @example Alter the `delete.retention.ms` and set it to 8640001
+      #   resource = Karafka::Admin::Configs::Resource.new(type: :topic, name: 'example')
+      #   resource.set('delete.retention.ms', '8640001')
+      #   Karafka::Admin::Configs.alter(resource)
       # @note This operation is not transactional and can work only partially if some config
       #   options are not valid. Always make sure, your alterations are correct.
       #
       # @note We call it `#alter` despite using the Kafka incremental alter API because the
       #   regular alter is deprecated.
-      #
-      # @example Alter the `delete.retention.ms` and set it to 8640001
-      #   resource = Karafka::Admin::Configs::Resource.new(type: :topic, name: 'example')
-      #   resource.set('delete.retention.ms', '8640001')
-      #   Karafka::Admin::Configs.alter(resource)
       def alter(*resources)
         operate_on_resources(
           :incremental_alter_configs,
