@@ -277,8 +277,8 @@ module Karafka
       #   `READ_COMMITTED` consumer will never see those messages, so lag calculated from the
       #   high-watermark is overstated on transactionally-produced topics. Passing
       #   `isolation_level: Karafka::Admin::IsolationLevels::READ_COMMITTED` here
-      #   returns the Last Stable Offset (LSO) — the highest offset a `READ_COMMITTED` consumer
-      #   would actually reach — giving accurate lag figures.
+      #   returns the Last Stable Offset (LSO) - the highest offset a `READ_COMMITTED` consumer
+      #   would actually reach - giving accurate lag figures.
       #
       # - `:max_timestamp` spec: returns the offset of the message with the highest timestamp
       #   in the partition. Not available via watermarks.
