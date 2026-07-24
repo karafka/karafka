@@ -31,9 +31,6 @@
 module Karafka
   module Pro
     module Processing
-      # Consumer-group-specific Pro processing components (driven by rebalance callbacks and
-      # partition ticks). Parallel `ShareGroups` will live next to this namespace once KIP-932
-      # lands.
       module ConsumerGroups
         # Pro coordinator that provides extra orchestration methods useful for parallel processing
         # within the same partition
@@ -95,7 +92,7 @@ module Karafka
             # need to make sure we collect them all. Under collapse when we reference a given
             # consumer we should be able to get all the errors and not just first/last.
             #
-            # @note We use zero as the attempt mark because we are not "yet" in the attempt 1
+            # We use zero as the attempt mark because we are not "yet" in the attempt 1
             @errors_tracker.clear if attempt.zero?
             @executed.clear
 

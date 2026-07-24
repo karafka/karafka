@@ -2,8 +2,6 @@
 
 module Karafka
   module Processing
-    # Consumer-group-specific processing components (driven by rebalance callbacks and partition
-    # ticks). Parallel `ShareGroups` will live next to this namespace once KIP-932 lands.
     module ConsumerGroups
       module Strategies
         # Same as pure dead letter queue but we do not marked failed message as consumed

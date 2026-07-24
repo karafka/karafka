@@ -8,8 +8,8 @@ module Karafka
         class Shutdown < ::Karafka::Processing::Jobs::Base
           self.action = :shutdown
 
-          # @param executor [Karafka::Processing::ConsumerGroups::Executor] executor that is supposed to run a given
-          #   job on an active consumer
+          # @param executor [Karafka::Processing::ConsumerGroups::Executor] executor that is
+          #   supposed to run a given job on an active consumer
           # @return [Shutdown]
           def initialize(executor)
             @executor = executor

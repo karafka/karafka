@@ -31,9 +31,6 @@
 module Karafka
   module Pro
     module Processing
-      # Consumer-group-specific Pro processing components (driven by rebalance callbacks and
-      # partition ticks). Parallel `ShareGroups` will live next to this namespace once KIP-932
-      # lands.
       module ConsumerGroups
         # All code needed for messages piping in Karafka
         module Piping
@@ -48,8 +45,8 @@ module Karafka
             private_constant :EMPTY_HASH
 
             # Pipes given message to the provided topic with expected details. Useful for
-            # pass-through operations where deserialization is not needed. Upon usage it will include
-            # all the source headers + meta headers about the source of message.
+            # pass-through operations where deserialization is not needed. Upon usage it will
+            # include all the source headers + meta headers about the source of message.
             #
             # @param topic [String, Symbol] where we want to send the message
             # @param message [Karafka::Messages::Message] source message to pipe

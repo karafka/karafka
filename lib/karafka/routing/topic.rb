@@ -47,9 +47,9 @@ module Karafka
         @group = group
         @attributes = {}
         @active = true
-        # @note We use identifier related to the group that owns a topic, because from Karafka 0.6
-        #   we can handle multiple Kafka instances with the same process and we can have same
-        #   topic name across multiple groups
+        # We use identifier related to the group that owns a topic, because from Karafka 0.6 we can
+        # handle multiple Kafka instances with the same process and we can have same topic name
+        # across multiple groups
         @id = "#{group.id}_#{@name}"
         @consumer = nil
         @active_assigned = false

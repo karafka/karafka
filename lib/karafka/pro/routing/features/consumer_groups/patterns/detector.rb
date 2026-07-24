@@ -71,7 +71,8 @@ module Karafka
 
               # Adds the discovered topic into the routing
               #
-              # @param pattern [Karafka::Pro::Routing::Features::ConsumerGroups::Patterns::Pattern] matched pattern
+              # @param pattern [Karafka::Pro::Routing::Features::ConsumerGroups::Patterns::Pattern]
+              #   matched pattern
               # @param discovered_topic [String] topic that we discovered that should be part of the
               #   routing from now on.
               # @param sg_topics [Array<Karafka::Routing::Topic>]

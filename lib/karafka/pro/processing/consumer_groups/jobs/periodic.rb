@@ -31,7 +31,6 @@
 module Karafka
   module Pro
     module Processing
-      # Pro consumer-group-specific processing components
       module ConsumerGroups
         # Pro jobs
         module Jobs
@@ -40,8 +39,8 @@ module Karafka
           class Periodic < Karafka::Processing::Jobs::Base
             self.action = :tick
 
-            # @param executor [Karafka::Pro::Processing::ConsumerGroups::Executor] pro executor that is suppose to
-            #   run a given job
+            # @param executor [Karafka::Pro::Processing::ConsumerGroups::Executor] pro executor that
+            #   is suppose to run a given job
             def initialize(executor)
               @executor = executor
               super()

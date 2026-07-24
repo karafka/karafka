@@ -62,6 +62,26 @@ Documentation/BlankLineBeforeDefinition:
     SingleBlankLine: true
     OrphanedDocs: true
 
+Documentation/DuplicateNamespaceComment:
+  Description: Detects namespaces documented with a YARD comment in more than one file.
+  Enabled: true
+  Severity: error
+
+Documentation/UnderfilledLines:
+  Description: Detects documentation prose that wraps too early and wastes horizontal space.
+  Enabled: true
+  Severity: error
+  # Aligned with RuboCop's Layout/LineLength (Max: 100) so documentation prose
+  # wraps to the same width as code.
+  MaxLength: 100
+
+Documentation/LineLength:
+  Description: Detects documentation lines that exceed the maximum length.
+  Enabled: true
+  Severity: error
+  # Aligned with RuboCop's Layout/LineLength (Max: 100).
+  MaxLength: 100
+
 # Tags validators
 Tags/Order:
   Description: Enforces consistent ordering of YARD tags.
@@ -142,7 +162,7 @@ Tags/OptionTags:
 Tags/ExampleSyntax:
   Description: Validates Ruby syntax in @example tags.
   Enabled: true
-  Severity: warning
+  Severity: error
 
 Tags/RedundantParamDescription:
   Description: Detects meaningless parameter descriptions that add no value.

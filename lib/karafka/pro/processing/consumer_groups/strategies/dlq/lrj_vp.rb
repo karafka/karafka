@@ -31,15 +31,12 @@
 module Karafka
   module Pro
     module Processing
-      # Consumer-group-specific Pro processing components (driven by rebalance callbacks and
-      # partition ticks). Parallel `ShareGroups` will live next to this namespace once KIP-932
-      # lands.
       module ConsumerGroups
         module Strategies
           module Dlq
-            # Dead-Letter Queue enabled
-            # Long-Running Job enabled
-            # Virtual Partitions enabled
+            # - Dead-Letter Queue enabled
+            # - Long-Running Job enabled
+            # - Virtual Partitions enabled
             module LrjVp
               # Same flow as the Dlq Lrj because VP collapses on errors, so DlqLrj can kick in
               include Strategies::Vp::Default

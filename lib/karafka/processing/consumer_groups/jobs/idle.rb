@@ -9,8 +9,8 @@ module Karafka
         class Idle < ::Karafka::Processing::Jobs::Base
           self.action = :idle
 
-          # @param executor [Karafka::Processing::ConsumerGroups::Executor] executor that is supposed to run a given
-          #   job on an active consumer
+          # @param executor [Karafka::Processing::ConsumerGroups::Executor] executor that is
+          #   supposed to run a given job on an active consumer
           # @return [Idle]
           def initialize(executor)
             @executor = executor

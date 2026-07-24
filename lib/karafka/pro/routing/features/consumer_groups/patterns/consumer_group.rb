@@ -42,7 +42,8 @@ module Karafka
                 @patterns = Patterns.new([])
               end
 
-              # @return [::Karafka::Pro::Routing::Features::ConsumerGroups::Patterns::Patterns] created patterns
+              # @return [::Karafka::Pro::Routing::Features::ConsumerGroups::Patterns::Patterns]
+              #   created patterns
               def patterns
                 @patterns
               end

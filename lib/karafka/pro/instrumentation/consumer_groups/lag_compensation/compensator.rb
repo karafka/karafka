@@ -31,7 +31,6 @@
 module Karafka
   module Pro
     module Instrumentation
-      # Instrumentation components for consumer groups based operation
       module ConsumerGroups
         module LagCompensation
           # Compensates stale offsets and lags of long-paused partitions in the raw librdkafka
