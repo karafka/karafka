@@ -31,15 +31,12 @@
 module Karafka
   module Pro
     module Processing
-      # Consumer-group-specific Pro processing components (driven by rebalance callbacks and
-      # partition ticks). Parallel `ShareGroups` will live next to this namespace once KIP-932
-      # lands.
       module ConsumerGroups
         module Strategies
           # Filtering related init strategies
           module Ftr
-            # Filtering enabled
-            # VPs enabled
+            # - Filtering enabled
+            # - VPs enabled
             #
             # VPs should operate without any problems with filtering because virtual partitioning
             # happens on the limited set of messages and collective filtering applies the same

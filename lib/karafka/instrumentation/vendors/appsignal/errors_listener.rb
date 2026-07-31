@@ -5,7 +5,6 @@ require_relative "base"
 module Karafka
   module Instrumentation
     module Vendors
-      # Namespace for Appsignal instrumentation
       module Appsignal
         # Listener for reporting errors from both consumers and producers
         # Since we have the same API for WaterDrop and Karafka, we can use one listener with

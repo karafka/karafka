@@ -326,8 +326,8 @@ module Karafka
         # won't get into this loop again. This can happen when supervision decides it should close
         # things faster
         #
-        # @see https://github.com/confluentinc/librdkafka/issues/4792
-        # @see https://github.com/confluentinc/librdkafka/issues/4527
+        # See https://github.com/confluentinc/librdkafka/issues/4792
+        # See https://github.com/confluentinc/librdkafka/issues/4527
         if unsubscribe?
           @unsubscribing = true
 
@@ -597,8 +597,8 @@ module Karafka
         @kafka = nil
         @wrapped_kafka = nil
         @buffer.clear
-        # @note We do not clear rebalance manager here as we may still have revocation info
-        # here that we want to consider valid prior to running another reconnection
+        # We do not clear rebalance manager here as we may still have revocation info here that we
+        # want to consider valid prior to running another reconnection
       end
 
       # Unsubscribes from all the subscriptions
@@ -702,7 +702,7 @@ module Karafka
         case e.code
         when *EARLY_REPORT_ERRORS
           early_report = true
-        # @see
+        # See
         # https://github.com/confluentinc/confluent-kafka-dotnet/issues/1366#issuecomment-821842990
         # This will be raised each time poll detects a non-existing topic. When auto creation is
         # on, we can safely ignore it
@@ -737,8 +737,8 @@ module Karafka
         raise unless retryable
 
         # Most of the errors can be safely ignored as librdkafka will recover from them
-        # @see https://github.com/edenhill/librdkafka/issues/1987#issuecomment-422008750
-        # @see https://github.com/edenhill/librdkafka/wiki/Error-handling
+        # See https://github.com/edenhill/librdkafka/issues/1987#issuecomment-422008750
+        # See https://github.com/edenhill/librdkafka/wiki/Error-handling
 
         time_poll.checkpoint
         time_poll.backoff

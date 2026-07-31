@@ -31,12 +31,7 @@
 module Karafka
   module Pro
     module Instrumentation
-      # Instrumentation components for consumer groups based operation
       module ConsumerGroups
-        # Active refreshing of watermarks and lags for long-paused partitions. librdkafka only
-        # updates those values from fetch responses, so partitions paused for a long time
-        # report frozen statistics. The refresher periodically fetches fresh values and the
-        # decorator overlays them onto the emitted statistics.
         module LagCompensation
           # Refreshes offsets and lags data of partitions that stayed paused for at least the
           # configured pause age, at most once per interval.

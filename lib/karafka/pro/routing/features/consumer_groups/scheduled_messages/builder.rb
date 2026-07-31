@@ -38,9 +38,9 @@ module Karafka
             module Builder
               # Enabled scheduled messages operations and adds needed topics and other stuff.
               #
-              # @param topic_name [String, false] name for scheduled messages topic that is also used
-              #   as a group identifier. Users can have multiple schedule topics flows to prevent key
-              #   collisions, prioritize and do other stuff. `false` if not active.
+              # @param topic_name [String, false] name for scheduled messages topic that is also
+              #   used as a group identifier. Users can have multiple schedule topics flows to
+              #   prevent key collisions, prioritize and do other stuff. `false` if not active.
               # @param block [Proc] optional reconfiguration of the topics definitions.
               # @note Namespace for topics should include the divider as it is not automatically
               #   added.

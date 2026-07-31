@@ -31,9 +31,6 @@
 module Karafka
   module Pro
     module Processing
-      # Consumer-group-specific Pro processing components (driven by rebalance callbacks and
-      # partition ticks). Parallel `ShareGroups` will live next to this namespace once KIP-932
-      # lands.
       module ConsumerGroups
         # Namespace for periodic jobs related processing APIs
         module PeriodicJob
@@ -64,8 +61,8 @@ module Karafka
             end
 
             # Runs the on-schedule tick periodic operations
-            # This method is an alias but is part of the naming convention used for other flows, this
-            # is why we do not reference the `handle_before_schedule_tick` directly
+            # This method is an alias but is part of the naming convention used for other flows,
+            # this is why we do not reference the `handle_before_schedule_tick` directly
             def on_before_schedule_tick
               handle_before_schedule_tick
             end

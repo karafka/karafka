@@ -2,16 +2,14 @@
 
 module Karafka
   module Processing
-    # Consumer-group-specific processing components (driven by rebalance callbacks and partition
-    # ticks). Parallel `ShareGroups` will live next to this namespace once KIP-932 lands.
     module ConsumerGroups
       # Basic coordinator that allows us to provide coordination objects into consumers.
       #
       # This is a wrapping layer to simplify management of work to be handled around consumption.
       #
       # @note This coordinator needs to be thread safe. Some operations are performed only in the
-      #   listener thread, but we go with thread-safe by default for all not to worry about potential
-      #   future mistakes.
+      #   listener thread, but we go with thread-safe by default for all not to worry about
+      #   potential future mistakes.
       class Coordinator
         extend Forwardable
         include Core::Helpers::Time
@@ -29,7 +27,8 @@ module Karafka
 
         # @param topic [Karafka::Routing::Topic]
         # @param partition [Integer]
-        # @param pause_tracker [Karafka::TimeTrackers::Pause] pause tracker for given topic partition
+        # @param pause_tracker [Karafka::TimeTrackers::Pause] pause tracker for given topic
+        #   partition
         def initialize(topic, partition, pause_tracker)
           @topic = topic
           @partition = partition

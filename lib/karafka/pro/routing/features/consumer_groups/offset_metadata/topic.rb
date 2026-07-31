@@ -33,12 +33,6 @@ module Karafka
     module Routing
       module Features
         module ConsumerGroups
-          # This feature allows for saving and retrieving offset metadata with custom deserialization
-          # support. It allows for storing extra data during commits that can be then used to alter
-          # the processing flow after a rebalance.
-          #
-          # @note Because this feature has zero performance impact and makes no queries to Kafka
-          #   unless requested, it is always enabled.
           class OffsetMetadata < Base
             # Empty string not to create it on each deserialization
             EMPTY_STRING = ""

@@ -129,7 +129,7 @@ module Karafka
           # librdkafka's per-partition metadata cache for all integer-offset partitions in
           # one roundtrip. Without this pre-fetch, librdkafka triggers a much broader
           # metadata refresh when assign is called later, adding at least a second to
-          # iterator startup — noticeable in latency-sensitive contexts like Puma.
+          # iterator startup - noticeable in latency-sensitive contexts like Puma.
           # The epoch timestamp ensures every partition returns its LWM; the result is
           # intentionally discarded since we only need the warm-up side effect here.
           warm_up_tpl = Rdkafka::Consumer::TopicPartitionList.new

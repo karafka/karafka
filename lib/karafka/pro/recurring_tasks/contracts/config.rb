@@ -31,7 +31,6 @@
 module Karafka
   module Pro
     module RecurringTasks
-      # Recurring Tasks related contracts
       module Contracts
         # Makes sure, all the expected config is defined as it should be
         class Config < Karafka::Contracts::Base

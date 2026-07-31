@@ -5,7 +5,6 @@ require_relative "base"
 module Karafka
   module Instrumentation
     module Vendors
-      # Namespace for Appsignal instrumentation
       module Appsignal
         # Listener that ships metrics to Appsignal
         class MetricsListener < Base

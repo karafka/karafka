@@ -31,7 +31,6 @@
 module Karafka
   module Pro
     module Processing
-      # Namespace for Pro schedulers
       module Schedulers
         # Optimizes scheduler that takes into consideration of execution time needed to process
         # messages from given topics partitions. It uses the non-preemptive LJF algorithm

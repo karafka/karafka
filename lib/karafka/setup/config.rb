@@ -22,8 +22,8 @@ module Karafka
         # option token [String, false] - license token issued when you acquire a Pro license
         # Leave false if using the LGPL version and all is going to work just fine :)
         #
-        # @note By using the commercial components, you accept the LICENSE-COMM commercial license
-        #   terms and conditions
+        # By using the commercial components, you accept the LICENSE-COMM commercial license terms
+        # and conditions
         setting :token, default: false
         # option entity [String] for whom we did issue the license
         setting :entity, default: ""
@@ -88,8 +88,8 @@ module Karafka
         setting :token_provider_listener, default: false
       end
 
-      # rdkafka default options
-      # @see https://github.com/edenhill/librdkafka/blob/master/CONFIGURATION.md
+      # rdkafka default options See
+      # https://github.com/edenhill/librdkafka/blob/master/CONFIGURATION.md
       setting :kafka, default: {}
 
       # Public configuration for swarm operations
@@ -163,9 +163,8 @@ module Karafka
       setting :internal do
         # option status [Karafka::Status] app status
         setting :status, default: Status.new
-        # option process [Karafka::Process] process status
-        # @note In the future, we need to have a single process representation for all the karafka
-        #   instances
+        # option process [Karafka::Process] process status. In the future, we need to have a single
+        # process representation for all the karafka instances
         setting :process, default: Process.new
         # Interval of "ticking". This is used to define the maximum time between consecutive
         # polling of the main rdkafka queue. It should match also the `statistics.interval.ms`
@@ -406,9 +405,8 @@ module Karafka
       # Thanks to that we have an initial state out of the box.
       configure
 
-      # Backwards compatibility: Add old flat API methods to the config instance
-      # These delegate to the new nested pause config
-      # @deprecated Will be removed in Karafka 2.6
+      # Backwards compatibility: Add old flat API methods to the config instance. These delegate
+      # to the new nested pause config. Deprecated: Will be removed in Karafka 2.6
       #
       # Prior to the introduction of nested pause configuration, pause-related settings were
       # accessed directly on the config object (e.g., `config.pause_timeout`). With the nested
