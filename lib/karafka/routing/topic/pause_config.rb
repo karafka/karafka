@@ -5,9 +5,7 @@ module Karafka
     class Topic
       # Per-topic pause (backoff) configuration value object.
       #
-      # In OSS this always mirrors the global `config.pause.*` settings, since overriding pausing on
-      # a per-topic basis is a Karafka Pro feature (Granular Backoffs). Pro's Pausing feature
-      # overrides `Topic#pause` to allow per-topic overrides while returning this same value object.
+      # Defaults to the global `config.pause.*` settings unless overridden on a per-topic basis.
       PauseConfig = Struct.new(
         :active,
         :timeout,

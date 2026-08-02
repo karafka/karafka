@@ -74,9 +74,8 @@ module Karafka
         RUBY
       end
 
-      # @return [Karafka::Routing::Topic::PauseConfig] per-topic pause configuration. In OSS this
-      #   always reflects the root `config.pause.*` settings; Karafka Pro's Pausing feature allows
-      #   overriding it per-topic via `#pause(timeout:, max_timeout:, with_exponential_backoff:)`.
+      # @return [Karafka::Routing::Topic::PauseConfig] per-topic pause configuration, reflecting
+      #   the root `config.pause.*` settings.
       def pause
         @pause ||= PauseConfig.new(
           active: false,
