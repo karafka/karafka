@@ -35,9 +35,10 @@ module Karafka
         class Pausing < Base
           # Config for pausing feature.
           #
-          # The pause config value object now lives in OSS (`Karafka::Routing::Topic::PauseConfig`)
-          # since the per-topic `#pause` reader defaults to the global config there. This alias is
-          # kept so existing references to the Pro constant keep resolving to the same class.
+          # By convention each routing feature exposes a `Config`. The pause value object is defined
+          # in OSS (`Karafka::Routing::Topic::PauseConfig`) because the per-topic `#pause` reader
+          # defaults to the global config there, so the feature points its `Config` at that shared
+          # class rather than redefining it.
           Config = Karafka::Routing::Topic::PauseConfig
         end
       end
