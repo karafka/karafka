@@ -74,10 +74,10 @@ module Karafka
         RUBY
       end
 
-      # @return [Karafka::Routing::Topic::PauseConfig] per-topic pause configuration, reflecting
-      #   the root `config.pause.*` settings.
+      # @return [Karafka::Routing::Features::Pausing::Config] per-topic pause configuration,
+      #   reflecting the root `config.pause.*` settings.
       def pause
-        @pause ||= PauseConfig.new(
+        @pause ||= Features::Pausing::Config.new(
           active: false,
           timeout: Karafka::App.config.pause.timeout,
           max_timeout: Karafka::App.config.pause.max_timeout,
