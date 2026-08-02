@@ -32,9 +32,6 @@ module Karafka
         max_wait_time
         initial_offset
         consumer_persistence
-        pause_timeout
-        pause_max_timeout
-        pause_with_exponential_backoff
       ].freeze
 
       private_constant :INHERITABLE_ATTRIBUTES
@@ -58,35 +55,51 @@ module Karafka
         INHERITABLE_ATTRIBUTES.each do |attribute|
           instance_variable_set("@#{attribute}", nil)
         end
+
+        # Explicit nil initialization for Ruby's object shapes optimization. The per-topic pause
+        # config is built lazily on first read, defaulting to the global `config.pause.*` settings.
+        @pause = nil
       end
 
-      # Some inheritable attributes do not live under a same-named accessor on the global config.
-      # Pause settings were moved to the nested `config.pause.*` namespace, so their per-topic
-      # fallback needs to read from there rather than from a flat `config.pause_timeout` accessor.
-      INHERITABLE_ATTRIBUTES_CONFIG_DEFAULTS = {
-        pause_timeout: "Karafka::App.config.pause.timeout",
-        pause_max_timeout: "Karafka::App.config.pause.max_timeout",
-        pause_with_exponential_backoff: "Karafka::App.config.pause.with_exponential_backoff"
-      }.freeze
-
-      private_constant :INHERITABLE_ATTRIBUTES_CONFIG_DEFAULTS
+      # Per-topic pause (backoff) configuration value object.
+      #
+      # In OSS this always mirrors the global `config.pause.*` settings, since overriding pausing on
+      # a per-topic basis is a Karafka Pro feature (Granular Backoffs). Pro's Pausing feature
+      # overrides `#pause` to allow per-topic overrides while returning this same value object.
+      PauseConfig = Struct.new(
+        :active,
+        :timeout,
+        :max_timeout,
+        :with_exponential_backoff,
+        keyword_init: true
+      ) do
+        alias_method :active?, :active
+        alias_method :with_exponential_backoff?, :with_exponential_backoff
+      end
 
       INHERITABLE_ATTRIBUTES.each do |attribute|
         # Defined below
         attr_writer attribute unless attribute == :kafka
 
-        default = INHERITABLE_ATTRIBUTES_CONFIG_DEFAULTS.fetch(
-          attribute,
-          "Karafka::App.config.send(:#{attribute})"
-        )
-
         class_eval <<~RUBY, __FILE__, __LINE__ + 1
           def #{attribute}
             return @#{attribute} unless @#{attribute}.nil?
 
-            @#{attribute} = #{default}
+            @#{attribute} = Karafka::App.config.send(:#{attribute})
           end
         RUBY
+      end
+
+      # @return [Karafka::Routing::Topic::PauseConfig] per-topic pause configuration. In OSS this
+      #   always reflects the root `config.pause.*` settings; Karafka Pro's Pausing feature allows
+      #   overriding it per-topic via `#pause(timeout:, max_timeout:, with_exponential_backoff:)`.
+      def pause
+        @pause ||= PauseConfig.new(
+          active: false,
+          timeout: Karafka::App.config.pause.timeout,
+          max_timeout: Karafka::App.config.pause.max_timeout,
+          with_exponential_backoff: Karafka::App.config.pause.with_exponential_backoff
+        )
       end
 
       # Often users want to have the same basic cluster setup with small setting alterations
@@ -171,6 +184,7 @@ module Karafka
           name: name,
           active: active?,
           consumer: consumer,
+          pause: pause.to_h,
           group_id: group.id,
           # Kept as a reference alongside `group_id` for backwards compatibility. Will be removed
           # in Karafka 3.0.

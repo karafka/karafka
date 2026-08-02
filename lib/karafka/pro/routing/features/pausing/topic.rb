@@ -35,84 +35,39 @@ module Karafka
         class Pausing < Base
           # Expansion allowing for a per topic pause strategy definitions
           module Topic
-            # This method sets up the extra instance variable to nil before calling
-            # the parent class initializer. The explicit initialization
-            # to nil is included as an optimization for Ruby's object shapes system,
-            # which improves memory layout and access performance.
-            def initialize(...)
-              @pausing = nil
-              super
-            end
-
-            # Allows for per-topic pausing strategy setting
+            # Allows for per-topic pausing strategy setting.
+            #
+            # Overrides the OSS `#pause` reader (this module is prepended onto `Routing::Topic`).
+            # With no arguments it returns the current configuration, defaulting to the global
+            # `config.pause.*` settings via `super`. With arguments it overrides the pausing
+            # strategy for this topic and marks it as active.
             #
             # @param timeout [Integer] how long should we wait upon processing error (milliseconds)
             # @param max_timeout [Integer] what is the max timeout in case of an exponential
             #   backoff (milliseconds)
             # @param with_exponential_backoff [Boolean] should we use exponential backoff
-            # @return [Config] pausing config object
+            # @return [Karafka::Routing::Topic::PauseConfig] pausing config object
             def pause(timeout: nil, max_timeout: nil, with_exponential_backoff: nil)
-              # If no arguments provided, just return or initialize the config
-              return pausing if timeout.nil? && max_timeout.nil? && with_exponential_backoff.nil?
+              config = super()
 
-              # Update instance variables for backwards compatibility
-              # This ensures code reading @pause_timeout directly or via the inherited getter
-              # will get the correct values
-              @pause_timeout = timeout if timeout
-              @pause_max_timeout = max_timeout if max_timeout
+              # If no arguments provided, just return the current (default or overridden) config
+              return config if timeout.nil? && max_timeout.nil? && with_exponential_backoff.nil?
 
-              unless with_exponential_backoff.nil?
-                @pause_with_exponential_backoff = with_exponential_backoff
-              end
-
-              # Create or update the config
-              @pausing ||= Config.new(
-                active: false,
-                timeout: @pause_timeout || Karafka::App.config.pause.timeout,
-                max_timeout: @pause_max_timeout || Karafka::App.config.pause.max_timeout,
-                with_exponential_backoff: if @pause_with_exponential_backoff.nil?
-                                            Karafka::App.config.pause.with_exponential_backoff
-                                          else
-                                            @pause_with_exponential_backoff
-                                          end
-              )
-
-              @pausing.timeout = timeout if timeout
-              @pausing.max_timeout = max_timeout if max_timeout
+              config.timeout = timeout if timeout
+              config.max_timeout = max_timeout if max_timeout
 
               unless with_exponential_backoff.nil?
-                @pausing.with_exponential_backoff = with_exponential_backoff
+                config.with_exponential_backoff = with_exponential_backoff
               end
 
-              @pausing.active = true
+              config.active = true
 
-              @pausing
+              config
             end
 
-            # @return [Config] pausing configuration object
-            def pausing
-              @pausing ||= Config.new(
-                active: false,
-                timeout: @pause_timeout || Karafka::App.config.pause.timeout,
-                max_timeout: @pause_max_timeout || Karafka::App.config.pause.max_timeout,
-                with_exponential_backoff: if @pause_with_exponential_backoff.nil?
-                                            Karafka::App.config.pause.with_exponential_backoff
-                                          else
-                                            @pause_with_exponential_backoff
-                                          end
-              )
-            end
-
-            # @return [Boolean] is pausing explicitly configured
-            def pausing?
-              pausing.active?
-            end
-
-            # @return [Hash] topic with all its native configuration options plus pausing settings
-            def to_h
-              super.merge(
-                pausing: pausing.to_h
-              ).freeze
+            # @return [Boolean] is pausing explicitly configured on a per-topic basis
+            def pause?
+              pause.active?
             end
           end
         end
