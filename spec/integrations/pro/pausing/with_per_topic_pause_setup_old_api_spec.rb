@@ -33,9 +33,9 @@
 # This is a backwards compatibility test
 
 setup_karafka(allow_errors: %w[consumer.consume.error]) do |config|
-  config.pause_timeout = 1_000
-  config.pause_max_timeout = 10_000
-  config.pause_with_exponential_backoff = false
+  config.pause.timeout = 1_000
+  config.pause.max_timeout = 10_000
+  config.pause.with_exponential_backoff = false
   config.max_wait_time = 100
 end
 
@@ -128,15 +128,7 @@ end
 
 config = Karafka::App.config
 
-# Verify backwards compatibility: old API and new API should return the same values
-assert_equal 1_000, config.pause_timeout
+# Verify the global nested pause configuration is applied
 assert_equal 1_000, config.pause.timeout
-assert_equal config.pause_timeout, config.pause.timeout
-
-assert_equal 10_000, config.pause_max_timeout
 assert_equal 10_000, config.pause.max_timeout
-assert_equal config.pause_max_timeout, config.pause.max_timeout
-
-assert_equal false, config.pause_with_exponential_backoff
 assert_equal false, config.pause.with_exponential_backoff
-assert_equal config.pause_with_exponential_backoff, config.pause.with_exponential_backoff
