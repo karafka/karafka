@@ -60,15 +60,31 @@ module Karafka
         end
       end
 
+      # Some inheritable attributes do not live under a same-named accessor on the global config.
+      # Pause settings were moved to the nested `config.pause.*` namespace, so their per-topic
+      # fallback needs to read from there rather than from a flat `config.pause_timeout` accessor.
+      INHERITABLE_ATTRIBUTES_CONFIG_DEFAULTS = {
+        pause_timeout: "Karafka::App.config.pause.timeout",
+        pause_max_timeout: "Karafka::App.config.pause.max_timeout",
+        pause_with_exponential_backoff: "Karafka::App.config.pause.with_exponential_backoff"
+      }.freeze
+
+      private_constant :INHERITABLE_ATTRIBUTES_CONFIG_DEFAULTS
+
       INHERITABLE_ATTRIBUTES.each do |attribute|
         # Defined below
         attr_writer attribute unless attribute == :kafka
+
+        default = INHERITABLE_ATTRIBUTES_CONFIG_DEFAULTS.fetch(
+          attribute,
+          "Karafka::App.config.send(:#{attribute})"
+        )
 
         class_eval <<~RUBY, __FILE__, __LINE__ + 1
           def #{attribute}
             return @#{attribute} unless @#{attribute}.nil?
 
-            @#{attribute} = Karafka::App.config.send(:#{attribute})
+            @#{attribute} = #{default}
           end
         RUBY
       end
