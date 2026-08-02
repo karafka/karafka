@@ -6,6 +6,10 @@ module Karafka
       # Per-topic pause (backoff) configuration value object.
       #
       # Defaults to the global `config.pause.*` settings unless overridden on a per-topic basis.
+      #
+      # Unlike most feature configs, `active` here does not switch the behavior on or off - the
+      # pause/backoff always applies. It only marks whether these settings were explicitly set for
+      # this topic (`true`) or inherited from the global defaults (`false`).
       PauseConfig = Struct.new(
         :active,
         :timeout,
