@@ -57,10 +57,10 @@ t2 = Karafka::App.routes.first.topics.last
 
 assert_equal t1.subscription_group, t2.subscription_group
 
-assert_equal 100, t1.pause_timeout
-assert_equal 1_000, t1.pause_max_timeout
-assert_equal true, t1.pause_with_exponential_backoff
+assert_equal 100, t1.pause.timeout
+assert_equal 1_000, t1.pause.max_timeout
+assert_equal true, t1.pause.with_exponential_backoff
 
-assert_equal 200, t2.pause_timeout
-assert_equal 2_000, t2.pause_max_timeout
-assert_equal false, t2.pause_with_exponential_backoff
+assert_equal 200, t2.pause.timeout
+assert_equal 2_000, t2.pause.max_timeout
+assert_equal false, t2.pause.with_exponential_backoff
