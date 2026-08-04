@@ -35,7 +35,7 @@ Bundler.with_unbundled_env do
   system!("cd app && bundle install")
   msg = system!("cd app && bundle exec karafka install", raise_error: false)
 
-  exit if msg.include?("karafka-web < 0.10.0 is not compatible with this karafka version")
+  exit if msg.include?("karafka-web < 1.0.0.rc2 is not compatible with this karafka version")
 
   raise InvalidExitCode
 end
