@@ -65,6 +65,14 @@ class Consumer < Karafka::BaseConsumer
   end
 end
 
+# Pre-create the transactional produce target so the parallel segments producing to it
+# concurrently do not trigger racing Kafka auto-topic-creation (TOPIC_ALREADY_EXISTS warnings)
+draw_topics do
+  topic DT.topics[1] do
+    partitions 1
+  end
+end
+
 draw_routes do
   consumer_group DT.group do
     parallel_segments(
