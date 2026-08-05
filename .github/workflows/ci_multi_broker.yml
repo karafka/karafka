@@ -63,6 +63,7 @@ jobs:
         with:
           ruby-version: ${{ matrix.ruby }}
           bundler-cache: true
+          cache-version: 2
           bundler: 'latest'
 
       - name: Install latest Bundler

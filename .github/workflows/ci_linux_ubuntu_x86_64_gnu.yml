@@ -51,6 +51,7 @@ jobs:
         with:
           ruby-version: '4.0.6'
           bundler-cache: true
+          cache-version: 2
       - name: Run RuboCop
         run: bundle exec rubocop
 
@@ -70,6 +71,7 @@ jobs:
         with:
           ruby-version: '4.0.6'
           bundler-cache: true
+          cache-version: 2
       - name: Run yard-lint
         run: bundle exec yard-lint lib/
 
@@ -131,6 +133,7 @@ jobs:
         with:
           ruby-version: ${{matrix.ruby}}
           bundler-cache: true
+          cache-version: 2
           bundler: 'latest'
 
       - name: Wait for Kafka
