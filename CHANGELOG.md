@@ -1,6 +1,6 @@
 # Karafka Framework Changelog
 
-## 2.6.0 (Unreleased)
+## 2.6.0 (2026-08-05)
 - **[Breaking]** Remove the flat global pause configuration accessors (`config.pause_timeout`, `config.pause_max_timeout`, `config.pause_with_exponential_backoff`) deprecated in 2.5.2. Use the nested `config.pause.*` namespace (`config.pause.timeout`, `config.pause.max_timeout`, `config.pause.with_exponential_backoff`) instead.
 - **[Breaking]** Nest the per-topic pause configuration under `topic.pause`. The flat `topic.pause_timeout`, `topic.pause_max_timeout`, and `topic.pause_with_exponential_backoff` readers are removed in favor of `topic.pause.timeout`, `topic.pause.max_timeout`, and `topic.pause.with_exponential_backoff`; `topic.to_h` now emits a nested `pause:` hash instead of the flat keys. The Pro Granular Backoffs override DSL is unchanged (`pause(timeout:, max_timeout:, with_exponential_backoff:)`), and `topic.pausing`/`topic.pausing?` are now `topic.pause`/`topic.pause?`. In OSS `topic.pause` reflects the global `config.pause.*` settings; per-topic overriding remains a Pro feature.
 - **[Feature]** Add `Karafka::Admin.read_partition_offsets` (and `Admin::Topics#read_partition_offsets`) exposing the `rd_kafka_ListOffsets` admin API to query partition offsets by spec (`:earliest`, `:latest`, `:max_timestamp`, or a timestamp in ms) without a consumer group. Accepts an optional `isolation_level:` keyword (pass `READ_COMMITTED` for the Last Stable Offset instead of the high-watermark, giving accurate lag on transactional topics).
