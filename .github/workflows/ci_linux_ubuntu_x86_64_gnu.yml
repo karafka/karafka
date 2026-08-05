@@ -103,12 +103,11 @@ jobs:
       fail-fast: false
       matrix:
         ruby:
-          - '4.0.0'
+          - '4.0'
           - '3.4'
           - '3.3'
-          - '3.2'
         include:
-          - ruby: '3.4'
+          - ruby: '4.0'
             coverage: 'true'
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -158,10 +157,9 @@ jobs:
       fail-fast: false
       matrix:
         ruby:
-          - '4.0.0'
+          - '4.0'
           - '3.4'
           - '3.3'
-          - '3.2'
         parallel_group:
           - '0'
           - '1'
@@ -235,10 +233,9 @@ jobs:
       fail-fast: false
       matrix:
         ruby:
-          - '4.0.0'
+          - '4.0'
           - '3.4'
           - '3.3'
-          - '3.2'
         parallel_group:
           - '0'
           - '1'

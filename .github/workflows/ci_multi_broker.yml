@@ -10,12 +10,12 @@ on:
       ruby_version:
         description: 'Ruby version to test'
         required: false
-        default: '3.4'
+        default: '4.0'
         type: choice
         options:
+          - '4.0'
           - '3.4'
           - '3.3'
-          - '3.2'
 
   pull_request:
     branches: [master]

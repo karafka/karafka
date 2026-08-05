@@ -25,15 +25,14 @@ jobs:
       fail-fast: false
       matrix:
         ruby:
-          - '4.0.0'
+          - '4.0'
           - '3.4'
           - '3.3'
-          - '3.2'
         macos-version:
           - 'macos-14'
           - 'macos-15'
         exclude:
-          - ruby: '4.0.0'
+          - ruby: '4.0'
             macos-version: 'macos-14'
     runs-on: ${{ matrix.macos-version }}
     steps:
