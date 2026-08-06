@@ -3,6 +3,9 @@
 # Karafka should use more than one thread to consume independent topics partitions
 
 setup_karafka do |config|
+  # This spec measures parallelism via thread identities, which binds it to the threads
+  # workers backend (fibers share carrier threads)
+  config.workers.backend = :threads
   config.concurrency = 10
   config.initial_offset = "latest"
 end
