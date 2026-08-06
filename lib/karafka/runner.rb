@@ -32,7 +32,7 @@ module Karafka
 
       # Start worker threads after listeners are created so a failure in the boot steps above
       # does not leave live worker threads blocked on an open queue.
-      workers.scale(Karafka::App.config.concurrency)
+      workers.scale(Karafka::App.config.workers.concurrency)
 
       until manager.done?
         conductor.wait

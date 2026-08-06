@@ -9,8 +9,13 @@ en:
         missing: needs to be present
         client_id_format: 'needs to be a string with a Kafka accepted format'
         group_id_format: 'needs to be a string with a Kafka accepted format'
-        concurrency_format: needs to be an integer bigger than 0
         consumer_persistence_format: needs to be either true or false
+
+        workers.backend_format: 'needs to be :threads or :fibers'
+        workers.concurrency_format: needs to be an integer bigger than 0
+        workers.thread_priority_format: must be between -3 and 3
+        workers.carrier_threads_format: needs to be an integer bigger than 0
+        workers.carrier_threads_vs_concurrency: must be less than or equal to workers.concurrency
 
         pause.timeout_format: needs to be an integer bigger than 0
         pause.max_timeout_format: needs to be an integer bigger than 0
@@ -30,11 +35,11 @@ en:
           Setting it manually may cause misbehaviours and other unexpected issues
         pause.timeout_max_timeout_vs_pause_max_timeout: pause.timeout must be less or equal to pause.max_timeout
         shutdown_timeout_vs_max_wait_time: shutdown_timeout must be more than max_wait_time
-        worker_thread_priority_format: must be between -3 and 3
 
         oauth.token_provider_listener_format: 'must be false or respond to #on_oauthbearer_token_refresh'
 
         internal.processing.jobs_queue_class_format: cannot be nil
+        internal.processing.workers_pool_class_format: cannot be nil
         internal.processing.scheduler_class_format: cannot be nil
         internal.processing.worker_job_call_wrapper_format: 'needs to be false or respond to #wrap'
         internal.processing.critical_errors_format: 'needs to be an array of Exception subclasses'

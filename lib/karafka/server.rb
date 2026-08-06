@@ -11,7 +11,8 @@ module Karafka
       forceful_exit_code: %i[internal forceful_exit_code],
       forceful_shutdown_wait: %i[internal forceful_shutdown_wait],
       process: %i[internal process],
-      jobs_queue_class: %i[internal processing jobs_queue_class]
+      jobs_queue_class: %i[internal processing jobs_queue_class],
+      workers_pool_class: %i[internal processing workers_pool_class]
     )
 
     class << self
@@ -213,7 +214,7 @@ module Karafka
 
         self.listeners = []
         self.jobs_queue = jobs_queue_class.new
-        self.workers = Processing::WorkersPool.new
+        self.workers = workers_pool_class.new
       end
 
       # Quiets the Karafka server.

@@ -144,7 +144,9 @@ RSpec.describe_current do
   describe "#reducer" do
     subject(:reducer) { topic.virtual_partitions.reducer }
 
-    before { allow(Karafka::App.config).to receive(:concurrency).and_return(concurrency) }
+    before do
+      allow(Karafka::App.config.workers).to receive(:concurrency).and_return(concurrency)
+    end
 
     context "when using default reducer" do
       context "when concurrency is set to 1" do

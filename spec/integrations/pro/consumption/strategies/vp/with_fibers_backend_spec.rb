@@ -28,58 +28,54 @@
 # License: https://karafka.io/docs/Pro-License-Comm/
 # Contact: contact@karafka.io
 
-# Virtual partitions and long-running jobs should not have any problems working together
+# With the fibers workers backend, virtual partitions should parallelize IO-bound processing of
+# a single topic partition as fibers multiplexed on a single carrier thread
 
 setup_karafka do |config|
-  # This spec measures parallelism via thread identities, which binds it to the threads
-  # workers backend (fibers share carrier threads)
-  config.workers.backend = :threads
-  config.max_messages = 50
-  config.max_wait_time = 1_000
-  # We set it here that way not too wait too long on stuff
-  config.kafka[:"max.poll.interval.ms"] = 10_000
-  config.kafka[:"session.timeout.ms"] = 10_000
-  config.concurrency = 5
+  config.workers.backend = :fibers
+  config.workers.concurrency = 5
+  config.workers.carrier_threads = 1
 end
 
 class Consumer < Karafka::BaseConsumer
   def consume
-    # just a check that we have this api method included in the strategy
-    collapsed?
+    DT[:threads] << Thread.current.name
+    DT[:objects] << object_id
+    DT[:starts] << Process.clock_gettime(Process::CLOCK_MONOTONIC)
+    # Scheduler-aware blocking operation simulating IO
+    sleep(1)
+    DT[:stops] << Process.clock_gettime(Process::CLOCK_MONOTONIC)
 
-    # Ensure we exceed max poll interval, if that happens and this would not work async we would
-    # be kicked out of the group
-    sleep(15)
-
-    messages.each do |message|
-      DT[:messages] << message.raw_payload
-    end
-
-    DT[:threads] << Thread.current.object_id
+    messages.each { |message| DT[:offsets] << message.offset }
   end
 end
 
 draw_routes do
   topic DT.topic do
     consumer Consumer
-    long_running_job true
     virtual_partitions(
       partitioner: ->(msg) { msg.raw_payload }
     )
   end
 end
 
-produce_many(DT.topic, DT.uuids(100))
+produce_many(DT.topic, DT.uuids(20))
 
 start_karafka_and_wait_until do
-  DT[:messages].size >= 100
+  DT[:offsets].uniq.size >= 20
 end
 
-# We should use all the threads available to process data despite it coming from a single partition
-assert_equal 5, DT.data[:threads].uniq.size
+# More than one virtual partition consumer instance processed the data
+assert DT[:objects].uniq.size >= 2
 
-# We should not have any duplicated messages
-assert_equal DT[:messages], DT[:messages].uniq
+# All the VP work ran as fibers on the single carrier thread
+assert_equal ["karafka.carrier#0"], DT[:threads].uniq
 
-# We should have exactly as many as we expected
-assert_equal 100, DT[:messages].size
+# And the virtual partitions processing overlapped in time, which a single thread can only
+# achieve with fibers
+intervals = DT[:starts].zip(DT[:stops])
+overlap = intervals.combination(2).any? do |(start1, stop1), (start2, stop2)|
+  start1 < stop2 && start2 < stop1
+end
+
+assert overlap, "expected virtual partitions to overlap on the carrier thread"

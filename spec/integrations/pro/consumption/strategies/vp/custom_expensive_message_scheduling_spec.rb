@@ -111,6 +111,9 @@ end
 
 # Test configuration with custom scheduler
 setup_karafka do |config|
+  # This spec measures parallelism via thread identities, which binds it to the threads
+  # workers backend (fibers share carrier threads)
+  config.workers.backend = :threads
   # Set concurrency to 5 worker threads
   config.concurrency = 5
   config.max_messages = 120

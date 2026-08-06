@@ -17,8 +17,12 @@ RSpec.describe_current do
       max_wait_time: 1_000,
       strict_topics_namespacing: false,
       strict_declarative_topics: false,
-      concurrency: 5,
-      worker_thread_priority: 0,
+      workers: {
+        backend: :threads,
+        concurrency: 5,
+        thread_priority: 0,
+        carrier_threads: 1
+      },
       license: {
         token: false,
         entity: ""
@@ -92,6 +96,7 @@ RSpec.describe_current do
         processing: {
           scheduler_class: Karafka::Processing::Schedulers::Default,
           jobs_queue_class: Karafka::Processing::JobsQueue,
+          workers_pool_class: Karafka::Processing::WorkersPool,
           worker_job_call_wrapper: false,
           critical_errors: [SystemExit, SignalException, NoMemoryError],
           consumer_groups: {
@@ -572,49 +577,127 @@ RSpec.describe_current do
     end
   end
 
-  context "when we validate concurrency" do
-    context "when concurrency is nil" do
-      before { config[:concurrency] = nil }
+  context "when we validate workers backend" do
+    context "when backend is nil" do
+      before { config[:workers][:backend] = nil }
 
       it { expect(contract.call(config)).not_to be_success }
     end
 
-    context "when concurrency is not an int" do
-      before { config[:concurrency] = 2.1 }
+    context "when backend is fibers" do
+      before { config[:workers][:backend] = :fibers }
+
+      it { expect(contract.call(config)).to be_success }
+    end
+
+    context "when backend is not a supported value" do
+      before { config[:workers][:backend] = :processes }
 
       it { expect(contract.call(config)).not_to be_success }
     end
 
-    context "when concurrency is less then 1" do
-      before { config[:concurrency] = 0 }
+    context "when backend is a string version of a supported value" do
+      before { config[:workers][:backend] = "threads" }
 
       it { expect(contract.call(config)).not_to be_success }
     end
   end
 
-  context "when we validate worker_thread_priority" do
-    context "when worker_thread_priority is nil" do
-      before { config[:worker_thread_priority] = nil }
+  context "when we validate workers concurrency" do
+    context "when concurrency is nil" do
+      before { config[:workers][:concurrency] = nil }
 
       it { expect(contract.call(config)).not_to be_success }
     end
 
-    context "when worker_thread_priority is not an integer" do
-      before { config[:worker_thread_priority] = 2.1 }
+    context "when concurrency is not an int" do
+      before { config[:workers][:concurrency] = 2.1 }
 
       it { expect(contract.call(config)).not_to be_success }
     end
 
-    context "when worker_thread_priority is less than -3" do
-      before { config[:worker_thread_priority] = -4 }
+    context "when concurrency is less then 1" do
+      before { config[:workers][:concurrency] = 0 }
+
+      it { expect(contract.call(config)).not_to be_success }
+    end
+  end
+
+  context "when we validate workers thread_priority" do
+    context "when thread_priority is nil" do
+      before { config[:workers][:thread_priority] = nil }
 
       it { expect(contract.call(config)).not_to be_success }
     end
 
-    context "when worker_thread_priority is more than 3" do
-      before { config[:worker_thread_priority] = 4 }
+    context "when thread_priority is not an integer" do
+      before { config[:workers][:thread_priority] = 2.1 }
 
       it { expect(contract.call(config)).not_to be_success }
+    end
+
+    context "when thread_priority is less than -3" do
+      before { config[:workers][:thread_priority] = -4 }
+
+      it { expect(contract.call(config)).not_to be_success }
+    end
+
+    context "when thread_priority is more than 3" do
+      before { config[:workers][:thread_priority] = 4 }
+
+      it { expect(contract.call(config)).not_to be_success }
+    end
+  end
+
+  context "when we validate workers carrier_threads" do
+    context "when carrier_threads is nil" do
+      before { config[:workers][:carrier_threads] = nil }
+
+      it { expect(contract.call(config)).not_to be_success }
+    end
+
+    context "when carrier_threads is not an int" do
+      before { config[:workers][:carrier_threads] = 2.1 }
+
+      it { expect(contract.call(config)).not_to be_success }
+    end
+
+    context "when carrier_threads is less then 1" do
+      before { config[:workers][:carrier_threads] = 0 }
+
+      it { expect(contract.call(config)).not_to be_success }
+    end
+
+    context "when fibers backend uses more carrier threads than concurrency" do
+      before do
+        config[:workers][:backend] = :fibers
+        config[:workers][:concurrency] = 2
+        config[:workers][:carrier_threads] = 3
+      end
+
+      it { expect(contract.call(config)).not_to be_success }
+    end
+
+    context "when fibers backend uses as many carrier threads as concurrency" do
+      before do
+        config[:workers][:backend] = :fibers
+        config[:workers][:concurrency] = 3
+        config[:workers][:carrier_threads] = 3
+      end
+
+      it { expect(contract.call(config)).to be_success }
+    end
+
+    context "when threads backend has more carrier threads than concurrency" do
+      before do
+        config[:workers][:backend] = :threads
+        config[:workers][:concurrency] = 2
+        config[:workers][:carrier_threads] = 3
+      end
+
+      # carrier_threads is not used by the threads backend, so its relation to concurrency
+      # is irrelevant there
+      it { expect(contract.call(config)).to be_success }
     end
   end
 
@@ -748,6 +831,7 @@ RSpec.describe_current do
 
     %i[
       jobs_queue_class
+      workers_pool_class
       scheduler_class
       worker_job_call_wrapper
       critical_errors

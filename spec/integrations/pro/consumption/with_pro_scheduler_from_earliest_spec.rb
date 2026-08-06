@@ -32,6 +32,9 @@
 # Here we just aim to ensure, that we schedule all the jobs and that things operate as expected
 
 setup_karafka do |config|
+  # This spec measures parallelism via thread identities, which binds it to the threads
+  # workers backend (fibers share carrier threads)
+  config.workers.backend = :threads
   config.concurrency = 10
 end
 

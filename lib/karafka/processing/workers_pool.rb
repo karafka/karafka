@@ -10,8 +10,8 @@ module Karafka
     # (integer assignment is atomic in MRI).
     class WorkersPool
       include Helpers::ConfigImporter.new(
-        concurrency: %i[concurrency],
-        worker_thread_priority: %i[worker_thread_priority],
+        concurrency: %i[workers concurrency],
+        worker_thread_priority: %i[workers thread_priority],
         monitor: %i[monitor]
       )
 

@@ -107,6 +107,23 @@ def setup_karafka(
     config.swarm.nodes = 2
     config.internal.connection.reset_backoff = 1_000
 
+    # Allows running the whole integration suite against a non-default workers backend, e.g.
+    # `KARAFKA_WORKERS_BACKEND=fibers bin/integrations`. Applied before the spec block so specs
+    # that configure a backend explicitly always win. Skipped in pristine mode because pristine
+    # bundles do not carry the optional `async` gem.
+    workers_backend = ENV["KARAFKA_WORKERS_BACKEND"]
+
+    if workers_backend && !ENV.key?("PRISTINE_MODE")
+      config.workers.backend = workers_backend.to_sym
+
+      # A correctly configured fibers-based app must use fiber-level execution state isolation,
+      # otherwise things like CurrentAttributes would leak between jobs sharing a carrier
+      # thread. We mirror that requirement here so the suite behaves like a properly set up app.
+      if workers_backend == "fibers" && defined?(ActiveSupport::IsolatedExecutionState)
+        ActiveSupport::IsolatedExecutionState.isolation_level = :fiber
+      end
+    end
+
     # Allows to overwrite any option we're interested in
     yield(config) if block_given?
 
@@ -272,6 +289,15 @@ def setup_active_job
   # This is done in Railtie but here we use only ActiveJob, not Rails
   ActiveJob::Base.extend Karafka::ActiveJob::JobExtensions
   ActiveJob::Base.queue_adapter = :karafka
+
+  # A correctly configured fibers-based app must use fiber-level execution state isolation,
+  # otherwise CurrentAttributes and similar would leak between jobs sharing a carrier thread.
+  # ActiveSupport is often loaded only here, hence this is applied in addition to the
+  # `setup_karafka` handling of the workers backend override.
+  if Karafka::App.config.workers.backend == :fibers &&
+      defined?(ActiveSupport::IsolatedExecutionState)
+    ActiveSupport::IsolatedExecutionState.isolation_level = :fiber
+  end
 end
 
 # Sets up a raw rdkafka consumer

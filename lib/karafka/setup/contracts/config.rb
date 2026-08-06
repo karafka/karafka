@@ -29,8 +29,14 @@ module Karafka
         end
 
         required(:client_id) { |val| val.is_a?(String) && TOPIC_REGEXP.match?(val) }
-        required(:concurrency) { |val| val.is_a?(Integer) && val.positive? }
         required(:consumer_persistence) { |val| [true, false].include?(val) }
+
+        nested(:workers) do
+          required(:backend) { |val| %i[threads fibers].include?(val) }
+          required(:concurrency) { |val| val.is_a?(Integer) && val.positive? }
+          required(:thread_priority) { |val| (-3..3).to_a.include?(val) }
+          required(:carrier_threads) { |val| val.is_a?(Integer) && val.positive? }
+        end
 
         nested(:pause) do
           required(:timeout) { |val| val.is_a?(Integer) && val.positive? }
@@ -44,7 +50,6 @@ module Karafka
         required(:group_id) { |val| val.is_a?(String) && TOPIC_REGEXP.match?(val) }
         required(:kafka) { |val| val.is_a?(Hash) && !val.empty? }
         required(:strict_declarative_topics) { |val| [true, false].include?(val) }
-        required(:worker_thread_priority) { |val| (-3..3).to_a.include?(val) }
 
         nested(:swarm) do
           required(:nodes) { |val| val.is_a?(Integer) && val.positive? }
@@ -122,6 +127,7 @@ module Karafka
 
           nested(:processing) do
             required(:jobs_queue_class) { |val| !val.nil? }
+            required(:workers_pool_class) { |val| !val.nil? }
             required(:scheduler_class) { |val| !val.nil? }
             required(:worker_job_call_wrapper) { |val| val == false || val.respond_to?(:wrap) }
             required(:critical_errors) do |val|
@@ -202,6 +208,18 @@ module Karafka
           end
 
           detected_errors
+        end
+
+        # More carriers than workers would leave carriers idling with no fibers to host
+        virtual do |data, errors|
+          next unless errors.empty?
+
+          workers = data.fetch(:workers)
+
+          next unless workers.fetch(:backend) == :fibers
+          next if workers.fetch(:carrier_threads) <= workers.fetch(:concurrency)
+
+          [[%i[workers carrier_threads], :vs_concurrency]]
         end
 
         virtual do |data, errors|

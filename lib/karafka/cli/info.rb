@@ -5,7 +5,7 @@ module Karafka
     # Info Karafka Cli action
     class Info < Base
       include Helpers::ConfigImporter.new(
-        concurrency: %i[concurrency],
+        concurrency: %i[workers concurrency],
         license: %i[license],
         client_id: %i[client_id]
       )

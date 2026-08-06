@@ -50,8 +50,23 @@ module Karafka
       #   longer waits for the consumers to stop gracefully but instead we force terminate
       #   everything.
       setting :shutdown_timeout, default: 60_000
-      # option [Integer] number of threads in which we want to do parallel processing
-      setting :concurrency, default: 5
+      # Namespace for workers (job execution units) related settings
+      setting :workers do
+        # option [Symbol] execution backend for workers. `:threads` runs each worker in its own
+        #   thread. This is the only backend available at the moment. A `:fibers` backend (workers
+        #   running as fibers on carrier threads for IO-bound workloads) is planned and this
+        #   setting is the seam via which it will be activated.
+        setting :backend, default: :threads
+        # option [Integer] number of workers processing jobs in parallel (total execution slots)
+        setting :concurrency, default: 5
+        # Defaults to the CPU thread priority slice of -1 (50ms) to ensure that CPU intense
+        # processing does not affect other threads and prevents starvation
+        setting :thread_priority, default: -1
+        # option [Integer] number of threads hosting workers when the `:fibers` backend is used.
+        #   Not used by the `:threads` backend where each worker owns its thread.
+        setting :carrier_threads, default: 1
+      end
+
       # Namespace for pause-related settings
       setting :pause do
         # option [Integer] how long should we wait upon processing error (milliseconds)
@@ -77,10 +92,6 @@ module Karafka
       # Really useful when you want to ensure that all topics in routing are managed via
       # declaratives.
       setting :strict_declarative_topics, default: false
-      # Defaults to the CPU thread priority slice to -1 (50ms) to ensure that CPU intense
-      # processing does not affect other threads and prevents starvation
-      setting :worker_thread_priority, default: -1
-
       setting :oauth do
         # option [false, #call] Listener for using oauth bearer. This listener will be able to
         #   get the client name to decide whether to use a single multi-client token refreshing
@@ -239,7 +250,7 @@ module Karafka
           # How long should we wait before a critical listener recovery
           # Too short may cause endless rebalance loops
           setting :reset_backoff, default: 60_000
-          # Similar to the `#worker_thread_priority`. Listener threads do not operate for long
+          # Similar to the `workers.thread_priority`. Listener threads do not operate for long
           # time and release GVL on polling but we provide this for API consistency and some
           # special edge cases.
           setting :listener_thread_priority, default: 0
@@ -308,6 +319,10 @@ module Karafka
 
         setting :processing do
           setting :jobs_queue_class, default: Processing::JobsQueue
+          # option workers_pool_class [Class] class used to build the workers pool. This is the
+          #   seam via which alternative execution backends (e.g. the planned fibers backend)
+          #   plug in their own pool implementation based on the `workers.backend` setting.
+          setting :workers_pool_class, default: Processing::WorkersPool
           # option scheduler [Object] scheduler we will be using
           setting :scheduler_class, default: Processing::Schedulers::Default
           # option worker_job_call_wrapper [Proc, false] callable object that will be used to wrap
@@ -425,6 +440,10 @@ module Karafka
           # any block given
           configure { yield(proxy) if block_given? }
 
+          # Materialize the selected workers backend into the pool class before validation so
+          # a misconfiguration (like a missing `async` gem) surfaces during setup
+          resolve_workers_backend(config)
+
           Contracts::Config.new.validate!(
             config.to_h,
             scope: %w[config]
@@ -459,6 +478,80 @@ module Karafka
         end
 
         private
+
+        # Resolves the `workers.backend` setting into the workers pool class used by the server.
+        #
+        # An explicitly configured custom `internal.processing.workers_pool_class` always wins -
+        # the backend is only materialized when the pool class is still the default of the
+        # other backend, so custom pool implementations keep working regardless of the backend
+        # value they declare compatibility with.
+        #
+        # The `async` gem is an optional dependency required only by the fibers backend, hence
+        # it is loaded lazily here and its absence is reported as a configuration-time error.
+        #
+        # @param config [Karafka::Core::Configurable::Node] root config node
+        def resolve_workers_backend(config)
+          processing = config.internal.processing
+
+          case config.workers.backend
+          when :fibers
+            begin
+              require "async"
+            rescue LoadError
+              raise(
+                Errors::DependencyConstraintsError,
+                "The fibers workers backend requires the `async` gem. " \
+                "Add `gem \"async\"` to your Gemfile to use " \
+                "`config.workers.backend = :fibers`"
+              )
+            end
+
+            return unless processing.workers_pool_class == Processing::WorkersPool
+
+            processing.workers_pool_class = Processing::WorkersPools::Fibers
+          when :threads
+            return unless processing.workers_pool_class == Processing::WorkersPools::Fibers
+
+            processing.workers_pool_class = Processing::WorkersPool
+          end
+        end
+
+        # Installs deprecated root-level forwarders for settings that moved into the `workers`
+        # namespace (`config.concurrency` -> `config.workers.concurrency` and
+        # `config.worker_thread_priority` -> `config.workers.thread_priority`).
+        #
+        # Readers stay silent because external gems (e.g. karafka-web) read them on hot paths
+        # and would flood the logs. Writers emit a one-time (per process, per setting)
+        # deprecation warning. Since the canonical values live only under `workers`, there is a
+        # single source of truth and `#to_h` (used for contracts validation) contains only the
+        # nested representation.
+        #
+        # @param target [Karafka::Core::Configurable::Node] root config node
+        def install_workers_aliases(target)
+          workers = target.workers
+          warned = {}
+
+          {
+            concurrency: :concurrency,
+            worker_thread_priority: :thread_priority
+          }.each do |old_name, new_name|
+            target.define_singleton_method(old_name) { workers.public_send(new_name) }
+
+            target.define_singleton_method(:"#{old_name}=") do |value|
+              unless warned[old_name]
+                warned[old_name] = true
+
+                Kernel.warn(
+                  "DEPRECATION WARNING: `config.#{old_name}` is deprecated and will be " \
+                  "removed in a future major release. Please use " \
+                  "`config.workers.#{new_name}` instead."
+                )
+              end
+
+              workers.public_send(:"#{new_name}=", value)
+            end
+          end
+        end
 
         # Installs forwarding reader methods on the processing config node so that the old
         # (pre-nesting) paths like `config.internal.processing.strategy_selector` still resolve
@@ -522,6 +615,12 @@ module Karafka
           config_proxy.producer_initialization_block.call(config.producer.config)
         end
       end
+
+      # The config node is memoized at the class level, so the aliases installed here survive
+      # subsequent `configure` calls (including the user setup block) for the process lifetime.
+      # This must run before any user setup so `config.concurrency = x` keeps working inside
+      # `Karafka::App.setup`.
+      send(:install_workers_aliases, config)
     end
   end
 end

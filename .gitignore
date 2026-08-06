@@ -68,3 +68,6 @@ pickle-email-*.html
 # documentation
 .yardoc
 .git-pr-body-*.md
+
+# Local Pro license token for running pro integration specs
+.env.pro

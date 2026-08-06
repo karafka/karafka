@@ -28,45 +28,41 @@
 # License: https://karafka.io/docs/Pro-License-Comm/
 # Contact: contact@karafka.io
 
-# Parallel consumer should also work with ActiveJob, though it will be a bit nondeterministic
-# unless we use headers data to balance work.
+# Long Running Jobs should work with the fibers workers backend: the non-blocking job releases
+# the jobs queue lock (tick) from within a fiber and long fiber jobs do not block polling
 
 setup_karafka do |config|
-  # This spec measures parallelism via thread identities, which binds it to the threads
-  # workers backend (fibers share carrier threads)
-  config.workers.backend = :threads
-  config.concurrency = 5
-  config.max_messages = 50
+  config.workers.backend = :fibers
+  config.workers.concurrency = 5
+  config.max_messages = 5
 end
 
-setup_active_job
+class Consumer < Karafka::BaseConsumer
+  def consume
+    DT[:threads] << Thread.current.name
+
+    # Long, scheduler-aware work inside an LRJ fiber
+    sleep(2)
+
+    messages.each { |message| DT[:offsets] << message.offset }
+  end
+end
 
 draw_routes do
-  active_job_topic DT.topic do
-    # We do not publish any details with this job, thus we do a random work distribution
-    virtual_partitions(
-      partitioner: ->(_) { (0..4).to_a.sample }
-    )
+  topic DT.topic do
+    consumer Consumer
+    long_running_job true
   end
 end
 
-class Job < ActiveJob::Base
-  queue_as DT.topic
-
-  def perform(value)
-    sleep(0.001)
-    DT[0] << value
-    DT[:threads_ids] << Thread.current.object_id
-  end
-end
-
-values = (1..200).to_a
-values.each { |value| Job.perform_later(value) }
+produce_many(DT.topic, DT.uuids(10))
 
 start_karafka_and_wait_until do
-  DT[0].size >= 200
+  DT[:offsets].uniq.size >= 10
 end
 
-assert_equal 5, DT[:threads_ids].uniq.size
-assert_equal values, DT[0].sort
-assert_equal DT[0], DT[0].uniq
+# All the LRJ work ran on carrier-hosted fibers
+assert(DT[:threads].all? { |name| name.match?(/karafka\.carrier#\d+/) }, DT[:threads])
+
+# All data was consumed in order
+assert_equal (0..9).to_a, DT[:offsets].uniq.sort

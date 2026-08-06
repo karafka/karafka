@@ -42,6 +42,7 @@ class Scenario
     default: [0],
     'consumption/worker_critical_error_behaviour_spec.rb' => [0, 2].freeze,
     'shutdown/on_hanging_jobs_and_a_shutdown_spec.rb' => [2].freeze,
+    'consumption/fibers/on_hanging_job_and_a_shutdown_spec.rb' => [2].freeze,
     'shutdown/on_hanging_on_shutdown_job_and_a_shutdown_spec.rb' => [2].freeze,
     'shutdown/on_hanging_listener_and_shutdown_spec.rb' => [2].freeze,
     'shutdown/on_forceful_shutdown_reports_blocking_details_spec.rb' => [2].freeze,

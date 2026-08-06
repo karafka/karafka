@@ -8,6 +8,8 @@ gemspec
 # They are added here because they are part of the integration suite
 # Since some of those are only needed for some specs, they should never be required automatically
 group :integrations, :test do
+  # Optional runtime dependency of the fibers workers backend, needed here to test it
+  gem "async", require: false
   gem "fugit", require: false
   gem "rspec", require: false
   gem "stringio"

@@ -133,6 +133,150 @@ RSpec.describe_current do
     end
   end
 
+  describe "workers configuration backwards compatibility" do
+    subject(:config) { Karafka::App.config }
+
+    after do
+      config.workers.concurrency = 5
+      config.workers.thread_priority = -1
+    end
+
+    context "when using the new nested API" do
+      it "allows setting workers.concurrency" do
+        config.workers.concurrency = 7
+
+        expect(config.workers.concurrency).to eq(7)
+      end
+
+      it "allows setting workers.thread_priority" do
+        config.workers.thread_priority = 2
+
+        expect(config.workers.thread_priority).to eq(2)
+      end
+
+      it "has the threads backend by default" do
+        expect(config.workers.backend).to eq(:threads)
+      end
+
+      it "has one carrier thread by default" do
+        expect(config.workers.carrier_threads).to eq(1)
+      end
+    end
+
+    context "when using the deprecated root-level aliases" do
+      it "reads concurrency from workers.concurrency" do
+        config.workers.concurrency = 9
+
+        expect(config.concurrency).to eq(9)
+      end
+
+      it "writes concurrency through to workers.concurrency" do
+        config.concurrency = 11
+
+        expect(config.workers.concurrency).to eq(11)
+      end
+
+      it "reads worker_thread_priority from workers.thread_priority" do
+        config.workers.thread_priority = 3
+
+        expect(config.worker_thread_priority).to eq(3)
+      end
+
+      it "writes worker_thread_priority through to workers.thread_priority" do
+        config.worker_thread_priority = -2
+
+        expect(config.workers.thread_priority).to eq(-2)
+      end
+
+      it "keeps a single source of truth in to_h (no root-level keys)" do
+        expect(config.to_h.key?(:concurrency)).to be(false)
+        expect(config.to_h.key?(:worker_thread_priority)).to be(false)
+        expect(config.to_h.fetch(:workers).key?(:concurrency)).to be(true)
+      end
+    end
+  end
+
+  describe "workers backend resolution" do
+    subject(:config) { Karafka::App.config }
+
+    after do
+      Karafka::App.setup do |c|
+        c.workers.backend = :threads
+        c.workers.carrier_threads = 1
+      end
+    end
+
+    context "when backend is threads (default)" do
+      it "uses the threads workers pool" do
+        Karafka::App.setup {} # rubocop:disable Lint/EmptyBlock
+
+        expect(config.internal.processing.workers_pool_class)
+          .to eq(Karafka::Processing::WorkersPool)
+      end
+    end
+
+    context "when backend is fibers" do
+      it "resolves the fibers workers pool" do
+        Karafka::App.setup do |c|
+          c.workers.backend = :fibers
+        end
+
+        expect(config.internal.processing.workers_pool_class)
+          .to eq(Karafka::Processing::WorkersPools::Fibers)
+      end
+
+      it "switches back to the threads pool when backend returns to threads" do
+        Karafka::App.setup do |c|
+          c.workers.backend = :fibers
+        end
+
+        Karafka::App.setup do |c|
+          c.workers.backend = :threads
+        end
+
+        expect(config.internal.processing.workers_pool_class)
+          .to eq(Karafka::Processing::WorkersPool)
+      end
+
+      it "raises a clear error when the async gem is not available" do
+        allow(Karafka::Setup::Config)
+          .to receive(:require)
+          .with("async")
+          .and_raise(LoadError)
+
+        expect do
+          Karafka::App.setup do |c|
+            c.workers.backend = :fibers
+          end
+        end.to raise_error(
+          Karafka::Errors::DependencyConstraintsError,
+          /requires the `async` gem/
+        )
+      end
+    end
+
+    context "when a custom workers pool class is configured explicitly" do
+      let(:custom_pool) { Class.new(Karafka::Processing::WorkersPool) }
+
+      after do
+        Karafka::App.setup do |c|
+          c.internal.processing.workers_pool_class = Karafka::Processing::WorkersPool
+        end
+      end
+
+      it "is not overwritten by the backend resolution" do
+        custom = custom_pool
+
+        Karafka::App.setup do |c|
+          c.workers.backend = :fibers
+          c.internal.processing.workers_pool_class = custom
+        end
+
+        expect(config.internal.processing.workers_pool_class).to eq(custom)
+      end
+    end
+  end
+
   describe "producer configuration block" do
     subject(:config) { Karafka::App.config }
 

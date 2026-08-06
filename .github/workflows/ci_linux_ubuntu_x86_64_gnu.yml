@@ -150,7 +150,7 @@ jobs:
       - name: Check test topics naming convention
         run: bundle exec bin/verify_topics_naming
 
-  integrations_oss:
+  integrations_oss_threads:
     timeout-minutes: 30
     runs-on: ubuntu-latest
     strategy:
@@ -226,7 +226,70 @@ jobs:
       - name: Check test topics naming convention
         run: bundle exec bin/verify_topics_naming
 
-  integrations_pro:
+  # Runs the OSS integration suite against the fibers workers backend. Independent from the
+  # threads run so failures are clearly attributable to a backend. Latest Ruby only - the
+  # backend-independent logic is already covered on all Rubies by the threads jobs.
+  # Pristine/poro scenarios are excluded as they do not apply the backend override.
+  integrations_oss_fibers:
+    timeout-minutes: 30
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        ruby:
+          - '4.0'
+        parallel_group:
+          - '0'
+          - '1'
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Install package dependencies
+        run: "[ -e $APT_DEPS ] || sudo apt-get install -y --no-install-recommends $APT_DEPS"
+
+      - name: Start Kafka with docker compose
+        run: |
+          for attempt in 1 2 3 4 5; do
+            docker compose up -d && break
+            echo "Attempt $attempt/5 failed."
+            docker compose down -v 2>/dev/null || true
+            [ $attempt -lt 5 ] && echo "Retrying in $((attempt * 15))s..." && sleep $((attempt * 15)) || exit 1
+          done
+
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@95ef2b042f9d7a56d8268cba8559e2842e2ad01b # v1.321.0
+        with:
+          ruby-version: ${{matrix.ruby}}
+          bundler: 'latest'
+
+      - name: Install latest Bundler
+        run: |
+          gem install bundler --no-document
+          gem update --system
+          bundle config set without 'tools benchmarks docs'
+
+      - name: Bundle install
+        run: |
+          bundle config set without development
+          bundle install --jobs 4 --retry 3
+
+      - name: Wait for Kafka
+        run: |
+          bundle exec bin/wait_for_kafka
+
+      - name: Run OSS integration tests on the fibers backend
+        env:
+          KARAFKA_WORKERS_BACKEND: fibers
+          SPECS_SEED: ${{ github.run_id }}
+          SPECS_GROUP: ${{ matrix.parallel_group }}
+        run: bin/integrations --exclude '/pro' --exclude '/multi_broker' --exclude 'pristine' --exclude 'poro'
+
+      - name: Check Kafka logs for unexpected warnings
+        run: bin/verify_kafka_warnings
+
+      - name: Check test topics naming convention
+        run: bundle exec bin/verify_topics_naming
+
+  integrations_pro_threads:
     timeout-minutes: 45
     runs-on: ubuntu-latest
     strategy:
@@ -296,6 +359,73 @@ jobs:
       - name: Check test topics naming convention
         run: bin/verify_topics_naming
 
+  # Runs the Pro integration suite against the fibers workers backend, mirroring the
+  # integrations_oss_fibers job split rationale.
+  integrations_pro_fibers:
+    timeout-minutes: 45
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        ruby:
+          - '4.0'
+        parallel_group:
+          - '0'
+          - '1'
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Install package dependencies
+        run: "[ -e $APT_DEPS ] || sudo apt-get install -y --no-install-recommends $APT_DEPS"
+
+      - name: Start Kafka with docker compose
+        run: |
+          for attempt in 1 2 3 4 5; do
+            docker compose up -d && break
+            echo "Attempt $attempt/5 failed."
+            docker compose down -v 2>/dev/null || true
+            [ $attempt -lt 5 ] && echo "Retrying in $((attempt * 15))s..." && sleep $((attempt * 15)) || exit 1
+          done
+
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@95ef2b042f9d7a56d8268cba8559e2842e2ad01b # v1.321.0
+        with:
+          ruby-version: ${{matrix.ruby}}
+          bundler: 'latest'
+
+      - name: Install latest Bundler
+        run: |
+          gem install bundler --no-document
+          gem update --system
+          bundle config set without 'tools benchmarks docs'
+
+      - name: Bundle install
+        run: |
+          bundle config set without development
+          bundle install --jobs 4 --retry 3
+
+      - name: Wait for Kafka
+        run: |
+          bundle exec bin/wait_for_kafka
+
+      - name: Run Pro integration tests on the fibers backend
+        env:
+          KARAFKA_WORKERS_BACKEND: fibers
+          KARAFKA_PRO_LICENSE_TOKEN: ${{ secrets.KARAFKA_PRO_LICENSE_TOKEN }}
+          KARAFKA_PRO_USERNAME: ${{ secrets.KARAFKA_PRO_USERNAME }}
+          KARAFKA_PRO_PASSWORD: ${{ secrets.KARAFKA_PRO_PASSWORD }}
+          KARAFKA_PRO_VERSION: ${{ secrets.KARAFKA_PRO_VERSION }}
+          KARAFKA_PRO_LICENSE_CHECKSUM: ${{ secrets.KARAFKA_PRO_LICENSE_CHECKSUM }}
+          SPECS_SEED: ${{ github.run_id }}
+          SPECS_GROUP: ${{ matrix.parallel_group }}
+        run: |
+          bin/integrations '/pro'
+
+      - name: Check Kafka logs for unexpected warnings
+        run: bin/verify_kafka_warnings
+
+      - name: Check test topics naming convention
+        run: bin/verify_topics_naming
+
   ci-success:
     name: CI Linux Ubuntu x86_64 GNU Success
     runs-on: ubuntu-latest
@@ -306,8 +436,10 @@ jobs:
       - yard-lint
       - lostconf
       - specs
-      - integrations_oss
-      - integrations_pro
+      - integrations_oss_threads
+      - integrations_oss_fibers
+      - integrations_pro_threads
+      - integrations_pro_fibers
     steps:
       - name: Check all jobs passed
         if: |
