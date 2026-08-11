@@ -430,6 +430,11 @@ module Karafka
             scope: %w[config]
           )
 
+          # Verify config-dependent constraints (registered by features for their optional
+          # environment requirements) once the config shape is guaranteed by the contract but
+          # before any components spin up
+          Karafka::Constraints.verify!(:config, config)
+
           configure_components(proxy)
 
           # Install backwards-compatible forwarding so that gems (e.g. karafka-testing) that

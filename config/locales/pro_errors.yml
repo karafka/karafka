@@ -115,6 +115,7 @@ en:
     setup:
       config:
         encryption.active_format: 'needs to be either true or false'
+        encryption.mode_format: 'needs to be either :envelope or :direct'
         encryption.public_key_invalid: 'is not a valid public RSA key'
         encryption.public_key_needs_to_be_public: 'is a private RSA key not a public one'
         encryption.private_keys_format: 'needs to be a hash of version and private key value'

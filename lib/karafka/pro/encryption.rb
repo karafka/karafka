@@ -43,6 +43,12 @@ module Karafka
           config.instance_eval do
             setting(:encryption, default: Setup::Config.config)
           end
+
+          # Registered as a config-phase constraint (verified centrally during setup together
+          # with all other environment requirements) instead of being checked ad hoc here
+          Karafka::Constraints.register(:pro_encryption_envelope_openssl, phase: :config) do |cfg|
+            verify_envelope_requirements!(cfg)
+          end
         end
 
         # @param config [Karafka::Core::Configurable::Node] root node config
@@ -60,6 +66,13 @@ module Karafka
 
           # Encryption for WaterDrop
           config.producer.middleware.append(Messages::Middleware.new)
+
+          # Warm the cipher internals (sub-ciphers, parsed key material) in this
+          # single-threaded phase so runtime encryption and decryption across worker threads
+          # only read already-built state. Custom ciphers can opt in by exposing
+          # #warmup(config)
+          cipher = config.encryption.cipher
+          cipher.warmup(config) if cipher.respond_to?(:warmup)
         end
 
         # This feature does not need any changes post-fork
@@ -68,6 +81,27 @@ module Karafka
         # @param _pre_fork_producer [WaterDrop::Producer]
         def post_fork(_config, _pre_fork_producer)
           true
+        end
+
+        private
+
+        # The envelope mode relies on the EVP PKey API (`PKey#encrypt`/`#decrypt` with an
+        # options hash), available since the openssl gem 3.0. All supported Rubies bundle a
+        # sufficient version as a default gem, but it can be pinned lower in a Gemfile, hence
+        # this runtime constraint instead of a gemspec dependency that everyone would carry
+        # for a single opt-in feature.
+        #
+        # @param config [Karafka::Core::Configurable::Node] root node config
+        def verify_envelope_requirements!(config)
+          return unless config.encryption.active
+          return unless config.encryption.mode == :envelope
+          return if Gem::Version.new(OpenSSL::VERSION) >= Gem::Version.new("3.0.0")
+
+          raise(
+            Karafka::Errors::DependencyConstraintsError,
+            "encryption.mode = :envelope requires the openssl gem >= 3.0, " \
+            "#{OpenSSL::VERSION} detected"
+          )
         end
       end
     end
