@@ -55,4 +55,64 @@ RSpec.describe_current do
       end
     end
   end
+
+  describe "mode dispatch on encryption" do
+    let(:modulus_size) do
+      OpenSSL::PKey::RSA.new(fixture_file("rsa/public_key_1.pem")).n.num_bytes
+    end
+
+    it "produces the direct RSA format in the default direct mode" do
+      expect(cipher.encrypt("content").bytesize).to eq(modulus_size)
+    end
+
+    context "when envelope mode is configured" do
+      before do
+        allow(Karafka::App.config.encryption).to receive(:mode).and_return(:envelope)
+      end
+
+      it "produces the envelope format" do
+        expect(cipher.encrypt("content").bytesize).to be > modulus_size
+      end
+
+      it "supports payloads beyond the direct RSA capacity" do
+        content = "a" * 10_000
+
+        expect(cipher.decrypt("1", cipher.encrypt(content))).to eq(content)
+      end
+    end
+  end
+
+  describe "format routing on decryption" do
+    it "decrypts direct format payloads while in envelope mode" do
+      direct = cipher.encrypt("legacy at rest")
+
+      allow(Karafka::App.config.encryption).to receive(:mode).and_return(:envelope)
+
+      expect(cipher.decrypt("1", direct)).to eq("legacy at rest")
+    end
+
+    it "decrypts envelope format payloads while in direct mode" do
+      allow(Karafka::App.config.encryption).to receive(:mode).and_return(:envelope)
+      envelope = cipher.encrypt("new format")
+      allow(Karafka::App.config.encryption).to receive(:mode).and_return(:direct)
+
+      expect(cipher.decrypt("1", envelope)).to eq("new format")
+    end
+
+    it "routes payloads of exactly the modulus size to the direct RSA path" do
+      # Inherent blind spot of the size heuristic: such input cannot be told apart from a
+      # direct ciphertext. Depending on the exact bytes it either raises an RSA error or -
+      # when the PKCS1 v1.5 padding coincidentally validates - yields garbage. It must never
+      # produce the envelope diagnostics nor the original plaintext
+      allow(Karafka::App.config.encryption).to receive(:mode).and_return(:envelope)
+      modulus_size = OpenSSL::PKey::RSA.new(fixture_file("rsa/public_key_1.pem")).n.num_bytes
+      truncated = cipher.encrypt("sensitive").b[0, modulus_size]
+
+      begin
+        expect(cipher.decrypt("1", truncated)).not_to eq("sensitive")
+      rescue OpenSSL::PKey::PKeyError => e
+        expect(e.message).not_to match(/corrupted|unsupported/)
+      end
+    end
+  end
 end
