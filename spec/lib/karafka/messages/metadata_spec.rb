@@ -60,6 +60,50 @@ RSpec.describe_current do
         2.times { metadata.key }
         expect(key_deserializer_proc).to have_received(:call).once
       end
+
+      context "when the deserialized key is nil (keyless message)" do
+        let(:raw_key) { nil }
+        let(:key_deserializer_proc) { ->(metadata) { metadata.raw_key } }
+
+        it "returns nil and memoizes the falsy result" do
+          expect(metadata.key).to be_nil
+
+          2.times { metadata.key }
+
+          expect(key_deserializer_proc).to have_received(:call).once
+        end
+      end
+
+      context "when the deserialized key is false" do
+        let(:key_deserializer_proc) { ->(_metadata) { false } }
+
+        it "returns false and memoizes the falsy result" do
+          expect(metadata.key).to be(false)
+
+          2.times { metadata.key }
+
+          expect(key_deserializer_proc).to have_received(:call).once
+        end
+      end
+
+      context "when the deserializer raises" do
+        let(:key_deserializer_proc) do
+          calls = 0
+
+          lambda do |metadata|
+            calls += 1
+
+            raise "boom" if calls == 1
+
+            "deserialized_#{metadata.raw_key}"
+          end
+        end
+
+        it "does not cache the error and retries on the next access" do
+          expect { metadata.key }.to raise_error(RuntimeError, "boom")
+          expect(metadata.key).to eq("deserialized_test_key")
+        end
+      end
     end
 
     describe "#headers" do
@@ -70,6 +114,18 @@ RSpec.describe_current do
       it "memoizes the deserialized headers" do
         2.times { metadata.headers }
         expect(headers_deserializer_proc).to have_received(:call).once
+      end
+
+      context "when the deserialized headers are nil" do
+        let(:headers_deserializer_proc) { ->(_metadata) {} }
+
+        it "returns nil and memoizes the falsy result" do
+          expect(metadata.headers).to be_nil
+
+          2.times { metadata.headers }
+
+          expect(headers_deserializer_proc).to have_received(:call).once
+        end
       end
     end
   end
