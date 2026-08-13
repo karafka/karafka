@@ -437,11 +437,6 @@ module Karafka
 
           configure_components(proxy)
 
-          # Install backwards-compatible forwarding so that gems (e.g. karafka-testing) that
-          # still access config.internal.processing.strategy_selector (etc.) keep working after
-          # the move to config.internal.processing.consumer_groups.*
-          install_processing_cg_forwarders(config)
-
           # Refreshes the references that are cached that might have been changed by the config
           Karafka.refresh!
 
@@ -464,38 +459,6 @@ module Karafka
         end
 
         private
-
-        # Installs forwarding reader methods on the processing config node so that the old
-        # (pre-nesting) paths like `config.internal.processing.strategy_selector` still resolve
-        # by delegating to `config.internal.processing.consumer_groups.strategy_selector`.
-        # This keeps external gems (e.g. karafka-testing) working until they migrate.
-        #
-        # @param config [Karafka::Core::Configurable::Node] root config node
-        def install_processing_cg_forwarders(config)
-          processing = config.internal.processing
-          cg_node = processing.consumer_groups
-
-          %i[
-            jobs_builder
-            coordinator_class
-            errors_tracker_class
-            partitioner_class
-            strategy_selector
-            expansions_selector
-            executor_class
-          ].each do |setting_name|
-            writer = :"#{setting_name}="
-
-            # Remove previous definitions (if setup runs more than once) to avoid
-            # "method redefined" warnings that spec_helper promotes to errors
-            sc = processing.singleton_class
-            sc.remove_method(setting_name) if processing.respond_to?(setting_name)
-            sc.remove_method(writer) if processing.respond_to?(writer)
-
-            processing.define_singleton_method(setting_name) { cg_node.public_send(setting_name) }
-            processing.define_singleton_method(writer) { |val| cg_node.public_send(writer, val) }
-          end
-        end
 
         # Sets up all the components that are based on the user configuration
         # @param config_proxy [ConfigProxy] the configuration proxy containing deferred setup
