@@ -46,7 +46,7 @@ class Consumer < Karafka::BaseConsumer
   end
 end
 
-pattern_base = SecureRandom.hex(4)
+pattern_base = "it-parallel-segments-pattern-#{SecureRandom.hex(4)}"
 topic_pattern = /#{pattern_base}-.*-topic/
 
 draw_routes(create_topics: false) do
