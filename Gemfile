@@ -16,7 +16,7 @@ end
 
 group :integrations do
   gem "activejob", require: false
-  gem "karafka-testing", ">= 2.6.0", require: false
+  gem "karafka-testing", ">= 2.6.2", require: false
   gem "karafka-web", ">= 1.0.0.rc2", require: false
 end
 
