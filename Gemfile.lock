@@ -101,10 +101,10 @@ GEM
     karafka-testing (2.6.1)
       karafka (>= 2.6.0.rc2, < 2.7.0)
       waterdrop (>= 2.10.0)
-    karafka-web (1.0.0.rc2)
+    karafka-web (1.0.0)
       erubi (~> 1.4)
-      karafka (>= 2.6.0.rc2, < 2.7.0)
-      karafka-core (>= 2.6.0, < 2.7.0)
+      karafka (>= 2.6.0, < 2.7.0)
+      karafka-core (>= 2.6.2, < 2.7.0)
       roda (>= 3.100, < 4.0)
       tilt (~> 2.0)
     logger (1.7.0)
@@ -215,7 +215,7 @@ CHECKSUMS
   karafka-rdkafka (0.28.0-x86_64-linux-gnu) sha256=34f2deb92d5d4a82b5c80985a6ff4b662a5046d6a23ae4fc9fd1606d4d26d951
   karafka-rdkafka (0.28.0-x86_64-linux-musl) sha256=4388d2c2c316ee62b17fe4c0ceab99bac571454a21534f65cc7e2fe7fe739c52
   karafka-testing (2.6.1) sha256=793f472c9d2422dff84a6d3fbccfdf8d594b4b9e5c4d88c7cd12ebd92931634b
-  karafka-web (1.0.0.rc2) sha256=4a7409c4bbe1eb8778dcaffd2146611b7cca7d431a7eea36381444fe65b17616
+  karafka-web (1.0.0) sha256=f453f5a2c10cec316a9bccf5f07efba03001b6d188eb262e1992154ad211a28f
   logger (1.7.0) sha256=196edec7cc44b66cfb40f9755ce11b392f21f7967696af15d274dde7edff0203
   mini_portile2 (2.8.9) sha256=0cd7c7f824e010c072e33f68bc02d85a00aeb6fce05bb4819c03dfd3c140c289
   minitest (6.0.6) sha256=153ea36d1d987a62942382b61075745042a2b3123b1cd48f4c3675af9cc7d6f1
