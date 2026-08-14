@@ -49,11 +49,16 @@ class MonitoringConsumer < Karafka::BaseConsumer
   end
 end
 
-draw_routes do
-  scheduled_messages(DT.topics[0]) do |t1, t2|
-    t1.config.partitions = 1
-    t2.config.partitions = 1
+# Topic structure is declared through the declaratives DSL, independently of routing
+draw_topics(create_topics: false) do
+  scheduled_messages(DT.topics[0]) do |messages_topic, states_topic|
+    messages_topic.partitions 1
+    states_topic.partitions 1
   end
+end
+
+draw_routes do
+  scheduled_messages(DT.topics[0])
 
   topic DT.topics[1] do
     consumer MonitoringConsumer

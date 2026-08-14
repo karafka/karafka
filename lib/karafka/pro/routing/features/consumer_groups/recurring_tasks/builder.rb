@@ -52,38 +52,9 @@ module Karafka
                 tasks_cfg = App.config.recurring_tasks
                 topics_cfg = tasks_cfg.topics
 
-                # Declarative topic definitions live independently of routing. We declare the
-                # broker-side structure here so it is managed by the CLI topics commands without
-                # relying on the (to be retired) routing `config(...)` bridge.
-                #
-                # We guard each declaration with `find_topic` because `Declaratives::Builder#topic`
-                # re-applies its block on an already existing declaration (additive semantics),
-                # unlike the old bridge which used `||=` and kept the first declaration. Without the
-                # guard, our framework defaults would clobber a topic the user may have declared
-                # themselves via `App.declaratives.draw`. Skipping when already present preserves
-                # first-declaration-wins.
-                App.declaratives.draw do
-                  # Keep older data for a day and compact to the last state available
-                  unless find_topic(topics_cfg.schedules.name)
-                    topic(topics_cfg.schedules.name) do
-                      config(
-                        "cleanup.policy": "compact,delete",
-                        "retention.ms": 86_400_000
-                      )
-                    end
-                  end
-
-                  # Keep cron logs of executions for a week and after that remove. Week should be
-                  # enough and should not produce too much data.
-                  unless find_topic(topics_cfg.logs.name)
-                    topic(topics_cfg.logs.name) do
-                      config(
-                        "cleanup.policy": "delete",
-                        "retention.ms": 604_800_000
-                      )
-                    end
-                  end
-                end
+                # Broker-side topic structure (partitions, replication, compaction/retention) is
+                # declared independently via `Karafka::App.declaratives.draw { recurring_tasks(true) }`
+                # and is intentionally not defined here. Routing only wires the runtime behavior.
 
                 consumer_group tasks_cfg.group_id do
                   # Registers the primary topic that we use to control schedules execution. This is

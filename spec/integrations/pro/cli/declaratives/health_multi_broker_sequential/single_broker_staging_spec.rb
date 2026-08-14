@@ -33,22 +33,26 @@
 
 setup_karafka
 
+draw_topics(create_topics: false) do
+  topic(DT.topics[0]) do
+    partitions 3
+    replication_factor 1
+  end
+
+  topic(DT.topics[1]) do
+    partitions 2
+    replication_factor 1
+  end
+end
+
 draw_routes do
   # Typical staging setup: single broker, RF=1
   topic DT.topics[0] do
     consumer Class.new
-    config(
-      partitions: 3,
-      replication_factor: 1
-    )
   end
 
   topic DT.topics[1] do
     consumer Class.new
-    config(
-      partitions: 2,
-      replication_factor: 1
-    )
   end
 end
 

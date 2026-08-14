@@ -32,44 +32,50 @@
 
 setup_karafka
 
+draw_topics(create_topics: false) do
+  topic(DT.topics[0]) do
+    partitions 1
+    replication_factor 1
+  end
+
+  topic(DT.topics[1]) do
+    partitions 2
+    replication_factor 2
+    config("min.insync.replicas": 2)
+  end
+
+  topic(DT.topics[2]) do
+    partitions 2
+    replication_factor 3
+    config("min.insync.replicas": 1)
+  end
+
+  topic(DT.topics[3]) do
+    partitions 2
+    replication_factor 3
+    config("min.insync.replicas": 2)
+  end
+end
+
 draw_routes do
   # Critical: RF=1
   topic DT.topics[0] do
     consumer Class.new
-    config(
-      partitions: 1,
-      replication_factor: 1
-    )
   end
 
   # Critical: RF=2, min.insync=2
   topic DT.topics[1] do
     consumer Class.new
-    config(
-      partitions: 2,
-      replication_factor: 2,
-      "min.insync.replicas": 2
-    )
   end
 
   # Warning: RF=3, min.insync=1
   topic DT.topics[2] do
     consumer Class.new
-    config(
-      partitions: 2,
-      replication_factor: 3,
-      "min.insync.replicas": 1
-    )
   end
 
   # Healthy: RF=3, min.insync=2
   topic DT.topics[3] do
     consumer Class.new
-    config(
-      partitions: 2,
-      replication_factor: 3,
-      "min.insync.replicas": 2
-    )
   end
 end
 

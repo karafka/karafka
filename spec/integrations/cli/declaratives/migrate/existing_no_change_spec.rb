@@ -6,18 +6,28 @@ Consumer = Class.new(Karafka::BaseConsumer)
 
 setup_karafka
 
+draw_topics(create_topics: false) do
+  topic(DT.topic) do
+    partitions 5
+  end
+end
+
 draw_routes do
   topic DT.topic do
-    config(partitions: 5)
     consumer Consumer
   end
 end
 
 clear_app_draws
 
+draw_topics(create_topics: false) do
+  topic(DT.topic) do
+    partitions 5
+  end
+end
+
 draw_routes(create_topics: false) do
   topic DT.topic do
-    config(partitions: 5)
     consumer Consumer
   end
 end

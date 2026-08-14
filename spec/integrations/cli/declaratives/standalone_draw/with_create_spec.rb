@@ -19,10 +19,15 @@ Karafka::App.declaratives.draw do
 end
 
 # Define a different topic via routing (old way)
+draw_topics(create_topics: false) do
+  topic(DT.topics[1]) do
+    partitions 3
+  end
+end
+
 draw_routes(create_topics: false) do
   topic DT.topics[1] do
     consumer Consumer
-    config(partitions: 3)
   end
 end
 

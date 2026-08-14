@@ -7,6 +7,16 @@ RSpec.describe_current do
 
   after { Karafka::App.config.strict_declarative_topics = false }
 
+  # Declarative definitions live independently of routing in the declaratives repository.
+  # A routed topic counts as declaratively managed when it has an active declaration there.
+  let(:declare) do
+    lambda do |name, active: true|
+      Karafka::App.declaratives.draw do
+        topic(name) { active(active) }
+      end
+    end
+  end
+
   context "when there are no routes" do
     let(:routing) { [] }
 
@@ -14,6 +24,8 @@ RSpec.describe_current do
   end
 
   context "when there are topics routes with declaratives without DLQ" do
+    before { declare.call("topic") }
+
     let(:routing) do
       [
         {
@@ -21,8 +33,7 @@ RSpec.describe_current do
             {
               name: "topic",
               patterns: { active: false },
-              dead_letter_queue: { active: false },
-              declaratives: { active: true }
+              dead_letter_queue: { active: false }
             }
           ]
         }
@@ -33,6 +44,8 @@ RSpec.describe_current do
   end
 
   context "when there are topics routes with inactive declaratives" do
+    before { declare.call("topic", active: false) }
+
     let(:routing) do
       [
         {
@@ -40,8 +53,7 @@ RSpec.describe_current do
             {
               name: "topic",
               patterns: { active: false },
-              dead_letter_queue: { active: false },
-              declaratives: { active: false }
+              dead_letter_queue: { active: false }
             }
           ]
         }
@@ -59,8 +71,7 @@ RSpec.describe_current do
             {
               name: "topic",
               patterns: { active: true },
-              dead_letter_queue: { active: false },
-              declaratives: { active: false }
+              dead_letter_queue: { active: false }
             }
           ]
         }
@@ -71,6 +82,8 @@ RSpec.describe_current do
   end
 
   context "when there are topics routes with DLQ without declaratives" do
+    before { declare.call("topic") }
+
     let(:routing) do
       [
         {
@@ -78,8 +91,7 @@ RSpec.describe_current do
             {
               name: "topic",
               patterns: { active: false },
-              dead_letter_queue: { active: true, topic: "dlq" },
-              declaratives: { active: false }
+              dead_letter_queue: { active: true, topic: "dlq" }
             }
           ]
         }
@@ -90,6 +102,11 @@ RSpec.describe_current do
   end
 
   context "when there are topics routes with DLQ with declaratives" do
+    before do
+      declare.call("topic")
+      declare.call("dlq")
+    end
+
     let(:routing) do
       [
         {
@@ -97,14 +114,12 @@ RSpec.describe_current do
             {
               name: "topic",
               patterns: { active: false },
-              dead_letter_queue: { active: true, topic: "dlq" },
-              declaratives: { active: true }
+              dead_letter_queue: { active: true, topic: "dlq" }
             },
             {
               name: "dlq",
               patterns: { active: false },
-              dead_letter_queue: { active: false },
-              declaratives: { active: true }
+              dead_letter_queue: { active: false }
             }
           ]
         }
@@ -115,6 +130,8 @@ RSpec.describe_current do
   end
 
   context "when there are pattern topics routes with DLQ without declaratives" do
+    before { declare.call("dlq") }
+
     let(:routing) do
       [
         {
@@ -122,14 +139,12 @@ RSpec.describe_current do
             {
               name: "topic",
               patterns: { active: true },
-              dead_letter_queue: { active: true, topic: "dlq" },
-              declaratives: { active: false }
+              dead_letter_queue: { active: true, topic: "dlq" }
             },
             {
               name: "dlq",
               patterns: { active: false },
-              dead_letter_queue: { active: false },
-              declaratives: { active: true }
+              dead_letter_queue: { active: false }
             }
           ]
         }
@@ -149,8 +164,7 @@ RSpec.describe_current do
             {
               name: "topic",
               patterns: { active: false },
-              dead_letter_queue: { active: false },
-              declaratives: { active: false }
+              dead_letter_queue: { active: false }
             }
           ]
         }
