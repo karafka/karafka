@@ -79,11 +79,34 @@ module Karafka
               def install(pattern, discovered_topic, sg_topics)
                 group = pattern.topic.group
 
-                # Build new topic and register within the owning group
-                topic = group.public_send(:topic=, discovered_topic, &pattern.config)
-                topic.patterns(active: true, type: :discovered)
+                # Under multiplexing several subscription groups share the same consumer group but
+                # each runs its own listener thread and independently discovers the same topic.
+                # ConsumerGroup#topic= appends unconditionally, so without this guard the shared
+                # group would accumulate up to `multiplex_factor` duplicate Topic objects per
+                # discovered topic, polluting the routing tree. We run under the process-wide
+                # MUTEX (see #expand), so the find + register below is atomic across subscription
+                # groups: the discovered topic is registered in the shared group only once.
+                topic = group.topics.detect { |existing| existing.name == discovered_topic }
 
-                # Assign the appropriate subscription group to this topic
+                if topic
+                  # A sibling multiplexed subscription group already registered this topic in the
+                  # shared consumer group. Each subscription group must still hold its OWN Topic
+                  # instance in its topics array: the Topic doubles as a per-subscription-group
+                  # key (Instrumentation::AssignmentsTracker keys assignments on the instance and
+                  # reads topic.subscription_group.id), so reusing one instance across
+                  # subscription groups would collide their assignments. We inject a
+                  # per-subscription-group copy, mirroring how the multiplexing subscription
+                  # groups builder dups topics per group at boot.
+                  topic = topic.dup
+                else
+                  # Build new topic and register within the owning group
+                  topic = group.public_send(:topic=, discovered_topic, &pattern.config)
+                  topic.patterns(active: true, type: :discovered)
+                end
+
+                # Assign the appropriate subscription group to this topic. Each subscription group
+                # owns its own Topic instance (freshly built or dup'd above), so this never leaks
+                # across multiplexed subscription groups.
                 topic.subscription_group = pattern.topic.subscription_group
 
                 # Inject into subscription group topics array always, so everything is reflected
