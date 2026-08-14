@@ -74,3 +74,15 @@ end
 
 assert_equal 5, DT[:clients].uniq.size
 assert DT[:consumers].uniq.size >= 5
+
+# Regression: the 5 multiplexed subscription groups share one consumer group but each runs its
+# own listener thread and independently discovers this pattern topic at runtime. Before the
+# dedup guard in the patterns detector, ConsumerGroup#topic= appended unconditionally, so the
+# shared consumer group accumulated one duplicate Topic per subscription group (up to the
+# multiplex factor) for the single discovered topic. It must be registered exactly once.
+discovered = Karafka::App
+  .routes
+  .flat_map { |consumer_group| consumer_group.topics.to_a }
+  .select { |topic| topic.name == DT.topic }
+
+assert_equal 1, discovered.size, discovered.map(&:name).inspect
