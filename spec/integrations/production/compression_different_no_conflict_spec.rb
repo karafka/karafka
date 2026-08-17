@@ -5,12 +5,15 @@
 
 setup_karafka
 
+draw_topics do
+  topic DT.topic do
+    partitions 1
+    config("compression.type": "lz4")
+  end
+end
+
 draw_routes do
   topic DT.topic do
-    config(
-      partitions: 1,
-      "compression.type": "lz4"
-    )
     active false
   end
 end

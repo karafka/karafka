@@ -303,6 +303,52 @@ RSpec.describe_current do
     end
   end
 
+  describe "generations bounding (so the map cannot grow without bound)" do
+    # Each subscription group carries its own distinct topic object, so assigning N of them adds N
+    # distinct keys to @generations - mirroring how pattern subscriptions inject a new topic per
+    # discovered name.
+    let(:groups) { Array.new(5) { build(:routing_subscription_group) } }
+
+    def assign(group)
+      tpl = Rdkafka::Consumer::TopicPartitionList.new
+      tpl.add_topic(group.topics.first.name, [0])
+      tracker.on_rebalance_partitions_assigned(subscription_group: group, tpl: tpl)
+    end
+
+    before { stub_const("#{described_class}::GENERATIONS_TOPICS_LIMIT", 3) }
+
+    context "when more topics than the limit are assigned" do
+      before { groups.each { |group| assign(group) } }
+
+      it "expect to retain only the most-recently-assigned topics up to the limit" do
+        expect(tracker.generations.size).to eq(3)
+        expect(tracker.generations.keys).to eq(groups.last(3).map { |group| group.topics.first })
+      end
+    end
+
+    context "when an older topic is reassigned before the limit is exceeded" do
+      before do
+        assign(groups[0])
+        assign(groups[1])
+        assign(groups[2])
+        # Re-touch the oldest topic - it must now count as most-recently-used...
+        assign(groups[0])
+        # ...so this assignment evicts groups[1] (the real least-recently-used), not groups[0]
+        assign(groups[3])
+      end
+
+      it "expect to evict by least-recently-assigned, not insertion order" do
+        expect(tracker.generations.size).to eq(3)
+        expect(tracker.generations.key?(groups[0].topics.first)).to be(true)
+        expect(tracker.generations.key?(groups[1].topics.first)).to be(false)
+      end
+
+      it "expect the survived reassigned topic to keep its incremented generation" do
+        expect(tracker.generation(groups[0].topics.first, 0)).to eq(2)
+      end
+    end
+  end
+
   describe "#inspect" do
     let(:subscription_group) { build(:routing_subscription_group) }
     let(:topic) { subscription_group.topics.first }

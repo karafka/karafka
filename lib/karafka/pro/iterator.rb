@@ -120,10 +120,19 @@ module Karafka
           @current_message = nil
           @current_consumer = nil
         end
-
-        # Reset so we can use the same iterator again if needed (including after a `#stop`)
+      ensure
+        # Reset so we can use the same iterator again if needed, regardless of how the previous run
+        # ended: normal completion, `#stop`, or a `break` out of the yielded block. A `break` is a
+        # non-local return out of `#each`; placed after the loop this reset would be skipped on a
+        # break, leaving `@stopped_partitions` full so the next run's `done?` is immediately true
+        # and the whole iteration becomes a silent no-op.
         @stopped_partitions = Set.new
         @stopped = false
+        # Reset the stored-offsets latch so it reflects only the current run's marking activity.
+        # Otherwise a single `mark_as_consumed` would keep firing a spurious blocking sync commit on
+        # the teardown of every subsequent `#each`, each of which runs on a brand-new consumer that
+        # has no stored offsets.
+        @stored_offsets = false
       end
 
       # Stops the partition we're currently yielded into

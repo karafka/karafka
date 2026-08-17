@@ -30,11 +30,16 @@ class ConsumerGroup3 < Karafka::BaseConsumer
 end
 
 # Draw routes with three separate consumer groups, all using KIP-848
+draw_topics do
+  topic DT.topic do
+    partitions 3
+  end
+end
+
 draw_routes do
   # First consumer group
   consumer_group "#{DT.group}-group1" do
     topic DT.topic do
-      config(partitions: 3)
       consumer ConsumerGroup1
     end
   end

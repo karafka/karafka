@@ -34,6 +34,12 @@ setup_karafka
 
 segment1 = "#{DT.group}-parallel-0"
 
+draw_topics do
+  topic DT.topic do
+    partitions 2
+  end
+end
+
 draw_routes do
   consumer_group DT.group do
     parallel_segments(
@@ -42,7 +48,6 @@ draw_routes do
     )
 
     topic DT.topic do
-      config(partitions: 2)
       consumer Class.new(Karafka::BaseConsumer)
     end
   end

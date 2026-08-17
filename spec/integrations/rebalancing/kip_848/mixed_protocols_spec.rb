@@ -38,11 +38,16 @@ end
 setup_karafka
 
 # Draw routes with different consumer groups using different protocols
+draw_topics do
+  topic DT.topic do
+    partitions 3
+  end
+end
+
 draw_routes do
   # Consumer group using KIP-848
   consumer_group "#{DT.group}-kip848" do
     topic DT.topic do
-      config(partitions: 3)
       consumer Kip848Consumer
       # Configure this group to use KIP-848
       kafka(

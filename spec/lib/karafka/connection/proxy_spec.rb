@@ -57,6 +57,76 @@ RSpec.describe_current do
     end
   end
 
+  describe "#read_partition_offsets" do
+    let(:specs) { { "test_topic" => [{ partition: 0, offset: :latest }] } }
+    let(:offsets) { [{ topic: "test_topic", partition: 0, offset: 10 }] }
+    let(:handle) { instance_double(Rdkafka::Admin::ListOffsetsHandle) }
+    let(:report) { instance_double(Rdkafka::Admin::ListOffsetsReport, offsets: offsets) }
+
+    before do
+      allow(wrapped_object)
+        .to receive(:list_offsets)
+        .with(specs, isolation_level: nil)
+        .and_return(handle)
+
+      allow(handle).to receive(:wait).with(max_wait_timeout_ms: 5_000).and_return(report)
+    end
+
+    it "expect to resolve the batched query and return the offsets" do
+      expect(proxy.read_partition_offsets(specs)).to eq(offsets)
+    end
+
+    it "expect to resolve all the requested partitions with one batched query" do
+      proxy.read_partition_offsets(specs)
+
+      expect(wrapped_object).to have_received(:list_offsets).once
+    end
+
+    context "when an isolation level is provided" do
+      before do
+        allow(wrapped_object)
+          .to receive(:list_offsets)
+          .with(specs, isolation_level: Karafka::Admin::IsolationLevels::READ_COMMITTED)
+          .and_return(handle)
+      end
+
+      it "expect to forward it to the wrapped object" do
+        proxy.read_partition_offsets(
+          specs,
+          isolation_level: Karafka::Admin::IsolationLevels::READ_COMMITTED
+        )
+
+        expect(wrapped_object)
+          .to have_received(:list_offsets)
+          .with(specs, isolation_level: Karafka::Admin::IsolationLevels::READ_COMMITTED)
+      end
+    end
+
+    context "when the batched query times out" do
+      before do
+        allow(handle).to receive(:wait).and_raise(Rdkafka::AbstractHandle::WaitTimeoutError)
+      end
+
+      it "expect to surface it as a timed out error and retry up to the max attempts" do
+        expect { proxy.read_partition_offsets(specs) }
+          .to raise_error(Rdkafka::RdkafkaError, /timed_out/)
+
+        expect(wrapped_object).to have_received(:list_offsets).exactly(3 + 1).times
+      end
+    end
+
+    context "when an all_brokers_down error occurs" do
+      before { allow(wrapped_object).to receive(:list_offsets).and_raise(all_down_error) }
+
+      it "retries up to the max attempts and then raises the error" do
+        expect { proxy.read_partition_offsets(specs) }
+          .to raise_error(Rdkafka::RdkafkaError, /all_brokers_down/)
+
+        expect(wrapped_object).to have_received(:list_offsets).exactly(3 + 1).times
+      end
+    end
+  end
+
   describe "#offsets_for_times" do
     let(:tpl) { double }
     let(:result) { double }

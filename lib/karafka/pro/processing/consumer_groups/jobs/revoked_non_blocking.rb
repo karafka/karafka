@@ -30,11 +30,8 @@
 
 module Karafka
   module Pro
-    # Pro components related to processing part of Karafka
     module Processing
-      # Pro consumer-group-specific processing components
       module ConsumerGroups
-        # Pro jobs
         module Jobs
           # The revoked job type in a non-blocking variant.
           # This variant works "like" the regular revoked but does not block the queue.

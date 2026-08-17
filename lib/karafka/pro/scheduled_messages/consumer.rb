@@ -72,7 +72,13 @@ module Karafka
 
           @states_reporter.call
 
-          recent_timestamp = messages.last.timestamp.to_i
+          # Clamp to the wall clock: a future-dated message timestamp (producer clock skew or an
+          # explicitly set future timestamp) must not be treated as proof of catch-up. Otherwise a
+          # single future-dated message read mid-backlog would flip `loaded!` while older tombstones
+          # at higher offsets are still unread, dispatching schedules whose cancelling tombstones
+          # have not been loaded yet (double dispatch). Mirrors the `[timestamp, now].min` clamp in
+          # the batch metadata builder.
+          recent_timestamp = [messages.last.timestamp.to_i, Time.now.to_i].min
           post_started_timestamp = @tracker.started_at + GRACE_PERIOD
 
           # If we started getting messages that are beyond the current time, it means we have

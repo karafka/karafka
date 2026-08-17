@@ -31,7 +31,6 @@
 module Karafka
   module Pro
     module Cleaner
-      # Cleaner messages components related enhancements
       module Messages
         # Extensions to the message metadata that allow for granular memory control on a per
         # message basis

@@ -44,9 +44,14 @@ class Consumer < Karafka::BaseConsumer
   end
 end
 
+draw_topics do
+  topic DT.topic do
+    partitions 2
+  end
+end
+
 draw_routes do
   topic DT.topic do
-    config(partitions: 2)
     consumer Consumer
     periodic true
   end

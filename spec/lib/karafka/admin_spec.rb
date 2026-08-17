@@ -206,6 +206,175 @@ RSpec.describe_current do
     end
   end
 
+  describe "#with_consumer" do
+    context "when operating on an external client" do
+      subject(:admin) { described_class.new(external_client: external_client) }
+
+      let(:external_client) { instance_double(Rdkafka::Consumer) }
+
+      it "yields a proxy wrapping the external client" do
+        admin.with_consumer do |proxy|
+          expect(proxy).to be_a(Karafka::Connection::Proxy)
+          expect(proxy.wrapped).to eq(external_client)
+        end
+      end
+
+      it "does not wrap an already proxied external client with another proxy level" do
+        proxied = Karafka::Connection::Proxy.new(external_client)
+
+        described_class.new(external_client: proxied).with_consumer do |proxy|
+          expect(proxy.wrapped).to eq(external_client)
+        end
+      end
+
+      it "does not manage the external client lifecycle" do
+        # Verifying double raises on any unexpected message, so lack of errors proves that no
+        # start, unsubscribe or close was invoked on the external client
+        expect { admin.with_consumer { nil } }.not_to raise_error
+      end
+
+      it "does not manage the external client lifecycle also when the block raises" do
+        expect { admin.with_consumer { raise ArgumentError } }.to raise_error(ArgumentError)
+      end
+
+      it "ignores provided settings" do
+        admin.with_consumer("group.id": "whatever") do |proxy|
+          expect(proxy.wrapped).to eq(external_client)
+        end
+      end
+
+      it "returns the block result" do
+        expect(admin.with_consumer { 42 }).to eq(42)
+      end
+    end
+
+    context "when the external client is a connection client" do
+      subject(:admin) { described_class.new(external_client: connection_client) }
+
+      let(:subscription_group) { build(:routing_subscription_group) }
+      let(:connection_client) do
+        Karafka::Connection::Client.new(subscription_group, -> { true })
+      end
+      let(:initial_handle) { instance_double(Rdkafka::Consumer) }
+      let(:rebuilt_handle) { instance_double(Rdkafka::Consumer) }
+
+      it "resolves the current handle on each use so it follows the client across resets" do
+        allow(connection_client)
+          .to receive(:wrapped_kafka)
+          .and_return(
+            Karafka::Connection::Proxy.new(initial_handle),
+            Karafka::Connection::Proxy.new(rebuilt_handle)
+          )
+
+        admin.with_consumer { |proxy| expect(proxy.wrapped).to eq(initial_handle) }
+        admin.with_consumer { |proxy| expect(proxy.wrapped).to eq(rebuilt_handle) }
+      end
+    end
+  end
+
+  describe "#with_admin" do
+    context "when the external client is an rdkafka admin instance" do
+      subject(:admin) { described_class.new(external_client: external_client) }
+
+      let(:external_client) do
+        Rdkafka::Config.new(Karafka::App.config.kafka).admin
+      end
+
+      after { external_client.close }
+
+      it "yields a proxy wrapping the external admin and leaves it open" do
+        admin.with_admin do |proxy|
+          expect(proxy).to be_a(Karafka::Connection::Proxy)
+          expect(proxy.wrapped).to eq(external_client)
+        end
+
+        expect(external_client.closed?).to be(false)
+      end
+
+      it "does not wrap an already proxied external admin with another proxy level" do
+        proxied = Karafka::Connection::Proxy.new(external_client)
+
+        described_class.new(external_client: proxied).with_admin do |proxy|
+          expect(proxy.wrapped).to eq(external_client)
+        end
+      end
+
+      it "leaves the external admin open also when the block raises" do
+        expect { admin.with_admin { raise ArgumentError } }.to raise_error(ArgumentError)
+        expect(external_client.closed?).to be(false)
+      end
+
+      it "is not used for consumer-based operations" do
+        admin.with_consumer do |proxy|
+          expect(proxy.wrapped).not_to eq(external_client)
+        end
+      end
+
+      it "serves cluster_info without a dedicated admin instance" do
+        # Materialize the external admin and the subject upfront so only operational usage is
+        # guarded
+        external_client
+        admin
+
+        expect(Rdkafka::Config).not_to receive(:new)
+
+        expect(admin.cluster_info.topics).to be_a(Array)
+      end
+    end
+
+    context "when the external client is a consumer" do
+      subject(:admin) { described_class.new(external_client: external_client) }
+
+      let(:external_client) { instance_double(Rdkafka::Consumer) }
+
+      it "is not used and a dedicated admin instance operates" do
+        admin.with_admin do |proxy|
+          expect(proxy.wrapped).not_to eq(external_client)
+        end
+      end
+    end
+  end
+
+  describe "external client delegations" do
+    subject(:admin) { described_class.new(external_client: external_client) }
+
+    let(:external_client) { instance_double(Rdkafka::Consumer) }
+
+    it "carries the external client over to consumer groups operations" do
+      expect(Karafka::Admin::ConsumerGroups)
+        .to receive(:new)
+        .with(kafka: {}, external_client: external_client)
+        .and_call_original
+
+      allow_any_instance_of(Karafka::Admin::ConsumerGroups)
+        .to receive(:read_lags_with_offsets)
+
+      admin.read_lags_with_offsets
+    end
+
+    it "carries the external client over to topics operations" do
+      expect(Karafka::Admin::Topics)
+        .to receive(:new)
+        .with(kafka: {}, external_client: external_client)
+        .and_call_original
+
+      allow_any_instance_of(Karafka::Admin::Topics).to receive(:info)
+
+      admin.topic_info(name)
+    end
+
+    it "carries the external client over to replication planning" do
+      expect(Karafka::Admin::Replication)
+        .to receive(:new)
+        .with(kafka: {}, external_client: external_client)
+        .and_call_original
+
+      allow_any_instance_of(Karafka::Admin::Replication).to receive(:plan)
+
+      admin.plan_topic_replication(topic: name, replication_factor: 2)
+    end
+  end
+
   describe "#close" do
     subject(:admin) { described_class.new }
 

@@ -43,6 +43,7 @@ module Karafka
 
           nested(:encryption) do
             required(:active) { |val| [true, false].include?(val) }
+            required(:mode) { |val| %i[envelope direct].include?(val) }
             required(:version) { |val| val.is_a?(String) && !val.empty? }
             required(:public_key) { |val| val.is_a?(String) }
             required(:fingerprinter) { |val| val == false || val.respond_to?(:hexdigest) }

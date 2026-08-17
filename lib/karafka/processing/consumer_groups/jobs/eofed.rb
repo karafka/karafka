@@ -2,8 +2,6 @@
 
 module Karafka
   module Processing
-    # Consumer-group-specific processing components (driven by rebalance callbacks and partition
-    # ticks). Parallel `ShareGroups` will live next to this namespace once KIP-932 lands.
     module ConsumerGroups
       # Consumer-group-specific job types
       module Jobs
@@ -11,7 +9,8 @@ module Karafka
         class Eofed < ::Karafka::Processing::Jobs::Base
           self.action = :eofed
 
-          # @param executor [Karafka::Processing::ConsumerGroups::Executor] executor that is supposed to run the job
+          # @param executor [Karafka::Processing::ConsumerGroups::Executor] executor that is
+          #   supposed to run the job
           # @return [Eofed]
           def initialize(executor)
             @executor = executor

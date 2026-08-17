@@ -3,7 +3,6 @@
 # This file contains Railtie for auto-configuration
 
 unless Karafka.rails?
-  # Without defining this in any way, Zeitwerk ain't happy so we do it that way
   module Karafka
     class Railtie
     end

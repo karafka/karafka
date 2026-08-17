@@ -84,6 +84,14 @@ module Karafka
 
           # We initialize it here so we don't initialize it during multi-threading work
           Processing::ConsumerGroups::SubscriptionGroupsCoordinator.instance
+
+          # Subscribe the paused partitions lags refresher only when the feature is enabled.
+          # It is checked post setup as the interval is user-configurable during setup
+          unless config.internal.statistics.consumer_groups.lag_compensation.interval.zero?
+            config.monitor.subscribe(
+              Instrumentation::ConsumerGroups::LagCompensation::Refresher.new
+            )
+          end
         end
 
         # Runs operations needed after fork in swarm for features that need it
@@ -134,6 +142,10 @@ module Karafka
           icfg.active_job.consumer_class = ActiveJob::Consumer
           icfg.active_job.dispatcher = ActiveJob::Dispatcher.new
           icfg.active_job.job_options_contract = ActiveJob::JobOptionsContract.new
+
+          # The decorator is swapped unconditionally as it is a pass-through when the paused
+          # partitions lags refreshing is disabled or when there is no refreshed data
+          icfg.statistics.consumer_groups.decorator_class = Instrumentation::Callbacks::ConsumerGroups::Decorator
 
           config.monitor.subscribe(Instrumentation::PerformanceTracker.instance)
         end

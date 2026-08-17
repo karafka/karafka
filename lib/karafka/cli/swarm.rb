@@ -1,7 +1,6 @@
 # frozen_string_literal: true
 
 module Karafka
-  # Karafka framework Cli
   class Cli
     # Starts swarm of consumers forked from the supervisor
     class Swarm < Base

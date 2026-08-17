@@ -18,12 +18,10 @@ class Consumer < Karafka::BaseConsumer
   end
 end
 
-draw_routes do
+draw_topics do
   topic DT.topic do
-    consumer Consumer
-
+    partitions 1
     config(
-      partitions: 1,
       "cleanup.policy": "compact",
       "min.cleanable.dirty.ratio": 0.00001,
       "segment.ms": 500,
@@ -32,6 +30,12 @@ draw_routes do
       "min.compaction.lag.ms": 500,
       "retention.ms": 500
     )
+  end
+end
+
+draw_routes do
+  topic DT.topic do
+    consumer Consumer
   end
 end
 

@@ -31,9 +31,7 @@
 module Karafka
   module Pro
     module Processing
-      # Pro consumer-group-specific processing components
       module ConsumerGroups
-        # Pro jobs
         module Jobs
           # Non-Blocking version of the Eofed job
           # We use this version for LRJ topics for cases where saturated resources would not allow

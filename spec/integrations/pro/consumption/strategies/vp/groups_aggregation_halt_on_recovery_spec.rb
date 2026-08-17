@@ -51,7 +51,7 @@ draw_routes do
   consumer_group DT.group do
     topic DT.topic do
       consumer Consumer
-      filter VpStabilizer
+      filter FlowStabilizer
       virtual_partitions(
         partitioner: ->(_msg) { rand(2) }
       )

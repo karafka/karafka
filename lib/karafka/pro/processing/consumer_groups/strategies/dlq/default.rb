@@ -31,9 +31,6 @@
 module Karafka
   module Pro
     module Processing
-      # Consumer-group-specific Pro processing components (driven by rebalance callbacks and
-      # partition ticks). Parallel `ShareGroups` will live next to this namespace once KIP-932
-      # lands.
       module ConsumerGroups
         module Strategies
           # Namespace for all the strategies starting with DLQ
@@ -49,8 +46,8 @@ module Karafka
 
               # Override of the standard `#mark_as_consumed` in order to handle the pause tracker
               # reset in case DLQ is marked as fully independent. When DLQ is marked independent,
-              # any offset marking causes the pause count tracker to reset. This is useful when
-              # the error is not due to the collective batch operations state but due to intermediate
+              # any offset marking causes the pause count tracker to reset. This is useful when the
+              # error is not due to the collective batch operations state but due to intermediate
               # "crawling" errors that move with it
               #
               # @see `Strategies::Default#mark_as_consumed` for more details
@@ -68,8 +65,8 @@ module Karafka
                 @_current_offset_metadata = nil
               end
 
-              # Override of the standard `#mark_as_consumed!`. Resets the pause tracker count in case
-              # DLQ was configured with the `independent` flag.
+              # Override of the standard `#mark_as_consumed!`. Resets the pause tracker count in
+              # case DLQ was configured with the `independent` flag.
               #
               # @see `Strategies::Default#mark_as_consumed!` for more details
               # @param message [Messages::Message]
@@ -147,8 +144,8 @@ module Karafka
                 )
               end
 
-              # Dispatches the message to the DLQ (when needed and when applicable based on settings)
-              #   and marks this message as consumed for non MOM flows.
+              # Dispatches the message to the DLQ (when needed and when applicable based on
+              # settings) and marks this message as consumed for non MOM flows.
               #
               # If producer is transactional and config allows, uses transaction to do that
               def dispatch_if_needed_and_mark_as_consumed
@@ -157,11 +154,7 @@ module Karafka
                 dispatch = lambda do
                   dispatch_to_dlq(skippable_message) if dispatch_to_dlq?
 
-                  if mark_after_dispatch?
-                    mark_dispatched_to_dlq(skippable_message)
-                  else
-                    self.seek_offset = skippable_message.offset + 1
-                  end
+                  mark_dispatched_to_dlq(skippable_message) if mark_after_dispatch?
                 end
 
                 if dispatch_in_a_transaction?
@@ -169,6 +162,12 @@ module Karafka
                 else
                   dispatch.call
                 end
+
+                # When not marking after dispatch, the seek offset is advanced manually. This must
+                # happen only after the dispatch (and its transaction) succeeded - advancing it
+                # inside the transaction would let the mutation survive an abort, skipping the
+                # broken message which would then be neither in the DLQ nor reprocessed
+                self.seek_offset = skippable_message.offset + 1 unless mark_after_dispatch?
               end
 
               # @param skippable_message [Array<Karafka::Messages::Message>]

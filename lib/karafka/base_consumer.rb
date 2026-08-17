@@ -1,6 +1,5 @@
 # frozen_string_literal: true
 
-# Karafka module namespace
 module Karafka
   # Base consumer from which all Karafka consumers should inherit
   class BaseConsumer

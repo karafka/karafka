@@ -31,9 +31,6 @@
 module Karafka
   module Pro
     module Processing
-      # Consumer-group-specific Pro processing components (driven by rebalance callbacks and
-      # partition ticks). Parallel `ShareGroups` will live next to this namespace once KIP-932
-      # lands.
       module ConsumerGroups
         module Filters
           # Delayer that checks if we have appropriate insights available. If not, pauses for
@@ -89,7 +86,7 @@ module Karafka
 
             # Pause when we had to back-off or skip if delay is not needed
             def action
-              applied? ? :pause : :skip
+              applied? ? Actions.pause : Actions.skip
             end
           end
         end

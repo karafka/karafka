@@ -10,20 +10,31 @@ topic1 = "#{DT.topic}-1"
 topic2 = "#{DT.topic}-2"
 topic3 = "#{DT.topic}-3"
 
+draw_topics do
+  topic topic1 do
+    partitions 2
+  end
+
+  topic topic2 do
+    partitions 3
+  end
+
+  topic topic3 do
+    partitions 1
+  end
+end
+
 draw_routes do
   topic topic1 do
     active(false)
-    config(partitions: 2)
   end
 
   topic topic2 do
     active(false)
-    config(partitions: 3)
   end
 
   topic topic3 do
     active(false)
-    config(partitions: 1)
   end
 end
 

@@ -31,16 +31,12 @@
 module Karafka
   module Pro
     module Processing
-      # Consumer-group-specific Pro processing components (driven by rebalance callbacks and
-      # partition ticks). Parallel `ShareGroups` will live next to this namespace once KIP-932
-      # lands.
       module ConsumerGroups
-        # Offset Metadata support on the processing side
         module OffsetMetadata
           # Extra API methods for offset metadata fetching
-          # @note Part of this feature API is embedded directly into the strategies because it alters
-          #   how marking methods (`#mark_as_consumed` and `#mark_as_consumed!`) operate. Because
-          #   of that, they had to be embedded into the strategies.
+          # @note Part of this feature API is embedded directly into the strategies because it
+          #   alters how marking methods (`#mark_as_consumed` and `#mark_as_consumed!`) operate.
+          #   Because of that, they had to be embedded into the strategies.
           module Consumer
             # @param cache [Boolean] should we use cached result if present (true by default)
             # @return [false, Object] false in case we do not own the partition anymore or

@@ -54,6 +54,28 @@ module Karafka
           # This allows us to support key rotation
           setting(:private_keys, default: {})
 
+          # Encryption mode used when producing messages:
+          #
+          # - `:direct` (default) - payload is RSA-encrypted directly, which limits it to the
+          #   RSA key capacity (key size minus padding, ~245 bytes for 2048-bit keys). Default
+          #   for backwards compatibility with already running deployments. The default will
+          #   switch to `:envelope` in a future release (with prior notice); decryption of the
+          #   `:direct` format is never planned for removal, as data at rest never expires.
+          # - `:envelope` - payload is encrypted with a one-time AES-256-GCM key and only that
+          #   key is RSA-wrapped, so payloads of any size are supported and the GCM auth tag
+          #   detects corruption and truncation. Note this is not authenticity: the public key
+          #   is distributed to all producers, so any of its holders can build a valid envelope
+          #
+          # Decryption always supports both formats regardless of this setting. Since processes
+          # older than the version that introduced this setting cannot decrypt envelope
+          # payloads, when enabling `:envelope` upgrade all consuming processes first and only
+          # then switch producers to the envelope mode.
+          #
+          # The envelope openssl gem requirement (>= 3.0) is verified during setup. Flipping
+          # this setting to `:envelope` at runtime on an unsupported openssl bypasses that
+          # friendly boot error and fails on first use instead.
+          setting(:mode, default: :direct)
+
           # Cipher used to encrypt and decrypt data
           setting(:cipher, default: Encryption::Cipher.new)
 

@@ -2,8 +2,6 @@
 
 module Karafka
   module Processing
-    # Consumer-group-specific processing components (driven by rebalance callbacks and partition
-    # ticks). Parallel `ShareGroups` will live next to this namespace once KIP-932 lands.
     module ConsumerGroups
       # Buffer for executors of a given subscription group. It wraps around the concept of building
       # and caching them, so we can re-use them instead of creating new each time.
@@ -63,8 +61,8 @@ module Karafka
         #
         # @param topic [String] topic name
         # @param partition [Integer] partition number
-        # @return [Array<Executor, Pro::Processing::ConsumerGroups::Executor>] executors in use for this
-        #   topic + partition
+        # @return [Array<Executor, Pro::Processing::ConsumerGroups::Executor>] executors in use for
+        #   this topic + partition
         def find_all(topic, partition)
           @buffer[topic][partition].values
         end

@@ -31,19 +31,16 @@
 module Karafka
   module Pro
     module Processing
-      # Consumer-group-specific Pro processing components (driven by rebalance callbacks and
-      # partition ticks). Parallel `ShareGroups` will live next to this namespace once KIP-932
-      # lands.
       module ConsumerGroups
         # Offset Metadata support on the processing side
         module OffsetMetadata
           # This fetcher is responsible for fetching and caching committed offsets metadata
           # information.
           #
-          # By design we fetch all information for a requested topic assignments. Not all topics from
-          # the same subscription group may need metadata and even if, we can run the few smaller
-          # queries. This approach prevents us from querying all assigned topics data in one go
-          # preventing excessive queries.
+          # By design we fetch all information for a requested topic assignments. Not all topics
+          # from the same subscription group may need metadata and even if, we can run the few
+          # smaller queries. This approach prevents us from querying all assigned topics data in one
+          # go preventing excessive queries.
           #
           # Since the assumption is, that user will not have to reach out for the later metadata
           # since it is produced in the context of a given consumer assignment, we can cache the
@@ -64,7 +61,8 @@ module Karafka
               @tpls = {}
             end
 
-            # Registers a client of a given subscription group, so we can use it for queries later on
+            # Registers a client of a given subscription group, so we can use it for queries later
+            # on
             # @param client [Karafka::Connection::Client]
             # @note Since we store the client reference and not the underlying rdkafka consumer
             #   instance, we do not have to deal with the recovery as it is abstracted away
@@ -104,8 +102,8 @@ module Karafka
 
             # Clears cache of a given subscription group. It is triggered on assignment changes.
             #
-            # @param subscription_group [Karafka::Routing::SubscriptionGroup] subscription group that
-            #   we want to clear.
+            # @param subscription_group [Karafka::Routing::SubscriptionGroup] subscription group
+            #   that we want to clear.
             def clear(subscription_group)
               @mutexes.fetch(subscription_group).synchronize do
                 @tpls[subscription_group].clear

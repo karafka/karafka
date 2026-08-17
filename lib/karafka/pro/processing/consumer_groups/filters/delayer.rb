@@ -31,9 +31,6 @@
 module Karafka
   module Pro
     module Processing
-      # Consumer-group-specific Pro processing components (driven by rebalance callbacks and
-      # partition ticks). Parallel `ShareGroups` will live next to this namespace once KIP-932
-      # lands.
       module ConsumerGroups
         module Filters
           # A filter that allows us to delay processing by pausing until time is right.
@@ -80,9 +77,9 @@ module Karafka
 
             # @return [Symbol] action to take on post-filtering
             def action
-              return :skip unless applied?
+              return Actions.skip unless applied?
 
-              (timeout <= 0) ? :seek : :pause
+              (timeout <= 0) ? Actions.seek : Actions.pause
             end
           end
         end

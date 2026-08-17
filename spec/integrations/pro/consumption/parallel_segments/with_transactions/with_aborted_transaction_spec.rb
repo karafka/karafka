@@ -31,7 +31,13 @@
 # When a transaction is aborted, the parallel segments should handle this properly without marking
 # offsets
 
-setup_karafka do |config|
+# We allow consume errors because of a known librdkafka defect
+# (https://github.com/confluentinc/librdkafka/issues/4849): aborting a transaction right after
+# producing on a producer that just committed a previous transaction can fail its EndTxn with a
+# fatal INVALID_TXN_STATE under load. WaterDrop reloads the client on such fatals and the batch
+# is retried, so the behavioral assertions below remain fully valid - the error is a recoverable
+# blip, not a rollback correctness issue.
+setup_karafka(allow_errors: %w[consumer.consume.error]) do |config|
   config.concurrency = 5
   config.max_messages = 10
   config.kafka[:"transactional.id"] = SecureRandom.uuid
@@ -72,6 +78,11 @@ class Consumer < Karafka::BaseConsumer
             key: message.key,
             segment_id: segment_id
           }
+
+          # Give the async produce a moment to register the transaction at the coordinator
+          # before we abort - aborting with the very first produce still in flight is the exact
+          # race behind librdkafka#4849 that can fail the abort EndTxn with INVALID_TXN_STATE
+          sleep(1)
 
           raise WaterDrop::AbortTransaction
         end

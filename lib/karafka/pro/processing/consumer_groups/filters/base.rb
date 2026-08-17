@@ -31,9 +31,6 @@
 module Karafka
   module Pro
     module Processing
-      # Consumer-group-specific Pro processing components (driven by rebalance callbacks and
-      # partition ticks). Parallel `ShareGroups` will live next to this namespace once KIP-932
-      # lands.
       module ConsumerGroups
         module Filters
           # Base for all the filters. All filters (including custom) need to use this API.
@@ -47,6 +44,8 @@ module Karafka
             attr_reader :cursor
 
             include Karafka::Core::Helpers::Time
+            # Provides `#skip?`, `#pause?` and `#seek?` predicates built on top of `#action`
+            include Actions
 
             # Initializes the filter as not yet applied
             def initialize
@@ -60,10 +59,10 @@ module Karafka
               raise NotImplementedError, "Implement in a subclass"
             end
 
-            # @return [Symbol] filter post-execution action on consumer. Either `:skip`, `:pause` or
-            #   `:seek`.
+            # @return [Symbol] filter post-execution action on consumer. One of {Actions::ALL}
+            #   (`Actions.skip`, `Actions.pause` or `Actions.seek`).
             def action
-              :skip
+              Actions.skip
             end
 
             # @return [Boolean] did this filter change messages in any way

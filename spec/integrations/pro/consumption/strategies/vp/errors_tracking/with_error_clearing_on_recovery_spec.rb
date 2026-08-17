@@ -66,7 +66,7 @@ draw_routes do
     virtual_partitions(
       partitioner: ->(_msg) { DT[:iterator].next }
     )
-    filter VpStabilizer
+    filter FlowStabilizer
   end
 end
 

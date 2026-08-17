@@ -134,6 +134,34 @@ RSpec.describe Karafka::Admin::ConsumerGroups do
 
       it { expect(results).to eq("doesnotexist" => { name => { 0 => { lag: -1, offset: -1 } } }) }
     end
+
+    context "when running on an external client" do
+      subject(:results) do
+        described_class
+          .new(external_client: external_client)
+          .read_lags_with_offsets(cgs_t)
+      end
+
+      before do
+        Karafka::Admin::Topics.create(name, 1, 1)
+        PRODUCERS.regular.produce_sync(topic: name, payload: "1")
+      end
+
+      after { external_client.close }
+
+      let(:external_client) do
+        Rdkafka::Config.new(
+          Karafka::App.config.kafka.merge("group.id": "doesnotexist")
+        ).consumer
+      end
+
+      let(:cgs_t) { { "doesnotexist" => [name] } }
+
+      it "expect to read via the external client and leave it open" do
+        expect(results).to eq("doesnotexist" => { name => { 0 => { lag: -1, offset: -1 } } })
+        expect(external_client.closed?).to be(false)
+      end
+    end
   end
 
   describe "#trigger_rebalance" do

@@ -467,6 +467,8 @@ module Karafka
         when "virtual_partitions.partitioner.error"
           error "Virtual partitions partitioner error occurred: #{details}"
           error backtrace
+        when "lag_compensation.refresher.error"
+          warn "Lag compensation refresher error occurred: #{details}"
         # This handles any custom errors coming from places like Web-UI, etc
         else
           error "#{type} error occurred: #{error.class} - #{details}"

@@ -2,13 +2,12 @@
 
 module Karafka
   module Processing
-    # Consumer-group-specific processing components (driven by rebalance callbacks and partition
-    # ticks). Parallel `ShareGroups` will live next to this namespace once KIP-932 lands.
     module ConsumerGroups
       module Strategies
-        # No features enabled.
-        # No manual offset management
-        # No long running jobs
+        # No features enabled:
+        # - No manual offset management
+        # - No long running jobs
+        #
         # Nothing. Just standard, automatic flow
         module Default
           include Base
@@ -59,6 +58,8 @@ module Karafka
             # In case like this we ignore marking
             return true if seek_offset.nil?
             # Ignore double markings of the same offset
+            # Only this exact re-mark is skipped - marking genuinely older offsets is intentionally
+            # allowed and rewinds the seek offset for reprocessing (see #2432)
             return true if (seek_offset - 1) == message.offset
             return false if revoked?
             unless client.mark_as_consumed(message)
@@ -85,6 +86,8 @@ module Karafka
             # In case like this we ignore marking
             return true if seek_offset.nil?
             # Ignore double markings of the same offset
+            # Only this exact re-mark is skipped - marking genuinely older offsets is intentionally
+            # allowed and rewinds the seek offset for reprocessing (see #2432)
             return true if (seek_offset - 1) == message.offset
             return false if revoked?
 
@@ -214,8 +217,8 @@ module Karafka
           end
 
           # We need to always un-pause the processing in case we have lost a given partition.
-          # Otherwise the underlying librdkafka would not know we may want to continue processing and
-          # the pause could in theory last forever
+          # Otherwise the underlying librdkafka would not know we may want to continue processing
+          # and the pause could in theory last forever
           def handle_revoked
             resume
 

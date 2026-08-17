@@ -4,7 +4,6 @@ module Karafka
   module Instrumentation
     # Callbacks used to transport things from rdkafka
     module Callbacks
-      # Consumer-group-specific librdkafka callbacks
       module ConsumerGroups
         # Callback that kicks in when consumer error occurs and is published in a background thread
         class Error

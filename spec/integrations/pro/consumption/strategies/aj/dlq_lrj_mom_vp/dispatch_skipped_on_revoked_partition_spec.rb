@@ -71,9 +71,14 @@ class Job < ActiveJob::Base
   end
 end
 
+draw_topics do
+  topic DT.topic do
+    partitions 2
+  end
+end
+
 draw_routes do
   active_job_topic DT.topic do
-    config(partitions: 2)
     # VP + DLQ requires at least one retry; the collapsed retry is where dispatch is decided
     dead_letter_queue topic: DT.topics[1], max_retries: 1
     long_running_job true
