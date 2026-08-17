@@ -28,41 +28,31 @@
 # License: https://karafka.io/docs/Pro-License-Comm/
 # Contact: contact@karafka.io
 
-# When altering the default pausing using old API (setters), it should not impact other topics
-# This is a backwards compatibility test
+# Booting with the envelope encryption mode on an openssl gem too old for the EVP PKey API
+# must fail during setup with a clear dependency constraints error. This is a first-boot
+# process, so it also guards the ordering: the constraint registered in the feature pre_setup
+# must be in the registry by the time the central config-phase verification runs.
 
-setup_karafka
+# Simulate an old openssl gem. Integration specs are standalone scripts without RSpec, so
+# stub_const is not available here
+# rubocop:disable RSpec/RemoveConst
+OpenSSL.send(:remove_const, :VERSION)
+# rubocop:enable RSpec/RemoveConst
+OpenSSL::VERSION = "2.2.1"
 
-draw_routes(create_topics: false) do
-  topic :a do
-    consumer Class.new(Karafka::BaseConsumer)
-    pause_timeout 1_000
-    pause_max_timeout 5_000
-    pause_with_exponential_backoff true
+failed = false
+
+begin
+  setup_karafka do |config|
+    config.encryption.active = true
+    config.encryption.mode = :envelope
+    config.encryption.public_key = fixture_file("rsa/public_key_1.pem")
+    config.encryption.private_keys = { "1" => fixture_file("rsa/private_key_1.pem") }
   end
+rescue Karafka::Errors::DependencyConstraintsError => e
+  failed = true
 
-  topic :b do
-    consumer Class.new(Karafka::BaseConsumer)
-    pause_timeout 5_000
-    pause_max_timeout 10_000
-    pause_with_exponential_backoff false
-  end
-
-  topic :c do
-    consumer Class.new(Karafka::BaseConsumer)
-  end
+  assert e.message.include?("openssl gem >= 3.0"), e.message
 end
 
-topics = Karafka::App.routes.first.topics
-
-assert_equal 1_000, topics[0].pause_timeout
-assert_equal 5_000, topics[0].pause_max_timeout
-assert_equal true, topics[0].pause_with_exponential_backoff
-
-assert_equal 5_000, topics[1].pause_timeout
-assert_equal 10_000, topics[1].pause_max_timeout
-assert_equal false, topics[1].pause_with_exponential_backoff
-
-assert_equal 1, topics[2].pause_timeout
-assert_equal 1, topics[2].pause_max_timeout
-assert_equal false, topics[2].pause_with_exponential_backoff
+assert failed, "expected setup with envelope mode on old openssl to raise"

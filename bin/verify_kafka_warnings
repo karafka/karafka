@@ -28,6 +28,7 @@ allowed_patterns=(
    "Auto topic creation failed for it-production."
    "Auto topic creation failed for it-us01.production."
    "Auto topic creation failed for it-sandbox.production."
+   "Auto topic creation failed for it-parallel-segments-pattern-.*TOPIC_ALREADY_EXISTS"
 )
 
 # Use provided container names or default to "kafka"

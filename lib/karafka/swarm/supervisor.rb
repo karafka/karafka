@@ -143,8 +143,10 @@ module Karafka
 
         # We check from time to time (for the timeout period) if all the threads finished
         # their work and if so, we can just return and normal shutdown process will take place
-        # We divide it by 1000 because we use time in ms.
-        ((total_shutdown_timeout / 1_000) * (1 / supervision_sleep)).to_i.times do
+        # We use float math and divide by 1000 (ms -> s) so that sub-second timeout values do not
+        # collapse to zero iterations via integer division. We `ceil` to guarantee at least one
+        # supervision check for any positive timeout.
+        (total_shutdown_timeout / (supervision_sleep * 1_000)).ceil.times do
           if manager.stopped?
             manager.cleanup
             return

@@ -33,17 +33,13 @@ module Karafka
     module Routing
       module Features
         class Pausing < Base
-          # Config for pausing feature
-          Config = Struct.new(
-            :active,
-            :timeout,
-            :max_timeout,
-            :with_exponential_backoff,
-            keyword_init: true
-          ) do
-            alias_method :active?, :active
-            alias_method :with_exponential_backoff?, :with_exponential_backoff
-          end
+          # Config for pausing feature.
+          #
+          # By convention each routing feature exposes a `Config`. The pause value object is defined
+          # in OSS (`Karafka::Routing::Features::Pausing::Config`) because the per-topic `#pause`
+          # reader defaults to the global config there, so the feature points its `Config` at that
+          # shared class rather than redefining it.
+          Config = Karafka::Routing::Features::Pausing::Config
         end
       end
     end

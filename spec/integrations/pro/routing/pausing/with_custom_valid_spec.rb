@@ -58,14 +58,14 @@ end
 
 topics = Karafka::App.routes.first.topics
 
-assert_equal 1_000, topics[0].pause_timeout
-assert_equal 5_000, topics[0].pause_max_timeout
-assert_equal true, topics[0].pause_with_exponential_backoff
+assert_equal 1_000, topics[0].pause.timeout
+assert_equal 5_000, topics[0].pause.max_timeout
+assert_equal true, topics[0].pause.with_exponential_backoff
 
-assert_equal 5_000, topics[1].pause_timeout
-assert_equal 10_000, topics[1].pause_max_timeout
-assert_equal false, topics[1].pause_with_exponential_backoff
+assert_equal 5_000, topics[1].pause.timeout
+assert_equal 10_000, topics[1].pause.max_timeout
+assert_equal false, topics[1].pause.with_exponential_backoff
 
-assert_equal 1, topics[2].pause_timeout
-assert_equal 1, topics[2].pause_max_timeout
-assert_equal false, topics[2].pause_with_exponential_backoff
+assert_equal 1, topics[2].pause.timeout
+assert_equal 1, topics[2].pause.max_timeout
+assert_equal false, topics[2].pause.with_exponential_backoff

@@ -19,9 +19,9 @@ module Karafka
       # @return [Karafka::TimeTrackers::Pause] pause tracker instance
       def fetch(topic, partition)
         @pauses[topic][partition] ||= TimeTrackers::Pause.new(
-          timeout: topic.pause_timeout,
-          max_timeout: topic.pause_max_timeout,
-          exponential_backoff: topic.pause_with_exponential_backoff
+          timeout: topic.pause.timeout,
+          max_timeout: topic.pause.max_timeout,
+          exponential_backoff: topic.pause.with_exponential_backoff
         )
       end
 

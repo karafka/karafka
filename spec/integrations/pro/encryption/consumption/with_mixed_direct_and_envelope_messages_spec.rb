@@ -28,61 +28,47 @@
 # License: https://karafka.io/docs/Pro-License-Comm/
 # Contact: contact@karafka.io
 
-# We should be able to multiplex a pattern and things should operate as expected
+# Messages encrypted with the legacy `:direct` mode (pre-envelope format at rest) and messages
+# encrypted with the `:envelope` mode must both be decryptable by the same consumer, as the
+# formats are auto-recognized. This guards backwards compatibility of already produced data and
+# the safety of staged envelope rollouts.
+
+PUBLIC_KEY = fixture_file("rsa/public_key_1.pem")
+PRIVATE_KEYS = { "1" => fixture_file("rsa/private_key_1.pem") }.freeze
 
 setup_karafka do |config|
-  config.concurrency = 10
+  config.encryption.active = true
+  config.encryption.public_key = PUBLIC_KEY
+  config.encryption.private_keys = PRIVATE_KEYS
 end
 
 class Consumer < Karafka::BaseConsumer
   def consume
-    DT[:clients] << client.object_id
-    DT[:consumers] << object_id
-  end
-end
-
-draw_routes(create_topics: false) do
-  subscription_group :sg do
-    multiplexing(max: 5)
-
-    pattern("test", /#{DT.topic}/) do
-      consumer Consumer
+    messages.each do |message|
+      DT[:consumed] << message.payload
     end
   end
 end
 
-start_karafka_and_wait_until do
-  unless @created
-    sleep(5)
-
-    Karafka::Admin.create_topic(
-      DT.topic,
-      10,
-      1
-    )
-    @created = true
+draw_routes do
+  topic DT.topic do
+    consumer Consumer
+    deserializer ->(message) { message.raw_payload.to_s }
   end
-
-  10.times do |i|
-    produce_many(DT.topic, DT.uuids(10), partition: i)
-  end
-
-  sleep(1)
-
-  DT[:clients].uniq.size >= 5 && DT[:consumers].uniq.size >= 5
 end
 
-assert_equal 5, DT[:clients].uniq.size
-assert DT[:consumers].uniq.size >= 5
+# Produce first with the legacy direct format (simulates data at rest from older versions)
+Karafka::App.config.encryption.mode = :direct
+legacy_elements = DT.uuids(5)
+legacy_elements.each { |element| produce(DT.topic, element) }
 
-# Regression: the 5 multiplexed subscription groups share one consumer group but each runs its
-# own listener thread and independently discovers this pattern topic at runtime. Before the
-# dedup guard in the patterns detector, ConsumerGroup#topic= appended unconditionally, so the
-# shared consumer group accumulated one duplicate Topic per subscription group (up to the
-# multiplex factor) for the single discovered topic. It must be registered exactly once.
-discovered = Karafka::App
-  .routes
-  .flat_map { |consumer_group| consumer_group.topics.to_a }
-  .select { |topic| topic.name == DT.topic }
+# And then with the envelope format, including payloads impossible in the direct mode
+Karafka::App.config.encryption.mode = :envelope
+envelope_elements = Array.new(5) { |i| "envelope-#{i}-#{"x" * 2_000}" }
+envelope_elements.each { |element| produce(DT.topic, element) }
 
-assert_equal 1, discovered.size, discovered.map(&:name).inspect
+start_karafka_and_wait_until do
+  DT[:consumed].size >= 10
+end
+
+assert_equal (legacy_elements + envelope_elements).sort, DT[:consumed].sort
