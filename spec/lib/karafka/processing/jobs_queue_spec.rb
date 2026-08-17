@@ -103,6 +103,16 @@ RSpec.describe_current do
     end
   end
 
+  describe "#tick" do
+    it "keeps the semaphore bounded instead of accumulating unconsumed signals" do
+      10.times { queue.tick(job1.group_id) }
+
+      semaphore = queue.instance_variable_get(:@semaphores).fetch(job1.group_id)
+
+      expect(semaphore.size).to eq(1)
+    end
+  end
+
   describe "#clear" do
     before do
       queue << job1

@@ -101,7 +101,15 @@ module Karafka
       # @param group_id [String] id of the group we want to unlock for one tick
       # @note This does not release the wait lock. It just causes a conditions recheck
       def tick(group_id)
-        @semaphores.fetch(group_id) << true
+        semaphore = @semaphores.fetch(group_id)
+
+        # This queue is used only as a level-triggered signal, never as a counter, so we drain any
+        # stale, unconsumed signals before pushing a new one. Without this, ticks accumulate
+        # without bound whenever #wait is not actively popping (for example for pure
+        # non-blocking/LRJ jobs, where #wait never runs because #wait? is false from the start)
+        semaphore.pop(timeout: 0) until semaphore.empty?
+
+        semaphore << true
       end
 
       # Marks a given job from a given group as completed. When there are no more jobs from a given
