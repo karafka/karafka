@@ -300,6 +300,27 @@ RSpec.describe_current do
       end
     end
 
+    context "when async locking was used before but this group is currently unlocked" do
+      before do
+        queue.register(1)
+        # @async_locking stays true process-wide once any group has locked async, even after
+        # this lock is released - the exact condition that used to skip draining
+        queue.lock_async(1, :temp)
+        queue.unlock_async(1, :temp)
+      end
+
+      it "still drains the semaphore via #wait even though #wait? is false from the start" do
+        50.times { queue.tick(1) }
+
+        semaphore = queue.instance_variable_get(:@semaphores).fetch(1)
+        expect(semaphore.size).to be > 0
+
+        queue.wait(1)
+
+        expect(semaphore.size).to eq(0)
+      end
+    end
+
     context "when we have to wait and tick runs" do
       let(:thread1) do
         Thread.new do

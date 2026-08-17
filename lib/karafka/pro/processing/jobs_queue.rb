@@ -191,6 +191,10 @@ module Karafka
           # extra objects. That's why we only use it when locks are actually in use
           base_interval = tick_interval / 1_000.0
 
+          # Single-consumer per group_id here too (same caller as the base class), so draining is
+          # safe - see `Karafka::Processing::JobsQueue#wait`
+          drain(group_id)
+
           while wait?(group_id)
             yield if block_given?
 
@@ -205,6 +209,7 @@ module Karafka
             wait_times << base_interval
 
             @semaphores.fetch(group_id).pop(timeout: wait_times.min)
+            drain(group_id)
           end
         end
 
