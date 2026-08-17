@@ -101,15 +101,7 @@ module Karafka
       # @param group_id [String] id of the group we want to unlock for one tick
       # @note This does not release the wait lock. It just causes a conditions recheck
       def tick(group_id)
-        semaphore = @semaphores.fetch(group_id)
-
-        # This queue is used only as a level-triggered signal, never as a counter, so we drain any
-        # stale, unconsumed signals before pushing a new one. Without this, ticks accumulate
-        # without bound whenever #wait is not actively popping (for example for pure
-        # non-blocking/LRJ jobs, where #wait never runs because #wait? is false from the start)
-        semaphore.pop(timeout: 0) until semaphore.empty?
-
-        semaphore << true
+        @semaphores.fetch(group_id) << true
       end
 
       # Marks a given job from a given group as completed. When there are no more jobs from a given
@@ -176,12 +168,23 @@ module Karafka
       def wait(group_id)
         interval_in_seconds = tick_interval / 1_000.0
 
+        # #tick is invoked from multiple worker threads concurrently (for example every
+        # non-blocking job start and completion ticks the same group), so it cannot safely drain
+        # its semaphore itself without extra locking. This method however is only ever called by
+        # the single listener thread that owns this group_id (once per fetch loop iteration,
+        # regardless of whether we actually end up waiting below), so it is the only place we can
+        # drain accumulated signals without introducing synchronization - keeping the semaphore
+        # bounded even when `wait?` is `false` from the start, as is the case for pure
+        # non-blocking/LRJ jobs
+        drain(group_id)
+
         # Go doing other things while we cannot process and wait for anyone to finish their work
         # and re-check the wait status
         while wait?(group_id)
           yield if block_given?
 
           @semaphores.fetch(group_id).pop(timeout: interval_in_seconds)
+          drain(group_id)
         end
       end
 
@@ -214,6 +217,17 @@ module Karafka
       #   as they may exceed `max.poll.interval`
       def wait?(group_id)
         !@in_processing[group_id].all?(&:non_blocking?)
+      end
+
+      # Empties, without blocking, a given group semaphore of any accumulated signals
+      # @param group_id [String] id of the group in which semaphore we're interested.
+      # @note No-op for a group_id that was never `#register`ed, as there is nothing to drain
+      def drain(group_id)
+        semaphore = @semaphores[group_id]
+
+        return unless semaphore
+
+        semaphore.pop(timeout: 0) until semaphore.empty?
       end
     end
   end

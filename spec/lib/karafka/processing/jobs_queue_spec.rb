@@ -104,12 +104,51 @@ RSpec.describe_current do
   end
 
   describe "#tick" do
-    it "keeps the semaphore bounded instead of accumulating unconsumed signals" do
+    it "does not drain by itself, as draining is #wait's single-consumer responsibility" do
       10.times { queue.tick(job1.group_id) }
 
       semaphore = queue.instance_variable_get(:@semaphores).fetch(job1.group_id)
 
-      expect(semaphore.size).to eq(1)
+      expect(semaphore.size).to eq(10)
+    end
+  end
+
+  describe "semaphore draining (regression for unbounded tick accumulation)" do
+    let(:non_blocking_job) { OpenStruct.new(group_id: 1, id: 1, call: true, non_blocking?: true) }
+
+    def semaphore_for(group_id)
+      queue.instance_variable_get(:@semaphores).fetch(group_id)
+    end
+
+    context "when ticks accumulate while only non-blocking jobs are in processing" do
+      before do
+        queue.register(non_blocking_job.group_id)
+        queue << non_blocking_job
+      end
+
+      it "drains all of them the next time #wait runs, even though #wait? never blocks" do
+        50.times { queue.tick(non_blocking_job.group_id) }
+
+        expect(semaphore_for(non_blocking_job.group_id).size).to eq(50)
+
+        queue.wait(non_blocking_job.group_id)
+
+        expect(semaphore_for(non_blocking_job.group_id).size).to eq(0)
+      end
+    end
+
+    context "when many threads tick the same group concurrently" do
+      it "still converges to an empty semaphore once #wait runs, regardless of the race" do
+        threads = Array.new(4) do
+          Thread.new { 20.times { queue.tick(job1.group_id) } }
+        end
+
+        threads.each(&:join)
+
+        queue.wait(job1.group_id)
+
+        expect(semaphore_for(job1.group_id).size).to eq(0)
+      end
     end
   end
 
