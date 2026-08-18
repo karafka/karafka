@@ -14,7 +14,7 @@ Karafka is a Ruby and Rails multi-threaded efficient Kafka processing framework 
 - Has [ActiveJob backend](https://karafka.io/docs/Active-Job) support (including [ordered jobs](https://karafka.io/docs/Pro-Enhanced-Active-Job#ordered-jobs))
 - Has a seamless [Dead Letter Queue](https://karafka.io/docs/Dead-Letter-Queue/) functionality built-in
 - Supports in-development [code reloading](https://karafka.io/docs/Auto-reload-of-code-changes-in-development)
-- Is powered by [librdkafka](https://github.com/edenhill/librdkafka) (the Apache Kafka C/C++ client library)
+- Is powered by [librdkafka](https://github.com/confluentinc/librdkafka) (the Apache Kafka C/C++ client library)
 - Has an out-of the box [AppSignal](https://karafka.io/docs/Monitoring-and-Logging/#appsignal-metrics-and-error-tracking) and [StatsD/DataDog](https://karafka.io/docs/Monitoring-and-Logging/#datadog-and-statsd-integration) monitoring with dashboard templates.
 
 ```ruby
