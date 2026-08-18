@@ -519,7 +519,13 @@ RSpec.describe_current do
     context "when querying single topic with single partition" do
       let(:topics_with_partitions) { { name => [0] } }
 
-      before { described_class.create(name, 1, 1) }
+      before do
+        described_class.create(name, 1, 1)
+
+        # No messages are produced here, so nothing blocks until the new partition has a leader.
+        # Querying watermark offsets right away can race leader election (not_leader_for_partition).
+        wait_if_needed
+      end
 
       it "expect to return correct structure" do
         expect(offsets).to eq({ name => { 0 => [0, 0] } })
@@ -586,6 +592,11 @@ RSpec.describe_current do
       before do
         described_class.create(name, 2, 1)
         described_class.create(name2, 3, 1)
+
+        # Unlike the sibling contexts, this one produces no messages, so there is no produce_sync
+        # to block until the freshly-created partitions have a leader. Querying watermark offsets
+        # immediately can race leader election and raise `not_leader_for_partition` under load.
+        wait_if_needed
       end
 
       it "expect to return correct structure with zero offsets" do
