@@ -424,6 +424,8 @@ RSpec.describe_current do
     context "when there are no jobs of a given group" do
       let(:group_id) { SecureRandom.hex(6) }
 
+      before { queue.register(group_id) }
+
       it "expect not to wait" do
         queue.wait(group_id)
       end
