@@ -127,6 +127,15 @@ module Karafka
 
             yield(keys) if block_given?
           end
+        rescue
+          # A failed flush leaves the not-yet-produced entries staged here. Those messages are
+          # still in the daily buffer (their keys were never yielded, so never evicted) and will be
+          # re-buffered on the next tick, so we drop the stale staging to avoid dispatching them a
+          # second time.
+          @buffer.clear
+          @keys.clear
+
+          raise
         end
 
         private

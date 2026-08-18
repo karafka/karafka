@@ -161,6 +161,10 @@ RSpec.describe_current do
         # Only the first, successfully-produced chunk is reported, so the consumer evicts just
         # those keys and does not re-dispatch them next tick
         expect(yielded).to eq([[message1.key, message1.key]])
+
+        # The not-yet-produced entries are dropped so the next tick (which re-buffers them from the
+        # daily buffer) does not dispatch them twice
+        expect(dispatcher.buffer).to be_empty
       end
     end
   end
