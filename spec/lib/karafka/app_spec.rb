@@ -93,7 +93,7 @@ RSpec.describe_current do
       end
     end
 
-    context "with draw + routes coexistence" do
+    context "with multiple standalone draws" do
       before do
         app_class.declaratives.draw do
           topic :standalone_topic do
@@ -101,22 +101,21 @@ RSpec.describe_current do
           end
         end
 
-        app_class.routes.draw do
-          topic :routed_topic do
-            consumer Class.new(Karafka::BaseConsumer)
-            config(partitions: 5, replication_factor: 2)
+        app_class.declaratives.draw do
+          topic :other_topic do
+            partitions 5
           end
         end
       end
 
       it "both topics are in the repository" do
-        standalone = app_class.declaratives.find_topic(:standalone_topic)
-        routed = app_class.declaratives.find_topic(:routed_topic)
+        first = app_class.declaratives.find_topic(:standalone_topic)
+        second = app_class.declaratives.find_topic(:other_topic)
 
-        expect(standalone).not_to be_nil
-        expect(routed).not_to be_nil
-        expect(standalone.partitions).to eq(20)
-        expect(routed.partitions).to eq(5)
+        expect(first).not_to be_nil
+        expect(second).not_to be_nil
+        expect(first.partitions).to eq(20)
+        expect(second.partitions).to eq(5)
       end
     end
   end

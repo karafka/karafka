@@ -7,10 +7,15 @@ setup_karafka
 
 Karafka::Admin.create_topic(DT.topic, 5, 1)
 
+draw_topics(create_topics: false) do
+  topic(DT.topic) do
+    partitions 2
+  end
+end
+
 draw_routes(create_topics: false) do
   topic DT.topic do
     active false
-    config(partitions: 2)
   end
 end
 

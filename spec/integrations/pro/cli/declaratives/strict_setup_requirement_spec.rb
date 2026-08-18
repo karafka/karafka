@@ -29,7 +29,9 @@
 # Contact: contact@karafka.io
 
 # When we have strict_declarative_topics set to true, we should ensure all non-pattern definitions
-# of topics have their declarative references
+# of topics have their declarative references. Pattern (regexp) topics are virtual and excluded.
+# Declarative definitions now live independently in the declaratives repository, so a routed topic
+# is "covered" only when it has an active declaration there.
 
 setup_karafka do |config|
   config.strict_declarative_topics = true
@@ -37,8 +39,17 @@ end
 
 ARGV[0] = "info"
 
-def draw_and_validate(valid:, &block)
+# @param valid [Boolean] whether strict validation is expected to pass
+# @param declaratives [Hash] topic name => active flag to declare before drawing routes
+# @param block [Proc] routing definition
+def draw_and_validate(valid:, declaratives: {}, &block)
   guarded = false
+
+  declaratives.each do |name, active|
+    Karafka::App.declaratives.draw do
+      topic(name) { active(active) }
+    end
+  end
 
   begin
     draw_routes(create_topics: false) do
@@ -55,61 +66,45 @@ def draw_and_validate(valid:, &block)
   clear_app_draws
 end
 
+# 'a' routed but not declared -> guards
 draw_and_validate(valid: false) do
-  topic "a" do
-    consumer Class.new
-    config(active: false)
-  end
-end
-
-draw_and_validate(valid: true) do
   topic "a" do
     consumer Class.new
   end
 end
 
-draw_and_validate(valid: false) do
+# 'a' routed and declared active -> ok
+draw_and_validate(valid: true, declaratives: { "a" => true }) do
+  topic "a" do
+    consumer Class.new
+  end
+end
+
+# 'a' declared but its DLQ 'dlq' is not -> guards
+draw_and_validate(valid: false, declaratives: { "a" => true }) do
   topic "a" do
     consumer Class.new
     dead_letter_queue(topic: "dlq")
   end
 end
 
-draw_and_validate(valid: true) do
+# both 'a' and 'dlq' declared active -> ok
+draw_and_validate(valid: true, declaratives: { "a" => true, "dlq" => true }) do
   topic "a" do
     consumer Class.new
     dead_letter_queue(topic: "dlq")
   end
-
-  topic "dlq" do
-    active(false)
-  end
 end
 
-draw_and_validate(valid: false) do
+# 'dlq' declared inactive -> guards
+draw_and_validate(valid: false, declaratives: { "a" => true, "dlq" => false }) do
   topic "a" do
     consumer Class.new
     dead_letter_queue(topic: "dlq")
   end
-
-  topic "dlq" do
-    active(false)
-    config(active: false)
-  end
 end
 
-draw_and_validate(valid: false) do
-  pattern(/a/) do
-    consumer Class.new
-    dead_letter_queue(topic: "dlq")
-  end
-
-  topic "dlq" do
-    active(false)
-    config(active: false)
-  end
-end
-
+# Pattern topic is excluded, but its DLQ 'dlq' is still required and is not declared -> guards
 draw_and_validate(valid: false) do
   pattern(/a/) do
     consumer Class.new
@@ -117,29 +112,26 @@ draw_and_validate(valid: false) do
   end
 end
 
+# Pattern-only routing has no non-pattern topics to declare -> ok
 draw_and_validate(valid: true) do
   pattern(/a/) do
     consumer Class.new
   end
 end
 
+# Named pattern is still a virtual pattern topic -> excluded -> ok
 draw_and_validate(valid: true) do
   pattern("a", /a/) do
     consumer Class.new
   end
 end
 
-# When no strict declaratives
+# When strict declaratives is off, missing declarations are acceptable
 Karafka::App.config.strict_declarative_topics = false
 
-draw_and_validate(valid: true) do
+draw_and_validate(valid: true, declaratives: { "a" => true, "dlq" => false }) do
   topic "a" do
     consumer Class.new
     dead_letter_queue(topic: "dlq")
-  end
-
-  topic "dlq" do
-    active(false)
-    config(active: false)
   end
 end

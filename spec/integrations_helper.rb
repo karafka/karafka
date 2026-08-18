@@ -341,11 +341,16 @@ def draw_routes(consumer_class = nil, create_topics: true, &block)
 
   return unless create_topics
 
-  # Ensure every routed topic has a declaration so it gets created. Already-declared topics
-  # (via `draw_topics` or an inline `config()`) are returned unchanged (first-declaration-wins);
-  # plain routed topics get the default 1-partition / RF-1 declaration, preserving the previous
-  # behaviour where iterating the routing tree auto-created these declarations.
-  fetch_routes_topics.each(&:declaratives)
+  # Ensure every routed topic has a declaration so it gets created. Already-declared topics (via
+  # `draw_topics`) are left unchanged; plain routed topics get the default 1-partition / RF-1
+  # declaration. Virtual pattern topics are skipped - their real Kafka names are unknown (they are
+  # subscribed by regular expressions), so they cannot be managed declaratively.
+  fetch_routes_topics.each do |routing_topic|
+    next if routing_topic.respond_to?(:patterns?) && routing_topic.patterns?
+    next if Karafka::App.declaratives.find_topic(routing_topic.name)
+
+    Karafka::App.declaratives.topic(routing_topic.name)
+  end
 
   create_declarative_topics
 end
@@ -378,7 +383,7 @@ def fetch_routes_topics
 end
 
 # @return [Array<Karafka::Declaratives::Topic>] active declarations in the shared repository.
-#   Populated by `draw_topics` (DSL) and by the routing `config()` bridge alike.
+#   Populated by `draw_topics` (DSL) and by `draw_routes` (which declares plain routed topics).
 def fetch_declarative_topics
   Karafka::App.declaratives.repository.active
 end
@@ -411,8 +416,8 @@ def fetch_declarative_topics_configs
   accu
 end
 
-# Creates all declared topics (via `draw_topics` and/or the routing `config()` bridge) so they
-# are available for the specs.
+# Creates all declared topics (via `draw_topics` and/or `draw_routes`) so they are available for
+# the specs.
 # If a topic is already created for example with more partitions, this will do nothing.
 #
 # @note This code ensures that we do not create multiple topics from multiple tests at the same

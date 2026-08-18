@@ -32,13 +32,16 @@
 
 setup_karafka
 
+draw_topics(create_topics: false) do
+  topic(DT.topics[0]) do
+    partitions 1
+    replication_factor 1
+  end
+end
+
 draw_routes do
   topic DT.topics[0] do
     consumer Class.new
-    config(
-      partitions: 1,
-      replication_factor: 1
-    )
   end
 end
 

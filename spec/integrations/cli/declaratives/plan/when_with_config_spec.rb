@@ -7,28 +7,33 @@ setup_karafka
 Karafka::Admin.create_topic(DT.topics[0], 2, 1)
 Karafka::Admin.create_topic(DT.topics[1], 5, 1)
 
+draw_topics(create_topics: false) do
+  topic(DT.topics[0]) do
+    partitions 2
+    config("max.compaction.lag.ms": "9223372036854", "max.message.bytes": "100000")
+  end
+
+  topic(DT.topics[1]) do
+    partitions 5
+    config("message.timestamp.after.max.ms": "9223372036854775802", "retention.bytes": "1000000")
+  end
+
+  topic(DT.topics[2]) do
+    active false
+  end
+end
+
 draw_routes(create_topics: false) do
   topic DT.topics[0] do
     active false
-    config(
-      partitions: 2,
-      "max.compaction.lag.ms": "9223372036854",
-      "max.message.bytes": "100000"
-    )
   end
 
   topic DT.topics[1] do
     active false
-    config(
-      partitions: 5,
-      "message.timestamp.after.max.ms": "9223372036854775802",
-      "retention.bytes": "1000000"
-    )
   end
 
   topic DT.topics[2] do
     active false
-    config(active: false)
   end
 end
 

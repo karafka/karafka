@@ -32,14 +32,17 @@
 
 setup_karafka
 
+draw_topics(create_topics: false) do
+  topic(DT.topics[0]) do
+    partitions 2
+    replication_factor 3
+    config("min.insync.replicas": 2)
+  end
+end
+
 draw_routes do
   topic DT.topics[0] do
     consumer Class.new
-    config(
-      partitions: 2,
-      replication_factor: 3,
-      "min.insync.replicas": 2
-    )
   end
 end
 

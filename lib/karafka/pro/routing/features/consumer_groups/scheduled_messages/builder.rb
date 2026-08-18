@@ -50,58 +50,13 @@ module Karafka
                 # Load zlib only if user enables scheduled messages
                 require "zlib"
 
-                # We set it to 5 so we have enough space to handle more events. All related topics
-                # should have same partition count.
-                default_partitions = 5
                 msg_cfg = App.config.scheduled_messages
                 states_topic_name = "#{topic_name}#{msg_cfg.states_postfix}"
 
-                # Declarative topic definitions live independently of routing. We declare the
-                # broker-side structure here so it is managed by the CLI topics commands without
-                # relying on the (to be retired) routing `config(...)` bridge.
-                #
-                # We guard each declaration with `find_topic` because `Declaratives::Builder#topic`
-                # re-applies its block on an already existing declaration (additive semantics),
-                # unlike the old bridge which used `||=` and kept the first declaration. Without the
-                # guard, our framework defaults would clobber a topic the user may have declared
-                # themselves via `App.declaratives.draw`. Skipping when already present preserves
-                # first-declaration-wins.
-                App.declaratives.draw do
-                  # This is a setup that should allow messages to be compacted fairly fast. Since
-                  # each dispatched message should be removed via tombstone, they do not have to
-                  # be present in the topic for too long.
-                  unless find_topic(topic_name)
-                    topic(topic_name) do
-                      partitions default_partitions
-                      config(
-                        # Will ensure, that after tombstone is present, given scheduled message,
-                        # that has been dispatched is removed by Kafka
-                        "cleanup.policy": "compact",
-                        # When 10% or more dispatches are done, compact data
-                        "min.cleanable.dirty.ratio": 0.1,
-                        # Frequent segment rotation to support intense compaction
-                        "segment.ms": 3_600_000,
-                        "delete.retention.ms": 3_600_000,
-                        "segment.bytes": 52_428_800
-                      )
-                    end
-                  end
-
-                  # Holds states of scheduler per each of the partitions. Same partition count as
-                  # the messages topic since they tick independently per partition.
-                  unless find_topic(states_topic_name)
-                    topic(states_topic_name) do
-                      partitions default_partitions
-                      config(
-                        "cleanup.policy": "compact",
-                        "min.cleanable.dirty.ratio": 0.1,
-                        "segment.ms": 3_600_000,
-                        "delete.retention.ms": 3_600_000,
-                        "segment.bytes": 52_428_800
-                      )
-                    end
-                  end
-                end
+                # Broker-side topic structure (partitions, replication, compaction/retention) is
+                # declared independently via
+                # `Karafka::App.declaratives.draw { scheduled_messages(name) }` and is intentionally
+                # not defined here. Routing only wires the runtime behavior.
 
                 consumer_group msg_cfg.group_id do
                   # Registers the primary topic that we use to control schedules execution. This is

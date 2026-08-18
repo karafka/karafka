@@ -24,9 +24,8 @@ module Karafka
         @bootstrap_servers = nil
       end
 
-      # Self-accessor for backwards compatibility.
-      # CLI commands that previously accessed topic.declaratives.partitions on routing topics
-      # can now call the same on Declaratives::Topic instances directly.
+      # Self-accessor kept so CLI commands can uniformly call `topic.declaratives.partitions` on
+      # a declaration regardless of where it originated.
       #
       # @return [Karafka::Declaratives::Topic] self
       def declaratives
@@ -35,13 +34,10 @@ module Karafka
 
       # Gets or sets the active flag.
       #
-      # The active flag exists because the routing bridge (Routing::Features::Declaratives::Topic)
-      # auto-creates a declaration for every routing topic that calls config(). Some routing
-      # topics - notably Pro pattern-matched virtual topics - must exist in routing but cannot
-      # be managed declaratively (their real Kafka topic names are unknown). Those call
-      # config(active: false) to opt out. Once the routing bridge is retired and declaratives
-      # are defined exclusively via Karafka::App.declaratives.draw, this flag becomes
-      # unnecessary: topics simply won't be declared if they shouldn't be managed.
+      # The active flag lets a declared topic opt out of being managed by the `karafka topics`
+      # commands (create/migrate/align/etc.) while still being present in the declaratives
+      # repository. Declaring `topic(name) { active false }` keeps the definition around (e.g. for
+      # documentation or partial management) without acting on it.
       #
       # @param value [Symbol, Boolean] when :not_set returns current value, otherwise sets it
       # @return [Boolean] active state
