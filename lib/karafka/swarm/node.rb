@@ -190,6 +190,8 @@ module Karafka
       # @param signal [String]
       # @return [Boolean] true if signal was sent, false if process doesn't exist
       def signal(signal)
+        @mutex.synchronize { return false if @alive == false }
+
         ::Process.kill(signal, @pid)
         true
       rescue Errno::ESRCH

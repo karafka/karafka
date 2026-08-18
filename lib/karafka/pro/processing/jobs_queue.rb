@@ -185,6 +185,14 @@ module Karafka
         #   Thanks to the fact that we use the minimum lock time as a timeout, we do not have to
         #   wait a whole ticking period to unlock async locks.
         def wait(group_id)
+          # Drain stale `#tick` signals up front: for non-blocking/LRJ jobs and released async
+          # locks (both Pro-only) `#wait?` can be false from the start, so the loop below - the
+          # only other consumer - never runs and signals would otherwise accumulate unbounded.
+          # Safe without locking as `#wait` runs only on the single listener thread that owns
+          # (and has already registered) this group.
+          semaphore = @semaphores.fetch(group_id)
+          semaphore.pop(timeout: 0) until semaphore.empty?
+
           return super unless @async_locking
 
           # We do not generalize this flow because this one is more expensive as it has to allocate
