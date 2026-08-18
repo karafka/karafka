@@ -124,7 +124,10 @@ RSpec.describe_current do
   end
 
   describe "#stop" do
+    let(:original_shutdown_timeout) { Karafka::App.config.shutdown_timeout }
+
     before do
+      original_shutdown_timeout
       Karafka::App.config.internal.status.run!
       Karafka::App.config.shutdown_timeout = timeout_ms
       # `shutdown_timeout` is memoized on the class via ConfigImporter, so we clear it to ensure
@@ -142,6 +145,8 @@ RSpec.describe_current do
         terminate: nil
       )
       server_class.stop
+      Karafka::App.config.shutdown_timeout = original_shutdown_timeout
+      described_class.instance_variable_set(:@shutdown_timeout, nil)
       # After shutdown we need to reinitialize the app for other specs
       Karafka::App.initialize!
     end
