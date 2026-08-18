@@ -186,7 +186,7 @@ module Karafka
         topic_kafka = topic.kafka
 
         unless topic_kafka.empty? || topic_kafka.equal?(Karafka::App.config.kafka)
-          lines << "      kafka overrides: #{topic_kafka.inspect}"
+          lines << "      kafka overrides: #{redact_kafka_config(topic_kafka).inspect}"
         end
 
         topic_features_info(topic, lines)
@@ -261,12 +261,20 @@ module Karafka
       def kafka_config_info
         lines = [green("========== Kafka Config ==========")]
 
-        Karafka::App.config.kafka.each do |key, value|
-          display_value = key.to_s.match?(SENSITIVE_KAFKA_CONFIG_PATTERN) ? "[REDACTED]" : value
-          lines << "#{key}: #{display_value}"
+        redact_kafka_config(Karafka::App.config.kafka).each do |key, value|
+          lines << "#{key}: #{value}"
         end
 
         lines
+      end
+
+      # Redacts values of sensitive kafka config keys so credentials are never printed
+      # @param kafka [Hash] kafka configuration
+      # @return [Hash] copy of the config with sensitive values replaced by "[REDACTED]"
+      def redact_kafka_config(kafka)
+        kafka.to_h.each_with_object({}) do |(key, value), redacted|
+          redacted[key] = key.to_s.match?(SENSITIVE_KAFKA_CONFIG_PATTERN) ? "[REDACTED]" : value
+        end
       end
     end
   end

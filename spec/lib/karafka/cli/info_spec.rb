@@ -221,6 +221,30 @@ RSpec.describe_current do
       end
     end
 
+    context "when running with --extended and topic kafka overrides contain sensitive keys" do
+      before do
+        Karafka::App.config.license.token = false
+        allow(info_cli).to receive(:options).and_return(extended: true)
+
+        Karafka::App.consumer_groups.draw do
+          topic :secret_topic do
+            consumer Class.new(Karafka::BaseConsumer)
+            kafka(inherit: true, "sasl.password": "topsecret")
+          end
+        end
+      end
+
+      it "expect to redact sensitive values in the overrides" do
+        info_cli.call
+        expect(Karafka.logger).to have_received(:info).with(/kafka overrides:.*\[REDACTED\]/)
+      end
+
+      it "expect not to leak the sensitive value" do
+        info_cli.call
+        expect(Karafka.logger).not_to have_received(:info).with(/topsecret/)
+      end
+    end
+
     context "when running with --extended and topic has no explicit kafka overrides" do
       before do
         Karafka::App.config.license.token = false
