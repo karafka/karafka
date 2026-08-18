@@ -44,13 +44,11 @@ module Karafka
         max_wait_time
         initial_offset
         consumer_persistence
-        pause_timeout
-        pause_max_timeout
-        pause_with_exponential_backoff
+        pause
+        group_id
       ].freeze
 
-      # Core consumer group attributes to exclude when detecting features from
-      # consumer_group#to_h
+      # Core consumer group attributes to exclude when detecting features from consumer_group#to_h
       CORE_CONSUMER_GROUP_ATTRIBUTES = %i[
         id
         topics
@@ -181,9 +179,9 @@ module Karafka
         lines << "      max_wait_time: #{topic.max_wait_time}"
         lines << "      initial_offset: #{topic.initial_offset}"
         lines << "      consumer_persistence: #{topic.consumer_persistence}"
-        lines << "      pause_timeout: #{topic.pause_timeout}"
-        lines << "      pause_max_timeout: #{topic.pause_max_timeout}"
-        lines << "      pause_with_exponential_backoff: #{topic.pause_with_exponential_backoff}"
+        lines << "      pause_timeout: #{topic.pause.timeout}"
+        lines << "      pause_max_timeout: #{topic.pause.max_timeout}"
+        lines << "      pause_with_exponential_backoff: #{topic.pause.with_exponential_backoff}"
 
         topic_kafka = topic.kafka
 
