@@ -110,7 +110,7 @@ RSpec.describe_current do
 
   context "when schedule_target_epoch is implausibly far in the future" do
     before do
-      too_far = Time.now.to_i + described_class::MAX_FUTURE_INTERVAL + 60
+      too_far = Time.now.to_i + described_class.const_get(:MAX_FUTURE_INTERVAL) + 60
       message[:headers]["schedule_target_epoch"] = too_far.to_s
     end
 
@@ -119,7 +119,7 @@ RSpec.describe_current do
 
   context "when schedule_target_epoch is far in the future but within the allowed bound" do
     before do
-      within = Time.now.to_i + described_class::MAX_FUTURE_INTERVAL - 60
+      within = Time.now.to_i + described_class.const_get(:MAX_FUTURE_INTERVAL) - 60
       message[:headers]["schedule_target_epoch"] = within.to_s
     end
 

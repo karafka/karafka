@@ -58,11 +58,14 @@ module Karafka
             schedule_source_type
           ].freeze
 
-          # Upper bound (in seconds) for how far ahead a schedule may target. schedule_target_epoch
-          # is Unix time in seconds; anything beyond this is almost certainly a unit mistake (for
-          # example milliseconds passed as seconds, ~1000x too large). We reject it here so it fails
-          # loudly at publish time instead of being silently dropped by the consumer.
+          # Upper bound (in seconds) for how far ahead a schedule may target: 100 years.
+          # schedule_target_epoch is Unix time in seconds; anything beyond this is almost certainly
+          # a unit mistake (for example milliseconds passed as seconds, ~1000x too large). We reject
+          # it here so it fails loudly at publish time instead of being silently dropped by the
+          # consumer.
           MAX_FUTURE_INTERVAL = 100 * 365 * 24 * 60 * 60
+
+          private_constant :MAX_FUTURE_INTERVAL
 
           required(:key) { |val| val.is_a?(String) && val.size.positive? }
 
