@@ -364,6 +364,24 @@ RSpec.describe_current do
       end
     end
 
+    context "when only non-blocking jobs are processed and no async lock is held" do
+      before do
+        queue.register(3)
+        queue << OpenStruct.new(group_id: 3, id: 1, call: true, non_blocking?: true)
+      end
+
+      it "still drains ticks accumulated via #wait even though #wait? never blocks" do
+        50.times { queue.tick(3) }
+
+        semaphore = queue.instance_variable_get(:@semaphores).fetch(3)
+        expect(semaphore.size).to eq(50)
+
+        queue.wait(3)
+
+        expect(semaphore.size).to eq(0)
+      end
+    end
+
     context "when Karafka is stopping and the queue is empty" do
       before { allow(Karafka::App).to receive(:stopping?).and_return(true) }
 

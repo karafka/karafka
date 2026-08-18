@@ -185,15 +185,22 @@ module Karafka
         #   Thanks to the fact that we use the minimum lock time as a timeout, we do not have to
         #   wait a whole ticking period to unlock async locks.
         def wait(group_id)
+          # `#tick` pushes a signal onto this group's semaphore on every job completion, every
+          # non-blocking job start (worker.rb) and every async lock/unlock. Non-blocking/LRJ jobs
+          # and async locks are both Pro-only, and in both cases `#wait?` can be `false` from the
+          # start (nothing to block on), so the wait loop - the only place that pops these signals
+          # - may never run, letting them accumulate unbounded over the process lifetime. Draining
+          # here, before we decide whether to wait, keeps the semaphore bounded regardless of the
+          # `super`/async branch taken below. It is safe without extra locking because `#wait` is
+          # only ever invoked by the single listener thread that owns this group_id.
+          semaphore = @semaphores[group_id]
+          semaphore.pop(timeout: 0) until semaphore.nil? || semaphore.empty?
+
           return super unless @async_locking
 
           # We do not generalize this flow because this one is more expensive as it has to allocate
           # extra objects. That's why we only use it when locks are actually in use
           base_interval = tick_interval / 1_000.0
-
-          # Single-consumer per group_id here too (same caller as the base class), so draining is
-          # safe - see `Karafka::Processing::JobsQueue#wait`
-          drain(group_id)
 
           while wait?(group_id)
             yield if block_given?
@@ -209,7 +216,6 @@ module Karafka
             wait_times << base_interval
 
             @semaphores.fetch(group_id).pop(timeout: wait_times.min)
-            drain(group_id)
           end
         end
 
