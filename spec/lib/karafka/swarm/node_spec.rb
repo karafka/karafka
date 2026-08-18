@@ -97,6 +97,15 @@ RSpec.describe Karafka::Swarm::Node, mode: :fork do
         expect(node.signal(signal_string)).to be(false)
       end
     end
+
+    context "when node is known to be dead" do
+      before { node.instance_variable_set(:@alive, false) }
+
+      it "returns false without signaling" do
+        expect(node.signal(signal_string)).to be(false)
+        expect(Process).not_to have_received(:kill)
+      end
+    end
   end
 
   describe "#alive?" do
