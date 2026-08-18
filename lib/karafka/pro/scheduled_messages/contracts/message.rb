@@ -58,6 +58,12 @@ module Karafka
             schedule_source_type
           ].freeze
 
+          # Upper bound (in seconds) for how far ahead a schedule may target. schedule_target_epoch
+          # is Unix time in seconds; anything beyond this is almost certainly a unit mistake (for
+          # example milliseconds passed as seconds, ~1000x too large). We reject it here so it fails
+          # loudly at publish time instead of being silently dropped by the consumer.
+          MAX_FUTURE_INTERVAL = 100 * 365 * 24 * 60 * 60
+
           required(:key) { |val| val.is_a?(String) && val.size.positive? }
 
           # Ensure that schedule has all correct keys and that others have other related data
@@ -84,9 +90,15 @@ module Karafka
 
             # We allow for small lag as those will be dispatched but we should prevent dispatching
             # in the past in general as often it is a source of errors
-            next if epoch_time >= Time.now.to_i - 10
+            if epoch_time < Time.now.to_i - 10
+              next [[[:headers], :schedule_target_epoch_in_the_past]]
+            end
 
-            [[[:headers], :schedule_target_epoch_in_the_past]]
+            # Reject epochs implausibly far ahead (e.g. milliseconds passed as seconds), which would
+            # otherwise validate here and then be silently dropped by the consumer, never scheduled
+            next if epoch_time <= Time.now.to_i + MAX_FUTURE_INTERVAL
+
+            [[[:headers], :schedule_target_epoch_too_far_in_future]]
           end
 
           # Makes sure, that the target envelope topic we dispatch to is a scheduled messages topic

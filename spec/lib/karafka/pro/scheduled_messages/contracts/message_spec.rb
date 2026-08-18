@@ -101,4 +101,28 @@ RSpec.describe_current do
 
     it { expect(contract.call(message)).to be_success }
   end
+
+  context "when schedule_target_epoch is a milliseconds value mistaken for seconds" do
+    before { message[:headers]["schedule_target_epoch"] = (Time.now.to_i * 1_000).to_s }
+
+    it { expect(contract.call(message)).not_to be_success }
+  end
+
+  context "when schedule_target_epoch is implausibly far in the future" do
+    before do
+      too_far = Time.now.to_i + described_class::MAX_FUTURE_INTERVAL + 60
+      message[:headers]["schedule_target_epoch"] = too_far.to_s
+    end
+
+    it { expect(contract.call(message)).not_to be_success }
+  end
+
+  context "when schedule_target_epoch is far in the future but within the allowed bound" do
+    before do
+      within = Time.now.to_i + described_class::MAX_FUTURE_INTERVAL - 60
+      message[:headers]["schedule_target_epoch"] = within.to_s
+    end
+
+    it { expect(contract.call(message)).to be_success }
+  end
 end
