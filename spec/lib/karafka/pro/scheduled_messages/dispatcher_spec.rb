@@ -117,6 +117,52 @@ RSpec.describe_current do
       expect(producer).to have_received(:produce_many_sync).with(messages)
       expect(dispatcher.buffer).to be_empty
     end
+
+    context "when dispatching in multiple chunks" do
+      let(:message1) do
+        create(:messages_message, topic: topic, partition: partition, raw_key: "k0", raw_headers: raw_headers)
+      end
+
+      let(:message2) do
+        create(:messages_message, topic: topic, partition: partition, raw_key: "k1", raw_headers: raw_headers)
+      end
+
+      before do
+        # One message per chunk (each `<<` buffers a target + a tombstone => 2 entries)
+        allow(Karafka::App.config.scheduled_messages).to receive(:flush_batch_size).and_return(2)
+
+        # Reset both the buffer and the aligned keys seeded by the outer `before`
+        dispatcher.buffer.clear
+        dispatcher.instance_variable_get(:@keys).clear
+        dispatcher << message1
+        dispatcher << message2
+      end
+
+      it "yields the keys of each chunk once it is confirmed delivered" do
+        yielded = []
+        dispatcher.flush { |keys| yielded << keys }
+
+        expect(yielded).to eq([[message1.key, message1.key], [message2.key, message2.key]])
+      end
+
+      it "reports the confirmed chunk before a later chunk's failure propagates" do
+        call = 0
+        allow(producer).to receive(:produce_many_sync) do
+          call += 1
+          raise("boom") if call == 2
+        end
+
+        yielded = []
+
+        expect do
+          dispatcher.flush { |keys| yielded << keys }
+        end.to raise_error("boom")
+
+        # Only the first, successfully-produced chunk is reported, so the consumer evicts just
+        # those keys and does not re-dispatch them next tick
+        expect(yielded).to eq([[message1.key, message1.key]])
+      end
+    end
   end
 
   describe "#state" do

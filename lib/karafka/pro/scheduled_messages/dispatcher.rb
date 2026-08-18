@@ -46,6 +46,10 @@ module Karafka
           @topic = topic
           @partition = partition
           @buffer = []
+          # Source (daily buffer) key aligned 1:1 with each `@buffer` entry, so `#flush` can report
+          # which keys were confirmed delivered per chunk and the consumer can evict them
+          # incrementally instead of only after the whole flush succeeds
+          @keys = []
           @serializer = Serializer.new
         end
 
@@ -79,11 +83,13 @@ module Karafka
           extract(target, message.headers, :partition_key)
 
           @buffer << target
+          @keys << message.key
 
           # Tombstone message so this schedule is no longer in use and gets removed from Kafka by
           # Kafka itself during compacting. It will not cancel it because already dispatched but
           # will cause it not to be sent again and will be marked as dispatched.
           @buffer << Proxy.tombstone(message: message)
+          @keys << message.key
         end
 
         # Builds and dispatches the state report message with schedules details
@@ -105,13 +111,21 @@ module Karafka
         # Sends all messages to Kafka in a sync way.
         # We use sync with batches to prevent overloading.
         # When transactional producer in use, this will be wrapped in a transaction automatically.
+        #
+        # @yieldparam [Array<String>] keys of the chunk that was just confirmed delivered. Yielded
+        #   after each chunk's sync produce returns, so the caller can evict those keys from the
+        #   daily buffer incrementally. If a later chunk raises, the chunks already produced have
+        #   still been reported, so a non-transactional producer will not re-dispatch them.
         def flush
           until @buffer.empty?
-            config.producer.produce_many_sync(
-              # We can remove this prior to the dispatch because we only evict messages from the
-              # daily buffer once dispatch is successful
-              @buffer.shift(config.flush_batch_size)
-            )
+            batch_size = config.flush_batch_size
+
+            messages = @buffer.shift(batch_size)
+            keys = @keys.shift(batch_size)
+
+            config.producer.produce_many_sync(messages)
+
+            yield(keys) if block_given?
           end
         end
 
