@@ -99,7 +99,11 @@ RSpec.describe Karafka::Swarm::Node, mode: :fork do
     end
 
     context "when node is known to be dead" do
-      before { node.instance_variable_set(:@alive, false) }
+      before do
+        # Reproduce the real reap that caches @alive as false, rather than setting the ivar
+        allow(Process).to receive(:waitpid).and_raise(Errno::ECHILD)
+        node.cleanup
+      end
 
       it "returns false without signaling" do
         expect(node.signal(signal_string)).to be(false)
