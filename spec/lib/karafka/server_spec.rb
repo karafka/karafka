@@ -124,7 +124,13 @@ RSpec.describe_current do
   end
 
   describe "#stop" do
+    let(:original_shutdown_timeout) { Karafka::App.config.shutdown_timeout }
+
     before do
+      # Capture the pristine value before mutating so we can restore it afterwards. Sub-second
+      # timeouts used here are lower than the default `max_wait_time`, so leaking them into the
+      # global config makes unrelated specs fail validation with a random run order.
+      original_shutdown_timeout
       Karafka::App.config.internal.status.run!
       Karafka::App.config.shutdown_timeout = timeout_ms
       # `shutdown_timeout` is memoized on the class via ConfigImporter, so we clear it to ensure
@@ -142,6 +148,10 @@ RSpec.describe_current do
         terminate: nil
       )
       server_class.stop
+      # Restore the global config and drop the memoized value so the mutated (possibly sub-second)
+      # `shutdown_timeout` does not leak into other specs and break their config validation.
+      Karafka::App.config.shutdown_timeout = original_shutdown_timeout
+      described_class.instance_variable_set(:@shutdown_timeout, nil)
       # After shutdown we need to reinitialize the app for other specs
       Karafka::App.initialize!
     end
