@@ -173,6 +173,20 @@ RSpec.describe_current do
         it { expect { queue.unlock(job1) }.to raise_error(expected_error) }
       end
     end
+
+    context "when the group was already cleared (recovery raced with a locked job)" do
+      let(:expected_error) { Karafka::Errors::JobsQueueSynchronizationError }
+
+      before do
+        queue.lock(job1)
+        queue.clear(job1.group_id)
+      end
+
+      it "expect not to over-decrement waiting on top of what #clear already accounted for" do
+        expect { queue.unlock(job1) }.to raise_error(expected_error)
+        expect(queue.statistics).to eq(busy: 0, enqueued: 0, waiting: 0)
+      end
+    end
   end
 
   describe "#lock_async" do
@@ -221,6 +235,21 @@ RSpec.describe_current do
         let(:expected_error) { Karafka::Errors::JobsQueueSynchronizationError }
 
         it { expect { queue.unlock_async(1, 1) }.to raise_error(expected_error) }
+      end
+    end
+
+    context "when the group was already cleared (recovery raced with an async lock)" do
+      let(:expected_error) { Karafka::Errors::JobsQueueSynchronizationError }
+
+      before do
+        queue.register(1)
+        queue.lock_async(1, 1)
+        queue.clear(1)
+      end
+
+      it "expect to raise consistently with #unlock in the same scenario, not touch waiting" do
+        expect { queue.unlock_async(1, 1) }.to raise_error(expected_error)
+        expect(queue.statistics).to eq(busy: 0, enqueued: 0, waiting: 0)
       end
     end
   end
