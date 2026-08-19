@@ -63,7 +63,13 @@ RSpec.describe_current do
     end
 
     context "when trying to read empty topic" do
-      before { described_class.create(name, 1, 1) }
+      before do
+        described_class.create(name, 1, 1)
+
+        # No messages are produced here, so nothing blocks until the new partition has a leader.
+        # Reading right away can race leader election (not_leader_for_partition).
+        wait_if_needed
+      end
 
       it { expect(reading.size).to eq(0) }
     end
@@ -234,7 +240,13 @@ RSpec.describe_current do
     context "when trying to read empty topic from the future" do
       let(:offset) { Time.now + 60 }
 
-      before { described_class.create(name, 1, 1) }
+      before do
+        described_class.create(name, 1, 1)
+
+        # No messages are produced here, so nothing blocks until the new partition has a leader.
+        # Reading right away can race leader election (not_leader_for_partition).
+        wait_if_needed
+      end
 
       it { expect(reading.size).to eq(0) }
     end
@@ -421,7 +433,13 @@ RSpec.describe_current do
     end
 
     context "when topic exists and is empty" do
-      before { described_class.create(name, 1, 1) }
+      before do
+        described_class.create(name, 1, 1)
+
+        # No messages are produced here, so nothing blocks until the new partition has a leader.
+        # Reading partition offsets right away can race leader election (not_leader_for_partition).
+        wait_if_needed
+      end
 
       it { expect(result).to be_an(Array) }
       it { expect(result.size).to eq(1) }
@@ -492,7 +510,13 @@ RSpec.describe_current do
     end
 
     context "when getting watermarks from an empty partition" do
-      before { described_class.create(name, 1, 1) }
+      before do
+        described_class.create(name, 1, 1)
+
+        # No messages are produced here, so nothing blocks until the new partition has a leader.
+        # Querying watermark offsets right away can race leader election (not_leader_for_partition).
+        wait_if_needed
+      end
 
       it { expect(offsets.first).to eq(0) }
       it { expect(offsets.last).to eq(0) }
@@ -519,7 +543,13 @@ RSpec.describe_current do
     context "when querying single topic with single partition" do
       let(:topics_with_partitions) { { name => [0] } }
 
-      before { described_class.create(name, 1, 1) }
+      before do
+        described_class.create(name, 1, 1)
+
+        # No messages are produced here, so nothing blocks until the new partition has a leader.
+        # Querying watermark offsets right away can race leader election (not_leader_for_partition).
+        wait_if_needed
+      end
 
       it "expect to return correct structure" do
         expect(offsets).to eq({ name => { 0 => [0, 0] } })
@@ -532,6 +562,10 @@ RSpec.describe_current do
       before do
         described_class.create(name, 3, 1)
         PRODUCERS.regular.produce_sync(topic: name, payload: "test", partition: 1)
+
+        # The produce above only warms up partition 1's leader; partitions 0 and 2 are queried
+        # while still empty and can race leader election (not_leader_for_partition).
+        wait_if_needed
       end
 
       it "expect to return correct structure for all partitions" do
@@ -586,6 +620,11 @@ RSpec.describe_current do
       before do
         described_class.create(name, 2, 1)
         described_class.create(name2, 3, 1)
+
+        # Unlike the sibling contexts, this one produces no messages, so there is no produce_sync
+        # to block until the freshly-created partitions have a leader. Querying watermark offsets
+        # immediately can race leader election and raise `not_leader_for_partition` under load.
+        wait_if_needed
       end
 
       it "expect to return correct structure with zero offsets" do
