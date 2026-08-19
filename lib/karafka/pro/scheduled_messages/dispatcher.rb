@@ -82,6 +82,13 @@ module Karafka
           extract(target, message.headers, :key)
           extract(target, message.headers, :partition_key)
 
+          # `message.key` is pushed to `@keys` once per `@buffer` entry (here and below), not once
+          # per message: `@keys` must stay 1:1 aligned with `@buffer` (see `#flush`) so that
+          # shifting a chunk off both arrays together always yields the correct keys for that
+          # chunk. The target and its tombstone are two separate `@buffer` entries for the same
+          # schedule, so the same key is intentionally paired with each. `DailyBuffer#delete` is a
+          # plain `Hash#delete`, so a key evicted twice within the same yielded chunk (once per
+          # entry) is a harmless no-op the second time.
           @buffer << target
           @keys << message.key
 
