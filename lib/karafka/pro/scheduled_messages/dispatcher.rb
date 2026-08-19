@@ -116,26 +116,37 @@ module Karafka
         #   after each chunk's sync produce returns, so the caller can evict those keys from the
         #   daily buffer incrementally. If a later chunk raises, the chunks already produced have
         #   still been reported, so a non-transactional producer will not re-dispatch them.
+        # @raise [ArgumentError] when called without a block, since a caller that cannot observe
+        #   per-chunk confirmations cannot evict incrementally and would reintroduce the
+        #   whole-flush-or-nothing duplicate-dispatch window this method exists to close
         def flush
+          raise ArgumentError, "#flush requires a block to report per-chunk confirmations" unless block_given?
+
           until @buffer.empty?
             batch_size = config.flush_batch_size
+
+            # A message's target and its tombstone are always buffered as an adjacent pair (see
+            # `#<<`). Rounding the chunk size up to even guarantees a chunk boundary can never
+            # fall between them - with an odd (or 1) `flush_batch_size`, a chunk could otherwise
+            # confirm and yield a key whose target was produced but whose tombstone was not, and a
+            # later chunk failing would then leave that schedule non-tombstoned in Kafka, to be
+            # re-dispatched after a restart/reload.
+            batch_size += 1 if batch_size.odd?
 
             messages = @buffer.shift(batch_size)
             keys = @keys.shift(batch_size)
 
             config.producer.produce_many_sync(messages)
 
-            yield(keys) if block_given?
+            yield(keys)
           end
-        rescue
-          # A failed flush leaves the not-yet-produced entries staged here. Those messages are
-          # still in the daily buffer (their keys were never yielded, so never evicted) and will be
-          # re-buffered on the next tick, so we drop the stale staging to avoid dispatching them a
-          # second time.
+        ensure
+          # Whether flush finished normally (buffer already empty here, so this is a no-op) or
+          # raised partway through, drop anything left. Those messages are still in the daily
+          # buffer (their keys were never yielded, so never evicted) and will be re-buffered on
+          # the next tick, so stale leftovers here must not be dispatched a second time.
           @buffer.clear
           @keys.clear
-
-          raise
         end
 
         private
