@@ -20,6 +20,28 @@ RSpec.describe_current do
       it { expect(manager.active?(:topics, "topic1")).to be(true) }
       it { expect(manager.active?(:topics, "topic2")).to be(false) }
     end
+
+    context "when included as a wildcard pattern" do
+      before { manager.include(:topics, "app-a-*") }
+
+      it { expect(manager.active?(:topics, "app-a-topic-1")).to be(true) }
+      it { expect(manager.active?(:topics, "app-a-topic-2")).to be(true) }
+      it { expect(manager.active?(:topics, "another-app-a-topic-1")).to be(false) }
+    end
+
+    context "when included as a consumer group wildcard pattern" do
+      before { manager.include(:consumer_groups, "app-a-*") }
+
+      it { expect(manager.active?(:consumer_groups, "app-a-group")).to be(true) }
+      it { expect(manager.active?(:consumer_groups, "app-b-group")).to be(false) }
+    end
+
+    context "when included as a subscription group wildcard pattern" do
+      before { manager.include(:subscription_groups, "app-a-*") }
+
+      it { expect(manager.active?(:subscription_groups, "app-a-group")).to be(true) }
+      it { expect(manager.active?(:subscription_groups, "app-b-group")).to be(false) }
+    end
   end
 
   describe "#exclude and #active?" do
@@ -55,6 +77,21 @@ RSpec.describe_current do
       it { expect(manager.active?(:topics, "topic1")).to be(true) }
       it { expect(manager.active?(:topics, "topic2")).to be(false) }
     end
+
+    context "when excluded as a wildcard pattern" do
+      before { manager.exclude(:topics, "app-a-*") }
+
+      it { expect(manager.active?(:topics, "app-a-topic-1")).to be(false) }
+      it { expect(manager.active?(:topics, "app-a-topic-2")).to be(false) }
+      it { expect(manager.active?(:topics, "another-app-a-topic-1")).to be(true) }
+    end
+  end
+
+  describe ".wildcard?" do
+    it { expect(described_class.wildcard?("topic1")).to be(false) }
+    it { expect(described_class.wildcard?("app-a-*")).to be(true) }
+    it { expect(described_class.wildcard?("app-a-topic-?")).to be(true) }
+    it { expect(described_class.wildcard?("app-a-[12]")).to be(true) }
   end
 
   describe "#to_h" do
