@@ -90,12 +90,14 @@ module Karafka
         # @param job [Jobs::Base] job that locked the queue
         def unlock(job)
           @mutex.synchronize do
-            @statistics[:waiting] -= 1
+            if @in_waiting[job.group_id].delete(job)
+              @statistics[:waiting] -= 1
 
-            return if @in_waiting[job.group_id].delete(job)
+              return
+            end
 
             # This should never happen. It means there was a job being unlocked that was never
-            # locked in the first place
+            # locked in the first place (or its group was already reset via `#clear`)
             raise(Errors::JobsQueueSynchronizationError, job.group_id)
           end
         end
