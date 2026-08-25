@@ -34,7 +34,6 @@ module Karafka
       module Features
         module ConsumerGroups
           class Patterns < Base
-            # Namespace for patterns related contracts
             module Contracts
               # Contract used to validate pattern data
               class Pattern < Karafka::Contracts::Base

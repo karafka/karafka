@@ -42,10 +42,8 @@ module Karafka
                   File.join(Karafka.gem_root, "config", "locales", "pro_errors.yml")
                 ).fetch("en").fetch("validations").fetch("routing").fetch("topic")
 
-                # Validate the nested pausing configuration
-                # Both old setters and new pause() method update the pausing config,
-                # so we only need to validate this one format
-                nested :pausing do
+                # Validate the nested pause configuration
+                nested :pause do
                   required(:active) { |val| [true, false].include?(val) }
                   required(:timeout) { |val| val.is_a?(Integer) && val.positive? }
                   required(:max_timeout) { |val| val.is_a?(Integer) && val.positive? }
@@ -56,13 +54,13 @@ module Karafka
                 virtual do |data, errors|
                   next unless errors.empty?
 
-                  pausing = data.fetch(:pausing)
-                  timeout = pausing.fetch(:timeout)
-                  max_timeout = pausing.fetch(:max_timeout)
+                  pause = data.fetch(:pause)
+                  timeout = pause.fetch(:timeout)
+                  max_timeout = pause.fetch(:max_timeout)
 
                   next if timeout <= max_timeout
 
-                  [[%i[pausing timeout], :max_timeout_vs_pause_max_timeout]]
+                  [[%i[pause timeout], :max_timeout_vs_pause_max_timeout]]
                 end
               end
             end

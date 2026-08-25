@@ -31,9 +31,6 @@
 module Karafka
   module Pro
     module Processing
-      # Consumer-group-specific Pro processing components (driven by rebalance callbacks and
-      # partition ticks). Parallel `ShareGroups` will live next to this namespace once KIP-932
-      # lands.
       module ConsumerGroups
         # Processing components for virtual partitions
         module VirtualPartitions
@@ -41,7 +38,8 @@ module Karafka
           module Distributors
             # Base class for all virtual partition distributors
             class Base
-              # @param config [Karafka::Pro::Routing::Features::ConsumerGroups::VirtualPartitions::Config]
+              # @param config
+              #   [Karafka::Pro::Routing::Features::ConsumerGroups::VirtualPartitions::Config]
               def initialize(config)
                 @config = config
               end

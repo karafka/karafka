@@ -31,9 +31,6 @@
 module Karafka
   module Pro
     module Processing
-      # Consumer-group-specific Pro processing components (driven by rebalance callbacks and
-      # partition ticks). Parallel `ShareGroups` will live next to this namespace once KIP-932
-      # lands.
       module ConsumerGroups
         # Pro selector of appropriate topic setup based features enhancements.
         class ExpansionsSelector < Karafka::Processing::ConsumerGroups::ExpansionsSelector

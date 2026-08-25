@@ -31,9 +31,6 @@
 module Karafka
   module Pro
     module Processing
-      # Consumer-group-specific Pro processing components (driven by rebalance callbacks and
-      # partition ticks). Parallel `ShareGroups` will live next to this namespace once KIP-932
-      # lands.
       module ConsumerGroups
         module Strategies
           # Namespace for all the strategies starting with DLQ
@@ -49,8 +46,8 @@ module Karafka
 
               # Override of the standard `#mark_as_consumed` in order to handle the pause tracker
               # reset in case DLQ is marked as fully independent. When DLQ is marked independent,
-              # any offset marking causes the pause count tracker to reset. This is useful when
-              # the error is not due to the collective batch operations state but due to intermediate
+              # any offset marking causes the pause count tracker to reset. This is useful when the
+              # error is not due to the collective batch operations state but due to intermediate
               # "crawling" errors that move with it
               #
               # @see `Strategies::Default#mark_as_consumed` for more details
@@ -68,8 +65,8 @@ module Karafka
                 @_current_offset_metadata = nil
               end
 
-              # Override of the standard `#mark_as_consumed!`. Resets the pause tracker count in case
-              # DLQ was configured with the `independent` flag.
+              # Override of the standard `#mark_as_consumed!`. Resets the pause tracker count in
+              # case DLQ was configured with the `independent` flag.
               #
               # @see `Strategies::Default#mark_as_consumed!` for more details
               # @param message [Messages::Message]
@@ -147,8 +144,8 @@ module Karafka
                 )
               end
 
-              # Dispatches the message to the DLQ (when needed and when applicable based on settings)
-              #   and marks this message as consumed for non MOM flows.
+              # Dispatches the message to the DLQ (when needed and when applicable based on
+              # settings) and marks this message as consumed for non MOM flows.
               #
               # If producer is transactional and config allows, uses transaction to do that
               def dispatch_if_needed_and_mark_as_consumed
@@ -265,7 +262,7 @@ module Karafka
                   # Use custom topic if it was returned from the strategy
                   @_dispatch_to_dlq_topic = target_topic || topic.dead_letter_queue.topic
                 else
-                  raise Karafka::UnsupportedCaseError, flow
+                  raise Karafka::Errors::UnsupportedCaseError, flow
                 end
 
                 yield

@@ -30,7 +30,6 @@
 
 module Karafka
   module Pro
-    # Pro Admin utilities
     module Admin
       class Recovery < Karafka::Admin
         # Recovery related errors

@@ -27,10 +27,22 @@ RSpec.describe_current do
     it { expect(contract.call(config)).not_to be_success }
   end
 
+  context "when we want to use a consumer groups wildcard pattern that matches nothing yet" do
+    before { config[:include_consumer_groups] = ["#{rand}-*"] }
+
+    it { expect(contract.call(config)).to be_success }
+  end
+
   context "when we want to exclude consumer groups that are not defined" do
     before { config[:exclude_consumer_groups] = [rand.to_s] }
 
     it { expect(contract.call(config)).not_to be_success }
+  end
+
+  context "when we want to exclude a consumer groups wildcard pattern that matches nothing yet" do
+    before { config[:exclude_consumer_groups] = ["#{rand}-*"] }
+
+    it { expect(contract.call(config)).to be_success }
   end
 
   context "when we want to use topics that are not defined" do
@@ -39,10 +51,22 @@ RSpec.describe_current do
     it { expect(contract.call(config)).not_to be_success }
   end
 
+  context "when we want to use a topics wildcard pattern that matches nothing yet" do
+    before { config[:include_topics] = ["#{rand}-*"] }
+
+    it { expect(contract.call(config)).to be_success }
+  end
+
   context "when we want to exclude topics that are not defined" do
     before { config[:exclude_topics] = [rand.to_s] }
 
     it { expect(contract.call(config)).not_to be_success }
+  end
+
+  context "when we want to exclude a topics wildcard pattern that matches nothing yet" do
+    before { config[:exclude_topics] = ["#{rand}-*"] }
+
+    it { expect(contract.call(config)).to be_success }
   end
 
   context "when we want to use subscription groups that are not defined" do
@@ -51,10 +75,22 @@ RSpec.describe_current do
     it { expect(contract.call(config)).not_to be_success }
   end
 
+  context "when we want to use a subscription groups wildcard pattern that matches nothing yet" do
+    before { config[:include_subscription_groups] = ["#{rand}-*"] }
+
+    it { expect(contract.call(config)).to be_success }
+  end
+
   context "when we want to exclude subscription groups that are not defined" do
     before { config[:exclude_subscription_groups] = [rand.to_s] }
 
     it { expect(contract.call(config)).not_to be_success }
+  end
+
+  context "when we want to exclude a subscription groups wildcard pattern matching nothing yet" do
+    before { config[:exclude_subscription_groups] = ["#{rand}-*"] }
+
+    it { expect(contract.call(config)).to be_success }
   end
 
   context "when nothing to listen on" do

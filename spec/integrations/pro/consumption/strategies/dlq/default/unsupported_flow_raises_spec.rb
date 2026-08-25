@@ -28,41 +28,42 @@
 # License: https://karafka.io/docs/Pro-License-Comm/
 # Contact: contact@karafka.io
 
-# When altering the default pausing using old API (setters), it should not impact other topics
-# This is a backwards compatibility test
+# A custom DLQ strategy that returns an unsupported flow symbol must raise
+# Karafka::Errors::UnsupportedCaseError - not a NameError from a wrong constant namespace.
 
-setup_karafka
+setup_karafka(allow_errors: true)
 
-draw_routes(create_topics: false) do
-  topic :a do
-    consumer Class.new(Karafka::BaseConsumer)
-    pause_timeout 1_000
-    pause_max_timeout 5_000
-    pause_with_exponential_backoff true
-  end
+Karafka.monitor.subscribe("error.occurred") do |event|
+  DT[:errors] << event[:error]
+end
 
-  topic :b do
-    consumer Class.new(Karafka::BaseConsumer)
-    pause_timeout 5_000
-    pause_max_timeout 10_000
-    pause_with_exponential_backoff false
-  end
-
-  topic :c do
-    consumer Class.new(Karafka::BaseConsumer)
+class UnsupportedFlowStrategy
+  def call(_errors_tracker, _attempt)
+    :unsupported_flow
   end
 end
 
-topics = Karafka::App.routes.first.topics
+class Consumer < Karafka::BaseConsumer
+  def consume
+    raise StandardError
+  end
+end
 
-assert_equal 1_000, topics[0].pause_timeout
-assert_equal 5_000, topics[0].pause_max_timeout
-assert_equal true, topics[0].pause_with_exponential_backoff
+draw_routes do
+  topic DT.topics[0] do
+    consumer Consumer
 
-assert_equal 5_000, topics[1].pause_timeout
-assert_equal 10_000, topics[1].pause_max_timeout
-assert_equal false, topics[1].pause_with_exponential_backoff
+    dead_letter_queue(
+      topic: DT.topics[1],
+      strategy: UnsupportedFlowStrategy.new
+    )
+  end
+end
 
-assert_equal 1, topics[2].pause_timeout
-assert_equal 1, topics[2].pause_max_timeout
-assert_equal false, topics[2].pause_with_exponential_backoff
+produce_many(DT.topics[0], DT.uuids(1))
+
+start_karafka_and_wait_until do
+  DT[:errors].any? { |error| error.is_a?(Karafka::Errors::UnsupportedCaseError) }
+end
+
+assert DT[:errors].any? { |error| error.is_a?(Karafka::Errors::UnsupportedCaseError) }

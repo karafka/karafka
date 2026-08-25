@@ -50,12 +50,13 @@ module Karafka
               #   groups that will be created)
               # @param partitioner [nil, #call] nil or callable partitioner
               # @param reducer [nil, #call] reducer for parallel key. It allows for using a custom
-              #   reducer to achieve enhanced parallelization when the default reducer is not enough.
+              #   reducer to achieve enhanced parallelization when the default reducer is not
+              #   enough.
               # @param merge_key [String] key used to build the parallel segment consumer groups
               #
-              # @note This method is an assignor but the API is actually via the `#parallel_segments`
-              #   method. Our `Routing::Proxy` normalizes that the way we want to have it exposed
-              #   for the end users.
+              # @note This method is an assignor but the API is actually via the
+              #   `#parallel_segments` method. Our `Routing::Proxy` normalizes that the way we want
+              #   to have it exposed for the end users.
               def parallel_segments=(
                 count: 1,
                 partitioner: nil,

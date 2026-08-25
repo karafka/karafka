@@ -105,7 +105,13 @@ RSpec.describe_current do
           }
         },
         statistics: {
-          decorator_class: Karafka::Instrumentation::Callbacks::ConsumerGroups::Decorator
+          consumer_groups: {
+            decorator_class: Karafka::Instrumentation::Callbacks::ConsumerGroups::Decorator,
+            lag_compensation: {
+              interval: 0,
+              pause_age: 30_000
+            }
+          }
         },
         active_job: {
           dispatcher: Karafka::ActiveJob::Dispatcher.new,
@@ -831,9 +837,57 @@ RSpec.describe_current do
     end
 
     context "when statistics decorator_class is missing" do
-      before { config[:internal][:statistics].delete(:decorator_class) }
+      before { config[:internal][:statistics][:consumer_groups].delete(:decorator_class) }
 
       it { expect(contract.call(config)).not_to be_success }
+    end
+
+    context "when statistics lag_compensation interval is missing" do
+      before { config[:internal][:statistics][:consumer_groups][:lag_compensation].delete(:interval) }
+
+      it { expect(contract.call(config)).not_to be_success }
+    end
+
+    context "when statistics lag_compensation interval is negative" do
+      before { config[:internal][:statistics][:consumer_groups][:lag_compensation][:interval] = -1 }
+
+      it { expect(contract.call(config)).not_to be_success }
+    end
+
+    context "when statistics lag_compensation interval is not an integer" do
+      before { config[:internal][:statistics][:consumer_groups][:lag_compensation][:interval] = 1.5 }
+
+      it { expect(contract.call(config)).not_to be_success }
+    end
+
+    context "when statistics lag_compensation interval is a positive integer" do
+      before { config[:internal][:statistics][:consumer_groups][:lag_compensation][:interval] = 30_000 }
+
+      it { expect(contract.call(config)).to be_success }
+    end
+
+    context "when statistics lag_compensation pause_age is missing" do
+      before { config[:internal][:statistics][:consumer_groups][:lag_compensation].delete(:pause_age) }
+
+      it { expect(contract.call(config)).not_to be_success }
+    end
+
+    context "when statistics lag_compensation pause_age is negative" do
+      before { config[:internal][:statistics][:consumer_groups][:lag_compensation][:pause_age] = -1 }
+
+      it { expect(contract.call(config)).not_to be_success }
+    end
+
+    context "when statistics lag_compensation pause_age is below the minimum" do
+      before { config[:internal][:statistics][:consumer_groups][:lag_compensation][:pause_age] = 4_999 }
+
+      it { expect(contract.call(config)).not_to be_success }
+    end
+
+    context "when statistics lag_compensation pause_age is at the minimum" do
+      before { config[:internal][:statistics][:consumer_groups][:lag_compensation][:pause_age] = 5_000 }
+
+      it { expect(contract.call(config)).to be_success }
     end
   end
 

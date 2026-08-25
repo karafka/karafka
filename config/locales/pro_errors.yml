@@ -32,11 +32,11 @@ en:
         delaying.delay_format: 'needs to be equal or more than 0 and an integer'
         delaying.active_format: 'needs to be boolean'
 
-        pausing.active_format: 'needs to be boolean'
-        pausing.timeout_format: needs to be an integer bigger than 0
-        pausing.max_timeout_format: needs to be an integer bigger than 0
-        pausing.with_exponential_backoff_format: needs to be either true or false
-        pausing.timeout_max_timeout_vs_pause_max_timeout: timeout must be less or equal to max_timeout
+        pause.active_format: 'needs to be boolean'
+        pause.timeout_format: needs to be an integer bigger than 0
+        pause.max_timeout_format: needs to be an integer bigger than 0
+        pause.with_exponential_backoff_format: needs to be either true or false
+        pause.timeout_max_timeout_vs_pause_max_timeout: timeout must be less or equal to max_timeout
 
         patterns.active_format: 'needs to be boolean'
         patterns.type_format: 'needs to be :matcher, :discovered or :regular'
@@ -115,6 +115,7 @@ en:
     setup:
       config:
         encryption.active_format: 'needs to be either true or false'
+        encryption.mode_format: 'needs to be either :envelope or :direct'
         encryption.public_key_invalid: 'is not a valid public RSA key'
         encryption.public_key_needs_to_be_public: 'is a private RSA key not a public one'
         encryption.private_keys_format: 'needs to be a hash of version and private key value'
@@ -156,5 +157,6 @@ en:
       key_missing: must be present and should be unique within the partition
       key_format: needs to be a non-empty string unique within the partition
       headers_schedule_target_epoch_in_the_past: 'scheduling cannot happen in the past'
+      headers_schedule_target_epoch_too_far_in_future: 'scheduling is too far in the future (schedule_target_epoch must be Unix time in seconds)'
       headers_format: are not correct
       not_a_scheduled_messages_topic: 'the envelope topic is not a scheduled messages topic'

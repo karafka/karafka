@@ -124,9 +124,15 @@ RSpec.describe_current do
   end
 
   describe "#stop" do
+    let(:original_shutdown_timeout) { Karafka::App.config.shutdown_timeout }
+
     before do
+      original_shutdown_timeout
       Karafka::App.config.internal.status.run!
       Karafka::App.config.shutdown_timeout = timeout_ms
+      # `shutdown_timeout` is memoized on the class via ConfigImporter, so we clear it to ensure
+      # each example reads the freshly assigned config value regardless of run order.
+      described_class.instance_variable_set(:@shutdown_timeout, nil)
       allow(process).to receive(:supervised?).and_return(true)
     end
 
@@ -139,6 +145,8 @@ RSpec.describe_current do
         terminate: nil
       )
       server_class.stop
+      Karafka::App.config.shutdown_timeout = original_shutdown_timeout
+      described_class.instance_variable_set(:@shutdown_timeout, nil)
       # After shutdown we need to reinitialize the app for other specs
       Karafka::App.initialize!
     end
@@ -252,6 +260,52 @@ RSpec.describe_current do
         it "expect stop and exit with sleep" do
           expect(Karafka::App).to have_received(:stop!)
           expect(described_class).to have_received(:sleep).with(0.1).exactly(timeout_s * 10).times
+          expect(Kernel).to have_received(:exit!).with(2)
+        end
+      end
+    end
+
+    context "when shutdown time is below 1000ms (sub-second grace)" do
+      let(:timeout_ms) { 500 }
+
+      before do
+        allow(Karafka::App).to receive_messages(
+          stopped?: false,
+          terminated?: false,
+          stop!: nil
+        )
+        allow(described_class).to receive(:sleep)
+        allow(Kernel).to receive(:exit!)
+      end
+
+      context "when there are active consuming threads (consuming does not want to stop)" do
+        let(:active_thread) do
+          instance_double(
+            Karafka::Connection::Listener,
+            stopped?: true,
+            terminate: true,
+            shutdown: true,
+            active?: true
+          )
+        end
+
+        before do
+          described_class.listeners = instance_double(
+            Karafka::Connection::ListenersBatch,
+            active: [active_thread],
+            all?: false,
+            select: [active_thread],
+            each: nil
+          )
+          server_class.stop
+        end
+
+        # Regression: integer division `500 / 1_000` used to floor to 0, giving the supervision
+        # loop zero iterations and skipping the grace period entirely (immediate forceful kill).
+        # With float math, 500ms / 0.1s supervision sleep must run 5 grace checks.
+        it "expect to still grant a grace period instead of collapsing to zero iterations" do
+          expect(Karafka::App).to have_received(:stop!)
+          expect(described_class).to have_received(:sleep).with(0.1).exactly(5).times
           expect(Kernel).to have_received(:exit!).with(2)
         end
       end

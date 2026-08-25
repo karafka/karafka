@@ -2,31 +2,29 @@
 
 module Karafka
   module Processing
-    # Consumer-group-specific processing components (driven by rebalance callbacks and partition
-    # ticks). Parallel `ShareGroups` will live next to this namespace once KIP-932 lands.
     module ConsumerGroups
       module InlineInsights
         # Object used to track statistics coming from librdkafka in a way that can be accessible by
         # the consumers
         #
-        # We use a single tracker because we do not need state management here as our consumer groups
-        # clients identified by statistics name value are unique. On top of that, having a per
-        # process one that is a singleton allows us to use tracker easily also from other places like
-        # filtering API etc.
+        # We use a single tracker because we do not need state management here as our consumer
+        # groups clients identified by statistics name value are unique. On top of that, having a
+        # per process one that is a singleton allows us to use tracker easily also from other places
+        # like filtering API etc.
         #
         # @note We include cache of 5 minutes for revoked partitions to compensate for cases where
-        #   when using LRJ a lost partition data would not be present anymore, however we would still
-        #   be in the processing phase. Since those metrics are published with each `poll`, regular
-        #   processing is not a subject of this issue. For LRJ we keep the reference. The only case
-        #   where this could be switched midway is when LRJ is running for an extended period of time
-        #   after the involuntary revocation. Having a time based cache instead of tracking
-        #   simplifies the design as we do not have to deal with state tracking, especially since
-        #   we would have to track also operations running in a revoked state.
+        #   when using LRJ a lost partition data would not be present anymore, however we would
+        #   still be in the processing phase. Since those metrics are published with each `poll`,
+        #   regular processing is not a subject of this issue. For LRJ we keep the reference. The
+        #   only case where this could be switched midway is when LRJ is running for an extended
+        #   period of time after the involuntary revocation. Having a time based cache instead of
+        #   tracking simplifies the design as we do not have to deal with state tracking, especially
+        #   since we would have to track also operations running in a revoked state.
         #
         # @note This tracker keeps in memory data about all topics and partitions that it encounters
-        #   because in case of routing patterns, we may start getting statistics prior to registering
-        #   given topic via dynamic routing expansions. In such case we would not have insights
-        #   where they were actually available for us to use.
+        #   because in case of routing patterns, we may start getting statistics prior to
+        #   registering given topic via dynamic routing expansions. In such case we would not have
+        #   insights where they were actually available for us to use.
         #
         # @note Memory usage is negligible as long as we can evict expired data. Single metrics set
         #   for a single partition contains around 4KB of data. This means, that in case of an

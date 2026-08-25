@@ -35,6 +35,7 @@ RSpec.describe_current do
     {
       encryption: {
         active: false,
+        mode: :envelope,
         version: "1",
         public_key: "",
         private_keys: {},
@@ -52,6 +53,24 @@ RSpec.describe_current do
 
   context "when active status is not a boolean" do
     before { encryption[:active] = "1" }
+
+    it { expect(contract.call(config)).not_to be_success }
+  end
+
+  context "when mode is direct" do
+    before { encryption[:mode] = :direct }
+
+    it { expect(contract.call(config)).to be_success }
+  end
+
+  context "when mode is not a supported value" do
+    before { encryption[:mode] = :hybrid }
+
+    it { expect(contract.call(config)).not_to be_success }
+  end
+
+  context "when mode is a string version of a supported value" do
+    before { encryption[:mode] = "envelope" }
 
     it { expect(contract.call(config)).not_to be_success }
   end

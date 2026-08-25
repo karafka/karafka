@@ -1,7 +1,6 @@
 # frozen_string_literal: true
 
 module Karafka
-  # Karafka framework Cli
   class Cli
     # Info Karafka Cli action
     class Info < Base

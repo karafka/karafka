@@ -1,0 +1,285 @@
+# frozen_string_literal: true
+
+# Karafka Pro - Source Available Commercial Software
+# Copyright (c) 2017-present Maciej Mensfeld. All rights reserved.
+#
+# This software is NOT open source. It is source-available commercial software
+# requiring a paid license for use. It is NOT covered by LGPL.
+#
+# The author retains all right, title, and interest in this software,
+# including all copyrights, patents, and other intellectual property rights.
+# No patent rights are granted under this license.
+#
+# PROHIBITED:
+# - Use without a valid commercial license
+# - Redistribution, modification, or derivative works without authorization
+# - Reverse engineering, decompilation, or disassembly of this software
+# - Use as training data for AI/ML models or inclusion in datasets
+# - Scraping, crawling, or automated collection for any purpose
+#
+# PERMITTED:
+# - Reading, referencing, and linking for personal or commercial use
+# - Runtime retrieval by AI assistants, coding agents, and RAG systems
+#   for the purpose of providing contextual help to Karafka users
+#
+# Receipt, viewing, or possession of this software does not convey or
+# imply any license or right beyond those expressly stated above.
+#
+# License: https://karafka.io/docs/Pro-License-Comm/
+# Contact: contact@karafka.io
+
+RSpec.describe_current do
+  subject(:refresher) { described_class.new }
+
+  let(:client_name) { SecureRandom.hex(6) }
+  let(:sg_id) { SecureRandom.hex(6) }
+  let(:registry) { Karafka::Pro::Instrumentation::ConsumerGroups::LagCompensation::Registry.instance }
+  let(:subscription_group) { instance_double(Karafka::Routing::SubscriptionGroup, id: sg_id) }
+
+  let(:client) do
+    instance_double(
+      Karafka::Connection::Client,
+      name: client_name
+    )
+  end
+
+  let(:tick_event) do
+    Karafka::Core::Monitoring::Event.new(
+      "client.events_poll",
+      caller: client,
+      subscription_group: subscription_group
+    )
+  end
+
+  let(:revocation_event) do
+    Karafka::Core::Monitoring::Event.new(
+      "rebalance.partitions_revoked",
+      subscription_group: subscription_group
+    )
+  end
+
+  before do
+    Karafka::App.config.internal.statistics.consumer_groups.lag_compensation.interval = 1
+    Karafka::App.config.internal.statistics.consumer_groups.lag_compensation.pause_age = 1
+
+    # A single controllable monotonic clock shared by the refresher (pause ages) and its
+    # internal IntervalRunner (tick gating), so time advances deterministically via #age_pause
+    # instead of real sleeps. Every non-monotonic clock reading falls through to the real one.
+    @now = 1_000_000.0
+    original_clock = ::Process.method(:clock_gettime)
+    allow(::Process).to receive(:clock_gettime) do |clock_id, *rest|
+      if clock_id == ::Process::CLOCK_MONOTONIC && rest == [:float_millisecond]
+        @now
+      else
+        original_clock.call(clock_id, *rest)
+      end
+    end
+
+    allow(client).to receive(:read_partition_offsets) do |request|
+      request.flat_map do |topic, specs|
+        specs.map { |spec| { topic: topic, partition: spec[:partition], offset: 95 } }
+      end
+    end
+  end
+
+  after do
+    Karafka::App.config.internal.statistics.consumer_groups.lag_compensation.interval = 0
+    Karafka::App.config.internal.statistics.consumer_groups.lag_compensation.pause_age = 30_000
+    registry.evict(client_name)
+  end
+
+  def pause_event(topic: "topic", partition: 0)
+    Karafka::Core::Monitoring::Event.new(
+      "client.pause",
+      caller: client,
+      subscription_group: subscription_group,
+      topic: topic,
+      partition: partition
+    )
+  end
+
+  def resume_event(topic: "topic", partition: 0)
+    Karafka::Core::Monitoring::Event.new(
+      "client.resume",
+      caller: client,
+      subscription_group: subscription_group,
+      topic: topic,
+      partition: partition
+    )
+  end
+
+  # Advances the shared monotonic clock well past both the pause age threshold and the tick
+  # interval, deterministically and without touching real time
+  def age_pause
+    @now += 10_000
+  end
+
+  describe "#on_client_events_poll" do
+    context "when nothing is paused" do
+      it "does not store anything" do
+        refresher.on_client_events_poll(tick_event)
+
+        expect(registry.fetch(client_name)).to be_nil
+      end
+    end
+
+    context "when a partition was paused for less than the pause age" do
+      it "does not store anything" do
+        # First tick makes the follow-up tick due-gated, so age the state first
+        refresher.on_client_events_poll(tick_event)
+        age_pause
+
+        refresher.on_client_pause(pause_event)
+        refresher.on_client_events_poll(tick_event)
+
+        expect(registry.fetch(client_name)).to be_nil
+      end
+    end
+
+    context "when a partition stayed paused for at least the pause age" do
+      it "queries and stores refreshed data" do
+        refresher.on_client_pause(pause_event)
+        age_pause
+        refresher.on_client_events_poll(tick_event)
+
+        expect(registry.fetch(client_name)).to eq(
+          "topic" => { 0 => 95 }
+        )
+      end
+    end
+
+    context "when the refresh is not due yet" do
+      before do
+        Karafka::App.config.internal.statistics.consumer_groups.lag_compensation.interval = 10_000
+        Karafka::App.config.internal.statistics.consumer_groups.lag_compensation.pause_age = 10_000
+      end
+
+      it "does not store anything despite a long-paused partition" do
+        refresher.on_client_pause(pause_event)
+
+        # Backdate the pause so it qualifies as long-paused despite the large interval
+        state = refresher.instance_variable_get(:@states).fetch(sg_id)
+        state[:paused]["topic"][0] -= 20_000
+
+        refresher.on_client_events_poll(tick_event)
+
+        expect(registry.fetch(client_name)).not_to be_nil
+
+        registry.evict(client_name)
+
+        # Immediate follow-up tick is within the interval window and must do nothing
+        refresher.on_client_events_poll(tick_event)
+
+        expect(registry.fetch(client_name)).to be_nil
+      end
+    end
+
+    context "when querying fails" do
+      before { allow(client).to receive(:read_partition_offsets).and_raise(StandardError) }
+
+      it "does not raise and does not store anything" do
+        refresher.on_client_pause(pause_event)
+        age_pause
+
+        expect { refresher.on_client_events_poll(tick_event) }.not_to raise_error
+        expect(registry.fetch(client_name)).to be_nil
+      end
+
+      it "instruments the error with a dedicated type" do
+        refresher.on_client_pause(pause_event)
+        age_pause
+
+        expect(Karafka.monitor)
+          .to receive(:instrument)
+          .with(
+            "error.occurred",
+            hash_including(type: "lag_compensation.refresher.error")
+          )
+
+        refresher.on_client_events_poll(tick_event)
+      end
+    end
+
+    context "when the process is done" do
+      before { allow(Karafka::App).to receive(:done?).and_return(true) }
+
+      it "does not query nor store anything" do
+        refresher.on_client_pause(pause_event)
+        age_pause
+        refresher.on_client_events_poll(tick_event)
+
+        expect(registry.fetch(client_name)).to be_nil
+      end
+    end
+  end
+
+  describe "#on_client_resume" do
+    it "keeps the refreshed values of a resumed partition" do
+      refresher.on_client_pause(pause_event)
+      age_pause
+      refresher.on_client_events_poll(tick_event)
+
+      expect(registry.fetch(client_name)).to eq("topic" => { 0 => 95 })
+
+      refresher.on_client_resume(resume_event)
+
+      # Kept, so the compensator can hand over to the live statistics instead of the emitted
+      # values snapping back to the frozen pre-resume ones
+      expect(registry.fetch(client_name)).to eq("topic" => { 0 => 95 })
+    end
+
+    it "stops refreshing a resumed partition" do
+      refresher.on_client_pause(pause_event)
+      age_pause
+      refresher.on_client_events_poll(tick_event)
+      refresher.on_client_resume(resume_event)
+
+      # Nothing stays paused, so the follow-up tick must not query the resumed partition again
+      age_pause
+      refresher.on_client_events_poll(tick_event)
+
+      expect(client).to have_received(:read_partition_offsets).once
+    end
+
+    it "keeps the data of both resumed and still paused partitions" do
+      refresher.on_client_pause(pause_event(partition: 0))
+      refresher.on_client_pause(pause_event(partition: 1))
+      age_pause
+
+      refresher.on_client_events_poll(tick_event)
+      refresher.on_client_resume(resume_event(partition: 0))
+
+      expect(registry.fetch(client_name)).to eq(
+        "topic" => { 0 => 95, 1 => 95 }
+      )
+    end
+
+    it "does not raise when the partition was not tracked" do
+      expect { refresher.on_client_resume(resume_event) }.not_to raise_error
+    end
+  end
+
+  describe "#on_rebalance_partitions_revoked" do
+    it "evicts stored data and stops tracking all pauses" do
+      refresher.on_client_pause(pause_event)
+      age_pause
+      refresher.on_client_events_poll(tick_event)
+
+      expect(registry.fetch(client_name)).not_to be_nil
+
+      refresher.on_rebalance_partitions_revoked(revocation_event)
+
+      expect(registry.fetch(client_name)).to be_nil
+
+      # Without new pause events, nothing must be refreshed again even after aging
+      age_pause
+      refresher.on_client_events_poll(tick_event)
+
+      expect(registry.fetch(client_name)).to be_nil
+    end
+
+    it "does not raise when nothing was tracked for a given subscription group" do
+      expect { refresher.on_rebalance_partitions_revoked(revocation_event) }.not_to raise_error
+    end
+  end
+end

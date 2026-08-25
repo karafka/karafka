@@ -115,8 +115,11 @@ module Karafka
 
         # We check from time to time (for the timeout period) if all the threads finished
         # their work and if so, we can just return and normal shutdown process will take place
-        # We divide it by 1000 because we use time in ms.
-        ((timeout / 1_000) * (1 / supervision_sleep)).to_i.times do
+        # We use float math and divide by 1000 (ms -> s) so that sub-second `shutdown_timeout`
+        # values do not collapse to zero iterations (integer division would floor them to 0,
+        # skipping the grace period entirely and forcing an immediate forceful shutdown). We
+        # `ceil` to guarantee at least one supervision check for any positive timeout.
+        (timeout / (supervision_sleep * 1_000)).ceil.times do
           all_listeners_stopped = listeners.all?(&:stopped?)
           all_workers_stopped = workers.stopped?
 

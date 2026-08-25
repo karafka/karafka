@@ -31,9 +31,6 @@
 module Karafka
   module Pro
     module Processing
-      # Consumer-group-specific Pro processing components (driven by rebalance callbacks and
-      # partition ticks). Parallel `ShareGroups` will live next to this namespace once KIP-932
-      # lands.
       module ConsumerGroups
         module Coordinators
           # Applier for all filters we want to have. Whether related to limiting messages based
@@ -101,11 +98,12 @@ module Karafka
 
             # @return [Integer] minimum timeout we need to pause. This is the minimum for all the
             #   pausing filters to satisfy all of them: we pause for the shortest requested backoff,
-            #   re-poll and re-apply, and any filter that still needs more time pauses again.
-            #   We consider only filters that actually resolved to `:pause`. Per the filter contract
-            #   non-pausing filters should report a `nil` timeout, but the built-in throttler/delayer
-            #   report `0` when seeking; including such a filter let that `0` collapse the pause to
-            #   `0`, which expires immediately and busy-spins instead of backing off.
+            #   re-poll and re-apply, and any filter that still needs more time pauses again. We
+            #   consider only filters that actually resolved to `:pause`. Per the filter contract
+            #   non-pausing filters should report a `nil` timeout, but the built-in
+            #   throttler/delayer report `0` when seeking; including such a filter let that `0`
+            #   collapse the pause to `0`, which expires immediately and busy-spins instead of
+            #   backing off.
             def timeout
               applied
                 .select(&:pause?)

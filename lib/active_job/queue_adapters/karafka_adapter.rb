@@ -20,7 +20,7 @@ module ActiveJob
     # - Other Rails versions: Inherit from AbstractAdapter (normal behavior)
     # - No Rails: Inherit from Object (standalone ActiveJob usage)
     #
-    # @see https://github.com/sidekiq/sidekiq/issues/6746 Similar issue in Sidekiq
+    # See https://github.com/sidekiq/sidekiq/issues/6746 Similar issue in Sidekiq
     base = if defined?(Rails::VERSION)
       ((Rails::VERSION::MAJOR == 7 && Rails::VERSION::MINOR < 2) ? Object : AbstractAdapter)
     else

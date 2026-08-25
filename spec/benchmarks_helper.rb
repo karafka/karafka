@@ -16,9 +16,9 @@ def setup_karafka
 
     config.kafka = { "bootstrap.servers": "127.0.0.1:9092" }
     config.client_id = caller_id
-    config.pause_timeout = 1
-    config.pause_max_timeout = 1
-    config.pause_with_exponential_backoff = false
+    config.pause.timeout = 1
+    config.pause.max_timeout = 1
+    config.pause.with_exponential_backoff = false
     config.logger = Logger.new($stdout)
     config.logger.level = Logger::ERROR
 

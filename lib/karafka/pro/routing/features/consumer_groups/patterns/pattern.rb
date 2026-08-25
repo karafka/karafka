@@ -100,7 +100,8 @@ module Karafka
               # prevent it from running but internally in this component we need to ensure, that
               # prior to the validations we operate on a regexp
               #
-              # @return [Regexp] returns a regexp always even if what we've received was not a regexp
+              # @return [Regexp] returns a regexp always even if what we've received was not a
+              #   regexp
               def safe_regexp
                 # This regexp will never match anything
                 regexp.is_a?(Regexp) ? regexp : /$a/

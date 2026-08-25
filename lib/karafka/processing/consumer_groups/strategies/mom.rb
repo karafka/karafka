@@ -2,11 +2,10 @@
 
 module Karafka
   module Processing
-    # Consumer-group-specific processing components (driven by rebalance callbacks and partition
-    # ticks). Parallel `ShareGroups` will live next to this namespace once KIP-932 lands.
     module ConsumerGroups
       module Strategies
-        # When using manual offset management, we do not mark as consumed after successful processing
+        # When using manual offset management, we do not mark as consumed after successful
+        # processing
         module Mom
           include Default
 

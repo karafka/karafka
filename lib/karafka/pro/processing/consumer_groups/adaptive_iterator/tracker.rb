@@ -31,9 +31,6 @@
 module Karafka
   module Pro
     module Processing
-      # Consumer-group-specific Pro processing components (driven by rebalance callbacks and
-      # partition ticks). Parallel `ShareGroups` will live next to this namespace once KIP-932
-      # lands.
       module ConsumerGroups
         module AdaptiveIterator
           # Tracker is responsible for monitoring the processing of messages within the poll
@@ -45,7 +42,8 @@ module Karafka
 
             # Initializes a new Tracker instance.
             #
-            # @param safety_margin [Float] The safety margin percentage (0-100) to leave as a buffer.
+            # @param safety_margin [Float] The safety margin percentage (0-100) to leave as a
+            #   buffer.
             # @param last_polled_at [Float] The timestamp of the last polling in milliseconds.
             # @param max_poll_interval_ms [Integer] The maximum poll interval time in milliseconds.
             def initialize(

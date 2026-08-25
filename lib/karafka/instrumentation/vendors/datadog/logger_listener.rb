@@ -6,8 +6,7 @@ module Karafka
     module Vendors
       # Datadog specific instrumentation
       module Datadog
-        # A karafka's logger listener for Datadog
-        # It depends on the 'ddtrace' gem
+        # A karafka's logger listener for Datadog. It depends on the 'ddtrace' gem
         class LoggerListener
           include Karafka::Core::Configurable
           extend Forwardable
@@ -17,7 +16,7 @@ module Karafka
           # `Datadog::Tracing` client that we should use to trace stuff
           setting :client
 
-          # @see https://docs.datadoghq.com/tracing/trace_collection/dd_libraries/ruby
+          # See https://docs.datadoghq.com/tracing/trace_collection/dd_libraries/ruby
           setting :service_name, default: nil
 
           configure
@@ -145,6 +144,8 @@ module Karafka
               error "Parallel segments partitioner error occurred: #{error}"
             when "virtual_partitions.partitioner.error"
               error "Virtual partitions partitioner error occurred: #{error}"
+            when "lag_compensation.refresher.error"
+              warn "Lag compensation refresher error occurred: #{error}"
             else
               error "#{event[:type]} error occurred: #{error}"
             end

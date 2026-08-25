@@ -22,8 +22,8 @@ module Karafka
         # option token [String, false] - license token issued when you acquire a Pro license
         # Leave false if using the LGPL version and all is going to work just fine :)
         #
-        # @note By using the commercial components, you accept the LICENSE-COMM commercial license
-        #   terms and conditions
+        # By using the commercial components, you accept the LICENSE-COMM commercial license terms
+        # and conditions
         setting :token, default: false
         # option entity [String] for whom we did issue the license
         setting :entity, default: ""
@@ -88,8 +88,8 @@ module Karafka
         setting :token_provider_listener, default: false
       end
 
-      # rdkafka default options
-      # @see https://github.com/edenhill/librdkafka/blob/master/CONFIGURATION.md
+      # rdkafka default options See
+      # https://github.com/edenhill/librdkafka/blob/master/CONFIGURATION.md
       setting :kafka, default: {}
 
       # Public configuration for swarm operations
@@ -163,9 +163,8 @@ module Karafka
       setting :internal do
         # option status [Karafka::Status] app status
         setting :status, default: Status.new
-        # option process [Karafka::Process] process status
-        # @note In the future, we need to have a single process representation for all the karafka
-        #   instances
+        # option process [Karafka::Process] process status. In the future, we need to have a single
+        # process representation for all the karafka instances
         setting :process, default: Process.new
         # Interval of "ticking". This is used to define the maximum time between consecutive
         # polling of the main rdkafka queue. It should match also the `statistics.interval.ms`
@@ -356,11 +355,32 @@ module Karafka
 
         # Things related to librdkafka statistics decoration prior to their emission
         setting :statistics do
-          # option decorator_class [Class] class used to decorate raw librdkafka statistics
-          #   (adds delta/freeze-duration values) before `statistics.emitted` is instrumented.
-          #   Exposed so it can be replaced with a custom decorator (e.g. one that also enriches
-          #   or corrects specific values) without touching the callback that uses it.
-          setting :decorator_class, default: Instrumentation::Callbacks::ConsumerGroups::Decorator
+          # Consumer groups related statistics settings
+          setting :consumer_groups do
+            # option decorator_class [Class] class used to decorate raw librdkafka statistics
+            #   (adds delta/freeze-duration values) before `statistics.emitted` is instrumented.
+            #   Exposed so it can be replaced with a custom decorator (e.g. one that also
+            #   enriches or corrects specific values) without touching the callback that uses
+            #   it.
+            setting :decorator_class, default: Instrumentation::Callbacks::ConsumerGroups::Decorator
+
+            # Active refreshing of watermarks and lags for long-paused partitions (Pro).
+            # librdkafka only updates watermark offsets and lags from fetch responses, so
+            # partitions paused for a long time report frozen values in statistics. When
+            # enabled, they are refreshed via the running consumer connection and overlaid onto
+            # the emitted statistics.
+            setting :lag_compensation do
+              # option interval [Integer] how often (ms) at most to refresh watermarks and lags
+              #   of long-paused partitions. 0 disables the feature entirely.
+              setting :interval, default: 0
+
+              # option pause_age [Integer] how long (ms) a partition needs to stay paused to
+              #   qualify for the compensation. Short pause/resume cycles reset the clock and
+              #   never qualify. Minimum accepted value is 5 seconds as statistics of partitions
+              #   paused shorter are fresh enough to make compensating them pointless.
+              setting :pause_age, default: 30_000
+            end
+          end
         end
 
         # Karafka components for ActiveJob
@@ -384,54 +404,6 @@ module Karafka
       # This will load all the defaults that can be later overwritten.
       # Thanks to that we have an initial state out of the box.
       configure
-
-      # Backwards compatibility: Add old flat API methods to the config instance
-      # These delegate to the new nested pause config
-      # @deprecated Will be removed in Karafka 2.6
-      #
-      # Prior to the introduction of nested pause configuration, pause-related settings were
-      # accessed directly on the config object (e.g., `config.pause_timeout`). With the nested
-      # structure introduced, these settings moved to `config.pause.timeout`, etc.
-      #
-      # This instance_eval block adds delegation methods to maintain backwards compatibility,
-      # allowing existing code using the old flat API to continue working without modification.
-      config.instance_eval do
-        # @return [Integer] delegated timeout value from pause.timeout
-        # @deprecated Use config.pause.timeout instead
-        def pause_timeout
-          pause.timeout
-        end
-
-        # @param value [Integer] timeout value to set
-        # @deprecated Use config.pause.timeout= instead
-        def pause_timeout=(value)
-          pause.timeout = value
-        end
-
-        # @return [Integer] delegated max_timeout value from pause.max_timeout
-        # @deprecated Use config.pause.max_timeout instead
-        def pause_max_timeout
-          pause.max_timeout
-        end
-
-        # @param value [Integer] max timeout value to set
-        # @deprecated Use config.pause.max_timeout= instead
-        def pause_max_timeout=(value)
-          pause.max_timeout = value
-        end
-
-        # @return [Boolean] delegated exponential backoff flag from pause.with_exponential_backoff
-        # @deprecated Use config.pause.with_exponential_backoff instead
-        def pause_with_exponential_backoff
-          pause.with_exponential_backoff
-        end
-
-        # @param value [Boolean] exponential backoff flag to set
-        # @deprecated Use config.pause.with_exponential_backoff= instead
-        def pause_with_exponential_backoff=(value)
-          pause.with_exponential_backoff = value
-        end
-      end
 
       class << self
         # Configuring method
@@ -458,12 +430,12 @@ module Karafka
             scope: %w[config]
           )
 
-          configure_components(proxy)
+          # Verify config-dependent constraints (registered by features for their optional
+          # environment requirements) once the config shape is guaranteed by the contract but
+          # before any components spin up
+          Karafka::Constraints.verify!(:config, config)
 
-          # Install backwards-compatible forwarding so that gems (e.g. karafka-testing) that
-          # still access config.internal.processing.strategy_selector (etc.) keep working after
-          # the move to config.internal.processing.consumer_groups.*
-          install_processing_cg_forwarders(config)
+          configure_components(proxy)
 
           # Refreshes the references that are cached that might have been changed by the config
           Karafka.refresh!
@@ -487,38 +459,6 @@ module Karafka
         end
 
         private
-
-        # Installs forwarding reader methods on the processing config node so that the old
-        # (pre-nesting) paths like `config.internal.processing.strategy_selector` still resolve
-        # by delegating to `config.internal.processing.consumer_groups.strategy_selector`.
-        # This keeps external gems (e.g. karafka-testing) working until they migrate.
-        #
-        # @param config [Karafka::Core::Configurable::Node] root config node
-        def install_processing_cg_forwarders(config)
-          processing = config.internal.processing
-          cg_node = processing.consumer_groups
-
-          %i[
-            jobs_builder
-            coordinator_class
-            errors_tracker_class
-            partitioner_class
-            strategy_selector
-            expansions_selector
-            executor_class
-          ].each do |setting_name|
-            writer = :"#{setting_name}="
-
-            # Remove previous definitions (if setup runs more than once) to avoid
-            # "method redefined" warnings that spec_helper promotes to errors
-            sc = processing.singleton_class
-            sc.remove_method(setting_name) if processing.respond_to?(setting_name)
-            sc.remove_method(writer) if processing.respond_to?(writer)
-
-            processing.define_singleton_method(setting_name) { cg_node.public_send(setting_name) }
-            processing.define_singleton_method(writer) { |val| cg_node.public_send(writer, val) }
-          end
-        end
 
         # Sets up all the components that are based on the user configuration
         # @param config_proxy [ConfigProxy] the configuration proxy containing deferred setup

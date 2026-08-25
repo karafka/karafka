@@ -8,8 +8,7 @@ module Karafka
         deserializer: %i[internal active_job deserializer]
       )
 
-      # Defaults for dispatching
-      # The can be updated by using `#karafka_options` on the job
+      # Defaults for dispatching. They can be updated by using `#karafka_options` on the job
       DEFAULTS = {
         dispatch_method: :produce_async,
         dispatch_many_method: :produce_many_async

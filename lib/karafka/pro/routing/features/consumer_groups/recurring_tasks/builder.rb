@@ -117,8 +117,7 @@ module Karafka
                     # Since the execution of particular tasks is isolated and guarded, it should not
                     # leak. This means, that this is to handle errors like schedule version
                     # incompatibility and other errors that will not go away without a redeployment
-                    pause_timeout(60 * 1_000)
-                    pause_max_timeout(60 * 1_000)
+                    pause(timeout: 60 * 1_000, max_timeout: 60 * 1_000)
 
                     # This is the core of execution. Since we're producers of states, we need a way
                     # to tick without having new data

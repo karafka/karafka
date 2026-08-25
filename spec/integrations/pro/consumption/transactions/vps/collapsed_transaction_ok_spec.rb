@@ -56,7 +56,7 @@ DT[:iterator] = (0..9).cycle
 draw_routes do
   topic DT.topic do
     consumer Consumer
-    filter VpStabilizer
+    filter FlowStabilizer
     virtual_partitions(
       partitioner: ->(_msg) { DT[:iterator].next }
     )

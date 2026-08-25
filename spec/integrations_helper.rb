@@ -261,7 +261,7 @@ def become_pro!
   Karafka.const_set(:License, mod) unless Karafka.const_defined?(:License)
   require "karafka/pro/loader"
   Karafka::Pro::Loader.require_all
-  require_relative "support/vp_stabilizer"
+  require_relative "support/flow_stabilizer"
 end
 
 # Configures ActiveJob stuff in a similar way as the Railtie does for full Rails setup
@@ -525,6 +525,30 @@ def start_karafka_and_wait_until(mode: :server, reset_status: false, sleep: 0.01
   # Since manager is for the whole lifecycle of the process, it needs to be re-created
   manager_class = Karafka::App.config.internal.connection.manager.class
   Karafka::App.config.internal.connection.manager = manager_class.new
+end
+
+# Retries a block that tolerates transient Kafka errors, backing off between attempts. Useful
+# for operations that reach internal/lazily-created topics (e.g. `__consumer_offsets`) whose
+# partition leader may still be under election on a freshly started broker. Such calls raise
+# retriable errors like `not_leader_for_partition` that are broker startup races, not failures.
+# Only the given transient codes are retried; any other error is re-raised immediately so real
+# failures still surface.
+# @param attempts [Integer] how many times to try before giving up
+# @param backoff [Float] how long to sleep between attempts
+# @param codes [Array<Symbol>] rdkafka error codes to treat as transient and retry
+# @return [Object] whatever the block returns on success
+def with_transient_retry(
+  attempts: 10,
+  backoff: 0.5,
+  codes: %i[not_leader_for_partition leader_not_available unknown_topic_or_part]
+)
+  yield
+rescue Rdkafka::RdkafkaError => e
+  raise unless codes.include?(e.code)
+  raise if (attempts -= 1) <= 0
+
+  sleep(backoff)
+  retry
 end
 
 # Sleeps until Karafka has an assignment on requested topics
