@@ -21,6 +21,13 @@ RSpec.describe_current do
     allow(Karafka::App).to receive(:subscription_groups).and_return({ cg => sgs })
   end
 
+  # These examples unit-test the listener's own readiness gate, not its reaction to the process
+  # lifecycle. The full suite runs in random order and a prior spec can leave `Karafka::App` in a
+  # `done?` state (stopped/quieting/etc.); without pinning it here, that leaked state short-circuits
+  # `#evaluate_healthy` to not-ready and fails every "should be ready" example under some seeds. The
+  # draining examples below override this to `true` on purpose.
+  before { allow(Karafka::App).to receive(:done?).and_return(false) }
+
   describe "events mapping" do
     it { expect(NotificationsChecker.valid?(listener)).to be(true) }
   end
