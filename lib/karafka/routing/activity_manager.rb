@@ -16,6 +16,8 @@ module Karafka
       # pattern instead of a literal name
       WILDCARD_CHARACTERS = /[*?\[\]]/
 
+      private_constant :WILDCARD_CHARACTERS
+
       class << self
         # @param value [String] name or pattern used in an include/exclude filter
         # @return [Boolean] true if the value is a wildcard pattern and not a literal name
