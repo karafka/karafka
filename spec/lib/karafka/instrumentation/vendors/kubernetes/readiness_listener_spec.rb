@@ -115,6 +115,34 @@ RSpec.describe_current do
         listener.on_connection_listener_fetch_loop(fetch_loop_event("sg_a"))
         expect(listener.healthy?).to be(true)
       end
+
+      it "surfaces the swallowed discovery error through the error pipeline exactly once" do
+        allow(Karafka.monitor).to receive(:instrument).and_call_original
+
+        3.times { listener.healthy? }
+
+        expect(Karafka.monitor)
+          .to have_received(:instrument)
+          .with("error.occurred", hash_including(type: "readiness_listener.subscription_groups.error"))
+          .once
+      end
+    end
+
+    context "when the expected set only becomes known after a fallback poll" do
+      it "does not latch on the fallback: the authoritative gate applies once routes are drawn" do
+        # Routes not drawn yet: fallback reports ready after one poll.
+        allow(Karafka::App).to receive(:subscription_groups).and_return({})
+        listener.on_connection_listener_fetch_loop(fetch_loop_event("sg_a"))
+        expect(listener.healthy?).to be(true)
+
+        # Routes are now drawn and reveal a second, not-yet-polled group. Because the fallback
+        # never latched, readiness must drop back to not-ready until sg_b also polls.
+        stub_active_groups("sg_a", "sg_b")
+        expect(listener.healthy?).to be(false)
+
+        listener.on_connection_listener_fetch_loop(fetch_loop_event("sg_b"))
+        expect(listener.healthy?).to be(true)
+      end
     end
   end
 

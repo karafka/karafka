@@ -54,6 +54,9 @@ module Karafka
             # false -> true; readiness then also depends on the process not being `done?` (see
             # #healthy?), which is what lets the probe report not-ready again during shutdown.
             @all_groups_polled = false
+            # One-shot guard so a persistent subscription-group discovery error, re-evaluated on
+            # every poll/probe, is surfaced through the error pipeline once instead of spamming it.
+            @discovery_error_reported = false
             # Holds a single healthy? snapshot for the duration of a #status_body call so the HTTP
             # status code and the body's `ready` field agree; nil at all other times.
             @health_snapshot = nil
@@ -81,8 +84,10 @@ module Karafka
 
             synchronize do
               @polled_groups << group_id
-              # Once latched, skip recomputing the expected set on every subsequent poll.
-              @all_groups_polled ||= all_active_groups_polled?
+              # Called for its latching side effect: closes @all_groups_polled once the
+              # authoritative gate (expected set known and fully polled) is satisfied. Once
+              # latched, it short-circuits and skips recomputing the expected set.
+              ready_without_drain?
             end
           end
 
@@ -104,20 +109,32 @@ module Karafka
           def evaluate_healthy
             return false if Karafka::App.done?
 
-            synchronize { @all_groups_polled }
+            synchronize { ready_without_drain? }
           end
 
-          # @return [Boolean] whether every active subscription group has polled at least once.
-          # @note Caller must hold `@mutex` (reads `@polled_groups`).
-          def all_active_groups_polled?
+          # @return [Boolean] whether the consumer is ready, ignoring the drain (`done?`) check
+          #   that #evaluate_healthy layers on top: true once every active subscription group has
+          #   polled at least once.
+          # @note Caller must hold `@mutex` (reads `@polled_groups`, may set the latch).
+          #
+          # The authoritative "every expected group has polled" gate latches once met, so a later
+          # rebalance cannot flip readiness back off. Until that gate can be evaluated (the expected
+          # subscription-group set is not yet determinable), we fall back to "at least one group
+          # polled", evaluated live and *not* latched - so the authoritative gate takes over as soon
+          # as the expected set becomes available, and a transient discovery gap can no longer
+          # permanently latch readiness on a single poll.
+          def ready_without_drain?
+            return true if @all_groups_polled
+
             expected = expected_group_ids
 
-            # If the expected set cannot be determined (routes not drawn, or an unexpected error),
-            # fall back to "at least one group polled" so a discovery failure can never wedge a pod
-            # into never-ready.
+            # Expected set not determinable (routes not drawn yet, or a discovery error): live
+            # fallback so a discovery failure can never wedge a pod into never-ready, while never
+            # latching on this incomplete picture.
             return @polled_groups.any? if expected.nil? || expected.empty?
 
-            expected.subset?(@polled_groups)
+            # Authoritative gate: latch once satisfied.
+            @all_groups_polled = expected.subset?(@polled_groups)
           end
 
           # @return [Set<String>, nil] ids of the subscription groups this process will run, or nil
@@ -131,8 +148,30 @@ module Karafka
             return nil if ids.empty?
 
             Set.new(ids)
-          rescue
+          rescue => e
+            # Never let a discovery failure wedge the pod (the caller falls back to "any group
+            # polled"), but surface the error once so a genuine bug here stays diagnosable instead
+            # of being silently masked behind the fallback forever.
+            report_discovery_error(e)
             nil
+          end
+
+          # Surface a subscription-group discovery error through Karafka's error pipeline, but only
+          # once: this runs on every poll/probe while the failure persists, so repeated dispatch
+          # would spam the notifications bus.
+          # @param error [StandardError] the swallowed discovery error
+          # @note Caller must hold `@mutex` (reads and sets `@discovery_error_reported`).
+          def report_discovery_error(error)
+            return if @discovery_error_reported
+
+            @discovery_error_reported = true
+
+            Karafka.monitor.instrument(
+              "error.occurred",
+              caller: self,
+              error: error,
+              type: "readiness_listener.subscription_groups.error"
+            )
           end
 
           # Wraps the logic with a mutex
