@@ -85,6 +85,17 @@ RSpec.describe_current do
       it { expect(manager.active?(:topics, "app-a-topic-2")).to be(false) }
       it { expect(manager.active?(:topics, "another-app-a-topic-1")).to be(true) }
     end
+
+    context "when excluded value is a non-string (e.g. an array passed as a single name)" do
+      # Such a value can never equal a real (string) topic name and must not be treated as a
+      # wildcard, otherwise `File.fnmatch?` would raise a `TypeError`. It should behave as a
+      # non-matching literal, leaving the topic active.
+      before { manager.exclude(:topics, ["topic1"]) }
+
+      it { expect { manager.active?(:topics, "topic1") }.not_to raise_error }
+      it { expect(manager.active?(:topics, "topic1")).to be(true) }
+      it { expect(manager.active?(:topics, "topic2")).to be(true) }
+    end
   end
 
   describe ".wildcard?" do
@@ -92,6 +103,9 @@ RSpec.describe_current do
     it { expect(described_class.wildcard?("app-a-*")).to be(true) }
     it { expect(described_class.wildcard?("app-a-topic-?")).to be(true) }
     it { expect(described_class.wildcard?("app-a-[12]")).to be(true) }
+    it { expect(described_class.wildcard?(["topic1"])).to be(false) }
+    it { expect(described_class.wildcard?(nil)).to be(false) }
+    it { expect(described_class.wildcard?(:"app-a-*")).to be(false) }
   end
 
   describe "#to_h" do

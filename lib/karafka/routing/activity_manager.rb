@@ -19,8 +19,11 @@ module Karafka
       class << self
         # @param value [String] name or pattern used in an include/exclude filter
         # @return [Boolean] true if the value is a wildcard pattern and not a literal name
+        # @note Only `String` values can be wildcard patterns. Non-string entries (e.g. an
+        #   array accidentally passed as a single name) are always treated as literals so they
+        #   never reach `File.fnmatch?`, which only accepts strings.
         def wildcard?(value)
-          value.to_s.match?(WILDCARD_CHARACTERS)
+          value.is_a?(::String) && value.match?(WILDCARD_CHARACTERS)
         end
       end
 
@@ -97,8 +100,17 @@ module Karafka
       # @param name [String] name to match against the patterns
       # @return [Boolean] true if any of the patterns matches the name, either literally or
       #   as a wildcard
+      # @note Only string wildcard patterns are matched via `File.fnmatch?`. Any other entry
+      #   (a literal name or a non-string value) is compared with plain equality, which keeps
+      #   the pre-wildcard behavior and avoids passing non-strings into `File.fnmatch?`.
       def matches?(patterns, name)
-        patterns.any? { |pattern| File.fnmatch?(pattern, name, File::FNM_EXTGLOB) }
+        patterns.any? do |pattern|
+          if self.class.wildcard?(pattern)
+            File.fnmatch?(pattern, name, File::FNM_EXTGLOB)
+          else
+            pattern == name
+          end
+        end
       end
     end
   end
