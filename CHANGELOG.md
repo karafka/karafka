@@ -1,6 +1,7 @@
 # Karafka Framework Changelog
 
 ## 2.6.2 (Unreleased)
+- [Fix] Stabilize the `Karafka::Admin::Acl` `#create`/`#describe` specs against asynchronous ACL propagation on slow CI. `#describe` now polls until the expected number of entries is visible instead of relying on a single fixed sleep, and `#create` asserts that the freshly created (uniquely named) ACL becomes visible rather than on a racy global count delta.
 - **[Feature]** Allow the `--include`/`--exclude` CLI server filters (consumer groups, subscription groups, topics) to accept wildcard patterns (e.g. `--exclude-consumer-groups app-a-*`), matched via `File.fnmatch?`. A pattern is recognized by the presence of `*`, `?`, `[` or `]`; plain literal names keep matching exactly as before. The CLI contract also stops requiring wildcard entries to match an already-known route, since a pattern may legitimately match consumer groups/topics/subscription groups that do not exist yet. Wildcards also apply to Pro routing patterns (`pattern(/regexp/)`): the filter is matched against the matcher topic name and against every topic the pattern discovers at runtime, so `--exclude-topics` can exclude pattern-matched topics by name just like statically routed ones. Non-string filter values (e.g. an array accidentally passed as a single name) are treated as non-matching literals instead of raising.
 
 ## 2.6.1 (2026-08-24)
