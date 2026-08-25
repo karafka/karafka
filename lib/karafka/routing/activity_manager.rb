@@ -36,7 +36,8 @@ module Karafka
       end
 
       # Adds resource to included/active
-      # @param type [Symbol] type for inclusion
+      # @param type [Symbol] resource type to register the inclusion under (one of
+      #   {SUPPORTED_TYPES})
       # @param name [String] name of the element or a wildcard pattern (e.g. `"app-a-*"`)
       def include(type, name)
         validate!(type)
@@ -45,7 +46,8 @@ module Karafka
       end
 
       # Adds resource to excluded
-      # @param type [Symbol] type for inclusion
+      # @param type [Symbol] resource type to register the exclusion under (one of
+      #   {SUPPORTED_TYPES})
       # @param name [String] name of the element or a wildcard pattern (e.g. `"app-a-*"`)
       def exclude(type, name)
         validate!(type)
@@ -53,7 +55,7 @@ module Karafka
         @excluded[type] << name
       end
 
-      # @param type [Symbol] type for inclusion
+      # @param type [Symbol] resource type to check activity for (one of {SUPPORTED_TYPES})
       # @param name [String] name of the element
       # @return [Boolean] is the given resource active or not
       def active?(type, name)
@@ -91,7 +93,7 @@ module Karafka
 
       # Checks if the type we want to register is supported
       #
-      # @param type [Symbol] type for inclusion
+      # @param type [Symbol] resource type to validate (one of {SUPPORTED_TYPES})
       def validate!(type)
         return if SUPPORTED_TYPES.include?(type)
 
