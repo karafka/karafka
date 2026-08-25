@@ -121,22 +121,19 @@ module Karafka
           # that all tombstone events are loaded not to duplicate dispatches
           return unless @state.loaded?
 
-          keys = []
-
-          # We first collect all the data for dispatch and then dispatch and **only** after
-          # dispatch that is sync is successful we remove those messages from the daily buffer
-          # and update the max epoch. Since only the dispatch itself is volatile and can crash
-          # with timeouts, etc, we need to be sure it wen through prior to deleting those messages
-          # from the daily buffer. That way we ensure the at least once delivery and in case of
-          # a transactional producer, exactly once delivery.
+          # We first collect all the data for dispatch and then dispatch it in sync batches. Each
+          # key is removed from the daily buffer only once the batch carrying it is confirmed
+          # delivered - not after the whole flush - so a broker error partway through does not
+          # leave already-produced batches in the buffer to be re-dispatched on the next tick
+          # (a duplicate-dispatch window for non-transactional producers). This keeps the
+          # at-least-once guarantee, and exactly-once when a transactional producer is used.
           @daily_buffer.for_dispatch do |message|
-            keys << message.key
             @dispatcher << message
           end
 
-          @dispatcher.flush
-
-          keys.each { |key| @daily_buffer.delete(key) }
+          @dispatcher.flush do |dispatched_keys|
+            dispatched_keys.each { |key| @daily_buffer.delete(key) }
+          end
 
           @states_reporter.call
         end

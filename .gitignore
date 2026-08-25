@@ -21,6 +21,8 @@ db/*.sqlite3
 *.sassc
 .byebug_history
 .redcar/
+.claude/
+.codex/
 .capistrano/
 .sass-cache
 /config/god/sidekiq.rb
