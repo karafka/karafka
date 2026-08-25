@@ -55,7 +55,7 @@ module Karafka
             # #healthy?), which is what lets the probe report not-ready again during shutdown.
             @all_groups_polled = false
             # One-shot guard so a persistent subscription-group discovery error, re-evaluated on
-            # every poll/probe, is surfaced through the error pipeline once instead of spamming it.
+            # every poll/probe, is logged once instead of on every tick.
             @discovery_error_reported = false
             # Holds a single healthy? snapshot for the duration of a #status_body call so the HTTP
             # status code and the body's `ready` field agree; nil at all other times.
@@ -156,9 +156,14 @@ module Karafka
             nil
           end
 
-          # Surface a subscription-group discovery error through Karafka's error pipeline, but only
-          # once: this runs on every poll/probe while the failure persists, so repeated dispatch
-          # would spam the notifications bus.
+          # Log a subscription-group discovery error once (it recurs on every poll/probe while the
+          # failure persists, so repeated logging would just be noise). We log directly rather than
+          # dispatching on the shared `error.occurred` bus: that bus invokes every other subscriber
+          # (e.g. a co-subscribed LivenessListener, which reacts to it) and does not rescue their
+          # exceptions, so emitting it from inside the fetch-loop handler could both perturb
+          # unrelated listeners and let a raising subscriber escape into the polling loop - the very
+          # wedge this rescue exists to prevent. The log call is itself guarded so nothing here can
+          # escape.
           # @param error [StandardError] the swallowed discovery error
           # @note Caller must hold `@mutex` (reads and sets `@discovery_error_reported`).
           def report_discovery_error(error)
@@ -166,12 +171,12 @@ module Karafka
 
             @discovery_error_reported = true
 
-            Karafka.monitor.instrument(
-              "error.occurred",
-              caller: self,
-              error: error,
-              type: "readiness_listener.subscription_groups.error"
+            Karafka.logger.error(
+              "ReadinessListener could not determine the expected subscription groups " \
+              "(#{error.class}: #{error.message}); falling back to 'at least one group polled'"
             )
+          rescue
+            nil
           end
 
           # Wraps the logic with a mutex

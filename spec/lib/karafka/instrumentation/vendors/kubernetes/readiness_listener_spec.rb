@@ -116,15 +116,21 @@ RSpec.describe_current do
         expect(listener.healthy?).to be(true)
       end
 
-      it "surfaces the swallowed discovery error through the error pipeline exactly once" do
-        allow(Karafka.monitor).to receive(:instrument).and_call_original
+      it "logs the swallowed discovery error exactly once" do
+        allow(Karafka.logger).to receive(:error)
 
         3.times { listener.healthy? }
 
-        expect(Karafka.monitor)
-          .to have_received(:instrument)
-          .with("error.occurred", hash_including(type: "readiness_listener.subscription_groups.error"))
-          .once
+        expect(Karafka.logger).to have_received(:error).once
+      end
+
+      it "does not dispatch on the shared error.occurred bus (would perturb other listeners)" do
+        allow(Karafka.logger).to receive(:error)
+        allow(Karafka.monitor).to receive(:instrument).and_call_original
+
+        listener.healthy?
+
+        expect(Karafka.monitor).not_to have_received(:instrument).with("error.occurred", anything)
       end
     end
 
