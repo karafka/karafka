@@ -70,3 +70,4 @@ pickle-email-*.html
 # documentation
 .yardoc
 .git-pr-body-*.md
+.env.pro
