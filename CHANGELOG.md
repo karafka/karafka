@@ -25,77 +25,68 @@
 - [Fix] `Swarm::Node#signal` (used by `#stop`/`#terminate`/`#quiet`) could send a signal to a reaped node's stale `@pid`, which the OS may have already reassigned to an unrelated process. It now returns `false` without signaling if the node is already known to be dead.
 
 ## 2.6.0 (2026-08-05)
-- **[Breaking]** Remove the flat global pause configuration accessors (`config.pause_timeout`, `config.pause_max_timeout`, `config.pause_with_exponential_backoff`) deprecated in 2.5.2. Use the nested `config.pause.*` namespace (`config.pause.timeout`, `config.pause.max_timeout`, `config.pause.with_exponential_backoff`) instead.
-- **[Breaking]** Nest the per-topic pause configuration under `topic.pause`. The flat `topic.pause_timeout`, `topic.pause_max_timeout`, and `topic.pause_with_exponential_backoff` readers are removed in favor of `topic.pause.timeout`, `topic.pause.max_timeout`, and `topic.pause.with_exponential_backoff`; `topic.to_h` now emits a nested `pause:` hash instead of the flat keys. The Pro Granular Backoffs override DSL is unchanged (`pause(timeout:, max_timeout:, with_exponential_backoff:)`), and `topic.pausing`/`topic.pausing?` are now `topic.pause`/`topic.pause?`. In OSS `topic.pause` reflects the global `config.pause.*` settings; per-topic overriding remains a Pro feature.
-- **[Feature]** Add `Karafka::Admin.read_partition_offsets` (and `Admin::Topics#read_partition_offsets`) exposing the `rd_kafka_ListOffsets` admin API to query partition offsets by spec (`:earliest`, `:latest`, `:max_timestamp`, or a timestamp in ms) without a consumer group. Accepts an optional `isolation_level:` keyword (pass `READ_COMMITTED` for the Last Stable Offset instead of the high-watermark, giving accurate lag on transactional topics).
-- **[Feature]** Add `Karafka::Connection::Client#read_partition_offsets` (and `Connection::Proxy#read_partition_offsets`) exposing the batched `ListOffsets` query on a consumer's own connection, forwarding its `isolation.level`. Note that `:latest` resolves to the high watermark regardless of isolation level, so it includes uncommitted messages on topics with in-flight transactions.
-- **[Feature]** Allow `Karafka::Admin` (and subsystems like `Admin::ConsumerGroups`, `Admin::Topics`) to operate on an external client via `Karafka::Admin.new(external_client: client)`. Reuses the caller's client (no per-call bootstrap); its lifecycle stays with its owner.
-- **[Feature]** Add `Karafka::Admin::IsolationLevels` module with `READ_UNCOMMITTED` and `READ_COMMITTED` constants wrapping the underlying rdkafka integer constants.
-- **[Feature]** Introduce standalone `Karafka::Declaratives` subsystem (`Declaratives::Topic`, `Declaratives::Repository`, `Declaratives::Builder`) decoupled from routing. Topics can be declared via `Karafka::App.declaratives.draw`; the existing `routing#config(...)` DSL keeps working as a backwards-compatible bridge.
-- **[Feature]** Add `Processing::WorkersPool` with dynamic thread pool scaling via `#scale`, `nil` sentinel-based worker exit for downscaling, and `worker.scaling.up`/`worker.scaling.down` instrumentation events.
-- [Enhancement] Refresh watermark offsets and lags of long-paused partitions in `statistics.emitted` (Pro). Opt-in via `config.internal.statistics.consumer_groups.lag_compensation.interval` (ms, default `0` - disabled); partitions qualify after being paused for at least `lag_compensation.pause_age` (ms, min `5_000`, default `30_000`). Refreshed values are kept on resume until live statistics catch up, then dropped in bulk on the next rebalance.
-- [Enhancement] Replace per-partition `query_watermark_offsets` calls with batched `list_offsets` in `Admin::Topics#read_watermark_offsets`, `Admin::ConsumerGroups#seek`, and `Pro::Iterator::TplBuilder#resolve_partitions_with_negative_offsets`, cutting N sequential roundtrips to a small constant and avoiding a dedicated admin client in the iterator path (Pro).
-- [Enhancement] Add `stability_ttl` to `Kubernetes::LivenessListener` and `Pro::Swarm::LivenessListener` to detect consumers frozen in a single non-`"steady"` librdkafka `cgrp.join_state`. On breach, reports `stability_ttl_exceeded: true` (HTTP 500) / status code `4`; clears once the group returns to `"steady"`. Requires `statistics.interval.ms`; defaults to twice the max `max.poll.interval.ms` across active subscription groups.
-- [Enhancement] Contain non-`StandardError` errors (`ScriptError`, `SystemStackError`, etc.) raised in the consumption flow through the normal retry/pause/DLQ flow instead of skipping the batch. Process-critical errors (`SystemExit`, `SignalException`, `NoMemoryError`) are recorded, keep the partition paused, and trigger a graceful shutdown via the auto-subscribed `Instrumentation::CriticalErrorsListener` instead of being retried or dispatched to the DLQ. Configurable via `config.internal.processing.critical_errors`.
-- [Enhancement] Introduce polymorphic `Routing::Topic#group` and `Routing::SubscriptionGroup#group` accessors (`#consumer_group` kept as a backwards-compatible alias), expose `group_id` in `Routing::Topic#to_h`, and emit parallel `group`/`group_id` keys alongside the legacy `consumer_group`/`consumer_group_id` keys in `rebalance.*`, `error.occurred`, and `statistics.emitted` payloads. Prepares routing for KIP-932 share groups; legacy keys remain until Karafka 3.0.
-- [Enhancement] Add `Pro::Processing::ConsumerGroups::Filters::Actions` as the single source of truth for filter post-execution actions (`Actions.skip`/`Actions.pause`/`Actions.seek` value methods, the `ALL` list, and `#skip?`/`#pause?`/`#seek?` predicates mixed into `Filters::Base` and `Coordinators::FiltersApplier`). Returned values remain the same plain symbols, so existing filters keep working (Pro).
-- [Enhancement] Make the statistics decorator used by `Instrumentation::Callbacks::ConsumerGroups::Statistics` configurable via `config.internal.statistics.consumer_groups.decorator_class` instead of hardcoding `Karafka::Core::Monitoring::StatisticsDecorator`.
-- [Enhancement] Declare recurring tasks and scheduled messages internal topics via the standalone `Karafka::App.declaratives.draw` DSL instead of the routing `config(...)` bridge; the resulting declarations are unchanged (Pro).
-- [Enhancement] CLI topic commands (`create`, `delete`, `reset`, `repartition`, `align`, `migrate`, `plan`) now read from `Karafka::App.declaratives.topics` instead of walking the routing tree, so topics declared via `declaratives.draw` are managed without a routing entry.
-- [Enhancement] Add per-partition generation tracking to `AssignmentsTracker` to distinguish first-time assignments from reassignments.
-- [Enhancement] Make liveness listeners fiber-safe.
-- [Enhancement] Bump swarm supervisor `SHUTDOWN_GRACE_PERIOD` from 1s to 15s to give forked nodes enough time to finish post-`shutdown_timeout` cleanup before forceful termination.
-- [Enhancement] Move consumer-group-specific `Processing` components (`Coordinator`, `CoordinatorsBuffer`, `Executor`, `ExecutorsBuffer`, `Partitioner`, `ExpansionsSelector`, `InlineInsights`) and their Pro equivalents under the `ConsumerGroups` namespace (internal). Related config defaults are updated; user-provided classes are unaffected.
-- [Enhancement] Move processing strategies (`Processing::Strategies::*` and `Pro::Processing::Strategies::*`) under the `ConsumerGroups` namespace (internal), preparing for parallel `ShareGroups::Strategies` (KIP-932).
-- [Enhancement] Move `Processing::StrategySelector` (OSS and Pro) under the `ConsumerGroups` namespace (internal); the `config.processing.strategy_selector` default is updated, user selectors unaffected.
-- [Enhancement] Move `Karafka::Connection::RebalanceManager` to `Connection::ConsumerGroups::RebalanceManager` (internal).
-- [Enhancement] Move the rebalance librdkafka callback to `Instrumentation::Callbacks::ConsumerGroups::Rebalance` (internal); event names and payloads unchanged.
-- [Enhancement] Move `Instrumentation::Callbacks::Error` and `Callbacks::Statistics` under `Callbacks::ConsumerGroups` (internal), completing the callbacks-layer namespacing; event names and payloads unchanged.
-- [Enhancement] Namespace consumer-group-specific processing job classes under `Processing::ConsumerGroups::Jobs` (OSS) and `Pro::Processing::ConsumerGroups::Jobs` (Pro); only `Jobs::Base` stays generic. Internal move, no public API changes.
-- [Enhancement] Move `Processing::JobsBuilder` (OSS and Pro) under the `ConsumerGroups` namespace (internal).
-- [Enhancement] Nest consumer-group-specific processing config settings (`coordinator_class`, `errors_tracker_class`, `partitioner_class`, `strategy_selector`, `expansions_selector`, `executor_class`, `jobs_builder`) under `config.internal.processing.consumer_groups`; shared settings stay at `config.internal.processing`.
-- [Enhancement] Move OSS consumer-group-specific routing features (`ActiveJob`, `DeadLetterQueue`, `Eofed`, `InlineInsights`, `ManualOffsetManagement`) under `Routing::Features::ConsumerGroups` (internal); agnostic features stay put.
-- [Enhancement] Move Pro consumer-group-specific routing features under `Pro::Routing::Features::ConsumerGroups` (internal); agnostic features (`Expiring`, `Filtering`, `Pausing`, `Throttling`) stay put.
-- [Change] Require `karafka-rdkafka` `>= 0.28.0`, which exposes `Rdkafka::Consumer#list_offsets` and rebuilds `#lag` on top of it, so lag reads issue a single batched end-offsets query instead of one watermark roundtrip per partition.
-- [Change] Require `karafka-rdkafka` `>= 0.27.1` for the `poll_batch`/`poll_batch_nb` fix that discarded topic/partition/offset context from `e.details`, causing `TopicNotFoundError` crashes on `partition_eof`.
-- [Change] Remove the public `custom_kafka` reader from `Karafka::Admin` (internal collaboration detail, unused by any public API; custom kafka settings are provided at construction via `Karafka::Admin.new(kafka: ...)`).
-- [Refactor] Remove the unused `@mutex` from `Pro::Connection::Manager` (dead since #1851 replaced lock-based `@changes` eviction with key preloading; the lock-free threading model is now documented) (Pro).
-- [Maintenance] Split declarative topic configuration from routing in the integration suite: add a `draw_topics` spec helper wrapping `Karafka::App.declaratives.draw`, source spec topic creation from the declaratives repository, and migrate general integration specs to declare partitions/config via `draw_topics`.
-- [Maintenance] Replace manual per-version `Warning[:performance]`/`Warning[:deprecated]` spec setup with a dynamic `Warning.categories`-based approach that enables all non-experimental warning categories automatically.
-- [Maintenance] Use namespaced topic naming format in all integration specs for consistent traceability.
-- [Maintenance] Add `bin/tests_topics_hashes` script for looking up spec files by their topic name hash prefix.
-- [Maintenance] Fix flaky `pro/admin/recovery/coordinator_for_spec.rb` by warming up the `__consumer_offsets` topic and retrying the first `Recovery.coordinator_for` call with exponential backoff on `MetadataError`.
-- [Fix] Compare recurring task schedule versions with `Gem::Version` instead of as strings, so multi-segment upgrades like `1.9.0` → `1.10.0` are no longer misread as downgrades and rejected with `IncompatibleScheduleError` (Pro).
-- [Fix] Fix dynamic multiplexing `scale_delay` being applied globally instead of per subscription-group family (`Pro::Connection::Manager#stable?` memoized the first family's value for all); it is now read per family on every check (Pro).
-- [Fix] Make `Routing::Topics#<<` copy-on-write so a topic discovered at runtime by a pattern subscription can no longer be observed mid-append by a concurrent reader (e.g. `Router#find_by` from a `Pro::Iterator` or `Admin` call on another thread).
-- [Fix] Bound `Instrumentation::AssignmentsTracker`'s `@generations` map (`GENERATIONS_TOPICS_LIMIT`, LRU eviction) so it no longer grows for the whole process lifetime under regex pattern subscriptions; static topologies are unaffected.
-- [Fix] Derive the filtering pause timeout only from filters that actually want to pause, so a coexisting `:seek` filter reporting a `0` timeout no longer collapses a `:pause` to `0` and busy-spins (Pro).
-- [Fix] Clamp scheduled message CreateTime to the wall clock in the loaded heuristic, so a single future-dated message can no longer be taken as proof of catch-up and cause double dispatch of not-yet-loaded cancellations (Pro).
-- [Fix] Reset `Pro::Iterator#each` EOF/stop tracking in an `ensure`, so breaking out of the yielded block no longer leaves `done?` immediately true and silently drops a fresh backlog on reuse (Pro).
-- [Fix] Fix the `parallel_segments` CLI commands (`distribute`, `collapse`, `reset`) silently skipping groups when more than one was requested via `--groups` (the matched group was deleted from the array being iterated); all requested groups are now processed (Pro).
-- [Fix] Evict a partition's samples from `Pro::Instrumentation::PerformanceTracker` on revoke and scope samples by subscription group id, fixing unbounded growth and cross-group interference. **Breaking (internal API):** `processing_time_p95` now takes the subscription group id first (`processing_time_p95(group_id, topic, partition)`) (Pro).
-- [Fix] Fall back to the current offset metadata (instead of raising `KeyError`) in Virtual Partitions `VirtualOffsetManager#markable` under the `:exact` strategy when the lowest-offset virtual-partition group is left unmarked (Pro).
-- [Fix] Leave tombstone records (key with a `nil` payload) untouched on produce and consume instead of crashing in `cipher.encrypt`/`decrypt`, so they remain valid tombstones for log compaction (Pro).
-- [Fix] Recompute the `Pro::Processing::JobsQueue#clear` async-locking fast-path flag from the remaining groups' locks instead of forcing it off globally, so another subscription group's active `lock_async` locks are no longer ignored (Pro).
-- [Fix] Reset the per-partition retry attempt counter on revocation, so a message reclaimed after a rebalance is no longer treated as having exhausted its retries and dispatched to the DLQ early.
-- [Fix] Reset ActiveJob `CurrentAttributes` in an `ensure`, so a failed job's attributes no longer leak into the next job on the same worker.
-- [Fix] Return `false` from `#mark_as_consumed`, `#mark_as_consumed!`, and `#commit_offsets!` when the operation fails because the partition was lost (previously could return `true`).
-- [Fix] Reset `seek_offset` only after a `#seek` succeeds, so a raising seek (e.g. an unresolvable time-based offset) no longer pauses without seeking back and skips the rest of the batch.
-- [Fix] Skip DLQ dispatch when the partition was revoked mid-job in the ActiveJob + DLQ + long-running job strategies (matching the non-AJ LRJ strategies), so the new owner handles it instead of producing a duplicate (Pro).
-- [Fix] Advance the in-memory `seek_offset` only after a transactional DLQ dispatch succeeds, so an aborted dispatch transaction with `mark_after_dispatch: false` no longer skips the broken message (Pro).
-- [Fix] Report ownership truthfully from Virtual Partitions `#mark_as_consumed`/`#mark_as_consumed!` when there is no real offset to materialize yet (previously inverted) (Pro).
-- [Fix] Stop reverting recurring task commands consumed during the boot replay phase, which previously persisted the reverted state and lost the command permanently (Pro).
-- [Fix] Always precede Virtual Partitions DLQ `:dispatch`/`:skip` decisions with a collapsed retry, so they run on the linear deterministic flow instead of an arbitrary virtual-partition subset that could lose messages or dispatch the wrong one (Pro).
-- [Fix] Compare scheduled messages schema versions as `Gem::Version` instead of strings, fixing mis-evaluation once a version segment reaches two digits (Pro).
+- **[Breaking]** Remove the flat global pause accessors (`config.pause_timeout`, `config.pause_max_timeout`, `config.pause_with_exponential_backoff`) deprecated in 2.5.2; use the nested `config.pause.*` namespace instead.
+- **[Breaking]** Nest per-topic pause configuration under `topic.pause` (`topic.pause.timeout`, `topic.pause.max_timeout`, `topic.pause.with_exponential_backoff`); `topic.to_h` now emits a nested `pause:` hash, and `topic.pausing`/`topic.pausing?` become `topic.pause`/`topic.pause?`. The Pro Granular Backoffs DSL is unchanged.
+- **[Feature]** Add `Karafka::Admin.read_partition_offsets` (and `Admin::Topics#read_partition_offsets`) to query partition offsets (`:earliest`, `:latest`, `:max_timestamp`, or a timestamp) without a consumer group, with an optional `isolation_level:` for accurate lag on transactional topics.
+- **[Feature]** Add `Karafka::Connection::Client#read_partition_offsets` (and `Connection::Proxy#read_partition_offsets`) to run the same batched offset query on a consumer's own connection.
+- **[Feature]** Allow `Karafka::Admin` to operate on an external client via `Karafka::Admin.new(external_client: client)`, reusing the caller's client instead of bootstrapping a new one per call.
+- **[Feature]** Add `Karafka::Admin::IsolationLevels` with `READ_UNCOMMITTED` and `READ_COMMITTED` constants.
+- **[Feature]** Introduce a standalone `Karafka::Declaratives` subsystem for declaring topics via `Karafka::App.declaratives.draw`, decoupled from routing; the existing `routing#config(...)` DSL keeps working.
+- **[Feature]** Add `Processing::WorkersPool` with dynamic thread-pool scaling (`#scale`) and `worker.scaling.up`/`worker.scaling.down` events.
+- [Enhancement] Refresh watermark offsets and lags of long-paused partitions in `statistics.emitted`, opt-in via `config.internal.statistics.consumer_groups.lag_compensation.interval` (Pro).
+- [Enhancement] Use batched `list_offsets` instead of per-partition `query_watermark_offsets` in watermark reads, `Admin::ConsumerGroups#seek`, and the Pro iterator, cutting many roundtrips to a few (Pro).
+- [Enhancement] Add `stability_ttl` to the Kubernetes and swarm liveness listeners to detect consumers frozen in a non-`steady` join state; requires `statistics.interval.ms`.
+- [Enhancement] Route non-`StandardError` consumption errors through the normal retry/pause/DLQ flow, and escalate process-critical errors (`SystemExit`, `NoMemoryError`, ...) to a graceful shutdown. Configurable via `config.internal.processing.critical_errors`.
+- [Enhancement] Add polymorphic `Routing::Topic#group`/`Routing::SubscriptionGroup#group` accessors and emit parallel `group`/`group_id` keys alongside the legacy `consumer_group`/`consumer_group_id` keys, preparing for KIP-932 share groups (legacy keys kept until 3.0).
+- [Enhancement] Add `Pro::Processing::ConsumerGroups::Filters::Actions` as the single source of truth for filter actions; existing filters keep working (Pro).
+- [Enhancement] Make the statistics decorator configurable via `config.internal.statistics.consumer_groups.decorator_class`.
+- [Enhancement] Declare the recurring-tasks and scheduled-messages internal topics via `declaratives.draw` (Pro).
+- [Enhancement] CLI topic commands now read from `Karafka::App.declaratives.topics`, so topics declared via `declaratives.draw` are managed without a routing entry.
+- [Enhancement] Track per-partition assignment generations in `AssignmentsTracker` to distinguish first assignments from reassignments.
+- [Enhancement] Make the liveness listeners fiber-safe.
+- [Enhancement] Raise the swarm supervisor `SHUTDOWN_GRACE_PERIOD` from 1s to 15s so forked nodes have time to finish cleanup before forceful termination.
+- [Enhancement] Move consumer-group-specific components (processing, strategies, selectors, jobs, callbacks, rebalance manager, and OSS/Pro routing features) under a `ConsumerGroups` namespace, preparing for KIP-932 share groups. Internal only; related config defaults updated, user-provided classes unaffected.
+- [Enhancement] Nest consumer-group-specific processing config under `config.internal.processing.consumer_groups`; shared settings stay at `config.internal.processing`.
+- [Change] Require `karafka-rdkafka` `>= 0.28.0` for `list_offsets`-based batched lag reads.
+- [Change] Require `karafka-rdkafka` `>= 0.27.1` for the `poll_batch`/`poll_batch_nb` fix that caused `TopicNotFoundError` crashes on `partition_eof`.
+- [Change] Remove the public `custom_kafka` reader from `Karafka::Admin` (internal, unused by any public API).
+- [Refactor] Remove the unused `@mutex` from `Pro::Connection::Manager` (Pro).
+- [Maintenance] Split declarative topic configuration from routing in the integration suite (add a `draw_topics` helper).
+- [Maintenance] Enable non-experimental warning categories dynamically via `Warning.categories` in specs.
+- [Maintenance] Use namespaced topic naming in all integration specs.
+- [Maintenance] Add `bin/tests_topics_hashes` to look up spec files by topic name hash.
+- [Maintenance] Fix flaky `pro/admin/recovery/coordinator_for_spec.rb` by warming up `__consumer_offsets` and retrying with backoff on `MetadataError`.
+- [Fix] Compare recurring task schedule versions with `Gem::Version` so multi-segment upgrades (e.g. `1.9.0` → `1.10.0`) are not misread as downgrades (Pro).
+- [Fix] Read dynamic multiplexing `scale_delay` per subscription-group family instead of globally (Pro).
+- [Fix] Make `Routing::Topics#<<` copy-on-write so a runtime-discovered topic can't be observed mid-append by a concurrent reader.
+- [Fix] Bound `AssignmentsTracker`'s `@generations` map (LRU) so it no longer grows unbounded under regex pattern subscriptions.
+- [Fix] Derive the filtering pause timeout only from filters that want to pause, so a `:seek` filter's `0` timeout no longer collapses a `:pause` and busy-spins (Pro).
+- [Fix] Clamp scheduled-message CreateTime to the wall clock so a single future-dated message can't trigger double dispatch of not-yet-loaded cancellations (Pro).
+- [Fix] Reset `Pro::Iterator#each` EOF/stop tracking in an `ensure`, so breaking out of the block no longer drops a fresh backlog on reuse (Pro).
+- [Fix] Fix the `parallel_segments` CLI commands skipping groups when more than one was passed via `--groups` (Pro).
+- [Fix] Evict a partition's `Pro::Instrumentation::PerformanceTracker` samples on revoke and scope them by subscription group. **Breaking (internal API):** `processing_time_p95` now takes the subscription group id first (Pro).
+- [Fix] Fall back to current offset metadata instead of raising `KeyError` in Virtual Partitions `VirtualOffsetManager#markable` under the `:exact` strategy (Pro).
+- [Fix] Leave tombstone records (nil payload) untouched on produce/consume instead of crashing in encryption, so they stay valid for log compaction (Pro).
+- [Fix] Recompute the `Pro::Processing::JobsQueue#clear` async-locking fast-path flag from the remaining groups' locks, so another group's active `lock_async` is no longer ignored (Pro).
+- [Fix] Reset the per-partition retry attempt counter on revocation, so a message reclaimed after a rebalance is not dispatched to the DLQ early.
+- [Fix] Reset ActiveJob `CurrentAttributes` in an `ensure`, so a failed job's attributes don't leak into the next job on the same worker.
+- [Fix] Return `false` from `#mark_as_consumed`, `#mark_as_consumed!`, and `#commit_offsets!` when the partition was lost (previously could return `true`).
+- [Fix] Reset `seek_offset` only after a `#seek` succeeds, so a failing seek no longer pauses without seeking and skips the rest of the batch.
+- [Fix] Skip DLQ dispatch when the partition was revoked mid-job in the ActiveJob + DLQ + long-running-job strategies, so the new owner handles it (Pro).
+- [Fix] Advance the in-memory `seek_offset` only after a transactional DLQ dispatch commits, so an aborted dispatch with `mark_after_dispatch: false` no longer skips the message (Pro).
+- [Fix] Report ownership correctly from Virtual Partitions `#mark_as_consumed`/`#mark_as_consumed!` when there is no real offset to materialize yet (Pro).
+- [Fix] Stop reverting recurring task commands consumed during boot replay, which permanently lost the command (Pro).
+- [Fix] Precede Virtual Partitions DLQ `:dispatch`/`:skip` decisions with a collapsed retry, so they run on the deterministic linear flow (Pro).
+- [Fix] Compare scheduled-messages schema versions as `Gem::Version` instead of strings (Pro).
 - [Fix] Fix `Karafka::Admin.read_topic` with a `Time` start offset beyond the last message returning the newest messages instead of none.
-- [Fix] Prevent silent worker thread death draining the workers pool: worker continuation is now an explicit framework decision (only a closed queue or downscale sentinel stops a worker), so a user `Consumer#wrap` returning a falsy value no longer kills the thread.
-- [Fix] Track `Pro::Iterator` EOF and explicit stops per topic-partition instead of globally, so a partition receiving new data mid-iteration no longer exhausts the EOF budget and terminates `#each` while others still have backlog; `#each` also resets `#stop` on finish so the iterator can be reused (Pro).
-- [Fix] Include orphaned node detection in the Pro swarm liveness listener.
+- [Fix] Prevent silent worker-thread death: only a closed queue or downscale sentinel stops a worker, so a user `Consumer#wrap` returning a falsy value no longer kills the thread.
+- [Fix] Track `Pro::Iterator` EOF and explicit stops per topic-partition instead of globally, and reset `#stop` on finish so the iterator can be reused (Pro).
+- [Fix] Detect orphaned nodes in the Pro swarm liveness listener.
 - [Fix] Report liveness on `connection.listener.before_fetch_loop` so nodes send an initial healthy report before the first consumption.
 - [Fix] Fire liveness events during `wait_pinging` so nodes keep reporting health during shutdown with active LRJ jobs.
-- [Fix] Fix `DataCollector::SPEC_HASH` producing non-deterministic hashes for pristine and poro specs by passing the original spec path via the `KARAFKA_SPEC_PATH` env var.
-- [Fix] Fix the swarm supervisor leaking reader pipe file descriptors on node restarts by closing the old reader before creating a new pipe in `Node#start`.
-- [Fix] Raise `InvalidLicenseTokenError` when a manually-defined `Karafka::License` module is missing `#token` or `#version` instead of silently skipping Pro loading and raising a confusing `NameError` later in boot.
+- [Fix] Fix `DataCollector::SPEC_HASH` producing non-deterministic hashes for pristine and poro specs.
+- [Fix] Fix the swarm supervisor leaking reader pipe file descriptors on node restarts.
+- [Fix] Raise `InvalidLicenseTokenError` when a manually-defined `Karafka::License` is missing `#token` or `#version` instead of failing confusingly later in boot.
 
 ## 2.5.9 (2026-03-30)
 - [Enhancement] Validate that `statistics.interval.ms` is not zero when dynamic multiplexing is enabled (Pro).
