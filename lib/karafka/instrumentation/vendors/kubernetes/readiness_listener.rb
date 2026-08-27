@@ -78,11 +78,11 @@ module Karafka
 
           # Record that a subscription group has polled. This runs on every poll iteration (the hot
           # path), so it is kept deliberately cheap: it only tracks the polled group id and does
-          # *not* evaluate the readiness gate here (which would call `Karafka::App.subscription_groups`
-          # and rebuild the expected set on every tick until latched). Latching of
-          # `@all_groups_polled` happens lazily the next time the probe calls `#healthy?` /
-          # `#status_body` - the only places the gate is actually observed - so moving it off the
-          # poll loop changes nothing an external caller can see.
+          # *not* evaluate the readiness gate here (which would call
+          # `Karafka::App.subscription_groups` and rebuild the expected set on every tick until
+          # latched). Latching of `@all_groups_polled` happens lazily the next time the probe calls
+          # `#healthy?` / `#status_body` - the only places the gate is actually observed - so moving
+          # it off the poll loop changes nothing an external caller can see.
           # @param event [Karafka::Core::Monitoring::Event] carries the `:subscription_group`
           def on_connection_listener_fetch_loop(event)
             group_id = event[:subscription_group]&.id
