@@ -20,6 +20,26 @@ RSpec.describe_current do
       it "returns false indicating no changes were applied" do
         expect(migrate_topics.call).to be_falsey
       end
+
+      it "preserves no-argument phase construction" do
+        migrate_topics.call
+
+        expect(Karafka::Cli::Topics::Create).to have_received(:new).with(no_args)
+        expect(Karafka::Cli::Topics::Repartition).to have_received(:new).with(no_args)
+        expect(Karafka::Cli::Topics::Align).to have_received(:new).with(no_args)
+      end
+
+      context "with custom Kafka configuration" do
+        let(:kafka) { { "bootstrap.servers": "other:9092" } }
+
+        it "passes it to every migration phase" do
+          described_class.new(kafka: kafka).call
+
+          expect(Karafka::Cli::Topics::Create).to have_received(:new).with(kafka: kafka)
+          expect(Karafka::Cli::Topics::Repartition).to have_received(:new).with(kafka: kafka)
+          expect(Karafka::Cli::Topics::Align).to have_received(:new).with(kafka: kafka)
+        end
+      end
     end
 
     context "when only Create makes changes" do

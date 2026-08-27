@@ -22,7 +22,7 @@ module Karafka
 
             if existing_count && existing_count < desired_count
               supervised("Increasing number of partitions to #{desired_count} on topic #{name}") do
-                Admin.create_partitions(name, desired_count)
+                admin.create_partitions(name, desired_count)
               end
 
               change = desired_count - existing_count

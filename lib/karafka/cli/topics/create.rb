@@ -16,7 +16,7 @@ module Karafka
               puts "#{yellow("Skipping")} because topic #{name} already exists."
             else
               supervised("Creating topic #{name}") do
-                Admin.create_topic(
+                admin.create_topic(
                   name,
                   topic.declaratives.partitions,
                   topic.declaratives.replication_factor,
