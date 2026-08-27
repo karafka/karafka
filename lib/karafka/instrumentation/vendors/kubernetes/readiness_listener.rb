@@ -41,11 +41,13 @@ module Karafka
         #   )
         class ReadinessListener < BaseListener
           # @param hostname [String, nil] hostname or nil to bind on all
-          # @param port [Integer] TCP port on which we want to run our HTTP status server. Use a
-          #   port different from the liveness listener (and from Puma when embedding).
+          # @param port [Integer] TCP port on which we want to run our HTTP status server. Defaults
+          #   to 3001 (one above the {LivenessListener} default of 3000) so both can be subscribed
+          #   together out of the box without colliding. Use a port different from the liveness
+          #   listener (and from Puma when embedding).
           def initialize(
             hostname: nil,
-            port: 3000
+            port: 3001
           )
             @mutex = Mutex.new
             # Ids of subscription groups that have polled at least once.
@@ -74,21 +76,20 @@ module Karafka
             stop
           end
 
-          # Record that a subscription group has polled, and latch once all active subscription
-          # groups have polled at least once.
+          # Record that a subscription group has polled. This runs on every poll iteration (the hot
+          # path), so it is kept deliberately cheap: it only tracks the polled group id and does
+          # *not* evaluate the readiness gate here (which would call `Karafka::App.subscription_groups`
+          # and rebuild the expected set on every tick until latched). Latching of
+          # `@all_groups_polled` happens lazily the next time the probe calls `#healthy?` /
+          # `#status_body` - the only places the gate is actually observed - so moving it off the
+          # poll loop changes nothing an external caller can see.
           # @param event [Karafka::Core::Monitoring::Event] carries the `:subscription_group`
           def on_connection_listener_fetch_loop(event)
             group_id = event[:subscription_group]&.id
 
             return unless group_id
 
-            synchronize do
-              @polled_groups << group_id
-              # Called for its latching side effect: closes @all_groups_polled once the
-              # authoritative gate (expected set known and fully polled) is satisfied. Once
-              # latched, it short-circuits and skips recomputing the expected set.
-              ready_without_drain?
-            end
+            synchronize { @polled_groups << group_id }
           end
 
           # @return [Boolean] true when every active subscription group has polled at least once
