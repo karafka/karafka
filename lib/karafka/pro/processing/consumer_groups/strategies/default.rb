@@ -347,8 +347,8 @@ module Karafka
               nil
             end
 
-            # Increment number of attempts per one "full" job. For all VP on a single topic partition
-            # this also should run once.
+            # Increment number of attempts per one "full" job. For all VP on a single topic
+            # partition this also should run once.
             #
             # If parallel deserialization was dispatched for this batch, retrieve the Ractor pool
             # results now and inject them into the messages. Without this, results are silently

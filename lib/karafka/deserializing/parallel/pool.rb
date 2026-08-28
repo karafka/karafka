@@ -2,8 +2,7 @@
 
 module Karafka
   module Deserializing
-    # Namespace for parallel deserialization using Ractors
-    # Requires Ruby 4.0+ for stable Ractor APIs
+    # Namespace for parallel deserialization using Ractors. Requires Ruby 4.0+ for Ractor APIs
     module Parallel
       # Marker for failed deserialization - used instead of actual error to keep it simple
       # Messages marked with this will be retried via lazy deserialization during consumption
@@ -59,8 +58,7 @@ module Karafka
           @started
         end
 
-        # Resets the pool state
-        # This is used in the test suite
+        # Resets the pool state. This is used in the test suite
         def reset!
           @workers = []
           @size = 0

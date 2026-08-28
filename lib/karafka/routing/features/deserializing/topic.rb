@@ -3,7 +3,6 @@
 module Karafka
   module Routing
     module Features
-      # Deserializers for all the message details (payload, headers, key)
       class Deserializing < Base
         # Routing topic deserializers API. It allows to configure deserializers for various
         # components of each message.

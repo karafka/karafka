@@ -4,7 +4,6 @@ module Karafka
   # Namespace for all deserialization-related components
   # This includes both the default deserializers and parallel deserialization infrastructure
   module Deserializing
-    # Module for all supported by default deserializers
     module Deserializers
       # Default message headers deserializer
       class Headers < Base
