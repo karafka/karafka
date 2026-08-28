@@ -70,9 +70,6 @@ module Karafka
             def apply!(messages)
               return unless active?
 
-              # Reset cached applied filters since we're re-applying
-              @applied_cache = nil
-
               @filters.each { |filter| filter.apply!(messages) }
             end
 

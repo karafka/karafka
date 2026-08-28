@@ -47,7 +47,7 @@ module Karafka
             deserializing(payload: payload)
           end
 
-          # @return [Boolean] Deserializers are always active
+          # @return [Boolean] Deserializing is always active
           def deserializing?
             deserializing.active?
           end
