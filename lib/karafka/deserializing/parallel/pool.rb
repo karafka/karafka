@@ -60,13 +60,18 @@ module Karafka
 
         # Resets the pool state. This is used in the test suite
         def reset!
-          @workers = []
-          @size = 0
-          @started = false
-          @ready_port = nil
-          @work_queue = nil
-          @coordinator = nil
-          @min_payloads = 50
+          @mutex.synchronize do
+            stop_coordinator
+            stop_workers
+
+            @workers = []
+            @size = 0
+            @started = false
+            @ready_port = nil
+            @work_queue = nil
+            @coordinator = nil
+            @min_payloads = 50
+          end
         end
 
         # Dispatches messages for parallel deserialization
@@ -123,6 +128,26 @@ module Karafka
 
           @coordinator.name = "karafka.parallel_deser.coordinator"
           @coordinator.abort_on_exception = true
+        end
+
+        # Stops the coordinator thread, if running, and waits for it to finish
+        def stop_coordinator
+          return unless @coordinator
+
+          @work_queue << :stop
+          @coordinator.join
+        end
+
+        # Stops all the Ractor workers, if any, and waits for them to finish
+        # Mirrors the coordinator's own dispatch protocol: grab a ready worker, send it
+        # the stop signal, repeat for every worker in the pool
+        def stop_workers
+          @size.times do
+            ready = @ready_port.receive
+            ready[:port].send(:stop)
+          end
+
+          @workers.each(&:join)
         end
 
         # Creates persistent Ractor workers
