@@ -59,6 +59,10 @@ module Karafka
             # One-shot guard so a persistent subscription-group discovery error, re-evaluated on
             # every poll/probe, is logged once instead of on every tick.
             @discovery_error_reported = false
+            # Memoized expected subscription-group id set, resolved lazily on first successful
+            # discovery. Routing is final once drawn, so caching it lets probes/polls after that
+            # skip the repeated `Karafka::App.subscription_groups` lookup and Set rebuild.
+            @expected_group_ids = nil
             # Holds a single healthy? snapshot for the duration of a #status_body call so the HTTP
             # status code and the body's `ready` field agree; nil at all other times.
             @health_snapshot = nil
@@ -143,12 +147,19 @@ module Karafka
           #   reflects the CLI `--include`/`--exclude` filtering and its ids match the ones carried
           #   on each `connection.listener.fetch_loop` event, so comparing the polled set against it
           #   is an accurate "all groups online" gate. Resolved lazily (not in `#initialize`)
-          #   because routing may not be drawn yet when the listener is constructed in `karafka.rb`.
+          #   because routing may not be drawn yet when the listener is constructed in `karafka.rb`,
+          #   then memoized on the first successful resolution: routing is final once drawn, so
+          #   later probes/polls return the cached set instead of rebuilding it from
+          #   `Karafka::App.subscription_groups` on every call. While it is still nil (routes not
+          #   drawn, or a discovery error) nothing is cached, so we keep retrying until it resolves.
+          # @note Caller must hold `@mutex` (reads and memoizes `@expected_group_ids`).
           def expected_group_ids
+            return @expected_group_ids if @expected_group_ids
+
             ids = Karafka::App.subscription_groups.values.flatten.map(&:id)
             return nil if ids.empty?
 
-            Set.new(ids)
+            @expected_group_ids = Set.new(ids)
           rescue => e
             # Never let a discovery failure wedge the pod (the caller falls back to "any group
             # polled"), but surface the error once so a genuine bug here stays diagnosable instead

@@ -117,10 +117,14 @@ RSpec.describe_current do
     # matcher observes a deterministic `from`.
     def wait_for_config(reader, expected)
       50.times do
-        break if reader.call == expected
+        return if reader.call == expected
 
         sleep(0.1)
       end
+
+      # Fail loudly instead of proceeding with an unmet precondition, which would otherwise surface
+      # later as a confusing `change` matcher mismatch that points at the wrong cause.
+      raise "Expected config to become #{expected.inspect} but it stayed #{reader.call.inspect}"
     end
 
     before { Karafka::Admin.create_topic(topic_name, 2, 1) }
