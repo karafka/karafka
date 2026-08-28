@@ -53,7 +53,7 @@ rescue Rdkafka::RdkafkaError
 end
 sleep(1)  # Give Kafka time to process deletions
 
-create_routes_topics
+create_declarative_topics
 
 ARGV[0] = "topics"
 ARGV[1] = "health"

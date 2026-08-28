@@ -115,8 +115,11 @@ module Karafka
 
         # We check from time to time (for the timeout period) if all the threads finished
         # their work and if so, we can just return and normal shutdown process will take place
-        # We divide it by 1000 because we use time in ms.
-        ((timeout / 1_000) * (1 / supervision_sleep)).to_i.times do
+        # We use float math and divide by 1000 (ms -> s) so that sub-second `shutdown_timeout`
+        # values do not collapse to zero iterations (integer division would floor them to 0,
+        # skipping the grace period entirely and forcing an immediate forceful shutdown). We
+        # `ceil` to guarantee at least one supervision check for any positive timeout.
+        (timeout / (supervision_sleep * 1_000)).ceil.times do
           all_listeners_stopped = listeners.all?(&:stopped?)
           all_workers_stopped = workers.stopped?
 
@@ -168,6 +171,15 @@ module Karafka
         # otherwise we would overwrite the shutdown process of the process that started Karafka
         return unless process.supervised?
 
+        # We intentionally do NOT flush or close the producer before the `Kernel.exit!` below.
+        # Forceful shutdown is a last resort - a job already exceeded `shutdown_timeout` - and it
+        # is expected that in-flight, async-buffered data (user `produce_async` calls and DLQ
+        # `produce_async` copies) may be lost. Flushing here would be risky precisely when it
+        # matters: the producer (or its connection pool) may itself be the resource that is blocked
+        # (e.g. an unreachable broker), so waiting on it could stall or hang the very forceful exit
+        # that must guarantee the process terminates. On a normal (graceful) shutdown the producer
+        # is still closed via the `ensure` block below, which `exit!` deliberately skips here.
+        #
         # exit! is not within the instrumentation as it would not trigger due to exit
         Kernel.exit!(forceful_exit_code)
       ensure
@@ -224,5 +236,9 @@ module Karafka
     self.execution_mode = ExecutionMode.new(:standalone)
 
     self.id = SecureRandom.hex(6)
+
+    # We need to have it set always for cases where it would be references outside of the Karafka
+    # process
+    self.workers = Processing::WorkersPool.new
   end
 end

@@ -39,11 +39,37 @@ draw_routes do
   end
 end
 
+# Produce a message and commit an offset so the __consumer_offsets internal topic is guaranteed
+# to exist in cluster metadata. On a fresh CI broker it may not exist until a consumer group
+# has committed at least once.
+produce(DT.topics[0], "warmup")
+
+Karafka::Admin.seek_consumer_group(SecureRandom.uuid, { DT.topics[0] => { 0 => 0 } })
+
 metadata = Karafka::Admin.cluster_info
 first_broker = metadata.brokers.first
 broker_id = first_broker.is_a?(Hash) ? (first_broker[:broker_id] || first_broker[:node_id]) : first_broker.node_id
 
-result = Karafka::Admin::Recovery.affected_partitions(broker_id)
+# On a fresh CI broker the __consumer_offsets topic may take a while to appear in cluster
+# metadata even after a commit. Retry the first Recovery call with exponential backoff for
+# up to ~30 s before giving up with the original MetadataError.
+result = nil
+backoff = 1
+total_waited = 0
+
+loop do
+  result = Karafka::Admin::Recovery.affected_partitions(broker_id)
+  break
+rescue Karafka::Pro::Admin::Recovery::Errors::MetadataError
+  raise if total_waited >= 30
+
+  sleep(backoff)
+  total_waited += backoff
+  backoff = [backoff * 2, 10].min
+end
+
+# Re-fetch so the __consumer_offsets entry is present for the partition count assertion below
+metadata = Karafka::Admin.cluster_info
 
 # Should be a sorted array
 assert result.is_a?(Array), "Expected Array, got #{result.class}"

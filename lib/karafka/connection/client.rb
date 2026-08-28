@@ -28,6 +28,12 @@ module Karafka
       # @return [String] id of the client
       attr_reader :id
 
+      # @return [Karafka::Connection::Proxy, nil] proxy wrapping the underlying rdkafka consumer
+      #   instance or nil when the connection was not yet established. Used by the admin APIs
+      #   external client support to run admin operations on top of a running consumer
+      #   connection. Low-level internal API.
+      attr_reader :wrapped_kafka
+
       # How many times should we retry polling in case of a failure
       MAX_POLL_RETRIES = 20
 
@@ -320,8 +326,8 @@ module Karafka
         # won't get into this loop again. This can happen when supervision decides it should close
         # things faster
         #
-        # @see https://github.com/confluentinc/librdkafka/issues/4792
-        # @see https://github.com/confluentinc/librdkafka/issues/4527
+        # See https://github.com/confluentinc/librdkafka/issues/4792
+        # See https://github.com/confluentinc/librdkafka/issues/4527
         if unsubscribe?
           @unsubscribing = true
 
@@ -454,6 +460,26 @@ module Karafka
         @wrapped_kafka.query_watermark_offsets(topic, partition)
       end
 
+      # Resolves offsets of many partitions with one batched request instead of one broker
+      # roundtrip per partition.
+      #
+      # @param topic_partition_offsets [Hash{String => Array<Hash>}] topics with arrays of
+      #   partition offset specs, each with a `:partition` and an `:offset` (`:earliest`,
+      #   `:latest`, `:max_timestamp` or an integer timestamp in ms)
+      # @return [Array<Hash>] resolved offsets, each with `:topic`, `:partition` and `:offset`
+      # @note This consumer own isolation level is forwarded to the query. Be aware that the
+      #   underlying batched `ListOffsets` resolves `:latest` to the high watermark regardless of
+      #   the isolation level (unlike the consumer `query_watermark_offsets`, which returns the
+      #   last stable offset for a read_committed consumer). On a topic with an in-flight
+      #   transaction `:latest` therefore includes the uncommitted messages a read_committed
+      #   consumer will not see. Non-transactional topics are unaffected (LSO == HWM).
+      def read_partition_offsets(topic_partition_offsets)
+        @wrapped_kafka.read_partition_offsets(
+          topic_partition_offsets,
+          isolation_level: isolation_level
+        )
+      end
+
       # @return [String] safe inspection string that is causing circular dependencies and other
       #   issues
       def inspect
@@ -462,6 +488,17 @@ module Karafka
       end
 
       private
+
+      # @return [Integer] isolation level of this consumer mapped to the constant expected by the
+      #   offsets queries. It cannot change after the client is created, hence memoized.
+      # @note When not configured, librdkafka reads committed, so we mirror that default here.
+      def isolation_level
+        @isolation_level ||=
+          case @subscription_group.kafka.fetch(:"isolation.level", "read_committed").to_s
+          when "read_uncommitted" then Admin::IsolationLevels::READ_UNCOMMITTED
+          else Admin::IsolationLevels::READ_COMMITTED
+          end
+      end
 
       # When we cannot store an offset, it means we no longer own the partition
       #
@@ -560,8 +597,8 @@ module Karafka
         @kafka = nil
         @wrapped_kafka = nil
         @buffer.clear
-        # @note We do not clear rebalance manager here as we may still have revocation info
-        # here that we want to consider valid prior to running another reconnection
+        # We do not clear rebalance manager here as we may still have revocation info here that we
+        # want to consider valid prior to running another reconnection
       end
 
       # Unsubscribes from all the subscriptions
@@ -665,7 +702,7 @@ module Karafka
         case e.code
         when *EARLY_REPORT_ERRORS
           early_report = true
-        # @see
+        # See
         # https://github.com/confluentinc/confluent-kafka-dotnet/issues/1366#issuecomment-821842990
         # This will be raised each time poll detects a non-existing topic. When auto creation is
         # on, we can safely ignore it
@@ -700,8 +737,8 @@ module Karafka
         raise unless retryable
 
         # Most of the errors can be safely ignored as librdkafka will recover from them
-        # @see https://github.com/edenhill/librdkafka/issues/1987#issuecomment-422008750
-        # @see https://github.com/edenhill/librdkafka/wiki/Error-handling
+        # See https://github.com/edenhill/librdkafka/issues/1987#issuecomment-422008750
+        # See https://github.com/edenhill/librdkafka/wiki/Error-handling
 
         time_poll.checkpoint
         time_poll.backoff
@@ -815,8 +852,7 @@ module Karafka
       # Decides whether or not we should unsubscribe prior to closing.
       #
       # We cannot do it when there is a static group membership assignment as it would be
-      # reassigned.
-      # We cannot do it also for assign mode because then there are no subscriptions
+      # reassigned. We cannot do it also for assign mode because then there are no subscriptions
       # We also do not do it if there are no assignments at all as it does not make sense
       #
       # @return [Boolean] should we unsubscribe prior to shutdown

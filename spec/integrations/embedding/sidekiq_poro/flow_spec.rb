@@ -21,7 +21,12 @@ end
 # Enable fake mode to avoid Redis dependency
 Sidekiq::Testing.fake!
 
-SPEC_HASH = Digest::MD5.hexdigest($PROGRAM_NAME)[0, 6]
+# Topic prefix follows the suite-wide it-<hash>- convention. The hash is computed from this
+# spec's path given as a literal (not from runtime state), so it is environment-independent,
+# unique per spec and discoverable via bin/tests_topics_hashes
+SPEC_HASH = Digest::MD5.hexdigest(
+  "spec/integrations/embedding/sidekiq_poro/flow_spec.rb"
+)[0, 6]
 TOPIC = "it-#{SPEC_HASH}-#{SecureRandom.hex(6)}".freeze
 PID = Process.pid
 

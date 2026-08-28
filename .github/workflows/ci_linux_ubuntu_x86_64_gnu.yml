@@ -24,7 +24,7 @@ jobs:
     strategy:
       fail-fast: false
     steps:
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           fetch-depth: 0
       - name: Run Karafka license checksum verification
@@ -43,14 +43,15 @@ jobs:
     env:
       BUNDLE_GEMFILE: Gemfile.lint
     steps:
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           fetch-depth: 0
       - name: Set up Ruby
-        uses: ruby/setup-ruby@97ecb7b512899eb71ab1bf2310a624c6f1589ac6 # v1.308.0
+        uses: ruby/setup-ruby@95ef2b042f9d7a56d8268cba8559e2842e2ad01b # v1.321.0
         with:
-          ruby-version: '4.0.4'
+          ruby-version: '4.0.6'
           bundler-cache: true
+          cache-version: 2
       - name: Run RuboCop
         run: bundle exec rubocop
 
@@ -62,14 +63,15 @@ jobs:
     env:
       BUNDLE_GEMFILE: Gemfile.lint
     steps:
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           fetch-depth: 0
       - name: Set up Ruby
-        uses: ruby/setup-ruby@97ecb7b512899eb71ab1bf2310a624c6f1589ac6 # v1.308.0
+        uses: ruby/setup-ruby@95ef2b042f9d7a56d8268cba8559e2842e2ad01b # v1.321.0
         with:
-          ruby-version: '4.0.4'
+          ruby-version: '4.0.6'
           bundler-cache: true
+          cache-version: 2
       - name: Run yard-lint
         run: bundle exec yard-lint lib/
 
@@ -79,11 +81,11 @@ jobs:
     strategy:
       fail-fast: false
     steps:
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           fetch-depth: 0
       - name: Set up Node.js
-        uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
           node-version: '20'
           cache: 'npm'
@@ -101,31 +103,36 @@ jobs:
       fail-fast: false
       matrix:
         ruby:
-          - '4.0.0'
+          - '4.0'
           - '3.4'
           - '3.3'
-          - '3.2'
         include:
-          - ruby: '3.4'
+          - ruby: '4.0'
             coverage: 'true'
     steps:
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - name: Install package dependencies
         run: "[ -e $APT_DEPS ] || sudo apt-get install -y --no-install-recommends $APT_DEPS"
 
       - name: Start Kafka with docker compose
         run: |
-          docker compose up -d || (sleep 5 && docker compose up -d)
+          for attempt in 1 2 3 4 5; do
+            docker compose up -d && break
+            echo "Attempt $attempt/5 failed."
+            docker compose down -v 2>/dev/null || true
+            [ $attempt -lt 5 ] && echo "Retrying in $((attempt * 15))s..." && sleep $((attempt * 15)) || exit 1
+          done
 
       - name: Remove Gemfile.lock for Ruby dev/preview versions
         if: contains(matrix.ruby, 'dev') || contains(matrix.ruby, 'preview') || contains(matrix.ruby, 'rc')
         run: rm -f Gemfile.lock
 
       - name: Set up Ruby
-        uses: ruby/setup-ruby@97ecb7b512899eb71ab1bf2310a624c6f1589ac6 # v1.308.0
+        uses: ruby/setup-ruby@95ef2b042f9d7a56d8268cba8559e2842e2ad01b # v1.321.0
         with:
           ruby-version: ${{matrix.ruby}}
           bundler-cache: true
+          cache-version: 2
           bundler: 'latest'
 
       - name: Wait for Kafka
@@ -150,15 +157,14 @@ jobs:
       fail-fast: false
       matrix:
         ruby:
-          - '4.0.0'
+          - '4.0'
           - '3.4'
           - '3.3'
-          - '3.2'
         parallel_group:
           - '0'
           - '1'
     steps:
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - name: Install package dependencies
         run: "[ -e $APT_DEPS ] || sudo apt-get install -y --no-install-recommends $APT_DEPS"
 
@@ -167,10 +173,15 @@ jobs:
 
       - name: Start Kafka with docker compose
         run: |
-          docker compose up -d || (sleep 5 && docker compose up -d)
+          for attempt in 1 2 3 4 5; do
+            docker compose up -d && break
+            echo "Attempt $attempt/5 failed."
+            docker compose down -v 2>/dev/null || true
+            [ $attempt -lt 5 ] && echo "Retrying in $((attempt * 15))s..." && sleep $((attempt * 15)) || exit 1
+          done
 
       - name: Set up Ruby
-        uses: ruby/setup-ruby@97ecb7b512899eb71ab1bf2310a624c6f1589ac6 # v1.308.0
+        uses: ruby/setup-ruby@95ef2b042f9d7a56d8268cba8559e2842e2ad01b # v1.321.0
         with:
           # Do not use cache here as we run bundle install also later in some of the integration
           # tests and we need to be able to run it without cache
@@ -222,24 +233,28 @@ jobs:
       fail-fast: false
       matrix:
         ruby:
-          - '4.0.0'
+          - '4.0'
           - '3.4'
           - '3.3'
-          - '3.2'
         parallel_group:
           - '0'
           - '1'
     steps:
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - name: Install package dependencies
         run: "[ -e $APT_DEPS ] || sudo apt-get install -y --no-install-recommends $APT_DEPS"
 
       - name: Start Kafka with docker compose
         run: |
-          docker compose up -d || (sleep 5 && docker compose up -d)
+          for attempt in 1 2 3 4 5; do
+            docker compose up -d && break
+            echo "Attempt $attempt/5 failed."
+            docker compose down -v 2>/dev/null || true
+            [ $attempt -lt 5 ] && echo "Retrying in $((attempt * 15))s..." && sleep $((attempt * 15)) || exit 1
+          done
 
       - name: Set up Ruby
-        uses: ruby/setup-ruby@97ecb7b512899eb71ab1bf2310a624c6f1589ac6 # v1.308.0
+        uses: ruby/setup-ruby@95ef2b042f9d7a56d8268cba8559e2842e2ad01b # v1.321.0
         with:
           ruby-version: ${{matrix.ruby}}
           bundler: 'latest'

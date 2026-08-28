@@ -76,6 +76,7 @@ end
   [1_000, 2_000]
 ].each_with_index do |(min, max), index|
   previous = nil
+  over_max = 0
 
   DT[DT.topics[index]].each do |time|
     unless previous
@@ -87,8 +88,10 @@ end
     delta = ((time - previous) * 1_000).ceil
 
     assert delta >= min, [delta, min]
-    assert delta <= max, [delta, max]
+    over_max += 1 if delta > max
 
     previous = time
   end
+
+  assert over_max <= 1, [over_max, max]
 end

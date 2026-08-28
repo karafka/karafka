@@ -14,7 +14,7 @@ module Karafka
       attr_reader :id, :name, :group
       attr_writer :consumer
 
-      # Backwards compatible alias for `#group`. Kept purely for compatibility — this is an
+      # Backwards compatible alias for `#group`. Kept purely for compatibility - this is an
       # unconditional alias and performs no type validation, so callers should prefer `#group`
       # once additional group types (e.g. KIP-932 share groups) land.
       alias_method :consumer_group, :group
@@ -32,9 +32,6 @@ module Karafka
         max_wait_time
         initial_offset
         consumer_persistence
-        pause_timeout
-        pause_max_timeout
-        pause_with_exponential_backoff
       ].freeze
 
       private_constant :INHERITABLE_ATTRIBUTES
@@ -47,9 +44,9 @@ module Karafka
         @group = group
         @attributes = {}
         @active = true
-        # @note We use identifier related to the group that owns a topic, because from Karafka 0.6
-        #   we can handle multiple Kafka instances with the same process and we can have same
-        #   topic name across multiple groups
+        # We use identifier related to the group that owns a topic, because from Karafka 0.6 we can
+        # handle multiple Kafka instances with the same process and we can have same topic name
+        # across multiple groups
         @id = "#{group.id}_#{@name}"
         @consumer = nil
         @active_assigned = false
@@ -58,6 +55,10 @@ module Karafka
         INHERITABLE_ATTRIBUTES.each do |attribute|
           instance_variable_set("@#{attribute}", nil)
         end
+
+        # Explicit nil initialization for Ruby's object shapes optimization. The per-topic pause
+        # config is built lazily on first read, defaulting to the global `config.pause.*` settings.
+        @pause = nil
       end
 
       INHERITABLE_ATTRIBUTES.each do |attribute|
@@ -71,6 +72,17 @@ module Karafka
             @#{attribute} = Karafka::App.config.send(:#{attribute})
           end
         RUBY
+      end
+
+      # @return [Karafka::Routing::Features::Pausing::Config] per-topic pause configuration,
+      #   reflecting the root `config.pause.*` settings.
+      def pause
+        @pause ||= Features::Pausing::Config.new(
+          active: false,
+          timeout: Karafka::App.config.pause.timeout,
+          max_timeout: Karafka::App.config.pause.max_timeout,
+          with_exponential_backoff: Karafka::App.config.pause.with_exponential_backoff
+        )
       end
 
       # Often users want to have the same basic cluster setup with small setting alterations
@@ -155,6 +167,7 @@ module Karafka
           name: name,
           active: active?,
           consumer: consumer,
+          pause: pause.to_h,
           group_id: group.id,
           # Kept as a reference alongside `group_id` for backwards compatibility. Will be removed
           # in Karafka 3.0.

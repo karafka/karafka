@@ -62,7 +62,7 @@ draw_routes do
   topic DT.topic do
     consumer Consumer
     manual_offset_management true
-    filter(VpStabilizer)
+    filter(FlowStabilizer)
     virtual_partitions(
       partitioner: ->(_msg) { DT[:iterator].next },
       offset_metadata_strategy: :exact

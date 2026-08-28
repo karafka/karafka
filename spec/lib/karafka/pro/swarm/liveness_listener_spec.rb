@@ -47,6 +47,12 @@ RSpec.describe_current do
   let(:listener_polling_ttl) { listener.instance_variable_get(:@polling_ttl) }
   let(:listener_pollings) { listener.instance_variable_get(:@pollings) }
   let(:listener_consumptions) { listener.instance_variable_get(:@consumptions) }
+  let(:listener_instabilities) { listener.instance_variable_get(:@instabilities) }
+  let(:listener_join_states) { listener.instance_variable_get(:@join_states) }
+
+  def stats_event(join_state:, sg_id: "sg1")
+    { subscription_group_id: sg_id, statistics: { "cgrp" => { "join_state" => join_state } } }
+  end
 
   before do
     allow(listener).to receive(:node).and_return(node)
@@ -60,6 +66,10 @@ RSpec.describe_current do
       expect(listener_memory_limit).to eq(memory_limit)
       expect(listener_consuming_ttl).to eq(consuming_ttl)
       expect(listener_polling_ttl).to eq(polling_ttl)
+    end
+
+    it "initializes instabilities as an empty hash" do
+      expect(listener_instabilities).to eq({})
     end
   end
 
@@ -176,6 +186,264 @@ RSpec.describe_current do
       # Only f1 clears its entry
       f1.resume
       expect(listener_consumptions.size).to eq(1)
+    end
+  end
+
+  describe "#on_statistics_emitted" do
+    context "when join_state is steady" do
+      it "clears any existing non-steady tracking for that subscription group" do
+        listener.on_statistics_emitted(stats_event(join_state: "wait-assn"))
+        expect(listener_instabilities).not_to be_empty
+
+        listener.on_statistics_emitted(stats_event(join_state: "steady"))
+        expect(listener_instabilities).to be_empty
+      end
+
+      it "clears the join_states entry when the consumer recovers" do
+        listener.on_statistics_emitted(stats_event(join_state: "wait-assn"))
+        expect(listener_join_states).not_to be_empty
+
+        listener.on_statistics_emitted(stats_event(join_state: "steady"))
+        expect(listener_join_states).to be_empty
+      end
+    end
+
+    context "when join_state is non-steady" do
+      it "records when the group first became non-steady" do
+        listener.on_statistics_emitted(stats_event(join_state: "wait-join"))
+        expect(listener_instabilities["sg1"]).to be_a(Numeric)
+      end
+
+      it "does not reset the start time when the same non-steady state repeats" do
+        listener.on_statistics_emitted(stats_event(join_state: "wait-join"))
+        first_tick = listener_instabilities["sg1"]
+
+        sleep(0.01)
+        listener.on_statistics_emitted(stats_event(join_state: "wait-join"))
+        expect(listener_instabilities["sg1"]).to eq(first_tick)
+      end
+
+      it "resets the start time when the non-steady state changes" do
+        listener.on_statistics_emitted(stats_event(join_state: "wait-join"))
+        first_tick = listener_instabilities["sg1"]
+
+        sleep(0.01)
+        listener.on_statistics_emitted(stats_event(join_state: "wait-assn"))
+        expect(listener_instabilities["sg1"]).to be > first_tick
+      end
+    end
+
+    context "when statistics have no cgrp key" do
+      it "ignores the event" do
+        event_without_cgrp = { subscription_group_id: "sg1", statistics: {} }
+        listener.on_statistics_emitted(event_without_cgrp)
+        expect(listener_instabilities).to be_empty
+      end
+    end
+
+    context "when cgrp is present but join_state is nil" do
+      it "ignores the event without starting an instability timer" do
+        event = { subscription_group_id: "sg1", statistics: { "cgrp" => { "join_state" => nil } } }
+        listener.on_statistics_emitted(event)
+        expect(listener_instabilities).to be_empty
+      end
+    end
+
+    context "when join_state is init" do
+      it "does not start an instability timer for a fresh subscription group" do
+        listener.on_statistics_emitted(stats_event(join_state: "init"))
+        expect(listener_instabilities).to be_empty
+      end
+
+      it "clears any existing instability entry on rdkafka client reset" do
+        listener.on_statistics_emitted(stats_event(join_state: "wait-assn"))
+        expect(listener_instabilities).not_to be_empty
+
+        listener.on_statistics_emitted(stats_event(join_state: "init"))
+        expect(listener_instabilities).to be_empty
+      end
+
+      it "clears the join_states entry on rdkafka client reset" do
+        listener.on_statistics_emitted(stats_event(join_state: "wait-assn"))
+        expect(listener_join_states).not_to be_empty
+
+        listener.on_statistics_emitted(stats_event(join_state: "init"))
+        expect(listener_join_states).to be_empty
+      end
+    end
+
+    context "when join_state is wait-metadata" do
+      it "does not start an instability timer for a fresh subscription group" do
+        listener.on_statistics_emitted(stats_event(join_state: "wait-metadata"))
+        expect(listener_instabilities).to be_empty
+      end
+
+      it "clears any existing instability entry so the prior timer cannot fire later" do
+        listener.on_statistics_emitted(stats_event(join_state: "wait-assn"))
+        expect(listener_instabilities).not_to be_empty
+
+        listener.on_statistics_emitted(stats_event(join_state: "wait-metadata"))
+        expect(listener_instabilities).to be_empty
+      end
+
+      it "clears the join_states entry when the consumer moves into wait-metadata" do
+        listener.on_statistics_emitted(stats_event(join_state: "wait-assn"))
+        expect(listener_join_states).not_to be_empty
+
+        listener.on_statistics_emitted(stats_event(join_state: "wait-metadata"))
+        expect(listener_join_states).to be_empty
+      end
+    end
+
+    context "when event[:statistics] is nil (defensive)" do
+      it "does not raise" do
+        expect do
+          listener.on_statistics_emitted(subscription_group_id: "sg1", statistics: nil)
+        end.not_to raise_error
+        expect(listener_instabilities).to be_empty
+      end
+    end
+  end
+
+  describe "#on_connection_listener_after_fetch_loop" do
+    let(:sg1) { instance_double(Karafka::Routing::SubscriptionGroup, id: "sg1") }
+
+    before { listener.on_statistics_emitted(stats_event(join_state: "wait-join")) }
+
+    it "clears instability tracking for the stopped subscription group" do
+      listener.on_connection_listener_after_fetch_loop(subscription_group: sg1)
+
+      expect(listener_instabilities).to be_empty
+      expect(listener_join_states).to be_empty
+    end
+
+    it "does not affect other subscription groups" do
+      listener.on_statistics_emitted(stats_event(join_state: "wait-join", sg_id: "sg2"))
+      listener.on_connection_listener_after_fetch_loop(subscription_group: sg1)
+
+      expect(listener_instabilities.keys).to eq(["sg2"])
+      expect(listener_join_states.keys).to eq(["sg2"])
+    end
+
+    it "is a no-op when the event carries no subscription group" do
+      listener.on_connection_listener_after_fetch_loop({})
+
+      expect(listener_instabilities.keys).to eq(["sg1"])
+    end
+  end
+
+  describe "#status" do
+    context "when stability_ttl is exceeded" do
+      subject(:listener) do
+        described_class.new(
+          memory_limit: memory_limit,
+          consuming_ttl: consuming_ttl,
+          polling_ttl: polling_ttl,
+          stability_ttl: 0
+        )
+      end
+
+      before { allow(listener).to receive(:node).and_return(node) }
+
+      it "returns status code 4" do
+        listener.on_statistics_emitted(stats_event(join_state: "wait-assn"))
+        expect(listener.send(:status)).to eq(4)
+      end
+    end
+
+    context "when nothing is exceeded" do
+      it "returns 0" do
+        expect(listener.send(:status)).to eq(0)
+      end
+    end
+  end
+
+  describe "default stability_ttl derivation" do
+    # The outer `before` accesses `listener`, which would memoize it before any per-example
+    # config stubs apply. We use a separate `fresh_listener` let so it is realized lazily
+    # in the it block (after any inner-context `before` stubs run).
+    let(:fresh_listener) do
+      described_class.new(
+        memory_limit: memory_limit,
+        consuming_ttl: consuming_ttl,
+        polling_ttl: polling_ttl,
+        **provided_stability_ttl_kwarg
+      )
+    end
+    let(:provided_stability_ttl_kwarg) { {} }
+    let(:fresh_listener_stability_ttl) { fresh_listener.send(:stability_ttl) }
+
+    def sg_with(max_poll_interval)
+      instance_double(
+        Karafka::Routing::SubscriptionGroup,
+        kafka: { "max.poll.interval.ms": max_poll_interval }
+      )
+    end
+
+    context "when stability_ttl is not provided" do
+      it "is not resolved at initialize time" do
+        expect(fresh_listener.instance_variable_get(:@stability_ttl)).to be_nil
+      end
+
+      context "when subscription groups are available" do
+        before do
+          allow(Karafka::App).to receive(:subscription_groups).and_return(
+            cg1: [sg_with(300_000), sg_with(900_000)],
+            cg2: [sg_with(600_000)]
+          )
+        end
+
+        it "derives the default as the max max.poll.interval.ms across all groups times 2" do
+          expect(fresh_listener_stability_ttl).to eq(900_000 * 2)
+        end
+
+        it "does not fall back to the root kafka config" do
+          expect(Karafka::Setup::DefaultsInjector).not_to receive(:consumer)
+          fresh_listener_stability_ttl
+        end
+      end
+
+      context "when no subscription groups are available" do
+        before { allow(Karafka::App).to receive(:subscription_groups).and_return({}) }
+
+        it "falls back to the root config max.poll.interval.ms times 2 (librdkafka default)" do
+          expect(fresh_listener_stability_ttl).to eq(300_000 * 2)
+        end
+
+        context "when Karafka::App.config.kafka explicitly sets max.poll.interval.ms" do
+          before do
+            allow(Karafka::App.config).to receive(:kafka).and_return(
+              "max.poll.interval.ms": 900_000
+            )
+          end
+
+          it "uses the configured value times 2" do
+            expect(fresh_listener_stability_ttl).to eq(900_000 * 2)
+          end
+        end
+
+        context "when DefaultsInjector fills in the librdkafka default" do
+          before { allow(Karafka::App.config).to receive(:kafka).and_return({}) }
+
+          it "results in 600_000 ms (5 min * 2) when the user hasn't set the key" do
+            expect(fresh_listener_stability_ttl).to eq(600_000)
+          end
+        end
+      end
+    end
+
+    context "when stability_ttl is explicitly provided" do
+      let(:provided_stability_ttl_kwarg) { { stability_ttl: 12_345 } }
+
+      it "uses the provided value verbatim and does not derive" do
+        expect(fresh_listener_stability_ttl).to eq(12_345)
+      end
+
+      it "does not consult routing or DefaultsInjector for the derivation path" do
+        expect(Karafka::App).not_to receive(:subscription_groups)
+        expect(Karafka::Setup::DefaultsInjector).not_to receive(:consumer)
+        fresh_listener_stability_ttl
+      end
     end
   end
 

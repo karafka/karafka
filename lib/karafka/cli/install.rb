@@ -3,7 +3,6 @@
 require "erb"
 
 module Karafka
-  # Karafka framework Cli
   class Cli
     # Install Karafka Cli action
     class Install < Base

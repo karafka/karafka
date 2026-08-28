@@ -76,8 +76,7 @@ module Karafka
 
         private
 
-        # Recognizes whether the type is provided and remaps it to a symbol representation if
-        # needed
+        # Recognizes whether the type is provided and remaps it to a symbol representation if needed
         #
         # @param type [Symbol, Integer]
         # @return [Symbol]

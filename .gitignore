@@ -21,6 +21,8 @@ db/*.sqlite3
 *.sassc
 .byebug_history
 .redcar/
+.claude/
+.codex/
 .capistrano/
 .sass-cache
 /config/god/sidekiq.rb
@@ -67,3 +69,5 @@ pickle-email-*.html
 
 # documentation
 .yardoc
+.git-pr-body-*.md
+.env.pro

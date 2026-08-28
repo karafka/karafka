@@ -41,12 +41,14 @@ RSpec.describe Karafka::BaseConsumer, type: :pro do
   end
 
   let(:strategy) { Karafka::Pro::Processing::ConsumerGroups::Strategies::Default }
-  let(:coordinator) { build(:processing_coordinator_pro, seek_offset: nil) }
+  let(:coordinator) { build(:processing_coordinator_pro, topic: topic, seek_offset: nil) }
   let(:client) { instance_double(Karafka::Connection::Client, pause: true, seek: true) }
   let(:first_message) { instance_double(Karafka::Messages::Message, offset: offset, partition: 0) }
   let(:last_message) { instance_double(Karafka::Messages::Message, offset: offset, partition: 0) }
   let(:offset) { 123 }
-  let(:topic) { build(:routing_topic) }
+  # The topic carries a subscription group so the globally-subscribed PerformanceTracker (which
+  # scopes samples per subscription group) can read `topic.subscription_group.id` on consume
+  let(:topic) { build(:routing_subscription_group).topics.first }
 
   let(:messages) do
     instance_double(
@@ -593,6 +595,46 @@ RSpec.describe Karafka::BaseConsumer, type: :pro do
         end
 
         consumer.on_tick
+      end
+    end
+  end
+
+  describe "ownership result contracts" do
+    let(:marking_message) { instance_double(Karafka::Messages::Message, offset: 200) }
+
+    before do
+      coordinator.seek_offset = 100
+      allow(Karafka.producer).to receive(:transactional?).and_return(false)
+    end
+
+    %i[mark_as_consumed mark_as_consumed!].each do |method|
+      describe "##{method}" do
+        context "when the client marking fails due to ownership loss" do
+          before do
+            allow(client).to receive(method).and_return(false)
+            allow(client).to receive(:assignment_lost?).and_return(true)
+          end
+
+          it "expect false (never the revocation status) and a revoked coordinator" do
+            expect(consumer.public_send(method, marking_message)).to be(false)
+            expect(coordinator.revoked?).to be(true)
+          end
+
+          it "expect not to advance the seek offset" do
+            consumer.public_send(method, marking_message)
+
+            expect(consumer.seek_offset).to eq(100)
+          end
+        end
+
+        context "when the client marking succeeds" do
+          before { allow(client).to receive(method).and_return(true) }
+
+          it "expect true and an advanced seek offset" do
+            expect(consumer.public_send(method, marking_message)).to be(true)
+            expect(consumer.seek_offset).to eq(201)
+          end
+        end
       end
     end
   end

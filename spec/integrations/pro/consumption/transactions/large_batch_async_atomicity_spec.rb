@@ -32,7 +32,12 @@
 # Ensures that even with hundreds of async produce operations, either all succeed or all fail
 # together with the offset marking.
 #
-# Note: This spec works correctly regardless of how Kafka batches messages for delivery.
+# The whole point is a single large transaction: 100 source messages fanned out into 300 async
+# productions, all committed atomically with the offset marking. That only holds when all 100
+# messages are handed to one `#consume` call. Kafka does not guarantee that - a cold fetch may split
+# them across several smaller batches, in which case the per-batch bookkeeping never reaches 100,
+# `DT[:done]` never flips and the spec hangs until the execution guard kills it. The FlowStabilizer
+# filter removes this nondeterminism by seeking back until the whole batch arrives in one poll.
 
 setup_karafka do |config|
   config.kafka[:"transactional.id"] = SecureRandom.uuid
@@ -84,6 +89,11 @@ class Consumer < Karafka::BaseConsumer
       mark_as_consumed(messages.last)
     end
 
+    # Set before handlers.each so wait_until can fire once targets catch up; handlers finish
+    # during graceful shutdown. Setting it after caused 4-min timeouts when handler.wait
+    # blocked on slow delivery callbacks under CPU contention.
+    DT[:done] = true if DT[:processed_offsets].size >= 100
+
     handlers.each do |handler_info|
       result = handler_info[:handler].wait
 
@@ -94,8 +104,6 @@ class Consumer < Karafka::BaseConsumer
         topic_index: handler_info[:topic_index]
       }
     end
-
-    DT[:done] = true if DT[:processed_offsets].size >= 100
   end
 end
 
@@ -121,6 +129,9 @@ draw_routes do
   topic DT.topics[0] do
     consumer Consumer
     manual_offset_management true
+    # Guarantee all 100 source messages land in a single batch so the fan-out happens within one
+    # transaction, regardless of how Kafka chunks the initial fetch
+    filter ->(*_args) { FlowStabilizer.new(100) }
   end
 
   topic DT.topics[1] do

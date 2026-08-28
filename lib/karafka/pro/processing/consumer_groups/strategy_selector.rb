@@ -31,9 +31,6 @@
 module Karafka
   module Pro
     module Processing
-      # Consumer-group-specific Pro processing components (driven by rebalance callbacks and
-      # partition ticks). Parallel `ShareGroups` will live next to this namespace once KIP-932
-      # lands.
       module ConsumerGroups
         # Selector of appropriate processing strategy matching topic combinations
         # When using Karafka Pro, there is a different set of strategies than for regular, as
@@ -41,8 +38,7 @@ module Karafka
         class StrategySelector
           attr_reader :strategies
 
-          # Strategies that we support in the Pro offering
-          # They can be combined
+          # Strategies that we support in the Pro offering They can be combined
           SUPPORTED_FEATURES = %i[
             active_job
             long_running_job

@@ -33,15 +33,8 @@ module Karafka
     module Routing
       module Features
         module ConsumerGroups
-          # Holds pattern info reference
-          # Type is set to:
-          #   `:regular` - in case patterns are not used and topic is just a regular existing topic
-          #                matched directly based on the name
-          #   `:discovered` - in case it is a real topic on which we started to listed
-          #   `:matcher` - represents a regular expression used by librdkafka
           class Patterns < Base
-            # Config for pattern based topic
-            # Only pattern related topics are active in this context
+            # Config for pattern based topic Only pattern related topics are active in this context
             Config = Struct.new(
               :active,
               :type,

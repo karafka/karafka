@@ -37,8 +37,8 @@ module Karafka
     #
     # Methods here are suppose to be always available or are expected to be redefined
     module BaseConsumer
-      # @return [Karafka::Pro::Processing::ConsumerGroups::Coordinators::ErrorsTracker] tracker for errors that
-      #   occurred during processing until another successful processing
+      # @return [Karafka::Pro::Processing::ConsumerGroups::Coordinators::ErrorsTracker] tracker for
+      #   errors that occurred during processing until another successful processing
       #
       # @note This will always contain **only** details of errors that occurred during `#consume`
       #   because only those are retryable.
@@ -53,9 +53,9 @@ module Karafka
         coordinator.errors_tracker
       end
 
-      # @return [Karafka::Pro::Processing::ConsumerGroups::SubscriptionGroupsCoordinator] Coordinator allowing to
-      #   pause and resume polling of the given subscription group jobs queue for postponing
-      #   further work.
+      # @return [Karafka::Pro::Processing::ConsumerGroups::SubscriptionGroupsCoordinator]
+      #   Coordinator allowing to pause and resume polling of the given subscription group jobs
+      #   queue for postponing further work.
       #
       # @note Since this stops polling, it can cause reaching `max.poll.interval.ms` limitations.
       #

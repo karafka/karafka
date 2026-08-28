@@ -33,8 +33,6 @@ module Karafka
     module Routing
       module Features
         module ConsumerGroups
-          # Alterations to the direct assignments that allow us to do stable direct assignments
-          # without working with consumer groups dynamic assignments
           class DirectAssignments < Base
             # Extension allowing us to select correct subscriptions and assignments based on the
             # expanded routing setup

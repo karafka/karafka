@@ -110,7 +110,7 @@ module Karafka
           if partitions_with_offsets.is_a?(Hash)
             tpl_base[topic] = partitions_with_offsets
           else
-            topic_info = Topics.new(kafka: @custom_kafka).info(topic)
+            topic_info = topics_admin.info(topic)
             topic_info[:partition_count].times do |partition|
               tpl_base[topic][partition] = partitions_with_offsets
             end
@@ -167,21 +167,34 @@ module Karafka
           unless time_tpl.empty?
             real_offsets = consumer.offsets_for_times(time_tpl)
 
-            real_offsets.to_h.each do |name, results|
+            # Collect all partitions where the timestamp is beyond the last message
+            # (negative offset returned) so we can fetch their HWMs in a single batch
+            # admin call instead of one per-partition consumer call
+            real_offsets_by_topic = real_offsets.to_h
+            hwm_specs = {}
+            real_offsets_by_topic.each do |name, results|
               results.each do |result|
                 raise(Errors::InvalidTimeBasedOffsetError) unless result
+                next unless result.offset.negative?
 
-                partition = result.partition
+                (hwm_specs[name] ||= []) << { partition: result.partition, offset: :latest }
+              end
+            end
 
-                # Negative offset means we're beyond last message and we need to query for the
-                # high watermark offset to get the most recent offset and move there
-                if result.offset.negative?
-                  _, offset = consumer.query_watermark_offsets(name, result.partition)
-                else
-                  # If we get an offset, it means there existed a message close to this time
-                  # location
-                  offset = result.offset
+            hwms = {}
+            unless hwm_specs.empty?
+              with_admin do |admin|
+                admin.list_offsets(hwm_specs).wait(max_wait_timeout_ms: max_wait_time_ms).offsets.each do |r|
+                  (hwms[r[:topic]] ||= {})[r[:partition]] = r[:offset]
                 end
+              end
+            end
+
+            real_offsets_by_topic.each do |name, results|
+              results.each do |result|
+                partition = result.partition
+                # If offset is negative the timestamp was beyond the last message; use HWM
+                offset = result.offset.negative? ? hwms.dig(name, partition) : result.offset
 
                 # Since now we have proper offsets, we can add this to the final tpl for commit
                 tpl.to_h[name] ||= []
@@ -345,7 +358,9 @@ module Karafka
           sleep(0.1)
 
           # Unsubscribe - this will trigger the second rebalance when the consumer closes
-          # The ensure block in with_consumer will handle the unsubscribe and close
+          # The ensure block in with_consumer will handle the unsubscribe and close for the
+          # dedicated consumer created here. This operation subscribes and must never run on
+          # an external client as nothing would restore its subscription
         end
       end
 
@@ -367,6 +382,10 @@ module Karafka
       #
       # @note This lag reporting is for committed lags and is "Kafka-centric", meaning that this
       #   represents lags from Kafka perspective and not the consumer. They may differ.
+      #
+      # @note When this instance operates on an external client, every queried group runs
+      #   through that single consumer identity, so query it only about the external client's
+      #   own group.
       def read_lags_with_offsets(groups_with_topics = {}, active_topics_only: true)
         # We first fetch all the topics with partitions count that exist in the cluster so we
         # do not query for topics that do not exist and so we can get partitions count for all

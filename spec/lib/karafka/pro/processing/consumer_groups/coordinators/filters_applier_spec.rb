@@ -231,6 +231,57 @@ RSpec.describe_current do
     end
   end
 
+  # Builds a filter double resolving to the given action. The applier depends on the `#pause?` /
+  # `#seek?` predicates (not the raw `#action` symbol), so we derive them here to keep the doubles
+  # in sync with a single action value.
+  def filter_double(action:, timeout:)
+    instance_double(
+      Karafka::Pro::Processing::ConsumerGroups::Filters::Base,
+      apply!: nil,
+      applied?: true,
+      timeout: timeout,
+      skip?: action == :skip,
+      pause?: action == :pause,
+      seek?: action == :seek
+    )
+  end
+
+  context "when a pausing filter and a seeking 0-timeout filter both apply" do
+    # The resolved action is :pause (a pausing filter has the highest priority), but the seeking
+    # filter reports a 0 timeout. The combined timeout must come from the pausing filter only and
+    # must not be collapsed to 0 by the seek filter's 0.
+    let(:pausing) { filter_double(action: :pause, timeout: 5_000) }
+    let(:seeking) { filter_double(action: :seek, timeout: 0) }
+
+    let(:factories) { [->(*) { pausing }, ->(*) { seeking }] }
+
+    before { applier.apply!(messages) }
+
+    it "expect pause as the highest priority action" do
+      expect(applier.action).to eq(:pause)
+    end
+
+    it "expect the timeout to be the pausing filter's backoff, not collapsed to 0" do
+      expect(applier.timeout).to eq(5_000)
+    end
+  end
+
+  context "when several pausing filters and a seeking 0-timeout filter all apply" do
+    # We pause for the shortest pausing backoff (the minimum), re-poll and re-apply, so the longer
+    # filters pause again on the next cycle. The seek filter's 0 timeout must be ignored entirely.
+    let(:short_pause) { filter_double(action: :pause, timeout: 2_000) }
+    let(:long_pause) { filter_double(action: :pause, timeout: 5_000) }
+    let(:seeking) { filter_double(action: :seek, timeout: 0) }
+
+    let(:factories) { [->(*) { short_pause }, ->(*) { long_pause }, ->(*) { seeking }] }
+
+    before { applier.apply!(messages) }
+
+    it "expect the timeout to be the minimum pausing backoff, ignoring the seek 0" do
+      expect(applier.timeout).to eq(2_000)
+    end
+  end
+
   context "when there are messages and multiple filters applied but none pauses" do
     let(:factories) do
       [

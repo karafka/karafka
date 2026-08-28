@@ -31,12 +31,8 @@
 module Karafka
   module Pro
     module Processing
-      # Consumer-group-specific Pro processing components (driven by rebalance callbacks and
-      # partition ticks). Parallel `ShareGroups` will live next to this namespace once KIP-932
-      # lands.
       module ConsumerGroups
         module Strategies
-          # Filtering related init strategies
           module Ftr
             # Only filtering enabled
             module Default
@@ -134,7 +130,7 @@ module Karafka
                     pause(throttle_message.offset, throttle_timeout, false)
                   end
                 else
-                  raise Karafka::Errors::UnsupportedCaseError filter.action
+                  raise Karafka::Errors::UnsupportedCaseError, filter.action
                 end
               end
             end

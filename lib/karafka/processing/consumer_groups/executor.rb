@@ -7,8 +7,8 @@ module Karafka
     # ticks). Parallel `ShareGroups` will live next to this namespace once KIP-932 lands.
     module ConsumerGroups
       # Executors:
-      # - run consumers code (for `#call`) or run given preparation / teardown operations when needed
-      #   from separate threads.
+      # - run consumers code (for `#call`) or run given preparation / teardown operations when
+      #   needed from separate threads.
       # - they re-create consumer instances in case of partitions that were revoked and assigned
       #   back.
       #
@@ -54,8 +54,8 @@ module Karafka
           @coordinator = coordinator
         end
 
-        # Allows us to prepare the consumer in the listener thread prior to the job being send to
-        # be scheduled. It also allows to run some code that is time sensitive and cannot wait in the
+        # Allows us to prepare the consumer in the listener thread prior to the job being send to be
+        # scheduled. It also allows to run some code that is time sensitive and cannot wait in the
         # queue as it could cause starvation.
         #
         # @param messages [Array<Karafka::Messages::Message>]

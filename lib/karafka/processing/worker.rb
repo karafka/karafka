@@ -38,18 +38,23 @@ module Karafka
 
       private
 
-      # Runs processing of jobs in a loop
-      # Stops when queue is closed.
+      # Runs processing of jobs in a loop Stops when queue is closed.
       def call
         loop { break unless process }
       end
 
       # Fetches a single job, processes it and marks as completed.
       #
-      # @note We do not have error handling here, as no errors should propagate this far. If they
-      #   do, it is a critical error and should bubble up.
+      # @note No user or framework errors should propagate this far. If they do, it is a critical
+      #   error that we instrument while keeping the worker alive.
       #
       # @note Upon closing the jobs queue, worker will close it's thread
+      #
+      # @return [Boolean] should the worker keep running. False only when the jobs queue is
+      #   closed (full shutdown) or a downscale sentinel was received. This decision is
+      #   deliberately decoupled from the processing flow result: the flow passes through the
+      #   user-redefinable `#wrap`, whose return value (or an error raised in user code or in an
+      #   instrumentation subscriber) must never be able to silently kill the worker thread.
       def process
         job = @jobs_queue.pop
 
@@ -77,10 +82,10 @@ module Karafka
               end
 
               job.after_call
-
-              true
             end
           end
+
+          true
         else
           # nil means either queue closed (full shutdown) or pool downscaling.
           # Either way, deregister from pool so it reflects the actual worker count.
@@ -88,9 +93,7 @@ module Karafka
           false
         end
       # We signal critical exceptions, notify and do not allow worker to fail
-      # rubocop:disable Lint/RescueException
       rescue Exception => e
-        # rubocop:enable Lint/RescueException
         monitor.instrument(
           "error.occurred",
           caller: self,
@@ -99,6 +102,10 @@ module Karafka
           error: e,
           type: "worker.process.error"
         )
+
+        # Keep the worker alive. Without an explicit true this arm would return the result of
+        # the instrumentation call (nil) and the worker thread would silently exit
+        true
       ensure
         # job can be nil when the queue is being closed or during pool downscaling
         if job

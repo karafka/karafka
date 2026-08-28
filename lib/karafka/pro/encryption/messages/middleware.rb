@@ -48,6 +48,11 @@ module Karafka
           def call(message)
             payload = message[:payload]
 
+            # Tombstones (records with a nil payload) carry no data to encrypt. We pass them
+            # through untouched so they remain valid tombstones (for example for log compaction)
+            # instead of crashing on `cipher.encrypt(nil)`.
+            return message if payload.nil?
+
             message[:headers] ||= {}
             message[:headers]["encryption"] = version
             message[:payload] = cipher.encrypt(payload)

@@ -94,8 +94,7 @@ module Karafka
               # Skip negative and time based offsets
               next unless offset.is_a?(Integer) && offset >= 0
 
-              # Exact offsets can be used as they are
-              # No need for extra operations
+              # Exact offsets can be used as they are No need for extra operations
               @mapped_topics[name][partition] = offset
             end
           end
@@ -108,31 +107,72 @@ module Karafka
         # heavily compacted topics, this may return less than the desired number but it is a
         # limitation that is documented.
         def resolve_partitions_with_negative_offsets
+          # Collect all integer-offset partitions (positive and negative) and the subset
+          # that actually need LWM/HWM resolution
+          warm_up_partitions = {}
+          negative_partitions = {}
+
           @expanded_topics.each do |name, partitions|
             next unless partitions.is_a?(Hash)
 
             partitions.each do |partition, offset|
-              # Care only about numerical offsets
-              #
-              # For time based we already resolve them via librdkafka lookup API
               next unless offset.is_a?(Integer)
 
-              low_offset, high_offset = @consumer.query_watermark_offsets(name, partition)
+              (warm_up_partitions[name] ||= []) << partition
+              (negative_partitions[name] ||= {})[partition] = offset if offset.negative?
+            end
+          end
 
-              # Care only about negative offsets (last n messages)
-              #
-              # We reject the above results but we **NEED** to run the `#query_watermark_offsets`
-              # for each topic partition nonetheless. Without this, librdkafka fetches a lot more
-              # metadata about each topic and each partition and this takes much more time than
-              # just getting watermarks. If we do not run watermark, at least an extra second
-              # is added at the beginning of iterator flow
-              #
-              # This may not be significant when this runs in the background but in case of
-              # using iterator in thins like Puma, it heavily impacts the end user experience
-              next unless offset.negative?
+          return if warm_up_partitions.empty?
 
+          # A single batched offsets_for_times call on the consumer handle warms up
+          # librdkafka's per-partition metadata cache for all integer-offset partitions in
+          # one roundtrip. Without this pre-fetch, librdkafka triggers a much broader
+          # metadata refresh when assign is called later, adding at least a second to
+          # iterator startup - noticeable in latency-sensitive contexts like Puma.
+          # The epoch timestamp ensures every partition returns its LWM; the result is
+          # intentionally discarded since we only need the warm-up side effect here.
+          warm_up_tpl = Rdkafka::Consumer::TopicPartitionList.new
+          warm_up_partitions.each do |name, part_ids|
+            warm_up_tpl.add_topic_and_partitions_with_offsets(
+              name, part_ids.to_h { |p| [p, Time.at(0)] }
+            )
+          end
+          @consumer.offsets_for_times(warm_up_tpl)
+
+          return if negative_partitions.empty?
+
+          # Batch-fetch LWM and HWM for all negative-offset partitions in two calls (one for
+          # :earliest, one for :latest) instead of N per-partition watermark queries. Both run
+          # on the consumer own connection, so no dedicated admin client is ever created. The
+          # proxy passes no isolation level, so :latest resolves with the librdkafka default
+          # (read_uncommitted), i.e. the true high watermark - same as the previous
+          # read_watermark_offsets path this replaced
+          low_specs = {}
+          high_specs = {}
+
+          negative_partitions.each do |name, partitions|
+            low_specs[name] = partitions.keys.map { |p| { partition: p, offset: :earliest } }
+            high_specs[name] = partitions.keys.map { |p| { partition: p, offset: :latest } }
+          end
+
+          lows = {}
+          highs = {}
+
+          @consumer.read_partition_offsets(low_specs).each do |result|
+            (lows[result[:topic]] ||= {})[result[:partition]] = result[:offset]
+          end
+
+          @consumer.read_partition_offsets(high_specs).each do |result|
+            (highs[result[:topic]] ||= {})[result[:partition]] = result[:offset]
+          end
+
+          negative_partitions.each do |name, partitions|
+            partitions.each do |partition, offset|
+              low = lows.dig(name, partition) || 0
+              high = highs.dig(name, partition) || 0
               # We add because this offset is negative
-              @mapped_topics[name][partition] = [high_offset + offset, low_offset].max
+              @mapped_topics[name][partition] = [high + offset, low].max
             end
           end
         end

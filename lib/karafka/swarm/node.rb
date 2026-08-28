@@ -58,7 +58,7 @@ module Karafka
         # nil means unknown status - will check with waitpid
         @mutex.synchronize { @alive = nil }
 
-        # :nocov:
+        # simplecov:disable
         @pid = ::Process.fork do
           # Close the old producer so it is not a subject to GC
           # While it was not opened in the parent, without explicit closing, there still could be
@@ -89,7 +89,7 @@ module Karafka
 
           @writer.close
         end
-        # :nocov:
+        # simplecov:enable
 
         @writer.close
       end
@@ -190,6 +190,8 @@ module Karafka
       # @param signal [String]
       # @return [Boolean] true if signal was sent, false if process doesn't exist
       def signal(signal)
+        @mutex.synchronize { return false if @alive == false }
+
         ::Process.kill(signal, @pid)
         true
       rescue Errno::ESRCH

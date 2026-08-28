@@ -71,9 +71,16 @@ module Karafka
                 message.offset - 1
               )
             when "command"
-              @executor.apply_command(payload)
+              # During replaying commands are only buffered. Applying them immediately would be
+              # pointless as the end-of-replay synchronization with the last stored schedule
+              # state would overwrite their effects. They are applied after the synchronization
+              if @executor.replaying?
+                @executor.replay_command(payload)
 
-              next if @executor.replaying?
+                next
+              end
+
+              @executor.apply_command(payload)
 
               # Execute on each incoming command to have nice latency but only after replaying
               # During replaying we should not execute because there may be more state changes

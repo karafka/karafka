@@ -2,8 +2,6 @@
 
 module Karafka
   module Processing
-    # Consumer-group-specific processing components (driven by rebalance callbacks and partition
-    # ticks). Parallel `ShareGroups` will live next to this namespace once KIP-932 lands.
     module ConsumerGroups
       # Coordinators builder used to build coordinators per topic partition
       #
@@ -49,6 +47,13 @@ module Karafka
         # @param partition [Integer] partition number
         def revoke(topic_name, partition)
           return unless @coordinators[topic_name].key?(partition)
+
+          # Reset (or, if not currently paused, remove) the partition's pause tracker. This
+          # prevents a stale retry attempt count from being reused as-is if we reclaim this
+          # partition (which, with DLQ, would send the next failure straight to the dead letter
+          # queue, skipping the retries) while also keeping `PausesManager#@pauses` from growing
+          # unbounded. See `PausesManager#revoke` for the full reasoning
+          @pauses_manager.revoke(@topics.find(topic_name), partition)
 
           # The fact that we delete here does not change the fact that the executor still holds the
           # reference to this coordinator. We delete it here, as we will no longer process any

@@ -31,15 +31,13 @@
 module Karafka
   module Pro
     module Processing
-      # Consumer-group-specific Pro processing components (driven by rebalance callbacks and
-      # partition ticks). Parallel `ShareGroups` will live next to this namespace once KIP-932
-      # lands.
       module ConsumerGroups
         module Strategies
-          # No features enabled.
-          # No manual offset management
-          # No long running jobs
-          # No virtual partitions
+          # No features enabled:
+          # - No manual offset management
+          # - No long running jobs
+          # - No virtual partitions
+          #
           # Nothing. Just standard, automatic flow
           module Default
             include Base
@@ -70,10 +68,10 @@ module Karafka
             # @return [Boolean] true if we were able to mark the offset, false otherwise.
             #   False indicates that we were not able and that we have lost the partition.
             #
-            # @note We keep track of this offset in case we would mark as consumed and got error when
-            #   processing another message. In case like this we do not pause on the message we've
-            #   already processed but rather at the next one. This applies to both sync and async
-            #   versions of this method.
+            # @note We keep track of this offset in case we would mark as consumed and got error
+            #   when processing another message. In case like this we do not pause on the message
+            #   we've already processed but rather at the next one. This applies to both sync and
+            #   async versions of this method.
             def mark_as_consumed(message, offset_metadata = @_current_offset_metadata)
               # If we are inside a transaction than we can just mark as consumed within it
               if @_in_transaction
@@ -88,6 +86,8 @@ module Karafka
                 # We ignore second marking because it changes nothing and in case of people using
                 # metadata storage but with automatic offset marking, this would cause metadata to be
                 # erased by automatic marking
+                # Only this exact re-mark is skipped - marking genuinely older offsets is intentionally
+                # allowed and rewinds the seek offset for reprocessing (see #2432)
                 return true if (seek_offset - 1) == message.offset
                 return false if revoked?
 
@@ -101,7 +101,14 @@ module Karafka
                   client.mark_as_consumed(message, offset_metadata)
                 end
 
-                return revoked? unless stored
+                unless stored
+                  # Evaluate ownership for its coordinator-revoking side effect - all marking
+                  # failure causes are ownership related. The failure itself always reports
+                  # false: the offset was not stored, regardless of the ownership state
+                  revoked?
+
+                  return false
+                end
 
                 self.seek_offset = message.offset + 1
               end
@@ -130,6 +137,8 @@ module Karafka
                 # We ignore second marking because it changes nothing and in case of people using
                 # metadata storage but with automatic offset marking, this would cause metadata to be
                 # erased by automatic marking
+                # Only this exact re-mark is skipped - marking genuinely older offsets is intentionally
+                # allowed and rewinds the seek offset for reprocessing (see #2432)
                 return true if (seek_offset - 1) == message.offset
                 return false if revoked?
 
@@ -143,7 +152,14 @@ module Karafka
                   client.mark_as_consumed!(message, offset_metadata)
                 end
 
-                return revoked? unless stored
+                unless stored
+                  # Evaluate ownership for its coordinator-revoking side effect - all marking
+                  # failure causes are ownership related. The failure itself always reports
+                  # false: the offset was not stored, regardless of the ownership state
+                  revoked?
+
+                  return false
+                end
 
                 self.seek_offset = message.offset + 1
               end
@@ -162,8 +178,8 @@ module Karafka
             #
             # @param active_producer [WaterDrop::Producer] alternative producer instance we may want
             #   to use. It is useful when we have connection pool or any other selective engine for
-            #   managing multiple producers. If not provided, default producer taken from `#producer`
-            #   will be used.
+            #   managing multiple producers. If not provided, default producer taken from
+            #   `#producer` will be used.
             #
             # @yield code that we want to run in a transaction
             #
@@ -212,23 +228,23 @@ module Karafka
                 # This offset is already stored in transaction but we set it here anyhow because we
                 # want to make sure our internal in-memory state is aligned with the transaction
                 #
-                # @note We never need to use the blocking `#mark_as_consumed!` here because the
-                #   offset anyhow was already stored during the transaction
+                # We never need to use the blocking `#mark_as_consumed!` here because the offset
+                # anyhow was already stored during the transaction
                 #
-                # @note Since the offset could have been already stored in Kafka (could have because
-                #   you can have transactions without marking), we use the `@_in_transaction_marked`
-                #   state to decide if we need to dispatch the offset via client at all
-                #   (if post transaction, then we do not have to)
+                # Since the offset could have been already stored in Kafka (could have because you
+                # can have transactions without marking), we use the `@_in_transaction_marked` state
+                # to decide if we need to dispatch the offset via client at all (if post
+                # transaction, then we do not have to)
                 #
-                # @note In theory we could only keep reference to the most recent marking and reject
-                #   others. We however do not do it for two reasons:
-                #   - User may have non standard flow relying on some alternative order and we want
-                #     to mimic this
-                #   - Complex strategies like VPs can use this in VPs to mark in parallel without
-                #     having to redefine the transactional flow completely
+                # In theory we could only keep reference to the most recent marking and reject
+                # others. We however do not do it for two reasons:
+                # - User may have non standard flow relying on some alternative order and we want
+                #   to mimic this
+                # - Complex strategies like VPs can use this in VPs to mark in parallel without
+                #   having to redefine the transactional flow completely
                 #
-                # @note This should be applied only if transaction did not error and if it was not
-                #   aborted.
+                # This should be applied only if transaction did not error and if it was not
+                # aborted.
                 if transaction_completed
                   @_transaction_marked.each do |marking|
                     marking.pop ? mark_as_consumed(*marking) : mark_as_consumed!(*marking)
@@ -301,7 +317,8 @@ module Karafka
             # Marks the current state only in memory as the offset marking has already happened
             # using the producer transaction
             # @param message [Messages::Message] last successfully processed message.
-            # @return [Boolean] true if all good, false if we lost assignment and no point in marking
+            # @return [Boolean] true if all good, false if we lost assignment and no point in
+            #   marking
             def mark_in_memory(message)
               # seek offset can be nil only in case `#seek` was invoked with offset reset request
               # In case like this we ignore marking
@@ -310,6 +327,8 @@ module Karafka
               # We ignore second marking because it changes nothing and in case of people using
               # metadata storage but with automatic offset marking, this would cause metadata to be
               # erased by automatic marking
+              # Only this exact re-mark is skipped - marking genuinely older offsets is intentionally
+              # allowed and rewinds the seek offset for reprocessing (see #2432)
               return true if (seek_offset - 1) == message.offset
               return false if revoked?
 
@@ -360,7 +379,11 @@ module Karafka
 
               # Mark job as successful
               coordinator.success!(self)
-            rescue => e
+            # Failure recording must be class-agnostic: an unrecorded non-StandardError would
+            # leave the consumption result in its default (successful) state and the
+            # after-consume flow would mark the failed batch as consumed instead of engaging
+            # the retry
+            rescue Exception => e
               # If failed, mark as failed
               coordinator.failure!(self, e)
 

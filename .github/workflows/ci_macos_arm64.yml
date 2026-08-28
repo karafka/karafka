@@ -25,19 +25,18 @@ jobs:
       fail-fast: false
       matrix:
         ruby:
-          - '4.0.0'
+          - '4.0'
           - '3.4'
           - '3.3'
-          - '3.2'
         macos-version:
           - 'macos-14'
           - 'macos-15'
         exclude:
-          - ruby: '4.0.0'
+          - ruby: '4.0'
             macos-version: 'macos-14'
     runs-on: ${{ matrix.macos-version }}
     steps:
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - name: Remove Gemfile.lock for Ruby preview versions
         if: contains(matrix.ruby, 'preview')
@@ -117,10 +116,11 @@ jobs:
         run: rm -f Gemfile.lock
 
       - name: Set up Ruby
-        uses: ruby/setup-ruby@97ecb7b512899eb71ab1bf2310a624c6f1589ac6 # v1.308.0
+        uses: ruby/setup-ruby@95ef2b042f9d7a56d8268cba8559e2842e2ad01b # v1.321.0
         with:
           ruby-version: ${{ matrix.ruby }}
           bundler-cache: true
+          cache-version: 2
           bundler: 'latest'
 
       - name: Run swarm unit specs

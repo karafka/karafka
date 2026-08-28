@@ -104,9 +104,14 @@ end
 all_messages = segment_messages[0] + segment_messages[1]
 Karafka::App.producer.produce_many_sync(all_messages)
 
-# Start Karafka and wait until we have processed some messages
+# Start Karafka and wait until both expected segments processed their messages. A total-only
+# condition could stop the server when the faster segment consumed all its messages while the
+# other one did not start consuming yet
 start_karafka_and_wait_until do
-  DT[:consumed_messages].size >= 10
+  consumed = DT[:consumed_messages]
+
+  consumed.count { |message| message[:segment_id].zero? } >= 10 &&
+    consumed.count { |message| message[:segment_id] == 1 } >= 10
 end
 
 # 1. Get the consumer group IDs for all segments

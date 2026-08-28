@@ -43,7 +43,12 @@ module Karafka
           def call(message)
             message_version = message.headers["schedule_schema_version"]
 
-            return if message_version <= ScheduledMessages::SCHEMA_VERSION
+            # Versions are semver, so they need to be compared segment-wise and not as strings
+            # ("1.2.0" is older than "1.10.0" but lexicographically greater)
+            message_gem_version = Gem::Version.new(message_version)
+            current_gem_version = Gem::Version.new(ScheduledMessages::SCHEMA_VERSION)
+
+            return if message_gem_version <= current_gem_version
 
             raise Errors::IncompatibleSchemaError, message_version
           end

@@ -1,6 +1,23 @@
 # frozen_string_literal: true
 
 RSpec.describe_current do
+  # Polls the given block until it returns a collection of exactly `expected_size` entries or
+  # until the timeout elapses (~5s). ACL creates/deletes propagate asynchronously in the broker,
+  # so a query issued right after a mutation can transiently return a stale count on slower CI
+  # machines. Returns the last result so callers can still assert on its contents.
+  def await_acl_count(expected_size)
+    result = nil
+
+    50.times do
+      result = yield
+      break if result.size == expected_size
+
+      sleep(0.1)
+    end
+
+    result
+  end
+
   let(:resource_type) { :topic }
   let(:resource_name) { generate_topic_name }
   let(:resource_pattern_type) { :literal }
@@ -44,7 +61,26 @@ RSpec.describe_current do
       let(:permission_type) { :allow }
 
       it { expect { creation }.not_to raise_error }
-      it { expect { creation }.to change { described_class.all.size }.by(1) }
+
+      it "expect to add the acl" do
+        creation
+
+        # ACL changes propagate asynchronously in the broker - wait for the freshly created ACL
+        # to become visible instead of asserting on a global count delta, which is racy because
+        # ACLs created by other (async) examples can land in the same window. The resource name
+        # is unique per example, so its presence is a deterministic signal.
+        present = false
+
+        50.times do
+          present = described_class.all.any? { |entry| entry.resource_name == resource_name }
+          break if present
+
+          sleep(0.1)
+        end
+
+        expect(present).to be(true)
+      end
+
       it { expect(creation.last.resource_name).to eq(resource_name) }
       it { expect(creation.last.resource_type).to eq(resource_type) }
     end
@@ -54,7 +90,26 @@ RSpec.describe_current do
       let(:permission_type) { :allow }
 
       it { expect { creation }.not_to raise_error }
-      it { expect { creation }.to change { described_class.all.size }.by(1) }
+
+      it "expect to add the acl" do
+        creation
+
+        # ACL changes propagate asynchronously in the broker - wait for the freshly created ACL
+        # to become visible instead of asserting on a global count delta, which is racy because
+        # ACLs created by other (async) examples can land in the same window. The resource name
+        # is unique per example, so its presence is a deterministic signal.
+        present = false
+
+        50.times do
+          present = described_class.all.any? { |entry| entry.resource_name == resource_name }
+          break if present
+
+          sleep(0.1)
+        end
+
+        expect(present).to be(true)
+      end
+
       it { expect(creation.last.resource_name).to eq(resource_name) }
       it { expect(creation.last.resource_type).to eq(resource_type) }
     end
@@ -64,7 +119,26 @@ RSpec.describe_current do
       let(:permission_type) { :allow }
 
       it { expect { creation }.not_to raise_error }
-      it { expect { creation }.to change { described_class.all.size }.by(1) }
+
+      it "expect to add the acl" do
+        creation
+
+        # ACL changes propagate asynchronously in the broker - wait for the freshly created ACL
+        # to become visible instead of asserting on a global count delta, which is racy because
+        # ACLs created by other (async) examples can land in the same window. The resource name
+        # is unique per example, so its presence is a deterministic signal.
+        present = false
+
+        50.times do
+          present = described_class.all.any? { |entry| entry.resource_name == resource_name }
+          break if present
+
+          sleep(0.1)
+        end
+
+        expect(present).to be(true)
+      end
+
       it { expect(creation.last.resource_name).to eq(resource_name) }
       it { expect(creation.last.resource_type).to eq(resource_type) }
     end
@@ -179,12 +253,11 @@ RSpec.describe_current do
   end
 
   describe "#describe" do
-    let(:describing) do
-      # We wait before describing because in most of the specs we setup some ACLs and their
-      # propagation can take a bit of time
-      # This improves stability on slow CIs
-      sleep(0.3)
-      described_class.describe(acl)
+    # Describes the current `acl` filter, polling until exactly `expected_size` entries are
+    # visible. ACL propagation can lag on slow CI, so a single fixed sleep is not enough; the
+    # per-example `resource_name` is unique, so the query only ever sees this example's ACLs.
+    def describing(expected_size)
+      await_acl_count(expected_size) { described_class.describe(acl) }
     end
 
     let(:permission_type) { :any }
@@ -202,13 +275,13 @@ RSpec.describe_current do
     end
 
     context "when trying to describe an acl that does not match" do
-      it { expect(describing).to eq([]) }
+      it { expect(describing(0)).to eq([]) }
     end
 
     context "when trying to describe an acl that matches one" do
       before { described_class.create(acl1) }
 
-      it { expect(describing.size).to eq(1) }
+      it { expect(describing(1).size).to eq(1) }
     end
 
     context "when trying to describe an acl that matches many" do
@@ -217,7 +290,7 @@ RSpec.describe_current do
         described_class.create(acl2)
       end
 
-      it { expect(describing.size).to eq(2) }
+      it { expect(describing(2).size).to eq(2) }
     end
 
     context "when trying to describe transactional id acl that matches one" do
@@ -229,14 +302,11 @@ RSpec.describe_current do
         described_class.new(**config)
       end
 
-      before do
-        described_class.create(acl1)
-        sleep(0.3)
-      end
+      before { described_class.create(acl1) }
 
-      it { expect(describing.size).to eq(1) }
-      it { expect(describing.first.resource_type).to eq(:transactional_id) }
-      it { expect(describing.first.resource_name).to eq(resource_name) }
+      it { expect(describing(1).size).to eq(1) }
+      it { expect(describing(1).first.resource_type).to eq(:transactional_id) }
+      it { expect(describing(1).first.resource_name).to eq(resource_name) }
     end
 
     context "when trying to describe transactional id acl that matches many" do
@@ -258,12 +328,11 @@ RSpec.describe_current do
       before do
         described_class.create(acl1)
         described_class.create(acl2)
-        sleep(0.3)
       end
 
-      it { expect(describing.size).to eq(2) }
-      it { expect(describing.map(&:resource_type).uniq).to eq([:transactional_id]) }
-      it { expect(describing.map(&:resource_name).uniq).to eq([resource_name]) }
+      it { expect(describing(2).size).to eq(2) }
+      it { expect(describing(2).map(&:resource_type).uniq).to eq([:transactional_id]) }
+      it { expect(describing(2).map(&:resource_name).uniq).to eq([resource_name]) }
     end
   end
 

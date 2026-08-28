@@ -42,8 +42,8 @@ module Karafka
           # @param executor [Karafka::Pro::Processing::ConsumerGroups::Executor]
           # @param messages [Karafka::Messages::Messages] messages batch to be consumed
           # @return [Karafka::Processing::ConsumerGroups::Jobs::Consume] blocking job
-          # @return [Karafka::Pro::Processing::ConsumerGroups::Jobs::ConsumeNonBlocking] non blocking
-          #   for lrj
+          # @return [Karafka::Pro::Processing::ConsumerGroups::Jobs::ConsumeNonBlocking] non
+          #   blocking for lrj
           def consume(executor, messages)
             if executor.topic.long_running_job?
               Jobs::ConsumeNonBlocking.new(executor, messages)
@@ -54,8 +54,9 @@ module Karafka
 
           # @param executor [Karafka::Pro::Processing::ConsumerGroups::Executor]
           # @return [Karafka::Processing::ConsumerGroups::Jobs::Eofed] eofed job for non LRJ
-          # @return [Karafka::Pro::Processing::ConsumerGroups::Jobs::EofedNonBlocking] eofed job that
-          #   is non-blocking, so when revocation job is scheduled for LRJ it also will not block
+          # @return [Karafka::Pro::Processing::ConsumerGroups::Jobs::EofedNonBlocking] eofed job
+          #   that is non-blocking, so when revocation job is scheduled for LRJ it also will not
+          #   block
           def eofed(executor)
             if executor.topic.long_running_job?
               Jobs::EofedNonBlocking.new(executor)

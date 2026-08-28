@@ -2,9 +2,7 @@
 
 module Karafka
   module Instrumentation
-    # Namespace for vendor specific instrumentation
     module Vendors
-      # Datadog specific instrumentation
       module Datadog
         # Listener that can be used to subscribe to Karafka to receive stats via StatsD
         # and/or Datadog
@@ -241,8 +239,7 @@ module Karafka
             when :brokers
               statistics.fetch("brokers").each_value do |broker_statistics|
                 # Skip bootstrap nodes
-                # Bootstrap nodes have nodeid -1, other nodes have positive
-                # node ids
+                # Bootstrap nodes have nodeid -1, other nodes have positive node ids
                 next if broker_statistics["nodeid"] == -1
 
                 tags = ["broker:#{broker_statistics["nodename"]}"]

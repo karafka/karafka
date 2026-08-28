@@ -31,17 +31,14 @@
 module Karafka
   module Pro
     module Processing
-      # Consumer-group-specific Pro processing components (driven by rebalance callbacks and
-      # partition ticks). Parallel `ShareGroups` will live next to this namespace once KIP-932
-      # lands.
       module ConsumerGroups
         module Strategies
           module Aj
-            # ActiveJob enabled
-            # Filtering enabled
-            # Long-Running Job enabled
-            # Manual offset management enabled
-            # Virtual Partitions enabled
+            # - ActiveJob enabled
+            # - Filtering enabled
+            # - Long-Running Job enabled
+            # - Manual offset management enabled
+            # - Virtual Partitions enabled
             module FtrLrjMomVp
               include Strategies::Vp::Default
               include Strategies::Lrj::FtrMom
@@ -69,7 +66,7 @@ module Karafka
 
                       # :seek and :pause are fully handled by handle_post_filtering
                       # For :skip we still need to resume the LRJ MAX_PAUSE_TIME pause
-                      return unless coordinator.filter.action == :skip
+                      return unless coordinator.filter.skip?
                     elsif !revoked?
                       # no need to check for manual seek because AJ consumer is internal and
                       # fully controlled by us

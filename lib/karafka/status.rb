@@ -41,8 +41,7 @@ module Karafka
       @status.to_s
     end
 
-    # Resets the status state
-    # This is used mostly in the integration suite
+    # Resets the status state This is used mostly in the integration suite
     def reset!
       @status = :initializing
     end

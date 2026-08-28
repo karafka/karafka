@@ -47,28 +47,50 @@ module Karafka
       #   - 1 - polling ttl exceeded
       #   - 2 - consuming ttl exceeded
       #   - 3 - memory limit exceeded
+      #   - 4 - stability ttl exceeded (stuck in non-steady librdkafka join state)
       #
       # @note This listener should not break anything if subscribed in the supervisor prior to
       #   forking as it relies on server events for operations.
       class LivenessListener < Karafka::Swarm::LivenessListener
+        # Default time in ms after which we consider consumption hanging (5 minutes)
+        DEFAULT_CONSUMING_TTL = 5 * 60 * 1_000
+        # Default max time in ms between polls before the node is considered dead (5 minutes)
+        DEFAULT_POLLING_TTL = 5 * 60 * 1_000
+        # Multiplier applied to max.poll.interval.ms when deriving the default stability_ttl.
+        STABILITY_TTL_MAX_POLL_MULTIPLIER = 2
+
+        private_constant(
+          :DEFAULT_CONSUMING_TTL,
+          :DEFAULT_POLLING_TTL,
+          :STABILITY_TTL_MAX_POLL_MULTIPLIER
+        )
+
         # @param memory_limit [Integer] max memory in MB for this process to be considered healthy
-        # @param consuming_ttl [Integer] time in ms after which we consider consumption hanging.
-        #   It allows us to define max consumption time after which supervisor should consider
-        #   given process as hanging
-        # @param polling_ttl [Integer] max time in ms for polling. If polling (any) does not
-        #   happen that often, process should be considered dead.
-        # @note The default TTL matches the default `max.poll.interval.ms`
+        # @param consuming_ttl [Integer] see Kubernetes::LivenessListener for full documentation.
+        # @param polling_ttl [Integer] see Kubernetes::LivenessListener for full documentation.
+        # @param stability_ttl [Integer, nil] see Kubernetes::LivenessListener for full
+        #   documentation, including the derivation rules (max `max.poll.interval.ms` across
+        #   all active subscription groups, times 2, resolved lazily on first health
+        #   evaluation). Same semantics apply here; the node is reported unhealthy with
+        #   status code 4 instead of returning HTTP 500.
         def initialize(
           memory_limit: Float::INFINITY,
-          consuming_ttl: 5 * 60 * 1_000,
-          polling_ttl: 5 * 60 * 1_000
+          consuming_ttl: DEFAULT_CONSUMING_TTL,
+          polling_ttl: DEFAULT_POLLING_TTL,
+          stability_ttl: nil
         )
           @polling_ttl = polling_ttl
           @consuming_ttl = consuming_ttl
+          # When nil, resolved lazily via #stability_ttl on first health evaluation because
+          # the default derives from the routing subscription groups, which may not be drawn
+          # yet when the listener is constructed in karafka.rb
+          @stability_ttl = stability_ttl
           # We cast it just in case someone would provide '10MB' or something similar
           @memory_limit = memory_limit.is_a?(String) ? memory_limit.to_i : memory_limit
           @pollings = {}
           @consumptions = {}
+          @join_states = {}
+          @instabilities = {}
 
           super()
         end
@@ -117,6 +139,27 @@ module Karafka
           RUBY
         end
 
+        # @see Karafka::Instrumentation::Vendors::Kubernetes::LivenessListener#on_statistics_emitted
+        # @param event [Karafka::Core::Monitoring::Event]
+        def on_statistics_emitted(event)
+          cgrp = event[:statistics]&.dig("cgrp")
+          return unless cgrp
+
+          sg_id = event[:subscription_group_id]
+          join_state = cgrp["join_state"]
+          return unless join_state
+
+          synchronize do
+            if join_state == "steady" || join_state == "init" || join_state == "wait-metadata"
+              @instabilities.delete(sg_id)
+              @join_states.delete(sg_id)
+            elsif @join_states[sg_id] != join_state
+              @join_states[sg_id] = join_state
+              @instabilities[sg_id] = monotonic_now
+            end
+          end
+        end
+
         # @param _event [Karafka::Core::Monitoring::Event]
         def on_error_occurred(_event)
           clear_consumption_tick
@@ -143,6 +186,13 @@ module Karafka
           clear_polling_tick
         end
 
+        # @see Karafka::Instrumentation::Vendors::Kubernetes::LivenessListener
+        #   #on_connection_listener_after_fetch_loop
+        # @param event [Karafka::Core::Monitoring::Event]
+        def on_connection_listener_after_fetch_loop(event)
+          clear_instability_tracking(event[:subscription_group])
+        end
+
         private
 
         # Reports the current status to the supervisor periodically
@@ -158,10 +208,21 @@ module Karafka
           end
         end
 
-        # @return [Integer] object id of the current fiber
-        # @note We use fiber object id instead of thread object id to ensure fiber-safety.
-        #   Multiple fibers can run on the same thread, and using thread id would cause them
-        #   to overwrite each other's timestamps.
+        # @see Karafka::Instrumentation::Vendors::Kubernetes::LivenessListener
+        #   #clear_instability_tracking
+        # @param subscription_group [Karafka::Routing::SubscriptionGroup, nil]
+        def clear_instability_tracking(subscription_group)
+          return unless subscription_group
+
+          sg_id = subscription_group.id
+
+          synchronize do
+            @instabilities.delete(sg_id)
+            @join_states.delete(sg_id)
+          end
+        end
+
+        # @see Karafka::Instrumentation::Vendors::Kubernetes::LivenessListener#fiber_id
         def fiber_id
           Fiber.current.object_id
         end
@@ -195,15 +256,59 @@ module Karafka
         end
 
         # Did we exceed any of the ttls
-        # @return [String] 204 string if ok, 500 otherwise
+        # @return [Integer] 0 if healthy, positive error code otherwise:
+        #   1 - polling TTL exceeded
+        #   2 - consuming TTL exceeded
+        #   3 - memory limit exceeded
+        #   4 - stability TTL exceeded (stuck in non-steady join state)
+        # @note Reads `@pollings`, `@consumptions` and `@instabilities` without acquiring the
+        #   mutex. This is intentional and consistent across all three: `status` is called from
+        #   inside `periodically`, which already holds `@mutex` for scheduling, so re-entering
+        #   `synchronize` here would deadlock. Concurrent writes from `mark_*` / `clear_*` /
+        #   `on_statistics_emitted` are safe to observe partially on MRI (GVL atomises Hash ops).
+        #   This is the asymmetry vs `Kubernetes::LivenessListener`, which can lock its reads
+        #   because it has no equivalent periodic-scheduling lock. Do not "fix" this without
+        #   resolving the periodic-scheduling lock first - JRuby is not a supported runtime.
         def status
           time = monotonic_now
 
           return 1 if @pollings.values.any? { |tick| (time - tick) > @polling_ttl }
           return 2 if @consumptions.values.any? { |tick| (time - tick) > @consuming_ttl }
           return 3 if rss_mb > @memory_limit
+          return 4 if @instabilities.values.any? { |start| (time - start) > stability_ttl }
 
           0
+        end
+
+        # @return [Integer] effective stability ttl in ms. Resolved lazily (instead of in
+        #   `#initialize`) because the default derives from the routing subscription groups,
+        #   which may not be drawn yet when the listener is constructed in karafka.rb. By the
+        #   time status is evaluated, routing is final.
+        def stability_ttl
+          @stability_ttl ||= default_stability_ttl
+        end
+
+        # @return [Integer] default stability_ttl derived from the configured
+        #   max.poll.interval.ms, multiplied by 2 for headroom above the slowest legitimate
+        #   rebalance phase. Uses the maximum value across all active subscription groups
+        #   (their kafka configs already have librdkafka defaults injected), so per
+        #   subscription group overrides set via the routing DSL are respected. Falls back to
+        #   the root kafka config when no subscription groups are available.
+        def default_stability_ttl
+          max_poll_interval = Karafka::App
+            .subscription_groups
+            .values
+            .flatten
+            .map { |sg| sg.kafka.fetch(:"max.poll.interval.ms") }
+            .max
+
+          max_poll_interval ||= begin
+            kafka_config = Karafka::App.config.kafka.dup
+            Karafka::Setup::DefaultsInjector.consumer(kafka_config)
+            kafka_config.fetch(:"max.poll.interval.ms")
+          end
+
+          max_poll_interval * STABILITY_TTL_MAX_POLL_MULTIPLIER
         end
 
         # @return [Integer] RSS in MB for the current process

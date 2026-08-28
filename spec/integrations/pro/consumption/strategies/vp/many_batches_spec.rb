@@ -29,8 +29,7 @@
 # Contact: contact@karafka.io
 
 # When using virtual partitions, we should easily consume data with the same instances on many
-# batches and until there is a rebalance or critical error, the consumer instances should
-# not change
+# batches and until there is a rebalance or critical error, the consumer instances should not change
 
 setup_karafka do |config|
   config.concurrency = 10

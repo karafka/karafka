@@ -124,6 +124,24 @@ RSpec.describe_current do
     it "expect to clear a given group only" do
       expect { queue.clear(job1.group_id) }.not_to change(queue, :statistics)
     end
+
+    context "when another subscription group holds an async lock" do
+      let(:group_a) { SecureRandom.uuid }
+      let(:group_b) { SecureRandom.uuid }
+
+      before do
+        queue.register(group_a)
+        queue.register(group_b)
+        queue.lock_async(group_a, SecureRandom.uuid)
+        queue.lock_async(group_b, SecureRandom.uuid)
+      end
+
+      it "expect clearing one group to keep the other group's async lock in effect" do
+        queue.clear(group_a)
+
+        expect(queue.empty?(group_b)).to be(false)
+      end
+    end
   end
 
   describe "#lock" do
@@ -153,6 +171,20 @@ RSpec.describe_current do
         let(:expected_error) { Karafka::Errors::JobsQueueSynchronizationError }
 
         it { expect { queue.unlock(job1) }.to raise_error(expected_error) }
+      end
+    end
+
+    context "when the group was already cleared (recovery raced with a locked job)" do
+      let(:expected_error) { Karafka::Errors::JobsQueueSynchronizationError }
+
+      before do
+        queue.lock(job1)
+        queue.clear(job1.group_id)
+      end
+
+      it "expect not to over-decrement waiting on top of what #clear already accounted for" do
+        expect { queue.unlock(job1) }.to raise_error(expected_error)
+        expect(queue.statistics).to eq(busy: 0, enqueued: 0, waiting: 0)
       end
     end
   end
@@ -203,6 +235,21 @@ RSpec.describe_current do
         let(:expected_error) { Karafka::Errors::JobsQueueSynchronizationError }
 
         it { expect { queue.unlock_async(1, 1) }.to raise_error(expected_error) }
+      end
+    end
+
+    context "when the group was already cleared (recovery raced with an async lock)" do
+      let(:expected_error) { Karafka::Errors::JobsQueueSynchronizationError }
+
+      before do
+        queue.register(1)
+        queue.lock_async(1, 1)
+        queue.clear(1)
+      end
+
+      it "expect to raise consistently with #unlock in the same scenario, not touch waiting" do
+        expect { queue.unlock_async(1, 1) }.to raise_error(expected_error)
+        expect(queue.statistics).to eq(busy: 0, enqueued: 0, waiting: 0)
       end
     end
   end
@@ -282,6 +329,27 @@ RSpec.describe_current do
       end
     end
 
+    context "when async locking was used before but this group is currently unlocked" do
+      before do
+        queue.register(1)
+        # @async_locking stays true process-wide once any group has locked async, even after
+        # this lock is released - the exact condition that used to skip draining
+        queue.lock_async(1, :temp)
+        queue.unlock_async(1, :temp)
+      end
+
+      it "still drains the semaphore via #wait even though #wait? is false from the start" do
+        50.times { queue.tick(1) }
+
+        semaphore = queue.instance_variable_get(:@semaphores).fetch(1)
+        expect(semaphore.size).to be > 0
+
+        queue.wait(1)
+
+        expect(semaphore.size).to eq(0)
+      end
+    end
+
     context "when we have to wait and tick runs" do
       let(:thread1) do
         Thread.new do
@@ -322,6 +390,24 @@ RSpec.describe_current do
 
       it "expect not to block" do
         queue.wait(job1.group_id)
+      end
+    end
+
+    context "when only non-blocking jobs are processed and no async lock is held" do
+      before do
+        queue.register(3)
+        queue << OpenStruct.new(group_id: 3, id: 1, call: true, non_blocking?: true)
+      end
+
+      it "still drains ticks accumulated via #wait even though #wait? never blocks" do
+        50.times { queue.tick(3) }
+
+        semaphore = queue.instance_variable_get(:@semaphores).fetch(3)
+        expect(semaphore.size).to eq(50)
+
+        queue.wait(3)
+
+        expect(semaphore.size).to eq(0)
       end
     end
 
@@ -366,6 +452,8 @@ RSpec.describe_current do
 
     context "when there are no jobs of a given group" do
       let(:group_id) { SecureRandom.hex(6) }
+
+      before { queue.register(group_id) }
 
       it "expect not to wait" do
         queue.wait(group_id)

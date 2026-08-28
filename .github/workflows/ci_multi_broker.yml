@@ -10,12 +10,12 @@ on:
       ruby_version:
         description: 'Ruby version to test'
         required: false
-        default: '3.4'
+        default: '4.0'
         type: choice
         options:
+          - '4.0'
           - '3.4'
           - '3.3'
-          - '3.2'
 
   pull_request:
     branches: [master]
@@ -41,24 +41,29 @@ jobs:
         ruby:
           - ${{ github.event.inputs.ruby_version || '3.4' }}
     steps:
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - name: Install package dependencies
         run: "[ -e $APT_DEPS ] || sudo apt-get install -y --no-install-recommends $APT_DEPS"
 
       - name: Start Multi-Broker Kafka cluster
         run: |
-          docker compose -f docker-compose.multi-broker.yml up -d || \
-            (sleep 5 && docker compose -f docker-compose.multi-broker.yml up -d)
+          for attempt in 1 2 3 4 5; do
+            docker compose -f docker-compose.multi-broker.yml up -d && break
+            echo "Attempt $attempt/5 failed."
+            docker compose -f docker-compose.multi-broker.yml down -v 2>/dev/null || true
+            [ $attempt -lt 5 ] && echo "Retrying in $((attempt * 15))s..." && sleep $((attempt * 15)) || exit 1
+          done
 
           echo "Waiting for Kafka brokers to initialize..."
           sleep 30
 
       - name: Set up Ruby
-        uses: ruby/setup-ruby@97ecb7b512899eb71ab1bf2310a624c6f1589ac6 # v1.308.0
+        uses: ruby/setup-ruby@95ef2b042f9d7a56d8268cba8559e2842e2ad01b # v1.321.0
         with:
           ruby-version: ${{ matrix.ruby }}
           bundler-cache: true
+          cache-version: 2
           bundler: 'latest'
 
       - name: Install latest Bundler

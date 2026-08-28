@@ -30,9 +30,7 @@
 
 module Karafka
   module Pro
-    # Namespace for Pro routing enhancements
     module Routing
-      # Namespace for additional Pro features
       module Features
         module ConsumerGroups
           # Non Blocking Job is just an alias for LRJ.

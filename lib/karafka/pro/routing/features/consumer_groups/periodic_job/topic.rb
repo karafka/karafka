@@ -49,12 +49,12 @@ module Karafka
               # poll where messages were not received.
               # @param active [Boolean] should ticking happen for this topic assignments.
               # @param interval [Integer] minimum interval to run periodic jobs on given topic.
-              # @param during_pause [Boolean, nil] Should periodic jobs run when partition is paused.
-              #   It is set to `nil` by default allowing for detection when this value is not
-              #   configured but should be built dynamically based on LRJ status.
+              # @param during_pause [Boolean, nil] Should periodic jobs run when partition is
+              #   paused. It is set to `nil` by default allowing for detection when this value is
+              #   not configured but should be built dynamically based on LRJ status.
               # @param during_retry [Boolean, nil] Should we run when there was an error and we are
-              #   in a retry flow. Please note that for this to work, `during_pause` also needs to be
-              #   set to true as errors retry happens after pause.
+              #   in a retry flow. Please note that for this to work, `during_pause` also needs to
+              #   be set to true as errors retry happens after pause.
               def periodic_job(
                 active = false,
                 interval: nil,

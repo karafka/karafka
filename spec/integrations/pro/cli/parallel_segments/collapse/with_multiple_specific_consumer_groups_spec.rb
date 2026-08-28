@@ -1,0 +1,112 @@
+# frozen_string_literal: true
+
+# Karafka Pro - Source Available Commercial Software
+# Copyright (c) 2017-present Maciej Mensfeld. All rights reserved.
+#
+# This software is NOT open source. It is source-available commercial software
+# requiring a paid license for use. It is NOT covered by LGPL.
+#
+# The author retains all right, title, and interest in this software,
+# including all copyrights, patents, and other intellectual property rights.
+# No patent rights are granted under this license.
+#
+# PROHIBITED:
+# - Use without a valid commercial license
+# - Redistribution, modification, or derivative works without authorization
+# - Reverse engineering, decompilation, or disassembly of this software
+# - Use as training data for AI/ML models or inclusion in datasets
+# - Scraping, crawling, or automated collection for any purpose
+#
+# PERMITTED:
+# - Reading, referencing, and linking for personal or commercial use
+# - Runtime retrieval by AI assistants, coding agents, and RAG systems
+#   for the purpose of providing contextual help to Karafka users
+#
+# Receipt, viewing, or possession of this software does not convey or
+# imply any license or right beyond those expressly stated above.
+#
+# License: https://karafka.io/docs/Pro-License-Comm/
+# Contact: contact@karafka.io
+
+# Karafka parallel segments collapse should collapse every consumer group requested via
+# `--groups`, not only a subset. Previously `applicable_groups` deleted matched groups from the
+# array it was iterating, so with two or more requested groups the iteration skipped every other
+# one and those groups were silently left un-collapsed.
+
+setup_karafka
+
+segment_1_1 = "#{DT.group}-parallel-0"
+segment_1_2 = "#{DT.group}-parallel-1"
+
+segment_2_1 = "#{DT.group}_2-parallel-0"
+segment_2_2 = "#{DT.group}_2-parallel-1"
+
+draw_topics do
+  topic DT.topic do
+    partitions 2
+  end
+
+  topic "#{DT.topic}_2" do
+    partitions 2
+  end
+end
+
+draw_routes do
+  consumer_group DT.group do
+    parallel_segments(
+      count: 2,
+      partitioner: ->(msg) { msg.key }
+    )
+
+    topic DT.topic do
+      consumer Class.new(Karafka::BaseConsumer)
+    end
+  end
+
+  consumer_group "#{DT.group}_2" do
+    parallel_segments(
+      count: 2,
+      partitioner: ->(msg) { msg.key }
+    )
+    topic "#{DT.topic}_2" do
+      consumer Class.new(Karafka::BaseConsumer)
+    end
+  end
+end
+
+produce_many(DT.topic, DT.uuids(10))
+produce_many("#{DT.topic}_2", DT.uuids(10))
+
+Karafka::Admin.seek_consumer_group(segment_1_1, { DT.topic => { 0 => 3, 1 => 5 } })
+Karafka::Admin.seek_consumer_group(segment_1_2, { DT.topic => { 0 => 3, 1 => 5 } })
+
+Karafka::Admin.seek_consumer_group(segment_2_1, { "#{DT.topic}_2" => { 0 => 6, 1 => 8 } })
+Karafka::Admin.seek_consumer_group(segment_2_2, { "#{DT.topic}_2" => { 0 => 6, 1 => 8 } })
+
+# Request BOTH consumer groups at once. `--groups` is an Array option, so multiple values are
+# provided comma-separated.
+ARGV[0] = "parallel_segments"
+ARGV[1] = "collapse"
+ARGV[2] = "--groups"
+ARGV[3] = "#{DT.group},#{DT.group}_2"
+
+results = capture_stdout do
+  Karafka::Cli.start
+end
+
+assert results.include?("Collapse completed")
+assert results.include?("successfully")
+# Both requested groups must appear in the output
+assert results.include?(DT.group)
+assert results.include?("#{DT.group}_2")
+
+# The first requested group must be collapsed into its origin consumer group
+offsets1 = Karafka::Admin.read_lags_with_offsets({ DT.group => [DT.topic] })
+assert_equal 3, offsets1[DT.group][DT.topic][0][:offset]
+assert_equal 5, offsets1[DT.group][DT.topic][1][:offset]
+
+# The second requested group must ALSO be collapsed into its origin consumer group.
+# Before the fix this group was skipped and its origin offsets stayed at -1.
+offsets2 = Karafka::Admin.read_lags_with_offsets({ "#{DT.group}_2" => ["#{DT.topic}_2"] })
+assert_equal 6, offsets2["#{DT.group}_2"]["#{DT.topic}_2"][0][:offset]
+assert_equal 8, offsets2["#{DT.group}_2"]["#{DT.topic}_2"][1][:offset]

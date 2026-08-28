@@ -59,7 +59,7 @@ draw_routes do
     consumer_group DT.groups[i] do
       topic DT.topics[i] do
         consumer Consumer
-        filter VpStabilizer
+        filter FlowStabilizer
         virtual_partitions(
           partitioner: RoundRobinPartitioner.new,
           reducer: ->(virtual_key) { virtual_key }

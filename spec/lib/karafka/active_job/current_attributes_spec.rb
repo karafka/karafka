@@ -95,6 +95,18 @@ RSpec.describe_current do
 
       expect(Karafka::CurrentAttrTest).to have_received(:user_id=).with(1)
     end
+
+    context "when the job raises" do
+      before do
+        allow(Karafka::CurrentAttrTest).to receive(:reset)
+        allow(ActiveJob::Base).to receive(:execute).and_raise(StandardError)
+      end
+
+      it "expect to reset current attributes despite the error so they do not leak" do
+        expect { consumer.consume }.to raise_error(StandardError)
+        expect(Karafka::CurrentAttrTest).to have_received(:reset)
+      end
+    end
   end
 
   private

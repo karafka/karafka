@@ -54,10 +54,15 @@ class Consumer < Karafka::BaseConsumer
   end
 end
 
+draw_topics do
+  topic DT.topics[0] do
+    partitions 100
+  end
+end
+
 draw_routes do
   topic DT.topics[0] do
     consumer Consumer
-    config(partitions: 100)
     dead_letter_queue(
       topic: DT.topics[1],
       max_retries: 0

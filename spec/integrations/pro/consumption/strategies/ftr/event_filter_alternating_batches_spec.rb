@@ -118,7 +118,7 @@ end
 draw_routes do
   topic DT.topic do
     consumer Consumer
-    filter ->(*_args) { VpStabilizer.new(10) }
+    filter ->(*_args) { FlowStabilizer.new(10) }
     filter ->(*) { EventFilter.new }
     manual_offset_management true
   end

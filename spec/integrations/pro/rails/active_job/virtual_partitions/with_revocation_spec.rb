@@ -49,10 +49,15 @@ end
 
 setup_active_job
 
+draw_topics do
+  topic DT.topic do
+    partitions 2
+  end
+end
+
 draw_routes do
   active_job_topic DT.topic do
     long_running_job true
-    config(partitions: 2)
     virtual_partitions(
       partitioner: ->(_) { rand }
     )

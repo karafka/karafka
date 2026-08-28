@@ -132,6 +132,9 @@ module Karafka
             required(:jobs_queue_class) { |val| !val.nil? }
             required(:scheduler_class) { |val| !val.nil? }
             required(:worker_job_call_wrapper) { |val| val == false || val.respond_to?(:wrap) }
+            required(:critical_errors) do |val|
+              val.is_a?(Array) && val.all? { |klass| klass.is_a?(Class) && klass <= Exception }
+            end
 
             nested(:consumer_groups) do
               required(:jobs_builder) { |val| !val.nil? }
@@ -141,6 +144,17 @@ module Karafka
               required(:strategy_selector) { |val| !val.nil? }
               required(:expansions_selector) { |val| !val.nil? }
               required(:executor_class) { |val| !val.nil? }
+            end
+          end
+
+          nested(:statistics) do
+            nested(:consumer_groups) do
+              required(:decorator_class) { |val| !val.nil? }
+
+              nested(:lag_compensation) do
+                required(:interval) { |val| val.is_a?(Integer) && val >= 0 }
+                required(:pause_age) { |val| val.is_a?(Integer) && val >= 5_000 }
+              end
             end
           end
 

@@ -52,6 +52,10 @@ module Karafka
 
             return super unless active && encryption
 
+            # Tombstones (nil payload) have nothing to decrypt; defer to the default parser so they
+            # remain valid tombstones instead of crashing on `cipher.decrypt(nil)`.
+            return super if message.raw_payload.nil?
+
             # Decrypt raw payload so it can be handled by the default parser logic
             decrypted_payload = cipher.decrypt(
               encryption,

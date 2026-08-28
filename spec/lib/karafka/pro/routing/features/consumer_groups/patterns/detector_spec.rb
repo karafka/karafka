@@ -77,4 +77,46 @@ RSpec.describe_current do
       end
     end
   end
+
+  # Regression: under multiplexing several subscription groups share the SAME consumer group
+  # object but each runs its own listener thread and independently discovers the same topic.
+  # ConsumerGroup#topic= appends unconditionally, so before the dedup guard the shared group
+  # accumulated one duplicate Topic per subscription group (bounded by the multiplex factor),
+  # polluting the routing tree.
+  context "when the same topic is discovered from multiple subscription groups sharing a group" do
+    let(:consumer_group) { build(:routing_consumer_group) }
+    let(:pattern_topic_first) { build(:pattern_routing_topic, regexp: /.*/, group: consumer_group) }
+    let(:pattern_topic_second) { build(:pattern_routing_topic, regexp: /.*/, group: consumer_group) }
+    let(:sg_topics_first) { Karafka::Routing::Topics.new([pattern_topic_first]) }
+    let(:sg_topics_second) { Karafka::Routing::Topics.new([pattern_topic_second]) }
+    let(:discovered_first) { sg_topics_first.detect { |topic| topic.name == topic_name } }
+    let(:discovered_second) { sg_topics_second.detect { |topic| topic.name == topic_name } }
+
+    before do
+      described_class.new.expand(sg_topics_first, topic_name)
+      described_class.new.expand(sg_topics_second, topic_name)
+    end
+
+    it "expect the shared consumer group to register the discovered topic only once" do
+      matching = consumer_group.topics.select { |topic| topic.name == topic_name }
+      expect(matching.size).to eq(1)
+    end
+
+    it "expect each subscription group to see the discovered topic in its own topics" do
+      expect(sg_topics_first.map(&:name)).to include(topic_name)
+      expect(sg_topics_second.map(&:name)).to include(topic_name)
+    end
+
+    # Each subscription group must hold its own Topic instance: the Topic doubles as a per-SG
+    # assignments key in AssignmentsTracker, so sharing one instance across multiplexed
+    # subscription groups would collide their assignments.
+    it "expect each subscription group to hold its own distinct topic instance" do
+      expect(discovered_first).not_to equal(discovered_second)
+    end
+
+    it "expect each discovered topic to carry its own subscription group" do
+      expect(discovered_first.subscription_group).to eq(pattern_topic_first.subscription_group)
+      expect(discovered_second.subscription_group).to eq(pattern_topic_second.subscription_group)
+    end
+  end
 end

@@ -31,9 +31,6 @@
 module Karafka
   module Pro
     module Processing
-      # Consumer-group-specific Pro processing components (driven by rebalance callbacks and
-      # partition ticks). Parallel `ShareGroups` will live next to this namespace once KIP-932
-      # lands.
       module ConsumerGroups
         module Coordinators
           # Manager that keeps track of our offsets with the virtualization layer that are local
@@ -173,7 +170,10 @@ module Karafka
 
               offset_metadata = case @offset_metadata_strategy
               when :exact
-                @offsets_metadata.fetch(@real_offset)
+                # When the lowest-offset group is unmarked, the materialized real offset falls back
+                # to `min - 1` (see #materialize_real_offset), an offset that was never registered
+                # and thus has no metadata. Fall back to the current metadata instead of raising.
+                @offsets_metadata.fetch(@real_offset, @current_offset_metadata)
               when :current
                 @current_offset_metadata
               else

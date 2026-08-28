@@ -2,8 +2,6 @@
 
 module Karafka
   module Processing
-    # Consumer-group-specific processing components (driven by rebalance callbacks and partition
-    # ticks). Parallel `ShareGroups` will live next to this namespace once KIP-932 lands.
     module ConsumerGroups
       module Strategies
         # Same as pure dead letter queue but we do not marked failed message as consumed
@@ -23,6 +21,11 @@ module Karafka
 
             if coordinator.success?
               coordinator.pause_tracker.reset
+            # Process-critical errors are never dispatched to the DLQ regardless of the retries
+            # state: the retry pause protects the partition during the critical shutdown and
+            # the failed batch is redelivered after the restart
+            elsif critical_error?(coordinator.consumption(self).cause)
+              retry_after_pause
             elsif coordinator.pause_tracker.attempt <= topic.dead_letter_queue.max_retries
               retry_after_pause
             # If we've reached number of retries that we could, we need to skip the first message

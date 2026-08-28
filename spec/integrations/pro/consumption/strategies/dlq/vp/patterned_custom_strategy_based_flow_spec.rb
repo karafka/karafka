@@ -78,6 +78,8 @@ draw_routes do
   end
 end
 
+Karafka::Admin.create_topic(DT.topic, 1, 1)
+
 produce_many(DT.topic, DT.uuids(100))
 
 start_karafka_and_wait_until do

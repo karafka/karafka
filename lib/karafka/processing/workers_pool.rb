@@ -39,6 +39,13 @@ module Karafka
         # after a worker exits, so thread names remain unique across the lifetime of the process
         # and make it easy to correlate log entries with specific worker generations.
         @next_index = 0
+        # Number of downscale sentinels enqueued but not yet picked up by a worker. Workers
+        # deregister asynchronously, so the live thread count alone overstates the pool between
+        # a scale-down request and its completion. All sizing decisions use the committed size
+        # (live workers minus pending shrinks) so repeated or overlapping scale-down requests do
+        # not enqueue duplicate sentinels and drain the pool below the requested target (or
+        # below the minimum of one worker).
+        @pending_shrinks = 0
       end
 
       # Scale pool towards `target` workers (minimum 1).
@@ -63,7 +70,9 @@ module Karafka
         event = nil
 
         @mutex.synchronize do
-          current = @workers.size
+          # Compute against the committed size, not the live thread count: sentinels already in
+          # flight are removals this pool is committed to, just not yet executed by the workers
+          current = @workers.size - @pending_shrinks
           delta = target - current
 
           if delta.positive?
@@ -106,6 +115,11 @@ module Karafka
         @mutex.synchronize do
           @workers.delete(worker)
           @size = @workers.size
+          # A worker exits either because it picked up a downscale sentinel or because the jobs
+          # queue was closed for shutdown. The worker cannot tell those apart, so pending
+          # removals are settled here, with a floor because shutdown exits may have no pending
+          # shrink to consume
+          @pending_shrinks -= 1 if @pending_shrinks.positive?
         end
       end
 
@@ -142,14 +156,17 @@ module Karafka
       #
       # @param count [Integer] number of workers to remove
       # @return [Array, nil] instrumentation event args or nil if no-op
-      # @note Never shrinks below 1 worker.
+      # @note Never shrinks below 1 worker, including removals already in flight - the cap is
+      #   computed against the committed size, not the live thread count.
       def shrink(count)
-        effective = [count, @workers.size - 1].min
+        committed = @workers.size - @pending_shrinks
+        effective = [count, committed - 1].min
         return if effective <= 0
 
         from = @workers.size
+        @pending_shrinks += effective
         effective.times { @jobs_queue << nil }
-        to = from - effective
+        to = committed - effective
 
         ["worker.scaling.down", { workers_pool: self, from: from, to: to }]
       end

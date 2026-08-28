@@ -68,7 +68,8 @@ module Karafka
       # @param count [Integer] how many messages we want to get at most
       # @param start_offset [Integer, Time] offset from which we should start. If -1 is provided
       #   (default) we will start from the latest offset. If time is provided, the appropriate
-      #   offset will be resolved. If negative beyond -1 is provided, we move backwards more.
+      #   offset will be resolved. A time beyond the last message yields no messages. If
+      #   negative beyond -1 is provided, we move backwards more.
       # @param settings [Hash] kafka extra settings (optional)
       #
       # @return [Array<Karafka::Messages::Message>] array with messages
@@ -76,6 +77,7 @@ module Karafka
         messages = []
         tpl = Rdkafka::Consumer::TopicPartitionList.new
         low_offset, high_offset = nil
+        time_based = start_offset.is_a?(Time)
 
         with_consumer(settings) do |consumer|
           # Convert the time offset (if needed)
@@ -83,9 +85,20 @@ module Karafka
 
           low_offset, high_offset = consumer.query_watermark_offsets(name, partition)
 
-          # Select offset dynamically if -1 or less and move backwards with the negative
-          # offset, allowing to start from N messages back from high-watermark
-          start_offset = high_offset - count - start_offset.abs + 1 if start_offset.negative?
+          if start_offset.negative?
+            start_offset = if time_based
+              # A negative result of time resolution means there is no message at or after the
+              # requested time. It must not fall into the numeric relative form below (which
+              # would return the newest messages, all older than requested): starting at the
+              # high watermark yields the correct empty result
+              high_offset
+            else
+              # Select offset dynamically if -1 or less and move backwards with the negative
+              # offset, allowing to start from N messages back from high-watermark
+              high_offset - count - start_offset.abs + 1
+            end
+          end
+
           start_offset = low_offset if start_offset.negative?
 
           # Build the requested range - since first element is on the start offset we need to
@@ -193,8 +206,7 @@ module Karafka
         end
       end
 
-      # Fetches the watermark offsets for a given topic partition or multiple topics and
-      # partitions
+      # Fetches the watermark offsets for a given topic partition or multiple topics and partitions
       #
       # @param name_or_hash [String, Symbol, Hash] topic name or hash with topics and partitions
       # @param partition [Integer, nil] partition number
@@ -224,13 +236,30 @@ module Karafka
         # Normalize input to hash format
         topics_with_partitions = partition ? { name_or_hash => [partition] } : name_or_hash
 
-        result = Hash.new { |h, k| h[k] = {} }
+        low_specs = {}
+        high_specs = {}
 
-        with_consumer do |consumer|
-          topics_with_partitions.each do |topic, partitions|
-            partitions.each do |partition_id|
-              result[topic][partition_id] = consumer.query_watermark_offsets(topic, partition_id)
-            end
+        topics_with_partitions.each do |topic, partitions|
+          low_specs[topic] = partitions.map { |p| { partition: p, offset: :earliest } }
+          high_specs[topic] = partitions.map { |p| { partition: p, offset: :latest } }
+        end
+
+        lows = {}
+        highs = {}
+
+        with_admin do |admin|
+          admin.list_offsets(low_specs).wait(max_wait_timeout_ms: max_wait_time_ms).offsets.each do |r|
+            (lows[r[:topic]] ||= {})[r[:partition]] = r[:offset]
+          end
+          admin.list_offsets(high_specs).wait(max_wait_timeout_ms: max_wait_time_ms).offsets.each do |r|
+            (highs[r[:topic]] ||= {})[r[:partition]] = r[:offset]
+          end
+        end
+
+        result = Hash.new { |h, k| h[k] = {} }
+        topics_with_partitions.each do |topic, partitions|
+          partitions.each do |partition_id|
+            result[topic][partition_id] = [lows.dig(topic.to_s, partition_id), highs.dig(topic.to_s, partition_id)]
           end
         end
 
@@ -248,8 +277,8 @@ module Karafka
       #   `READ_COMMITTED` consumer will never see those messages, so lag calculated from the
       #   high-watermark is overstated on transactionally-produced topics. Passing
       #   `isolation_level: Karafka::Admin::IsolationLevels::READ_COMMITTED` here
-      #   returns the Last Stable Offset (LSO) — the highest offset a `READ_COMMITTED` consumer
-      #   would actually reach — giving accurate lag figures.
+      #   returns the Last Stable Offset (LSO) - the highest offset a `READ_COMMITTED` consumer
+      #   would actually reach - giving accurate lag figures.
       #
       # - `:max_timestamp` spec: returns the offset of the message with the highest timestamp
       #   in the partition. Not available via watermarks.
@@ -281,12 +310,19 @@ module Karafka
       #
       # @raise [Rdkafka::RdkafkaError] on per-partition errors or connection issues
       #
+      # @note The specs must be passed as an explicit hash (in curly braces). Ruby parses a
+      #   brace-less trailing hash as keyword arguments, and since this method takes an
+      #   `isolation_level:` keyword, such a call raises an `ArgumentError` about a missing
+      #   positional argument.
+      #
       # @example Query earliest offset for partition 0 and latest for partition 1
       #   Karafka::Admin::Topics.read_partition_offsets(
-      #     'events' => [
-      #       { partition: 0, offset: :earliest },
-      #       { partition: 1, offset: :latest }
-      #     ]
+      #     {
+      #       'events' => [
+      #         { partition: 0, offset: :earliest },
+      #         { partition: 1, offset: :latest }
+      #       ]
+      #     }
       #   )
       #   # => [
       #   #   { topic: 'events', partition: 0, offset: 0, timestamp: -1, leader_epoch: nil },
@@ -295,13 +331,13 @@ module Karafka
       #
       # @example Get LSO (Last Stable Offset) for accurate lag on transactional topics
       #   Karafka::Admin::Topics.read_partition_offsets(
-      #     'events' => [{ partition: 0, offset: :latest }],
+      #     { 'events' => [{ partition: 0, offset: :latest }] },
       #     isolation_level: Karafka::Admin::IsolationLevels::READ_COMMITTED
       #   )
       #
       # @example Find offset at a specific point in time
       #   Karafka::Admin::Topics.read_partition_offsets(
-      #     'events' => [{ partition: 0, offset: 1_700_000_000_000 }]
+      #     { 'events' => [{ partition: 0, offset: 1_700_000_000_000 }] }
       #   )
       def read_partition_offsets(topic_partition_offsets, isolation_level: nil)
         with_admin do |admin|

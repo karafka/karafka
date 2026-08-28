@@ -40,9 +40,33 @@ end
 
 GROUP_ID = SecureRandom.uuid
 
-committed = Karafka::Admin::Recovery.read_committed_offsets(
-  GROUP_ID,
-  last_committed_at: Time.now - 60
-)
+# Commit an offset for a *different*, throwaway group so the __consumer_offsets internal topic is
+# guaranteed to exist in cluster metadata. On a fresh CI broker it may not exist until a consumer
+# group has committed at least once. GROUP_ID itself intentionally never commits, so the recovery
+# result for it must still be empty.
+produce(DT.topic, "warmup")
+
+Karafka::Admin.seek_consumer_group(SecureRandom.uuid, { DT.topic => { 0 => 0 } })
+
+# On a fresh CI broker the __consumer_offsets topic may take a while to appear in cluster
+# metadata even after a commit. Retry the Recovery call with exponential backoff for up to ~30 s
+# before giving up with the original MetadataError.
+committed = nil
+backoff = 1
+total_waited = 0
+
+loop do
+  committed = Karafka::Admin::Recovery.read_committed_offsets(
+    GROUP_ID,
+    last_committed_at: Time.now - 60
+  )
+  break
+rescue Karafka::Pro::Admin::Recovery::Errors::MetadataError
+  raise if total_waited >= 30
+
+  sleep(backoff)
+  total_waited += backoff
+  backoff = [backoff * 2, 10].min
+end
 
 assert_equal({}, committed)

@@ -72,5 +72,35 @@ RSpec.describe_current do
         expect { described_class.call(message) }.to raise_error(expected_error)
       end
     end
+
+    context "when the lower message schema version is lexicographically greater" do
+      before { stub_const("Karafka::Pro::ScheduledMessages::SCHEMA_VERSION", "1.10.0") }
+
+      let(:message) do
+        instance_double(
+          Karafka::Messages::Message,
+          headers: { "schedule_schema_version" => "1.2.0" }
+        )
+      end
+
+      it "does not raise an error" do
+        expect { described_class.call(message) }.not_to raise_error
+      end
+    end
+
+    context "when the higher message schema version is lexicographically lower" do
+      before { stub_const("Karafka::Pro::ScheduledMessages::SCHEMA_VERSION", "1.2.0") }
+
+      let(:message) do
+        instance_double(
+          Karafka::Messages::Message,
+          headers: { "schedule_schema_version" => "1.10.0" }
+        )
+      end
+
+      it "raises an IncompatibleSchemaError" do
+        expect { described_class.call(message) }.to raise_error(expected_error)
+      end
+    end
   end
 end

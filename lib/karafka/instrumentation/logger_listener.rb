@@ -467,6 +467,8 @@ module Karafka
         when "virtual_partitions.partitioner.error"
           error "Virtual partitions partitioner error occurred: #{details}"
           error backtrace
+        when "lag_compensation.refresher.error"
+          warn "Lag compensation refresher error occurred: #{details}"
         # This handles any custom errors coming from places like Web-UI, etc
         else
           error "#{type} error occurred: #{error.class} - #{details}"
@@ -494,8 +496,7 @@ module Karafka
       def error_details(event)
         caller_ref = event[:caller]
 
-        # Collect extra info if it was a consumer related error.
-        # Those come from user code
+        # Collect extra info if it was a consumer related error. Those come from user code
         details = case caller_ref
         when Karafka::BaseConsumer
           extract_consumer_info(caller_ref)

@@ -31,9 +31,6 @@
 module Karafka
   module Pro
     module Processing
-      # Consumer-group-specific Pro processing components (driven by rebalance callbacks and
-      # partition ticks). Parallel `ShareGroups` will live next to this namespace once KIP-932
-      # lands.
       module ConsumerGroups
         # Uses the jobs queue API to lock (pause) and unlock (resume) operations of a given
         # subscription group. It is abstracted away from jobs queue on this layer because we do

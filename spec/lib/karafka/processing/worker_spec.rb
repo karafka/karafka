@@ -91,6 +91,39 @@ RSpec.describe_current do
       it { expect(queue).to have_received(:complete).with(job) }
     end
 
+    context "when the job wrap returns a falsy value" do
+      let(:job1) { OpenStruct.new(group_id: 1, id: 1, call: true) }
+      let(:job2) { OpenStruct.new(group_id: 1, id: 2, call: true) }
+
+      before do
+        [job1, job2].each do |job|
+          # Simulates a user #wrap that yields but returns nil (e.g. ends with an assignment or
+          # a logger call) - a documented public API with no truthiness requirement
+          allow(job).to receive(:wrap) do |&block|
+            block.call
+            nil
+          end
+          allow(job).to receive(:before_call)
+          allow(job).to receive(:call)
+          allow(job).to receive(:after_call)
+        end
+
+        queue << job1
+        Thread.pass
+        sleep(0.05)
+      end
+
+      it "keeps the worker alive and processes subsequent jobs" do
+        expect(worker.alive?).to be(true)
+
+        queue << job2
+        sleep(0.05)
+
+        expect(job2).to have_received(:call)
+        expect(pool).not_to have_received(:deregister)
+      end
+    end
+
     context "when nil is pushed to the queue (pool downscaling)" do
       let(:downscale_queue) { Karafka::Processing::JobsQueue.new }
       let(:downscale_pool) { instance_double(Karafka::Processing::WorkersPool, size: 5) }
@@ -157,6 +190,22 @@ RSpec.describe_current do
 
       it "expect to publish completion even despite error" do
         expect(completions[0].id).to eq("worker.completed")
+      end
+
+      it "expect to keep the worker alive and processing subsequent jobs" do
+        expect(worker.alive?).to be(true)
+
+        ok_job = OpenStruct.new(group_id: 1, id: 2, call: true)
+        allow(ok_job).to receive(:wrap).and_yield
+        allow(ok_job).to receive(:before_call)
+        allow(ok_job).to receive(:call)
+        allow(ok_job).to receive(:after_call)
+
+        queue << ok_job
+        sleep(0.05)
+
+        expect(ok_job).to have_received(:call)
+        expect(pool).not_to have_received(:deregister)
       end
     end
   end

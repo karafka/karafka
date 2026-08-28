@@ -1,7 +1,6 @@
 # frozen_string_literal: true
 
 module Karafka
-  # Karafka framework Cli
   class Cli
     # Prints info with list of commands available
     class Help < Base

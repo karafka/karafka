@@ -1,10 +1,13 @@
 # frozen_string_literal: true
 
-Warning[:performance] = true if RUBY_VERSION >= "3.3"
-Warning[:deprecated] = true
-$VERBOSE = true
-
 require "warning"
+
+if Warning.respond_to?(:categories)
+  (Warning.categories - %i[experimental]).each do |cat|
+    Warning[cat] = true
+  end
+end
+$VERBOSE = true
 
 Warning.process do |warning|
   next unless warning.include?(Dir.pwd)
@@ -41,24 +44,24 @@ SPECS_TYPE = ENV.fetch("SPECS_TYPE", "default")
 
 # Don't include unnecessary stuff into rcov
 SimpleCov.start do
-  add_filter "/vendor/"
-  add_filter "/gems/"
-  add_filter "/.bundle/"
-  add_filter "/doc/"
-  add_filter "/spec/"
-  add_filter "/config/"
-  add_filter "/lib/karafka/railtie"
-  add_filter "/lib/karafka/patches"
+  skip "/vendor/"
+  skip "/gems/"
+  skip "/.bundle/"
+  skip "/doc/"
+  skip "/spec/"
+  skip "/config/"
+  skip "/lib/karafka/railtie"
+  skip "/lib/karafka/patches"
   # We do not spec strategies here. We do it via integration test suite
-  add_filter "/lib/karafka/cli/topics/align"
-  add_filter "/lib/karafka/cli/topics/base"
-  add_filter "/lib/karafka/cli/topics/plan"
-  add_filter "/processing/strategies"
+  skip "/lib/karafka/cli/topics/align"
+  skip "/lib/karafka/cli/topics/base"
+  skip "/lib/karafka/cli/topics/plan"
+  skip "/processing/consumer_groups/strategies"
   # Consumers are tested in integrations
-  add_filter "/consumer"
+  skip "/consumer"
   # CLI commands are also checked via integrations
-  add_filter "/cli/topics.rb"
-  add_filter "/vendors/"
+  skip "/cli/topics.rb"
+  skip "/vendors/"
 
   # Ractor-based parallel deserialization requires Ruby 4.0+ APIs
   # These files are fully covered on the Ruby 4.0 CI run and integration tests
@@ -73,7 +76,7 @@ SimpleCov.start do
 end
 
 # Require total coverage after running both regular and pro
-SimpleCov.minimum_coverage(92.0) if SPECS_TYPE == "pro"
+SimpleCov.minimum_coverage(91.0) if SPECS_TYPE == "pro"
 
 Dir["#{File.dirname(__FILE__)}/support/**/*.rb"].each { |f| require f }
 

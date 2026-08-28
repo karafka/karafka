@@ -17,17 +17,25 @@ class Consumer < Karafka::BaseConsumer
   end
 end
 
+draw_topics do
+  topic DT.topics[0] do
+    partitions 2
+  end
+
+  topic DT.topics[1] do
+    partitions 2
+  end
+end
+
 draw_routes do
   consumer_group DT.groups[0] do
     topic DT.topics[0] do
-      config(partitions: 2)
       consumer Consumer
     end
   end
 
   consumer_group DT.groups[1] do
     topic DT.topics[1] do
-      config(partitions: 2)
       consumer Consumer
     end
   end

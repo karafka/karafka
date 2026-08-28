@@ -52,7 +52,7 @@ module Karafka
           # @return [Hash{String => Array<Karafka::Routing::ConsumerGroup>}] hash with all parallel
           #   consumer groups as values and names of segments origin consumer group as the key.
           def applicable_groups
-            requested_groups = options[:groups].dup || []
+            requested_groups = options[:groups] || []
 
             workable_groups = Karafka::App
               .routes
@@ -68,7 +68,6 @@ module Karafka
               workable_group = workable_groups[requested_group]
 
               if workable_group
-                requested_groups.delete(requested_group)
                 applicable_groups[requested_group] = workable_group
               else
                 raise(
@@ -83,8 +82,7 @@ module Karafka
 
           # Collects the offsets for the segment origin consumer group and the parallel segments
           # consumers groups. We use segment origin group offsets as a baseline for the
-          # distribution and use existing (if any) parallel segments groups offsets for
-          # validations.
+          # distribution and use existing (if any) parallel segments groups offsets for validations.
           #
           # @param segment_origin [String] name of the origin consumer group
           # @param segments [Array<Karafka::Routing::ConsumerGroup>]

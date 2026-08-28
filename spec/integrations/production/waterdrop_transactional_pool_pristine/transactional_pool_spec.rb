@@ -45,6 +45,8 @@ setup_karafka
 
 draw_routes(TransactionalConsumer)
 
+Karafka::Admin.create_topic("#{DT.topic}-responses", 1, 1)
+
 # Send test messages using regular producer
 3.times do |i|
   Karafka.producer.produce_sync(

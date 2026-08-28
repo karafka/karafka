@@ -12,8 +12,8 @@ module Karafka
         end
 
         # Ensures, that when declarative topics strict requirement is on, all topics have
-        # declarative definition (including DLQ topics)
-        # @note It will ignore routing pattern topics because those topics are virtual
+        # declarative definition (including DLQ topics). It will ignore routing pattern topics
+        # because those topics are virtual
         virtual do |data, errors|
           next unless errors.empty?
           # Do not validate declaratives unless required and explicitly enabled
@@ -29,8 +29,7 @@ module Karafka
           data.each do |group|
             group[:topics].each do |topic|
               pat = topic[:patterns]
-              # Ignore pattern topics because they won't exist and should not be declarative
-              # managed
+              # Ignore pattern topics because they won't exist and should not be declarative managed
               topics << topic[:name] if !pat || !pat[:active]
 
               dlq = topic[:dead_letter_queue]

@@ -66,4 +66,32 @@ RSpec.describe_current do
       end
     end
   end
+
+  describe "#<< (copy-on-write)" do
+    let(:topic2) { build(:routing_topic) }
+
+    before { topics << topic }
+
+    it { expect(topics << topic2).to be(topics) }
+
+    # Pattern discovery appends at runtime while another thread iterates this collection. Copy-on-
+    # write means an in-flight iteration keeps traversing its original snapshot, so a concurrent
+    # append can never produce a torn read - here we append mid-`#each` and the running iteration
+    # must not pick up the new topic.
+    it "does not disturb an in-flight iteration when a topic is appended" do
+      seen = []
+
+      topics.each do |yielded|
+        seen << yielded
+        topics << topic2 if seen.size == 1
+      end
+
+      expect(seen).to eq([topic])
+    end
+
+    it "still reflects the appended topic for subsequent reads" do
+      topics << topic2
+      expect(topics.to_a).to eq([topic, topic2])
+    end
+  end
 end

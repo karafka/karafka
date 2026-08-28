@@ -46,7 +46,8 @@ module Karafka
                 super
               end
 
-              # @param active [Boolean] should this topic be considered related to scheduled messages
+              # @param active [Boolean] should this topic be considered related to scheduled
+              #   messages
               def scheduled_messages(active = false)
                 @scheduled_messages ||= Config.new(active: active)
               end
