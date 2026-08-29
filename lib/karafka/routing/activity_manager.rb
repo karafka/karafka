@@ -12,6 +12,23 @@ module Karafka
         topics
       ].freeze
 
+      # Characters that, when present in an include/exclude value, mark it as a wildcard
+      # pattern instead of a literal name
+      WILDCARD_CHARACTERS = /[*?\[\]]/
+
+      private_constant :WILDCARD_CHARACTERS
+
+      class << self
+        # @param value [String] name or pattern used in an include/exclude filter
+        # @return [Boolean] true if the value is a wildcard pattern and not a literal name
+        # @note Only `String` values can be wildcard patterns. Non-string entries (e.g. an
+        #   array accidentally passed as a single name) are always treated as literals so they
+        #   never reach `File.fnmatch?`, which only accepts strings.
+        def wildcard?(value)
+          value.is_a?(::String) && value.match?(WILDCARD_CHARACTERS)
+        end
+      end
+
       # Initializes the activity manager with empty inclusion and exclusion lists
       def initialize
         @included = Hash.new { |h, k| h[k] = [] }
@@ -19,8 +36,9 @@ module Karafka
       end
 
       # Adds resource to included/active
-      # @param type [Symbol] type for inclusion
-      # @param name [String] name of the element
+      # @param type [Symbol] resource type to register the inclusion under (one of
+      #   {SUPPORTED_TYPES})
+      # @param name [String] name of the element or a wildcard pattern (e.g. `"app-a-*"`)
       def include(type, name)
         validate!(type)
 
@@ -28,15 +46,16 @@ module Karafka
       end
 
       # Adds resource to excluded
-      # @param type [Symbol] type for inclusion
-      # @param name [String] name of the element
+      # @param type [Symbol] resource type to register the exclusion under (one of
+      #   {SUPPORTED_TYPES})
+      # @param name [String] name of the element or a wildcard pattern (e.g. `"app-a-*"`)
       def exclude(type, name)
         validate!(type)
 
         @excluded[type] << name
       end
 
-      # @param type [Symbol] type for inclusion
+      # @param type [Symbol] resource type to check activity for (one of {SUPPORTED_TYPES})
       # @param name [String] name of the element
       # @return [Boolean] is the given resource active or not
       def active?(type, name)
@@ -48,12 +67,12 @@ module Karafka
         # If nothing defined, all active by default
         return true if included.empty? && excluded.empty?
         # Inclusion supersedes exclusion in case someone wrote both
-        return true if !included.empty? && included.include?(name)
+        return true if !included.empty? && matches?(included, name)
 
         # If there are exclusions but our is not excluded and no inclusions or included, it's ok
         !excluded.empty? &&
-          !excluded.include?(name) &&
-          (included.empty? || included.include?(name))
+          !matches?(excluded, name) &&
+          (included.empty? || matches?(included, name))
       end
 
       # @return [Hash] accumulated data in a hash for validations
@@ -74,11 +93,28 @@ module Karafka
 
       # Checks if the type we want to register is supported
       #
-      # @param type [Symbol] type for inclusion
+      # @param type [Symbol] resource type to validate (one of {SUPPORTED_TYPES})
       def validate!(type)
         return if SUPPORTED_TYPES.include?(type)
 
         raise(::Karafka::Errors::UnsupportedCaseError, type)
+      end
+
+      # @param patterns [Array<String>] literal names and/or wildcard patterns
+      # @param name [String] name to match against the patterns
+      # @return [Boolean] true if any of the patterns matches the name, either literally or
+      #   as a wildcard
+      # @note Only string wildcard patterns are matched via `File.fnmatch?`. Any other entry
+      #   (a literal name or a non-string value) is compared with plain equality, which keeps
+      #   the pre-wildcard behavior and avoids passing non-strings into `File.fnmatch?`.
+      def matches?(patterns, name)
+        patterns.any? do |pattern|
+          if self.class.wildcard?(pattern)
+            File.fnmatch?(pattern, name, File::FNM_EXTGLOB)
+          else
+            pattern == name
+          end
+        end
       end
     end
   end
