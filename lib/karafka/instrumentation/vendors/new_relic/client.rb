@@ -3,7 +3,6 @@
 module Karafka
   module Instrumentation
     module Vendors
-      # Namespace for New Relic instrumentation
       module NewRelic
         # Default client that delegates to the global NewRelic::Agent.
         # Can be replaced with a test double by reassigning `config.client`.

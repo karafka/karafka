@@ -40,7 +40,16 @@ end
 lag_metrics = dummy_client.buffer.keys.select { |k| k.include?("consumer.lags") }
 assert_equal true, lag_metrics.any?, "No consumer.lags metrics recorded"
 
+# Metric names must be group-scoped (Custom/{ns}/consumer.lags.{group_id}.{topic}.{partition})
+# since New Relic custom metrics do not support tags - without the group id, lag metrics from
+# different consumer groups on the same topic/partition would collide.
 lag_metrics.each do |key|
+  assert_equal(
+    true,
+    key.include?(".#{DT.group}."),
+    "Expected #{key} to be scoped to consumer group #{DT.group}"
+  )
+
   dummy_client.buffer[key].each do |value|
     assert_equal true, value >= 0, "Unexpected negative lag for #{key}: #{value}"
   end

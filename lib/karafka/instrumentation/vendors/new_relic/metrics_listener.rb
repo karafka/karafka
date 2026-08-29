@@ -53,7 +53,7 @@ module Karafka
             RdKafkaMetric.new(:root, "messages.consumed", "rxmsgs_d"),
             RdKafkaMetric.new(:root, "messages.consumed.bytes", "rxmsg_bytes"),
 
-            # Broker-level (published as Custom/{ns}/broker.{name}/{metric_name})
+            # Broker-level (published as Custom/{ns}/{metric_name}.{group_id}.{broker})
             RdKafkaMetric.new(:brokers, "consume.attempts", "txretries_d"),
             RdKafkaMetric.new(:brokers, "consume.errors", "txerrs_d"),
             RdKafkaMetric.new(:brokers, "receive.errors", "rxerrs_d"),
@@ -63,7 +63,8 @@ module Karafka
             RdKafkaMetric.new(:brokers, "network.latency.p95", %w[rtt p95]),
             RdKafkaMetric.new(:brokers, "network.latency.p99", %w[rtt p99]),
 
-            # Topic/partition-level (published as Custom/{ns}/{metric_name}/{topic}/{partition})
+            # Topic/partition-level
+            # (published as Custom/{ns}/{metric_name}.{group_id}.{topic}.{partition})
             RdKafkaMetric.new(:topics, "consumer.lags", "consumer_lag_stored"),
             RdKafkaMetric.new(:topics, "consumer.lags_delta", "consumer_lag_stored_d")
           ].freeze
@@ -76,7 +77,6 @@ module Karafka
             setup(&block) if block
           end
 
-          # @param block [Proc] configuration block
           # @note We define this alias to be consistent with `Karafka#setup`
           def setup(&)
             configure(&)
@@ -94,7 +94,7 @@ module Karafka
             end
           end
 
-          # Records error count. Error type and consumer context are embedded in the metric name.
+          # Records error count. Error type is embedded in the metric name.
           #
           # @param event [Karafka::Core::Monitoring::Event]
           def on_error_occurred(event)
@@ -180,7 +180,11 @@ module Karafka
                 next if broker_stats["nodeid"] == -1
 
                 broker = broker_stats["nodename"].tr(":", "_")
-                record("#{metric.name}.#{broker}", broker_stats.dig(*Array(metric.key_location)))
+
+                record(
+                  "#{metric.name}.#{group_id}.#{broker}",
+                  broker_stats.dig(*Array(metric.key_location))
+                )
               end
             when :topics
               statistics.fetch("topics").each do |topic_name, topic_values|
@@ -194,7 +198,7 @@ module Karafka
                   next if partition_stats["fetch_state"] == "none"
 
                   record(
-                    "#{metric.name}.#{topic_name}.#{partition_name}",
+                    "#{metric.name}.#{group_id}.#{topic_name}.#{partition_name}",
                     partition_stats.dig(*Array(metric.key_location))
                   )
                 end
