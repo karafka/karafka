@@ -130,7 +130,7 @@ module Karafka
                     pause(throttle_message.offset, throttle_timeout, false)
                   end
                 else
-                  raise Karafka::Errors::UnsupportedCaseError filter.action
+                  raise Karafka::Errors::UnsupportedCaseError, filter.action
                 end
               end
             end
