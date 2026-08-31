@@ -69,10 +69,14 @@ def setup_karafka(
   log_messages: true,
   consumer_group_protocol: false
 )
-  # Auto-skip multi-broker tests when running on single-broker setup
+  # Auto-skip topology-specific tests when their Kafka setup is unavailable
   # Tests/directories with "multi_broker" in the name require multiple brokers
   # Pattern: *_multi_broker_sequential* for tests requiring 2+ brokers to run sequentially
   caller_path = caller_locations(1..1).first.path
+  if caller_path.include?("multi_cluster")
+    exit 0 unless ENV.key?("SECONDARY_KAFKA_BOOTSTRAP_SERVERS")
+  end
+
   if caller_path.include?("multi_broker")
     # Check broker count from environment variable to avoid double Karafka setup
     bootstrap_servers = ENV.fetch("KAFKA_BOOTSTRAP_SERVERS", "127.0.0.1:9092")

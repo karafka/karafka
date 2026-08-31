@@ -30,6 +30,7 @@ env:
   BUNDLE_RETRY: 6
   BUNDLE_JOBS: 4
   KAFKA_BOOTSTRAP_SERVERS: '127.0.0.1:9092,127.0.0.1:9093,127.0.0.1:9094'
+  SECONDARY_KAFKA_BOOTSTRAP_SERVERS: '127.0.0.1:9095'
 
 jobs:
   multi-broker-replication:
@@ -81,6 +82,12 @@ jobs:
         run: |
           bundle exec bin/wait_for_kafka_multi_broker
 
+      - name: Wait for secondary Kafka cluster
+        env:
+          KAFKA_BOOTSTRAP_SERVERS: ${{ env.SECONDARY_KAFKA_BOOTSTRAP_SERVERS }}
+          EXPECTED_BROKERS: 1
+        run: bundle exec bin/wait_for_kafka_multi_broker
+
       - name: Verify cluster has 3 brokers
         run: |
           bundle exec ruby -e "
@@ -97,8 +104,11 @@ jobs:
           KARAFKA_PRO_LICENSE_TOKEN: ${{ secrets.KARAFKA_PRO_LICENSE_TOKEN }}
         run: bin/integrations 'multi_broker'
 
+      - name: Run multi-cluster integration tests
+        run: bin/integrations 'multi_cluster'
+
       - name: Check Kafka logs for unexpected warnings
-        run: bin/verify_kafka_warnings kafka1 kafka2 kafka3
+        run: bin/verify_kafka_warnings kafka1 kafka2 kafka3 kafka-secondary
 
       - name: Check test topics naming convention
         run: bundle exec bin/verify_topics_naming
@@ -114,6 +124,9 @@ jobs:
           echo ""
           echo "=== Kafka3 Logs ==="
           docker logs kafka3 --tail 100
+          echo ""
+          echo "=== Secondary Kafka Logs ==="
+          docker logs kafka-secondary --tail 100
 
       - name: Stop Kafka cluster
         if: always()

@@ -32,7 +32,7 @@ module Karafka
 
           resources_to_migrate.each do |resource|
             supervised("Updating topic: #{resource.name} configuration") do
-              Karafka::Admin::Configs.alter(resource)
+              configs_admin.alter(resource)
             end
 
             puts "#{green("Updated")} topic #{resource.name} configuration."
@@ -76,7 +76,7 @@ module Karafka
           resources_to_migrate = Set.new
 
           # We fetch all the configurations for all the topics
-          Admin::Configs.describe(resources).each do |topic_with_configs|
+          configs_admin.describe(resources).each do |topic_with_configs|
             t_candidate = candidate_topics.find do |candidate|
               candidate.name == topic_with_configs.name
             end

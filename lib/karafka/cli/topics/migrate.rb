@@ -10,18 +10,18 @@ module Karafka
         def call
           any_changes = false
 
-          if Topics::Create.new.call
+          if build_command(Topics::Create).call
             any_changes = true
             wait
           end
 
-          if Topics::Repartition.new.call
+          if build_command(Topics::Repartition).call
             any_changes = true
             wait
           end
 
           # No need to wait after the last one
-          any_changes = true if Topics::Align.new.call
+          any_changes = true if build_command(Topics::Align).call
 
           any_changes
         end
