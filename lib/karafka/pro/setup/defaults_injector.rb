@@ -32,7 +32,9 @@ module Karafka
   module Pro
     # Namespace for Pro setup components
     module Setup
-      # Pro defaults injector that extends the OSS defaults with Pro-specific settings
+      # Pro defaults injector that extends the OSS defaults with Pro-specific settings.
+      # It is prepended onto the OSS `Karafka::Setup::DefaultsInjector` so its consumer defaults
+      # are layered on top of the OSS ones and it manages its own keys.
       module DefaultsInjector
         # Pro-specific consumer kafka defaults
         # These defaults are carefully tuned to work with Pro's internal statistics aggregation,
@@ -45,6 +47,16 @@ module Karafka
 
         private_constant :CONSUMER_KAFKA_DEFAULTS
 
+        # Injects the Pro-specific consumer kafka defaults on top of the OSS ones
+        class Consumer < Karafka::Core::Configurable::Injector
+          class << self
+            # @return [Hash] Pro consumer kafka defaults
+            def defaults
+              CONSUMER_KAFKA_DEFAULTS
+            end
+          end
+        end
+
         # Pro actively manages these keys via its own DefaultsInjector so users are allowed
         # to set them if needed.
         #
@@ -53,16 +65,13 @@ module Karafka
           @managed_keys ||= Set.new
         end
 
-        # Enriches consumer kafka config with Pro-specific defaults
+        # Enriches consumer kafka config with the OSS defaults first (via `super`) and then the
+        # Pro-specific ones on top, each only when not already present.
         # @param kafka_config [Hash] kafka scoped config
         def consumer(kafka_config)
           super
 
-          CONSUMER_KAFKA_DEFAULTS.each do |key, value|
-            next if kafka_config.key?(key)
-
-            kafka_config[key] = value
-          end
+          Consumer.call(kafka_config)
         end
       end
     end
