@@ -16,6 +16,20 @@ RSpec.describe_current do
     end
   end
 
+  describe "scope injectors" do
+    it "builds the consumer injector on the core Configurable::Injector" do
+      expect(described_class::Consumer.ancestors).to include(
+        Karafka::Core::Configurable::Injector
+      )
+    end
+
+    it "builds the producer injector on the core Configurable::Injector" do
+      expect(described_class::Producer.ancestors).to include(
+        Karafka::Core::Configurable::Injector
+      )
+    end
+  end
+
   describe "#consumer" do
     context "when in production environment" do
       before do

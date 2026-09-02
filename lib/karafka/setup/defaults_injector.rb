@@ -51,6 +51,33 @@ module Karafka
         :CONSUMER_KAFKA_DEFAULTS, :CONSUMER_KAFKA_DEV_DEFAULTS, :PRODUCER_KAFKA_DEV_DEFAULTS
       )
 
+      # Injects the consumer kafka defaults into a kafka config hash, adding the dev-only ones
+      # outside of production. Extensions (e.g. Pro) layer extra defaults by prepending onto the
+      # singleton class and calling `super`.
+      class Consumer < Karafka::Core::Configurable::Injector
+        class << self
+          # @return [Hash] consumer kafka defaults for the current environment
+          def defaults
+            return CONSUMER_KAFKA_DEFAULTS if Karafka::App.env.production?
+
+            CONSUMER_KAFKA_DEFAULTS.merge(CONSUMER_KAFKA_DEV_DEFAULTS)
+          end
+        end
+      end
+
+      # Injects the producer kafka defaults into a kafka config hash. They are dev-only, so nothing
+      # is injected in production.
+      class Producer < Karafka::Core::Configurable::Injector
+        class << self
+          # @return [Hash] producer kafka defaults for the current environment
+          def defaults
+            return super if Karafka::App.env.production?
+
+            PRODUCER_KAFKA_DEV_DEFAULTS
+          end
+        end
+      end
+
       class << self
         # Kafka settings that are managed internally by Karafka and should not be set directly
         # by users. Setting them manually may cause misbehaviours and other unexpected issues.
@@ -67,19 +94,7 @@ module Karafka
         # them to overwrite the whole hash if they want to
         # @param kafka_config [Hash] kafka scoped config
         def consumer(kafka_config)
-          CONSUMER_KAFKA_DEFAULTS.each do |key, value|
-            next if kafka_config.key?(key)
-
-            kafka_config[key] = value
-          end
-
-          return if Karafka::App.env.production?
-
-          CONSUMER_KAFKA_DEV_DEFAULTS.each do |key, value|
-            next if kafka_config.key?(key)
-
-            kafka_config[key] = value
-          end
+          Consumer.call(kafka_config)
         end
 
         # Propagates the kafka settings defaults unless they are already present for producer
@@ -88,13 +103,7 @@ module Karafka
         #
         # @param kafka_config [Hash] kafka scoped config
         def producer(kafka_config)
-          return if Karafka::App.env.production?
-
-          PRODUCER_KAFKA_DEV_DEFAULTS.each do |key, value|
-            next if kafka_config.key?(key)
-
-            kafka_config[key] = value
-          end
+          Producer.call(kafka_config)
         end
       end
     end

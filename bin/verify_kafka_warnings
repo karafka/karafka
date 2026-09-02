@@ -4,6 +4,11 @@
 # Only specified warnings are allowed, all others should trigger failure
 
 allowed_patterns=(
+   # Enabling share groups (KIP-932) requires "share" in group.coordinator.rebalance.protocols
+   # on cp-kafka 8.3.0 (Kafka 4.x). That mechanism is deprecated in favour of the share.version
+   # feature flag (Kafka 5.0), but is still functionally required to enable share groups in this
+   # version, so the broker logs this deprecation warning on every startup. Expected here.
+   "group.coordinator.rebalance.protocols. is deprecated"
    "Performing controller activation"
    "registered with feature metadata.version"
    "Replayed TopicRecord for"
