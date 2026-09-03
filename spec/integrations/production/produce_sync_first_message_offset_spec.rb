@@ -20,7 +20,10 @@ class Consumer < Karafka::BaseConsumer
   end
 end
 
-draw_routes(Consumer)
+# Do not pre-create the topic: we want the very first produce_sync to hit a brand-new topic and
+# let the broker auto-create it, which is exactly the condition under which the -1001 report
+# offset shows up.
+draw_routes(Consumer, create_topics: false)
 
 # Produce synchronously to a brand-new topic (DT.topic is unique per spec run), capturing the
 # offset each delivery report carries.
