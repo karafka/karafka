@@ -60,7 +60,7 @@ module Karafka
             # Validate group settings. Share groups reuse the same routing machinery but have their
             # own contracts so their (different) feature flow can be validated independently.
             group_contract = group.share_group? ? Contracts::ShareGroup : Contracts::ConsumerGroup
-            topic_contract = group.share_group? ? Contracts::ShareTopic : Contracts::Topic
+            topic_contract = group.share_group? ? Contracts::ShareGroupTopic : Contracts::Topic
 
             group_contract.new.validate!(
               group.to_h,

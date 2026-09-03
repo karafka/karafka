@@ -9,7 +9,7 @@ module Karafka
       # inherit {Karafka::Routing::Topic}, so consumer-group routing features (which are prepended
       # onto `Routing::Topic`) do not leak onto share topics. Share-group specific routing features
       # will attach here once they land.
-      class ShareTopic < Base
+      class ShareGroupTopic < Base
       end
     end
   end

@@ -24,7 +24,7 @@ module Karafka
         # @return [Class] topic class used for consumer-group topics (the one CG routing features
         #   attach to)
         def topic_class
-          Topics::ConsumerTopic
+          Topics::ConsumerGroupTopic
         end
       end
     end

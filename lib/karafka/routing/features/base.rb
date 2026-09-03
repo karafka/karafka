@@ -18,10 +18,10 @@ module Karafka
             end
 
             # Share-group topic hook. Features that also apply to share groups (KIP-932) define a
-            # `ShareTopic` module and it is prepended onto the share topic class. This primitive is
+            # `ShareGroupTopic` module and it is prepended onto the share topic class. This primitive is
             # wired even though only shared features (e.g. deserializers) use it today.
-            if const_defined?("ShareTopic", false)
-              Topics::ShareTopic.prepend(self::ShareTopic)
+            if const_defined?("ShareGroupTopic", false)
+              Topics::ShareGroupTopic.prepend(self::ShareGroupTopic)
             end
 
             if const_defined?("Topics", false)
