@@ -70,6 +70,40 @@ RSpec.describe Karafka::Routing::Groups::ShareGroup do
     end
   end
 
+  context "when a share topic needs to process message payloads, keys and headers" do
+    before do
+      cclass = consumer_class
+
+      builder.draw do
+        share_group "sg" do
+          topic(:b) { consumer cclass }
+        end
+      end
+    end
+
+    let(:share_topic) { share_group.topics.first }
+
+    it "expect the deserializers (shared) feature to apply to share topics" do
+      expect(share_topic).to respond_to(:deserializers)
+      expect(share_topic.deserializers).to be_active
+      expect(share_topic.to_h).to include(:deserializers)
+    end
+  end
+
+  context "with backwards-compatible flat aliases" do
+    it "expect Routing::ShareGroup to alias Groups::ShareGroup" do
+      expect(Karafka::Routing::ShareGroup).to equal(described_class)
+    end
+
+    it "expect Routing::ConsumerGroup to alias Groups::ConsumerGroup" do
+      expect(Karafka::Routing::ConsumerGroup).to equal(Karafka::Routing::Groups::ConsumerGroup)
+    end
+
+    it "expect Routing::Topic to alias Topics::ConsumerTopic" do
+      expect(Karafka::Routing::Topic).to equal(Karafka::Routing::Topics::ConsumerTopic)
+    end
+  end
+
   context "when a share group and a consumer group are drawn together" do
     it "expect both to validate and coexist" do
       cclass = consumer_class

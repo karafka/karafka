@@ -49,7 +49,7 @@ module Karafka
 
           # Returns consumer groups for parallel segments with which we should be working
           #
-          # @return [Hash{String => Array<Karafka::Routing::ConsumerGroup>}] hash with all parallel
+          # @return [Hash{String => Array<Karafka::Routing::Groups::ConsumerGroup>}] hash with all parallel
           #   consumer groups as values and names of segments origin consumer group as the key.
           def applicable_groups
             requested_groups = options[:groups] || []
@@ -85,7 +85,7 @@ module Karafka
           # distribution and use existing (if any) parallel segments groups offsets for validations.
           #
           # @param segment_origin [String] name of the origin consumer group
-          # @param segments [Array<Karafka::Routing::ConsumerGroup>]
+          # @param segments [Array<Karafka::Routing::Groups::ConsumerGroup>]
           # @return [Hash] fetched offsets for all the group topics for all the groups
           def collect_offsets(segment_origin, segments)
             topics_names = segments.first.topics.map(&:name)

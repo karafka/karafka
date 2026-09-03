@@ -130,7 +130,7 @@ module Karafka
       end
 
       # Appends consumer group level feature info
-      # @param consumer_group [Karafka::Routing::ConsumerGroup]
+      # @param consumer_group [Karafka::Routing::Groups::ConsumerGroup]
       # @param lines [Array<String>] output accumulator
       def consumer_group_features_info(consumer_group, lines)
         cg_hash = consumer_group.to_h

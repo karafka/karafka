@@ -94,7 +94,7 @@ module Karafka
         draw(&)
       end
 
-      # @return [Array<Karafka::Routing::ConsumerGroup>] only active consumer groups that
+      # @return [Array<Karafka::Routing::Groups::ConsumerGroup>] only active consumer groups that
       #   we want to use. Since Karafka supports multi-process setup, we need to be able
       #   to pick only those consumer groups that should be active in our given process context
       def active

@@ -104,7 +104,7 @@ module Karafka
           # limit the groups that we will be operating here
           #
           # @param offsets [Hash]
-          # @param segments [Array<Karafka::Routing::ConsumerGroup>]
+          # @param segments [Array<Karafka::Routing::Groups::ConsumerGroup>]
           def validate!(offsets, segments)
             segments_names = segments.map(&:name)
 
@@ -130,7 +130,7 @@ module Karafka
           # the data.
           #
           # @param offsets [Hash]
-          # @param segments [Array<Karafka::Routing::ConsumerGroup>]
+          # @param segments [Array<Karafka::Routing::Groups::ConsumerGroup>]
           # @note This code does **not** apply the offsets, just computes their positions
           def distribute(offsets, segments)
             distributions = []

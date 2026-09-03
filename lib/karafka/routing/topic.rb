@@ -2,13 +2,10 @@
 
 module Karafka
   module Routing
-    # Consumer-group topic. This is the canonical topic class and the one that consumer-group
-    # routing features are prepended onto (see {Karafka::Routing::Features::Base.activate}).
-    #
-    # @note This is also reachable as {Karafka::Routing::Topics::ConsumerTopic}. The flat
-    #   `Routing::Topic` constant is kept because it is widely referenced and is de-facto public
-    #   API, and because routing features attach to it by name.
-    class Topic < Topics::Base
-    end
+    # Legacy flat alias for the canonical {Karafka::Routing::Topics::ConsumerTopic}. Kept for
+    # backwards compatibility because it is widely referenced - and because consumer-group routing
+    # features attach to it by this name - and is de-facto public API. New code should reference
+    # `Topics::ConsumerTopic`. Scheduled for retirement in Karafka 3.0.
+    Topic = Topics::ConsumerTopic
   end
 end

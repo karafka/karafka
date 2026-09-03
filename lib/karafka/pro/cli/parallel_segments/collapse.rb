@@ -91,7 +91,7 @@ module Karafka
           # on the segment origin consumer group.
           #
           # @param offsets [Hash]
-          # @param segments [Array<Karafka::Routing::ConsumerGroup>]
+          # @param segments [Array<Karafka::Routing::Groups::ConsumerGroup>]
           # @note This code does **not** apply the offsets, just computes their positions
           def collapse(offsets, segments)
             collapse = Hash.new { |h, k| h[k] = {} }
