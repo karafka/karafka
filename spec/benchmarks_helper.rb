@@ -135,3 +135,15 @@ class Tracker
     @times.sum / @times.size
   end
 end
+
+# Resets the Karafka server state to allow running multiple iterations
+# This properly resets all components that need to be reinitialized between runs
+def reset_karafka_state!
+  Karafka::App.config.internal.status.reset!
+  # Listeners have their own state and need to be moved back to be restarted
+  # Skip if this is the first run (listeners not yet created)
+  Karafka::Server.listeners&.each(&:pending!)
+  # Since manager is for the whole lifecycle of the process, it needs to be re-created
+  manager_class = Karafka::App.config.internal.connection.manager.class
+  Karafka::App.config.internal.connection.manager = manager_class.new
+end

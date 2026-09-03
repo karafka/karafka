@@ -6,7 +6,7 @@
 
 setup_karafka do |config|
   config.kafka[:"auto.offset.reset"] = "latest"
-  config.concurrency = 10
+  config.concurrency = ENV.fetch("CONCURRENCY", 10).to_i
 end
 
 # How many messages we want to consume per partition before stop
@@ -58,25 +58,25 @@ Tracker.run(messages_count: MAX_MESSAGES_PER_PARTITION * PARTITIONS_COUNT) do
   $start = false
   $stop = false
 
-  Karafka::App.config.internal.status.reset!
+  reset_karafka_state!
   Karafka::Server.run
 
   $stop - $start
 end
 
 # Workers count (messages per second)
-#  1: 967.0931828004976
-#  2: 1846.9631336499262
-#  3: 2627.037884455041
-#  4: 3343.378212044422
-#  5: 3733.2891955212363
-#  6: 4313.176246527221
-#  7: 4980.996950715934
-#  8: 5577.77580393055
-#  9: 5825.016430358137
-# 10: 6255.494936614387
-# 11: 6151.344610570285
-# 12: 6117.579001175221
-# 13: 6282.5906551290955
-# 14: 6305.589790322177
-# 15: 6146.980026710657
+#  1: 934.096077883839311
+#  2: 1930.138022722800614
+#  3: 2502.432224018435407
+#  4: 3296.080593324453945
+#  5: 4100.778161970138729
+#  6: 4154.084372545369577
+#  7: 4876.209472176644790
+#  8: 4416.402645019705111
+#  9: 5643.081301914965298
+# 10: 7206.639578508224654
+# 11: 7354.674565237919734
+# 12: 7527.780781931437848
+# 13: 7507.761164811440552
+# 14: 6957.094122640991776
+# 15: 7323.753857415998806
