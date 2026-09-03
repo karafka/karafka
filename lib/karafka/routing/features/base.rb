@@ -17,12 +17,24 @@ module Karafka
               Topic.prepend(self::Topic)
             end
 
+            # Share-group topic hook. Features that also apply to share groups (KIP-932) define a
+            # `ShareTopic` module and it is prepended onto the share topic class. This primitive is
+            # wired even though only shared features (e.g. deserializers) use it today.
+            if const_defined?("ShareTopic", false)
+              Topics::ShareTopic.prepend(self::ShareTopic)
+            end
+
             if const_defined?("Topics", false)
               Topics.prepend(self::Topics)
             end
 
             if const_defined?("ConsumerGroup", false)
               ConsumerGroup.prepend(self::ConsumerGroup)
+            end
+
+            # Share-group hook, mirroring `ConsumerGroup`. Prepended onto the share group class.
+            if const_defined?("ShareGroup", false)
+              Groups::ShareGroup.prepend(self::ShareGroup)
             end
 
             if const_defined?("Proxy", false)

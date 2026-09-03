@@ -37,23 +37,33 @@ module Karafka
                 result = super(&block)
 
                 each do |group|
-                  # Existing routing features are consumer-group features; their contracts assume
-                  # consumer-group topic shape. Share groups have their own (currently empty)
-                  # feature namespace, so we do not run consumer-group feature contracts against
-                  # them. Share-group feature validation will be wired when those features land.
-                  next unless group.consumer_group?
+                  # A feature validates each group with the contract matching that group's type.
+                  # Consumer groups use `Contracts::ConsumerGroup`/`Contracts::Topic`; share groups
+                  # use `Contracts::ShareGroup`/`Contracts::ShareTopic`. A feature only runs against
+                  # a group type for which it defines the corresponding contract, so a feature that
+                  # applies to a single mode simply omits the other mode's contracts. The
+                  # share-group primitives are wired here regardless of whether any feature uses
+                  # them yet.
+                  group_contract, topic_contract =
+                    if group.share_group?
+                      %w[ShareGroup ShareTopic]
+                    else
+                      %w[ConsumerGroup Topic]
+                    end
 
-                  if scope::Contracts.const_defined?("ConsumerGroup", false)
-                    scope::Contracts::ConsumerGroup.new.validate!(
+                  if scope::Contracts.const_defined?(group_contract, false)
+                    scope::Contracts.const_get(group_contract, false).new.validate!(
                       group.to_h,
                       scope: ["routes", group.name]
                     )
                   end
 
-                  next unless scope::Contracts.const_defined?("Topic", false)
+                  next unless scope::Contracts.const_defined?(topic_contract, false)
+
+                  topic_contract_class = scope::Contracts.const_get(topic_contract, false)
 
                   group.topics.each do |topic|
-                    scope::Contracts::Topic.new.validate!(
+                    topic_contract_class.new.validate!(
                       topic.to_h,
                       scope: ["routes", group.name, topic.name]
                     )
