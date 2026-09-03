@@ -37,6 +37,12 @@ module Karafka
                 result = super(&block)
 
                 each do |group|
+                  # Existing routing features are consumer-group features; their contracts assume
+                  # consumer-group topic shape. Share groups have their own (currently empty)
+                  # feature namespace, so we do not run consumer-group feature contracts against
+                  # them. Share-group feature validation will be wired when those features land.
+                  next unless group.consumer_group?
+
                   if scope::Contracts.const_defined?("ConsumerGroup", false)
                     scope::Contracts::ConsumerGroup.new.validate!(
                       group.to_h,

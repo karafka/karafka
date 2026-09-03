@@ -31,6 +31,16 @@ module Karafka
         )
 
         option(
+          :share_groups,
+          "Runs server only with specified share groups",
+          Array,
+          %w[
+            --share_groups
+            --include_share_groups
+          ]
+        )
+
+        option(
           :subscription_groups,
           "Runs server only with specified subscription groups",
           Array,
@@ -56,6 +66,15 @@ module Karafka
           Array,
           %w[
             --exclude_consumer_groups
+          ]
+        )
+
+        option(
+          :exclude_share_groups,
+          "Runs server without specified share groups",
+          Array,
+          %w[
+            --exclude_share_groups
           ]
         )
 
