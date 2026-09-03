@@ -9,7 +9,7 @@ module Karafka
       # consumer topics (including `deserializers`, since share groups also process message
       # payloads, keys and headers), but omits consumer-group-only routing features that are not
       # prepended onto share topics. Reuses the `routing.topic` locale messages.
-      class ShareTopic < Karafka::Contracts::Base
+      class ShareGroupTopic < Karafka::Contracts::Base
         configure do |config|
           config.error_messages = YAML.safe_load_file(
             File.join(Karafka.gem_root, "config", "locales", "errors.yml")

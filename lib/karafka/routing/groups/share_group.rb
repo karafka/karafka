@@ -9,7 +9,7 @@ module Karafka
       # @note Share groups reuse the whole consumer-group routing machinery (subscription group
       #   building, activity management, contracts). They differ only in the group type they report,
       #   the activity-manager scope they filter under and the topic class they instantiate
-      #   ({Topics::ShareTopic}), which is what keeps share-group feature flow separate from
+      #   ({Topics::ShareGroupTopic}), which is what keeps share-group feature flow separate from
       #   consumer-group feature flow.
       #
       # @note The routing layer only *describes* share groups. Running them is not yet supported -
@@ -31,7 +31,7 @@ module Karafka
         # @return [Class] topic class used for share-group topics. It deliberately does not inherit
         #   consumer-group routing features so that share-group feature flow stays independent.
         def topic_class
-          Topics::ShareTopic
+          Topics::ShareGroupTopic
         end
       end
     end

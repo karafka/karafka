@@ -7,7 +7,7 @@ module Karafka
         module Contracts
           # Share topics validate their deserializers exactly like consumer topics. Reuses the
           # consumer-group deserializers `Topic` contract.
-          ShareTopic = Topic
+          ShareGroupTopic = Topic
         end
       end
     end

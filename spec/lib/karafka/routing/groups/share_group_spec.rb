@@ -36,7 +36,7 @@ RSpec.describe Karafka::Routing::Groups::ShareGroup do
     it "expect its topics to be share topics carrying the share group type" do
       topic = share_group.topics.first
 
-      expect(topic).to be_a(Karafka::Routing::Topics::ShareTopic)
+      expect(topic).to be_a(Karafka::Routing::Topics::ShareGroupTopic)
       expect(topic).not_to be_a(Karafka::Routing::Topic)
       expect(topic.group_type).to eq(:share)
     end
@@ -99,8 +99,8 @@ RSpec.describe Karafka::Routing::Groups::ShareGroup do
       expect(Karafka::Routing::ConsumerGroup).to equal(Karafka::Routing::Groups::ConsumerGroup)
     end
 
-    it "expect Routing::Topic to alias Topics::ConsumerTopic" do
-      expect(Karafka::Routing::Topic).to equal(Karafka::Routing::Topics::ConsumerTopic)
+    it "expect Routing::Topic to alias Topics::ConsumerGroupTopic" do
+      expect(Karafka::Routing::Topic).to equal(Karafka::Routing::Topics::ConsumerGroupTopic)
     end
   end
 

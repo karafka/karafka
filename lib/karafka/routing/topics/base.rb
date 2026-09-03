@@ -6,9 +6,9 @@ module Karafka
       # Base class for the routing topic types. It stores all the mode-agnostic details on how we
       # should interact with a given Kafka topic and is a part of Karafka's DSL.
       #
-      # Concrete topic types ({Topics::ConsumerTopic} for consumer groups and {Topics::ShareTopic}
+      # Concrete topic types ({Topics::ConsumerGroupTopic} for consumer groups and {Topics::ShareGroupTopic}
       # for share groups) inherit from it. Consumer-group routing features are prepended onto
-      # {Topics::ConsumerTopic} only, so share topics deliberately do not inherit consumer-group
+      # {Topics::ConsumerGroupTopic} only, so share topics deliberately do not inherit consumer-group
       # feature flow.
       #
       # @note `#group` is the polymorphic reference to the owning group. `#consumer_group` is kept

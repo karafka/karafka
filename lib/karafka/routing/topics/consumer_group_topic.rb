@@ -10,7 +10,7 @@ module Karafka
       # It is also reachable via the legacy flat {Karafka::Routing::Topic} alias, which is kept for
       # backwards compatibility (routing features attach to it by that name too) and is scheduled
       # for retirement in Karafka 3.0.
-      class ConsumerTopic < Base
+      class ConsumerGroupTopic < Base
       end
     end
   end
