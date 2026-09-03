@@ -8,6 +8,7 @@ module Karafka
       # Supported types of inclusions and exclusions
       SUPPORTED_TYPES = %i[
         consumer_groups
+        share_groups
         subscription_groups
         topics
       ].freeze

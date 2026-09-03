@@ -163,7 +163,7 @@ Lint/HashCompareByIdentity:
 Lint/Void:
   Exclude:
     # Reports incorrectly for the topic=
-    - "lib/karafka/routing/consumer_group.rb"
+    - "lib/karafka/routing/groups/base.rb"
 
 Lint/NonLocalExitFromIterator:
   Enabled: false
