@@ -57,9 +57,16 @@ module Karafka
 
       # Just a nicer name for the consumer groups
       alias_method :routes, :consumer_groups
-      # Generalized alias - routing entries are "groups" (consumer groups today, other kinds
-      # of groups like KIP-932 share groups in the future).
+      # Generalized alias - routing entries are "groups" (consumer groups and, since KIP-932,
+      # share groups). Returns every group regardless of its type.
       alias_method :groups, :consumer_groups
+
+      # @return [Array<Karafka::Routing::Groups::ShareGroup>] all defined share groups (KIP-932).
+      # @note Share groups live in the same routing builder as consumer groups; this is just a
+      #   type-filtered view. Empty unless `share_group` routing blocks are defined.
+      def share_groups
+        groups.select(&:share_group?)
+      end
 
       # Returns current assignments of this process. Both topics and partitions
       #
