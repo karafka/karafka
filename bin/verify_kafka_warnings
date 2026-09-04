@@ -30,7 +30,6 @@ allowed_patterns=(
    "Auto topic creation failed for it-b0c959-"
    "Auto topic creation failed for it-f25972-"
    "Auto topic creation failed for it-21ec2c-"
-   "Auto topic creation failed for it-73f1e2-"
    "Auto topic creation failed for it-production."
    "Auto topic creation failed for it-us01.production."
    "Auto topic creation failed for it-sandbox.production."
