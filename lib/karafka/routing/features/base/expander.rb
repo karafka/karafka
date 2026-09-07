@@ -38,18 +38,20 @@ module Karafka
 
                 each do |group|
                   # A feature validates each group with the contract matching that group's type.
-                  # Consumer groups use `Contracts::ConsumerGroup`/`Contracts::ConsumerGroupTopic`;
+                  # Consumer groups use `Contracts::ConsumerGroup` and `Contracts::ConsumerGroupTopic`
+                  # (or the legacy `Contracts::Topic` name, kept for external features until 3.0);
                   # share groups use `Contracts::ShareGroup`/`Contracts::ShareGroupTopic`. A feature
-                  # only runs against a group type for which it defines the corresponding contract,
-                  # so a feature that applies to a single mode simply omits the other mode's
-                  # contracts. The share-group primitives are wired here regardless of whether any
-                  # feature uses them yet.
-                  group_contract, topic_contract =
-                    if group.share_group?
-                      %w[ShareGroup ShareGroupTopic]
-                    else
-                      %w[ConsumerGroup ConsumerGroupTopic]
-                    end
+                  # only runs against a group type for which it defines a matching contract, so a
+                  # feature that applies to a single mode simply omits the other mode's contracts.
+                  # The share-group primitives are wired here regardless of whether any feature uses
+                  # them yet.
+                  if group.share_group?
+                    group_contract = "ShareGroup"
+                    topic_contracts = %w[ShareGroupTopic]
+                  else
+                    group_contract = "ConsumerGroup"
+                    topic_contracts = %w[ConsumerGroupTopic Topic]
+                  end
 
                   if scope::Contracts.const_defined?(group_contract, false)
                     scope::Contracts.const_get(group_contract, false).new.validate!(
@@ -58,7 +60,11 @@ module Karafka
                     )
                   end
 
-                  next unless scope::Contracts.const_defined?(topic_contract, false)
+                  topic_contract = topic_contracts.find do |name|
+                    scope::Contracts.const_defined?(name, false)
+                  end
+
+                  next unless topic_contract
 
                   topic_contract_class = scope::Contracts.const_get(topic_contract, false)
 

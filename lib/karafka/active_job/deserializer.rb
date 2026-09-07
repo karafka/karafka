@@ -46,7 +46,7 @@ module Karafka
       #   this may be a JobWrapper instance instead of the original ::ActiveJob::Base.
       # @return [String] serialized job payload
       def serialize(job)
-        ::ActiveSupport::JSON.encode(job.serialize)
+        ::JSON.generate(job.serialize)
       end
 
       # Deserializes a Kafka message payload into an ActiveJob job hash

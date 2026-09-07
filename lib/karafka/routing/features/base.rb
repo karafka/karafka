@@ -19,6 +19,14 @@ module Karafka
               Topics::ConsumerGroupTopic.prepend(self::ConsumerGroupTopic)
             end
 
+            # Legacy consumer-group topic hook. `Topic` was the hook name before it was renamed to
+            # `ConsumerGroupTopic`; it is kept working so external routing features (and user code)
+            # that define a `Topic` module keep functioning. Prepended onto the same consumer topic
+            # class. Scheduled for removal in Karafka 3.0.
+            if const_defined?("Topic", false)
+              Topics::ConsumerGroupTopic.prepend(self::Topic)
+            end
+
             # Share-group topic hook. Features that also apply to share groups (KIP-932) define a
             # `ShareGroupTopic` module and it is prepended onto the share topic class. This
             # primitive is wired even though only shared features (e.g. deserializers) use it today.
