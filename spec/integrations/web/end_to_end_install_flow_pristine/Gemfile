@@ -4,6 +4,11 @@ source "https://rubygems.org"
 
 gem "activemodel", "7.2.3"
 gem "activesupport", "7.2.3"
+# Pin json below 3.0: json 3.0 dropped the `quirks_mode` keyword that ActiveSupport 7.2's
+# `to_json`/`ActiveSupport::JSON.encode` still passes, which breaks loading the released
+# `karafka-web` executable in this pristine install flow. Remove once karafka-web/ActiveSupport
+# in use here are compatible with json >= 3.0.
+gem "json", "< 3"
 gem "karafka", path: ENV.fetch("KARAFKA_GEM_DIR"), require: true
 gem "karafka-web", ">= 0.10.1"
 gem "railties", "7.2.3"
