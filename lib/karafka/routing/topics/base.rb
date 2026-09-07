@@ -6,10 +6,10 @@ module Karafka
       # Base class for the routing topic types. It stores all the mode-agnostic details on how we
       # should interact with a given Kafka topic and is a part of Karafka's DSL.
       #
-      # Concrete topic types ({Topics::ConsumerGroupTopic} for consumer groups and {Topics::ShareGroupTopic}
-      # for share groups) inherit from it. Consumer-group routing features are prepended onto
-      # {Topics::ConsumerGroupTopic} only, so share topics deliberately do not inherit consumer-group
-      # feature flow.
+      # Concrete topic types ({Topics::ConsumerGroupTopic} for consumer groups and
+      # {Topics::ShareGroupTopic} for share groups) inherit from it. Consumer-group routing
+      # features are prepended onto {Topics::ConsumerGroupTopic} only, so share topics
+      # deliberately do not inherit consumer-group feature flow.
       #
       # @note `#group` is the polymorphic reference to the owning group. `#consumer_group` is kept
       #   as an alias for backwards compatibility.
@@ -143,8 +143,8 @@ module Karafka
         end
 
         # @return [Class] consumer class that we should use
-        # @note This is just an alias to the `#consumer` method. We however want to use it internally
-        #   instead of referencing the `#consumer`. We use this to indicate that this method returns
+        # @note This is just an alias to the `#consumer` method. We however want to use it
+        #   internally instead of referencing the `#consumer`. We use this to indicate it returns
         #   class and not an instance. In the routing we want to keep the `#consumer Consumer`
         #   routing syntax, but for references outside, we should use this one.
         def consumer_class

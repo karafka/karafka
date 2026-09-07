@@ -38,17 +38,17 @@ module Karafka
 
                 each do |group|
                   # A feature validates each group with the contract matching that group's type.
-                  # Consumer groups use `Contracts::ConsumerGroup`/`Contracts::Topic`; share groups
-                  # use `Contracts::ShareGroup`/`Contracts::ShareGroupTopic`. A feature only runs against
-                  # a group type for which it defines the corresponding contract, so a feature that
-                  # applies to a single mode simply omits the other mode's contracts. The
-                  # share-group primitives are wired here regardless of whether any feature uses
-                  # them yet.
+                  # Consumer groups use `Contracts::ConsumerGroup`/`Contracts::ConsumerGroupTopic`;
+                  # share groups use `Contracts::ShareGroup`/`Contracts::ShareGroupTopic`. A feature
+                  # only runs against a group type for which it defines the corresponding contract,
+                  # so a feature that applies to a single mode simply omits the other mode's
+                  # contracts. The share-group primitives are wired here regardless of whether any
+                  # feature uses them yet.
                   group_contract, topic_contract =
                     if group.share_group?
                       %w[ShareGroup ShareGroupTopic]
                     else
-                      %w[ConsumerGroup Topic]
+                      %w[ConsumerGroup ConsumerGroupTopic]
                     end
 
                   if scope::Contracts.const_defined?(group_contract, false)

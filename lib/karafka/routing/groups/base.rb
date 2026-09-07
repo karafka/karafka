@@ -22,8 +22,8 @@ module Karafka
 
         # This is a "virtual" attribute that is not building subscription groups.
         # It allows us to store the "current" subscription group defined in the routing
-        # This subscription group id is then injected into topics, so we can compute the subscription
-        # groups
+        # This subscription group id is then injected into topics, so we can compute the
+        # subscription groups
         attr_accessor :current_subscription_group_details
 
         # @param name [String, Symbol] name of this group.
@@ -126,7 +126,7 @@ module Karafka
 
         private
 
-        # @return [Symbol] activity-manager scope this group filters under. Overridden by subclasses.
+        # @return [Symbol] activity-manager scope this group filters under (subclass override)
         # @raise [NotImplementedError] when not overridden
         def activity_scope
           raise NotImplementedError, "Implement in a subclass"

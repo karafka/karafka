@@ -13,13 +13,15 @@ module Karafka
         class << self
           # Extends topic and builder with given feature API
           def activate
-            if const_defined?("Topic", false)
-              Topic.prepend(self::Topic)
+            # Consumer-group topic hook. Features prepend their `ConsumerGroupTopic` module onto the
+            # consumer topic class.
+            if const_defined?("ConsumerGroupTopic", false)
+              Topics::ConsumerGroupTopic.prepend(self::ConsumerGroupTopic)
             end
 
             # Share-group topic hook. Features that also apply to share groups (KIP-932) define a
-            # `ShareGroupTopic` module and it is prepended onto the share topic class. This primitive is
-            # wired even though only shared features (e.g. deserializers) use it today.
+            # `ShareGroupTopic` module and it is prepended onto the share topic class. This
+            # primitive is wired even though only shared features (e.g. deserializers) use it today.
             if const_defined?("ShareGroupTopic", false)
               Topics::ShareGroupTopic.prepend(self::ShareGroupTopic)
             end

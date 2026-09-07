@@ -11,7 +11,7 @@ RSpec.describe_current do
       run!: nil,
       stopped?: true,
       terminated?: true,
-      subscription_groups: { 1 => [] }
+      subscription_groups: { build(:routing_consumer_group) => [] }
     )
 
     # Do not close the real producer as we use it in specs

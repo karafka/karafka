@@ -49,8 +49,8 @@ module Karafka
 
           # Returns consumer groups for parallel segments with which we should be working
           #
-          # @return [Hash{String => Array<Karafka::Routing::Groups::ConsumerGroup>}] hash with all parallel
-          #   consumer groups as values and names of segments origin consumer group as the key.
+          # @return [Hash{String => Array<Karafka::Routing::Groups::ConsumerGroup>}] hash with all
+          #   parallel consumer groups as values and names of segments origin consumer group as key.
           def applicable_groups
             requested_groups = options[:groups] || []
 
