@@ -53,8 +53,14 @@ module Karafka
       #
       # @param message [Karafka::Messages::Message] message containing the job
       # @return [Hash] deserialized job hash
+      #
+      # @note We use `::JSON.parse` rather than `::ActiveSupport::JSON.decode` on purpose. The job
+      #   payload is always a JSON object produced by ActiveJob's own serialization, so plain
+      #   parsing round-trips it identically, and it avoids `ActiveSupport::JSON.decode` passing a
+      #   second positional argument to `JSON.parse`, which raises `ArgumentError` under the
+      #   json gem `>= 3.0`.
       def deserialize(message)
-        ::ActiveSupport::JSON.decode(message.raw_payload)
+        ::JSON.parse(message.raw_payload)
       end
     end
   end
