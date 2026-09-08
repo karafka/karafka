@@ -88,6 +88,13 @@ RSpec.describe Karafka::Routing::ShareGroups::Group do
       expect(share_topic.deserializers).to be_active
       expect(share_topic.to_h).to include(:deserializers)
     end
+
+    it "expect the declaratives (shared) feature to apply to share topics" do
+      # Declaratives are mode-agnostic: a topic's structure (partitions, replication factor,
+      # config) does not depend on whether it is consumed via a consumer or a share group.
+      expect(share_topic).to respond_to(:config)
+      expect(share_topic).to respond_to(:declaratives)
+    end
   end
 
   context "with backwards-compatible flat aliases" do
