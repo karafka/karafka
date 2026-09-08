@@ -6,19 +6,31 @@ module Karafka
       # Routing builder expander that injects feature related drawing operations into it
       class Expander < Module
         # Resolves the feature contracts namespace (holding `Group`/`Topic`) for a group's mode,
-        # mirroring the routing namespaces. Every feature is defined under a mode namespace
-        # (`Features::ConsumerGroups::X` / `Features::ShareGroups::X`) and exposes kind-only
-        # contracts (`Contracts::Group` / `Contracts::Topic`) that apply only to its own mode.
+        # mirroring the routing namespaces. A feature defined under a mode namespace
+        # (`Features::ConsumerGroups::X` / `Features::ShareGroups::X`, how all built-in features are
+        # organized) exposes kind-only contracts (`Contracts::Group`/`Contracts::Topic`) that apply
+        # only to its own mode. A feature defined outside a mode namespace (e.g. a custom feature)
+        # instead exposes mode-qualified contracts (`Contracts::ConsumerGroups::{Group,Topic}` /
+        # `Contracts::ShareGroups::{Group,Topic}`).
         #
         # @param scope [Module] the feature
         # @param mode [Symbol] `:consumer` or `:share`
         # @return [Module, nil] contracts namespace holding `Group`/`Topic`, or nil if the feature
-        #   has no contracts or does not target this mode
+        #   has no contracts for this mode
         def self.contracts_for(scope, mode)
           return nil unless scope.const_defined?("Contracts", false)
-          return nil unless scope.routing_mode == mode
 
-          scope::Contracts
+          contracts = scope::Contracts
+
+          if scope.routing_mode
+            return nil unless scope.routing_mode == mode
+
+            contracts
+          else
+            mod_name = (mode == :share) ? "ShareGroups" : "ConsumerGroups"
+
+            contracts.const_defined?(mod_name, false) ? contracts.const_get(mod_name, false) : nil
+          end
         end
 
         # @param scope [Module] feature scope in which contract and other things should be
