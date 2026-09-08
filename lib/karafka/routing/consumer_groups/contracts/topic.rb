@@ -2,8 +2,8 @@
 
 module Karafka
   module Routing
-    module Contracts
-      module ConsumerGroups
+    module ConsumerGroups
+      module Contracts
         # Consumer group topic validation rules.
         class Topic < Karafka::Contracts::Base
           configure do |config|

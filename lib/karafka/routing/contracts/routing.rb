@@ -2,6 +2,8 @@
 
 module Karafka
   module Routing
+    # Namespace for cross-group routing contracts (mode-specific contracts live under
+    # `Routing::ConsumerGroups::Contracts` / `Routing::ShareGroups::Contracts`).
     module Contracts
       # Ensures that routing wide rules are obeyed
       class Routing < Karafka::Contracts::Base

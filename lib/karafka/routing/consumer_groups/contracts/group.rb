@@ -2,10 +2,9 @@
 
 module Karafka
   module Routing
-    # Namespace for routing related contracts
-    module Contracts
-      # Consumer-group route validation contracts (mirrors Routing::ConsumerGroups).
-      module ConsumerGroups
+    module ConsumerGroups
+      # Routing validation contracts for consumer groups.
+      module Contracts
         # Contract for single full route (consumer group + topics) validation.
         class Group < Karafka::Contracts::Base
           configure do |config|

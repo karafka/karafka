@@ -2,8 +2,8 @@
 
 module Karafka
   module Routing
-    module Contracts
-      module ShareGroups
+    module ShareGroups
+      module Contracts
         # Share group topic (KIP-932 / Queues for Kafka) validation rules.
         #
         # Mirrors the consumer-group {Topic} contract for the attributes share topics share with

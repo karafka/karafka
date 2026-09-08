@@ -2,9 +2,9 @@
 
 module Karafka
   module Routing
-    module Contracts
-      # Share-group route validation contracts (mirrors Routing::ShareGroups).
-      module ShareGroups
+    module ShareGroups
+      # Routing validation contracts for share groups.
+      module Contracts
         # Contract for a single share group (KIP-932 / Queues for Kafka) route validation.
         #
         # Share groups share the same group-level shape as consumer groups (`id` + `topics`), so
