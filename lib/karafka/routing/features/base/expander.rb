@@ -6,6 +6,32 @@ module Karafka
       class Base
         # Routing builder expander that injects feature related drawing operations into it
         class Expander < Module
+          # Resolves the feature contracts namespace (holding `Group`/`Topic`) for a group's mode,
+          # mirroring the routing namespaces. A mode-specific feature exposes kind-only contracts
+          # (`Contracts::Group`/`Contracts::Topic`) and only applies to its own mode; a shared
+          # feature exposes mode-qualified contracts (`Contracts::ConsumerGroups::{Group,Topic}` /
+          # `Contracts::ShareGroups::{Group,Topic}`).
+          #
+          # @param scope [Module] the feature
+          # @param mode [Symbol] `:consumer` or `:share`
+          # @return [Module, nil] contracts namespace holding `Group`/`Topic`, or nil if the feature
+          #   has no contracts for this mode
+          def self.contracts_for(scope, mode)
+            return nil unless scope.const_defined?("Contracts", false)
+
+            contracts = scope::Contracts
+
+            if scope.routing_mode
+              return nil unless scope.routing_mode == mode
+
+              contracts
+            else
+              mod_name = (mode == :share) ? "ShareGroups" : "ConsumerGroups"
+
+              contracts.const_defined?(mod_name, false) ? contracts.const_get(mod_name, false) : nil
+            end
+          end
+
           # @param scope [Module] feature scope in which contract and other things should be
           # @return [Expander] builder expander instance
           def initialize(scope)
@@ -37,33 +63,22 @@ module Karafka
                 result = super(&block)
 
                 each do |group|
-                  # A feature validates each group with the contract matching that group's type.
-                  # Consumer groups use `Contracts::ConsumerGroup`/`Contracts::Topic`; share groups
-                  # use `Contracts::ShareGroup`/`Contracts::ShareTopic`. A feature only runs against a
-                  # group type for which it defines a matching contract, so a feature that applies to
-                  # a single mode simply omits the other mode's contracts. The share-group primitives
-                  # are wired here regardless of whether any feature uses them yet.
-                  if group.share_group?
-                    group_contract = "ShareGroup"
-                    topic_contract = "ShareTopic"
-                  else
-                    group_contract = "ConsumerGroup"
-                    topic_contract = "Topic"
-                  end
+                  mode = group.share_group? ? :share : :consumer
+                  contracts = Base::Expander.contracts_for(scope, mode)
 
-                  if scope::Contracts.const_defined?(group_contract, false)
-                    scope::Contracts.const_get(group_contract, false).new.validate!(
+                  next unless contracts
+
+                  if contracts.const_defined?("Group", false)
+                    contracts::Group.new.validate!(
                       group.to_h,
                       scope: ["routes", group.name]
                     )
                   end
 
-                  next unless scope::Contracts.const_defined?(topic_contract, false)
-
-                  topic_contract_class = scope::Contracts.const_get(topic_contract, false)
+                  next unless contracts.const_defined?("Topic", false)
 
                   group.topics.each do |topic|
-                    topic_contract_class.new.validate!(
+                    contracts::Topic.new.validate!(
                       topic.to_h,
                       scope: ["routes", group.name, topic.name]
                     )

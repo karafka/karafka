@@ -12,8 +12,7 @@ module Karafka
       # activity management, contracts). They differ only in the group type they report, the
       # activity-manager scope they filter under and the topic class they instantiate
       # ({ShareGroups::Topic}), which keeps share-group feature flow separate from consumer-group
-      # feature flow. Also reachable via the legacy flat {Karafka::Routing::ShareGroup} alias
-      # (retired in 3.0).
+      # feature flow.
       #
       # @note The routing layer only describes share groups. Running them is not yet supported - the
       #   server raises when it detects a share group at boot until the share-group runtime lands.

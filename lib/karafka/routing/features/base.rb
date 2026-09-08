@@ -11,35 +11,43 @@ module Karafka
       # Base for all the features
       class Base
         class << self
+          # @return [Symbol, nil] routing mode this feature belongs to (`:consumer`/`:share`),
+          #   inferred from where the feature is defined (`Features::ConsumerGroups::X` ->
+          #   `:consumer`), or `nil` for a shared top-level feature that targets modes explicitly.
+          def routing_mode
+            case name.to_s.split("::")[-2]
+            when "ShareGroups" then :share
+            when "ConsumerGroups" then :consumer
+            end
+          end
+
+          # @param mode [Symbol] `:consumer` or `:share`
+          # @return [Module] the matching routing namespace (ConsumerGroups / ShareGroups)
+          def routing_mode_namespace(mode)
+            (mode == :share) ? Routing::ShareGroups : Routing::ConsumerGroups
+          end
+
           # Extends topic and builder with given feature API
           def activate
-            # Consumer-group topic hook. Features prepend their `Topic` module onto the consumer
-            # topic class. Fully qualified because a bare `ConsumerGroups` here would resolve to
-            # `Features::ConsumerGroups`.
-            if const_defined?("Topic", false)
-              Routing::ConsumerGroups::Topic.prepend(self::Topic)
-            end
+            # Group/topic hooks. Their target routing class mirrors the routing namespaces
+            # (`Routing::<Mode>::Group` / `Routing::<Mode>::Topic`). A mode-specific feature (one
+            # defined under `Features::ConsumerGroups::`/`ShareGroups::`) defines kind-only `Group`
+            # and `Topic` modules and its mode is taken from its namespace. A shared top-level
+            # feature (e.g. deserializers) spans modes, so it nests `ConsumerGroups`/`ShareGroups`
+            # sub-modules holding `Group`/`Topic`.
+            if routing_mode
+              activate_group_topic_hooks(self, routing_mode)
+            else
+              %i[consumer share].each do |mode|
+                mod_name = (mode == :share) ? "ShareGroups" : "ConsumerGroups"
+                next unless const_defined?(mod_name, false)
 
-            # Share-group topic hook. Features that also apply to share groups (KIP-932) define a
-            # `ShareTopic` module and it is prepended onto the share topic class. This primitive is
-            # wired even though only shared features (e.g. deserializers) use it today.
-            if const_defined?("ShareTopic", false)
-              Routing::ShareGroups::Topic.prepend(self::ShareTopic)
+                activate_group_topic_hooks(const_get(mod_name, false), mode)
+              end
             end
 
             if const_defined?("Topics", false)
               Topics.prepend(self::Topics)
-            end
-
-            # Consumer-group hook. Features prepend their `ConsumerGroup` module onto the consumer
-            # group class.
-            if const_defined?("ConsumerGroup", false)
-              Routing::ConsumerGroups::Group.prepend(self::ConsumerGroup)
-            end
-
-            # Share-group hook, mirroring `ConsumerGroup`. Prepended onto the share group class.
-            if const_defined?("ShareGroup", false)
-              Routing::ShareGroups::Group.prepend(self::ShareGroup)
             end
 
             if const_defined?("Proxy", false)
@@ -86,6 +94,23 @@ module Karafka
           end
 
           private
+
+          # Prepends a feature's `Group`/`Topic` modules onto the routing classes of a given mode.
+          # @param container [Module] module holding `Group`/`Topic` - the feature itself for a
+          #   mode-specific feature, or its `ConsumerGroups`/`ShareGroups` sub-module for a shared
+          #   one
+          # @param mode [Symbol] `:consumer` or `:share`
+          def activate_group_topic_hooks(container, mode)
+            routing_ns = routing_mode_namespace(mode)
+
+            if container.const_defined?("Group", false)
+              routing_ns::Group.prepend(container::Group)
+            end
+
+            return unless container.const_defined?("Topic", false)
+
+            routing_ns::Topic.prepend(container::Topic)
+          end
 
           # @return [Array<Class>] all available routing features that are direct descendants of
           #   the features base.Approach with using `#superclass` prevents us from accidentally

@@ -91,10 +91,6 @@ RSpec.describe Karafka::Routing::ShareGroups::Group do
   end
 
   context "with backwards-compatible flat aliases" do
-    it "expect Routing::ShareGroup to alias ShareGroups::Group" do
-      expect(Karafka::Routing::ShareGroup).to equal(described_class)
-    end
-
     it "expect Routing::ConsumerGroup to alias ConsumerGroups::Group" do
       expect(Karafka::Routing::ConsumerGroup).to equal(Karafka::Routing::ConsumerGroups::Group)
     end
