@@ -60,7 +60,7 @@ module Karafka
             # Validate group settings. Share groups reuse the same routing machinery but have their
             # own contracts so their (different) feature flow can be validated independently.
             group_contract = group.share_group? ? Contracts::ShareGroup : Contracts::ConsumerGroup
-            topic_contract = group.share_group? ? Contracts::ShareGroupTopic : Contracts::ConsumerGroupTopic
+            topic_contract = group.share_group? ? Contracts::ShareTopic : Contracts::Topic
 
             group_contract.new.validate!(
               group.to_h,
@@ -94,7 +94,7 @@ module Karafka
         draw(&)
       end
 
-      # @return [Array<Karafka::Routing::Groups::ConsumerGroup>] only active consumer groups that
+      # @return [Array<Karafka::Routing::ConsumerGroups::Group>] only active consumer groups that
       #   we want to use. Since Karafka supports multi-process setup, we need to be able
       #   to pick only those consumer groups that should be active in our given process context
       def active
@@ -134,7 +134,7 @@ module Karafka
         if group
           Proxy.new(group, &).target
         else
-          group = ConsumerGroup.new(group_id.to_s)
+          group = ConsumerGroups::Group.new(group_id.to_s)
           self << Proxy.new(group, &).target
         end
       end
@@ -152,7 +152,7 @@ module Karafka
         if group
           Proxy.new(group, &).target
         else
-          group = Groups::ShareGroup.new(group_id.to_s)
+          group = ShareGroups::Group.new(group_id.to_s)
           self << Proxy.new(group, &).target
         end
       end

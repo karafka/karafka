@@ -69,10 +69,10 @@ raise unless Karafka::Pro::Processing::ConsumerGroups::Partitioner
 raise unless Karafka::BaseConsumer
 raise unless Karafka::Pro::Processing::ConsumerGroups::JobsBuilder
 raise unless Karafka::Pro::Processing::Schedulers::Default
-raise unless Karafka::Pro::Routing::Features::ConsumerGroups::LongRunningJob::ConsumerGroupTopic
+raise unless Karafka::Pro::Routing::Features::ConsumerGroups::LongRunningJob::Topic
 raise unless Karafka::Pro::Routing::Features::ConsumerGroups::LongRunningJob::Contracts
 raise unless Karafka::Pro::Routing::Features::ConsumerGroups::LongRunningJob::Config
-raise unless Karafka::Pro::Routing::Features::ConsumerGroups::VirtualPartitions::ConsumerGroupTopic
+raise unless Karafka::Pro::Routing::Features::ConsumerGroups::VirtualPartitions::Topic
 raise unless Karafka::Pro::Routing::Features::ConsumerGroups::VirtualPartitions::Contracts
 raise unless Karafka::Pro::Routing::Features::ConsumerGroups::VirtualPartitions::Config
 raise unless Karafka::Pro::Processing::ConsumerGroups::Jobs::ConsumeNonBlocking

@@ -22,7 +22,7 @@ RSpec.describe_current do
   end
 
   describe "share group guard" do
-    let(:share_group) { Karafka::Routing::Groups::ShareGroup.new("webhooks") }
+    let(:share_group) { Karafka::Routing::ShareGroups::Group.new("webhooks") }
 
     before do
       allow(Karafka::App).to receive(:subscription_groups).and_return(

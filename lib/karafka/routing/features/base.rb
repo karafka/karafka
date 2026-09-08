@@ -13,38 +13,33 @@ module Karafka
         class << self
           # Extends topic and builder with given feature API
           def activate
-            # Consumer-group topic hook. Features prepend their `ConsumerGroupTopic` module onto the
-            # consumer topic class.
-            if const_defined?("ConsumerGroupTopic", false)
-              Topics::ConsumerGroupTopic.prepend(self::ConsumerGroupTopic)
-            end
-
-            # Legacy consumer-group topic hook. `Topic` was the hook name before it was renamed to
-            # `ConsumerGroupTopic`; it is kept working so external routing features (and user code)
-            # that define a `Topic` module keep functioning. Prepended onto the same consumer topic
-            # class. Scheduled for removal in Karafka 3.0.
+            # Consumer-group topic hook. Features prepend their `Topic` module onto the consumer
+            # topic class. Fully qualified because a bare `ConsumerGroups` here would resolve to
+            # `Features::ConsumerGroups`.
             if const_defined?("Topic", false)
-              Topics::ConsumerGroupTopic.prepend(self::Topic)
+              Routing::ConsumerGroups::Topic.prepend(self::Topic)
             end
 
             # Share-group topic hook. Features that also apply to share groups (KIP-932) define a
-            # `ShareGroupTopic` module and it is prepended onto the share topic class. This
-            # primitive is wired even though only shared features (e.g. deserializers) use it today.
-            if const_defined?("ShareGroupTopic", false)
-              Topics::ShareGroupTopic.prepend(self::ShareGroupTopic)
+            # `ShareTopic` module and it is prepended onto the share topic class. This primitive is
+            # wired even though only shared features (e.g. deserializers) use it today.
+            if const_defined?("ShareTopic", false)
+              Routing::ShareGroups::Topic.prepend(self::ShareTopic)
             end
 
             if const_defined?("Topics", false)
               Topics.prepend(self::Topics)
             end
 
+            # Consumer-group hook. Features prepend their `ConsumerGroup` module onto the consumer
+            # group class.
             if const_defined?("ConsumerGroup", false)
-              ConsumerGroup.prepend(self::ConsumerGroup)
+              Routing::ConsumerGroups::Group.prepend(self::ConsumerGroup)
             end
 
             # Share-group hook, mirroring `ConsumerGroup`. Prepended onto the share group class.
             if const_defined?("ShareGroup", false)
-              Groups::ShareGroup.prepend(self::ShareGroup)
+              Routing::ShareGroups::Group.prepend(self::ShareGroup)
             end
 
             if const_defined?("Proxy", false)

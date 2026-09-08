@@ -2,9 +2,9 @@
 
 module Karafka
   module Routing
-    # Legacy flat alias for the canonical {Karafka::Routing::Groups::ConsumerGroup}. Kept for
+    # Legacy flat alias for the canonical {Karafka::Routing::ConsumerGroups::Group}. Kept for
     # backwards compatibility because it is widely referenced and is de-facto public API. New code
-    # should reference `Groups::ConsumerGroup`. Scheduled for retirement in Karafka 3.0.
-    ConsumerGroup = Groups::ConsumerGroup
+    # should reference `ConsumerGroups::Group`. Scheduled for retirement in Karafka 3.0.
+    ConsumerGroup = ConsumerGroups::Group
   end
 end

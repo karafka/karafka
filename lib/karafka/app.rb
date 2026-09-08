@@ -61,7 +61,7 @@ module Karafka
       # share groups). Returns every group regardless of its type.
       alias_method :groups, :consumer_groups
 
-      # @return [Array<Karafka::Routing::Groups::ShareGroup>] all defined share groups (KIP-932).
+      # @return [Array<Karafka::Routing::ShareGroups::Group>] all defined share groups (KIP-932).
       # @note Share groups live in the same routing builder as consumer groups; this is just a
       #   type-filtered view. Empty unless `share_group` routing blocks are defined.
       def share_groups
