@@ -3,11 +3,10 @@
 module Karafka
   module Routing
     module Features
-      class Deserializers < Base
-        # This feature validation contracts
-        module Contracts
-          # Namespace for this feature's consumer-group routing hooks.
-          module ConsumerGroups
+      module ConsumerGroups
+        class Deserializers < Base
+          # This feature validation contracts
+          module Contracts
             # Basic validation of the Kafka expected config details
             class Topic < Karafka::Contracts::Base
               configure do |config|

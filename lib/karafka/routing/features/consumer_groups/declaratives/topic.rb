@@ -3,9 +3,8 @@
 module Karafka
   module Routing
     module Features
-      class Declaratives < Base
-        # Namespace for this feature's consumer-group routing hooks.
-        module ConsumerGroups
+      module ConsumerGroups
+        class Declaratives < Base
           # Bridge module prepended onto the consumer-group topic.
           # The config(...) method forwards to the Declaratives subsystem, creating or retrieving
           # a Karafka::Declaratives::Topic in the repository. This preserves backwards compatibility

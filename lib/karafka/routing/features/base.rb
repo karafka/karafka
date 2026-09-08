@@ -13,7 +13,7 @@ module Karafka
         class << self
           # @return [Symbol, nil] routing mode this feature belongs to (`:consumer`/`:share`),
           #   inferred from where the feature is defined (`Features::ConsumerGroups::X` ->
-          #   `:consumer`), or `nil` for a shared top-level feature that targets modes explicitly.
+          #   `:consumer`), or `nil` if the feature is not defined under a mode namespace.
           def routing_mode
             case name.to_s.split("::")[-2]
             when "ShareGroups" then :share
@@ -30,21 +30,10 @@ module Karafka
           # Extends topic and builder with given feature API
           def activate
             # Group/topic hooks. Their target routing class mirrors the routing namespaces
-            # (`Routing::<Mode>::Group` / `Routing::<Mode>::Topic`). A mode-specific feature (one
-            # defined under `Features::ConsumerGroups::`/`ShareGroups::`) defines kind-only `Group`
-            # and `Topic` modules and its mode is taken from its namespace. A shared top-level
-            # feature (e.g. deserializers) spans modes, so it nests `ConsumerGroups`/`ShareGroups`
-            # sub-modules holding `Group`/`Topic`.
-            if routing_mode
-              activate_group_topic_hooks(self, routing_mode)
-            else
-              %i[consumer share].each do |mode|
-                mod_name = (mode == :share) ? "ShareGroups" : "ConsumerGroups"
-                next unless const_defined?(mod_name, false)
-
-                activate_group_topic_hooks(const_get(mod_name, false), mode)
-              end
-            end
+            # (`Routing::<Mode>::Group` / `Routing::<Mode>::Topic`). Every feature is defined under
+            # a mode namespace (`Features::ConsumerGroups::`/`ShareGroups::`), defines kind-only
+            # `Group` and `Topic` modules, and its mode is taken from that namespace.
+            activate_group_topic_hooks(routing_mode) if routing_mode
 
             if const_defined?("Topics", false)
               Topics.prepend(self::Topics)
@@ -59,7 +48,7 @@ module Karafka
             end
 
             if const_defined?("Contracts", false)
-              Builder.prepend(Base::Expander.new(self))
+              Builder.prepend(Expander.new(self))
             end
 
             if const_defined?("SubscriptionGroup", false)
@@ -95,21 +84,18 @@ module Karafka
 
           private
 
-          # Prepends a feature's `Group`/`Topic` modules onto the routing classes of a given mode.
-          # @param container [Module] module holding `Group`/`Topic` - the feature itself for a
-          #   mode-specific feature, or its `ConsumerGroups`/`ShareGroups` sub-module for a shared
-          #   one
+          # Prepends this feature's `Group`/`Topic` modules onto the routing classes of its mode.
           # @param mode [Symbol] `:consumer` or `:share`
-          def activate_group_topic_hooks(container, mode)
+          def activate_group_topic_hooks(mode)
             routing_ns = routing_mode_namespace(mode)
 
-            if container.const_defined?("Group", false)
-              routing_ns::Group.prepend(container::Group)
+            if const_defined?("Group", false)
+              routing_ns::Group.prepend(self::Group)
             end
 
-            return unless container.const_defined?("Topic", false)
+            return unless const_defined?("Topic", false)
 
-            routing_ns::Topic.prepend(container::Topic)
+            routing_ns::Topic.prepend(self::Topic)
           end
 
           # @return [Array<Class>] all available routing features that are direct descendants of

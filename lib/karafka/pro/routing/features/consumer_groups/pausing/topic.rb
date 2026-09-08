@@ -47,7 +47,8 @@ module Karafka
               # @param max_timeout [Integer] what is the max timeout in case of an exponential
               #   backoff (milliseconds)
               # @param with_exponential_backoff [Boolean] should we use exponential backoff
-              # @return [Karafka::Routing::Features::Pausing::Config] pausing config object
+              # @return [Karafka::Routing::Features::ConsumerGroups::Pausing::Config] pausing config
+              #   object
               def pause(timeout: nil, max_timeout: nil, with_exponential_backoff: nil)
                 config = super()
 

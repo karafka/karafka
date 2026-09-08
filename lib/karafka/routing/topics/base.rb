@@ -56,10 +56,6 @@ module Karafka
           INHERITABLE_ATTRIBUTES.each do |attribute|
             instance_variable_set("@#{attribute}", nil)
           end
-
-          # Explicit nil initialization for Ruby's object shapes optimization. The per-topic pause
-          # config is built lazily on first read, defaulting to the global `config.pause.*` settings.
-          @pause = nil
         end
 
         INHERITABLE_ATTRIBUTES.each do |attribute|
@@ -78,17 +74,6 @@ module Karafka
         # @return [Symbol] the type of the owning group (`:consumer` / `:share`)
         def group_type
           group.group_type
-        end
-
-        # @return [Karafka::Routing::Features::Pausing::Config] per-topic pause configuration,
-        #   reflecting the root `config.pause.*` settings.
-        def pause
-          @pause ||= Features::Pausing::Config.new(
-            active: false,
-            timeout: Karafka::App.config.pause.timeout,
-            max_timeout: Karafka::App.config.pause.max_timeout,
-            with_exponential_backoff: Karafka::App.config.pause.with_exponential_backoff
-          )
         end
 
         # Often users want to have the same basic cluster setup with small setting alterations
@@ -171,7 +156,6 @@ module Karafka
             name: name,
             active: active?,
             consumer: consumer,
-            pause: pause.to_h,
             group_id: group.id,
             # Kept as a reference alongside `group_id` for backwards compatibility. Will be removed
             # in Karafka 3.0.

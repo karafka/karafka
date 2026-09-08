@@ -179,9 +179,13 @@ module Karafka
         lines << "      max_wait_time: #{topic.max_wait_time}"
         lines << "      initial_offset: #{topic.initial_offset}"
         lines << "      consumer_persistence: #{topic.consumer_persistence}"
-        lines << "      pause_timeout: #{topic.pause.timeout}"
-        lines << "      pause_max_timeout: #{topic.pause.max_timeout}"
-        lines << "      pause_with_exponential_backoff: #{topic.pause.with_exponential_backoff}"
+
+        # Pausing is a consumer-group only concern - share group topics (KIP-932) do not pause
+        if topic.respond_to?(:pause)
+          lines << "      pause_timeout: #{topic.pause.timeout}"
+          lines << "      pause_max_timeout: #{topic.pause.max_timeout}"
+          lines << "      pause_with_exponential_backoff: #{topic.pause.with_exponential_backoff}"
+        end
 
         topic_kafka = topic.kafka
 

@@ -36,11 +36,11 @@ module Karafka
           class Pausing < Base
             # Config for pausing feature.
             #
-            # By convention each routing feature exposes a `Config`. The pause object is defined
-            # in OSS (`Karafka::Routing::Features::Pausing::Config`) because the per-topic `#pause`
-            # reader defaults to the global config there, so the feature points its `Config` at that
-            # shared class rather than redefining it.
-            Config = Karafka::Routing::Features::Pausing::Config
+            # By convention each routing feature exposes a `Config`. The pause object is defined in
+            # OSS (`Karafka::Routing::Features::ConsumerGroups::Pausing::Config`) because the
+            # per-topic `#pause` reader defaults to the global config there, so the feature points
+            # its `Config` at that class rather than redefining it.
+            Config = Karafka::Routing::Features::ConsumerGroups::Pausing::Config
           end
         end
       end

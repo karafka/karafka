@@ -48,7 +48,10 @@ RSpec.describe Karafka::Routing::ShareGroups::Group do
   end
 
   context "when share topics do not inherit consumer-group feature DSL" do
-    it "expect a consumer topic to respond to a CG-only feature and a share topic not to" do
+    let(:consumer_topic) { builder.find(&:consumer_group?).topics.first }
+    let(:share_topic) { builder.find(&:share_group?).topics.first }
+
+    before do
       cclass = consumer_class
 
       builder.draw do
@@ -60,40 +63,23 @@ RSpec.describe Karafka::Routing::ShareGroups::Group do
           topic(:b) { consumer cclass }
         end
       end
-
-      consumer_topic = builder.find(&:consumer_group?).topics.first
-      share_topic = builder.find(&:share_group?).topics.first
-
-      # `dead_letter_queue` is a consumer-group routing feature prepended onto Routing::Topic only
-      expect(consumer_topic).to respond_to(:dead_letter_queue)
-      expect(share_topic).not_to respond_to(:dead_letter_queue)
     end
-  end
 
-  context "when a share topic needs to process message payloads, keys and headers" do
-    before do
-      cclass = consumer_class
-
-      builder.draw do
-        share_group "sg" do
-          topic(:b) { consumer cclass }
-        end
+    # Every routing feature is defined under a single mode namespace
+    # (`Features::ConsumerGroups::*`) and prepended onto the consumer topic only. None leak onto
+    # the share topic. When the share-group runtime lands, the features share groups also need
+    # (deserializers, etc.) will be duplicated under `Features::ShareGroups::*`.
+    %i[dead_letter_queue deserializers declaratives config pause].each do |feature|
+      it "expect a consumer topic to respond to :#{feature} and a share topic not to" do
+        expect(consumer_topic).to respond_to(feature)
+        expect(share_topic).not_to respond_to(feature)
       end
     end
 
-    let(:share_topic) { share_group.topics.first }
-
-    it "expect the deserializers (shared) feature to apply to share topics" do
-      expect(share_topic).to respond_to(:deserializers)
-      expect(share_topic.deserializers).to be_active
-      expect(share_topic.to_h).to include(:deserializers)
-    end
-
-    it "expect the declaratives (shared) feature to apply to share topics" do
-      # Declaratives are mode-agnostic: a topic's structure (partitions, replication factor,
-      # config) does not depend on whether it is consumed via a consumer or a share group.
-      expect(share_topic).to respond_to(:config)
-      expect(share_topic).to respond_to(:declaratives)
+    it "expect the share topic to_h to omit consumer-group only keys" do
+      expect(consumer_topic.to_h).to include(:deserializers, :pause)
+      expect(share_topic.to_h).not_to include(:deserializers)
+      expect(share_topic.to_h).not_to include(:pause)
     end
   end
 

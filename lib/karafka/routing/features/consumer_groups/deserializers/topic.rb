@@ -3,9 +3,8 @@
 module Karafka
   module Routing
     module Features
-      class Deserializers < Base
-        # Namespace for this feature's consumer-group routing hooks.
-        module ConsumerGroups
+      module ConsumerGroups
+        class Deserializers < Base
           # Routing topic deserializers API. It allows to configure deserializers for various
           # components of each message.
           module Topic
