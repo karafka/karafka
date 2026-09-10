@@ -21,7 +21,10 @@ module Karafka
           required(:id) { |val| val.is_a?(String) && Karafka::Contracts::TOPIC_REGEXP.match?(val) }
           required(:kafka) { |val| val.is_a?(Hash) && !val.empty? }
           required(:max_messages) { |val| val.is_a?(Integer) && val >= 1 }
-          required(:initial_offset) { |val| %w[earliest latest].include?(val) }
+          # `initial_offset` is deliberately not validated here: share consumers reject the
+          # client-side `auto.offset.reset` - the offset reset behavior of a share group is a
+          # broker-side group configuration (`share.auto.offset.reset`), so the attribute has no
+          # effect for share topics and is never propagated to their clients
           required(:max_wait_time) { |val| val.is_a?(Integer) && val >= 10 }
           required(:name) { |val| val.is_a?(String) && Karafka::Contracts::TOPIC_REGEXP.match?(val) }
           required(:active) { |val| [true, false].include?(val) }

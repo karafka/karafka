@@ -346,7 +346,7 @@ module Karafka
         # Build consumer settings using the group's kafka config from first topic
         # This ensures we use the same settings as the actual consumers
         # Following the same pattern as in Karafka::Connection::Client#build_kafka
-        consumer_settings = Setup::AttributesMap.consumer(first_topic.kafka.dup)
+        consumer_settings = Setup::AttributesMap.consumer_group(first_topic.kafka.dup)
         consumer_settings[:"group.id"] = group.id
         consumer_settings[:"enable.auto.offset.store"] = false
         consumer_settings[:"auto.offset.reset"] ||= first_topic.initial_offset

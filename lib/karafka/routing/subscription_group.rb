@@ -127,17 +127,31 @@ module Karafka
       #   topics but they lack the group.id (unless explicitly) provided. To make it compatible
       #   with our routing engine, we inject it before it will go to the consumer
       def build_kafka
-        kafka = Setup::AttributesMap.consumer(@topics.first.kafka.dup)
+        if @group.share_group?
+          # librdkafka rejects a number of regular-consumer properties for KIP-932 share
+          # consumers (offsets and assignment are broker-managed and there is no static group
+          # membership), so share groups use their own attributes scope and defaults and skip
+          # the consumer-group only injections
+          kafka = Setup::AttributesMap.share_group(@topics.first.kafka.dup)
 
-        inject_defaults(kafka)
-        inject_group_instance_id(kafka)
-        inject_client_id(kafka)
+          Setup::DefaultsInjector.share_group(kafka)
+          inject_client_id(kafka)
 
-        kafka[:"group.id"] ||= @group.id
-        kafka[:"auto.offset.reset"] ||= @topics.first.initial_offset
-        # Karafka manages the offsets based on the processing state, thus we do not rely on the
-        # rdkafka offset auto-storing
-        kafka[:"enable.auto.offset.store"] = false
+          kafka[:"group.id"] ||= @group.id
+        else
+          kafka = Setup::AttributesMap.consumer_group(@topics.first.kafka.dup)
+
+          inject_defaults(kafka)
+          inject_group_instance_id(kafka)
+          inject_client_id(kafka)
+
+          kafka[:"group.id"] ||= @group.id
+          kafka[:"auto.offset.reset"] ||= @topics.first.initial_offset
+          # Karafka manages the offsets based on the processing state, thus we do not rely on the
+          # rdkafka offset auto-storing
+          kafka[:"enable.auto.offset.store"] = false
+        end
+
         kafka.freeze
         kafka
       end
@@ -146,7 +160,7 @@ module Karafka
       #
       # @param kafka [Hash] kafka level config
       def inject_defaults(kafka)
-        Setup::DefaultsInjector.consumer(kafka)
+        Setup::DefaultsInjector.consumer_group(kafka)
       end
 
       # Sets (if needed) the client.id attribute

@@ -17,8 +17,8 @@ RSpec.describe_current do
   end
 
   describe "scope injectors" do
-    it "builds the consumer injector on the core Configurable::Injector" do
-      expect(described_class::Consumer.ancestors).to include(
+    it "builds the consumer-group injector on the core Configurable::Injector" do
+      expect(described_class::ConsumerGroup.ancestors).to include(
         Karafka::Core::Configurable::Injector
       )
     end
@@ -27,6 +27,42 @@ RSpec.describe_current do
       expect(described_class::Producer.ancestors).to include(
         Karafka::Core::Configurable::Injector
       )
+    end
+
+    it "builds the share-group injector on the core Configurable::Injector" do
+      expect(described_class::ShareGroup.ancestors).to include(
+        Karafka::Core::Configurable::Injector
+      )
+    end
+  end
+
+  describe "#consumer_group vs #consumer legacy alias" do
+    let(:via_canonical) { {} }
+    let(:via_legacy) { {} }
+
+    it "expect the legacy alias to produce the same defaults as the canonical method" do
+      injector.consumer_group(via_canonical)
+      injector.consumer(via_legacy)
+
+      expect(via_legacy).to eq(via_canonical)
+    end
+  end
+
+  describe "#share_group" do
+    let(:share_kafka_config) { {} }
+
+    before { injector.share_group(share_kafka_config) }
+
+    it "adds the mode-agnostic defaults" do
+      expect(share_kafka_config).to include(
+        "statistics.interval.ms": 5_000,
+        "client.software.name": "karafka",
+        "socket.nagle.disable": true
+      )
+    end
+
+    it "does not add the consumer-group only max.poll.interval.ms" do
+      expect(share_kafka_config).not_to include(:"max.poll.interval.ms")
     end
   end
 
