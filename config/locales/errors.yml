@@ -104,6 +104,7 @@ en:
       server:
         missing: needs to be present
         consumer_groups_inclusion: Unknown consumer group name
+        share_groups_inclusion: Unknown share group name
         subscription_groups_inclusion: Unknown subscription group name
         topics_inclusion: Unknown topic name
         topics_missing: No topics to subscribe to
@@ -124,6 +125,7 @@ en:
 
     routing:
       without_declarative_definition: lacks explicit declarative topics definition
+      groups_names_not_unique: group names must be unique across all group types (consumer and share groups)
 
       topic:
         kafka: needs to be a hash with kafka scope settings details

@@ -63,6 +63,11 @@ module Karafka
                   nodes_setup.freeze
 
                   builder.each do |group|
+                    # Swarm node assignments are a consumer-group feature. Share-group topics
+                    # (KIP-932) carry no swarm assignment API, so they are not part of this
+                    # validation.
+                    next unless group.consumer_group?
+
                     group.topics.each do |topic|
                       nodes_setup.each do |node_id, details|
                         next unless topic.active?

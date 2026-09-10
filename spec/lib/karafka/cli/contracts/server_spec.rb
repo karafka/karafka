@@ -7,9 +7,11 @@ RSpec.describe_current do
   let(:config) do
     {
       include_consumer_groups: [],
+      include_share_groups: [],
       include_subscription_groups: [],
       include_topics: [],
       exclude_consumer_groups: [],
+      exclude_share_groups: [],
       exclude_subscription_groups: [],
       exclude_topics: []
     }
@@ -19,6 +21,60 @@ RSpec.describe_current do
 
   context "when config is valid" do
     it { expect(contract.call(config)).to be_success }
+  end
+
+  context "when we want to use share groups that are not defined" do
+    before { config[:include_share_groups] = [rand.to_s] }
+
+    it { expect(contract.call(config)).not_to be_success }
+  end
+
+  context "when we want to exclude share groups that are not defined" do
+    before { config[:exclude_share_groups] = [rand.to_s] }
+
+    it { expect(contract.call(config)).not_to be_success }
+  end
+
+  context "when we want to use a share groups wildcard pattern that matches nothing yet" do
+    before { config[:include_share_groups] = ["#{rand}-*"] }
+
+    it { expect(contract.call(config)).to be_success }
+  end
+
+  context "when we reference a defined share group in the exclusions" do
+    before do
+      config[:exclude_share_groups] = ["present-sg"]
+
+      share_group = instance_double(
+        Karafka::Routing::ShareGroups::Group,
+        name: "present-sg",
+        share_group?: true,
+        consumer_group?: false
+      )
+
+      allow(Karafka::App).to receive(:routes).and_return([share_group])
+    end
+
+    it { expect(contract.call(config)).to be_success }
+  end
+
+  context "when a share group name is used in the consumer groups filter" do
+    before do
+      config[:include_consumer_groups] = ["present-sg"]
+
+      share_group = instance_double(
+        Karafka::Routing::ShareGroups::Group,
+        name: "present-sg",
+        share_group?: true,
+        consumer_group?: false
+      )
+
+      allow(Karafka::App).to receive(:routes).and_return([share_group])
+    end
+
+    it "expect not to accept a share group name as a consumer group" do
+      expect(contract.call(config)).not_to be_success
+    end
   end
 
   context "when we want to use consumer groups that are not defined" do

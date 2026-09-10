@@ -26,11 +26,29 @@ module Karafka
             return nil unless scope.routing_mode == mode
 
             contracts
-          else
-            mod_name = (mode == :share) ? "ShareGroups" : "ConsumerGroups"
-
-            contracts.const_defined?(mod_name, false) ? contracts.const_get(mod_name, false) : nil
+          elsif contracts.const_defined?((mode == :share) ? "ShareGroups" : "ConsumerGroups", false)
+            contracts.const_get((mode == :share) ? "ShareGroups" : "ConsumerGroups", false)
+          elsif mode == :consumer &&
+              (contracts.const_defined?("Topic", false) ||
+                contracts.const_defined?("ConsumerGroup", false))
+            # Legacy custom-feature layout (pre mode-namespaces): flat `Contracts::Topic` and/or
+            # `Contracts::ConsumerGroup` directly on the feature. Those predate share groups, so
+            # they apply to consumer groups only.
+            contracts
           end
+        end
+
+        # Resolves the group-level contract within a feature contracts namespace, supporting both
+        # the current `Group` name and the legacy `ConsumerGroup` one used by pre-mode-namespaces
+        # custom features.
+        #
+        # @param contracts [Module] contracts namespace resolved by {.contracts_for}
+        # @return [Class, nil] group contract class or nil when the feature has none
+        def self.group_contract_for(contracts)
+          return contracts::Group if contracts.const_defined?("Group", false)
+          return contracts::ConsumerGroup if contracts.const_defined?("ConsumerGroup", false)
+
+          nil
         end
 
         # @param scope [Module] feature scope in which contract and other things should be
@@ -64,13 +82,15 @@ module Karafka
               result = super(&block)
 
               each do |group|
-                mode = group.share_group? ? :share : :consumer
-                contracts = Karafka::Routing::Features::Expander.contracts_for(scope, mode)
+                expander = Karafka::Routing::Features::Expander
+                contracts = expander.contracts_for(scope, group.group_type)
 
                 next unless contracts
 
-                if contracts.const_defined?("Group", false)
-                  contracts::Group.new.validate!(
+                group_contract = expander.group_contract_for(contracts)
+
+                if group_contract
+                  group_contract.new.validate!(
                     group.to_h,
                     scope: ["routes", group.name]
                   )

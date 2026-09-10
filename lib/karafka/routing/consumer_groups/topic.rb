@@ -12,8 +12,8 @@ module Karafka
       # for retirement in Karafka 3.0.
       #
       # @note The per-topic pause (backoff) configuration lives here rather than on
-      #   {Topics::Base} because share groups (KIP-932) do not support pausing. See
-      #   {Karafka::Routing::Features::ConsumerGroups::Pausing}.
+      #   {Topics::Base}, following the per-mode duplication convention - {ShareGroups::Topic}
+      #   carries its own mirrored copy. See {Karafka::Routing::Features::ConsumerGroups::Pausing}.
       class Topic < Topics::Base
         # This method sets up the pause instance variable to nil before calling the parent class
         # initializer. The explicit initialization to nil is an optimization for Ruby's object

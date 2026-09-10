@@ -68,6 +68,18 @@ module Karafka
 
                 activate_group_topic_hooks(const_get(mod_name, false), mode)
               end
+
+              # Legacy custom-feature layout (pre mode-namespaces): a flat `Topic` module and/or a
+              # flat `ConsumerGroup` module directly on the feature. Those features predate share
+              # groups, so they are consumer-group scoped by definition and keep attaching to the
+              # consumer-group routing classes.
+              if const_defined?("Topic", false)
+                Routing::ConsumerGroups::Topic.prepend(self::Topic)
+              end
+
+              if const_defined?("ConsumerGroup", false)
+                Routing::ConsumerGroups::Group.prepend(self::ConsumerGroup)
+              end
             end
 
             if const_defined?("Topics", false)
