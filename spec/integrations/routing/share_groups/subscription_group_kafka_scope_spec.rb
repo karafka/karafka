@@ -46,7 +46,9 @@ assert sg_kafka.key?(:"client.id"), sg_kafka.keys
 assert sg_kafka.key?(:"statistics.interval.ms"), sg_kafka.keys
 assert sg_kafka.key?(:"client.software.version"), sg_kafka.keys
 
-# Share-specific keys pass the share attributes scope filtering
+# Users define a single kafka settings set (usually globally) and each client scope filters the
+# applicable subset - the share scope keeps share-specific keys and filters out consumer-group
+# specific ones, the same way producer-only settings are filtered out of consumer configs
 share_scoped = Karafka::Setup::AttributesMap.share_group(
   {
     "share.acknowledgement.mode": "explicit",

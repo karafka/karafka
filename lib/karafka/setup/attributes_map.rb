@@ -9,8 +9,8 @@ module Karafka
     #
     # It is built based on https://github.com/edenhill/librdkafka/blob/master/CONFIGURATION.md
     module AttributesMap
-      # List of rdkafka consumer accepted attributes
-      CONSUMER = %i[
+      # List of rdkafka consumer-group (regular) consumer accepted attributes
+      CONSUMER_GROUP = %i[
         allow.auto.create.topics
         api.version.fallback.ms
         api.version.request
@@ -174,33 +174,158 @@ module Karafka
         topic.metadata.refresh.sparse
       ].freeze
 
-      # Consumer attributes that do not apply to KIP-932 share consumers. librdkafka rejects
-      # them at share client creation with a client creation error: offsets are broker-managed
-      # per record (no commits, no offset reset, no offset store), assignment is broker-driven
-      # (no assignment strategy) and there is no static group membership.
-      #
-      # Based on the librdkafka 2.15.0 preview share consumer. Revisit when `karafka-rdkafka`
-      # adopts the share consumer bindings.
-      SHARE_GROUP_UNSUPPORTED = %i[
-        auto.commit.enable
-        auto.commit.interval.ms
-        auto.offset.reset
-        enable.auto.commit
-        enable.auto.offset.store
-        group.instance.id
-        partition.assignment.strategy
-      ].freeze
-
-      # Share-consumer specific attributes introduced by the librdkafka 2.15.0 preview that are
-      # not part of the regular consumer attributes list.
-      SHARE_GROUP_SPECIFIC = %i[
+      # List of rdkafka share consumer (KIP-932) accepted attributes. Same first-class scope
+      # as {CONSUMER_GROUP} and {PRODUCER}: users define a single kafka settings set and each
+      # scope filters the applicable subset. Curated from the librdkafka 2.15.0 preview
+      # CONFIGURATION.md share-consumer notes - properties marked as not supported for share
+      # consumers and consumer-group only concepts (offset commits and resets, client-side
+      # assignment, static group membership) are not part of this scope.
+      SHARE_GROUP = %i[
+        allow.auto.create.topics
+        api.version.fallback.ms
+        api.version.request
+        api.version.request.timeout.ms
+        background_event_cb
+        bootstrap.servers
+        broker.address.family
+        broker.address.ttl
+        broker.version.fallback
+        builtin.features
+        check.crcs
+        client.dns.lookup
+        client.id
+        client.rack
+        closesocket_cb
+        connect_cb
+        connections.max.idle.ms
+        consume.callback.max.messages
+        coordinator.query.interval.ms
+        debug
+        default_topic_conf
+        enable.metrics.push
+        enable.random.seed
+        enable.sasl.oauthbearer.unsecure.jwt
+        enable.ssl.certificate.verification
+        enabled_events
+        error_cb
+        fetch.max.bytes
+        fetch.message.max.bytes
+        fetch.min.bytes
+        fetch.wait.max.ms
+        group.id
+        group.protocol
+        group.protocol.type
+        heartbeat.interval.ms
+        https.ca.location
+        https.ca.pem
+        interceptors
+        internal.termination.signal
+        log.connection.close
+        log.queue
+        log.thread.name
+        log_cb
+        log_level
+        max.in.flight
+        max.in.flight.requests.per.connection
+        max.partition.fetch.bytes
+        max.poll.interval.ms
         max.poll.records
+        message.max.bytes
+        metadata.broker.list
+        metadata.max.age.ms
+        metadata.recovery.rebootstrap.trigger.ms
+        metadata.recovery.strategy
+        oauthbearer_token_refresh_cb
+        offset.store.method
+        offset.store.path
+        offset.store.sync.interval.ms
+        opaque
+        open_cb
+        plugin.library.paths
+        receive.message.max.bytes
+        reconnect.backoff.jitter.ms
+        reconnect.backoff.max.ms
+        reconnect.backoff.ms
+        resolve_cb
+        retry.backoff.max.ms
+        retry.backoff.ms
+        sasl.kerberos.keytab
+        sasl.kerberos.kinit.cmd
+        sasl.kerberos.min.time.before.relogin
+        sasl.kerberos.principal
+        sasl.kerberos.service.name
+        sasl.mechanism
+        sasl.mechanisms
+        sasl.oauthbearer.assertion.algorithm
+        sasl.oauthbearer.assertion.claim.aud
+        sasl.oauthbearer.assertion.claim.exp.seconds
+        sasl.oauthbearer.assertion.claim.iss
+        sasl.oauthbearer.assertion.claim.jti.include
+        sasl.oauthbearer.assertion.claim.nbf.seconds
+        sasl.oauthbearer.assertion.claim.sub
+        sasl.oauthbearer.assertion.file
+        sasl.oauthbearer.assertion.jwt.template.file
+        sasl.oauthbearer.assertion.private.key.file
+        sasl.oauthbearer.assertion.private.key.passphrase
+        sasl.oauthbearer.assertion.private.key.pem
+        sasl.oauthbearer.client.credentials.client.id
+        sasl.oauthbearer.client.credentials.client.secret
+        sasl.oauthbearer.client.id
+        sasl.oauthbearer.client.secret
+        sasl.oauthbearer.config
+        sasl.oauthbearer.extensions
+        sasl.oauthbearer.grant.type
+        sasl.oauthbearer.metadata.authentication.type
+        sasl.oauthbearer.method
+        sasl.oauthbearer.scope
+        sasl.oauthbearer.sub.claim.name
+        sasl.oauthbearer.token.endpoint.url
+        sasl.password
+        sasl.username
+        security.protocol
+        session.timeout.ms
         share.acknowledgement.mode
+        socket.blocking.max.ms
+        socket.connection.setup.timeout.ms
+        socket.keepalive.enable
+        socket.max.fails
+        socket.nagle.disable
+        socket.receive.buffer.bytes
+        socket.send.buffer.bytes
+        socket.timeout.ms
+        socket_cb
+        ssl.ca.certificate.stores
+        ssl.ca.location
+        ssl.ca.pem
+        ssl.certificate.location
+        ssl.certificate.pem
+        ssl.certificate.verify_cb
+        ssl.cipher.suites
+        ssl.crl.location
+        ssl.curves.list
+        ssl.endpoint.identification.algorithm
+        ssl.engine.id
+        ssl.engine.location
+        ssl.key.location
+        ssl.key.password
+        ssl.key.pem
+        ssl.keystore.location
+        ssl.keystore.password
+        ssl.providers
+        ssl.sigalgs.list
+        ssl_ca
+        ssl_certificate
+        ssl_engine_callback_data
+        ssl_key
+        statistics.interval.ms
+        stats_cb
+        throttle_cb
+        topic.metadata.propagation.max.ms
+        topic.metadata.refresh.fast.cnt
+        topic.metadata.refresh.fast.interval.ms
+        topic.metadata.refresh.interval.ms
+        topic.metadata.refresh.sparse
       ].freeze
-
-      # List of rdkafka share consumer (KIP-932) accepted attributes. Derived from the regular
-      # consumer list so regenerating {CONSUMER} keeps it up to date.
-      SHARE_GROUP = ((CONSUMER - SHARE_GROUP_UNSUPPORTED) + SHARE_GROUP_SPECIFIC).sort.freeze
 
       # List of rdkafka producer accepted attributes
       PRODUCER = %i[
@@ -379,17 +504,11 @@ module Karafka
         # @param kafka_settings [Hash] all kafka settings
         # @return [Hash] settings applicable to the consumer-group consumer
         def consumer_group(kafka_settings)
-          kafka_settings.slice(*CONSUMER)
+          kafka_settings.slice(*CONSUMER_GROUP)
         end
 
-        # Legacy alias for {.consumer_group}. Kept for backwards compatibility. Delegates through
-        # the canonical method so extensions layering on top of `consumer_group` (via singleton
-        # class prepends) keep intercepting regardless of the entry point.
-        # @param kafka_settings [Hash] all kafka settings
-        # @return [Hash] settings applicable to the consumer-group consumer
-        def consumer(kafka_settings)
-          consumer_group(kafka_settings)
-        end
+        # Legacy alias for {.consumer_group}. Kept for backwards compatibility.
+        alias_method :consumer, :consumer_group
 
         # Filter the provided settings leaving only the ones applicable to a KIP-932 share
         # consumer

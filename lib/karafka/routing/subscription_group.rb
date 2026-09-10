@@ -128,10 +128,6 @@ module Karafka
       #   with our routing engine, we inject it before it will go to the consumer
       def build_kafka
         if @group.share_group?
-          # librdkafka rejects a number of regular-consumer properties for KIP-932 share
-          # consumers (offsets and assignment are broker-managed and there is no static group
-          # membership), so share groups use their own attributes scope and defaults and skip
-          # the consumer-group only injections
           kafka = Setup::AttributesMap.share_group(@topics.first.kafka.dup)
 
           Setup::DefaultsInjector.share_group(kafka)
