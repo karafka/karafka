@@ -52,7 +52,9 @@ RSpec.describe_current do
         consumer_group?: false
       )
 
-      allow(Karafka::App).to receive(:routes).and_return([share_group])
+      routes = [share_group]
+      allow(routes).to receive_messages(consumer_groups: [], share_groups: [share_group])
+      allow(Karafka::App).to receive(:routes).and_return(routes)
     end
 
     it { expect(contract.call(config)).to be_success }
@@ -69,7 +71,9 @@ RSpec.describe_current do
         consumer_group?: false
       )
 
-      allow(Karafka::App).to receive(:routes).and_return([share_group])
+      routes = [share_group]
+      allow(routes).to receive_messages(consumer_groups: [], share_groups: [share_group])
+      allow(Karafka::App).to receive(:routes).and_return(routes)
     end
 
     it "expect not to accept a share group name as a consumer group" do

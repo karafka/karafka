@@ -103,6 +103,18 @@ module Karafka
         select(&:active?)
       end
 
+      # @return [Array<Karafka::Routing::ConsumerGroups::Group>] all defined consumer groups.
+      #   Type-filtered view allowing for chaining like `Karafka::App.routes.consumer_groups`.
+      def consumer_groups
+        select(&:consumer_group?)
+      end
+
+      # @return [Array<Karafka::Routing::ShareGroups::Group>] all defined share groups (KIP-932).
+      #   Type-filtered view allowing for chaining like `Karafka::App.routes.share_groups`.
+      def share_groups
+        select(&:share_group?)
+      end
+
       # Clears the builder and the draws memory
       def clear
         @mutex.synchronize do

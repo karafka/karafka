@@ -60,7 +60,7 @@ module Karafka
               # run all of them and no need to validate them here at all
               next if value.empty?
 
-              consumer_groups = Karafka::App.routes.select(&:consumer_group?).map(&:name)
+              consumer_groups = Karafka::App.routes.consumer_groups.map(&:name)
 
               # Wildcard patterns are not validated against the current routing because they may
               # match consumer groups that do not exist yet
@@ -79,7 +79,7 @@ module Karafka
               # run all of them and no need to validate them here at all
               next if value.empty?
 
-              share_groups = Karafka::App.routes.select(&:share_group?).map(&:name)
+              share_groups = Karafka::App.routes.share_groups.map(&:name)
 
               # Wildcard patterns are not validated against the current routing because they may
               # match share groups that do not exist yet
@@ -137,7 +137,7 @@ module Karafka
               # topics may be added during boot or runtime. We go with simple assumption:
               # if there are patterns defined, we do not check the inclusions at all.
               # Patterns are a consumer-group feature, so share groups (KIP-932) are not checked.
-              next unless Karafka::App.routes.select(&:consumer_group?).map(&:patterns).flatten.empty?
+              next unless Karafka::App.routes.consumer_groups.map(&:patterns).flatten.empty?
 
               # Found unknown topics
               [[[:"#{action}_topics"], :topics_inclusion]]

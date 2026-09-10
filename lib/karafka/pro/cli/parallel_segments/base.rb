@@ -54,11 +54,11 @@ module Karafka
           def applicable_groups
             requested_groups = options[:groups] || []
 
+            # Parallel segments are a consumer-group feature. Share groups (KIP-932) do not
+            # respond to the parallel-segments API, so they are not applicable here
             workable_groups = Karafka::App
               .routes
-              # Parallel segments are a consumer-group feature. Share groups (KIP-932) do not
-              # respond to the parallel-segments API, so they are not applicable here
-              .select(&:consumer_group?)
+              .consumer_groups
               .select(&:parallel_segments?)
               .group_by(&:segment_origin)
 

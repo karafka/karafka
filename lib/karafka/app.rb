@@ -65,7 +65,7 @@ module Karafka
       # @note Share groups live in the same routing builder as consumer groups; this is just a
       #   type-filtered view. Empty unless `share_group` routing blocks are defined.
       def share_groups
-        groups.select(&:share_group?)
+        routes.share_groups
       end
 
       # Ensures no active share group is about to be run. Share groups (KIP-932) can be described

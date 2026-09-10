@@ -30,7 +30,7 @@ module Karafka
             # run all of them and no need to validate them here at all
             next if value.empty?
 
-            consumer_groups = Karafka::App.routes.select(&:consumer_group?).map(&:name)
+            consumer_groups = Karafka::App.routes.consumer_groups.map(&:name)
 
             # Wildcard patterns are not validated against the current routing because they may
             # match consumer groups that do not exist yet
@@ -49,7 +49,7 @@ module Karafka
             # run all of them and no need to validate them here at all
             next if value.empty?
 
-            share_groups = Karafka::App.routes.select(&:share_group?).map(&:name)
+            share_groups = Karafka::App.routes.share_groups.map(&:name)
 
             # Wildcard patterns are not validated against the current routing because they may
             # match share groups that do not exist yet

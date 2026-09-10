@@ -399,7 +399,7 @@ module Karafka
         # If no expected groups, we use all from routing that have active topics. Share groups
         # (KIP-932) do not store classic committed offsets, so they are not queried here
         if groups_with_topics.empty?
-          groups_with_topics = Karafka::App.routes.select(&:consumer_group?).to_h do |group|
+          groups_with_topics = Karafka::App.routes.consumer_groups.to_h do |group|
             group_topics = group.topics.select do |group_topic|
               active_topics_only ? group_topic.active? : true
             end
