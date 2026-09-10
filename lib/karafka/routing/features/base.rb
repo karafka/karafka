@@ -11,10 +11,31 @@ module Karafka
       # Base for all the features
       class Base
         class << self
-          # @return [Symbol, nil] routing mode this feature belongs to (`:consumer`/`:share`),
-          #   inferred from where the feature is defined (`Features::ConsumerGroups::X` ->
-          #   `:consumer`), or `nil` if the feature is not defined under a mode namespace.
+          # Karafka supports two ways of defining a routing feature, and this method is what tells
+          # them apart:
+          #
+          # 1. **Mode-namespaced feature** (how every built-in Karafka/Karafka-Web feature is
+          #    defined): the feature class lives under a mode namespace, e.g.
+          #    `Karafka::Routing::Features::ConsumerGroups::Deserializers` or
+          #    `...::ShareGroups::Deserializers`. Its mode is read straight off that namespace and
+          #    it only needs to define kind-only `Group`/`Topic`/`Contracts` hooks.
+          #
+          # 2. **Custom feature** (the supported public extension point - see
+          #    `spec/integrations/routing/topic_custom_attributes_spec.rb`): the feature class is
+          #    defined outside a mode namespace (typically at the top level, e.g.
+          #    `class MyFeature < Karafka::Routing::Features::Base`). Its name carries no mode
+          #    segment, so `routing_mode` returns `nil`; the feature instead declares which mode(s)
+          #    it targets by nesting `ConsumerGroups`/`ShareGroups` sub-modules (see `#activate`).
+          #    This lets a single custom feature target one mode or both.
+          #
+          # `nil` is therefore a meaningful third state ("mode is not encoded in the namespace,
+          # look at the sub-modules"), not a missing case - do not collapse it to a default.
+          #
+          # @return [Symbol, nil] `:consumer`/`:share` for a mode-namespaced feature, or `nil` for
+          #   a custom feature defined outside a mode namespace (see cases above)
           def routing_mode
+            # `[-2]` is the namespace segment directly wrapping the feature class, i.e. the mode for
+            # a mode-namespaced feature. Anything else (custom feature) falls through to `nil`.
             case name.to_s.split("::")[-2]
             when "ShareGroups" then :share
             when "ConsumerGroups" then :consumer
@@ -30,15 +51,17 @@ module Karafka
           # Extends topic and builder with given feature API
           def activate
             # Group/topic hooks. Their target routing class mirrors the routing namespaces
-            # (`Routing::<Mode>::Group` / `Routing::<Mode>::Topic`). A feature defined under a mode
-            # namespace (`Features::ConsumerGroups::`/`ShareGroups::`, which is how all the built-in
-            # Karafka features are organized) defines kind-only `Group`/`Topic` modules and its mode
-            # is taken from its namespace. A feature defined outside a mode namespace (e.g. a custom
-            # feature declared at the top level) instead nests `ConsumerGroups`/`ShareGroups`
-            # sub-modules holding `Group`/`Topic` to declare the mode(s) it targets.
+            # (`Routing::<Mode>::Group` / `Routing::<Mode>::Topic`). The two branches below
+            # correspond to the two ways of defining a feature (see `#routing_mode`):
             if routing_mode
+              # Mode-namespaced feature (all built-in features): the feature itself holds the
+              # kind-only `Group`/`Topic` modules and its mode comes from its namespace.
               activate_group_topic_hooks(self, routing_mode)
             else
+              # Custom feature (public extension point): the feature is defined outside a mode
+              # namespace, so it declares its target mode(s) by nesting `ConsumerGroups` and/or
+              # `ShareGroups` sub-modules. We attach each sub-module that is present, so one custom
+              # feature can target a single mode or both.
               %i[consumer share].each do |mode|
                 mod_name = (mode == :share) ? "ShareGroups" : "ConsumerGroups"
                 next unless const_defined?(mod_name, false)
