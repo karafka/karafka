@@ -29,6 +29,20 @@ module Karafka
             required(:name) { |val| val.is_a?(String) && !val.empty? }
           end
 
+          # Share consumers (KIP-932) do not support pattern subscriptions, so regexp-style topic
+          # definitions must be rejected with a clear error instead of only the generic name-format
+          # one. A `Regexp` given to `topic()` is stringified by the routing into a `"(?..."`
+          # prefixed literal and a librdkafka pattern subscription string starts with `"^"` - both
+          # shapes indicate the user expected regexp subscriptions to work. This virtual runs
+          # independently of other errors so its message always accompanies the generic one.
+          virtual do |data, _errors|
+            name = data[:name].to_s
+
+            next unless name.start_with?("^", "(?")
+
+            [[%w[name], :regexp_subscription_not_supported]]
+          end
+
           # Consumer needs to be present only if topic is active
           # We allow not to define consumer for non-active because they may be only used via admin
           # api or other ways and not consumed with consumer
