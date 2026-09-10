@@ -98,17 +98,20 @@ module Karafka
         # @return [Class, String] consumer class or its stringified version if it was defined
         #   using a string
         def consumer
-          # If consumer is a string, we need to constantize it as it was provided as a string to
-          # allow for the code reload for anonymous consumer classes, but this is an edge case
-          if @consumer.is_a?(String)
+          if consumer_persistence
+            # When persistence of consumers is on, no need to reload them
+            @consumer
+          else
+            # In order to support code reload without having to change the topic api, we re-fetch the
+            # class of a consumer based on its class name. This will support all the cases where the
+            # consumer class is defined with a name. It won't support code reload for anonymous
+            # consumer classes, but this is an edge case
             begin
               Object.const_get(@consumer.to_s)
             rescue NameError
               # It will only fail if the in case of anonymous classes
               @consumer
             end
-          else
-            @consumer
           end
         end
 
