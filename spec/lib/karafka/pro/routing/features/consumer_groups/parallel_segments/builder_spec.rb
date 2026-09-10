@@ -57,7 +57,7 @@ RSpec.describe_current do
       let(:consumer_group_class_spy) { class_spy(Karafka::Routing::ConsumerGroups::Group) }
 
       before do
-        allow(builder).to receive(:find).and_return(consumer_group)
+        allow(builder).to receive(:consumer_groups).and_return([consumer_group])
         allow(Karafka::Routing::Proxy).to receive(:new).and_return(proxy)
       end
 
@@ -72,7 +72,7 @@ RSpec.describe_current do
       let(:proxy_block) { proc {} }
 
       before do
-        allow(builder).to receive(:find).and_return(nil)
+        allow(builder).to receive(:consumer_groups).and_return([])
         allow(builder).to receive(:<<)
       end
 

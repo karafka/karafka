@@ -322,7 +322,7 @@ module Karafka
       def trigger_rebalance(group_id)
         # Only consumer groups can be rebalanced via the classic group protocol. Share groups
         # (KIP-932) are not eligible, so they are not considered here
-        group = Karafka::App.routes.find { |g| g.id == group_id && g.consumer_group? }
+        group = Karafka::App.routes.consumer_groups.find { |g| g.id == group_id }
 
         unless group
           raise(

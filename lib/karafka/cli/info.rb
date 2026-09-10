@@ -87,13 +87,24 @@ module Karafka
           "Karafka version: #{Karafka::VERSION}#{postfix}",
           "Ruby version: #{RUBY_DESCRIPTION}",
           "Rdkafka version: #{::Rdkafka::VERSION}",
-          "Consumer groups count: #{Karafka::App.routes.size}",
+          "Consumer groups count: #{Karafka::App.routes.consumer_groups.size}",
+          share_groups_count_info,
           "Subscription groups count: #{Karafka::App.subscription_groups.values.flatten.size}",
           "Workers count: #{concurrency}",
           "Instance client id: #{client_id}",
           "Boot file: #{Karafka.boot_file}",
           "Environment: #{Karafka.env}"
-        ]
+        ].compact
+      end
+
+      # @return [String, nil] share groups count line or nil when no share groups are defined, so
+      #   the default output of consumer-group-only apps stays unchanged
+      def share_groups_count_info
+        share_groups_count = Karafka::App.routes.share_groups.size
+
+        return nil if share_groups_count.zero?
+
+        "Share groups count: #{share_groups_count}"
       end
 
       # @return [Array<String>] license related info
@@ -110,27 +121,39 @@ module Karafka
         end
       end
 
-      # @return [Array<String>] routing details for all consumer groups
+      # @return [Array<String>] routing details for all the groups (consumer and share ones)
       def routing_info
         lines = [green("========== Routing ==========")]
 
-        Karafka::App.consumer_groups.each do |consumer_group|
-          active_label = consumer_group.active? ? "active" : "inactive"
-          lines << ""
-          lines << "Consumer group: #{consumer_group.name} (#{active_label})"
+        Karafka::App.routes.consumer_groups.each do |consumer_group|
+          group_info("Consumer group", consumer_group, lines)
+        end
 
-          consumer_group_features_info(consumer_group, lines)
-
-          consumer_group.subscription_groups.each do |subscription_group|
-            subscription_group_info(subscription_group, lines)
-          end
+        Karafka::App.routes.share_groups.each do |share_group|
+          group_info("Share group", share_group, lines)
         end
 
         lines
       end
 
-      # Appends consumer group level feature info
-      # @param consumer_group [Karafka::Routing::ConsumerGroups::Group]
+      # Appends a single routing group details to lines
+      # @param label [String] group type label
+      # @param group [Karafka::Routing::Groups::Base] routing group
+      # @param lines [Array<String>] output accumulator
+      def group_info(label, group, lines)
+        active_label = group.active? ? "active" : "inactive"
+        lines << ""
+        lines << "#{label}: #{group.name} (#{active_label})"
+
+        consumer_group_features_info(group, lines)
+
+        group.subscription_groups.each do |subscription_group|
+          subscription_group_info(subscription_group, lines)
+        end
+      end
+
+      # Appends group level feature info
+      # @param consumer_group [Karafka::Routing::Groups::Base]
       # @param lines [Array<String>] output accumulator
       def consumer_group_features_info(consumer_group, lines)
         cg_hash = consumer_group.to_h

@@ -143,7 +143,7 @@ module Karafka
       # Builds and saves given consumer group
       # @param group_id [String, Symbol] name for consumer group
       def consumer_group(group_id, &)
-        group = find { |existing| existing.name == group_id.to_s && existing.consumer_group? }
+        group = consumer_groups.find { |existing| existing.name == group_id.to_s }
 
         if group
           Proxy.new(group, &).target
@@ -161,7 +161,7 @@ module Karafka
       #   supported. The server raises when it detects a share group at boot until the share-group
       #   runtime lands. See the KIP-932 roadmap.
       def share_group(group_id, &)
-        group = find { |existing| existing.name == group_id.to_s && existing.share_group? }
+        group = share_groups.find { |existing| existing.name == group_id.to_s }
 
         if group
           Proxy.new(group, &).target

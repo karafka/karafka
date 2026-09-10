@@ -42,7 +42,7 @@ module Karafka
               def consumer_group(group_id, &block)
                 # Same mode filter as in the core Builder#consumer_group - a share group with the
                 # same name must not be mistaken for a reopened consumer group
-                existing = find { |group| group.name == group_id.to_s && group.consumer_group? }
+                existing = consumer_groups.find { |group| group.name == group_id.to_s }
 
                 # Re-opening a CG should not change its parallel setup
                 if existing
