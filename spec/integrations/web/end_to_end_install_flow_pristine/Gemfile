@@ -4,10 +4,13 @@ source "https://rubygems.org"
 
 gem "activemodel", "7.2.3"
 gem "activesupport", "7.2.3"
-# Pin json below 3.0: json 3.0 dropped the `quirks_mode` keyword that ActiveSupport 7.2's
-# `to_json`/`ActiveSupport::JSON.encode` still passes, which breaks loading the released
-# `karafka-web` executable in this pristine install flow. Remove once karafka-web/ActiveSupport
-# in use here are compatible with json >= 3.0.
+# Pin json below 3.0. The json gem 3.0 removed the `quirks_mode` keyword that ActiveSupport's
+# JSON layer (`encode`/`decode`/`to_json`) still passes unconditionally on every released version
+# (verified 7.2.x and 8.0.x), so anything that pulls in ActiveSupport - here the released
+# `karafka-web` executable this pristine flow boots - raises `ArgumentError: unknown keyword:
+# quirks_mode` under json >= 3.0. This is an upstream ActiveSupport <-> json 3 incompatibility,
+# not specific to karafka-web, and no ActiveSupport version works with json 3 yet, so there is no
+# "support both" option - remove once Rails ships a json-3-compatible ActiveSupport. Test-env only.
 gem "json", "< 3"
 gem "karafka", path: ENV.fetch("KARAFKA_GEM_DIR"), require: true
 gem "karafka-web", ">= 0.10.1"

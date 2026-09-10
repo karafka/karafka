@@ -21,12 +21,12 @@ module Karafka
     #         producer: 'my-app',
     #         payload: job.serialize
     #       }
-    #       ::ActiveSupport::JSON.encode(envelope)
+    #       ::JSON.generate(envelope)
     #     end
     #
     #     def deserialize(message)
     #       # Extract the job from the envelope
-    #       envelope = ::ActiveSupport::JSON.decode(message.raw_payload)
+    #       envelope = ::JSON.parse(message.raw_payload)
     #
     #       # Could validate envelope version, log metadata, etc.
     #       raise 'Unsupported version' if envelope['version'] != 1
