@@ -65,10 +65,10 @@ RSpec.describe Karafka::Routing::ShareGroups::Group do
       end
     end
 
-    # Consumer-group routing features are prepended onto the consumer topic only and do not leak
-    # onto the share topic. When the share-group runtime lands, the features share groups also need
-    # (deserializers, etc.) will be duplicated under `Features::ShareGroups::*`.
-    %i[dead_letter_queue deserializers declaratives config].each do |feature|
+    # Consumer-group-only routing features are prepended onto the consumer topic only and do not
+    # leak onto the share topic. Features share groups also need (pausing, deserializers) are
+    # duplicated under `Features::ShareGroups::*` and are covered separately below.
+    %i[dead_letter_queue declaratives config].each do |feature|
       it "expect a consumer topic to respond to :#{feature} and a share topic not to" do
         expect(consumer_topic).to respond_to(feature)
         expect(share_topic).not_to respond_to(feature)
@@ -83,10 +83,17 @@ RSpec.describe Karafka::Routing::ShareGroups::Group do
       expect(share_topic.pause).to be_a(Karafka::Routing::Features::ShareGroups::Pausing::Config)
     end
 
-    it "expect the share topic to_h to include pause but omit consumer-group only keys" do
+    # Deserializers are provided for both modes in the same format (a per-mode feature prepended
+    # onto each topic class), since share groups also process message payloads, keys and headers.
+    it "expect both consumer and share topics to expose active deserializers" do
+      expect(consumer_topic).to respond_to(:deserializers)
+      expect(share_topic).to respond_to(:deserializers)
+      expect(share_topic.deserializers).to be_active
+    end
+
+    it "expect the share topic to_h to include pause and deserializers" do
       expect(consumer_topic.to_h).to include(:deserializers, :pause)
-      expect(share_topic.to_h).to include(:pause)
-      expect(share_topic.to_h).not_to include(:deserializers)
+      expect(share_topic.to_h).to include(:deserializers, :pause)
     end
   end
 
