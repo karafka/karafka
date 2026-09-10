@@ -88,23 +88,13 @@ module Karafka
           "Ruby version: #{RUBY_DESCRIPTION}",
           "Rdkafka version: #{::Rdkafka::VERSION}",
           "Consumer groups count: #{Karafka::App.routes.consumer_groups.size}",
-          share_groups_count_info,
+          "Share groups count: #{Karafka::App.routes.share_groups.size}",
           "Subscription groups count: #{Karafka::App.subscription_groups.values.flatten.size}",
           "Workers count: #{concurrency}",
           "Instance client id: #{client_id}",
           "Boot file: #{Karafka.boot_file}",
           "Environment: #{Karafka.env}"
-        ].compact
-      end
-
-      # @return [String, nil] share groups count line or nil when no share groups are defined, so
-      #   the default output of consumer-group-only apps stays unchanged
-      def share_groups_count_info
-        share_groups_count = Karafka::App.routes.share_groups.size
-
-        return nil if share_groups_count.zero?
-
-        "Share groups count: #{share_groups_count}"
+        ]
       end
 
       # @return [Array<String>] license related info
