@@ -304,7 +304,7 @@ module Karafka
 
           max_poll_interval ||= begin
             kafka_config = Karafka::App.config.kafka.dup
-            Karafka::Setup::DefaultsInjector.consumer(kafka_config)
+            Karafka::Setup::DefaultsInjector.consumer_group(kafka_config)
             kafka_config.fetch(:"max.poll.interval.ms")
           end
 

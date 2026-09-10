@@ -126,4 +126,36 @@ RSpec.describe Karafka::Routing::ShareGroups::Group do
       expect(builder.map(&:group_type)).to match_array(%i[consumer share])
     end
   end
+
+  context "when regexp-style topic definitions are used in a share group" do
+    it "expect a Regexp topic reference to be rejected by the topic contract with a clear error" do
+      cclass = consumer_class
+
+      expect do
+        builder.draw do
+          share_group "sg" do
+            topic(/events.*/) { consumer cclass }
+          end
+        end
+      end.to raise_error(
+        Karafka::Errors::InvalidConfigurationError,
+        /regexp\/pattern topic subscriptions are not supported for share groups/
+      )
+    end
+
+    it "expect a librdkafka-style '^' pattern string to be rejected with a clear error" do
+      cclass = consumer_class
+
+      expect do
+        builder.draw do
+          share_group "sg" do
+            topic("^events-.*") { consumer cclass }
+          end
+        end
+      end.to raise_error(
+        Karafka::Errors::InvalidConfigurationError,
+        /not supported for share groups/
+      )
+    end
+  end
 end

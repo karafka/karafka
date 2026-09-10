@@ -174,6 +174,34 @@ module Karafka
         topic.metadata.refresh.sparse
       ].freeze
 
+      # Consumer attributes that do not apply to KIP-932 share consumers. librdkafka rejects
+      # them at share client creation with a client creation error: offsets are broker-managed
+      # per record (no commits, no offset reset, no offset store), assignment is broker-driven
+      # (no assignment strategy) and there is no static group membership.
+      #
+      # Based on the librdkafka 2.15.0 preview share consumer. Revisit when `karafka-rdkafka`
+      # adopts the share consumer bindings.
+      SHARE_GROUP_UNSUPPORTED = %i[
+        auto.commit.enable
+        auto.commit.interval.ms
+        auto.offset.reset
+        enable.auto.commit
+        enable.auto.offset.store
+        group.instance.id
+        partition.assignment.strategy
+      ].freeze
+
+      # Share-consumer specific attributes introduced by the librdkafka 2.15.0 preview that are
+      # not part of the regular consumer attributes list.
+      SHARE_GROUP_SPECIFIC = %i[
+        max.poll.records
+        share.acknowledgement.mode
+      ].freeze
+
+      # List of rdkafka share consumer (KIP-932) accepted attributes. Derived from the regular
+      # consumer list so regenerating {CONSUMER} keeps it up to date.
+      SHARE_GROUP = ((CONSUMER - SHARE_GROUP_UNSUPPORTED) + SHARE_GROUP_SPECIFIC).sort.freeze
+
       # List of rdkafka producer accepted attributes
       PRODUCER = %i[
         acks
@@ -346,11 +374,29 @@ module Karafka
       private_constant :SOURCE
 
       class << self
-        # Filter the provided settings leaving only the once applicable to the consumer
+        # Filter the provided settings leaving only the ones applicable to a consumer-group
+        # (regular) consumer
         # @param kafka_settings [Hash] all kafka settings
-        # @return [Hash] settings applicable to the consumer
-        def consumer(kafka_settings)
+        # @return [Hash] settings applicable to the consumer-group consumer
+        def consumer_group(kafka_settings)
           kafka_settings.slice(*CONSUMER)
+        end
+
+        # Legacy alias for {.consumer_group}. Kept for backwards compatibility. Delegates through
+        # the canonical method so extensions layering on top of `consumer_group` (via singleton
+        # class prepends) keep intercepting regardless of the entry point.
+        # @param kafka_settings [Hash] all kafka settings
+        # @return [Hash] settings applicable to the consumer-group consumer
+        def consumer(kafka_settings)
+          consumer_group(kafka_settings)
+        end
+
+        # Filter the provided settings leaving only the ones applicable to a KIP-932 share
+        # consumer
+        # @param kafka_settings [Hash] all kafka settings
+        # @return [Hash] settings applicable to the share consumer
+        def share_group(kafka_settings)
+          kafka_settings.slice(*SHARE_GROUP)
         end
 
         # Filter the provided settings leaving only the once applicable to the producer

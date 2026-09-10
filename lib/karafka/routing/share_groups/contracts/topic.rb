@@ -21,12 +21,29 @@ module Karafka
           required(:id) { |val| val.is_a?(String) && Karafka::Contracts::TOPIC_REGEXP.match?(val) }
           required(:kafka) { |val| val.is_a?(Hash) && !val.empty? }
           required(:max_messages) { |val| val.is_a?(Integer) && val >= 1 }
-          required(:initial_offset) { |val| %w[earliest latest].include?(val) }
+          # `initial_offset` is deliberately not validated here: share consumers reject the
+          # client-side `auto.offset.reset` - the offset reset behavior of a share group is a
+          # broker-side group configuration (`share.auto.offset.reset`), so the attribute has no
+          # effect for share topics and is never propagated to their clients
           required(:max_wait_time) { |val| val.is_a?(Integer) && val >= 10 }
           required(:name) { |val| val.is_a?(String) && Karafka::Contracts::TOPIC_REGEXP.match?(val) }
           required(:active) { |val| [true, false].include?(val) }
           nested(:subscription_group_details) do
             required(:name) { |val| val.is_a?(String) && !val.empty? }
+          end
+
+          # Share consumers (KIP-932) do not support pattern subscriptions, so regexp-style topic
+          # definitions must be rejected with a clear error instead of only the generic name-format
+          # one. A `Regexp` given to `topic()` is stringified by the routing into a `"(?..."`
+          # prefixed literal and a librdkafka pattern subscription string starts with `"^"` - both
+          # shapes indicate the user expected regexp subscriptions to work. This virtual runs
+          # independently of other errors so its message always accompanies the generic one.
+          virtual do |data, _errors|
+            name = data[:name].to_s
+
+            next unless name.start_with?("^", "(?")
+
+            [[%w[name], :regexp_subscription_not_supported]]
           end
 
           # Consumer needs to be present only if topic is active

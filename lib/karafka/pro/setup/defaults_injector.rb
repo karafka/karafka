@@ -48,7 +48,7 @@ module Karafka
         private_constant :CONSUMER_KAFKA_DEFAULTS
 
         # Injects the Pro-specific consumer kafka defaults on top of the OSS ones
-        class Consumer < Karafka::Core::Configurable::Injector
+        class ConsumerGroup < Karafka::Core::Configurable::Injector
           class << self
             # @return [Hash] Pro consumer kafka defaults
             def defaults
@@ -65,13 +65,13 @@ module Karafka
           @managed_keys ||= Set.new
         end
 
-        # Enriches consumer kafka config with the OSS defaults first (via `super`) and then the
-        # Pro-specific ones on top, each only when not already present.
+        # Enriches consumer-group kafka config with the OSS defaults first (via `super`) and then
+        # the Pro-specific ones on top, each only when not already present.
         # @param kafka_config [Hash] kafka scoped config
-        def consumer(kafka_config)
+        def consumer_group(kafka_config)
           super
 
-          Consumer.call(kafka_config)
+          ConsumerGroup.call(kafka_config)
         end
       end
     end

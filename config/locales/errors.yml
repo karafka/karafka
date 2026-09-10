@@ -134,6 +134,7 @@ en:
         max_messages_format: 'needs to be an integer bigger than 0'
         max_wait_time_format: 'needs to be an integer bigger than 0'
         name_format: 'needs to be a string with a Kafka accepted format'
+        name_regexp_subscription_not_supported: regexp/pattern topic subscriptions are not supported for share groups (KIP-932) - use an explicit topic name
         deserializers_format: needs to be present
         consumer_format: needs to be present
         id_format: 'needs to be a string with a Kafka accepted format'
