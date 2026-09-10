@@ -35,9 +35,11 @@ RSpec.describe_current do
   let(:config) do
     {
       include_consumer_groups: [],
+      include_share_groups: [],
       include_subscription_groups: [],
       include_topics: [],
       exclude_consumer_groups: [],
+      exclude_share_groups: [],
       exclude_subscription_groups: [],
       exclude_topics: []
     }

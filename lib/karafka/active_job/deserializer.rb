@@ -21,12 +21,12 @@ module Karafka
     #         producer: 'my-app',
     #         payload: job.serialize
     #       }
-    #       ::ActiveSupport::JSON.encode(envelope)
+    #       ::JSON.generate(envelope)
     #     end
     #
     #     def deserialize(message)
     #       # Extract the job from the envelope
-    #       envelope = ::ActiveSupport::JSON.decode(message.raw_payload)
+    #       envelope = ::JSON.parse(message.raw_payload)
     #
     #       # Could validate envelope version, log metadata, etc.
     #       raise 'Unsupported version' if envelope['version'] != 1
@@ -46,15 +46,21 @@ module Karafka
       #   this may be a JobWrapper instance instead of the original ::ActiveJob::Base.
       # @return [String] serialized job payload
       def serialize(job)
-        ::ActiveSupport::JSON.encode(job.serialize)
+        ::JSON.generate(job.serialize)
       end
 
       # Deserializes a Kafka message payload into an ActiveJob job hash
       #
       # @param message [Karafka::Messages::Message] message containing the job
       # @return [Hash] deserialized job hash
+      #
+      # @note We use `::JSON.parse` rather than `::ActiveSupport::JSON.decode` on purpose. The job
+      #   payload is always a JSON object produced by ActiveJob's own serialization, so plain
+      #   parsing round-trips it identically, and it avoids `ActiveSupport::JSON.decode` passing a
+      #   second positional argument to `JSON.parse`, which raises `ArgumentError` under the
+      #   json gem `>= 3.0`.
       def deserialize(message)
-        ::ActiveSupport::JSON.decode(message.raw_payload)
+        ::JSON.parse(message.raw_payload)
       end
     end
   end

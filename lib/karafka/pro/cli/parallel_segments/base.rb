@@ -49,13 +49,16 @@ module Karafka
 
           # Returns consumer groups for parallel segments with which we should be working
           #
-          # @return [Hash{String => Array<Karafka::Routing::ConsumerGroup>}] hash with all parallel
-          #   consumer groups as values and names of segments origin consumer group as the key.
+          # @return [Hash{String => Array<Karafka::Routing::ConsumerGroups::Group>}] hash with all
+          #   parallel consumer groups as values and names of segments origin consumer group as key.
           def applicable_groups
             requested_groups = options[:groups] || []
 
+            # Parallel segments are a consumer-group feature. Share groups (KIP-932) do not
+            # respond to the parallel-segments API, so they are not applicable here
             workable_groups = Karafka::App
               .routes
+              .consumer_groups
               .select(&:parallel_segments?)
               .group_by(&:segment_origin)
 
@@ -85,7 +88,7 @@ module Karafka
           # distribution and use existing (if any) parallel segments groups offsets for validations.
           #
           # @param segment_origin [String] name of the origin consumer group
-          # @param segments [Array<Karafka::Routing::ConsumerGroup>]
+          # @param segments [Array<Karafka::Routing::ConsumerGroups::Group>]
           # @return [Hash] fetched offsets for all the group topics for all the groups
           def collect_offsets(segment_origin, segments)
             topics_names = segments.first.topics.map(&:name)

@@ -53,7 +53,7 @@ topics = Karafka::App.routes.first.topics
 topic_a = topics[0]
 
 # Verify the pause config object
-assert topic_a.pause.is_a?(Karafka::Pro::Routing::Features::Pausing::Config)
+assert topic_a.pause.is_a?(Karafka::Pro::Routing::Features::ConsumerGroups::Pausing::Config)
 assert_equal true, topic_a.pause.active?
 assert_equal 2_000, topic_a.pause.timeout
 assert_equal 8_000, topic_a.pause.max_timeout
@@ -75,7 +75,7 @@ assert_equal true, topic_a_hash[:pause][:with_exponential_backoff]
 topic_b = topics[1]
 
 # Verify the pause config object exists with defaults
-assert topic_b.pause.is_a?(Karafka::Pro::Routing::Features::Pausing::Config)
+assert topic_b.pause.is_a?(Karafka::Pro::Routing::Features::ConsumerGroups::Pausing::Config)
 assert_equal false, topic_b.pause.active?
 assert_equal 1, topic_b.pause.timeout
 assert_equal 1, topic_b.pause.max_timeout

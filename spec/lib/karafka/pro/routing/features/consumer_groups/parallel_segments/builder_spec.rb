@@ -52,17 +52,17 @@ RSpec.describe_current do
 
   describe "#consumer_group" do
     context "when reopening an existing consumer group" do
-      let(:consumer_group) { instance_double(Karafka::Routing::ConsumerGroup, name: "test-group") }
+      let(:consumer_group) { instance_double(Karafka::Routing::ConsumerGroups::Group, name: "test-group") }
       let(:proxy) { instance_double(Karafka::Routing::Proxy, target: consumer_group) }
-      let(:consumer_group_class_spy) { class_spy(Karafka::Routing::ConsumerGroup) }
+      let(:consumer_group_class_spy) { class_spy(Karafka::Routing::ConsumerGroups::Group) }
 
       before do
-        allow(builder).to receive(:find).and_return(consumer_group)
+        allow(builder).to receive(:consumer_groups).and_return([consumer_group])
         allow(Karafka::Routing::Proxy).to receive(:new).and_return(proxy)
       end
 
       it "uses the existing consumer group" do
-        stub_const("Karafka::Routing::ConsumerGroup", consumer_group_class_spy)
+        stub_const("Karafka::Routing::ConsumerGroups::Group", consumer_group_class_spy)
         builder.consumer_group("test-group") { nil }
         expect(consumer_group_class_spy).not_to have_received(:new)
       end
@@ -72,19 +72,19 @@ RSpec.describe_current do
       let(:proxy_block) { proc {} }
 
       before do
-        allow(builder).to receive(:find).and_return(nil)
+        allow(builder).to receive(:consumer_groups).and_return([])
         allow(builder).to receive(:<<)
       end
 
       context "with parallel segments disabled" do
         let(:parallel_active) { false }
         let(:temp_consumer_group) do
-          instance_double(Karafka::Routing::ConsumerGroup, name: "test-group")
+          instance_double(Karafka::Routing::ConsumerGroups::Group, name: "test-group")
         end
 
         let(:temp_target) do
           instance_double(
-            Karafka::Routing::ConsumerGroup,
+            Karafka::Routing::ConsumerGroups::Group,
             parallel_segments: parallel_segments_config
           )
         end
@@ -94,7 +94,7 @@ RSpec.describe_current do
         end
 
         before do
-          allow(Karafka::Routing::ConsumerGroup).to receive(:new).and_return(temp_consumer_group)
+          allow(Karafka::Routing::ConsumerGroups::Group).to receive(:new).and_return(temp_consumer_group)
           allow(Karafka::Routing::Proxy).to receive(:new).and_return(temp_proxy)
         end
 
@@ -110,12 +110,12 @@ RSpec.describe_current do
         let(:segments_count) { 3 }
 
         let(:temp_consumer_group) do
-          instance_double(Karafka::Routing::ConsumerGroup, name: "test-group")
+          instance_double(Karafka::Routing::ConsumerGroups::Group, name: "test-group")
         end
 
         let(:temp_target) do
           instance_double(
-            Karafka::Routing::ConsumerGroup,
+            Karafka::Routing::ConsumerGroups::Group,
             parallel_segments: parallel_segments_config
           )
         end
@@ -125,7 +125,7 @@ RSpec.describe_current do
         end
 
         before do
-          allow(Karafka::Routing::ConsumerGroup)
+          allow(Karafka::Routing::ConsumerGroups::Group)
             .to receive(:new)
             .and_return(temp_consumer_group)
 
@@ -136,10 +136,10 @@ RSpec.describe_current do
 
           segments_count.times do |i|
             group_name = "test-group-parallel-#{i}"
-            segment_group = instance_double(Karafka::Routing::ConsumerGroup, name: group_name)
+            segment_group = instance_double(Karafka::Routing::ConsumerGroups::Group, name: group_name)
             segment_proxy = instance_double(Karafka::Routing::Proxy, target: segment_group)
 
-            allow(Karafka::Routing::ConsumerGroup)
+            allow(Karafka::Routing::ConsumerGroups::Group)
               .to receive(:new)
               .with(group_name)
               .and_return(segment_group)
@@ -158,16 +158,16 @@ RSpec.describe_current do
         end
 
         it "uses the merge key in the group names" do
-          consumer_group_class_spy = class_spy(Karafka::Routing::ConsumerGroup)
-          stub_const("Karafka::Routing::ConsumerGroup", consumer_group_class_spy)
+          consumer_group_class_spy = class_spy(Karafka::Routing::ConsumerGroups::Group)
+          stub_const("Karafka::Routing::ConsumerGroups::Group", consumer_group_class_spy)
 
           # Create the necessary doubles for the test
           temp_consumer_group = instance_double(
-            Karafka::Routing::ConsumerGroup,
+            Karafka::Routing::ConsumerGroups::Group,
             name: "test-group"
           )
           temp_target = instance_double(
-            Karafka::Routing::ConsumerGroup,
+            Karafka::Routing::ConsumerGroups::Group,
             parallel_segments: parallel_segments_config
           )
           temp_proxy = instance_double(Karafka::Routing::Proxy, target: temp_target)
@@ -183,7 +183,7 @@ RSpec.describe_current do
           # Set up stubs for the parallel segment groups
           segments_count.times do |i|
             group_name = "test-group-parallel-#{i}"
-            segment_group = instance_double(Karafka::Routing::ConsumerGroup, name: group_name)
+            segment_group = instance_double(Karafka::Routing::ConsumerGroups::Group, name: group_name)
             segment_proxy = instance_double(Karafka::Routing::Proxy, target: segment_group)
 
             allow(consumer_group_class_spy)

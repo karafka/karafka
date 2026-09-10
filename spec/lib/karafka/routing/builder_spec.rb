@@ -319,4 +319,39 @@ RSpec.describe_current do
       expect(builder.active).to eq [active_group]
     end
   end
+
+  describe "#consumer_groups and #share_groups" do
+    let(:consumer_class) { Class.new(Karafka::BaseConsumer) }
+
+    before do
+      cclass = consumer_class
+
+      builder.draw do
+        consumer_group "cg" do
+          topic(:a) { consumer cclass }
+        end
+
+        share_group "sg" do
+          topic(:b) { consumer cclass }
+        end
+      end
+    end
+
+    after { builder.clear }
+
+    it "expect #consumer_groups to return only consumer groups" do
+      expect(builder.consumer_groups.map(&:name)).to eq(%w[cg])
+      expect(builder.consumer_groups).to all(be_consumer_group)
+    end
+
+    it "expect #share_groups to return only share groups" do
+      expect(builder.share_groups.map(&:name)).to eq(%w[sg])
+      expect(builder.share_groups).to all(be_share_group)
+    end
+
+    it "expect the chained views to be reachable via App.routes" do
+      expect(Karafka::App.routes).to respond_to(:consumer_groups)
+      expect(Karafka::App.routes).to respond_to(:share_groups)
+    end
+  end
 end
