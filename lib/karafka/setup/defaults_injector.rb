@@ -15,7 +15,7 @@ module Karafka
 
       # Defaults for consumer-group kafka settings, that will be overwritten only if not present
       # already
-      CONSUMER_KAFKA_DEFAULTS = {
+      CONSUMER_GROUP_KAFKA_DEFAULTS = {
         # We emit the statistics by default, so all the instrumentation and web-ui work out of
         # the box, without requiring users to take any extra actions aside from enabling.
         "statistics.interval.ms": 5_000,
@@ -29,7 +29,7 @@ module Karafka
       }.freeze
 
       # Contains settings that should not be used in production but make life easier in dev
-      CONSUMER_KAFKA_DEV_DEFAULTS = {
+      CONSUMER_GROUP_KAFKA_DEV_DEFAULTS = {
         # Will create non-existing topics automatically.
         # Note that the broker needs to be configured with `auto.create.topics.enable=true`
         # While it is not recommended in prod, it simplifies work in dev
@@ -70,7 +70,7 @@ module Karafka
 
       private_constant(
         :CLIENT_SOFTWARE_VERSION,
-        :CONSUMER_KAFKA_DEFAULTS, :CONSUMER_KAFKA_DEV_DEFAULTS,
+        :CONSUMER_GROUP_KAFKA_DEFAULTS, :CONSUMER_GROUP_KAFKA_DEV_DEFAULTS,
         :SHARE_GROUP_KAFKA_DEFAULTS, :SHARE_GROUP_KAFKA_DEV_DEFAULTS,
         :PRODUCER_KAFKA_DEV_DEFAULTS
       )
@@ -82,9 +82,9 @@ module Karafka
         class << self
           # @return [Hash] consumer-group kafka defaults for the current environment
           def defaults
-            return CONSUMER_KAFKA_DEFAULTS if Karafka::App.env.production?
+            return CONSUMER_GROUP_KAFKA_DEFAULTS if Karafka::App.env.production?
 
-            CONSUMER_KAFKA_DEFAULTS.merge(CONSUMER_KAFKA_DEV_DEFAULTS)
+            CONSUMER_GROUP_KAFKA_DEFAULTS.merge(CONSUMER_GROUP_KAFKA_DEV_DEFAULTS)
           end
         end
       end
@@ -134,13 +134,8 @@ module Karafka
           ConsumerGroup.call(kafka_config)
         end
 
-        # Legacy alias for {.consumer_group}. Kept for backwards compatibility. Delegates through
-        # the canonical method so extensions layering on top of `consumer_group` (via singleton
-        # class prepends) keep intercepting regardless of the entry point.
-        # @param kafka_config [Hash] kafka scoped config
-        def consumer(kafka_config)
-          consumer_group(kafka_config)
-        end
+        # Legacy alias for {.consumer_group}. Kept for backwards compatibility.
+        alias_method :consumer, :consumer_group
 
         # Propagates the kafka setting defaults unless they are already present for a share-group
         # (KIP-932) consumer config
