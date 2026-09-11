@@ -17,7 +17,8 @@ module Karafka
             alias_method :active?, :active
 
             # @return [Boolean] is parallel deserialization enabled for this topic
-            # @note Returns false if global parallel config is disabled, even if topic has it enabled
+            # @note Returns false if global parallel config is disabled, even if the topic
+            #   has it enabled
             # @note Result is cached since config values don't change after setup
             def parallel?
               return @parallel_cached unless @parallel_cached.nil?
