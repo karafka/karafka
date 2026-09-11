@@ -47,6 +47,7 @@ module Karafka
             exclude
           ].each do |action|
             optional(:"#{action}_consumer_groups") { |val| val.is_a?(Array) }
+            optional(:"#{action}_share_groups") { |val| val.is_a?(Array) }
             optional(:"#{action}_subscription_groups") { |sg| sg.is_a?(Array) }
             optional(:"#{action}_topics") { |topics| topics.is_a?(Array) }
 
@@ -58,12 +59,34 @@ module Karafka
               # If there were no consumer_groups declared in the server cli, it means that we will
               # run all of them and no need to validate them here at all
               next if value.empty?
+
+              consumer_groups = Karafka::App.routes.consumer_groups.map(&:name)
+
               # Wildcard patterns are not validated against the current routing because they may
               # match consumer groups that do not exist yet
-              next if (literal(value) - Karafka::App.routes.map(&:name)).empty?
+              next if (literal(value) - consumer_groups).empty?
 
               # Found unknown consumer groups
               [[[:"#{action}_consumer_groups"], :consumer_groups_inclusion]]
+            end
+
+            virtual do |data, errors|
+              next unless errors.empty?
+
+              value = data.fetch(:"#{action}_share_groups")
+
+              # If there were no share_groups declared in the server cli, it means that we will
+              # run all of them and no need to validate them here at all
+              next if value.empty?
+
+              share_groups = Karafka::App.routes.share_groups.map(&:name)
+
+              # Wildcard patterns are not validated against the current routing because they may
+              # match share groups that do not exist yet
+              next if (literal(value) - share_groups).empty?
+
+              # Found unknown share groups
+              [[[:"#{action}_share_groups"], :share_groups_inclusion]]
             end
 
             virtual do |data, errors|
@@ -112,8 +135,9 @@ module Karafka
 
               # If there are any patterns defined, we cannot report on topics inclusions because
               # topics may be added during boot or runtime. We go with simple assumption:
-              # if there are patterns defined, we do not check the inclusions at all
-              next unless Karafka::App.routes.map(&:patterns).flatten.empty?
+              # if there are patterns defined, we do not check the inclusions at all.
+              # Patterns are a consumer-group feature, so share groups (KIP-932) are not checked.
+              next unless Karafka::App.routes.consumer_groups.map(&:patterns).flatten.empty?
 
               # Found unknown topics
               [[[:"#{action}_topics"], :topics_inclusion]]

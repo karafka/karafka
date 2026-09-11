@@ -11,6 +11,28 @@ RSpec.describe_current do
     end
   end
 
+  describe "#share_groups" do
+    let(:consumer_class) { Class.new(Karafka::BaseConsumer) }
+
+    after { described_class.consumer_groups.clear }
+
+    it "returns only the defined share groups" do
+      cclass = consumer_class
+
+      described_class.consumer_groups.draw do
+        consumer_group("cg") { topic(:a) { consumer cclass } }
+        share_group("sg") { topic(:b) { consumer cclass } }
+      end
+
+      expect(app_class.share_groups.map(&:name)).to eq(%w[sg])
+      expect(app_class.share_groups).to all(be_share_group)
+    end
+
+    it "is empty when no share groups are defined" do
+      expect(app_class.share_groups).to eq([])
+    end
+  end
+
   describe "Karafka delegations" do
     %i[
       root

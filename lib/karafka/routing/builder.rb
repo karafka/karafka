@@ -57,15 +57,21 @@ module Karafka
           )
 
           each do |group|
-            # Validate group settings
-            Contracts::ConsumerGroup.new.validate!(
+            # Validate group settings. Contracts mirror the routing namespaces: consumer groups use
+            # `ConsumerGroups::Contracts::{Group,Topic}`, share groups `ShareGroups::Contracts::*`,
+            # so their (different) feature flow can be validated independently.
+            contracts = group.share_group? ? ShareGroups::Contracts : ConsumerGroups::Contracts
+            group_contract = contracts::Group
+            topic_contract = contracts::Topic
+
+            group_contract.new.validate!(
               group.to_h,
               scope: ["routes", group.name]
             )
 
             # and then its topics settings
             group.topics.each do |topic|
-              Contracts::Topic.new.validate!(
+              topic_contract.new.validate!(
                 topic.to_h,
                 scope: ["routes", group.name, topic.name]
               )
@@ -90,11 +96,23 @@ module Karafka
         draw(&)
       end
 
-      # @return [Array<Karafka::Routing::ConsumerGroup>] only active consumer groups that
+      # @return [Array<Karafka::Routing::ConsumerGroups::Group>] only active consumer groups that
       #   we want to use. Since Karafka supports multi-process setup, we need to be able
       #   to pick only those consumer groups that should be active in our given process context
       def active
         select(&:active?)
+      end
+
+      # @return [Array<Karafka::Routing::ConsumerGroups::Group>] all defined consumer groups.
+      #   Type-filtered view allowing for chaining like `Karafka::App.routes.consumer_groups`.
+      def consumer_groups
+        select(&:consumer_group?)
+      end
+
+      # @return [Array<Karafka::Routing::ShareGroups::Group>] all defined share groups (KIP-932).
+      #   Type-filtered view allowing for chaining like `Karafka::App.routes.share_groups`.
+      def share_groups
+        select(&:share_group?)
       end
 
       # Clears the builder and the draws memory
@@ -125,12 +143,30 @@ module Karafka
       # Builds and saves given consumer group
       # @param group_id [String, Symbol] name for consumer group
       def consumer_group(group_id, &)
-        group = find { |existing| existing.name == group_id.to_s }
+        group = consumer_groups.find { |existing| existing.name == group_id.to_s }
 
         if group
           Proxy.new(group, &).target
         else
-          group = ConsumerGroup.new(group_id.to_s)
+          group = ConsumerGroups::Group.new(group_id.to_s)
+          self << Proxy.new(group, &).target
+        end
+      end
+
+      # Builds and saves given share group (KIP-932 / Queues for Kafka)
+      #
+      # @param group_id [String, Symbol] name for the share group
+      #
+      # @note Share groups can be *described* in the routing today, but running them is not yet
+      #   supported. The server raises when it detects a share group at boot until the share-group
+      #   runtime lands. See the KIP-932 roadmap.
+      def share_group(group_id, &)
+        group = share_groups.find { |existing| existing.name == group_id.to_s }
+
+        if group
+          Proxy.new(group, &).target
+        else
+          group = ShareGroups::Group.new(group_id.to_s)
           self << Proxy.new(group, &).target
         end
       end

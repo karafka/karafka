@@ -9,7 +9,7 @@ FactoryBot.define do
     partition { 0 }
     timestamp { Time.now.utc }
     deserializers do
-      Karafka::Routing::Features::Deserializing::Config.new(
+      Karafka::Routing::Features::ConsumerGroups::Deserializing::Config.new(
         active: true,
         payload: ->(message) { JSON.parse(message.raw_payload) },
         key: Karafka::Deserializing::Deserializers::Key.new,

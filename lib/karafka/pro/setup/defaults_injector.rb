@@ -41,18 +41,18 @@ module Karafka
         # the Web UI dashboard, and the performance tracker. They depend on Pro's extended
         # instrumentation pipeline and should not be applied outside of Pro as they may cause
         # incomplete or inconsistent metrics collection and other unexpected behaviours.
-        CONSUMER_KAFKA_DEFAULTS = {
+        CONSUMER_GROUP_KAFKA_DEFAULTS = {
           "statistics.unassigned.include": false
         }.freeze
 
-        private_constant :CONSUMER_KAFKA_DEFAULTS
+        private_constant :CONSUMER_GROUP_KAFKA_DEFAULTS
 
         # Injects the Pro-specific consumer kafka defaults on top of the OSS ones
-        class Consumer < Karafka::Core::Configurable::Injector
+        class ConsumerGroup < Karafka::Core::Configurable::Injector
           class << self
             # @return [Hash] Pro consumer kafka defaults
             def defaults
-              CONSUMER_KAFKA_DEFAULTS
+              CONSUMER_GROUP_KAFKA_DEFAULTS
             end
           end
         end
@@ -65,13 +65,13 @@ module Karafka
           @managed_keys ||= Set.new
         end
 
-        # Enriches consumer kafka config with the OSS defaults first (via `super`) and then the
-        # Pro-specific ones on top, each only when not already present.
+        # Enriches consumer-group kafka config with the OSS defaults first (via `super`) and then
+        # the Pro-specific ones on top, each only when not already present.
         # @param kafka_config [Hash] kafka scoped config
-        def consumer(kafka_config)
+        def consumer_group(kafka_config)
           super
 
-          Consumer.call(kafka_config)
+          ConsumerGroup.call(kafka_config)
         end
       end
     end

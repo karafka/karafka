@@ -35,7 +35,8 @@ module Karafka
 
       # Gets or sets the active flag.
       #
-      # The active flag exists because the routing bridge (Routing::Features::Declaratives::Topic)
+      # The active flag exists because the routing bridge
+      # (Routing::Features::ConsumerGroups::Declaratives::Topic)
       # auto-creates a declaration for every routing topic that calls config(). Some routing
       # topics - notably Pro pattern-matched virtual topics - must exist in routing but cannot
       # be managed declaratively (their real Kafka topic names are unknown). Those call

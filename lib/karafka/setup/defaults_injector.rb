@@ -6,8 +6,16 @@ module Karafka
     # cluster and define them on a per-topic basis. We use this when we build the final config
     # per subscription group.
     module DefaultsInjector
-      # Defaults for kafka settings, that will be overwritten only if not present already
-      CONSUMER_KAFKA_DEFAULTS = {
+      # Client software version string reported to Kafka by all the clients we build
+      CLIENT_SOFTWARE_VERSION = [
+        "v#{Karafka::VERSION}",
+        "rdkafka-ruby-v#{Rdkafka::VERSION}",
+        "librdkafka-v#{Rdkafka::LIBRDKAFKA_VERSION}"
+      ].join("-").freeze
+
+      # Defaults for consumer-group kafka settings, that will be overwritten only if not present
+      # already
+      CONSUMER_GROUP_KAFKA_DEFAULTS = {
         # We emit the statistics by default, so all the instrumentation and web-ui work out of
         # the box, without requiring users to take any extra actions aside from enabling.
         "statistics.interval.ms": 5_000,
@@ -17,15 +25,11 @@ module Karafka
         # always have it
         "max.poll.interval.ms": 300_000,
         "socket.nagle.disable": true,
-        "client.software.version": [
-          "v#{Karafka::VERSION}",
-          "rdkafka-ruby-v#{Rdkafka::VERSION}",
-          "librdkafka-v#{Rdkafka::LIBRDKAFKA_VERSION}"
-        ].join("-")
+        "client.software.version": CLIENT_SOFTWARE_VERSION
       }.freeze
 
       # Contains settings that should not be used in production but make life easier in dev
-      CONSUMER_KAFKA_DEV_DEFAULTS = {
+      CONSUMER_GROUP_KAFKA_DEV_DEFAULTS = {
         # Will create non-existing topics automatically.
         # Note that the broker needs to be configured with `auto.create.topics.enable=true`
         # While it is not recommended in prod, it simplifies work in dev
@@ -34,6 +38,23 @@ module Karafka
         # fast enough. Fast enough means within reasonable time to provide decent user experience
         # While it's only a one time thing for new topics, it can still be irritating to have to
         # restart the process.
+        "topic.metadata.refresh.interval.ms": 5_000
+      }.freeze
+
+      # Defaults for share-group (KIP-932) kafka settings. They mirror the consumer-group ones
+      # minus the properties that do not apply to share consumers: `max.poll.interval.ms` is a
+      # consumer-group liveness property (share consumers use broker-side record acquisition
+      # locks instead of poll-based liveness), so it is not injected here.
+      SHARE_GROUP_KAFKA_DEFAULTS = {
+        "statistics.interval.ms": 5_000,
+        "client.software.name": "karafka",
+        "socket.nagle.disable": true,
+        "client.software.version": CLIENT_SOFTWARE_VERSION
+      }.freeze
+
+      # Dev-only share-group defaults. Same rationale as for the consumer-group ones.
+      SHARE_GROUP_KAFKA_DEV_DEFAULTS = {
+        "allow.auto.create.topics": "true",
         "topic.metadata.refresh.interval.ms": 5_000
       }.freeze
 
@@ -48,19 +69,35 @@ module Karafka
       }.freeze
 
       private_constant(
-        :CONSUMER_KAFKA_DEFAULTS, :CONSUMER_KAFKA_DEV_DEFAULTS, :PRODUCER_KAFKA_DEV_DEFAULTS
+        :CLIENT_SOFTWARE_VERSION,
+        :CONSUMER_GROUP_KAFKA_DEFAULTS, :CONSUMER_GROUP_KAFKA_DEV_DEFAULTS,
+        :SHARE_GROUP_KAFKA_DEFAULTS, :SHARE_GROUP_KAFKA_DEV_DEFAULTS,
+        :PRODUCER_KAFKA_DEV_DEFAULTS
       )
 
-      # Injects the consumer kafka defaults into a kafka config hash, adding the dev-only ones
-      # outside of production. Extensions (e.g. Pro) layer extra defaults by prepending onto the
-      # singleton class and calling `super`.
-      class Consumer < Karafka::Core::Configurable::Injector
+      # Injects the consumer-group kafka defaults into a kafka config hash, adding the dev-only
+      # ones outside of production. Extensions (e.g. Pro) layer extra defaults by prepending onto
+      # the module singleton class and calling `super`.
+      class ConsumerGroup < Karafka::Core::Configurable::Injector
         class << self
-          # @return [Hash] consumer kafka defaults for the current environment
+          # @return [Hash] consumer-group kafka defaults for the current environment
           def defaults
-            return CONSUMER_KAFKA_DEFAULTS if Karafka::App.env.production?
+            return CONSUMER_GROUP_KAFKA_DEFAULTS if Karafka::App.env.production?
 
-            CONSUMER_KAFKA_DEFAULTS.merge(CONSUMER_KAFKA_DEV_DEFAULTS)
+            CONSUMER_GROUP_KAFKA_DEFAULTS.merge(CONSUMER_GROUP_KAFKA_DEV_DEFAULTS)
+          end
+        end
+      end
+
+      # Injects the share-group (KIP-932) kafka defaults into a kafka config hash, adding the
+      # dev-only ones outside of production.
+      class ShareGroup < Karafka::Core::Configurable::Injector
+        class << self
+          # @return [Hash] share-group kafka defaults for the current environment
+          def defaults
+            return SHARE_GROUP_KAFKA_DEFAULTS if Karafka::App.env.production?
+
+            SHARE_GROUP_KAFKA_DEFAULTS.merge(SHARE_GROUP_KAFKA_DEV_DEFAULTS)
           end
         end
       end
@@ -89,12 +126,22 @@ module Karafka
           ]
         end
 
-        # Propagates the kafka setting defaults unless they are already present for consumer config
-        # This makes it easier to set some values that users usually don't change but still allows
-        # them to overwrite the whole hash if they want to
+        # Propagates the kafka setting defaults unless they are already present for a
+        # consumer-group consumer config. This makes it easier to set some values that users
+        # usually don't change but still allows them to overwrite the whole hash if they want to
         # @param kafka_config [Hash] kafka scoped config
-        def consumer(kafka_config)
-          Consumer.call(kafka_config)
+        def consumer_group(kafka_config)
+          ConsumerGroup.call(kafka_config)
+        end
+
+        # Legacy alias for {.consumer_group}. Kept for backwards compatibility.
+        alias_method :consumer, :consumer_group
+
+        # Propagates the kafka setting defaults unless they are already present for a share-group
+        # (KIP-932) consumer config
+        # @param kafka_config [Hash] kafka scoped config
+        def share_group(kafka_config)
+          ShareGroup.call(kafka_config)
         end
 
         # Propagates the kafka settings defaults unless they are already present for producer

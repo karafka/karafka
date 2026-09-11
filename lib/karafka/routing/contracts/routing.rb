@@ -2,6 +2,8 @@
 
 module Karafka
   module Routing
+    # Namespace for cross-group routing contracts (mode-specific contracts live under
+    # `Routing::ConsumerGroups::Contracts` / `Routing::ShareGroups::Contracts`).
     module Contracts
       # Ensures that routing wide rules are obeyed
       class Routing < Karafka::Contracts::Base
@@ -9,6 +11,19 @@ module Karafka
           config.error_messages = YAML.safe_load_file(
             File.join(Karafka.gem_root, "config", "locales", "errors.yml")
           ).fetch("en").fetch("validations").fetch("routing")
+        end
+
+        # Ensures that group names are unique across all the group types. Kafka uses a single
+        # group-id namespace for consumer groups and share groups (KIP-932), so the same name
+        # cannot describe both a consumer group and a share group
+        virtual do |data, errors|
+          next unless errors.empty?
+
+          ids = data.map { |group| group[:id] }
+
+          next if ids.size == ids.uniq.size
+
+          [[%i[groups], :names_not_unique]]
         end
 
         # Ensures, that when declarative topics strict requirement is on, all topics have
@@ -28,14 +43,18 @@ module Karafka
 
           data.each do |group|
             group[:topics].each do |topic|
+              dec = topic[:declaratives]
+
+              # Share-group topics (KIP-932) do not support declarative management (nor DLQ), so
+              # they are not subject to the strict declarative check
+              next unless dec
+
               pat = topic[:patterns]
               # Ignore pattern topics because they won't exist and should not be declarative managed
               topics << topic[:name] if !pat || !pat[:active]
 
               dlq = topic[:dead_letter_queue]
               topics << dlq[:topic] if dlq[:active]
-
-              dec = topic[:declaratives]
 
               dec_topics << topic[:name] if dec[:active]
             end

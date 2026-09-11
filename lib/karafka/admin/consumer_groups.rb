@@ -320,7 +320,9 @@ module Karafka
       # @example Trigger rebalance for a group
       #   Karafka::Admin::ConsumerGroups.trigger_rebalance('my-group')
       def trigger_rebalance(group_id)
-        group = Karafka::App.routes.find { |g| g.id == group_id }
+        # Only consumer groups can be rebalanced via the classic group protocol. Share groups
+        # (KIP-932) are not eligible, so they are not considered here
+        group = Karafka::App.routes.consumer_groups.find { |g| g.id == group_id }
 
         unless group
           raise(
@@ -344,7 +346,7 @@ module Karafka
         # Build consumer settings using the group's kafka config from first topic
         # This ensures we use the same settings as the actual consumers
         # Following the same pattern as in Karafka::Connection::Client#build_kafka
-        consumer_settings = Setup::AttributesMap.consumer(first_topic.kafka.dup)
+        consumer_settings = Setup::AttributesMap.consumer_group(first_topic.kafka.dup)
         consumer_settings[:"group.id"] = group.id
         consumer_settings[:"enable.auto.offset.store"] = false
         consumer_settings[:"auto.offset.reset"] ||= first_topic.initial_offset
@@ -394,9 +396,10 @@ module Karafka
           [topic[:topic_name], topic[:partition_count]]
         end.freeze
 
-        # If no expected groups, we use all from routing that have active topics
+        # If no expected groups, we use all from routing that have active topics. Share groups
+        # (KIP-932) do not store classic committed offsets, so they are not queried here
         if groups_with_topics.empty?
-          groups_with_topics = Karafka::App.routes.to_h do |group|
+          groups_with_topics = Karafka::App.routes.consumer_groups.to_h do |group|
             group_topics = group.topics.select do |group_topic|
               active_topics_only ? group_topic.active? : true
             end
