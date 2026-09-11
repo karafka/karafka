@@ -45,5 +45,5 @@ assert_equal(-1, latest[:timestamp])
 # The whole point of the out-of-order setup: `:max_timestamp` must match neither the end offset
 # nor the last message offset, otherwise this spec would also pass on an implementation that
 # silently treated `:max_timestamp` as `:latest`
-assert max_timestamp[:offset] != latest[:offset]
-assert max_timestamp[:offset] != deltas.size - 1
+assert_not_equal latest[:offset], max_timestamp[:offset]
+assert_not_equal deltas.size - 1, max_timestamp[:offset]

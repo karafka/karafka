@@ -45,4 +45,4 @@ latest = Karafka::Admin.read_partition_offsets(
 ).first
 
 assert_equal deltas.size, latest[:offset]
-assert beyond[:offset] != latest[:offset]
+assert_not_equal latest[:offset], beyond[:offset]
