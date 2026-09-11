@@ -83,6 +83,17 @@ RSpec.describe Karafka::Routing::ShareGroups::Group do
       expect(share_topic.pause).to be_a(Karafka::Routing::Features::ShareGroups::Pausing::Config)
     end
 
+    # `active` is not an on/off switch here: it marks whether the settings were set explicitly for
+    # this topic (`true`) or inherited from the global defaults (`false`). There is no per-topic
+    # override path yet, so the inherited case is the only reachable one and is what we pin.
+    it "expect the share topic pause config to be marked as inherited" do
+      expect(share_topic.pause.active?).to be(false)
+    end
+
+    it "expect the share topic to_h to be frozen" do
+      expect(share_topic.to_h).to be_frozen
+    end
+
     # Deserializers are provided for both modes in the same format (a per-mode feature prepended
     # onto each topic class), since share groups also process message payloads, keys and headers.
     it "expect both consumer and share topics to expose active deserializers" do
@@ -94,6 +105,47 @@ RSpec.describe Karafka::Routing::ShareGroups::Group do
     it "expect the share topic to_h to include pause and deserializers" do
       expect(consumer_topic.to_h).to include(:deserializers, :pause)
       expect(share_topic.to_h).to include(:deserializers, :pause)
+    end
+  end
+
+  context "when the global pause settings are customized" do
+    let(:share_topic) { builder.find(&:share_group?).topics.first }
+    let(:original_timeout) { Karafka::App.config.pause.timeout }
+    let(:original_max_timeout) { Karafka::App.config.pause.max_timeout }
+    let(:original_backoff) { Karafka::App.config.pause.with_exponential_backoff }
+
+    # The pause config is built lazily and memoized the first time it is read, which happens while
+    # the routes are drawn - so the global values have to be in place before `draw`. Distinct
+    # values matter too: the suite pins timeout and max_timeout to the same number, so comparing
+    # against the live config would pass even if the two reads were swapped.
+    before do
+      original_timeout
+      original_max_timeout
+      original_backoff
+
+      Karafka::App.config.pause.timeout = 1_234
+      Karafka::App.config.pause.max_timeout = 5_678
+      Karafka::App.config.pause.with_exponential_backoff = true
+
+      cclass = consumer_class
+
+      builder.draw do
+        share_group "sg" do
+          topic(:b) { consumer cclass }
+        end
+      end
+    end
+
+    after do
+      Karafka::App.config.pause.timeout = original_timeout
+      Karafka::App.config.pause.max_timeout = original_max_timeout
+      Karafka::App.config.pause.with_exponential_backoff = original_backoff
+    end
+
+    it "expect the share topic to inherit each global pause setting" do
+      expect(share_topic.pause.timeout).to eq(1_234)
+      expect(share_topic.pause.max_timeout).to eq(5_678)
+      expect(share_topic.pause.with_exponential_backoff).to be(true)
     end
   end
 
