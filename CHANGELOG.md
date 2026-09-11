@@ -8,6 +8,7 @@
 - [Enhancement] Introduce the share group (KIP-932) routing layer: `share_group` blocks with validation, introspection and `--include_share_groups`/`--exclude_share_groups` CLI filters. Share groups can be described but not run yet: the server raises `Karafka::Errors::ShareGroupsNotImplementedError`.
 - [Enhancement] Make the client-configuration seams share-group aware: `Setup::AttributesMap` and `Setup::DefaultsInjector` gain `.consumer_group`/`.share_group` scopes (`.consumer` stays a legacy alias), and share-group subscription groups skip the consumer-group-only settings librdkafka rejects.
 - [Enhancement] Build `Setup::DefaultsInjector` (and its Pro extension) on top of `Karafka::Core::Configurable::Injector` so the kafka defaults injection uses the shared ecosystem pattern. Behavior is unchanged. Requires karafka-core `>= 2.6.3`.
+- [Maintenance] Cover the `:max_timestamp` and Integer-timestamp `Admin#read_partition_offsets` offset modes with integration specs.
 - [Fix] Use `::JSON.parse` instead of `::ActiveSupport::JSON.decode` in the ActiveJob deserializer, so consuming ActiveJob messages keeps working under the json gem `>= 3.0` (where `ActiveSupport::JSON.decode` passes a now-invalid second argument to `JSON.parse`).
 - [Fix] [Pro] Stabilize the `Karafka::Admin::Recovery` `read_committed_offsets` no-offsets integration spec against a fresh CI broker.
 - [Fix] Stabilize the `Karafka::Admin::Acl` `#create`/`#describe` specs against asynchronous ACL propagation on slow CI.
