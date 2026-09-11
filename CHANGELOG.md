@@ -1,6 +1,7 @@
 # Karafka Framework Changelog
 
 ## 2.6.2 (Unreleased)
+- [Enhancement] Introduce a mode-aware consumer class hierarchy for KIP-932: `Karafka::Consumers::Base` with `Consumers::ConsumerGroup` (all current offset/pause/seek behavior) and `Consumers::ShareGroup` (share consumer with `mark_accepted`/`mark_released`/`mark_rejected`/`extend_lock!` ack API). `Karafka::BaseConsumer` is now a backwards-compatible alias of `Consumers::ConsumerGroup`. Share groups remain describable but not runnable until the runtime lands, so the ack API currently raises `NotImplementedError`. No behavior change for consumer-group consumers.
 - **[Feature]** Add `Instrumentation::Vendors::NewRelic::MetricsListener` for publishing Karafka metrics to New Relic. Context is encoded in the metric name, as New Relic custom metrics do not support tags (svyatmuzyka).
 - **[Feature]** Add `karafka info --extended`, printing the routing tree, global app config and effective Kafka config, with sensitive values redacted.
 - **[Feature]** Add `Kubernetes::ReadinessListener`, serving a readiness probe that reports healthy once all subscription groups poll and not-ready on shutdown or quieting, so pods drain before exiting.
