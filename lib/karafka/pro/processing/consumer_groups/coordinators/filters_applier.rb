@@ -131,11 +131,11 @@ module Karafka
 
             # @return [Symbol] `:mark_as_consumed` or `:mark_as_consumed!`
             def marking_method
-              candidates = applied.map(&:marking_method)
-
-              return :mark_as_consumed! if candidates.include?(:mark_as_consumed!)
-
-              :mark_as_consumed
+              if applied.any? { |filter| filter.marking_method == :mark_as_consumed! }
+                :mark_as_consumed!
+              else
+                :mark_as_consumed
+              end
             end
 
             # The first (lowest) message we want to mark as consumed in marking. By default it uses

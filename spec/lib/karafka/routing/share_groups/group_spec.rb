@@ -103,7 +103,9 @@ RSpec.describe Karafka::Routing::ShareGroups::Group do
     end
 
     it "expect the share topic to_h to include pause and deserializers" do
-      expect(consumer_topic.to_h).to include(:deserializers, :pause)
+      # The consumer-group feature is `deserializing` (it carries the extra `parallel` option),
+      # while share groups keep the plain `deserializers` one, so the emitted keys differ
+      expect(consumer_topic.to_h).to include(:deserializing, :pause)
       expect(share_topic.to_h).to include(:deserializers, :pause)
     end
   end

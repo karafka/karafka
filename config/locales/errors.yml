@@ -100,6 +100,10 @@ en:
         swarm.nodes_format: 'needs to be an integer bigger than 0'
         swarm.node_format: needs to be false or node instance
 
+        deserializing.parallel.active_format: needs to be either true or false
+        deserializing.parallel.concurrency_format: needs to be an integer bigger than 0
+        deserializing.parallel.min_payloads_format: needs to be an integer bigger than 0
+
     cli:
       server:
         missing: needs to be present
@@ -136,6 +140,7 @@ en:
         name_format: 'needs to be a string with a Kafka accepted format'
         name_regexp_subscription_not_supported: regexp/pattern topic subscriptions are not supported for share groups (KIP-932) - use an explicit topic name
         deserializers_format: needs to be present
+        deserializing_format: needs to be present
         consumer_format: needs to be present
         id_format: 'needs to be a string with a Kafka accepted format'
         initial_offset_format: needs to be either earliest or latest
@@ -173,6 +178,11 @@ en:
         deserializers.payload_format: 'needs to respond to #call'
         deserializers.key_format: 'needs to respond to #call'
         deserializers.headers_format: 'needs to respond to #call'
+        deserializing.active_format: 'needs to be true'
+        deserializing.payload_format: 'needs to respond to #call'
+        deserializing.key_format: 'needs to respond to #call'
+        deserializing.headers_format: 'needs to respond to #call'
+        deserializing.parallel_format: 'needs to be either true or false'
 
       consumer_group:
         missing: needs to be present

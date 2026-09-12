@@ -1,10 +1,12 @@
 # Karafka Framework Changelog
 
 ## 2.6.2 (Unreleased)
+- **[Breaking]** Move the default deserializers from `Karafka::Deserializers::{Payload,Key,Headers}` to `Karafka::Deserializing::Deserializers::{Payload,Key,Headers}`. `Karafka::Deserializers` is kept as a backwards compatible alias, so existing references keep working.
 - **[Feature]** Add `Instrumentation::Vendors::NewRelic::MetricsListener` for publishing Karafka metrics to New Relic. Context is encoded in the metric name, as New Relic custom metrics do not support tags (svyatmuzyka).
 - **[Feature]** Add `karafka info --extended`, printing the routing tree, global app config and effective Kafka config, with sensitive values redacted.
 - **[Feature]** Add `Kubernetes::ReadinessListener`, serving a readiness probe that reports healthy once all subscription groups poll and not-ready on shutdown or quieting, so pods drain before exiting.
 - **[Feature]** Allow the `--include`/`--exclude` CLI server filters to accept wildcard patterns (e.g. `--exclude-consumer-groups app-a-*`), including topics discovered at runtime by Pro routing patterns.
+- **[Feature]** Add an opt-in Ractor-based parallel deserialization engine (requires Ruby 4.0+), enabled globally with `config.deserializing.parallel.active = true` and per topic with `deserializing(parallel: true)`. Batches below `min_payloads`, or with the feature disabled, fall back to inline deserialization, so results are unchanged either way.
 - [Enhancement] Introduce the share group (KIP-932) routing layer: `share_group` blocks with validation, introspection and `--include_share_groups`/`--exclude_share_groups` CLI filters. Share groups can be described but not run yet: the server raises `Karafka::Errors::ShareGroupsNotImplementedError`.
 - [Enhancement] Make the client-configuration seams share-group aware: `Setup::AttributesMap` and `Setup::DefaultsInjector` gain `.consumer_group`/`.share_group` scopes (`.consumer` stays a legacy alias), and share-group subscription groups skip the consumer-group-only settings librdkafka rejects.
 - [Enhancement] Build `Setup::DefaultsInjector` (and its Pro extension) on top of `Karafka::Core::Configurable::Injector` so the kafka defaults injection uses the shared ecosystem pattern. Behavior is unchanged. Requires karafka-core `>= 2.6.3`.
