@@ -7,6 +7,10 @@ RSpec.describe_current do
     it { expect(described_class).to be < Karafka::Consumers::Base }
     it { expect(consumer).not_to be_a(Karafka::Consumers::ConsumerGroup) }
 
+    it "expect Karafka::ShareConsumer to alias this class as the user-facing primitive" do
+      expect(Karafka::ShareConsumer).to equal(described_class)
+    end
+
     it "expect to report the share group type" do
       expect(consumer.group_type).to eq(:share)
       expect(consumer).to be_share_group

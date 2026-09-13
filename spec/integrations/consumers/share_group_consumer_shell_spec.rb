@@ -7,16 +7,19 @@
 
 setup_karafka
 
-# (a) A share-group consumer subclass can be defined and introspects as share
-class ShareConsumer < Karafka::Consumers::ShareGroup
+# (a) A share-group consumer subclass can be defined via the user-facing Karafka::ShareConsumer
+# primitive (a flat alias of Consumers::ShareGroup) and introspects as share
+assert Karafka::ShareConsumer.equal?(Karafka::Consumers::ShareGroup)
+
+class MyShareConsumer < Karafka::ShareConsumer
   def consume
     nil
   end
 end
 
-share_consumer = ShareConsumer.new
+share_consumer = MyShareConsumer.new
 
-assert ShareConsumer < Karafka::Consumers::Base
+assert MyShareConsumer < Karafka::Consumers::Base
 assert_equal :share, share_consumer.group_type
 assert share_consumer.share_group?
 assert !share_consumer.consumer_group?
@@ -73,13 +76,36 @@ assert_equal 1, Karafka::App.routes.consumer_groups.size
 
 clear_app_draws
 
-# (d) Share groups still cannot run - the startup guard raises even with a valid share consumer
+# (d) A consumer-group consumer on a share group is rejected at draw, so a CG consumer can never
+# run on a share-group setup
+rejected = false
+
+begin
+  draw_routes(create_topics: false) do
+    share_group "sg-wrong-consumer" do
+      topic "sg-topic" do
+        active(false)
+        consumer CgConsumer
+      end
+    end
+  end
+rescue Karafka::Errors::InvalidConfigurationError => e
+  assert e.message.include?("share consumer inheriting from Karafka::ShareConsumer"), e.message
+
+  rejected = true
+end
+
+assert rejected
+
+clear_app_draws
+
+# (e) Share groups still cannot run - the startup guard raises even with a valid share consumer
 guarded = false
 
 draw_routes(create_topics: false) do
   share_group "sg" do
     topic "sg-topic" do
-      consumer ShareConsumer
+      consumer MyShareConsumer
     end
   end
 end

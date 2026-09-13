@@ -53,6 +53,21 @@ module Karafka
             [[%w[consumer], :missing]]
           end
 
+          # A share-group topic must be consumed by a share consumer. Requiring the consumer to
+          # inherit from Karafka::ShareConsumer (Consumers::ShareGroup) prevents accidentally
+          # wiring a consumer-group consumer onto a share group, which would run the wrong
+          # (offset/pause based) flow. Only checked when a consumer class is resolvable.
+          virtual do |data, errors|
+            next unless errors.empty?
+
+            consumer = data.fetch(:consumer)
+
+            next unless consumer.is_a?(Class)
+            next if consumer <= Karafka::Consumers::ShareGroup
+
+            [[%w[consumer], :share_consumer_required]]
+          end
+
           virtual do |data, errors|
             next unless errors.empty?
 

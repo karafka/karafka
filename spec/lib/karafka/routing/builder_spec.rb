@@ -322,9 +322,11 @@ RSpec.describe_current do
 
   describe "#consumer_groups and #share_groups" do
     let(:consumer_class) { Class.new(Karafka::BaseConsumer) }
+    let(:share_consumer_class) { Class.new(Karafka::ShareConsumer) }
 
     before do
       cclass = consumer_class
+      sclass = share_consumer_class
 
       builder.draw do
         consumer_group "cg" do
@@ -332,7 +334,7 @@ RSpec.describe_current do
         end
 
         share_group "sg" do
-          topic(:b) { consumer cclass }
+          topic(:b) { consumer sclass }
         end
       end
     end
