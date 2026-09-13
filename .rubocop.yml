@@ -137,7 +137,7 @@ Lint/RaiseException:
 # past unprocessed batches
 Lint/RescueException:
   Exclude:
-    - lib/karafka/base_consumer.rb
+    - lib/karafka/consumers/consumer_group.rb
     - lib/karafka/instrumentation/critical_errors_listener.rb
     - lib/karafka/processing/worker.rb
     - lib/karafka/processing/consumer_groups/strategies/default.rb
