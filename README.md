@@ -15,7 +15,7 @@ Karafka is a Ruby and Rails multi-threaded efficient Kafka processing framework 
 - Has a seamless [Dead Letter Queue](https://karafka.io/docs/Dead-Letter-Queue/) functionality built-in
 - Supports in-development [code reloading](https://karafka.io/docs/Auto-reload-of-code-changes-in-development)
 - Is powered by [librdkafka](https://github.com/confluentinc/librdkafka) (the Apache Kafka C/C++ client library)
-- Has an out-of the box [AppSignal](https://karafka.io/docs/Monitoring-and-Logging/#appsignal-metrics-and-error-tracking) and [StatsD/DataDog](https://karafka.io/docs/Monitoring-and-Logging/#datadog-and-statsd-integration) monitoring with dashboard templates.
+- Has out of the box [AppSignal](https://karafka.io/docs/Monitoring-and-Logging/#appsignal-metrics-and-error-tracking), [StatsD/DataDog](https://karafka.io/docs/Monitoring-and-Logging/#datadog-and-statsd-integration) and New Relic monitoring, with dashboard templates for AppSignal and DataDog.
 
 ```ruby
 # Define what topics you want to consume with which consumers in karafka.rb
