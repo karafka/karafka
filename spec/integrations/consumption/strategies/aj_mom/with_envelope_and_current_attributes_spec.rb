@@ -20,7 +20,7 @@ class EnvelopedWithCurrentAttributesDeserializer < Karafka::ActiveJob::Deseriali
       },
       payload: job_hash
     }
-    ::ActiveSupport::JSON.encode(envelope)
+    ::JSON.generate(envelope)
   end
 
   # Extracts the job from the envelope
