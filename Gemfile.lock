@@ -27,7 +27,7 @@ GEM
       tzinfo (~> 2.0, >= 2.0.5)
       uri (>= 0.13.1)
     base64 (0.3.0)
-    bigdecimal (4.1.2)
+    bigdecimal (4.1.3)
     byebug (13.0.0)
       reline (>= 0.6.0)
     concurrent-ruby (1.3.8)
@@ -57,42 +57,42 @@ GEM
       activesupport (>= 6.1)
     i18n (1.15.2)
       concurrent-ruby (~> 1.0)
-    io-console (0.8.2)
-    json (2.21.2)
-    karafka-core (2.6.3)
+    io-console (0.9.4)
+    json (3.0.2)
+    karafka-core (2.6.4)
       karafka-rdkafka (>= 0.20.0)
       logger (>= 1.6.0)
-    karafka-rdkafka (0.28.0)
+    karafka-rdkafka (0.29.0)
       ffi (~> 1.17.1)
       json (> 2.0)
       logger
       mini_portile2 (~> 2.6)
       rake (> 12)
-    karafka-rdkafka (0.28.0-aarch64-linux-gnu)
+    karafka-rdkafka (0.29.0-aarch64-linux-gnu)
       ffi (~> 1.17.1)
       json (> 2.0)
       logger
       mini_portile2 (~> 2.6)
       rake (> 12)
-    karafka-rdkafka (0.28.0-aarch64-linux-musl)
+    karafka-rdkafka (0.29.0-aarch64-linux-musl)
       ffi (~> 1.17.1)
       json (> 2.0)
       logger
       mini_portile2 (~> 2.6)
       rake (> 12)
-    karafka-rdkafka (0.28.0-arm64-darwin)
+    karafka-rdkafka (0.29.0-arm64-darwin)
       ffi (~> 1.17.1)
       json (> 2.0)
       logger
       mini_portile2 (~> 2.6)
       rake (> 12)
-    karafka-rdkafka (0.28.0-x86_64-linux-gnu)
+    karafka-rdkafka (0.29.0-x86_64-linux-gnu)
       ffi (~> 1.17.1)
       json (> 2.0)
       logger
       mini_portile2 (~> 2.6)
       rake (> 12)
-    karafka-rdkafka (0.28.0-x86_64-linux-musl)
+    karafka-rdkafka (0.29.0-x86_64-linux-musl)
       ffi (~> 1.17.1)
       json (> 2.0)
       logger
@@ -117,9 +117,9 @@ GEM
     raabro (1.5.0)
     rack (3.2.7)
     rake (13.4.2)
-    reline (0.6.3)
+    reline (0.7.0)
       io-console (~> 0.5)
-    roda (3.106.0)
+    roda (3.108.0)
       rack
     rspec (3.13.2)
       rspec-core (~> 3.13.0)
@@ -137,7 +137,7 @@ GEM
     securerandom (0.4.1)
     simplecov (1.3.0)
     stringio (3.2.0)
-    tilt (2.8.0)
+    tilt (2.9.0)
     tzinfo (2.0.6)
       concurrent-ruby (~> 1.0)
     uri (1.1.1)
@@ -180,7 +180,7 @@ CHECKSUMS
   activejob (8.1.3.1) sha256=1c8dd275df930df40deecffec63d913a550a33fd94bd298f69721dd96939954a
   activesupport (8.1.3.1) sha256=85458765f25ea48b9019c46b6bb3fa5683197bf4280d9f06710a6e8d7a831376
   base64 (0.3.0) sha256=27337aeabad6ffae05c265c450490628ef3ebd4b67be58257393227588f5a97b
-  bigdecimal (4.1.2) sha256=53d217666027eab4280346fba98e7d5b66baaae1b9c3c1c0ffe89d48188a3fbd
+  bigdecimal (4.1.3) sha256=61ebe1e5e559bdc3cc6f2c0ee7f427321fc838f59611c294356eb04d6e21cf66
   bundler (4.0.17) sha256=214e21431b5665dd2f99df8a5511c6b151d7a72e8015c8b38f8b775b61cbb6c1
   byebug (13.0.0) sha256=d2263efe751941ca520fa29744b71972d39cbc41839496706f5d9b22e92ae05d
   concurrent-ruby (1.3.8) sha256=b2f1be836e968ccc78ccfce277ea79c72a88633f22306782c16ff23fb415d1e1
@@ -204,16 +204,16 @@ CHECKSUMS
   fugit (1.14.0) sha256=e311a9cc85a54bb67649df45060e721282a1e2c8ebad40e41874a3a7d576f37e
   globalid (1.4.0) sha256=037f12fbf1d9d7a014d501c2d5c77356fd4ddd96d7a7991d6700bba96706f427
   i18n (1.15.2) sha256=00f9eb62412fe593b2a65a97daa75300d37abb8f7202ec748e94b6d46a9dd1b5
-  io-console (0.8.2) sha256=d6e3ae7a7cc7574f4b8893b4fca2162e57a825b223a177b7afa236c5ef9814cc
-  json (2.21.2) sha256=1f1d3b7cf2b3ba1a69beca0bb6db13d5438b80bff3cd54cdaaa620b9b07c1c6a
+  io-console (0.9.4) sha256=a403304f32928ee85e56d457b4612ca43f2703b561a3258844992bd24085fbb1
+  json (3.0.2) sha256=8e6d7e7b11384c21230430cef90b71f14849a34a1f4452796670f7c981bd19df
   karafka (2.6.1)
-  karafka-core (2.6.3) sha256=83a783895d8f69e5fd4b7e77617f6a43c129bbb905c93e1babb9ff299470ba4a
-  karafka-rdkafka (0.28.0) sha256=fd845140c42341c5892215cac1e8adacda53b0461688f2e16379d82cb33eb006
-  karafka-rdkafka (0.28.0-aarch64-linux-gnu) sha256=d3432d3ea266227eee92f38c06bfea78374c3b09e4a68b25aafacf340c0c7ba0
-  karafka-rdkafka (0.28.0-aarch64-linux-musl) sha256=750e53f5283639cec1c97761c0b61d9b52ba7e3a5c2f16e0cbcfdc40d44dc4e9
-  karafka-rdkafka (0.28.0-arm64-darwin) sha256=5c9bc06585672eb563883922dd332289746a5222ddff2d21c58ce47a8571e01c
-  karafka-rdkafka (0.28.0-x86_64-linux-gnu) sha256=34f2deb92d5d4a82b5c80985a6ff4b662a5046d6a23ae4fc9fd1606d4d26d951
-  karafka-rdkafka (0.28.0-x86_64-linux-musl) sha256=4388d2c2c316ee62b17fe4c0ceab99bac571454a21534f65cc7e2fe7fe739c52
+  karafka-core (2.6.4) sha256=e08166ca7ef12fadf0500f2a3aba63b5ba918a98533c3feaac9f43c90f159363
+  karafka-rdkafka (0.29.0) sha256=f2d39bbcc0f2bcd63dd0deea08ac4bb6ad31a714b7518c76493e724af0f0f2a2
+  karafka-rdkafka (0.29.0-aarch64-linux-gnu) sha256=4d7e7e8eb81a221c35d36d28bd6b02c666a901e064e11ca96f45800cd4575f29
+  karafka-rdkafka (0.29.0-aarch64-linux-musl) sha256=4dda233893d8157103fefb5697bd4cc86fec934ab678fa06090e68c1a49b7709
+  karafka-rdkafka (0.29.0-arm64-darwin) sha256=d421ae4b7c5947cc78ac5c4fcb6b99f5045989b39f17d5cb2320c686cf8a0080
+  karafka-rdkafka (0.29.0-x86_64-linux-gnu) sha256=fbeb0ba7ed32bdce1ee18fb262b18b425594cb13a004eaf4e39e6a811e3eaac4
+  karafka-rdkafka (0.29.0-x86_64-linux-musl) sha256=5dcebdc8127bda180b4dc8224c96b189eae10c4c9ce05a5ac5f814900400ec07
   karafka-testing (2.6.2) sha256=d6872f793a0d8465d5aea76303be5c2d5c8b75ebf3c6985fe1c32c03259190d4
   karafka-web (1.0.1) sha256=1d507cbe978998b20a81040751b8e79b6611f17d88756cefc2982ff479e5192a
   logger (1.7.0) sha256=196edec7cc44b66cfb40f9755ce11b392f21f7967696af15d274dde7edff0203
@@ -224,8 +224,8 @@ CHECKSUMS
   raabro (1.5.0) sha256=3f998a7bc84f9c84df3ab580634d2e0a5bda4f0841168d56035f529c9877440a
   rack (3.2.7) sha256=93e13e1c24f93556671d85d2d79fa228c3485815c50d7e2f265b5330c6528fb7
   rake (13.4.2) sha256=cb825b2bd5f1f8e91ca37bddb4b9aaf345551b4731da62949be002fa89283701
-  reline (0.6.3) sha256=1198b04973565b36ec0f11542ab3f5cfeeec34823f4e54cebde90968092b1835
-  roda (3.106.0) sha256=1a1cfb13c6690db158a3929e9c9ece88e697fb23b05baae63f07b0773e3bbade
+  reline (0.7.0) sha256=5b012d8e55dbf9d450f12bde2cf7d15ff546ae80b3f8f3b30e570d431815583d
+  roda (3.108.0) sha256=a209acc5c885c7c9cfe703ad985b343026f79f67949932dd739b83e5a129ffbd
   rspec (3.13.2) sha256=206284a08ad798e61f86d7ca3e376718d52c0bc944626b2349266f239f820587
   rspec-core (3.13.6) sha256=a8823c6411667b60a8bca135364351dda34cd55e44ff94c4be4633b37d828b2d
   rspec-expectations (3.13.5) sha256=33a4d3a1d95060aea4c94e9f237030a8f9eae5615e9bd85718fe3a09e4b58836
@@ -234,7 +234,7 @@ CHECKSUMS
   securerandom (0.4.1) sha256=cc5193d414a4341b6e225f0cb4446aceca8e50d5e1888743fac16987638ea0b1
   simplecov (1.3.0) sha256=d9886307863c1ead47657dcbed869bfffd82318808b09014d8f0ff77dcfe7492
   stringio (3.2.0) sha256=c37cb2e58b4ffbd33fe5cd948c05934af997b36e0b6ca6fdf43afa234cf222e1
-  tilt (2.8.0) sha256=ba472eb2716fe1e04112d6d219a9dae938ec09a6a1e2ad3ecc7922e79bde3721
+  tilt (2.9.0) sha256=da5735d0280bba96e9a91041bb14aee435ccad5c17b0fa519249ae543d9aa3a5
   tzinfo (2.0.6) sha256=8daf828cc77bcf7d63b0e3bdb6caa47e2272dcfaf4fbfe46f8c3a9df087a829b
   uri (1.1.1) sha256=379fa58d27ffb1387eaada68c749d1426738bd0f654d812fcc07e7568f5c57c6
   warning (1.6.0) sha256=a49cdfae19fb77d19afff2efbe45f8ab759e9cd25b4e4ce2c79dbaf46bdb6c9e
