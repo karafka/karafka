@@ -38,12 +38,17 @@ module Karafka
           # A consumer-group topic must be consumed by a consumer-group consumer. Requiring the
           # consumer to inherit from Karafka::BaseConsumer (Consumers::ConsumerGroup) prevents
           # accidentally wiring a share consumer onto a consumer group, which would run the wrong
-          # (share/ack based) flow. Only checked when a consumer class is resolvable.
+          # (share/ack based) flow.
           virtual do |data, errors|
             next unless errors.empty?
 
             consumer = data.fetch(:consumer)
 
+            # Only actual consumer classes carry mode information, so the mode is enforced on
+            # classes only. Every other value is left untouched: nil (inactive/admin-only topics
+            # may have no consumer, already handled by the missing-check above) and String/Symbol
+            # by-name references (a class passed for reload is resolved to a Class before it reaches
+            # here, so nothing functional is skipped).
             next unless consumer.is_a?(Class)
             next if consumer <= Karafka::Consumers::ConsumerGroup
 

@@ -205,6 +205,18 @@ RSpec.describe_current do
 
       it { expect(check).not_to be_success }
     end
+
+    context "when it is a by-name String reference" do
+      before { config[:consumer] = "SomeConsumerByName" }
+
+      it { expect(check).to be_success }
+    end
+
+    context "when it is a by-name Symbol reference" do
+      before { config[:consumer] = :SomeConsumerByName }
+
+      it { expect(check).to be_success }
+    end
   end
 
   context "when we validate active" do
