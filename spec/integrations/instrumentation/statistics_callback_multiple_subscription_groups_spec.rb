@@ -9,13 +9,13 @@ setup_karafka
 draw_routes do
   consumer_group DT.groups.first do
     topic DT.topic do
-      consumer Class.new
+      consumer Class.new(Karafka::BaseConsumer)
     end
   end
 
   consumer_group DT.groups.last do
     topic DT.topic do
-      consumer Class.new
+      consumer Class.new(Karafka::BaseConsumer)
     end
   end
 end

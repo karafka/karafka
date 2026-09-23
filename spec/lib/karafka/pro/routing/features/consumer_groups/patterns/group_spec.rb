@@ -33,7 +33,7 @@ RSpec.describe_current do
 
   let(:adding_pattern) do
     cg.public_send(:pattern=, /test/) do
-      consumer Class.new
+      consumer Class.new(Karafka::BaseConsumer)
     end
   end
 

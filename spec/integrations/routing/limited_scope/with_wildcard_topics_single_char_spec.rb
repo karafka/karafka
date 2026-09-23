@@ -8,15 +8,15 @@ setup_karafka
 
 draw_routes(create_topics: false) do
   topic "topic-1" do
-    consumer Class.new
+    consumer Class.new(Karafka::BaseConsumer)
   end
 
   topic "topic-x" do
-    consumer Class.new
+    consumer Class.new(Karafka::BaseConsumer)
   end
 
   topic "topic-42" do
-    consumer Class.new
+    consumer Class.new(Karafka::BaseConsumer)
   end
 end
 

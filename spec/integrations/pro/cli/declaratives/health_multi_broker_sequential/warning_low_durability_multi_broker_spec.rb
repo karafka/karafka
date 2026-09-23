@@ -34,7 +34,7 @@ setup_karafka
 
 draw_routes do
   topic DT.topics[0] do
-    consumer Class.new
+    consumer Class.new(Karafka::BaseConsumer)
     config(
       partitions: 2,
       replication_factor: 3,

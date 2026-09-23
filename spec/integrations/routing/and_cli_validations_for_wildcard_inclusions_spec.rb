@@ -13,7 +13,7 @@ draw_routes(create_topics: false) do
   consumer_group "app-a" do
     subscription_group "sg-a" do
       topic "topic-a" do
-        consumer Class.new
+        consumer Class.new(Karafka::BaseConsumer)
       end
     end
   end

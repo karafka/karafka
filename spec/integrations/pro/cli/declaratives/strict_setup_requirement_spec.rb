@@ -57,27 +57,27 @@ end
 
 draw_and_validate(valid: false) do
   topic "a" do
-    consumer Class.new
+    consumer Class.new(Karafka::BaseConsumer)
     config(active: false)
   end
 end
 
 draw_and_validate(valid: true) do
   topic "a" do
-    consumer Class.new
+    consumer Class.new(Karafka::BaseConsumer)
   end
 end
 
 draw_and_validate(valid: false) do
   topic "a" do
-    consumer Class.new
+    consumer Class.new(Karafka::BaseConsumer)
     dead_letter_queue(topic: "dlq")
   end
 end
 
 draw_and_validate(valid: true) do
   topic "a" do
-    consumer Class.new
+    consumer Class.new(Karafka::BaseConsumer)
     dead_letter_queue(topic: "dlq")
   end
 
@@ -88,19 +88,7 @@ end
 
 draw_and_validate(valid: false) do
   topic "a" do
-    consumer Class.new
-    dead_letter_queue(topic: "dlq")
-  end
-
-  topic "dlq" do
-    active(false)
-    config(active: false)
-  end
-end
-
-draw_and_validate(valid: false) do
-  pattern(/a/) do
-    consumer Class.new
+    consumer Class.new(Karafka::BaseConsumer)
     dead_letter_queue(topic: "dlq")
   end
 
@@ -112,20 +100,32 @@ end
 
 draw_and_validate(valid: false) do
   pattern(/a/) do
-    consumer Class.new
+    consumer Class.new(Karafka::BaseConsumer)
+    dead_letter_queue(topic: "dlq")
+  end
+
+  topic "dlq" do
+    active(false)
+    config(active: false)
+  end
+end
+
+draw_and_validate(valid: false) do
+  pattern(/a/) do
+    consumer Class.new(Karafka::BaseConsumer)
     dead_letter_queue(topic: "dlq")
   end
 end
 
 draw_and_validate(valid: true) do
   pattern(/a/) do
-    consumer Class.new
+    consumer Class.new(Karafka::BaseConsumer)
   end
 end
 
 draw_and_validate(valid: true) do
   pattern("a", /a/) do
-    consumer Class.new
+    consumer Class.new(Karafka::BaseConsumer)
   end
 end
 
@@ -134,7 +134,7 @@ Karafka::App.config.strict_declarative_topics = false
 
 draw_and_validate(valid: true) do
   topic "a" do
-    consumer Class.new
+    consumer Class.new(Karafka::BaseConsumer)
     dead_letter_queue(topic: "dlq")
   end
 

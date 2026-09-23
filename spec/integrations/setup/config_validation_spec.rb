@@ -14,7 +14,7 @@ begin
   draw_routes do
     consumer_group "usual" do
       topic "regular" do
-        consumer Class.new
+        consumer Class.new(Karafka::BaseConsumer)
       end
     end
   end
