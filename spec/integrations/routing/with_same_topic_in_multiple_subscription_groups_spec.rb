@@ -12,13 +12,13 @@ begin
     consumer_group :test do
       subscription_group "namespace_collision" do
         topic :test do
-          consumer Class.new
+          consumer Class.new(Karafka::BaseConsumer)
         end
       end
 
       subscription_group "namespace_collision2" do
         topic :test do
-          consumer Class.new
+          consumer Class.new(Karafka::BaseConsumer)
         end
       end
     end

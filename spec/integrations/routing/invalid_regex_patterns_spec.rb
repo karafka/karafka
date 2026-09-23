@@ -12,7 +12,7 @@ begin
     subscription_group do
       # Topic names with invalid characters
       topic "topic\x00name" do # Null byte
-        consumer Class.new
+        consumer Class.new(Karafka::BaseConsumer)
       end
     end
   end
@@ -31,7 +31,7 @@ begin
   draw_routes(create_topics: false) do
     subscription_group do
       topic very_long_topic_name do
-        consumer Class.new
+        consumer Class.new(Karafka::BaseConsumer)
       end
     end
   end
@@ -48,7 +48,7 @@ begin
     subscription_group do
       # Topic names with characters not allowed in Kafka
       topic "topic with spaces" do
-        consumer Class.new
+        consumer Class.new(Karafka::BaseConsumer)
       end
     end
   end
@@ -64,7 +64,7 @@ begin
   draw_routes(create_topics: false) do
     subscription_group do
       topic "" do # Empty topic name
-        consumer Class.new
+        consumer Class.new(Karafka::BaseConsumer)
       end
     end
   end

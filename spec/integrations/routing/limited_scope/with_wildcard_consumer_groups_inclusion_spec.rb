@@ -8,19 +8,19 @@ setup_karafka
 draw_routes(create_topics: false) do
   consumer_group "app-a-orders" do
     topic "t1" do
-      consumer Class.new
+      consumer Class.new(Karafka::BaseConsumer)
     end
   end
 
   consumer_group "app-a-payments" do
     topic "t2" do
-      consumer Class.new
+      consumer Class.new(Karafka::BaseConsumer)
     end
   end
 
   consumer_group "app-b-orders" do
     topic "t3" do
-      consumer Class.new
+      consumer Class.new(Karafka::BaseConsumer)
     end
   end
 end
