@@ -13,6 +13,7 @@
 - [Maintenance] Cover the `:max_timestamp` and Integer-timestamp `Admin#read_partition_offsets` offset modes with integration specs.
 - [Maintenance] Cover the share group routing layer with specs: pause inheritance and provenance, the frozen `#to_h`, and isolation from consumer-group feature DSL.
 - [Maintenance] Cover the untested New Relic `MetricsListener` paths with integration specs: revoked and shutdown metrics, overridden listener methods, and an empty metrics list.
+- [Maintenance] Run the Rails 8.0 transactional ActiveJob integration spec against Rails `8.0.3`. It was pinned to Rails `7.2.2.1`, so it duplicated the 7.2 run.
 - [Fix] Use `::JSON.parse` instead of `::ActiveSupport::JSON.decode` in the ActiveJob deserializer, so consuming ActiveJob messages keeps working under the json gem `>= 3.0` (where `ActiveSupport::JSON.decode` passes a now-invalid second argument to `JSON.parse`).
 - [Fix] [Pro] Stabilize the `Karafka::Admin::Recovery` `read_committed_offsets` no-offsets integration spec against a fresh CI broker.
 - [Fix] Stabilize the `Karafka::Admin::Acl` `#create`/`#describe` specs against asynchronous ACL propagation on slow CI.
