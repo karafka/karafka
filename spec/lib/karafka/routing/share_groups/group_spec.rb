@@ -191,5 +191,21 @@ RSpec.describe Karafka::Routing::ShareGroups::Group do
         end
       end.not_to raise_error
     end
+
+    it "expect a by-name (String/Symbol) consumer reference to be tolerated" do
+      expect do
+        builder.draw do
+          share_group "sg1" do
+            topic(:events) { consumer "SomeShareConsumerByName" }
+          end
+        end
+
+        builder.draw do
+          share_group "sg2" do
+            topic(:events) { consumer :SomeShareConsumerByName }
+          end
+        end
+      end.not_to raise_error
+    end
   end
 end
