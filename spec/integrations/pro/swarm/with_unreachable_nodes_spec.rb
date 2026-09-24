@@ -41,7 +41,7 @@ begin
     consumer_group "regular" do
       topic "t1" do
         swarm(nodes: (100..200))
-        consumer Class.new
+        consumer Class.new(Karafka::BaseConsumer)
       end
     end
   end
@@ -56,7 +56,7 @@ begin
     consumer_group "t2" do
       topic "regular" do
         swarm(nodes: [100, 123])
-        consumer Class.new
+        consumer Class.new(Karafka::BaseConsumer)
       end
     end
   end
@@ -71,7 +71,7 @@ begin
     consumer_group "t2" do
       topic "regular" do
         swarm(nodes: [2])
-        consumer Class.new
+        consumer Class.new(Karafka::BaseConsumer)
       end
     end
   end

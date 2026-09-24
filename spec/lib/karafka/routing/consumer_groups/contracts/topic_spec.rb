@@ -8,7 +8,7 @@ RSpec.describe_current do
       id: "id",
       name: "name",
       active: true,
-      consumer: Class.new,
+      consumer: Class.new(Karafka::BaseConsumer),
       deserializers: {},
       kafka: { "bootstrap.servers": "localhost:9092" },
       max_messages: 10,
@@ -183,6 +183,39 @@ RSpec.describe_current do
       it "expect not to require consumer" do
         expect(check).to be_success
       end
+    end
+
+    context "when it is a consumer group consumer" do
+      before { config[:consumer] = Class.new(Karafka::BaseConsumer) }
+
+      it { expect(check).to be_success }
+    end
+
+    context "when it is a share consumer" do
+      before { config[:consumer] = Class.new(Karafka::ShareConsumer) }
+
+      it "expect not to be valid with a share-consumer-required error" do
+        expect(check).not_to be_success
+        expect(check.errors.to_h[:consumer]).to include("consumer group consumer")
+      end
+    end
+
+    context "when it is not a consumer class at all" do
+      before { config[:consumer] = Class.new }
+
+      it { expect(check).not_to be_success }
+    end
+
+    context "when it is a by-name String reference" do
+      before { config[:consumer] = "SomeConsumerByName" }
+
+      it { expect(check).to be_success }
+    end
+
+    context "when it is a by-name Symbol reference" do
+      before { config[:consumer] = :SomeConsumerByName }
+
+      it { expect(check).to be_success }
     end
   end
 

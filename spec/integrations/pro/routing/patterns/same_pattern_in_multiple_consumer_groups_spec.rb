@@ -35,13 +35,13 @@ setup_karafka
 draw_routes(create_topics: false) do
   consumer_group :a do
     pattern(/non-existing-ever-na/) do
-      consumer Class.new
+      consumer Class.new(Karafka::BaseConsumer)
     end
   end
 
   consumer_group :b do
     pattern(/non-existing-ever-na/) do
-      consumer Class.new
+      consumer Class.new(Karafka::BaseConsumer)
     end
   end
 end

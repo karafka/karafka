@@ -53,6 +53,26 @@ module Karafka
             [[%w[consumer], :missing]]
           end
 
+          # A share-group topic must be consumed by a share consumer. Requiring the consumer to
+          # inherit from Karafka::ShareConsumer (Consumers::ShareGroup) prevents accidentally
+          # wiring a consumer-group consumer onto a share group, which would run the wrong
+          # (offset/pause based) flow.
+          virtual do |data, errors|
+            next unless errors.empty?
+
+            consumer = data.fetch(:consumer)
+
+            # Only actual consumer classes carry mode information, so the mode is enforced on
+            # classes only. Every other value is left untouched: nil (inactive/admin-only topics
+            # may have no consumer, already handled by the missing-check above) and String/Symbol
+            # by-name references (a class passed for reload is resolved to a Class before it reaches
+            # here, so nothing functional is skipped).
+            next unless consumer.is_a?(Class)
+            next if consumer <= Karafka::Consumers::ShareGroup
+
+            [[%w[consumer], :share_consumer_required]]
+          end
+
           virtual do |data, errors|
             next unless errors.empty?
 

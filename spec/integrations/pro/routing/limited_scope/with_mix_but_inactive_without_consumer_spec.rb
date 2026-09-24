@@ -44,7 +44,7 @@ draw_routes(create_topics: false) do
   consumer_group "d" do
     subscription_group "e" do
       topic "f" do
-        consumer Class.new
+        consumer Class.new(Karafka::BaseConsumer)
 
         # This is not needed but we nonetheless check such a case
         active true

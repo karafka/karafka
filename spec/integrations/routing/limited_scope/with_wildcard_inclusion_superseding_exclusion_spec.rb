@@ -9,15 +9,15 @@ setup_karafka
 
 draw_routes(create_topics: false) do
   topic "shared-a" do
-    consumer Class.new
+    consumer Class.new(Karafka::BaseConsumer)
   end
 
   topic "shared-b" do
-    consumer Class.new
+    consumer Class.new(Karafka::BaseConsumer)
   end
 
   topic "other-a" do
-    consumer Class.new
+    consumer Class.new(Karafka::BaseConsumer)
   end
 end
 

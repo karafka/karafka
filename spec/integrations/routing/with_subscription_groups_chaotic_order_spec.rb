@@ -7,23 +7,23 @@ setup_karafka
 
 draw_routes(create_topics: false) do
   topic "topic0" do
-    consumer Class.new
+    consumer Class.new(Karafka::BaseConsumer)
   end
 
   subscription_group "group1" do
     topic "topic1" do
-      consumer Class.new
+      consumer Class.new(Karafka::BaseConsumer)
     end
   end
 
   consumer_group "test" do
     topic "topic1" do
-      consumer Class.new
+      consumer Class.new(Karafka::BaseConsumer)
     end
   end
 
   topic "topic2" do
-    consumer Class.new
+    consumer Class.new(Karafka::BaseConsumer)
   end
 end
 

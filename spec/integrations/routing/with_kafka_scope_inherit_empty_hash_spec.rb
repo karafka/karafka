@@ -17,7 +17,7 @@ failed = false
 begin
   draw_routes(create_topics: false) do
     topic "topic_without_inherit_empty" do
-      consumer Class.new
+      consumer Class.new(Karafka::BaseConsumer)
       kafka(**{}) # Empty config without inherit should fail
     end
   end
@@ -33,13 +33,13 @@ clear_app_draws
 draw_routes(create_topics: false) do
   # Topic with inherit: true and empty hash config should preserve defaults
   topic "topic_with_empty_config" do
-    consumer Class.new
+    consumer Class.new(Karafka::BaseConsumer)
     kafka(**{}, inherit: true)
   end
 
   # Topic with inherit: true and some specific config should merge with defaults
   topic "topic_with_specific_config" do
-    consumer Class.new
+    consumer Class.new(Karafka::BaseConsumer)
     kafka("enable.partition.eof": true, inherit: true)
   end
 end

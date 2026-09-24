@@ -20,7 +20,7 @@ draw_routes(create_topics: false) do
   share_group "sg" do
     topic "share-topic" do
       active(false)
-      consumer Class.new(Karafka::BaseConsumer)
+      consumer Class.new(Karafka::ShareConsumer)
     end
   end
 end

@@ -36,7 +36,7 @@ setup_karafka do |config|
 end
 
 failed = false
-consumer_class = Class.new
+consumer_class = Class.new(Karafka::BaseConsumer)
 
 begin
   draw_routes(create_topics: false) do

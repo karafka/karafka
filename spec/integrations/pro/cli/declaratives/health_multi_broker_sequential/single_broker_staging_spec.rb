@@ -36,7 +36,7 @@ setup_karafka
 draw_routes do
   # Typical staging setup: single broker, RF=1
   topic DT.topics[0] do
-    consumer Class.new
+    consumer Class.new(Karafka::BaseConsumer)
     config(
       partitions: 3,
       replication_factor: 1
@@ -44,7 +44,7 @@ draw_routes do
   end
 
   topic DT.topics[1] do
-    consumer Class.new
+    consumer Class.new(Karafka::BaseConsumer)
     config(
       partitions: 2,
       replication_factor: 1

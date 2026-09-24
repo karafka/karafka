@@ -6,7 +6,10 @@ RSpec.describe Karafka::Routing::ShareGroups::Group do
   after { builder.clear }
 
   let(:share_group) { builder.first }
-  let(:consumer_class) { Class.new(Karafka::BaseConsumer) }
+  # Share topics require a share consumer; this spec draws share groups almost everywhere, so the
+  # default consumer class is a share consumer and consumer-group draws use `cg_consumer_class`.
+  let(:consumer_class) { Class.new(Karafka::ShareConsumer) }
+  let(:cg_consumer_class) { Class.new(Karafka::BaseConsumer) }
 
   context "when drawing a share group" do
     before do
@@ -52,7 +55,8 @@ RSpec.describe Karafka::Routing::ShareGroups::Group do
     let(:share_topic) { builder.find(&:share_group?).topics.first }
 
     before do
-      cclass = consumer_class
+      cclass = cg_consumer_class
+      sclass = consumer_class
 
       builder.draw do
         consumer_group "cg" do
@@ -60,7 +64,7 @@ RSpec.describe Karafka::Routing::ShareGroups::Group do
         end
 
         share_group "sg" do
-          topic(:b) { consumer cclass }
+          topic(:b) { consumer sclass }
         end
       end
     end
@@ -161,7 +165,8 @@ RSpec.describe Karafka::Routing::ShareGroups::Group do
 
   context "when a share group and a consumer group are drawn together" do
     it "expect both to validate and coexist" do
-      cclass = consumer_class
+      cclass = cg_consumer_class
+      sclass = consumer_class
 
       expect do
         builder.draw do
@@ -170,7 +175,7 @@ RSpec.describe Karafka::Routing::ShareGroups::Group do
           end
 
           share_group "webhooks" do
-            topic(:webhooks) { consumer cclass }
+            topic(:webhooks) { consumer sclass }
           end
         end
       end.not_to raise_error
@@ -208,6 +213,51 @@ RSpec.describe Karafka::Routing::ShareGroups::Group do
         Karafka::Errors::InvalidConfigurationError,
         /not supported for share groups/
       )
+    end
+  end
+
+  context "when the topic consumer is not a share consumer" do
+    it "expect a consumer-group consumer to be rejected with a clear error" do
+      cclass = cg_consumer_class
+
+      expect do
+        builder.draw do
+          share_group "sg" do
+            topic(:events) { consumer cclass }
+          end
+        end
+      end.to raise_error(
+        Karafka::Errors::InvalidConfigurationError,
+        /share consumer inheriting from Karafka::ShareConsumer/
+      )
+    end
+
+    it "expect a share consumer to be accepted" do
+      sclass = consumer_class
+
+      expect do
+        builder.draw do
+          share_group "sg" do
+            topic(:events) { consumer sclass }
+          end
+        end
+      end.not_to raise_error
+    end
+
+    it "expect a by-name (String/Symbol) consumer reference to be tolerated" do
+      expect do
+        builder.draw do
+          share_group "sg1" do
+            topic(:events) { consumer "SomeShareConsumerByName" }
+          end
+        end
+
+        builder.draw do
+          share_group "sg2" do
+            topic(:events) { consumer :SomeShareConsumerByName }
+          end
+        end
+      end.not_to raise_error
     end
   end
 end
