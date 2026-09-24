@@ -129,7 +129,7 @@ module Karafka
           icfg.connection.manager = Connection::Manager.new
 
           icfg.processing.scheduler_class = Processing::Schedulers::Default
-          icfg.processing.jobs_queue_class = Processing::JobsQueue
+          icfg.processing.jobs_queue_class = Processing::ConsumerGroups::JobsQueue
 
           icfg.processing.consumer_groups.coordinator_class = Processing::ConsumerGroups::Coordinator
           icfg.processing.consumer_groups.errors_tracker_class = Processing::ConsumerGroups::Coordinators::ErrorsTracker
