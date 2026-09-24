@@ -31,6 +31,48 @@ RSpec.describe_current do
     it "expect to create proper dirs and copy template files" do
       expect { install_cli.call }.not_to raise_error
     end
+
+    context "when the share_groups flag is not set (default)" do
+      it "expect not to create the ApplicationShareConsumer file" do
+        share_target = described_class::SHARE_GROUPS_FILES_MAP.values.first
+
+        install_cli.call
+
+        expect(File)
+          .not_to have_received(:write)
+          .with(Karafka.root.join(share_target), anything)
+      end
+    end
+
+    context "when the share_groups flag is set" do
+      subject(:install_cli) do
+        cli = described_class.new
+        allow(cli).to receive(:options).and_return(share_groups: true)
+        cli
+      end
+
+      before do
+        described_class::SHARE_GROUPS_FILES_MAP.each_value do |target|
+          allow(FileUtils)
+            .to receive(:mkdir_p)
+            .with(File.dirname(Karafka.root.join(target)))
+
+          allow(File)
+            .to receive(:write)
+            .with(Karafka.root.join(target), anything)
+        end
+      end
+
+      it "expect to also create the ApplicationShareConsumer file" do
+        share_target = described_class::SHARE_GROUPS_FILES_MAP.values.first
+
+        install_cli.call
+
+        expect(File)
+          .to have_received(:write)
+          .with(Karafka.root.join(share_target), anything)
+      end
+    end
   end
 
   describe "#rails?" do
