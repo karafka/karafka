@@ -27,7 +27,7 @@ module Karafka
           @queue = Queue.new
           # Those queues will act as semaphores internally. Since we need an indicator for waiting
           # we could use Thread.pass but this is expensive. Instead we can just lock until any
-          # of the workers finishes their work and we can re-check. This means that in the worse
+          # of the workers finishes their work and we can re-check. This means that in the worst
           # scenario, we will context switch 10 times per poll instead of getting this thread
           # scheduled by Ruby hundreds of thousands of times per group.
           # We cannot use a single semaphore as it could potentially block in listeners that should
