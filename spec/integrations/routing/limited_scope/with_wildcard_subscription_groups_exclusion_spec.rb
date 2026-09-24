@@ -8,19 +8,19 @@ setup_karafka
 draw_routes(create_topics: false) do
   subscription_group "sg-a-1" do
     topic "t1" do
-      consumer Class.new
+      consumer Class.new(Karafka::BaseConsumer)
     end
   end
 
   subscription_group "sg-a-2" do
     topic "t2" do
-      consumer Class.new
+      consumer Class.new(Karafka::BaseConsumer)
     end
   end
 
   subscription_group "sg-b-1" do
     topic "t3" do
-      consumer Class.new
+      consumer Class.new(Karafka::BaseConsumer)
     end
   end
 end

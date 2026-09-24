@@ -9,11 +9,11 @@ setup_karafka
 
 draw_routes(create_topics: false) do
   topic "orders-created" do
-    consumer Class.new
+    consumer Class.new(Karafka::BaseConsumer)
   end
 
   topic "payments-done" do
-    consumer Class.new
+    consumer Class.new(Karafka::BaseConsumer)
   end
 end
 

@@ -20,7 +20,7 @@ begin
     share_group "duplicated" do
       topic "t1" do
         active(false)
-        consumer Class.new(Karafka::BaseConsumer)
+        consumer Class.new(Karafka::ShareConsumer)
       end
     end
   end
@@ -44,7 +44,7 @@ draw_routes(create_topics: false) do
   share_group "sg-name" do
     topic "t1" do
       active(false)
-      consumer Class.new(Karafka::BaseConsumer)
+      consumer Class.new(Karafka::ShareConsumer)
     end
   end
 end

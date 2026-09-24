@@ -13,15 +13,17 @@ RSpec.describe_current do
 
   describe "#share_groups" do
     let(:consumer_class) { Class.new(Karafka::BaseConsumer) }
+    let(:share_consumer_class) { Class.new(Karafka::ShareConsumer) }
 
     after { described_class.consumer_groups.clear }
 
     it "returns only the defined share groups" do
       cclass = consumer_class
+      sclass = share_consumer_class
 
       described_class.consumer_groups.draw do
         consumer_group("cg") { topic(:a) { consumer cclass } }
-        share_group("sg") { topic(:b) { consumer cclass } }
+        share_group("sg") { topic(:b) { consumer sclass } }
       end
 
       expect(app_class.share_groups.map(&:name)).to eq(%w[sg])

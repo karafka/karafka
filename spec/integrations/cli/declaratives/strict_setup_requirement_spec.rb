@@ -29,27 +29,27 @@ end
 
 draw_and_validate(valid: false) do
   topic "a" do
-    consumer Class.new
+    consumer Class.new(Karafka::BaseConsumer)
     config(active: false)
   end
 end
 
 draw_and_validate(valid: true) do
   topic "a" do
-    consumer Class.new
+    consumer Class.new(Karafka::BaseConsumer)
   end
 end
 
 draw_and_validate(valid: false) do
   topic "a" do
-    consumer Class.new
+    consumer Class.new(Karafka::BaseConsumer)
     dead_letter_queue(topic: "dlq")
   end
 end
 
 draw_and_validate(valid: true) do
   topic "a" do
-    consumer Class.new
+    consumer Class.new(Karafka::BaseConsumer)
     dead_letter_queue(topic: "dlq")
   end
 
@@ -60,7 +60,7 @@ end
 
 draw_and_validate(valid: false) do
   topic "a" do
-    consumer Class.new
+    consumer Class.new(Karafka::BaseConsumer)
     dead_letter_queue(topic: "dlq")
   end
 
@@ -75,7 +75,7 @@ Karafka::App.config.strict_declarative_topics = false
 
 draw_and_validate(valid: true) do
   topic "a" do
-    consumer Class.new
+    consumer Class.new(Karafka::BaseConsumer)
     dead_letter_queue(topic: "dlq")
   end
 

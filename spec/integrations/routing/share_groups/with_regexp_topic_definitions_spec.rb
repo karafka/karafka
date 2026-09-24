@@ -17,7 +17,7 @@ begin
     share_group "sg-regexp" do
       topic(/events.*/) do
         active(false)
-        consumer Class.new(Karafka::BaseConsumer)
+        consumer Class.new(Karafka::ShareConsumer)
       end
     end
   end
@@ -39,7 +39,7 @@ begin
     share_group "sg-caret" do
       topic("^events-.*") do
         active(false)
-        consumer Class.new(Karafka::BaseConsumer)
+        consumer Class.new(Karafka::ShareConsumer)
       end
     end
   end
@@ -58,7 +58,7 @@ draw_routes(create_topics: false) do
   share_group "sg-ok" do
     topic "events" do
       active(false)
-      consumer Class.new(Karafka::BaseConsumer)
+      consumer Class.new(Karafka::ShareConsumer)
     end
   end
 end

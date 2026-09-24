@@ -269,6 +269,25 @@ RSpec.describe_current do
 
       it { expect { drawing }.to raise_error(Karafka::Errors::InvalidConfigurationError) }
     end
+
+    context "when a consumer group topic is given a share consumer" do
+      subject(:drawing) do
+        sclass = Class.new(Karafka::ShareConsumer)
+
+        builder.draw do
+          consumer_group :group_name1 do
+            topic(:topic_name1) { consumer sclass }
+          end
+        end
+      end
+
+      it "expect to be rejected with a clear error" do
+        expect { drawing }.to raise_error(
+          Karafka::Errors::InvalidConfigurationError,
+          /consumer group consumer inheriting from Karafka::BaseConsumer/
+        )
+      end
+    end
   end
 
   describe "#redraw" do
@@ -322,9 +341,11 @@ RSpec.describe_current do
 
   describe "#consumer_groups and #share_groups" do
     let(:consumer_class) { Class.new(Karafka::BaseConsumer) }
+    let(:share_consumer_class) { Class.new(Karafka::ShareConsumer) }
 
     before do
       cclass = consumer_class
+      sclass = share_consumer_class
 
       builder.draw do
         consumer_group "cg" do
@@ -332,7 +353,7 @@ RSpec.describe_current do
         end
 
         share_group "sg" do
-          topic(:b) { consumer cclass }
+          topic(:b) { consumer sclass }
         end
       end
     end

@@ -6,7 +6,10 @@ RSpec.describe Karafka::Routing::ShareGroups::Group do
   after { builder.clear }
 
   let(:share_group) { builder.first }
-  let(:consumer_class) { Class.new(Karafka::BaseConsumer) }
+  # Share topics require a share consumer; this spec draws share groups almost everywhere, so the
+  # default consumer class is a share consumer and consumer-group draws use `cg_consumer_class`.
+  let(:consumer_class) { Class.new(Karafka::ShareConsumer) }
+  let(:cg_consumer_class) { Class.new(Karafka::BaseConsumer) }
 
   context "when drawing a share group" do
     before do
@@ -52,7 +55,8 @@ RSpec.describe Karafka::Routing::ShareGroups::Group do
     let(:share_topic) { builder.find(&:share_group?).topics.first }
 
     before do
-      cclass = consumer_class
+      cclass = cg_consumer_class
+      sclass = consumer_class
 
       builder.draw do
         consumer_group "cg" do
@@ -60,7 +64,7 @@ RSpec.describe Karafka::Routing::ShareGroups::Group do
         end
 
         share_group "sg" do
-          topic(:b) { consumer cclass }
+          topic(:b) { consumer sclass }
         end
       end
     end
@@ -83,6 +87,17 @@ RSpec.describe Karafka::Routing::ShareGroups::Group do
       expect(share_topic.pause).to be_a(Karafka::Routing::Features::ShareGroups::Pausing::Config)
     end
 
+    # `active` is not an on/off switch here: it marks whether the settings were set explicitly for
+    # this topic (`true`) or inherited from the global defaults (`false`). There is no per-topic
+    # override path yet, so the inherited case is the only reachable one and is what we pin.
+    it "expect the share topic pause config to be marked as inherited" do
+      expect(share_topic.pause.active?).to be(false)
+    end
+
+    it "expect the share topic to_h to be frozen" do
+      expect(share_topic.to_h).to be_frozen
+    end
+
     # Deserializers are provided for both modes in the same format (a per-mode feature prepended
     # onto each topic class), since share groups also process message payloads, keys and headers.
     it "expect both consumer and share topics to expose active deserializers" do
@@ -99,6 +114,47 @@ RSpec.describe Karafka::Routing::ShareGroups::Group do
     end
   end
 
+  context "when the global pause settings are customized" do
+    let(:share_topic) { builder.find(&:share_group?).topics.first }
+    let(:original_timeout) { Karafka::App.config.pause.timeout }
+    let(:original_max_timeout) { Karafka::App.config.pause.max_timeout }
+    let(:original_backoff) { Karafka::App.config.pause.with_exponential_backoff }
+
+    # The pause config is built lazily and memoized the first time it is read, which happens while
+    # the routes are drawn - so the global values have to be in place before `draw`. Distinct
+    # values matter too: the suite pins timeout and max_timeout to the same number, so comparing
+    # against the live config would pass even if the two reads were swapped.
+    before do
+      original_timeout
+      original_max_timeout
+      original_backoff
+
+      Karafka::App.config.pause.timeout = 1_234
+      Karafka::App.config.pause.max_timeout = 5_678
+      Karafka::App.config.pause.with_exponential_backoff = true
+
+      cclass = consumer_class
+
+      builder.draw do
+        share_group "sg" do
+          topic(:b) { consumer cclass }
+        end
+      end
+    end
+
+    after do
+      Karafka::App.config.pause.timeout = original_timeout
+      Karafka::App.config.pause.max_timeout = original_max_timeout
+      Karafka::App.config.pause.with_exponential_backoff = original_backoff
+    end
+
+    it "expect the share topic to inherit each global pause setting" do
+      expect(share_topic.pause.timeout).to eq(1_234)
+      expect(share_topic.pause.max_timeout).to eq(5_678)
+      expect(share_topic.pause.with_exponential_backoff).to be(true)
+    end
+  end
+
   context "with backwards-compatible flat aliases" do
     it "expect Routing::ConsumerGroup to alias ConsumerGroups::Group" do
       expect(Karafka::Routing::ConsumerGroup).to equal(Karafka::Routing::ConsumerGroups::Group)
@@ -111,7 +167,8 @@ RSpec.describe Karafka::Routing::ShareGroups::Group do
 
   context "when a share group and a consumer group are drawn together" do
     it "expect both to validate and coexist" do
-      cclass = consumer_class
+      cclass = cg_consumer_class
+      sclass = consumer_class
 
       expect do
         builder.draw do
@@ -120,7 +177,7 @@ RSpec.describe Karafka::Routing::ShareGroups::Group do
           end
 
           share_group "webhooks" do
-            topic(:webhooks) { consumer cclass }
+            topic(:webhooks) { consumer sclass }
           end
         end
       end.not_to raise_error
@@ -158,6 +215,51 @@ RSpec.describe Karafka::Routing::ShareGroups::Group do
         Karafka::Errors::InvalidConfigurationError,
         /not supported for share groups/
       )
+    end
+  end
+
+  context "when the topic consumer is not a share consumer" do
+    it "expect a consumer-group consumer to be rejected with a clear error" do
+      cclass = cg_consumer_class
+
+      expect do
+        builder.draw do
+          share_group "sg" do
+            topic(:events) { consumer cclass }
+          end
+        end
+      end.to raise_error(
+        Karafka::Errors::InvalidConfigurationError,
+        /share consumer inheriting from Karafka::ShareConsumer/
+      )
+    end
+
+    it "expect a share consumer to be accepted" do
+      sclass = consumer_class
+
+      expect do
+        builder.draw do
+          share_group "sg" do
+            topic(:events) { consumer sclass }
+          end
+        end
+      end.not_to raise_error
+    end
+
+    it "expect a by-name (String/Symbol) consumer reference to be tolerated" do
+      expect do
+        builder.draw do
+          share_group "sg1" do
+            topic(:events) { consumer "SomeShareConsumerByName" }
+          end
+        end
+
+        builder.draw do
+          share_group "sg2" do
+            topic(:events) { consumer :SomeShareConsumerByName }
+          end
+        end
+      end.not_to raise_error
     end
   end
 end

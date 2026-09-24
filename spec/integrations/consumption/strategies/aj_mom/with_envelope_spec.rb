@@ -15,12 +15,12 @@ class EnvelopedJobDeserializer < Karafka::ActiveJob::Deserializer
       schema_version: 1,
       data: job_hash
     }
-    ::ActiveSupport::JSON.encode(envelope)
+    ::JSON.generate(envelope)
   end
 
   # Extracts the job from the envelope
   def deserialize(message)
-    envelope = ::ActiveSupport::JSON.decode(message.raw_payload)
+    envelope = ::JSON.parse(message.raw_payload)
 
     # Validate envelope structure
     raise "Invalid envelope: missing schema_id" unless envelope["schema_id"]

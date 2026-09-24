@@ -84,7 +84,12 @@ RSpec.describe_current do
     subject(:generated_list) { described_class.generate }
 
     it "expect to have correct settings for both consumer and producer" do
-      expect(generated_list[:consumer]).to eq(described_class::CONSUMER_GROUP)
+      # librdkafka classifies share-consumer-only options (`max.poll.records`,
+      # `share.acknowledgement.mode`) under the generic consumer (`C`) scope, so the generated
+      # consumer set is the union of the regular consumer-group and share-group attributes.
+      consumer = (described_class::CONSUMER_GROUP | described_class::SHARE_GROUP).sort
+
+      expect(generated_list[:consumer]).to eq(consumer)
       expect(generated_list[:producer]).to eq(described_class::PRODUCER)
     end
   end

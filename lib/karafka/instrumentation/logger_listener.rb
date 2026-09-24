@@ -498,7 +498,7 @@ module Karafka
 
         # Collect extra info if it was a consumer related error. Those come from user code
         details = case caller_ref
-        when Karafka::BaseConsumer
+        when Karafka::Consumers::Base
           extract_consumer_info(caller_ref)
         when Karafka::Connection::Client
           extract_client_info(caller_ref)
@@ -513,7 +513,7 @@ module Karafka
         "[#{details.map { |label, value| "#{label}: #{value}" }.join(", ")}]"
       end
 
-      # @param consumer [::Karafka::BaseConsumer]
+      # @param consumer [::Karafka::Consumers::Base]
       # @return [Hash] hash with consumer specific info for details of error
       def extract_consumer_info(consumer)
         {

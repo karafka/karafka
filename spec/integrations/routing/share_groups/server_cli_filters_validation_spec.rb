@@ -15,7 +15,7 @@ draw_routes(create_topics: false) do
 
   share_group "existing-sg" do
     topic "t2" do
-      consumer Class.new(Karafka::BaseConsumer)
+      consumer Class.new(Karafka::ShareConsumer)
     end
   end
 end

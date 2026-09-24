@@ -8,6 +8,16 @@ RSpec.describe_current do
     instance
   end
 
+  it "expect Karafka::BaseConsumer to alias Karafka::Consumers::ConsumerGroup" do
+    expect(described_class).to equal(Karafka::Consumers::ConsumerGroup)
+  end
+
+  it "expect to be a consumer-group consumer" do
+    expect(consumer.group_type).to eq(:consumer)
+    expect(consumer).to be_consumer_group
+    expect(consumer).not_to be_share_group
+  end
+
   let(:coordinator) { build(:processing_coordinator, seek_offset: -1) }
   let(:topic) { coordinator.topic }
   let(:client) { instance_double(Karafka::Connection::Client, pause: true) }

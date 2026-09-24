@@ -24,7 +24,7 @@ draw_routes(create_topics: false) do
 
   share_group "lags-share-group" do
     topic TOPIC do
-      consumer Class.new(Karafka::BaseConsumer)
+      consumer Class.new(Karafka::ShareConsumer)
     end
   end
 end

@@ -39,13 +39,13 @@ begin
   draw_routes(create_topics: false) do
     subscription_group :a do
       topic "namespace_collision" do
-        consumer Class.new
+        consumer Class.new(Karafka::BaseConsumer)
       end
     end
 
     subscription_group :b do
       topic "namespace_collision" do
-        consumer Class.new
+        consumer Class.new(Karafka::BaseConsumer)
       end
     end
   end
