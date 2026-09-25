@@ -38,7 +38,8 @@ module Karafka
       private_constant :INITIAL_EVENTS_POLL_TIMEOUT
 
       # @param subscription_group [Karafka::Routing::SubscriptionGroup]
-      # @param jobs_queue [Karafka::Processing::JobsQueue] queue where we should push work
+      # @param jobs_queue [Karafka::Processing::ConsumerGroups::JobsQueue] queue where we should
+      #   push work
       # @param scheduler [Karafka::Processing::Scheduler] scheduler we want to use
       # @return [Karafka::Connection::Listener] listener instance
       def initialize(subscription_group, jobs_queue, scheduler)

@@ -98,7 +98,7 @@ RSpec.describe_current do
         },
         processing: {
           scheduler_class: Karafka::Processing::Schedulers::Default,
-          jobs_queue_class: Karafka::Processing::JobsQueue,
+          jobs_queue_class: Karafka::Processing::ConsumerGroups::JobsQueue,
           worker_job_call_wrapper: false,
           critical_errors: [SystemExit, SignalException, NoMemoryError],
           consumer_groups: {
