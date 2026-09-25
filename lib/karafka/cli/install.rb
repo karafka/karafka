@@ -10,6 +10,13 @@ module Karafka
 
       desc "Installs all required things for Karafka application in current directory"
 
+      option(
+        :share_groups,
+        "Also installs the ApplicationShareConsumer base for share groups (KIP-932)",
+        TrueClass,
+        %w[--share_groups]
+      )
+
       # Directories created by default
       INSTALL_DIRS = %w[
         app/consumers
@@ -21,6 +28,14 @@ module Karafka
         "karafka.rb.erb" => Karafka.boot_file,
         "application_consumer.rb.erb" => "app/consumers/application_consumer.rb",
         "example_consumer.rb.erb" => "app/consumers/example_consumer.rb"
+      }.freeze
+
+      # Extra files installed only when the share groups (KIP-932) flag is passed. They are kept
+      # out of the default install because the share group runtime is not available yet, but all
+      # the wiring is here so the base can be generated on demand with
+      # `karafka install --share_groups`.
+      SHARE_GROUPS_FILES_MAP = {
+        "application_share_consumer.rb.erb" => "app/consumers/application_share_consumer.rb"
       }.freeze
 
       # Initializes the install command
@@ -47,7 +62,7 @@ module Karafka
         puts "Ruby on Rails detected..." if rails?
         puts
 
-        INSTALL_FILES_MAP.each do |source, target|
+        files_map.each do |source, target|
           pathed_target = Karafka.root.join(target)
           FileUtils.mkdir_p File.dirname(pathed_target)
 
@@ -69,6 +84,16 @@ module Karafka
       # Rails
       def rails?
         @rails
+      end
+
+      private
+
+      # @return [Hash] template source => target map to install, extended with the share group
+      #   files only when the `--share_groups` flag was provided
+      def files_map
+        return INSTALL_FILES_MAP unless options[:share_groups]
+
+        INSTALL_FILES_MAP.merge(SHARE_GROUPS_FILES_MAP)
       end
     end
   end
