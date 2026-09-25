@@ -3,7 +3,7 @@
 RSpec.describe_current do
   subject(:batch) { described_class.new(jobs_queue) }
 
-  let(:jobs_queue) { Karafka::Processing::JobsQueue.new }
+  let(:jobs_queue) { Karafka::Processing::ConsumerGroups::JobsQueue.new }
   let(:consumer_group) { build(:routing_consumer_group) }
   let(:subscription_group) { build(:routing_subscription_group) }
 

@@ -436,7 +436,7 @@ RSpec.describe_current do
       subscription_group = build(:routing_subscription_group)
       Karafka::Connection::Listener.new(
         subscription_group,
-        Karafka::Processing::JobsQueue.new,
+        Karafka::Processing::ConsumerGroups::JobsQueue.new,
         nil
       )
     end

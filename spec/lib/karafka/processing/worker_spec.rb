@@ -7,7 +7,7 @@ RSpec.describe_current do
     end
   end
 
-  let(:queue) { Karafka::Processing::JobsQueue.new }
+  let(:queue) { Karafka::Processing::ConsumerGroups::JobsQueue.new }
   let(:pool) { instance_double(Karafka::Processing::WorkersPool, size: 5, deregister: nil) }
 
   # Since this worker has a background thread, we need to initialize the worker before running
@@ -125,7 +125,7 @@ RSpec.describe_current do
     end
 
     context "when nil is pushed to the queue (pool downscaling)" do
-      let(:downscale_queue) { Karafka::Processing::JobsQueue.new }
+      let(:downscale_queue) { Karafka::Processing::ConsumerGroups::JobsQueue.new }
       let(:downscale_pool) { instance_double(Karafka::Processing::WorkersPool, size: 5) }
 
       let(:worker_with_pool) do

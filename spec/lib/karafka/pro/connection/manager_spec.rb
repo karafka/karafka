@@ -43,7 +43,7 @@ RSpec.describe_current do
   let(:routing_topic2) { build(:routing_topic) }
   let(:routing_topic3) { build(:routing_topic) }
   let(:routing_topic4) { build(:routing_topic) }
-  let(:jobs_queue) { Karafka::Processing::JobsQueue.new }
+  let(:jobs_queue) { Karafka::Processing::ConsumerGroups::JobsQueue.new }
   let(:app) { Karafka::App }
 
   let(:subscription_group1) do

@@ -1,57 +1,53 @@
 # Karafka Framework Changelog
 
 ## 2.6.2 (Unreleased)
-- [Enhancement] Introduce a mode-aware consumer class hierarchy for KIP-932: `Karafka::Consumers::Base` with `Consumers::ConsumerGroup` (all current offset/pause/seek behavior) and `Consumers::ShareGroup` (share consumer with `mark_accepted`/`mark_released`/`mark_rejected`/`extend_lock!` ack API). `Karafka::BaseConsumer` is now a backwards-compatible alias of `Consumers::ConsumerGroup`, and `Karafka::ShareConsumer` is the user-facing base for share-group consumers (aliases `Consumers::ShareGroup`). Share-group topics are validated to use a share consumer (inheriting `Karafka::ShareConsumer`). Share groups remain describable but not runnable until the runtime lands, so the ack API currently raises `NotImplementedError`. No behavior change for consumer-group consumers.
-- [Enhancement] Validate that consumer-group topics use a consumer-group consumer (inheriting `Karafka::BaseConsumer`), mirroring the share-group check, so accidentally wiring a share consumer onto a consumer group is caught during routing validation instead of running the wrong flow.
 - **[Feature]** Add `Instrumentation::Vendors::NewRelic::MetricsListener` for publishing Karafka metrics to New Relic. Context is encoded in the metric name, as New Relic custom metrics do not support tags (svyatmuzyka).
 - **[Feature]** Add `karafka info --extended`, printing the routing tree, global app config and effective Kafka config, with sensitive values redacted.
 - **[Feature]** Add `Kubernetes::ReadinessListener`, serving a readiness probe that reports healthy once all subscription groups poll and not-ready on shutdown or quieting, so pods drain before exiting.
 - **[Feature]** Allow the `--include`/`--exclude` CLI server filters to accept wildcard patterns (e.g. `--exclude-consumer-groups app-a-*`), including topics discovered at runtime by Pro routing patterns.
-- [Enhancement] Introduce the share group (KIP-932) routing layer: `share_group` blocks with validation, introspection and `--include_share_groups`/`--exclude_share_groups` CLI filters. Share groups can be described but not run yet: the server raises `Karafka::Errors::ShareGroupsNotImplementedError`.
-- [Enhancement] Make the client-configuration seams share-group aware: `Setup::AttributesMap` and `Setup::DefaultsInjector` gain `.consumer_group`/`.share_group` scopes (`.consumer` stays a legacy alias), and share-group subscription groups skip the consumer-group-only settings librdkafka rejects.
 - [Enhancement] Build `Setup::DefaultsInjector` (and its Pro extension) on top of `Karafka::Core::Configurable::Injector` so the kafka defaults injection uses the shared ecosystem pattern. Behavior is unchanged. Requires karafka-core `>= 2.6.3`.
 - [Maintenance] Cover the `:max_timestamp` and Integer-timestamp `Admin#read_partition_offsets` offset modes with integration specs.
-- [Maintenance] Cover the share group routing layer with specs: pause inheritance and provenance, the frozen `#to_h`, and isolation from consumer-group feature DSL.
 - [Maintenance] Cover the untested New Relic `MetricsListener` paths with integration specs: revoked and shutdown metrics, overridden listener methods, and an empty metrics list.
 - [Maintenance] Run the Rails 8.0 transactional ActiveJob integration spec against Rails `8.0.3`. It was pinned to Rails `7.2.2.1`, so it duplicated the 7.2 run.
+- [Maintenance] Foundational work for Kafka share groups (KIP-932) is in progress (routing layer, consumer class hierarchy, config seams). Not usable yet - share groups can be described in routing but cannot run.
 - [Fix] Use `::JSON.parse` instead of `::ActiveSupport::JSON.decode` in the ActiveJob deserializer, so consuming ActiveJob messages keeps working under the json gem `>= 3.0` (where `ActiveSupport::JSON.decode` passes a now-invalid second argument to `JSON.parse`).
 - [Fix] [Pro] Stabilize the `Karafka::Admin::Recovery` `read_committed_offsets` no-offsets integration spec against a fresh CI broker.
 - [Fix] Stabilize the `Karafka::Admin::Acl` `#create`/`#describe` specs against asynchronous ACL propagation on slow CI.
 - [Fix] Stabilize the empty-topic `read_watermark_offsets` specs against a broker leader-election race.
 
 ## 2.6.1 (2026-08-24)
-- **[Feature]** [Pro] Add an opt-in envelope encryption mode for Messages At Rest (`config.encryption.mode = :envelope`, requires openssl `>= 3.0`), lifting the RSA payload size limit of the default `:direct` mode. Both formats decrypt automatically; upgrade all consuming processes before enabling.
+- **[Feature]** [Pro] Add an opt-in envelope encryption mode for Messages At Rest (`config.encryption.mode = :envelope`, requires openssl `>= 3.0`) without the RSA payload size limit. Upgrade all consuming processes before enabling.
 - [Fix] [Pro] Add a missing comma in the filtering strategy's unsupported-action guard so it raises `Karafka::Errors::UnsupportedCaseError` instead of a `NoMethodError`.
 - [Fix] [Pro] Evict scheduled messages from the daily buffer per confirmed flush chunk, so a broker error mid-flush no longer re-dispatches already-produced chunks.
 - [Fix] Restore `shutdown_timeout` in the `Karafka::Server#stop` specs so a sub-second test value no longer leaks into unrelated specs.
 - [Fix] [Pro] Reject a `schedule_target_epoch` set implausibly far in the future (e.g. a milliseconds value passed as seconds) at publish time instead of silently dropping it on the consumer.
-- [Fix] [Pro] Raise `Karafka::Errors::UnsupportedCaseError` instead of a `NameError` (wrong constant namespace) when a custom DLQ strategy returns an unsupported flow, in both the default and virtual-partitions DLQ strategies.
-- [Enhancement] Support named `Karafka::Constraints` registered in two phases: `:load` (require time) and `:config` (during setup, after contract validation), so feature-specific environment requirements are verified in one place.
-- [Fix] Message `key` and `headers` deserialization results were not cached when the deserializer returned `nil` or `false` (e.g. keyless messages), re-running the deserializer on every access. Falsy results are now cached like truthy ones, matching the payload behavior and the documented contract.
+- [Fix] [Pro] Raise `Karafka::Errors::UnsupportedCaseError` instead of `NameError` when a custom DLQ strategy returns an unsupported flow.
+- [Enhancement] Support named `Karafka::Constraints` verified at load time or during setup, so feature-specific environment requirements are checked in one place.
+- [Fix] Cache `nil` and `false` message `key` and `headers` deserialization results, so keyless messages no longer re-run the deserializer on every access.
 - [Fix] [Pro] Reset the `Pro::Iterator` stored-offsets latch between runs, removing a spurious no-op `commit_offsets` at the end of every subsequent `#each`.
 - [Fix] [Pro] Deduplicate runtime pattern discovery under multiplexing, which accumulated duplicate `Topic` objects in the shared consumer group.
 - [Fix] Fix sub-second `shutdown_timeout` values collapsing to a zero-iteration supervision loop that skipped the grace period entirely. The swarm supervisor is fixed the same way.
-- [Fix] Remove the accidental backwards-compatible shim for the pre-2.6.0 `config.internal.processing.*` paths; use `config.internal.processing.consumer_groups.*` instead. Requires `karafka-testing >= 2.6.2`.
+- [Fix] Remove the accidental shim for the pre-2.6.0 `config.internal.processing.*` paths; use `config.internal.processing.consumer_groups.*` instead. Requires `karafka-testing >= 2.6.2`.
 - [Fix] Stop `PausesManager#@pauses` from growing unbounded across rebalances; unpaused trackers are now removed on revocation (added `PausesManager#delete`).
-- [Fix] Allow-list the benign auto-create `TOPIC_ALREADY_EXISTS` broker warning in `unexpected_patterns_loop_spec.rb`, the same pre-existing broker-side race already allow-listed for other pattern-matched-topic specs, unrelated to this release's other fixes.
+- [Fix] Allow-list a benign `TOPIC_ALREADY_EXISTS` broker warning in the unexpected patterns loop spec.
 - [Fix] [Pro] Fix unbounded memory growth from `Pro::Processing::JobsQueue`'s per-group semaphore accumulating unconsumed `#tick` signals under non-blocking/LRJ and async-locking workloads.
 - [Fix] [Pro] Stop `Pro::Processing::JobsQueue#unlock` from decrementing the `waiting` counter before confirming the job was tracked, which corrupted the counter after a group reset.
-- [Fix] `Swarm::Node#signal` (used by `#stop`/`#terminate`/`#quiet`) could send a signal to a reaped node's stale `@pid`, which the OS may have already reassigned to an unrelated process. It now returns `false` without signaling if the node is already known to be dead.
+- [Fix] Stop `Swarm::Node#signal` from signaling the stale pid of an already-dead node, which the OS may have reassigned to another process.
 
 ## 2.6.0 (2026-08-05)
 - **[Breaking]** Remove the flat global pause accessors (`config.pause_timeout`, `config.pause_max_timeout`, `config.pause_with_exponential_backoff`) deprecated in 2.5.2; use the nested `config.pause.*` namespace instead.
-- **[Breaking]** Nest per-topic pause configuration under `topic.pause` (`topic.pause.timeout`, `topic.pause.max_timeout`, `topic.pause.with_exponential_backoff`); `topic.to_h` now emits a nested `pause:` hash, and `topic.pausing`/`topic.pausing?` become `topic.pause`/`topic.pause?`. The Pro Granular Backoffs DSL is unchanged.
-- **[Feature]** Add `Karafka::Admin.read_partition_offsets` (and `Admin::Topics#read_partition_offsets`) to query partition offsets (`:earliest`, `:latest`, `:max_timestamp`, or a timestamp) without a consumer group, with an optional `isolation_level:` for accurate lag on transactional topics.
+- **[Breaking]** Nest per-topic pause configuration under `topic.pause` (`timeout`, `max_timeout`, `with_exponential_backoff`). `topic.to_h` emits a nested `pause:` hash, and `topic.pausing`/`topic.pausing?` become `topic.pause`/`topic.pause?`.
+- **[Feature]** Add `Karafka::Admin.read_partition_offsets` to query partition offsets without a consumer group, with an optional `isolation_level:` for accurate lag on transactional topics.
 - **[Feature]** Add `Karafka::Connection::Client#read_partition_offsets` (and `Connection::Proxy#read_partition_offsets`) to run the same batched offset query on a consumer's own connection.
 - **[Feature]** Allow `Karafka::Admin` to operate on an external client via `Karafka::Admin.new(external_client: client)`, reusing the caller's client instead of bootstrapping a new one per call.
 - **[Feature]** Add `Karafka::Admin::IsolationLevels` with `READ_UNCOMMITTED` and `READ_COMMITTED` constants.
 - **[Feature]** Introduce a standalone `Karafka::Declaratives` subsystem for declaring topics via `Karafka::App.declaratives.draw`, decoupled from routing; the existing `routing#config(...)` DSL keeps working.
 - **[Feature]** Add `Processing::WorkersPool` with dynamic thread-pool scaling (`#scale`) and `worker.scaling.up`/`worker.scaling.down` events.
 - [Enhancement] Refresh watermark offsets and lags of long-paused partitions in `statistics.emitted`, opt-in via `config.internal.statistics.consumer_groups.lag_compensation.interval` (Pro).
-- [Enhancement] Use batched `list_offsets` instead of per-partition `query_watermark_offsets` in watermark reads, `Admin::ConsumerGroups#seek`, and the Pro iterator, cutting many roundtrips to a few (Pro).
+- [Enhancement] Read watermarks, seek consumer groups and run the Pro iterator with batched `list_offsets`, cutting many broker roundtrips to a few.
 - [Enhancement] Add `stability_ttl` to the Kubernetes and swarm liveness listeners to detect consumers frozen in a non-`steady` join state; requires `statistics.interval.ms`.
-- [Enhancement] Route non-`StandardError` consumption errors through the normal retry/pause/DLQ flow, and escalate process-critical errors (`SystemExit`, `NoMemoryError`, ...) to a graceful shutdown. Configurable via `config.internal.processing.critical_errors`.
-- [Enhancement] Add polymorphic `Routing::Topic#group`/`Routing::SubscriptionGroup#group` accessors and emit parallel `group`/`group_id` keys alongside the legacy `consumer_group`/`consumer_group_id` keys, preparing for KIP-932 share groups (legacy keys kept until 3.0).
+- [Enhancement] Handle non-`StandardError` consumption errors with the normal retry, pause and DLQ flow, and shut down gracefully on process-critical errors. Configurable via `config.internal.processing.critical_errors`.
+- [Enhancement] Add `group` and `group_id` keys alongside the legacy `consumer_group` keys to prepare for KIP-932 share groups. Legacy keys stay until 3.0.
 - [Enhancement] Add `Pro::Processing::ConsumerGroups::Filters::Actions` as the single source of truth for filter actions; existing filters keep working (Pro).
 - [Enhancement] Make the statistics decorator configurable via `config.internal.statistics.consumer_groups.decorator_class`.
 - [Enhancement] Declare the recurring-tasks and scheduled-messages internal topics via `declaratives.draw` (Pro).
@@ -59,7 +55,7 @@
 - [Enhancement] Track per-partition assignment generations in `AssignmentsTracker` to distinguish first assignments from reassignments.
 - [Enhancement] Make the liveness listeners fiber-safe.
 - [Enhancement] Raise the swarm supervisor `SHUTDOWN_GRACE_PERIOD` from 1s to 15s so forked nodes have time to finish cleanup before forceful termination.
-- [Enhancement] Move consumer-group-specific components (processing, strategies, selectors, jobs, callbacks, rebalance manager, and OSS/Pro routing features) under a `ConsumerGroups` namespace, preparing for KIP-932 share groups. Internal only; related config defaults updated, user-provided classes unaffected.
+- [Enhancement] Move consumer-group-specific internals under a `ConsumerGroups` namespace to prepare for KIP-932 share groups. User-provided classes are unaffected.
 - [Enhancement] Nest consumer-group-specific processing config under `config.internal.processing.consumer_groups`; shared settings stay at `config.internal.processing`.
 - [Change] Require `karafka-rdkafka` `>= 0.28.0` for `list_offsets`-based batched lag reads.
 - [Change] Require `karafka-rdkafka` `>= 0.27.1` for the `poll_batch`/`poll_batch_nb` fix that caused `TopicNotFoundError` crashes on `partition_eof`.
@@ -78,7 +74,7 @@
 - [Fix] Clamp scheduled-message CreateTime to the wall clock so a single future-dated message can't trigger double dispatch of not-yet-loaded cancellations (Pro).
 - [Fix] Reset `Pro::Iterator#each` EOF/stop tracking in an `ensure`, so breaking out of the block no longer drops a fresh backlog on reuse (Pro).
 - [Fix] Fix the `parallel_segments` CLI commands skipping groups when more than one was passed via `--groups` (Pro).
-- [Fix] Evict a partition's `Pro::Instrumentation::PerformanceTracker` samples on revoke and scope them by subscription group. **Breaking (internal API):** `processing_time_p95` now takes the subscription group id first (Pro).
+- [Fix] Evict a partition's `PerformanceTracker` samples on revoke (Pro). **Breaking (internal API):** `processing_time_p95` now takes the subscription group id first.
 - [Fix] Fall back to current offset metadata instead of raising `KeyError` in Virtual Partitions `VirtualOffsetManager#markable` under the `:exact` strategy (Pro).
 - [Fix] Leave tombstone records (nil payload) untouched on produce/consume instead of crashing in encryption, so they stay valid for log compaction (Pro).
 - [Fix] Recompute the `Pro::Processing::JobsQueue#clear` async-locking fast-path flag from the remaining groups' locks, so another group's active `lock_async` is no longer ignored (Pro).
@@ -106,7 +102,7 @@
 - [Enhancement] Validate that `statistics.interval.ms` is not zero when dynamic multiplexing is enabled (Pro).
 - [Fix] Fix swarm liveness reporting to also use `on_connection_listener_fetch_loop` so nodes stay alive when `statistics.interval.ms` is disabled.
 - [Fix] Fix `ConfigProxy#producer` when called as a reader resetting the producer to nil instead of returning its value (#3076).
-- [Fix] Fix `Replication#build_generate_command` using `--reassignment-json-file` with `--generate` instead of `--topics-to-move-json-file` and `--broker-list` ([#3087](https://github.com/karafka/karafka/issues/3087)).
+- [Fix] Use the correct arguments for `Replication#build_generate_command` ([#3087](https://github.com/karafka/karafka/issues/3087)).
 
 ## 2.5.8 (2026-03-23)
 - **[Feature]** Add `Karafka::Admin::Recovery` for coordinator-bypass offset reading and consumer group migration when the Kafka group coordinator is in a FAILED state (Pro).
