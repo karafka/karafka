@@ -1,20 +1,16 @@
 # Karafka Framework Changelog
 
 ## 2.6.2 (Unreleased)
-- **[Feature]** Add `Instrumentation::Vendors::NewRelic::MetricsListener` for publishing Karafka metrics to New Relic (svyatmuzyka).
+- **[Feature]** Add `Instrumentation::Vendors::NewRelic::MetricsListener` for publishing Karafka metrics to New Relic. Context is encoded in the metric name, as New Relic custom metrics do not support tags (svyatmuzyka).
 - **[Feature]** Add `karafka info --extended`, printing the routing tree, global app config and effective Kafka config, with sensitive values redacted.
-- **[Feature]** Add `Kubernetes::ReadinessListener`, a readiness probe that reports not-ready on shutdown or quieting so pods drain before exiting.
-- **[Feature]** Allow wildcard patterns in the `--include`/`--exclude` CLI server filters (e.g. `--exclude-consumer-groups app-a-*`).
-- [Enhancement] Introduce a mode-aware consumer hierarchy for KIP-932: `Karafka::BaseConsumer` stays the consumer-group base and `Karafka::ShareConsumer` is the new share-group base. Share groups are not runnable yet. No behavior change for consumer-group consumers.
-- [Enhancement] Validate during routing that consumer-group topics use a consumer-group consumer.
-- [Enhancement] Introduce the share group (KIP-932) routing layer with validation and CLI filters. Share groups can be described but not run yet.
-- [Enhancement] Make client configuration share-group aware, skipping consumer-group-only settings for share groups.
-- [Enhancement] Build `Setup::DefaultsInjector` on the shared `Karafka::Core::Configurable::Injector`. No behavior change. Requires karafka-core `>= 2.6.3`.
+- **[Feature]** Add `Kubernetes::ReadinessListener`, serving a readiness probe that reports healthy once all subscription groups poll and not-ready on shutdown or quieting, so pods drain before exiting.
+- **[Feature]** Allow the `--include`/`--exclude` CLI server filters to accept wildcard patterns (e.g. `--exclude-consumer-groups app-a-*`), including topics discovered at runtime by Pro routing patterns.
+- [Enhancement] Build `Setup::DefaultsInjector` (and its Pro extension) on top of `Karafka::Core::Configurable::Injector` so the kafka defaults injection uses the shared ecosystem pattern. Behavior is unchanged. Requires karafka-core `>= 2.6.3`.
 - [Maintenance] Cover the `:max_timestamp` and Integer-timestamp `Admin#read_partition_offsets` offset modes with integration specs.
-- [Maintenance] Cover the share group routing layer with specs.
-- [Maintenance] Cover the untested New Relic `MetricsListener` paths with integration specs.
-- [Maintenance] Run the Rails 8.0 transactional ActiveJob integration spec against Rails `8.0.3` instead of `7.2.2.1`.
-- [Fix] Keep ActiveJob message consumption working with the json gem `>= 3.0`.
+- [Maintenance] Cover the untested New Relic `MetricsListener` paths with integration specs: revoked and shutdown metrics, overridden listener methods, and an empty metrics list.
+- [Maintenance] Run the Rails 8.0 transactional ActiveJob integration spec against Rails `8.0.3`. It was pinned to Rails `7.2.2.1`, so it duplicated the 7.2 run.
+- [Maintenance] Foundational work for Kafka share groups (KIP-932) is in progress (routing layer, consumer class hierarchy, config seams). Not usable yet - share groups can be described in routing but cannot run.
+- [Fix] Use `::JSON.parse` instead of `::ActiveSupport::JSON.decode` in the ActiveJob deserializer, so consuming ActiveJob messages keeps working under the json gem `>= 3.0` (where `ActiveSupport::JSON.decode` passes a now-invalid second argument to `JSON.parse`).
 - [Fix] [Pro] Stabilize the `Karafka::Admin::Recovery` `read_committed_offsets` no-offsets integration spec against a fresh CI broker.
 - [Fix] Stabilize the `Karafka::Admin::Acl` `#create`/`#describe` specs against asynchronous ACL propagation on slow CI.
 - [Fix] Stabilize the empty-topic `read_watermark_offsets` specs against a broker leader-election race.
