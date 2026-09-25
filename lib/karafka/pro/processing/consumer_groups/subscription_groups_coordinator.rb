@@ -59,7 +59,7 @@ module Karafka
 
           private
 
-          # @return [Karafka::Pro::Processing::JobsQueue]
+          # @return [Karafka::Pro::Processing::ConsumerGroups::JobsQueue]
           def jobs_queue
             @jobs_queue ||= Karafka::Server.jobs_queue
           end

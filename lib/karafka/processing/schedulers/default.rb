@@ -6,7 +6,8 @@ module Karafka
     module Schedulers
       # FIFO scheduler for messages coming from various topics and partitions
       class Default
-        # @param queue [Karafka::Processing::JobsQueue] queue where we want to put the jobs
+        # @param queue [Karafka::Processing::ConsumerGroups::JobsQueue] queue where we want to put
+        #   the jobs
         def initialize(queue)
           @queue = queue
         end

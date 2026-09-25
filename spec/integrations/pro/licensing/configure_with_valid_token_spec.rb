@@ -66,7 +66,7 @@ assert_equal pro::Processing::ConsumerGroups::StrategySelector, config.processin
 assert_equal pro::Processing::ConsumerGroups::Partitioner, config.processing.consumer_groups.partitioner_class
 assert_equal pro::Processing::ConsumerGroups::Coordinator, config.processing.consumer_groups.coordinator_class
 assert_equal pro::Processing::Schedulers::Default, config.processing.scheduler_class
-assert_equal pro::Processing::JobsQueue, config.processing.jobs_queue_class
+assert_equal pro::Processing::ConsumerGroups::JobsQueue, config.processing.jobs_queue_class
 assert_equal pro::Processing::ConsumerGroups::JobsBuilder, config.processing.consumer_groups.jobs_builder.class
 assert_equal pro::ActiveJob::Dispatcher, config.active_job.dispatcher.class
 assert_equal pro::ActiveJob::Consumer, config.active_job.consumer_class
