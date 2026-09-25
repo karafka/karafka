@@ -14,7 +14,7 @@ RSpec.describe_current do
   let(:routing_topic) { build(:routing_topic) }
   let(:status) { Karafka::Connection::Status.new }
 
-  let(:jobs_queue) { Karafka::Processing::JobsQueue.new }
+  let(:jobs_queue) { Karafka::Processing::ConsumerGroups::JobsQueue.new }
   let(:scheduler) { Karafka::Processing::Schedulers::Default.new(jobs_queue) }
   let(:app) { Karafka::App }
 

@@ -19,7 +19,7 @@ RSpec.describe_current do
     allow(Karafka::Runner).to receive(:new).and_return(runner)
     allow(runner).to receive(:call)
 
-    jobs_queue = Karafka::Processing::JobsQueue.new
+    jobs_queue = Karafka::Processing::ConsumerGroups::JobsQueue.new
 
     described_class.listeners = Karafka::Connection::ListenersBatch.new(jobs_queue)
     described_class.workers = instance_double(
