@@ -28,7 +28,8 @@
 # License: https://karafka.io/docs/Pro-License-Comm/
 # Contact: contact@karafka.io
 
-# Async-locking variant of the LRJ semaphore spec: #lock_async and #unlock_async both tick the
+# Async-locking variant of the LRJ semaphore spec: pausing and resuming the subscription group
+# through subscription_groups_coordinator (#lock_async/#unlock_async underneath) both tick the
 # group semaphore on the live Karafka::Server.jobs_queue and switch #wait to its async-locking
 # loop. Once the lock is released and the jobs are non-blocking, #wait? is false from the start,
 # so that loop never pops. Before #3315 every lock/unlock and every completed job left a signal
@@ -44,13 +45,17 @@ MESSAGES = 30
 
 class Consumer < Karafka::BaseConsumer
   def consume
-    jobs_queue = Karafka::Server.jobs_queue
-    group_id = topic.subscription_group.id
+    subscription_group = topic.subscription_group
+    lock_id = messages.last.offset
 
-    jobs_queue.lock_async(group_id, messages.last.offset, timeout: 5_000)
-    jobs_queue.unlock_async(group_id, messages.last.offset)
+    subscription_groups_coordinator.pause(subscription_group, lock_id, timeout: 5_000)
+    subscription_groups_coordinator.resume(subscription_group, lock_id)
 
-    DT[:sizes] << jobs_queue.instance_variable_get(:@semaphores).fetch(group_id).size
+    DT[:sizes] << Karafka::Server
+      .jobs_queue
+      .instance_variable_get(:@semaphores)
+      .fetch(subscription_group.id)
+      .size
     DT[:offsets] << messages.last.offset
   end
 end

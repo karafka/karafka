@@ -31,7 +31,7 @@
 # Every completed job ticks its subscription group semaphore on the live
 # Karafka::Server.jobs_queue. For LRJ (non-blocking) jobs #wait? is false from the start, so the
 # OSS wait loop - the only other thing popping that semaphore - never runs. Before #3315 those
-# signals were never consumed and the semaphore grew by one entry per completed job for the whole
+# signals were never consumed and the semaphore grew with every completed job for the whole
 # process lifetime. After the fix #wait drains stale signals up front on every listener loop, so
 # the semaphore stays bounded no matter how many jobs complete.
 
