@@ -5,6 +5,28 @@ module Karafka
     # Default logger for Event Delegator
     # @note It uses Logger features - providing basic logging
     class Logger < ::Logger
+      class LazyFile
+        def initialize(&open_file)
+          @open_file = open_file
+        end
+
+        def write(message)
+          file&.write(message)
+        end
+
+        def close
+          @file&.close
+        end
+
+        private
+
+        def file
+          @file ||= @open_file.call
+        end
+      end
+
+      private_constant :LazyFile
+
       # Map containing information about log level for given environment
       ENV_MAP = {
         "production" => Logger::ERROR,
@@ -32,7 +54,7 @@ module Karafka
       def target
         Karafka::Helpers::MultiDelegator
           .delegate(:write, :close)
-          .to(*[$stdout, file].compact)
+          .to($stdout, LazyFile.new { file })
       end
 
       # @return [Pathname] Path to a file to which we should log

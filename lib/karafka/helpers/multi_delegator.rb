@@ -17,6 +17,8 @@ module Karafka
         #   Logger.new MultiDelegator.delegate(:write, :close).to(STDOUT, log_file)
         def delegate(*methods)
           methods.each do |m|
+            next if method_defined?(m, false)
+
             define_method(m) do |*args|
               @targets.map { |t| t.send(m, *args) }
             end
