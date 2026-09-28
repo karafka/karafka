@@ -519,7 +519,6 @@ module Karafka
           admin.list_consumer_groups.wait(max_wait_timeout_ms: max_wait_time_ms)
         end
 
-        # Do not return a partial listing silently - surface the first per-broker error instead
         raise(report.errors.first) unless report.errors.empty?
 
         report.groups.map do |group|
