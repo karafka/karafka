@@ -202,6 +202,14 @@ module Karafka
         new.delete_consumer_group(group_id)
       end
 
+      # Lists all consumer groups in the cluster with their current state
+      #
+      # @return [Array<Hash>] array of `{ group_id:, state: }` entries
+      # @see ConsumerGroups.list
+      def list_consumer_groups
+        new.list_consumer_groups
+      end
+
       # Triggers a rebalance for the specified group
       #
       # @param group_id [String] group id to trigger rebalance for
@@ -386,6 +394,12 @@ module Karafka
     # @see ConsumerGroups#delete
     def delete_consumer_group(group_id)
       consumer_groups_admin.delete(group_id)
+    end
+
+    # @return [Array<Hash>] array of `{ group_id:, state: }` entries
+    # @see ConsumerGroups#list
+    def list_consumer_groups
+      consumer_groups_admin.list
     end
 
     # @param group_id [String] group id to trigger rebalance for
