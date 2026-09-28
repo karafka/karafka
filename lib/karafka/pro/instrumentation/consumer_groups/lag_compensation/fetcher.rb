@@ -46,17 +46,14 @@ module Karafka
           # by fetches), so their statistics values stay accurate while paused and lags can be
           # derived from them at compensation time.
           #
-          # The consumer isolation level is forwarded to the query, so on topics without in-flight
-          # transactions the end offset matches the reference the native consumer lag derives from.
-          #
-          # Known edge case (transactional topics): the batched `ListOffsets` this uses resolves
-          # `:latest` to the high watermark regardless of the forwarded isolation level, unlike the
-          # per-partition `query_watermark_offsets` it replaced, which returned the last stable
-          # offset for a read_committed consumer. So while a transaction is IN FLIGHT on a paused
-          # partition, the compensated end offset (and the lag derived from it) reflects the high
-          # watermark and can overstate the read_committed lag by the number of uncommitted
-          # messages. It self-corrects once the transaction commits or aborts and the last stable
-          # offset advances. Non-transactional topics are unaffected (LSO == HWM there).
+          # The consumer isolation level is forwarded to the query and, as of karafka-rdkafka
+          # 0.30.0, honoured by the batched `ListOffsets`, so for a read_committed consumer
+          # `:latest` resolves to the last stable offset - the same reference both the native
+          # consumer lag and the per-partition `query_watermark_offsets` it replaced derive from.
+          # So while a transaction is IN FLIGHT on a paused partition, the compensated end offset
+          # (and the lag derived from it) reflects the last stable offset and excludes the
+          # uncommitted messages a read_committed consumer will never see. Non-transactional topics
+          # are unaffected (LSO == HWM there).
           class Fetcher
             # @param client [Karafka::Connection::Client]
             # @param paused [Hash{String => Array<Integer>}] paused topics with partitions

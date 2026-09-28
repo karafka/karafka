@@ -467,12 +467,12 @@ module Karafka
       #   partition offset specs, each with a `:partition` and an `:offset` (`:earliest`,
       #   `:latest`, `:max_timestamp` or an integer timestamp in ms)
       # @return [Array<Hash>] resolved offsets, each with `:topic`, `:partition` and `:offset`
-      # @note This consumer own isolation level is forwarded to the query. Be aware that the
-      #   underlying batched `ListOffsets` resolves `:latest` to the high watermark regardless of
-      #   the isolation level (unlike the consumer `query_watermark_offsets`, which returns the
-      #   last stable offset for a read_committed consumer). On a topic with an in-flight
-      #   transaction `:latest` therefore includes the uncommitted messages a read_committed
-      #   consumer will not see. Non-transactional topics are unaffected (LSO == HWM).
+      # @note This consumer own isolation level is forwarded to the query and, as of
+      #   karafka-rdkafka 0.30.0, honoured by the underlying batched `ListOffsets`, so for a
+      #   read_committed consumer `:latest` resolves to the last stable offset - matching the
+      #   consumer `query_watermark_offsets`. On a topic with an in-flight transaction `:latest`
+      #   therefore excludes the uncommitted messages a read_committed consumer will not see.
+      #   Non-transactional topics are unaffected (LSO == HWM).
       def read_partition_offsets(topic_partition_offsets)
         @wrapped_kafka.read_partition_offsets(
           topic_partition_offsets,

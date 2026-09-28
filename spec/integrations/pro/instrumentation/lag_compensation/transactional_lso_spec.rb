@@ -28,18 +28,19 @@
 # License: https://karafka.io/docs/Pro-License-Comm/
 # Contact: contact@karafka.io
 
-# Documents a KNOWN EDGE CASE of the transactional-topic behaviour.
+# Pins the transactional-topic behaviour of the compensated lag.
 #
-# The refresh queries end offsets via the batched `ListOffsets` admin API. Unlike the per-partition
-# `query_watermark_offsets` it replaced, `ListOffsets` resolves `:latest` to the high watermark
-# even for a read_committed consumer. So while a transaction is held OPEN on a paused partition, the
-# compensated lag reflects the high watermark and includes the uncommitted messages a read_committed
-# consumer will never see - transiently overstating the lag until the transaction resolves.
+# The refresh queries end offsets via the batched `ListOffsets` admin API. As of karafka-rdkafka
+# 0.30.0 that call honours the forwarded isolation level, so for a read_committed consumer
+# `:latest` resolves to the last stable offset - the same reference `query_watermark_offsets` used.
+# So while a transaction is held OPEN on a paused partition, the compensated lag reflects the last
+# stable offset and excludes the uncommitted messages a read_committed consumer will never see.
 #
-# This spec pins that documented behaviour: with a large in-flight transaction the compensated lag
-# grows to include it. If a future change makes the refresh honour the last stable offset here (lag
-# would then reflect only the committed messages) this spec will fail - update the docs in
-# `Fetcher`, `Connection::Client#read_partition_offsets` and the CHANGELOG when it does.
+# This spec pins that behaviour: with a large in-flight transaction the compensated lag stays put
+# and does not grow to include it. Until karafka-rdkafka 0.30.0 `ListOffsets` silently ignored the
+# isolation level and resolved `:latest` to the high watermark, so this lag transiently overstated
+# by the number of uncommitted messages; if a future change reverts to that, this spec will fail -
+# update the docs in `Fetcher`, `Connection::Client#read_partition_offsets` and the CHANGELOG.
 
 setup_karafka do |config|
   config.max_messages = 1
@@ -104,17 +105,16 @@ Thread.new do
 end
 
 start_karafka_and_wait_until do
-  # Exit once the in-flight transaction is clearly reflected, with a sample-count fallback so a
-  # regression (or the feature being off) fails fast instead of hanging. Always release the held
-  # transaction on exit, otherwise the producer close would block on the open transaction.
-  ready = DT.key?(:open) &&
-    (DT[:lags].max.to_i >= (OPEN - 10) || DT[:lags].size >= 45)
+  # Collect enough lag samples while the transaction is held open to prove the lag does not creep
+  # up towards the in-flight size. Always release the held transaction on exit, otherwise the
+  # producer close would block on the open transaction.
+  ready = DT.key?(:open) && DT[:lags].size >= 45
   DT[:measured] = true if ready
   ready
 end
 
 transactional_producer.close
 
-# Known edge case: the compensated lag includes the in-flight transaction (high watermark), so it
-# grows to roughly the open-transaction size. A last-stable-offset result would stay near zero.
-assert DT[:lags].max >= OPEN - 10, "expected the in-flight transaction to be included, got max #{DT[:lags].max}"
+# The compensated lag reflects the last stable offset, so the in-flight transaction is excluded and
+# the lag stays near zero. A high-watermark result would grow to roughly the open-transaction size.
+assert DT[:lags].max < OPEN - 10, "expected the in-flight transaction to be excluded, got max #{DT[:lags].max}"
