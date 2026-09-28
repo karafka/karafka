@@ -72,7 +72,7 @@ RSpec.describe_current do
       consumer
     end
 
-    let(:client) { instance_double(Karafka::Connection::Client, pause: true) }
+    let(:client) { instance_double(Karafka::Connection::ConsumerGroups::Client, pause: true) }
     let(:coordinator) { build(:processing_coordinator, seek_offset: 0) }
     let(:message) do
       build(:messages_message, raw_payload: payload.merge("cattr_0" => { "user_id" => 1 }).to_json)

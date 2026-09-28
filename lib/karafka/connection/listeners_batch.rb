@@ -19,7 +19,7 @@ module Karafka
 
         @batch = App.subscription_groups.flat_map do |_group, subscription_groups|
           subscription_groups.map do |subscription_group|
-            Connection::Listener.new(
+            Connection::ConsumerGroups::Listener.new(
               subscription_group,
               jobs_queue,
               scheduler

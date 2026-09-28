@@ -42,7 +42,7 @@ RSpec.describe Karafka::BaseConsumer, type: :pro do
 
   let(:strategy) { Karafka::Pro::Processing::ConsumerGroups::Strategies::Default }
   let(:coordinator) { build(:processing_coordinator_pro, topic: topic, seek_offset: nil) }
-  let(:client) { instance_double(Karafka::Connection::Client, pause: true, seek: true) }
+  let(:client) { instance_double(Karafka::Connection::ConsumerGroups::Client, pause: true, seek: true) }
   let(:first_message) { instance_double(Karafka::Messages::Message, offset: offset, partition: 0) }
   let(:last_message) { instance_double(Karafka::Messages::Message, offset: offset, partition: 0) }
   let(:offset) { 123 }

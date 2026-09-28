@@ -45,7 +45,7 @@ module Karafka
         attr_reader :coordinator
 
         # @param group_id [String] id of the subscription group to which the executor belongs
-        # @param client [Karafka::Connection::Client] kafka client
+        # @param client [Karafka::Connection::ConsumerGroups::Client] kafka client
         # @param coordinator [Karafka::Processing::ConsumerGroups::Coordinator]
         def initialize(group_id, client, coordinator)
           @id = SecureRandom.hex(6)

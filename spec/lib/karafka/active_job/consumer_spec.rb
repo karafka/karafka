@@ -9,7 +9,7 @@ RSpec.describe_current do
     consumer
   end
 
-  let(:client) { instance_double(Karafka::Connection::Client, pause: true) }
+  let(:client) { instance_double(Karafka::Connection::ConsumerGroups::Client, pause: true) }
   let(:messages) { [message1, message2] }
   let(:coordinator) { build(:processing_coordinator, seek_offset: 0) }
   let(:message1) { build(:messages_message, raw_payload: payload1.to_json) }

@@ -34,7 +34,7 @@ RSpec.describe_current do
   subject(:manager) { described_class.new }
 
   let(:statistics) { JSON.parse(fixture_file("statistics.json")) }
-  let(:listener_class) { Karafka::Connection::Listener }
+  let(:listener_class) { Karafka::Connection::ConsumerGroups::Listener }
   let(:listener_g11) { listener_class.new(subscription_group1, jobs_queue, nil) }
   let(:listener_g12) { listener_class.new(subscription_group2, jobs_queue, nil) }
   let(:listener_g21) { listener_class.new(subscription_group3, jobs_queue, nil) }

@@ -151,7 +151,7 @@ module Karafka
 
             # Refreshes and stores the data of all the long-paused partitions (if any)
             #
-            # @param client [Karafka::Connection::Client]
+            # @param client [Karafka::Connection::ConsumerGroups::Client]
             # @param state [Hash] subscription group state
             def refresh_tick(client, state)
               state[:client_name] = client.name

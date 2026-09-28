@@ -4,7 +4,7 @@ RSpec.describe_current do
   subject(:executor) { described_class.new(group_id, client, coordinator) }
 
   let(:group_id) { rand.to_s }
-  let(:client) { instance_double(Karafka::Connection::Client) }
+  let(:client) { instance_double(Karafka::Connection::ConsumerGroups::Client) }
   let(:coordinator) { build(:processing_coordinator) }
   let(:topic) { coordinator.topic }
   let(:messages) { [build(:messages_message)] }
