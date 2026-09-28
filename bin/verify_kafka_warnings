@@ -35,6 +35,7 @@ allowed_patterns=(
    "Auto topic creation failed for it-sandbox.production."
    "Auto topic creation failed for it-parallel-segments-pattern-.*TOPIC_ALREADY_EXISTS"
    "Auto topic creation failed for it-not-funny-at-all-.*TOPIC_ALREADY_EXISTS"
+   "Renouncing the leadership due to a metadata log event"
 )
 
 # Use provided container names or default to "kafka"
