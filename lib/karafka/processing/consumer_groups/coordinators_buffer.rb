@@ -48,7 +48,8 @@ module Karafka
         def revoke(topic_name, partition)
           partitions = @coordinators[topic_name] if @coordinators.key?(topic_name)
 
-          return unless partitions&.key?(partition)
+          return unless partitions
+          return unless partitions.key?(partition)
 
           # Reset (or, if not currently paused, remove) the partition's pause tracker. This
           # prevents a stale retry attempt count from being reused as-is if we reclaim this
