@@ -46,7 +46,10 @@ module Karafka
         # @param topic_name [String] topic name
         # @param partition [Integer] partition number
         def revoke(topic_name, partition)
-          return unless @coordinators[topic_name].key?(partition)
+          partitions = @coordinators[topic_name] if @coordinators.key?(topic_name)
+
+          return unless partitions
+          return unless partitions.key?(partition)
 
           # Reset (or, if not currently paused, remove) the partition's pause tracker. This
           # prevents a stale retry attempt count from being reused as-is if we reclaim this
@@ -59,7 +62,13 @@ module Karafka
           # reference to this coordinator. We delete it here, as we will no longer process any
           # new stuff with it and we may need a new coordinator if we regain this partition, but the
           # coordinator may still be in use
-          @coordinators[topic_name].delete(partition).revoke
+          partitions.delete(partition).revoke
+
+          # Drop the topic entry entirely once it no longer tracks any partitions, so that
+          # `@coordinators` does not grow unbounded across rebalances for topics whose names are
+          # never reused (e.g. regex pattern subscriptions with ephemeral, per-discovery topic
+          # names). Mirrors `PausesManager#delete`
+          @coordinators.delete(topic_name) if partitions.empty?
         end
 
         # Clears coordinators and re-created the pauses manager

@@ -7,11 +7,14 @@
 - **[Feature]** Add `Kubernetes::ReadinessListener`, serving a readiness probe that reports healthy once all subscription groups poll and not-ready on shutdown or quieting, so pods drain before exiting.
 - **[Feature]** Allow the `--include`/`--exclude` CLI server filters to accept wildcard patterns (e.g. `--exclude-consumer-groups app-a-*`), including topics discovered at runtime by Pro routing patterns.
 - **[Feature]** Add an opt-in Ractor-based parallel deserialization engine (requires Ruby 4.0+), enabled globally with `config.deserializing.parallel.active = true` and per topic with `deserializing(parallel: true)`. Batches below `min_payloads`, or with the feature disabled, fall back to inline deserialization, so results are unchanged either way.
+- [Enhancement] Defer default log file creation until the first write and keep logging working (to stdout) when the log file cannot be created or written, e.g. on read-only filesystems (ydah).
 - [Enhancement] Build `Setup::DefaultsInjector` (and its Pro extension) on top of `Karafka::Core::Configurable::Injector` so the kafka defaults injection uses the shared ecosystem pattern. Behavior is unchanged. Requires karafka-core `>= 2.6.3`.
 - [Maintenance] Cover the `:max_timestamp` and Integer-timestamp `Admin#read_partition_offsets` offset modes with integration specs.
 - [Maintenance] Cover the untested New Relic `MetricsListener` paths with integration specs: revoked and shutdown metrics, overridden listener methods, and an empty metrics list.
+- [Maintenance] [Pro] Cover the `JobsQueue` per-group semaphore growth fix under LRJ and async-locking workloads with integration specs.
 - [Maintenance] Run the Rails 8.0 transactional ActiveJob integration spec against Rails `8.0.3`. It was pinned to Rails `7.2.2.1`, so it duplicated the 7.2 run.
 - [Maintenance] Foundational work for Kafka share groups (KIP-932) is in progress (routing layer, consumer class hierarchy, config seams). Not usable yet - share groups can be described in routing but cannot run.
+- [Fix] Stop `CoordinatorsBuffer#@coordinators` from growing unbounded across rebalances by dropping the topic entry on revoke once it tracks no partitions (mirrors `PausesManager#delete`); the revoke existence guard is now non-mutating so it no longer creates empty entries for unknown topics.
 - [Fix] Use `::JSON.parse` instead of `::ActiveSupport::JSON.decode` in the ActiveJob deserializer, so consuming ActiveJob messages keeps working under the json gem `>= 3.0` (where `ActiveSupport::JSON.decode` passes a now-invalid second argument to `JSON.parse`).
 - [Fix] [Pro] Stabilize the `Karafka::Admin::Recovery` `read_committed_offsets` no-offsets integration spec against a fresh CI broker.
 - [Fix] Stabilize the `Karafka::Admin::Acl` `#create`/`#describe` specs against asynchronous ACL propagation on slow CI.

@@ -210,7 +210,23 @@ def setup_web(migrate: true)
 
   return unless migrate
 
-  Karafka::Web::Installer.new.migrate
+  # On freshly created topics (single-broker KRaft) the initial state we just produced may not
+  # yet be visible to the fresh admin consumer the migrator uses to read it back, so `current!`
+  # can transiently raise a `MissingConsumers*Error`. In the Web processing consumer this
+  # self-heals because `current!` runs in a poll loop, but here `migrate` runs once, so we retry
+  # it until the watermark settles. All migration steps are idempotent, so re-running is safe.
+  attempts = 0
+
+  begin
+    Karafka::Web::Installer.new.migrate
+  rescue Karafka::Web::Errors::BaseError
+    attempts += 1
+
+    raise if attempts > 5
+
+    sleep(1)
+    retry
+  end
 end
 
 # Configures the testing framework in a given spec and allows to run it inline (in the same file)

@@ -38,13 +38,16 @@ draw_routes do
   end
 end
 
-Thread.new do
+producer_errors = Queue.new
+producer_thread = Thread.new do
   loop do
-    produce(DT.topic, "1")
+    begin
+      produce(DT.topic, "1")
+    rescue => e
+      producer_errors << e
+    end
 
     sleep(0.02)
-  rescue
-    nil
   end
 end
 
@@ -54,15 +57,26 @@ iterator = Karafka::Pro::Iterator.new(
   yield_nil: true
 )
 
-# Stop iterator when 100 messages are accumulated
 limit = 100
 buffer = []
 
+# Deadline so a stalled producer can never hang this tailing iterator until the suite timeout
+deadline = Time.now + 60
+
 iterator.each do |message|
   break if buffer.size >= limit
+  break if Time.now > deadline
 
-  # Message may be a nil when `yield_nil` is set to true
   buffer << message if message
 end
 
-assert_equal 100, buffer.size
+producer_thread.kill
+
+producer_error = producer_errors.empty? ? nil : producer_errors.pop
+assert(producer_error.nil?, "Background producer failed: #{producer_error}")
+
+assert_equal(
+  limit,
+  buffer.size,
+  "Expected #{limit} messages before the deadline, tailing iterator only accumulated #{buffer.size}"
+)
