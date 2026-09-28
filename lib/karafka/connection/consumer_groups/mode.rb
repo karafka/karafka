@@ -4,8 +4,8 @@ module Karafka
   module Connection
     module ConsumerGroups
       # Represents the connection mode state of the Kafka client.
-      # Encapsulates mode logic and provides a cleaner API for checking and setting connection modes,
-      # removing the need for symbol comparisons throughout the connection management code.
+      # Encapsulates mode logic and provides a cleaner API for checking and setting connection
+      # modes, removing the need for symbol comparisons throughout the connection management code.
       #
       # @note This class is used internally by the Client and is not part of the public API
       #

@@ -31,6 +31,9 @@
 module Karafka
   module Pro
     module Connection
+      # Consumer-group-specific Pro connection components (the multiplexing connection manager and
+      # its lifecycle listener). Parallel `ShareGroups` will live next to this namespace once
+      # KIP-932 lands.
       module ConsumerGroups
         # Manager that can handle working with multiplexed connections.
         #
@@ -88,8 +91,8 @@ module Karafka
           #   were emitted
           # @param statistics [Hash] emitted statistics
           #
-          # @note Please note that while we collect here per subscription group, we use those metrics
-          #   collectively on a whole consumer group. This reduces the friction.
+          # @note Please note that while we collect here per subscription group, we use those
+          #   metrics collectively on a whole consumer group. This reduces the friction.
           def notice(subscription_group_id, statistics)
             times = []
             # stateage is in microseconds

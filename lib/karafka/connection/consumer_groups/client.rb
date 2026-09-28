@@ -108,8 +108,8 @@ module Karafka
         #
         # Also periodically runs the events polling to trigger events callbacks.
         #
-        # @return [Karafka::Connection::MessagesBuffer] messages buffer that holds messages per topic
-        #   partition
+        # @return [Karafka::Connection::MessagesBuffer] messages buffer that holds messages per
+        #   topic partition
         # @note This method should not be executed from many threads at the same time
         def batch_poll
           time_poll = TimeTrackers::Poll.new(@subscription_group.max_wait_time)
@@ -206,8 +206,8 @@ module Karafka
         #   store_offset should be used to only store new offset when we want them to be flushed
         #
         # @note This method for async may return `true` despite involuntary partition revocation as
-        #   it does **not** resolve to `lost_assignment?`. It returns only the commit state operation
-        #   result.
+        #   it does **not** resolve to `lost_assignment?`. It returns only the commit state
+        #   operation result.
         def commit_offsets(async: true)
           internal_commit_offsets(async: async)
         end
@@ -224,7 +224,8 @@ module Karafka
         #
         # @param message [Messages::Message, Messages::Seek] message to which we want to seek to.
         #   It can have the time based offset.
-        # @note Please note, that if you are seeking to a time offset, getting the offset is blocking
+        # @note Please note, that if you are seeking to a time offset, getting the offset is
+        #   blocking
         def seek(message)
           @mutex.synchronize { internal_seek(message) }
         end
@@ -645,12 +646,12 @@ module Karafka
 
         # Performs a single poll operation and handles retries and errors
         #
-        # Keep in mind, that this timeout will be limited by a tick interval value, because we cannot
-        # block on a single poll longer than that. Otherwise our events polling would not be able to
-        # run frequently enough. This means, that even if you provide big value, it will not block
-        # for that long. This is anyhow compensated by the `#batch_poll` that can run for extended
-        # period of time but will run events polling frequently while waiting for the requested total
-        # time.
+        # Keep in mind, that this timeout will be limited by a tick interval value, because we
+        # cannot block on a single poll longer than that. Otherwise our events polling would not
+        # be able to run frequently enough. This means, that even if you provide big value, it
+        # will not block for that long. This is anyhow compensated by the `#batch_poll` that can
+        # run for extended period of time but will run events polling frequently while waiting
+        # for the requested total time.
         #
         # @param timeout [Integer] timeout for a single poll.
         # @return [Rdkafka::Consumer::Message, nil, Symbol] fetched message, nil if nothing polled

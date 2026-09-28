@@ -29,7 +29,8 @@ module Karafka
     # @param kafka [Hash] custom kafka configuration to merge with app defaults.
     #   Useful for multi-cluster operations where you want to target a different cluster.
     # @param external_client [Object, nil] active rdkafka client (raw, wrapped with
-    #   `Karafka::Connection::Proxy` or a `Karafka::Connection::ConsumerGroups::Client` of a running consumer)
+    #   `Karafka::Connection::Proxy` or a `Karafka::Connection::ConsumerGroups::Client` of a
+    #   running consumer)
     #   on which admin operations should run, instead of each operation creating its own
     #   short-lived instance. Routing is capability based: rdkafka admin instances are used by
     #   admin-based operations (`with_admin` and everything built on top of it, e.g.
@@ -41,7 +42,8 @@ module Karafka
     #   operations and for invoking only operations that are safe to run on a live client.
     #
     # @note Raw and proxied rdkafka instances are resolved once at construction, so the admin
-    #   instance should not outlive them. `Karafka::Connection::ConsumerGroups::Client` instances are resolved
+    #   instance should not outlive them. `Karafka::Connection::ConsumerGroups::Client` instances
+    #   are resolved
     #   on each use instead, so the admin instance follows such a client across the underlying
     #   connection recovery resets.
     #

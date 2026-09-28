@@ -24,7 +24,8 @@ module Karafka
         # @return [String] id of this listener
         attr_reader :id
 
-        # @return [Karafka::Routing::SubscriptionGroup] subscription group that this listener handles
+        # @return [Karafka::Routing::SubscriptionGroup] subscription group that this listener
+        #   handles
         attr_reader :subscription_group
 
         # @return [Processing::ConsumerGroups::CoordinatorsBuffer] coordinator buffers that can be
@@ -32,8 +33,8 @@ module Karafka
         #   without messages ahead in the topic)
         attr_reader :coordinators
 
-        # How long to wait in the initial events poll. Increases chances of having the initial events
-        # immediately available
+        # How long to wait in the initial events poll. Increases chances of having the initial
+        # events immediately available
         INITIAL_EVENTS_POLL_TIMEOUT = 100
 
         private_constant :INITIAL_EVENTS_POLL_TIMEOUT
@@ -159,8 +160,9 @@ module Karafka
         # @note We catch all the errors here, so they don't affect other listeners (or this one)
         #   so we will be able to listen and consume other incoming messages.
         #   Since it is run inside Karafka::Connection::Runner thread - catching all the exceptions
-        #   won't crash the whole process. Here we mostly focus on catching the exceptions related to
-        #   Kafka connections / Internet connection issues / Etc. Business logic problems should not
+        #   won't crash the whole process. Here we mostly focus on catching the exceptions
+        #   related to Kafka connections / Internet connection issues / Etc. Business logic problems
+        #   should not
         #   propagate this far.
         def fetch_loop
           running!

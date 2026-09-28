@@ -2,8 +2,9 @@
 
 module Karafka
   module Connection
-    # Consumer-group-specific connection components (rebalance handling driven by consumer group
-    # protocol). Parallel `ShareGroups` will live next to this namespace once KIP-932 lands.
+    # Consumer-group-specific connection components (the client, listener, pauses manager,
+    # connection mode and rebalance handling driven by the consumer group protocol). Parallel
+    # `ShareGroups` will live next to this namespace once KIP-932 lands.
     module ConsumerGroups
       # Manager for tracking changes in the partitions assignment after the assignment is done and
       # for ensuring, that proper buffer related operations that may be impacted by the rebalance
