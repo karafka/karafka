@@ -12,6 +12,7 @@
 - [Maintenance] [Pro] Cover the `JobsQueue` per-group semaphore growth fix under LRJ and async-locking workloads with integration specs.
 - [Maintenance] Run the Rails 8.0 transactional ActiveJob integration spec against Rails `8.0.3`. It was pinned to Rails `7.2.2.1`, so it duplicated the 7.2 run.
 - [Maintenance] Foundational work for Kafka share groups (KIP-932) is in progress (routing layer, consumer class hierarchy, config seams). Not usable yet - share groups can be described in routing but cannot run.
+- [Fix] Stop `CoordinatorsBuffer#@coordinators` from growing unbounded across rebalances by dropping the topic entry on revoke once it tracks no partitions (mirrors `PausesManager#delete`); the revoke existence guard is now non-mutating so it no longer creates empty entries for unknown topics.
 - [Fix] Use `::JSON.parse` instead of `::ActiveSupport::JSON.decode` in the ActiveJob deserializer, so consuming ActiveJob messages keeps working under the json gem `>= 3.0` (where `ActiveSupport::JSON.decode` passes a now-invalid second argument to `JSON.parse`).
 - [Fix] [Pro] Stabilize the `Karafka::Admin::Recovery` `read_committed_offsets` no-offsets integration spec against a fresh CI broker.
 - [Fix] Stabilize the `Karafka::Admin::Acl` `#create`/`#describe` specs against asynchronous ACL propagation on slow CI.
