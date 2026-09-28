@@ -104,4 +104,53 @@ RSpec.describe Karafka::Instrumentation::Logger do
       expect(logger.send(:file).path.to_s).to eq log_file.to_s
     end
   end
+
+  describe "read-only filesystem handling (EROFS)" do
+    let(:karafka_test_root) { Pathname(Dir::Tmpname.create("karafka") { |_| nil }) }
+    let(:log_path) { karafka_test_root.join("log/#{Karafka.env}.log") }
+
+    before do
+      allow(Karafka::App).to receive(:root).and_return(karafka_test_root)
+      Dir.mkdir(karafka_test_root, 0o700)
+    end
+
+    after { FileUtils.rm_rf(karafka_test_root) }
+
+    context "when opening the log file raises EROFS" do
+      before do
+        # The log directory "exists" but the filesystem is read-only, so opening fails
+        allow(FileUtils).to receive(:mkdir_p)
+        allow(File).to receive(:open).and_call_original
+        allow(File).to receive(:open).with(log_path, "a").and_raise(Errno::EROFS)
+      end
+
+      it "does not raise and does not create the log file" do
+        expect { logger.error("message") }.not_to raise_error
+        expect(log_path).not_to exist
+      end
+
+      it "attempts to open the file only once across many writes" do
+        logger.error("a")
+        logger.error("b")
+        logger.error("c")
+
+        expect(File).to have_received(:open).with(log_path, "a").once
+      end
+    end
+
+    context "when the file turns read-only after being opened (write raises EROFS)" do
+      let(:handle) { instance_double(File, write: nil, close: nil) }
+
+      before do
+        allow(FileUtils).to receive(:mkdir_p)
+        allow(File).to receive(:open).and_call_original
+        allow(File).to receive(:open).with(log_path, "a").and_return(handle)
+        allow(handle).to receive(:write).and_raise(Errno::EROFS)
+      end
+
+      it "does not raise" do
+        expect { logger.error("message") }.not_to raise_error
+      end
+    end
+  end
 end
