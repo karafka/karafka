@@ -7,6 +7,10 @@
 
 require "tmpdir"
 
+# A chmod-based read-only directory does not restrict the root user (root bypasses permission
+# bits), so this scenario can only be exercised deterministically as a non-privileged user
+exit(0) if Process.uid.zero?
+
 strio = StringIO.new
 proper_stdout = $stdout
 proper_stderr = $stderr
