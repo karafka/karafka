@@ -514,6 +514,17 @@ module Karafka
       #   unreachable broker yields a partial group list plus an error. We surface that error
       #   rather than returning a silently-incomplete listing, because a dropped broker would make
       #   an existing group look absent to callers relying on presence.
+      #
+      # @example List all consumer groups with their states
+      #   Karafka::Admin::ConsumerGroups.list
+      #   # => [
+      #   #   { group_id: 'billing', state: :stable },
+      #   #   { group_id: 'orders-processor', state: :empty }
+      #   # ]
+      #
+      # @example Check whether a group has live members right now
+      #   group = Karafka::Admin.list_consumer_groups.find { |g| g[:group_id] == 'billing' }
+      #   group && group[:state] == :stable
       def list
         report = with_admin do |admin|
           admin.list_consumer_groups.wait(max_wait_timeout_ms: max_wait_time_ms)
