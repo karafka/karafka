@@ -3,27 +3,23 @@
 RSpec.describe Karafka::Instrumentation::Logger do
   subject(:logger) { described_class.new }
 
-  let(:delegate_scope) { class_double(Karafka::Helpers::MultiDelegator) }
-
-  # We use a singleton logger that could be already initialized in other specs, so
-  # in order to check all the behaviours we need to "reset" it to the initial state
-  before do
-    allow(Karafka::Helpers::MultiDelegator).to receive(:delegate)
-      .with(:write, :close)
-      .and_return(delegate_scope)
-    allow(delegate_scope).to receive(:to)
-  end
-
   specify { expect(described_class).to be < Logger }
 
   describe "#new" do
     let(:karafka_test_root) { Pathname(Dir::Tmpname.create("karafka") { |_| nil }) }
     let(:log_path) { karafka_test_root.join("log/#{Karafka.env}.log") }
-    let(:file_matcher) { having_attributes(closed?: false, path: log_path.to_path, class: File) }
 
     before { allow(Karafka::App).to receive(:root).and_return(karafka_test_root) }
 
     after { FileUtils.rm_rf(karafka_test_root) }
+
+    it "does not create a log file before the first write" do
+      Dir.mkdir(karafka_test_root, 0o700)
+
+      described_class.new
+
+      expect(log_path).not_to exist
+    end
 
     it "expect to be of a proper level" do
       expect(logger.level).to eq Logger::ERROR
@@ -34,8 +30,9 @@ RSpec.describe Karafka::Instrumentation::Logger do
         before { Dir.mkdir(karafka_test_root, 0o500) }
 
         specify do
-          described_class.new
-          expect(delegate_scope).to have_received(:to).with($stdout)
+          logger.error("message")
+
+          expect(log_path).not_to exist
         end
       end
 
@@ -43,8 +40,10 @@ RSpec.describe Karafka::Instrumentation::Logger do
         before { Dir.mkdir(karafka_test_root, 0o700) }
 
         specify do
-          described_class.new
-          expect(delegate_scope).to have_received(:to).with($stdout, file_matcher)
+          logger.error("message")
+          logger.send(:file).flush
+
+          expect(log_path.read).to include("message")
         end
       end
     end
@@ -56,8 +55,9 @@ RSpec.describe Karafka::Instrumentation::Logger do
         before { Dir.mkdir(File.dirname(log_path), 0o500) }
 
         specify do
-          described_class.new
-          expect(delegate_scope).to have_received(:to).with($stdout)
+          logger.error("message")
+
+          expect(log_path).not_to exist
         end
       end
 
@@ -65,8 +65,10 @@ RSpec.describe Karafka::Instrumentation::Logger do
         before { Dir.mkdir(File.dirname(log_path), 0o700) }
 
         specify do
-          described_class.new
-          expect(delegate_scope).to have_received(:to).with($stdout, file_matcher)
+          logger.error("message")
+          logger.send(:file).flush
+
+          expect(log_path.read).to include("message")
         end
       end
     end
@@ -78,8 +80,10 @@ RSpec.describe Karafka::Instrumentation::Logger do
         before { FileUtils.install(File::NULL, log_path, mode: 0o700) }
 
         specify do
-          described_class.new
-          expect(delegate_scope).to have_received(:to).with($stdout, file_matcher)
+          logger.error("message")
+          logger.send(:file).flush
+
+          expect(log_path.read).to include("message")
         end
       end
 
@@ -87,8 +91,7 @@ RSpec.describe Karafka::Instrumentation::Logger do
         before { FileUtils.install(File::NULL, log_path, mode: 0o400) }
 
         specify do
-          described_class.new
-          expect(delegate_scope).to have_received(:to).with($stdout)
+          expect { logger.error("message") }.not_to change(log_path, :size)
         end
       end
     end
