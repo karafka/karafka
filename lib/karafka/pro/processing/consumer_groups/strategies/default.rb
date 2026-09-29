@@ -118,8 +118,6 @@ module Karafka
               @_current_offset_metadata = nil
             end
 
-            alias_method :mark_consumed, :mark_as_consumed
-
             # Marks message as consumed in a sync way.
             #
             # @param message [Messages::Message] last successfully processed message.
@@ -170,8 +168,6 @@ module Karafka
             ensure
               @_current_offset_metadata = nil
             end
-
-            alias_method :mark_consumed!, :mark_as_consumed!
 
             # Starts producer transaction, saves the transaction context for transactional marking
             # and runs user code in this context

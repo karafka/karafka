@@ -11,7 +11,7 @@ class Consumer < Karafka::ShareConsumer
   def consume
     messages.each do |message|
       DT[0] << message.raw_payload
-      mark_consumed(message)
+      mark_as_accepted(message)
     end
   end
 end

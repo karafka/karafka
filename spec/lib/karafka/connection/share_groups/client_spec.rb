@@ -63,7 +63,7 @@ RSpec.describe_current do
     end
 
     it "acknowledges a consumed message as accepted" do
-      client.mark_as_consumed(message)
+      client.mark_as_accepted(message)
 
       expect(share_consumer).to have_received(:acknowledge).with(message, :accept)
     end

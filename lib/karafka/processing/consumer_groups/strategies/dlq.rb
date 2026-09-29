@@ -36,8 +36,6 @@ module Karafka
             true
           end
 
-          alias_method :mark_consumed, :mark_as_consumed
-
           # Override of the standard `#mark_as_consumed!`. Resets the pause tracker count in case
           # DLQ was configured with the `independent` flag.
           #
@@ -52,8 +50,6 @@ module Karafka
 
             true
           end
-
-          alias_method :mark_consumed!, :mark_as_consumed!
 
           # When manual offset management is on, we do not mark anything as consumed automatically
           # and we rely on the user to figure things out

@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 # The share-group consumer (KIP-932) can be defined and introspected as a share consumer and
-# exposes the per-record acknowledgement API (mark_consumed/released/rejected, sync and async).
+# exposes the per-record acknowledgement API (mark_as_accepted/released/rejected, sync and async).
 # The advanced parts (delayed release, lock extension) are still not implemented and raise, and
 # share groups cannot run in the swarm yet (the swarm guard raises). Consumer-group consumers are
 # entirely unaffected by the consumer class hierarchy.
@@ -28,9 +28,9 @@ assert !share_consumer.consumer_group?
 # (b) The acknowledgement API is present, with async and sync (bang) variants plus the
 # consumer-group-consistent aliases
 %i[
-  mark_as_consumed mark_as_consumed! mark_consumed mark_consumed!
-  mark_as_released mark_as_released! mark_released mark_released!
-  mark_as_rejected mark_as_rejected! mark_rejected mark_rejected!
+  mark_as_accepted mark_as_accepted!
+  mark_as_released mark_as_released!
+  mark_as_rejected mark_as_rejected!
 ].each do |ack_method|
   assert share_consumer.respond_to?(ack_method), ack_method
 end
@@ -51,7 +51,7 @@ assert extend_lock_raised
 released_raised = false
 
 begin
-  share_consumer.mark_released(message, delay: 1_000)
+  share_consumer.mark_as_released(message, delay: 1_000)
 rescue NotImplementedError
   released_raised = true
 end

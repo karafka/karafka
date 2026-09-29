@@ -96,37 +96,28 @@ module Karafka
           EMPTY_ARRAY
         end
 
-        # Acknowledges a single record as successfully consumed (ACCEPT). Mirrors the consumer-group
-        # client's `#mark_as_consumed` naming so both modes share the same positive-ack convention;
-        # the record will not be redelivered.
+        # Acknowledges a single record as accepted (ACCEPT / successfully processed). The record
+        # will not be redelivered.
         #
         # @param message [Karafka::Messages::Message] message to acknowledge. It responds to
         #   `#topic`, `#partition` and `#offset`, which is what the acknowledgement needs.
-        def mark_as_consumed(message)
+        def mark_as_accepted(message)
           acknowledge(message, :accept)
         end
 
-        alias_method :mark_consumed, :mark_as_consumed
-
-        # Releases a single record back to the share group for redelivery (RELEASE). `mark_released`
-        # is provided as a shorter alias.
+        # Releases a single record back to the share group for redelivery (RELEASE).
         #
         # @param message [Karafka::Messages::Message] message to release
         def mark_as_released(message)
           acknowledge(message, :release)
         end
 
-        alias_method :mark_released, :mark_as_released
-
-        # Rejects a single record so it is not redelivered (REJECT). `mark_rejected` is provided as
-        # a shorter alias.
+        # Rejects a single record so it is not redelivered (REJECT).
         #
         # @param message [Karafka::Messages::Message] message to reject
         def mark_as_rejected(message)
           acknowledge(message, :reject)
         end
-
-        alias_method :mark_rejected, :mark_as_rejected
 
         # Flushes pending acknowledgements to the broker in a non-blocking or blocking way.
         #

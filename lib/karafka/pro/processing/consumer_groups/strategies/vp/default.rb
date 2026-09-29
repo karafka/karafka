@@ -81,8 +81,6 @@ module Karafka
                 @_current_offset_metadata = nil
               end
 
-              alias_method :mark_consumed, :mark_as_consumed
-
               # @param message [Karafka::Messages::Message] blocking marks message as consumed
               # @param offset_metadata [String, nil]
               def mark_as_consumed!(message, offset_metadata = @_current_offset_metadata)
@@ -106,8 +104,6 @@ module Karafka
               ensure
                 @_current_offset_metadata = nil
               end
-
-              alias_method :mark_consumed!, :mark_as_consumed!
 
               # Stores the next offset for processing inside of the transaction when collapsed and
               # accumulates marking as consumed in the local buffer.

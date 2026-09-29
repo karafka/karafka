@@ -76,10 +76,6 @@ module Karafka
             true
           end
 
-          # Shorter alias of the canonical `mark_as_consumed` (shared naming with the share-group
-          # consumer).
-          alias_method :mark_consumed, :mark_as_consumed
-
           # Marks message as consumed in a sync way.
           #
           # @param message [Messages::Message] last successfully processed message.
@@ -108,8 +104,6 @@ module Karafka
 
             true
           end
-
-          alias_method :mark_consumed!, :mark_as_consumed!
 
           # Triggers an async offset commit
           #

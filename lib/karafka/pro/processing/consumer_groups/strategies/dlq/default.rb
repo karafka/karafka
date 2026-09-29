@@ -65,8 +65,6 @@ module Karafka
                 @_current_offset_metadata = nil
               end
 
-              alias_method :mark_consumed, :mark_as_consumed
-
               # Override of the standard `#mark_as_consumed!`. Resets the pause tracker count in
               # case DLQ was configured with the `independent` flag.
               #
@@ -84,8 +82,6 @@ module Karafka
               ensure
                 @_current_offset_metadata = nil
               end
-
-              alias_method :mark_consumed!, :mark_as_consumed!
 
               # When we encounter non-recoverable message, we skip it and go on with our lives
               def handle_after_consume

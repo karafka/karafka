@@ -367,8 +367,6 @@ module Karafka
           store_offset(message, metadata) && !assignment_lost?
         end
 
-        alias_method :mark_consumed, :mark_as_consumed
-
         # Marks a given message as consumed and commits the offsets in a blocking way.
         #
         # @param message [Karafka::Messages::Message] message that we want to mark as processed
@@ -379,8 +377,6 @@ module Karafka
 
           commit_offsets!
         end
-
-        alias_method :mark_consumed!, :mark_as_consumed!
 
         # Closes and resets the client completely.
         def reset
