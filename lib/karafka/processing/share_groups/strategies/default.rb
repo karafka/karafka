@@ -10,7 +10,7 @@ module Karafka
       module Strategies
         # Default share-group processing flow:
         # - runs the user `#consume` (during which the user acknowledges records via
-        #   `#mark_accepted` / `#mark_released` / `#mark_rejected`)
+        #   `#mark_consumed` / `#mark_released` / `#mark_rejected`)
         # - on success, flushes the acknowledgements to the broker
         # - on failure, does nothing special: any record left unacknowledged is redelivered by the
         #   broker once its acquisition lock expires (at-least-once)

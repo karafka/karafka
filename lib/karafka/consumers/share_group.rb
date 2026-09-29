@@ -9,7 +9,7 @@ module Karafka
     # deliberately does not inherit the consumer-group offset/pause/seek/eof/revocation behavior.
     #
     # The default (and, for now, only) acknowledgement mode is explicit: inside `#consume` you call
-    # {#mark_accepted}, {#mark_released} or {#mark_rejected} per message. Accumulated
+    # {#mark_consumed}, {#mark_released} or {#mark_rejected} per message. Accumulated
     # acknowledgements are flushed to the broker after `#consume` returns successfully. Any record
     # left unacknowledged is redelivered by the broker after its acquisition lock expires.
     class ShareGroup < Base
