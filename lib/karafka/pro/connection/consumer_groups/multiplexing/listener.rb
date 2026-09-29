@@ -32,24 +32,26 @@ module Karafka
   module Pro
     # Namespace for Pro connections related components
     module Connection
-      # Namespace for Multiplexing management related components
-      module Multiplexing
-        # Listener used to connect listeners manager to the lifecycle events that are significant
-        # to its operations
-        class Listener
-          # Initializes the multiplexing listener with the connection manager
-          def initialize
-            @manager = App.config.internal.connection.manager
-          end
+      module ConsumerGroups
+        # Namespace for Multiplexing management related components
+        module Multiplexing
+          # Listener used to connect listeners manager to the lifecycle events that are significant
+          # to its operations
+          class Listener
+            # Initializes the multiplexing listener with the connection manager
+            def initialize
+              @manager = App.config.internal.connection.manager
+            end
 
-          # Triggers connection manage subscription groups details noticing
-          #
-          # @param event [Karafka::Core::Monitoring::Event] event with statistics
-          def on_statistics_emitted(event)
-            @manager.notice(
-              event[:subscription_group_id],
-              event[:statistics]
-            )
+            # Triggers connection manage subscription groups details noticing
+            #
+            # @param event [Karafka::Core::Monitoring::Event] event with statistics
+            def on_statistics_emitted(event)
+              @manager.notice(
+                event[:subscription_group_id],
+                event[:statistics]
+              )
+            end
           end
         end
       end

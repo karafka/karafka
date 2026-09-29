@@ -32,7 +32,7 @@ RSpec.describe_current do
   let(:message) { build(:messages_message) }
   let(:coordinator) { build(:processing_coordinator_pro, seek_offset: 0, topic: topic) }
   let(:topic) { build(:routing_topic) }
-  let(:client) { instance_double(Karafka::Connection::Client, pause: true) }
+  let(:client) { instance_double(Karafka::Connection::ConsumerGroups::Client, pause: true) }
   let(:messages_batch) do
     Karafka::Messages::Builders::Messages.call([message], topic, 0, Time.now)
   end

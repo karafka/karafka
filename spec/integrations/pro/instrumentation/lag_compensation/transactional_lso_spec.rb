@@ -39,7 +39,7 @@
 # This spec pins that documented behaviour: with a large in-flight transaction the compensated lag
 # grows to include it. If a future change makes the refresh honour the last stable offset here (lag
 # would then reflect only the committed messages) this spec will fail - update the docs in
-# `Fetcher`, `Connection::Client#read_partition_offsets` and the CHANGELOG when it does.
+# `Fetcher`, `Connection::ConsumerGroups::Client#read_partition_offsets` and the CHANGELOG when it does.
 
 setup_karafka do |config|
   config.max_messages = 1

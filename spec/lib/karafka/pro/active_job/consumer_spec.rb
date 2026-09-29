@@ -38,7 +38,7 @@ RSpec.describe_current do
     end
   end
 
-  let(:client) { instance_double(Karafka::Connection::Client, pause: true) }
+  let(:client) { instance_double(Karafka::Connection::ConsumerGroups::Client, pause: true) }
   let(:coordinator) { build(:processing_coordinator_pro, topic: topic) }
   let(:topic) { build(:routing_topic) }
   let(:messages) { Karafka::Messages::Messages.new([message1, message2], {}) }

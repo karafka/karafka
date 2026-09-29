@@ -58,7 +58,7 @@ module Karafka
           # messages. It self-corrects once the transaction commits or aborts and the last stable
           # offset advances. Non-transactional topics are unaffected (LSO == HWM there).
           class Fetcher
-            # @param client [Karafka::Connection::Client]
+            # @param client [Karafka::Connection::ConsumerGroups::Client]
             # @param paused [Hash{String => Array<Integer>}] paused topics with partitions
             # @return [Hash{String => Hash{Integer => Integer}}] end offsets of the requested
             #   partitions

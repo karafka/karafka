@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-RSpec.describe Karafka::Connection::Mode do
+RSpec.describe Karafka::Connection::ConsumerGroups::Mode do
   subject(:mode_instance) { described_class.new(mode) }
 
   let(:mode) { :subscribe }

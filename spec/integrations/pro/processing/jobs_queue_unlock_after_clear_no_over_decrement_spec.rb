@@ -33,7 +33,7 @@
 # unlike lock_async/unlock_async which go through SubscriptionGroupsCoordinator). This reproduces
 # the #44997 regression end-to-end against that live queue instance, not a bare unit-test double:
 # a job is locked, its subscription group is then cleared (exactly what a listener reset does on
-# recovery - Connection::Listener#reset calls jobs_queue.clear), and only afterwards is the same
+# recovery - Connection::ConsumerGroups::Listener#reset calls jobs_queue.clear), and only afterwards is the same
 # job unlocked - the sequence the bug report describes.
 #
 # Before the fix: #unlock decremented `waiting` unconditionally before checking whether the job

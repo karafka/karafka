@@ -126,7 +126,7 @@ module Karafka
           icfg.cli.contract = Cli::Contracts::Server.new
 
           # Use manager that supports multiplexing
-          icfg.connection.manager = Connection::Manager.new
+          icfg.connection.manager = Connection::ConsumerGroups::Manager.new
 
           icfg.processing.scheduler_class = Processing::Schedulers::Default
           icfg.processing.jobs_queue_class = Processing::ConsumerGroups::JobsQueue
