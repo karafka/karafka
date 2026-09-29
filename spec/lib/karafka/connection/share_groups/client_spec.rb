@@ -120,5 +120,16 @@ RSpec.describe_current do
 
       expect(client).not_to be_closed
     end
+
+    it "publishes a client.reset instrumentation event" do
+      events = []
+      Karafka.monitor.subscribe("client.reset") { |event| events << event }
+
+      client.batch_poll(100)
+      client.reset
+
+      expect(events.size).to eq(1)
+      expect(events.first[:subscription_group]).to eq(subscription_group)
+    end
   end
 end

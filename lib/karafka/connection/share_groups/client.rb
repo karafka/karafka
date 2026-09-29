@@ -188,9 +188,15 @@ module Karafka
         # Closes the current share consumer and allows a fresh one to be built on the next poll.
         # Used by the listener to recover from errors and to re-open after a stop.
         def reset
-          close
+          Karafka.monitor.instrument(
+            "client.reset",
+            caller: self,
+            subscription_group: @subscription_group
+          ) do
+            close
 
-          @mutex.synchronize { @closed = false }
+            @mutex.synchronize { @closed = false }
+          end
         end
 
         private
