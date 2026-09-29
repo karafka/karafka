@@ -39,7 +39,7 @@ RSpec.describe_current do
   describe "#on_connection_listener_fetch_loop" do
     subject(:trigger) { listener.on_connection_listener_fetch_loop(event) }
 
-    let(:connection_listener) { instance_double(Karafka::Connection::Listener, id: "id") }
+    let(:connection_listener) { instance_double(Karafka::Connection::ConsumerGroups::Listener, id: "id") }
     let(:payload) { { caller: connection_listener, time: 2 } }
     let(:message) { "[id] Polling messages..." }
 
@@ -59,7 +59,7 @@ RSpec.describe_current do
   describe "#on_connection_listener_fetch_loop_received" do
     subject(:trigger) { listener.on_connection_listener_fetch_loop_received(event) }
 
-    let(:connection_listener) { instance_double(Karafka::Connection::Listener, id: "id") }
+    let(:connection_listener) { instance_double(Karafka::Connection::ConsumerGroups::Listener, id: "id") }
 
     context "when there are no messages polled" do
       let(:payload) { { caller: connection_listener, messages_buffer: [], time: 2 } }
@@ -133,7 +133,7 @@ RSpec.describe_current do
     context "when pausing offset is provided" do
       subject(:trigger) { listener.on_client_pause(event) }
 
-      let(:client) { instance_double(Karafka::Connection::Client, id: SecureRandom.hex(6)) }
+      let(:client) { instance_double(Karafka::Connection::ConsumerGroups::Client, id: SecureRandom.hex(6)) }
       let(:message) do
         "[#{client.id}] Pausing on topic Topic-0 on offset 12"
       end
@@ -152,7 +152,7 @@ RSpec.describe_current do
     context "when pausing offset is not provided (consecutive)" do
       subject(:trigger) { listener.on_client_pause(event) }
 
-      let(:client) { instance_double(Karafka::Connection::Client, id: SecureRandom.hex(6)) }
+      let(:client) { instance_double(Karafka::Connection::ConsumerGroups::Client, id: SecureRandom.hex(6)) }
       let(:message) do
         "[#{client.id}] Pausing on topic Topic-0 on the consecutive offset"
       end
@@ -172,7 +172,7 @@ RSpec.describe_current do
   describe "#on_client_resume" do
     subject(:trigger) { listener.on_client_resume(event) }
 
-    let(:client) { instance_double(Karafka::Connection::Client, id: SecureRandom.hex(6)) }
+    let(:client) { instance_double(Karafka::Connection::ConsumerGroups::Client, id: SecureRandom.hex(6)) }
     let(:message) do
       "[#{client.id}] Resuming on topic Topic-0"
     end
@@ -430,11 +430,11 @@ RSpec.describe_current do
     let(:payload) { { caller: caller, error: error, type: type } }
     let(:error) { StandardError.new }
     let(:caller) { nil }
-    let(:con_client) { Karafka::Connection::Client.new(subscription_group, -> {}) }
+    let(:con_client) { Karafka::Connection::ConsumerGroups::Client.new(subscription_group, -> {}) }
 
     let(:con_listener) do
       subscription_group = build(:routing_subscription_group)
-      Karafka::Connection::Listener.new(
+      Karafka::Connection::ConsumerGroups::Listener.new(
         subscription_group,
         Karafka::Processing::ConsumerGroups::JobsQueue.new,
         nil

@@ -31,7 +31,7 @@ def count_pipe_fds
   end
 end
 
-# Build kafka config exactly the way Karafka::Connection::Client#build_consumer does
+# Build kafka config exactly the way Karafka::Connection::ConsumerGroups::Client#build_consumer does
 def build_kafka_config
   sg = Karafka::App.subscription_groups.values.flatten.first
 

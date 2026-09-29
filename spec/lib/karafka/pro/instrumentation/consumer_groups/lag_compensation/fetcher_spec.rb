@@ -33,7 +33,7 @@ RSpec.describe_current do
 
   let(:fetcher) { described_class.new }
   let(:paused) { { "topic" => [0, 1] } }
-  let(:client) { instance_double(Karafka::Connection::Client) }
+  let(:client) { instance_double(Karafka::Connection::ConsumerGroups::Client) }
 
   before do
     allow(client).to receive(:read_partition_offsets) do |request|

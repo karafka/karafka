@@ -73,7 +73,7 @@ RSpec.describe_current do
   end
 
   describe "#on_client_events_poll" do
-    let(:client) { instance_double(Karafka::Connection::Client, assignment_lost?: false) }
+    let(:client) { instance_double(Karafka::Connection::ConsumerGroups::Client, assignment_lost?: false) }
     let(:events_poll_event) do
       {
         caller: client,
@@ -107,7 +107,7 @@ RSpec.describe_current do
       end
 
       context "with multiple subscription groups" do
-        let(:client2) { instance_double(Karafka::Connection::Client, assignment_lost?: false) }
+        let(:client2) { instance_double(Karafka::Connection::ConsumerGroups::Client, assignment_lost?: false) }
         let(:events_poll_event2) do
           {
             caller: client2,
@@ -203,7 +203,7 @@ RSpec.describe_current do
     end
 
     context "when assignment loss via events_poll occurs" do
-      let(:client) { instance_double(Karafka::Connection::Client, assignment_lost?: true) }
+      let(:client) { instance_double(Karafka::Connection::ConsumerGroups::Client, assignment_lost?: true) }
       let(:events_poll_event) do
         {
           caller: client,

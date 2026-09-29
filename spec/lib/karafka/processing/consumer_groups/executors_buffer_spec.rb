@@ -3,7 +3,7 @@
 RSpec.describe_current do
   subject(:buffer) { described_class.new(client, subscription_group) }
 
-  let(:client) { instance_double(Karafka::Connection::Client) }
+  let(:client) { instance_double(Karafka::Connection::ConsumerGroups::Client) }
   let(:group_id) { SecureRandom.hex(6) }
   let(:coordinator) { build(:processing_coordinator) }
   let(:topic_name) { "topic_name1" }

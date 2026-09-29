@@ -35,7 +35,7 @@ module Karafka
       attr_reader :id
       # @return [Karafka::Messages::Messages] current messages batch
       attr_accessor :messages
-      # @return [Karafka::Connection::Client] kafka connection client
+      # @return [Karafka::Connection::ConsumerGroups::Client] kafka connection client
       attr_accessor :client
       # @return [Object] coordinator
       attr_accessor :coordinator

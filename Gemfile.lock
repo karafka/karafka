@@ -3,7 +3,7 @@ PATH
   specs:
     karafka (2.6.1)
       karafka-core (>= 2.6.3, < 2.7.0)
-      karafka-rdkafka (>= 0.28.0)
+      karafka-rdkafka (>= 0.30.0)
       waterdrop (>= 2.10.2, < 3.0.0)
       zeitwerk (~> 2.3)
 
@@ -62,37 +62,37 @@ GEM
     karafka-core (2.6.4)
       karafka-rdkafka (>= 0.20.0)
       logger (>= 1.6.0)
-    karafka-rdkafka (0.29.0)
+    karafka-rdkafka (0.30.0)
       ffi (~> 1.17.1)
       json (> 2.0)
       logger
       mini_portile2 (~> 2.6)
       rake (> 12)
-    karafka-rdkafka (0.29.0-aarch64-linux-gnu)
+    karafka-rdkafka (0.30.0-aarch64-linux-gnu)
       ffi (~> 1.17.1)
       json (> 2.0)
       logger
       mini_portile2 (~> 2.6)
       rake (> 12)
-    karafka-rdkafka (0.29.0-aarch64-linux-musl)
+    karafka-rdkafka (0.30.0-aarch64-linux-musl)
       ffi (~> 1.17.1)
       json (> 2.0)
       logger
       mini_portile2 (~> 2.6)
       rake (> 12)
-    karafka-rdkafka (0.29.0-arm64-darwin)
+    karafka-rdkafka (0.30.0-arm64-darwin)
       ffi (~> 1.17.1)
       json (> 2.0)
       logger
       mini_portile2 (~> 2.6)
       rake (> 12)
-    karafka-rdkafka (0.29.0-x86_64-linux-gnu)
+    karafka-rdkafka (0.30.0-x86_64-linux-gnu)
       ffi (~> 1.17.1)
       json (> 2.0)
       logger
       mini_portile2 (~> 2.6)
       rake (> 12)
-    karafka-rdkafka (0.29.0-x86_64-linux-musl)
+    karafka-rdkafka (0.30.0-x86_64-linux-musl)
       ffi (~> 1.17.1)
       json (> 2.0)
       logger
@@ -208,12 +208,12 @@ CHECKSUMS
   json (3.0.2) sha256=8e6d7e7b11384c21230430cef90b71f14849a34a1f4452796670f7c981bd19df
   karafka (2.6.1)
   karafka-core (2.6.4) sha256=e08166ca7ef12fadf0500f2a3aba63b5ba918a98533c3feaac9f43c90f159363
-  karafka-rdkafka (0.29.0) sha256=f2d39bbcc0f2bcd63dd0deea08ac4bb6ad31a714b7518c76493e724af0f0f2a2
-  karafka-rdkafka (0.29.0-aarch64-linux-gnu) sha256=4d7e7e8eb81a221c35d36d28bd6b02c666a901e064e11ca96f45800cd4575f29
-  karafka-rdkafka (0.29.0-aarch64-linux-musl) sha256=4dda233893d8157103fefb5697bd4cc86fec934ab678fa06090e68c1a49b7709
-  karafka-rdkafka (0.29.0-arm64-darwin) sha256=d421ae4b7c5947cc78ac5c4fcb6b99f5045989b39f17d5cb2320c686cf8a0080
-  karafka-rdkafka (0.29.0-x86_64-linux-gnu) sha256=fbeb0ba7ed32bdce1ee18fb262b18b425594cb13a004eaf4e39e6a811e3eaac4
-  karafka-rdkafka (0.29.0-x86_64-linux-musl) sha256=5dcebdc8127bda180b4dc8224c96b189eae10c4c9ce05a5ac5f814900400ec07
+  karafka-rdkafka (0.30.0) sha256=e491744d47eddf1b04953b10961ad7f8ddbbc3a760ae23f53a103cf887a84377
+  karafka-rdkafka (0.30.0-aarch64-linux-gnu) sha256=fd5b29c76897df538e9f081fe7298629bdca5bc8ce8f9598ec541bf41e6844ea
+  karafka-rdkafka (0.30.0-aarch64-linux-musl) sha256=57f375624a2a6719ad1f692275bb56e55872fbc95f03e04cbe212c05b9213258
+  karafka-rdkafka (0.30.0-arm64-darwin) sha256=c292798ac07de4aa4f37e62bc73a6288453ea6b708f94fd1fb395db1f2d8ef99
+  karafka-rdkafka (0.30.0-x86_64-linux-gnu) sha256=0c122df13168196ac5a1eecb034d40c18e3bc4094e43c31e1ed71ccf094f0a4f
+  karafka-rdkafka (0.30.0-x86_64-linux-musl) sha256=8edcd8386b413ccc596bf285b6f508ad4b63f1d8b2b01ca779559ed8f20cc2f5
   karafka-testing (2.6.2) sha256=d6872f793a0d8465d5aea76303be5c2d5c8b75ebf3c6985fe1c32c03259190d4
   karafka-web (1.0.1) sha256=1d507cbe978998b20a81040751b8e79b6611f17d88756cefc2982ff479e5192a
   logger (1.7.0) sha256=196edec7cc44b66cfb40f9755ce11b392f21f7967696af15d274dde7edff0203

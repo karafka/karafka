@@ -29,7 +29,8 @@ module Karafka
     # @param kafka [Hash] custom kafka configuration to merge with app defaults.
     #   Useful for multi-cluster operations where you want to target a different cluster.
     # @param external_client [Object, nil] active rdkafka client (raw, wrapped with
-    #   `Karafka::Connection::Proxy` or a `Karafka::Connection::Client` of a running consumer)
+    #   `Karafka::Connection::Proxy` or a `Karafka::Connection::ConsumerGroups::Client` of a
+    #   running consumer)
     #   on which admin operations should run, instead of each operation creating its own
     #   short-lived instance. Routing is capability based: rdkafka admin instances are used by
     #   admin-based operations (`with_admin` and everything built on top of it, e.g.
@@ -41,7 +42,8 @@ module Karafka
     #   operations and for invoking only operations that are safe to run on a live client.
     #
     # @note Raw and proxied rdkafka instances are resolved once at construction, so the admin
-    #   instance should not outlive them. `Karafka::Connection::Client` instances are resolved
+    #   instance should not outlive them. `Karafka::Connection::ConsumerGroups::Client` instances
+    #   are resolved
     #   on each use instead, so the admin instance follows such a client across the underlying
     #   connection recovery resets.
     #
@@ -64,7 +66,7 @@ module Karafka
       # on each use: such clients swap their underlying rdkafka instance across recovery
       # resets, so a handle resolved once at construction could go stale while the client
       # itself remains fully operational
-      if external_client.is_a?(Karafka::Connection::Client)
+      if external_client.is_a?(Karafka::Connection::ConsumerGroups::Client)
         @external_client = external_client
         @external_consumer = true
 
@@ -200,6 +202,14 @@ module Karafka
       # @see ConsumerGroups.delete
       def delete_consumer_group(group_id)
         new.delete_consumer_group(group_id)
+      end
+
+      # Lists all consumer groups in the cluster with their current state
+      #
+      # @return [Array<Hash>] array of `{ group_id:, state: }` entries
+      # @see ConsumerGroups.list
+      def list_consumer_groups
+        new.list_consumer_groups
       end
 
       # Triggers a rebalance for the specified group
@@ -388,6 +398,12 @@ module Karafka
       consumer_groups_admin.delete(group_id)
     end
 
+    # @return [Array<Hash>] array of `{ group_id:, state: }` entries
+    # @see ConsumerGroups#list
+    def list_consumer_groups
+      consumer_groups_admin.list
+    end
+
     # @param group_id [String] group id to trigger rebalance for
     # @see ConsumerGroups#trigger_rebalance
     def trigger_rebalance(group_id)
@@ -505,7 +521,7 @@ module Karafka
     #   For connection clients the handle is resolved on each use as they swap their underlying
     #   rdkafka instance across recovery resets while remaining operational
     def external_client_proxy
-      if @external_client.is_a?(Karafka::Connection::Client)
+      if @external_client.is_a?(Karafka::Connection::ConsumerGroups::Client)
         @external_client.wrapped_kafka
       else
         @external_client
