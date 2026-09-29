@@ -2,8 +2,8 @@
 
 # The share-group consumer (KIP-932) can be defined and introspected as a share consumer and
 # exposes the per-record acknowledgement API (mark_as_accepted/released/rejected, sync and async).
-# The advanced parts (delayed release, lock extension) are still not implemented and raise, and
-# share groups cannot run in the swarm yet (the swarm guard raises). Consumer-group consumers are
+# Advanced parts (delayed release, lock extension) are Pro/future and are simply not present.
+# Share groups cannot run in the swarm yet (the swarm guard raises). Consumer-group consumers are
 # entirely unaffected by the consumer class hierarchy.
 
 setup_karafka
@@ -25,8 +25,7 @@ assert_equal :share, share_consumer.group_type
 assert share_consumer.share_group?
 assert !share_consumer.consumer_group?
 
-# (b) The acknowledgement API is present, with async and sync (bang) variants plus the
-# consumer-group-consistent aliases
+# (b) The acknowledgement API is present, with async and sync (bang) variants
 %i[
   mark_as_accepted mark_as_accepted!
   mark_as_released mark_as_released!
@@ -35,28 +34,8 @@ assert !share_consumer.consumer_group?
   assert share_consumer.respond_to?(ack_method), ack_method
 end
 
-# (b.1) The advanced acknowledgement parts are not implemented yet and raise
-message = Object.new
-
-extend_lock_raised = false
-
-begin
-  share_consumer.extend_lock!(message)
-rescue NotImplementedError
-  extend_lock_raised = true
-end
-
-assert extend_lock_raised
-
-released_raised = false
-
-begin
-  share_consumer.mark_as_released(message, delay: 1_000)
-rescue NotImplementedError
-  released_raised = true
-end
-
-assert released_raised
+# (b.1) Advanced parts (delayed release, lock extension) are Pro/future and are not present
+assert !share_consumer.respond_to?(:extend_lock!)
 
 # (c) Existing consumer-group consumers are unaffected
 class CgConsumer < Karafka::BaseConsumer

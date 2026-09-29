@@ -72,23 +72,14 @@ module Karafka
       # delivery-count limit is reached.
       #
       # @param message [Karafka::Messages::Message] message to release
-      # @param delay [Integer, nil] optional delay in milliseconds before the message becomes
-      #   available for redelivery. Delayed release is not implemented yet.
-      # @raise [NotImplementedError] when a delay is provided
-      def mark_as_released(message, delay: nil)
-        raise_delayed_release_not_implemented(delay)
-
+      def mark_as_released(message)
         client.mark_as_released(message)
       end
 
       # Releases a message (RELEASE) and flushes acknowledgements synchronously.
       #
       # @param message [Karafka::Messages::Message] message to release
-      # @param delay [Integer, nil] optional delay in milliseconds. Not implemented yet.
-      # @raise [NotImplementedError] when a delay is provided
-      def mark_as_released!(message, delay: nil)
-        raise_delayed_release_not_implemented(delay)
-
+      def mark_as_released!(message)
         client.mark_as_released(message)
         client.commit!
       end
@@ -109,33 +100,12 @@ module Karafka
         client.commit!
       end
 
-      # Extends the acquisition lock on a message being processed (RENEW), buying more time before
-      # the broker considers it available for redelivery. Not implemented yet (expected to live in
-      # Pro).
-      #
-      # @param _message [Karafka::Messages::Message] message whose lock we want to extend
-      # @raise [NotImplementedError]
-      def extend_lock!(_message)
-        raise NotImplementedError, "Lock extension (`extend_lock!`) is not implemented yet"
-      end
-
       private
 
       # Flushes the acknowledgements accumulated during `#consume` to the broker. Called by the
       # processing strategy after a successful consume.
       def commit_acknowledgements
         client.commit!
-      end
-
-      # @param delay [Integer, nil] delay in milliseconds
-      # @raise [NotImplementedError] when a delay is provided (delayed release is not implemented)
-      def raise_delayed_release_not_implemented(delay)
-        return unless delay
-
-        raise(
-          NotImplementedError,
-          "Delayed release (`mark_released(delay:)`) is not implemented yet"
-        )
       end
     end
   end

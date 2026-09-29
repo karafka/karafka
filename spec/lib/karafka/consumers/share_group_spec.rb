@@ -60,13 +60,15 @@ RSpec.describe_current do
         consumer.mark_as_rejected!(message)
       end
     end
+  end
 
-    it "expect #mark_as_released with a delay to raise NotImplementedError (not implemented yet)" do
-      expect { consumer.mark_as_released(message, delay: 1_000) }.to raise_error(NotImplementedError)
-    end
-
-    it "expect #extend_lock! to raise NotImplementedError (not implemented yet)" do
-      expect { consumer.extend_lock!(message) }.to raise_error(NotImplementedError)
+  describe "not-yet-available API" do
+    # Delayed release and lock extension (RENEW) are Pro/future features and are intentionally
+    # absent from the core share consumer rather than present as raising stubs.
+    %i[extend_lock! renew].each do |method_name|
+      it "expect not to respond to :#{method_name}" do
+        expect(consumer).not_to respond_to(method_name)
+      end
     end
   end
 
