@@ -84,9 +84,9 @@ module Karafka
               # data in the topic since the last fetch and lower means the partition resumed
               # and its fetches are fresher than our refreshed snapshot. We compare against the
               # last stable offset since that is what the statistics report for a read_committed
-              # consumer. Note the refreshed end offset itself is a high watermark (see
-              # `Fetcher`): on a topic with an in-flight transaction it can exceed the fetch-based
-              # last stable offset and briefly overstate the lag until the transaction resolves.
+              # consumer. The refreshed end offset honours the consumer isolation level (see
+              # `Fetcher`), so for a read_committed consumer it too reflects the last stable offset
+              # and an in-flight transaction is excluded rather than overstating the lag.
               return unless end_offset > (p_stats["ls_offset"] || p_stats["hi_offset"] || -1)
 
               p_stats["ls_offset"] = end_offset
