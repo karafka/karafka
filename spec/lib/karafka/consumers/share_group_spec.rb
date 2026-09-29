@@ -24,18 +24,18 @@ RSpec.describe_current do
 
     before { consumer.client = client }
 
-    it "expect #mark_accepted to acknowledge the message as accepted via the client" do
-      expect(client).to receive(:mark).with(message, :accept)
-      consumer.mark_accepted(message)
+    it "expect #mark_as_consumed to acknowledge the message as consumed via the client" do
+      expect(client).to receive(:mark_as_consumed).with(message)
+      consumer.mark_as_consumed(message)
     end
 
     it "expect #mark_released to acknowledge the message as released via the client" do
-      expect(client).to receive(:mark).with(message, :release)
+      expect(client).to receive(:mark_released).with(message)
       consumer.mark_released(message)
     end
 
     it "expect #mark_rejected to acknowledge the message as rejected via the client" do
-      expect(client).to receive(:mark).with(message, :reject)
+      expect(client).to receive(:mark_rejected).with(message)
       consumer.mark_rejected(message)
     end
 

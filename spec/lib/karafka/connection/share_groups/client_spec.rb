@@ -54,36 +54,48 @@ RSpec.describe_current do
     end
   end
 
-  describe "#mark" do
+  describe "acknowledgements" do
     let(:message) { build(:messages_message) }
 
-    before { allow(share_consumer).to receive(:poll).and_return([]) }
-
-    it "acknowledges the message with the given type" do
-      allow(share_consumer).to receive(:acknowledge)
-
+    before do
+      allow(share_consumer).to receive_messages(poll: [], acknowledge: nil)
       client.batch_poll(100)
-      client.mark(message, :accept)
+    end
+
+    it "acknowledges a consumed message as accepted" do
+      client.mark_as_consumed(message)
 
       expect(share_consumer).to have_received(:acknowledge).with(message, :accept)
     end
+
+    it "acknowledges a released message" do
+      client.mark_released(message)
+
+      expect(share_consumer).to have_received(:acknowledge).with(message, :release)
+    end
+
+    it "acknowledges a rejected message" do
+      client.mark_rejected(message)
+
+      expect(share_consumer).to have_received(:acknowledge).with(message, :reject)
+    end
   end
 
-  describe "#commit" do
+  describe "#commit and #commit!" do
     before { allow(share_consumer).to receive(:poll).and_return([]) }
 
-    it "commits synchronously by default" do
+    it "commits asynchronously by default" do
       client.batch_poll(100)
       client.commit
 
-      expect(share_consumer).to have_received(:commit_sync)
+      expect(share_consumer).to have_received(:commit_async)
     end
 
-    it "commits asynchronously when requested" do
+    it "commits synchronously via commit!" do
       client.batch_poll(100)
-      client.commit(async: true)
+      client.commit!
 
-      expect(share_consumer).to have_received(:commit_async)
+      expect(share_consumer).to have_received(:commit_sync)
     end
   end
 

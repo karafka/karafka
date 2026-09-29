@@ -23,9 +23,9 @@ module Karafka
         )
 
         # Shared frozen empty result reused for empty/failed polls to avoid allocations
-        EMPTY_MESSAGES = [].freeze
+        EMPTY_ARRAY = [].freeze
 
-        private_constant :EMPTY_MESSAGES
+        private_constant :EMPTY_ARRAY
 
         # @return [Karafka::Routing::SubscriptionGroup] subscription group to which this client
         #   belongs
@@ -58,7 +58,7 @@ module Karafka
         def batch_poll(timeout = @subscription_group.max_wait_time)
           result = kafka.poll(timeout)
 
-          return EMPTY_MESSAGES if result.nil? || result.empty?
+          return EMPTY_ARRAY if result.nil? || result.empty?
 
           messages = []
 
@@ -93,23 +93,41 @@ module Karafka
           # redelivered by the broker after its lock expires.
           raise if e.fatal?
 
-          EMPTY_MESSAGES
+          EMPTY_ARRAY
         end
 
-        # Acknowledges a single record.
+        # Acknowledges a single record as successfully consumed (ACCEPT). Mirrors the consumer-group
+        # client's `#mark_as_consumed` naming so both modes share the same positive-ack convention;
+        # the record will not be redelivered.
         #
         # @param message [Karafka::Messages::Message] message to acknowledge. It responds to
         #   `#topic`, `#partition` and `#offset`, which is what the acknowledgement needs.
-        # @param type [Symbol] `:accept`, `:release` or `:reject`
-        def mark(message, type)
-          kafka.acknowledge(message, type)
+        def mark_as_consumed(message)
+          acknowledge(message, :accept)
         end
 
-        # Flushes pending acknowledgements to the broker.
+        # Releases a single record back to the share group for redelivery (RELEASE).
         #
-        # @param async [Boolean] should the commit be async (default: false, i.e. blocking). We
-        #   commit synchronously by default so acknowledgements are durable before we poll again.
-        def commit(async: false)
+        # @param message [Karafka::Messages::Message] message to release
+        def mark_released(message)
+          acknowledge(message, :release)
+        end
+
+        # Rejects a single record so it is not redelivered (REJECT).
+        #
+        # @param message [Karafka::Messages::Message] message to reject
+        def mark_rejected(message)
+          acknowledge(message, :reject)
+        end
+
+        # Flushes pending acknowledgements to the broker in a non-blocking or blocking way.
+        #
+        # Mirrors the consumer-group client's `#commit_offsets` convention (async by default, with a
+        # blocking `#commit!` variant); share groups flush acknowledgements rather than offsets, so
+        # the method is named `#commit`.
+        #
+        # @param async [Boolean] should the commit happen async (default) or sync
+        def commit(async: true)
           async ? kafka.commit_async : kafka.commit_sync
         rescue Rdkafka::RdkafkaError => e
           Karafka.monitor.instrument(
@@ -122,6 +140,13 @@ module Karafka
           raise if e.fatal?
 
           false
+        end
+
+        # Flushes pending acknowledgements in a synchronous (blocking) way.
+        #
+        # @see #commit
+        def commit!
+          commit(async: false)
         end
 
         # Gracefully stops the client: flushes outstanding acknowledgements and closes.
@@ -170,6 +195,14 @@ module Karafka
         end
 
         private
+
+        # Acknowledges a single record with the given state.
+        #
+        # @param message [Karafka::Messages::Message] message to acknowledge
+        # @param state [Symbol] `:accept`, `:release` or `:reject`
+        def acknowledge(message, state)
+          kafka.acknowledge(message, state)
+        end
 
         # @return [Rdkafka::ShareConsumer] librdkafka share consumer instance
         def kafka

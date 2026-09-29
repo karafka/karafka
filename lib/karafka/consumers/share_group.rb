@@ -49,11 +49,14 @@ module Karafka
         )
       end
 
-      # Acknowledges a message as successfully processed (ACCEPT). It will not be redelivered.
+      # Acknowledges a message as successfully consumed (ACCEPT). It will not be redelivered.
       #
-      # @param message [Karafka::Messages::Message] message to accept
-      def mark_accepted(message)
-        client.mark(message, :accept)
+      # Named to match the consumer-group `#mark_as_consumed` so both consumer modes share the same
+      # positive-acknowledgement convention.
+      #
+      # @param message [Karafka::Messages::Message] message to mark as consumed
+      def mark_as_consumed(message)
+        client.mark_as_consumed(message)
       end
 
       # Releases a message back to the share group for redelivery (RELEASE). The broker will hand
@@ -72,7 +75,7 @@ module Karafka
           )
         end
 
-        client.mark(message, :release)
+        client.mark_released(message)
       end
 
       # Rejects a message so it is not redelivered to this share group (REJECT). The broker
@@ -80,7 +83,7 @@ module Karafka
       #
       # @param message [Karafka::Messages::Message] message to reject
       def mark_rejected(message)
-        client.mark(message, :reject)
+        client.mark_rejected(message)
       end
 
       # Extends the acquisition lock on a message being processed (RENEW), buying more time before
@@ -98,7 +101,7 @@ module Karafka
       # Flushes the acknowledgements accumulated during `#consume` to the broker. Called by the
       # processing strategy after a successful consume.
       def commit_acknowledgements
-        client.commit(async: false)
+        client.commit!
       end
     end
   end

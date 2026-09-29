@@ -13,13 +13,11 @@ module Karafka
         # should be able to distribute work whenever any work is done in any of the listeners
         scheduler = App.config.internal.processing.scheduler_class.new(jobs_queue)
 
+        builder = ListenersBuilder.new
+
         @batch = App.subscription_groups.flat_map do |_group, subscription_groups|
           subscription_groups.map do |subscription_group|
-            listener_class_for(subscription_group).new(
-              subscription_group,
-              jobs_queue,
-              scheduler
-            )
+            builder.call(subscription_group, jobs_queue, scheduler)
           end
         end
       end
@@ -32,20 +30,6 @@ module Karafka
       # @return [Array<Listener>] active listeners
       def active
         select(&:active?)
-      end
-
-      private
-
-      # Picks the listener class matching a subscription group's mode.
-      #
-      # @param subscription_group [Karafka::Routing::SubscriptionGroup]
-      # @return [Class] the consumer-group or share-group listener class
-      def listener_class_for(subscription_group)
-        if subscription_group.group.share_group?
-          Connection::ShareGroups::Listener
-        else
-          Connection::ConsumerGroups::Listener
-        end
       end
     end
   end

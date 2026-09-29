@@ -4,7 +4,7 @@ RSpec.describe_current do
   subject(:executor) { described_class.new(group_id, client, coordinator) }
 
   let(:group_id) { SecureRandom.hex(6) }
-  let(:client) { instance_double(Karafka::Connection::ShareGroups::Client, mark: nil, commit: true) }
+  let(:client) { instance_double(Karafka::Connection::ShareGroups::Client, commit!: true) }
   let(:topic) { build(:routing_topic) }
   let(:coordinator) { Karafka::Processing::ShareGroups::Coordinator.new(topic) }
   let(:messages) { [build(:messages_message)] }
@@ -41,7 +41,7 @@ RSpec.describe_current do
 
     it "marks the coordinator successful and flushes acknowledgements" do
       expect(coordinator.success?).to be(true)
-      expect(client).to have_received(:commit).with(async: false)
+      expect(client).to have_received(:commit!)
     end
 
     it "exposes the topic and a batch-level partition of -1" do
