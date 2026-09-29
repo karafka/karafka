@@ -363,24 +363,24 @@ module Karafka
         # @note This method won't trigger automatic offsets commits, rather relying on the offset
         #   check-pointing trigger that happens with each batch processed. It will however check the
         #   `librdkafka` assignment ownership to increase accuracy for involuntary revocations.
-        def mark_consumed(message, metadata = nil)
+        def mark_as_consumed(message, metadata = nil)
           store_offset(message, metadata) && !assignment_lost?
         end
 
-        alias_method :mark_as_consumed, :mark_consumed
+        alias_method :mark_consumed, :mark_as_consumed
 
         # Marks a given message as consumed and commits the offsets in a blocking way.
         #
         # @param message [Karafka::Messages::Message] message that we want to mark as processed
         # @param metadata [String, nil] offset storage metadata or nil if none
         # @return [Boolean] true if successful. False if we no longer own given partition
-        def mark_consumed!(message, metadata = nil)
+        def mark_as_consumed!(message, metadata = nil)
           return false unless mark_consumed(message, metadata)
 
           commit_offsets!
         end
 
-        alias_method :mark_as_consumed!, :mark_consumed!
+        alias_method :mark_consumed!, :mark_as_consumed!
 
         # Closes and resets the client completely.
         def reset

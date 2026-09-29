@@ -63,19 +63,19 @@ RSpec.describe_current do
     end
 
     it "acknowledges a consumed message as accepted" do
-      client.mark_consumed(message)
+      client.mark_as_consumed(message)
 
       expect(share_consumer).to have_received(:acknowledge).with(message, :accept)
     end
 
     it "acknowledges a released message" do
-      client.mark_released(message)
+      client.mark_as_released(message)
 
       expect(share_consumer).to have_received(:acknowledge).with(message, :release)
     end
 
     it "acknowledges a rejected message" do
-      client.mark_rejected(message)
+      client.mark_as_rejected(message)
 
       expect(share_consumer).to have_received(:acknowledge).with(message, :reject)
     end

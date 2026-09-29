@@ -53,7 +53,7 @@ module Karafka
           #   processing another message. In case like this we do not pause on the message we've
           #   already processed but rather at the next one. This applies to both sync and async
           #   versions of this method.
-          def mark_consumed(message)
+          def mark_as_consumed(message)
             # seek offset can be nil only in case `#seek` was invoked with offset reset request
             # In case like this we ignore marking
             return true if seek_offset.nil?
@@ -78,14 +78,14 @@ module Karafka
 
           # Backwards/cross-mode compatible alias. `mark_consumed` is the canonical name (shared
           # with the share-group consumer); `mark_as_consumed` is kept for compatibility.
-          alias_method :mark_as_consumed, :mark_consumed
+          alias_method :mark_consumed, :mark_as_consumed
 
           # Marks message as consumed in a sync way.
           #
           # @param message [Messages::Message] last successfully processed message.
           # @return [Boolean] true if we were able to mark the offset, false otherwise.
           #   False indicates that we were not able and that we have lost the partition.
-          def mark_consumed!(message)
+          def mark_as_consumed!(message)
             # seek offset can be nil only in case `#seek` was invoked with offset reset request
             # In case like this we ignore marking
             return true if seek_offset.nil?
@@ -109,7 +109,7 @@ module Karafka
             true
           end
 
-          alias_method :mark_as_consumed!, :mark_consumed!
+          alias_method :mark_consumed!, :mark_as_consumed!
 
           # Triggers an async offset commit
           #

@@ -26,47 +26,47 @@ RSpec.describe_current do
 
     describe "async (flushed on the next commit)" do
       it "expect #mark_consumed to accept the message via the client" do
-        expect(client).to receive(:mark_consumed).with(message)
+        expect(client).to receive(:mark_as_consumed).with(message)
         consumer.mark_consumed(message)
       end
 
       it "expect #mark_as_consumed to be an alias of #mark_consumed" do
-        expect(client).to receive(:mark_consumed).with(message)
+        expect(client).to receive(:mark_as_consumed).with(message)
         consumer.mark_as_consumed(message)
       end
 
       it "expect #mark_released to release the message via the client" do
-        expect(client).to receive(:mark_released).with(message)
+        expect(client).to receive(:mark_as_released).with(message)
         consumer.mark_released(message)
       end
 
       it "expect #mark_rejected to reject the message via the client" do
-        expect(client).to receive(:mark_rejected).with(message)
+        expect(client).to receive(:mark_as_rejected).with(message)
         consumer.mark_rejected(message)
       end
     end
 
     describe "sync (flushed immediately)" do
       it "expect #mark_consumed! to accept and commit synchronously" do
-        expect(client).to receive(:mark_consumed).with(message).ordered
+        expect(client).to receive(:mark_as_consumed).with(message).ordered
         expect(client).to receive(:commit!).ordered
         consumer.mark_consumed!(message)
       end
 
       it "expect #mark_as_consumed! to be an alias of #mark_consumed!" do
-        allow(client).to receive(:mark_consumed)
+        allow(client).to receive(:mark_as_consumed)
         expect(client).to receive(:commit!)
         consumer.mark_as_consumed!(message)
       end
 
       it "expect #mark_released! to release and commit synchronously" do
-        expect(client).to receive(:mark_released).with(message).ordered
+        expect(client).to receive(:mark_as_released).with(message).ordered
         expect(client).to receive(:commit!).ordered
         consumer.mark_released!(message)
       end
 
       it "expect #mark_rejected! to reject and commit synchronously" do
-        expect(client).to receive(:mark_rejected).with(message).ordered
+        expect(client).to receive(:mark_as_rejected).with(message).ordered
         expect(client).to receive(:commit!).ordered
         consumer.mark_rejected!(message)
       end

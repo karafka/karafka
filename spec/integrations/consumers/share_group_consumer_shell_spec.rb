@@ -28,8 +28,9 @@ assert !share_consumer.consumer_group?
 # (b) The acknowledgement API is present, with async and sync (bang) variants plus the
 # consumer-group-consistent aliases
 %i[
-  mark_consumed mark_consumed! mark_released mark_released! mark_rejected mark_rejected!
-  mark_as_consumed mark_as_consumed!
+  mark_as_consumed mark_as_consumed! mark_consumed mark_consumed!
+  mark_as_released mark_as_released! mark_released mark_released!
+  mark_as_rejected mark_as_rejected! mark_rejected mark_rejected!
 ].each do |ack_method|
   assert share_consumer.respond_to?(ack_method), ack_method
 end
