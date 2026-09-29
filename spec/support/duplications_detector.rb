@@ -45,6 +45,12 @@ class DuplicationsDetector
   # @param event [Karafka::Core::Monitoring::Event]
   def on_consumer_consume(event)
     consumer = event[:caller]
+
+    # Share groups (KIP-932) are at-least-once and a batch may span partitions (batch-level
+    # partition is reported as -1), so the per-partition, single-partition-batch invariants below
+    # do not apply. Skip them for share consumers.
+    return if consumer.share_group?
+
     topic_name = consumer.topic.name
     partition = consumer.partition
 

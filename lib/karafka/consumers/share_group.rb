@@ -4,61 +4,101 @@ module Karafka
   module Consumers
     # Share-group consumer (KIP-932 / Queues for Kafka).
     #
-    # This is currently a shell: the share-group runtime is not implemented yet, so the per-record
-    # acknowledgement API is defined only as stubs that raise. The startup guard
-    # ({Karafka::App.verify_share_groups_inactive!}) prevents any share group from actually running
-    # until the runtime lands, so these methods are never reached at runtime today. They exist so
-    # the public consumer surface is stable and share consumers can already be defined and
-    # introspected.
+    # Share consumers acquire individual records under time-bounded broker leases and acknowledge
+    # them per record (accept/release/reject) instead of committing partition offsets. This class
+    # deliberately does not inherit the consumer-group offset/pause/seek/eof/revocation behavior.
     #
-    # It deliberately does not inherit the consumer-group offset/pause/seek/eof/revocation behavior
-    # - share consumers acknowledge individual records (accept/release/reject) instead of
-    # committing partition offsets.
+    # The default (and, for now, only) acknowledgement mode is explicit: inside `#consume` you call
+    # {#mark_accepted}, {#mark_released} or {#mark_rejected} per message. Accumulated
+    # acknowledgements are flushed to the broker after `#consume` returns successfully. Any record
+    # left unacknowledged is redelivered by the broker after its acquisition lock expires.
     class ShareGroup < Base
-      # Message used for the not-yet-implemented acknowledgement API
-      NOT_IMPLEMENTED_MESSAGE = "Share group (KIP-932) runtime is not implemented yet"
-
-      private_constant :NOT_IMPLEMENTED_MESSAGE
-
       # @return [Symbol] group type
       def group_type
         :share
       end
 
-      # Acknowledges a message as successfully processed (ACCEPT).
+      # Executes the default share consumer flow.
       #
-      # @param _message [Karafka::Messages::Message] message to accept
-      # @raise [NotImplementedError] until the share-group runtime lands
-      def mark_accepted(_message)
-        raise NotImplementedError, NOT_IMPLEMENTED_MESSAGE
+      # @private
+      #
+      # @note The containment is intentionally broad (`Exception`): an error escaping here would
+      #   bypass `#on_after_consume`, skipping the acknowledgement flush.
+      def on_consume
+        handle_consume
+      rescue Exception => e
+        monitor.instrument(
+          "error.occurred",
+          error: e,
+          caller: self,
+          type: "consumer.consume.error"
+        )
       end
 
-      # Releases a message back to the share group for redelivery (RELEASE), optionally after a
-      # delay.
+      # Runs the post-consumption flow (flushing acknowledgements).
       #
-      # @param _message [Karafka::Messages::Message] message to release
+      # @private
+      def on_after_consume
+        handle_after_consume
+      rescue Exception => e
+        monitor.instrument(
+          "error.occurred",
+          error: e,
+          caller: self,
+          type: "consumer.after_consume.error"
+        )
+      end
+
+      # Acknowledges a message as successfully processed (ACCEPT). It will not be redelivered.
+      #
+      # @param message [Karafka::Messages::Message] message to accept
+      def mark_accepted(message)
+        client.mark(message, :accept)
+      end
+
+      # Releases a message back to the share group for redelivery (RELEASE). The broker will hand
+      # it to a consumer again (delivery count increments), until the delivery-count limit is
+      # reached.
+      #
+      # @param message [Karafka::Messages::Message] message to release
       # @param delay [Integer, nil] optional delay in milliseconds before the message becomes
-      #   available for redelivery
-      # @raise [NotImplementedError] until the share-group runtime lands
-      def mark_released(_message, delay: nil)
-        raise NotImplementedError, NOT_IMPLEMENTED_MESSAGE
+      #   available for redelivery. Delayed release is not implemented yet.
+      # @raise [NotImplementedError] when a delay is provided
+      def mark_released(message, delay: nil)
+        if delay
+          raise(
+            NotImplementedError,
+            "Delayed release (`mark_released(delay:)`) is not implemented yet"
+          )
+        end
+
+        client.mark(message, :release)
       end
 
-      # Rejects a message so it is not redelivered to this share group (REJECT).
+      # Rejects a message so it is not redelivered to this share group (REJECT). The broker
+      # archives it immediately.
       #
-      # @param _message [Karafka::Messages::Message] message to reject
-      # @raise [NotImplementedError] until the share-group runtime lands
-      def mark_rejected(_message)
-        raise NotImplementedError, NOT_IMPLEMENTED_MESSAGE
+      # @param message [Karafka::Messages::Message] message to reject
+      def mark_rejected(message)
+        client.mark(message, :reject)
       end
 
       # Extends the acquisition lock on a message being processed (RENEW), buying more time before
-      # the broker considers it available for redelivery.
+      # the broker considers it available for redelivery. Not implemented yet (expected to live in
+      # Pro).
       #
       # @param _message [Karafka::Messages::Message] message whose lock we want to extend
-      # @raise [NotImplementedError] until the share-group runtime lands
+      # @raise [NotImplementedError]
       def extend_lock!(_message)
-        raise NotImplementedError, NOT_IMPLEMENTED_MESSAGE
+        raise NotImplementedError, "Lock extension (`extend_lock!`) is not implemented yet"
+      end
+
+      private
+
+      # Flushes the acknowledgements accumulated during `#consume` to the broker. Called by the
+      # processing strategy after a successful consume.
+      def commit_acknowledgements
+        client.commit(async: false)
       end
     end
   end

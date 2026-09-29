@@ -134,8 +134,11 @@ RSpec.describe_current do
     end
 
     it "expect every consumer-group attribute to be shared or explicitly excluded" do
+      # Attributes present for consumer groups but not for share groups are either consumer-group
+      # only features or the shared attributes we explicitly exclude for share consumers (CG
+      # protocol / offset management keys librdkafka rejects for the share protocol).
       expect(described_class::CONSUMER_GROUP - described_class::SHARE_GROUP)
-        .to match_array(consumer_group_only)
+        .to match_array(consumer_group_only + described_class::SHARE_GROUP_EXCLUDED)
     end
 
     it "expect share-only attributes to be exactly the share-specific ones" do

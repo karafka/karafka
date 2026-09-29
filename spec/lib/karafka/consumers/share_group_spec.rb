@@ -18,26 +18,32 @@ RSpec.describe_current do
     end
   end
 
-  describe "the not-yet-implemented acknowledgement API" do
+  describe "the acknowledgement API" do
     let(:message) { instance_double(Karafka::Messages::Message) }
+    let(:client) { instance_double(Karafka::Connection::ShareGroups::Client) }
 
-    it "expect #mark_accepted to raise NotImplementedError" do
-      expect { consumer.mark_accepted(message) }.to raise_error(NotImplementedError)
+    before { consumer.client = client }
+
+    it "expect #mark_accepted to acknowledge the message as accepted via the client" do
+      expect(client).to receive(:mark).with(message, :accept)
+      consumer.mark_accepted(message)
     end
 
-    it "expect #mark_released to raise NotImplementedError" do
-      expect { consumer.mark_released(message) }.to raise_error(NotImplementedError)
+    it "expect #mark_released to acknowledge the message as released via the client" do
+      expect(client).to receive(:mark).with(message, :release)
+      consumer.mark_released(message)
     end
 
-    it "expect #mark_released with a delay to raise NotImplementedError" do
+    it "expect #mark_rejected to acknowledge the message as rejected via the client" do
+      expect(client).to receive(:mark).with(message, :reject)
+      consumer.mark_rejected(message)
+    end
+
+    it "expect #mark_released with a delay to raise NotImplementedError (not implemented yet)" do
       expect { consumer.mark_released(message, delay: 1_000) }.to raise_error(NotImplementedError)
     end
 
-    it "expect #mark_rejected to raise NotImplementedError" do
-      expect { consumer.mark_rejected(message) }.to raise_error(NotImplementedError)
-    end
-
-    it "expect #extend_lock! to raise NotImplementedError" do
+    it "expect #extend_lock! to raise NotImplementedError (not implemented yet)" do
       expect { consumer.extend_lock!(message) }.to raise_error(NotImplementedError)
     end
   end
@@ -47,7 +53,7 @@ RSpec.describe_current do
     # the consumer-group offset/pause/seek/eof/revocation API must not be present.
     %i[
       pause resume seek seek_offset eofed? revoked? retrying? attempt retry_after_pause
-      on_consume on_after_consume on_eofed on_revoked
+      on_eofed on_revoked
     ].each do |method_name|
       it "expect not to respond to :#{method_name}" do
         expect(consumer).not_to respond_to(method_name)

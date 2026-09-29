@@ -13,13 +13,9 @@ module Karafka
         # should be able to distribute work whenever any work is done in any of the listeners
         scheduler = App.config.internal.processing.scheduler_class.new(jobs_queue)
 
-        # Share groups can be described in the routing but their runtime is not implemented yet.
-        # We refuse to assemble listeners for them instead of silently doing nothing
-        App.verify_share_groups_inactive!
-
         @batch = App.subscription_groups.flat_map do |_group, subscription_groups|
           subscription_groups.map do |subscription_group|
-            Connection::ConsumerGroups::Listener.new(
+            listener_class_for(subscription_group).new(
               subscription_group,
               jobs_queue,
               scheduler
@@ -36,6 +32,20 @@ module Karafka
       # @return [Array<Listener>] active listeners
       def active
         select(&:active?)
+      end
+
+      private
+
+      # Picks the listener class matching a subscription group's mode.
+      #
+      # @param subscription_group [Karafka::Routing::SubscriptionGroup]
+      # @return [Class] the consumer-group or share-group listener class
+      def listener_class_for(subscription_group)
+        if subscription_group.group.share_group?
+          Connection::ShareGroups::Listener
+        else
+          Connection::ConsumerGroups::Listener
+        end
       end
     end
   end
