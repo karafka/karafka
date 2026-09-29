@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-# When Karafka::Connection::Client#build_consumer raises after allocating the native
+# When Karafka::Connection::ConsumerGroups::Client#build_consumer raises after allocating the native
 # rdkafka consumer (e.g., subscribe fails due to transient broker issues like DNS
 # resolution failures, unknown_topic_or_part, unreleased_instance_id for static
 # group membership, etc.), it must clean up:
@@ -81,7 +81,7 @@ cycles = 10
 raised_count = 0
 
 cycles.times do
-  client = Karafka::Connection::Client.new(subscription_group, -> { true })
+  client = Karafka::Connection::ConsumerGroups::Client.new(subscription_group, -> { true })
 
   begin
     client.send(:build_consumer)

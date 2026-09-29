@@ -16,7 +16,7 @@ module Karafka
 
         # @param topics [Karafka::Routing::Topics]
         def initialize(topics)
-          @pauses_manager = Connection::PausesManager.new
+          @pauses_manager = Connection::ConsumerGroups::PausesManager.new
           @coordinators = Hash.new { |h, k| h[k] = {} }
           @topics = topics
         end
@@ -74,7 +74,7 @@ module Karafka
         # Clears coordinators and re-created the pauses manager
         # This should be used only for critical errors recovery
         def reset
-          @pauses_manager = Connection::PausesManager.new
+          @pauses_manager = Connection::ConsumerGroups::PausesManager.new
           @coordinators.clear
         end
       end

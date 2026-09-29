@@ -31,7 +31,7 @@
 RSpec.describe_current do
   subject(:fetcher) { described_class }
 
-  let(:client) { instance_double(Karafka::Connection::Client) }
+  let(:client) { instance_double(Karafka::Connection::ConsumerGroups::Client) }
   let(:topic) { build(:routing_topic) }
 
   before do

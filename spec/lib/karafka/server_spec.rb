@@ -178,7 +178,7 @@ RSpec.describe_current do
       context "when there are active consuming threads (consuming does not want to stop)" do
         let(:active_thread) do
           instance_double(
-            Karafka::Connection::Listener,
+            Karafka::Connection::ConsumerGroups::Listener,
             stopped?: true,
             terminate: true,
             shutdown: true,
@@ -207,7 +207,7 @@ RSpec.describe_current do
       context "when there are active consuming threads but not supervised" do
         let(:active_thread) do
           instance_double(
-            Karafka::Connection::Listener,
+            Karafka::Connection::ConsumerGroups::Listener,
             stopped?: false,
             terminate: true,
             shutdown: true,
@@ -238,7 +238,7 @@ RSpec.describe_current do
       context "when there are active processing workers (processing does not want to stop)" do
         let(:active_thread) do
           instance_double(
-            Karafka::Connection::Listener,
+            Karafka::Connection::ConsumerGroups::Listener,
             alive?: true,
             stopped?: false,
             terminate: true,
@@ -281,7 +281,7 @@ RSpec.describe_current do
       context "when there are active consuming threads (consuming does not want to stop)" do
         let(:active_thread) do
           instance_double(
-            Karafka::Connection::Listener,
+            Karafka::Connection::ConsumerGroups::Listener,
             stopped?: true,
             terminate: true,
             shutdown: true,

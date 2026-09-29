@@ -26,7 +26,7 @@ module FailingSeekOnce
   end
 end
 
-Karafka::Connection::Client.prepend(FailingSeekOnce)
+Karafka::Connection::ConsumerGroups::Client.prepend(FailingSeekOnce)
 
 class Consumer < Karafka::BaseConsumer
   def consume

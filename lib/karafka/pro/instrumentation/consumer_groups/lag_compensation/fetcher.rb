@@ -55,7 +55,7 @@ module Karafka
           # uncommitted messages a read_committed consumer will never see. Non-transactional topics
           # are unaffected (LSO == HWM there).
           class Fetcher
-            # @param client [Karafka::Connection::Client]
+            # @param client [Karafka::Connection::ConsumerGroups::Client]
             # @param paused [Hash{String => Array<Integer>}] paused topics with partitions
             # @return [Hash{String => Hash{Integer => Integer}}] end offsets of the requested
             #   partitions

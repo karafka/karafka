@@ -40,7 +40,8 @@
 # and does not grow to include it. Until karafka-rdkafka 0.30.0 `ListOffsets` silently ignored the
 # isolation level and resolved `:latest` to the high watermark, so this lag transiently overstated
 # by the number of uncommitted messages; if a future change reverts to that, this spec will fail -
-# update the docs in `Fetcher`, `Connection::Client#read_partition_offsets` and the CHANGELOG.
+# update the docs in `Fetcher`, `Connection::ConsumerGroups::Client#read_partition_offsets` and the
+# CHANGELOG.
 
 setup_karafka do |config|
   config.max_messages = 1

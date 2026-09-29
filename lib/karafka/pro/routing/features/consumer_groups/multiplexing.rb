@@ -72,7 +72,7 @@ module Karafka
                   # Subscribe for events and possibility to manage via the Pro connection manager
                   # that supports multiplexing
                   Karafka.monitor.subscribe(
-                    Karafka::Pro::Connection::Multiplexing::Listener.new
+                    Karafka::Pro::Connection::ConsumerGroups::Multiplexing::Listener.new
                   )
                 end
               end

@@ -253,7 +253,7 @@ RSpec.describe_current do
 
       let(:subscription_group) { build(:routing_subscription_group) }
       let(:connection_client) do
-        Karafka::Connection::Client.new(subscription_group, -> { true })
+        Karafka::Connection::ConsumerGroups::Client.new(subscription_group, -> { true })
       end
       let(:initial_handle) { instance_double(Rdkafka::Consumer) }
       let(:rebuilt_handle) { instance_double(Rdkafka::Consumer) }
