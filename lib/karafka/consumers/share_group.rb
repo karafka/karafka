@@ -49,41 +49,71 @@ module Karafka
         )
       end
 
-      # Acknowledges a message as successfully consumed (ACCEPT). It will not be redelivered.
+      # Acknowledges a message as successfully consumed (ACCEPT) in an async way - the
+      # acknowledgement is buffered and flushed to the broker on the next commit (which the
+      # framework runs after `#consume`). The message will not be redelivered.
       #
-      # Named to match the consumer-group `#mark_as_consumed` so both consumer modes share the same
-      # positive-acknowledgement convention.
+      # `mark_consumed` is the canonical name, shared with the consumer-group consumer;
+      # `mark_as_consumed` is kept as an alias for a consistent convention across both modes.
       #
       # @param message [Karafka::Messages::Message] message to mark as consumed
-      def mark_as_consumed(message)
+      def mark_consumed(message)
         client.mark_as_consumed(message)
       end
 
-      # Releases a message back to the share group for redelivery (RELEASE). The broker will hand
-      # it to a consumer again (delivery count increments), until the delivery-count limit is
-      # reached.
+      alias_method :mark_as_consumed, :mark_consumed
+
+      # Acknowledges a message as consumed (ACCEPT) and flushes acknowledgements synchronously, so
+      # the accept is durable before returning.
+      #
+      # @param message [Karafka::Messages::Message] message to mark as consumed
+      def mark_consumed!(message)
+        client.mark_as_consumed(message)
+        client.commit!
+      end
+
+      alias_method :mark_as_consumed!, :mark_consumed!
+
+      # Releases a message back to the share group for redelivery (RELEASE) in an async way. The
+      # broker will hand it to a consumer again (delivery count increments) until the
+      # delivery-count limit is reached.
       #
       # @param message [Karafka::Messages::Message] message to release
       # @param delay [Integer, nil] optional delay in milliseconds before the message becomes
       #   available for redelivery. Delayed release is not implemented yet.
       # @raise [NotImplementedError] when a delay is provided
       def mark_released(message, delay: nil)
-        if delay
-          raise(
-            NotImplementedError,
-            "Delayed release (`mark_released(delay:)`) is not implemented yet"
-          )
-        end
+        raise_delayed_release_not_implemented(delay)
 
         client.mark_released(message)
       end
 
-      # Rejects a message so it is not redelivered to this share group (REJECT). The broker
-      # archives it immediately.
+      # Releases a message (RELEASE) and flushes acknowledgements synchronously.
+      #
+      # @param message [Karafka::Messages::Message] message to release
+      # @param delay [Integer, nil] optional delay in milliseconds. Not implemented yet.
+      # @raise [NotImplementedError] when a delay is provided
+      def mark_released!(message, delay: nil)
+        raise_delayed_release_not_implemented(delay)
+
+        client.mark_released(message)
+        client.commit!
+      end
+
+      # Rejects a message so it is not redelivered to this share group (REJECT) in an async way.
+      # The broker archives it immediately.
       #
       # @param message [Karafka::Messages::Message] message to reject
       def mark_rejected(message)
         client.mark_rejected(message)
+      end
+
+      # Rejects a message (REJECT) and flushes acknowledgements synchronously.
+      #
+      # @param message [Karafka::Messages::Message] message to reject
+      def mark_rejected!(message)
+        client.mark_rejected(message)
+        client.commit!
       end
 
       # Extends the acquisition lock on a message being processed (RENEW), buying more time before
@@ -102,6 +132,17 @@ module Karafka
       # processing strategy after a successful consume.
       def commit_acknowledgements
         client.commit!
+      end
+
+      # @param delay [Integer, nil] delay in milliseconds
+      # @raise [NotImplementedError] when a delay is provided (delayed release is not implemented)
+      def raise_delayed_release_not_implemented(delay)
+        return unless delay
+
+        raise(
+          NotImplementedError,
+          "Delayed release (`mark_released(delay:)`) is not implemented yet"
+        )
       end
     end
   end
