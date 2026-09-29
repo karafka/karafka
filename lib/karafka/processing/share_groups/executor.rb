@@ -3,14 +3,9 @@
 module Karafka
   module Processing
     module ShareGroups
-      # Builds and drives a share-group consumer for a given topic. Mirrors
-      # {Processing::ConsumerGroups::Executor} but for the simpler share flow: there is no
-      # eofed/revoked lifecycle and no partitioner - a poll batch is handed to a single consumer
-      # instance which acknowledges records per message.
-      #
-      # @note For now the processing strategy is fixed ({Strategies::Default}); a selector and
-      #   per-mode config seams will be introduced once share-group features (delayed release,
-      #   lock extension, DLQ) land.
+      # Builds and drives a share-group consumer for a given topic. There is no eofed/revoked
+      # lifecycle and no partitioner - a poll batch is handed to a single consumer instance which
+      # acknowledges records per message. The processing strategy is {Strategies::Default}.
       class Executor
         extend Forwardable
 

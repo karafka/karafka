@@ -123,22 +123,13 @@ module Karafka
         #
         # Mirrors the consumer-group client's `#commit_offsets` convention (async by default, with a
         # blocking `#commit!` variant); share groups flush acknowledgements rather than offsets, so
-        # the method is named `#commit`.
+        # the method is named `#commit`. Errors propagate to the caller and surface through the
+        # regular error flow (the same way consumer-group commit errors do), rather than a
+        # dedicated error event.
         #
         # @param async [Boolean] should the commit happen async (default) or sync
         def commit(async: true)
           async ? kafka.commit_async : kafka.commit_sync
-        rescue Rdkafka::RdkafkaError => e
-          Karafka.monitor.instrument(
-            "error.occurred",
-            caller: self,
-            error: e,
-            type: "connection.client.commit.error"
-          )
-
-          raise if e.fatal?
-
-          false
         end
 
         # Flushes pending acknowledgements in a synchronous (blocking) way.

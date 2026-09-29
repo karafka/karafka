@@ -3,10 +3,7 @@
 module Karafka
   module Processing
     module ShareGroups
-      # Processing strategies for share-group consumers. For now there is a single, feature-less
-      # default flow (explicit per-record acknowledgement); further strategies (delayed release,
-      # lock extension, DLQ) will be added here as the feature set grows, mirroring the
-      # consumer-group strategies matrix.
+      # Processing strategies for share-group consumers.
       module Strategies
         # Default share-group processing flow:
         # - runs the user `#consume` (during which the user acknowledges records via

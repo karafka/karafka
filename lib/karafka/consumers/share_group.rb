@@ -8,7 +8,7 @@ module Karafka
     # them per record (accept/release/reject) instead of committing partition offsets. This class
     # deliberately does not inherit the consumer-group offset/pause/seek/eof/revocation behavior.
     #
-    # The default (and, for now, only) acknowledgement mode is explicit: inside `#consume` you call
+    # The acknowledgement mode is explicit: inside `#consume` you call
     # {#mark_as_accepted}, {#mark_as_released} or {#mark_as_rejected} per message. Accumulated
     # acknowledgements are flushed to the broker after `#consume` returns successfully. Any record
     # left unacknowledged is redelivered by the broker after its acquisition lock expires.
