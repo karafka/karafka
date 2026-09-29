@@ -26,12 +26,12 @@ RSpec.describe_current do
 
     describe "async (flushed on the next commit)" do
       it "expect #mark_consumed to accept the message via the client" do
-        expect(client).to receive(:mark_as_consumed).with(message)
+        expect(client).to receive(:mark_consumed).with(message)
         consumer.mark_consumed(message)
       end
 
       it "expect #mark_as_consumed to be an alias of #mark_consumed" do
-        expect(client).to receive(:mark_as_consumed).with(message)
+        expect(client).to receive(:mark_consumed).with(message)
         consumer.mark_as_consumed(message)
       end
 
@@ -48,13 +48,13 @@ RSpec.describe_current do
 
     describe "sync (flushed immediately)" do
       it "expect #mark_consumed! to accept and commit synchronously" do
-        expect(client).to receive(:mark_as_consumed).with(message).ordered
+        expect(client).to receive(:mark_consumed).with(message).ordered
         expect(client).to receive(:commit!).ordered
         consumer.mark_consumed!(message)
       end
 
       it "expect #mark_as_consumed! to be an alias of #mark_consumed!" do
-        allow(client).to receive(:mark_as_consumed)
+        allow(client).to receive(:mark_consumed)
         expect(client).to receive(:commit!)
         consumer.mark_as_consumed!(message)
       end

@@ -17,24 +17,6 @@ module Karafka
         :consumer
       end
 
-      # Marks a message as consumed in an async way. Canonical name shared with the share-group
-      # consumer; forwards to {#mark_as_consumed} (the offset-marking implementation lives in the
-      # processing strategy, so any feature-specific override - DLQ, virtual partitions - is picked
-      # up here too). Accepts the same arguments as {#mark_as_consumed}.
-      #
-      # @return [Boolean] whether we still own the partition
-      def mark_consumed(...)
-        mark_as_consumed(...)
-      end
-
-      # Marks a message as consumed in a sync way. Canonical alias of {#mark_as_consumed!}, taking
-      # the same arguments.
-      #
-      # @return [Boolean] whether we still own the partition
-      def mark_consumed!(...)
-        mark_as_consumed!(...)
-      end
-
       # Executes the default consumer flow.
       #
       # @private

@@ -72,7 +72,7 @@ module Karafka
             #   when processing another message. In case like this we do not pause on the message
             #   we've already processed but rather at the next one. This applies to both sync and
             #   async versions of this method.
-            def mark_as_consumed(message, offset_metadata = @_current_offset_metadata)
+            def mark_consumed(message, offset_metadata = @_current_offset_metadata)
               # If we are inside a transaction than we can just mark as consumed within it
               if @_in_transaction
                 mark_in_transaction(message, offset_metadata, true)
@@ -118,13 +118,15 @@ module Karafka
               @_current_offset_metadata = nil
             end
 
+            alias_method :mark_as_consumed, :mark_consumed
+
             # Marks message as consumed in a sync way.
             #
             # @param message [Messages::Message] last successfully processed message.
             # @param offset_metadata [String, nil] offset metadata string or nil if nothing
             # @return [Boolean] true if we were able to mark the offset, false otherwise.
             #   False indicates that we were not able and that we have lost the partition.
-            def mark_as_consumed!(message, offset_metadata = @_current_offset_metadata)
+            def mark_consumed!(message, offset_metadata = @_current_offset_metadata)
               if @_in_transaction
                 mark_in_transaction(message, offset_metadata, false)
               elsif @_in_transaction_marked
@@ -168,6 +170,8 @@ module Karafka
             ensure
               @_current_offset_metadata = nil
             end
+
+            alias_method :mark_as_consumed!, :mark_consumed!
 
             # Starts producer transaction, saves the transaction context for transactional marking
             # and runs user code in this context

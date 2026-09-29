@@ -102,9 +102,11 @@ module Karafka
         #
         # @param message [Karafka::Messages::Message] message to acknowledge. It responds to
         #   `#topic`, `#partition` and `#offset`, which is what the acknowledgement needs.
-        def mark_as_consumed(message)
+        def mark_consumed(message)
           acknowledge(message, :accept)
         end
+
+        alias_method :mark_as_consumed, :mark_consumed
 
         # Releases a single record back to the share group for redelivery (RELEASE).
         #

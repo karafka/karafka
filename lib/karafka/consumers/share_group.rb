@@ -58,7 +58,7 @@ module Karafka
       #
       # @param message [Karafka::Messages::Message] message to mark as consumed
       def mark_consumed(message)
-        client.mark_as_consumed(message)
+        client.mark_consumed(message)
       end
 
       alias_method :mark_as_consumed, :mark_consumed
@@ -68,7 +68,7 @@ module Karafka
       #
       # @param message [Karafka::Messages::Message] message to mark as consumed
       def mark_consumed!(message)
-        client.mark_as_consumed(message)
+        client.mark_consumed(message)
         client.commit!
       end
 

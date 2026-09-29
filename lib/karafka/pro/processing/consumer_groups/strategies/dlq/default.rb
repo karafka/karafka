@@ -53,7 +53,7 @@ module Karafka
               # @see `Strategies::Default#mark_as_consumed` for more details
               # @param message [Messages::Message]
               # @param offset_metadata [String, nil]
-              def mark_as_consumed(message, offset_metadata = @_current_offset_metadata)
+              def mark_consumed(message, offset_metadata = @_current_offset_metadata)
                 return super unless retrying?
                 return super unless topic.dead_letter_queue.independent?
                 return false unless super
@@ -65,13 +65,15 @@ module Karafka
                 @_current_offset_metadata = nil
               end
 
-              # Override of the standard `#mark_as_consumed!`. Resets the pause tracker count in
+              alias_method :mark_as_consumed, :mark_consumed
+
+              # Override of the standard `#mark_consumed!`. Resets the pause tracker count in
               # case DLQ was configured with the `independent` flag.
               #
-              # @see `Strategies::Default#mark_as_consumed!` for more details
+              # @see `Strategies::Default#mark_consumed!` for more details
               # @param message [Messages::Message]
               # @param offset_metadata [String, nil]
-              def mark_as_consumed!(message, offset_metadata = @_current_offset_metadata)
+              def mark_consumed!(message, offset_metadata = @_current_offset_metadata)
                 return super unless retrying?
                 return super unless topic.dead_letter_queue.independent?
                 return false unless super
@@ -82,6 +84,8 @@ module Karafka
               ensure
                 @_current_offset_metadata = nil
               end
+
+              alias_method :mark_as_consumed!, :mark_consumed!
 
               # When we encounter non-recoverable message, we skip it and go on with our lives
               def handle_after_consume

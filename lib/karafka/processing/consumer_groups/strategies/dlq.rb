@@ -23,7 +23,7 @@ module Karafka
           #
           # @see `Strategies::Default#mark_as_consumed` for more details
           # @param message [Messages::Message]
-          def mark_as_consumed(message)
+          def mark_consumed(message)
             # If we are not retrying pause count is already 0, no need to try to reset the state
             return super unless retrying?
             # If we do not use independent marking on DLQ, we just mark as consumed
@@ -36,12 +36,14 @@ module Karafka
             true
           end
 
-          # Override of the standard `#mark_as_consumed!`. Resets the pause tracker count in case
+          alias_method :mark_as_consumed, :mark_consumed
+
+          # Override of the standard `#mark_consumed!`. Resets the pause tracker count in case
           # DLQ was configured with the `independent` flag.
           #
-          # @see `Strategies::Default#mark_as_consumed!` for more details
+          # @see `Strategies::Default#mark_consumed!` for more details
           # @param message [Messages::Message]
-          def mark_as_consumed!(message)
+          def mark_consumed!(message)
             return super unless retrying?
             return super unless topic.dead_letter_queue.independent?
             return false unless super
@@ -50,6 +52,8 @@ module Karafka
 
             true
           end
+
+          alias_method :mark_as_consumed!, :mark_consumed!
 
           # When manual offset management is on, we do not mark anything as consumed automatically
           # and we rely on the user to figure things out

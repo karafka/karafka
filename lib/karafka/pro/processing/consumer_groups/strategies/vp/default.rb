@@ -51,7 +51,7 @@ module Karafka
               # @note This virtual offset management uses a regular default marking API underneath.
               #   We do not alter the "real" marking API, as VPs are just one of many cases we want
               #   to support and we do not want to impact them with collective offsets management
-              def mark_as_consumed(message, offset_metadata = @_current_offset_metadata)
+              def mark_consumed(message, offset_metadata = @_current_offset_metadata)
                 if @_in_transaction && !collapsed?
                   mark_in_transaction(message, offset_metadata, true)
                 elsif collapsed?
@@ -81,9 +81,11 @@ module Karafka
                 @_current_offset_metadata = nil
               end
 
+              alias_method :mark_as_consumed, :mark_consumed
+
               # @param message [Karafka::Messages::Message] blocking marks message as consumed
               # @param offset_metadata [String, nil]
-              def mark_as_consumed!(message, offset_metadata = @_current_offset_metadata)
+              def mark_consumed!(message, offset_metadata = @_current_offset_metadata)
                 if @_in_transaction && !collapsed?
                   mark_in_transaction(message, offset_metadata, false)
                 elsif collapsed?
@@ -95,7 +97,7 @@ module Karafka
                     manager.mark(message, offset_metadata)
                     manager.mark_until(message, offset_metadata) if coordinator.finished?
 
-                    # No real offset to commit yet is not a failure, see `#mark_as_consumed`
+                    # No real offset to commit yet is not a failure, see `#mark_consumed`
                     return !revoked? unless manager.markable?
 
                     super(*manager.markable)
@@ -104,6 +106,8 @@ module Karafka
               ensure
                 @_current_offset_metadata = nil
               end
+
+              alias_method :mark_as_consumed!, :mark_consumed!
 
               # Stores the next offset for processing inside of the transaction when collapsed and
               # accumulates marking as consumed in the local buffer.

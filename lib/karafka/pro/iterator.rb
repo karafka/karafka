@@ -172,18 +172,22 @@ module Karafka
       # Marks given message as consumed.
       #
       # @param message [Karafka::Messages::Message] message that we want to mark as processed
-      def mark_as_consumed(message)
+      def mark_consumed(message)
         @current_consumer.store_offset(message, nil)
         @stored_offsets = true
       end
 
+      alias_method :mark_as_consumed, :mark_consumed
+
       # Marks given message as consumed and commits offsets
       #
       # @param message [Karafka::Messages::Message] message that we want to mark as processed
-      def mark_as_consumed!(message)
-        mark_as_consumed(message)
+      def mark_consumed!(message)
+        mark_consumed(message)
         @current_consumer.commit_offsets(async: false)
       end
+
+      alias_method :mark_as_consumed!, :mark_consumed!
 
       private
 
