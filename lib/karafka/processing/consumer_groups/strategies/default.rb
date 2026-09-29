@@ -76,8 +76,8 @@ module Karafka
             true
           end
 
-          # Backwards/cross-mode compatible alias. `mark_consumed` is the canonical name (shared
-          # with the share-group consumer); `mark_as_consumed` is kept for compatibility.
+          # Shorter alias of the canonical `mark_as_consumed` (shared naming with the share-group
+          # consumer).
           alias_method :mark_consumed, :mark_as_consumed
 
           # Marks message as consumed in a sync way.

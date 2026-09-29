@@ -183,7 +183,7 @@ module Karafka
       #
       # @param message [Karafka::Messages::Message] message that we want to mark as processed
       def mark_as_consumed!(message)
-        mark_consumed(message)
+        mark_as_consumed(message)
         @current_consumer.commit_offsets(async: false)
       end
 

@@ -375,7 +375,7 @@ module Karafka
         # @param metadata [String, nil] offset storage metadata or nil if none
         # @return [Boolean] true if successful. False if we no longer own given partition
         def mark_as_consumed!(message, metadata = nil)
-          return false unless mark_consumed(message, metadata)
+          return false unless mark_as_consumed(message, metadata)
 
           commit_offsets!
         end
