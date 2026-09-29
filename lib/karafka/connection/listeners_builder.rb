@@ -29,11 +29,15 @@ module Karafka
       #
       # @param subscription_group [Karafka::Routing::SubscriptionGroup]
       # @return [Class] the consumer-group or share-group listener class
+      # @raise [Karafka::Errors::UnsupportedCaseError] when the group type is not recognized
       def listener_class_for(subscription_group)
-        if subscription_group.group.share_group?
+        case subscription_group.group.group_type
+        when :consumer
+          Connection::ConsumerGroups::Listener
+        when :share
           Connection::ShareGroups::Listener
         else
-          Connection::ConsumerGroups::Listener
+          raise Karafka::Errors::UnsupportedCaseError, subscription_group.group.group_type
         end
       end
     end

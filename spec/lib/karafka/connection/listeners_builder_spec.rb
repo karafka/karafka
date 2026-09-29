@@ -28,5 +28,16 @@ RSpec.describe_current do
         expect(listener).to be_a(Karafka::Connection::ShareGroups::Listener)
       end
     end
+
+    context "when the group type is not recognized" do
+      let(:group) { instance_double(Karafka::Routing::ConsumerGroups::Group, group_type: :unknown) }
+
+      before { allow(subscription_group).to receive(:group).and_return(group) }
+
+      it "raises an unsupported case error" do
+        expect { builder.call(subscription_group, jobs_queue, scheduler) }
+          .to raise_error(Karafka::Errors::UnsupportedCaseError)
+      end
+    end
   end
 end
