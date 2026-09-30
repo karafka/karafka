@@ -15,7 +15,18 @@ module Karafka
       # one day in seconds for future time reference
       DAY_IN_SECONDS = 60 * 60 * 24
 
-      private_constant :LONG_TIME_AGO, :DAY_IN_SECONDS
+      # Maps the numeric librdkafka consumer group state codes to cooked Ruby symbols so callers
+      # never deal with the native enum. Anything we do not recognize normalizes to `:unknown`.
+      CONSUMER_GROUP_STATES = {
+        Rdkafka::Bindings::RD_KAFKA_CONSUMER_GROUP_STATE_UNKNOWN => :unknown,
+        Rdkafka::Bindings::RD_KAFKA_CONSUMER_GROUP_STATE_PREPARING_REBALANCE => :preparing_rebalance,
+        Rdkafka::Bindings::RD_KAFKA_CONSUMER_GROUP_STATE_COMPLETING_REBALANCE => :completing_rebalance,
+        Rdkafka::Bindings::RD_KAFKA_CONSUMER_GROUP_STATE_STABLE => :stable,
+        Rdkafka::Bindings::RD_KAFKA_CONSUMER_GROUP_STATE_DEAD => :dead,
+        Rdkafka::Bindings::RD_KAFKA_CONSUMER_GROUP_STATE_EMPTY => :empty
+      }.freeze
+
+      private_constant :LONG_TIME_AGO, :DAY_IN_SECONDS, :CONSUMER_GROUP_STATES
 
       class << self
         # @param group_id [String] group for which we want to move offsets
@@ -63,6 +74,11 @@ module Karafka
             groups_with_topics,
             active_topics_only: active_topics_only
           )
+        end
+
+        # @see #list
+        def list
+          new.list
         end
       end
 
@@ -480,6 +496,48 @@ module Karafka
         end
 
         merged
+      end
+
+      # Lists all consumer groups in the cluster together with their current state.
+      #
+      # This is a read-only, lightweight introspection call: it answers "which groups exist and
+      # what state is each in" without touching offsets or members. Use it to tell an `:empty`
+      # group (offsets present, no live members) apart from a `:dead`/absent one.
+      #
+      # @return [Array<Hash>] one entry per consumer group. Each entry is a hash with:
+      #   - `:group_id` [String] the consumer group id
+      #   - `:state` [Symbol] cooked group state, one of `:unknown`, `:preparing_rebalance`,
+      #     `:completing_rebalance`, `:stable`, `:dead`, `:empty`
+      #
+      # @raise [Rdkafka::RdkafkaError] when the listing is partial. `ListConsumerGroups` fans out
+      #   to every broker and returns valid groups and per-broker errors separately, so an
+      #   unreachable broker yields a partial group list plus an error. We surface that error
+      #   rather than returning a silently-incomplete listing, because a dropped broker would make
+      #   an existing group look absent to callers relying on presence.
+      #
+      # @example List all consumer groups with their states
+      #   Karafka::Admin::ConsumerGroups.list
+      #   # => [
+      #   #   { group_id: 'billing', state: :stable },
+      #   #   { group_id: 'orders-processor', state: :empty }
+      #   # ]
+      #
+      # @example Check whether a group has live members right now
+      #   group = Karafka::Admin.list_consumer_groups.find { |g| g[:group_id] == 'billing' }
+      #   group && group[:state] == :stable
+      def list
+        report = with_admin do |admin|
+          admin.list_consumer_groups.wait(max_wait_timeout_ms: max_wait_time_ms)
+        end
+
+        raise(report.errors.first) unless report.errors.empty?
+
+        report.groups.map do |group|
+          {
+            group_id: group[:group_id],
+            state: CONSUMER_GROUP_STATES.fetch(group[:state], :unknown)
+          }
+        end
       end
     end
   end
