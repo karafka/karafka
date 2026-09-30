@@ -96,6 +96,34 @@ module Karafka
           EMPTY_ARRAY
         end
 
+        # Triggers the rdkafka main queue events by servicing it. This is not the share record
+        # acquisition queue but the one with:
+        #   - error callbacks
+        #   - stats callbacks
+        #   - OAuthBearer token refresh callbacks
+        #
+        # Unlike {#batch_poll} this does not acquire any share records, so it can be used to keep
+        # the callbacks flowing while we are not polling for records (waiting on in-flight work,
+        # quieting or draining on shutdown) - mirroring the consumer-group client.
+        #
+        # @param timeout [Integer] number of milliseconds to wait on events or 0 not to wait.
+        # @param safe [Boolean] when true, rescues Rdkafka::RdkafkaError so callers in
+        #   shutdown/quiet paths do not trigger a full listener reset.
+        def events_poll(timeout = 0, safe: false)
+          # Do not service (nor rebuild) the consumer once closed
+          return if @closed
+
+          kafka.events_poll(timeout)
+
+          Karafka.monitor.instrument(
+            "client.events_poll",
+            caller: self,
+            subscription_group: @subscription_group
+          )
+        rescue Rdkafka::RdkafkaError
+          safe ? nil : raise
+        end
+
         # Acknowledges a single record as accepted (ACCEPT / successfully processed). The record
         # will not be redelivered.
         #

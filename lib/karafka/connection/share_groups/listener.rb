@@ -29,6 +29,12 @@ module Karafka
         #   handles
         attr_reader :subscription_group
 
+        # How long to wait in the initial events poll. Increases chances of having the initial
+        # events (statistics, callbacks) immediately available.
+        INITIAL_EVENTS_POLL_TIMEOUT = 100
+
+        private_constant :INITIAL_EVENTS_POLL_TIMEOUT
+
         # @param subscription_group [Karafka::Routing::SubscriptionGroup]
         # @param jobs_queue [Karafka::Processing::ConsumerGroups::JobsQueue] queue where we push
         #   work (shared with consumer groups)
@@ -44,10 +50,20 @@ module Karafka
           # records are consumed as one batch by that topic's consumer instance.
           @coordinators = Processing::ShareGroups::CoordinatorsBuffer.new(subscription_group.topics)
           @executors = Processing::ShareGroups::ExecutorsBuffer.new(@client, subscription_group)
+          # Services the rdkafka main queue (statistics, error, OAuth callbacks) without acquiring
+          # share records, so callbacks keep flowing even while we are not polling for records.
+          @events_poller = Helpers::IntervalRunner.new { |**opts| @client.events_poll(**opts) }
           @mutex = Mutex.new
           @status = Status.new
 
           @jobs_queue.register(@subscription_group.id)
+
+          # Throttles events servicing (and any scheduler management) so it happens with the
+          # expected frequency even when jobs unlock the wait more often than the tick interval.
+          @interval_runner = Helpers::IntervalRunner.new do
+            @events_poller.call
+            @scheduler.on_manage
+          end
         end
 
         # Runs the main listener consume loop.
@@ -130,6 +146,10 @@ module Karafka
         def fetch_loop
           running!
 
+          # Run the initial events poll to improve chances of having statistics and initial
+          # callbacks available on start. Bounded so it does not delay boot noticeably.
+          @client.events_poll(INITIAL_EVENTS_POLL_TIMEOUT)
+
           while running?
             Karafka.monitor.instrument(
               "connection.listener.fetch_loop",
@@ -143,17 +163,17 @@ module Karafka
             wait
           end
 
-          # We are quieting or stopping now. Any in-flight consume jobs are already awaited in the
-          # loop above, but we wait once more as a safety net before running shutdown jobs.
-          wait
+          # We are quieting or stopping now. Drain any in-flight consume jobs before running the
+          # shutdown jobs, servicing events so callbacks keep flowing while we wait.
+          wait_servicing_events(wait_until: -> { @jobs_queue.empty?(@subscription_group.id) })
 
           build_and_schedule_shutdown_jobs
 
-          wait
+          wait_servicing_events(wait_until: -> { @jobs_queue.empty?(@subscription_group.id) })
 
           quieted!
 
-          sleep(0.1) while quiet?
+          wait_servicing_events(wait_until: -> { !quiet? })
 
           shutdown
 
@@ -259,9 +279,25 @@ module Karafka
           @scheduler.on_schedule_shutdown(jobs)
         end
 
-        # Waits for all the jobs from our subscription group to finish before moving forward.
+        # Waits for all the jobs from our subscription group to finish before moving forward,
+        # servicing the rdkafka events queue while blocked so callbacks keep flowing.
         def wait
-          @jobs_queue.wait(@subscription_group.id)
+          @jobs_queue.wait(@subscription_group.id) do
+            @interval_runner.call
+          end
+        end
+
+        # Waits until the given condition is met, servicing the events queue on each tick so
+        # statistics and callbacks keep flowing during the shutdown and quiet phases (where we no
+        # longer poll for records). Errors here are swallowed - on the way down they are not
+        # relevant enough to trigger a full listener reset.
+        #
+        # @param wait_until [Proc] until this evaluates to true, we keep servicing events
+        def wait_servicing_events(wait_until:)
+          until wait_until.call
+            @events_poller.call(safe: true)
+            sleep(0.2)
+          end
         end
 
         # Closes and resets the client, per-topic caches and the jobs queue state so the loop can
@@ -272,6 +308,8 @@ module Karafka
           @jobs_queue.wait(@subscription_group.id)
           @jobs_queue.clear(@subscription_group.id)
           @scheduler.on_clear(@subscription_group.id)
+          @events_poller.reset
+          @interval_runner.reset
           @client.reset
           @coordinators.reset
           @executors.clear
