@@ -5,9 +5,9 @@ module Karafka
     module ShareGroups
       # A single listener that consumes from one share-group subscription group.
       #
-      # It follows the KIP-932 tight-loop model: poll a batch of already-acquired records, process
-      # them inline (the listener thread is the worker - `workers_per_consumer` defaults to 1),
-      # acknowledge per record and flush, then poll again. There is no shared jobs queue, no
+      # It follows the KIP-932 model: poll a batch of already-acquired records, schedule the
+      # consumption on the shared workers pool (the same pool consumer groups use) and wait for it
+      # to finish before polling again, then acknowledge per record and flush. There is no
       # partition pausing/seeking and no rebalance handling - share assignment is fully
       # broker-driven and records are redelivered by the broker if their acquisition lock expires
       # unacknowledged.
@@ -17,6 +17,7 @@ module Karafka
         include Helpers::Async
 
         include Helpers::ConfigImporter.new(
+          jobs_builder: %i[internal processing share_groups jobs_builder],
           reset_backoff: %i[internal connection reset_backoff],
           listener_thread_priority: %i[internal connection listener_thread_priority]
         )
@@ -29,10 +30,11 @@ module Karafka
         attr_reader :subscription_group
 
         # @param subscription_group [Karafka::Routing::SubscriptionGroup]
-        # @param jobs_queue [Object, nil] accepted for a uniform listener API with consumer groups;
-        #   share groups process inline and do not use a shared jobs queue
-        # @param scheduler [Object, nil] accepted for a uniform listener API; unused by share groups
-        def initialize(subscription_group, jobs_queue = nil, scheduler = nil)
+        # @param jobs_queue [Karafka::Processing::ConsumerGroups::JobsQueue] queue where we push
+        #   work (shared with consumer groups)
+        # @param scheduler [Karafka::Processing::Schedulers::Default] scheduler we use to dispatch
+        #   jobs onto the workers pool
+        def initialize(subscription_group, jobs_queue, scheduler)
           @id = SecureRandom.hex(6)
           @subscription_group = subscription_group
           @jobs_queue = jobs_queue
@@ -40,10 +42,12 @@ module Karafka
           @client = Client.new(@subscription_group)
           # One executor + coordinator per topic. A share poll batch may span topics; each topic's
           # records are consumed as one batch by that topic's consumer instance.
-          @executors = {}
-          @coordinators = {}
+          @coordinators = Processing::ShareGroups::CoordinatorsBuffer.new(subscription_group.topics)
+          @executors = Processing::ShareGroups::ExecutorsBuffer.new(@client, subscription_group)
           @mutex = Mutex.new
           @status = Status.new
+
+          @jobs_queue.register(@subscription_group.id)
         end
 
         # Runs the main listener consume loop.
@@ -100,7 +104,7 @@ module Karafka
           )
         end
 
-        # Triggers shutdown on all the executors (sync) and stops the kafka client.
+        # Triggers shutdown and stops the kafka client.
         #
         # @note Not private despite being part of the fetch loop because on a forceful shutdown it
         #   may be invoked from a separate thread, hence the mutex.
@@ -109,9 +113,8 @@ module Karafka
             return if stopped?
             return stopped! if pending?
 
-            @executors.each_value(&:shutdown)
             @executors.clear
-            @coordinators.clear
+            @coordinators.reset
             @client.stop
 
             stopped!
@@ -120,7 +123,7 @@ module Karafka
 
         private
 
-        # The tight poll-process-acknowledge loop with error recovery.
+        # The poll-schedule-wait loop with error recovery.
         #
         # @note We catch all the errors here so they don't affect other listeners. Since this runs
         #   inside the runner thread, catching everything won't crash the process.
@@ -135,10 +138,19 @@ module Karafka
               subscription_group: @subscription_group
             )
 
-            fetch_and_consume
+            build_and_schedule_consume_jobs
+
+            wait
           end
 
-          # We are quieting or stopping now. Move to quiet and hold until we are told to fully stop.
+          # We are quieting or stopping now. Any in-flight consume jobs are already awaited in the
+          # loop above, but we wait once more as a safety net before running shutdown jobs.
+          wait
+
+          build_and_schedule_shutdown_jobs
+
+          wait
+
           quieted!
 
           sleep(0.1) while quiet?
@@ -161,76 +173,77 @@ module Karafka
           sleep(reset_backoff / 1_000.0) && retry
         end
 
-        # Polls a single batch and consumes it inline, grouped per topic.
+        # Polls a single batch and schedules its consumption on the workers pool, grouped per topic.
         #
         # @note We intentionally do not emit `connection.listener.fetch_loop.received` here. That
         #   event carries a consumer-group `MessagesBuffer` (with a partition/eof-aware `#each` and
         #   `#size`) that several shared subscribers depend on; a share poll returns a flat batch
         #   with different semantics. A share-specific received event can be added later once its
         #   payload shape is settled.
-        def fetch_and_consume
+        def build_and_schedule_consume_jobs
           messages = @client.batch_poll
 
           return if messages.empty?
 
-          messages.group_by(&:topic).each do |topic_name, topic_messages|
-            consume_topic_batch(topic_name, topic_messages)
-          end
-        end
-
-        # Builds Karafka messages for one topic's slice of the poll batch and runs the consumer
-        # inline through its full flow.
-        #
-        # @param topic_name [String] name of the topic these raw messages belong to
-        # @param raw_messages [Array<Rdkafka::ShareConsumer::Message>] raw records for that topic
-        def consume_topic_batch(topic_name, raw_messages)
-          topic = @subscription_group.topics.find(topic_name)
-
-          # A record for a topic we are not routing (should not happen given our subscription) is
-          # skipped; leaving it unacknowledged lets the broker redeliver/expire it.
-          return unless topic
-
           received_at = Time.now
+          jobs = []
 
-          built = raw_messages.map do |raw_message|
-            Messages::Builders::Message.call(raw_message, topic, received_at)
+          messages.group_by(&:topic).each do |topic_name, raw_messages|
+            topic = @subscription_group.topics.find(topic_name)
+
+            # A record for a topic we are not routing (should not happen given our subscription) is
+            # skipped; leaving it unacknowledged lets the broker redeliver/expire it.
+            next unless topic
+
+            built = raw_messages.map do |raw_message|
+              Messages::Builders::Message.call(raw_message, topic, received_at)
+            end
+
+            coordinator = @coordinators.find_or_create(topic_name)
+            executor = @executors.find_or_create(topic_name, coordinator)
+
+            coordinator.start(built)
+            coordinator.increment(:consume)
+
+            jobs << jobs_builder.consume(executor, built)
           end
 
-          coordinator = coordinator_for(topic)
-          executor = executor_for(topic, coordinator)
+          return if jobs.empty?
 
-          coordinator.start(built)
-          coordinator.increment(:consume)
-
-          executor.before_schedule_consume(built)
-          executor.before_consume
-          executor.consume
-          executor.after_consume
+          jobs.each(&:before_schedule)
+          @scheduler.on_schedule_consumption(jobs)
         end
 
-        # @param topic [Karafka::Routing::Topic]
-        # @return [Karafka::Processing::ShareGroups::Coordinator]
-        def coordinator_for(topic)
-          @coordinators[topic.name] ||= Processing::ShareGroups::Coordinator.new(topic)
+        # Enqueues the shutdown jobs for all the executors that exist in our subscription group.
+        def build_and_schedule_shutdown_jobs
+          jobs = []
+
+          @executors.each do |executor|
+            jobs << jobs_builder.shutdown(executor)
+          end
+
+          return if jobs.empty?
+
+          jobs.each(&:before_schedule)
+          @scheduler.on_schedule_shutdown(jobs)
         end
 
-        # @param topic [Karafka::Routing::Topic]
-        # @param coordinator [Karafka::Processing::ShareGroups::Coordinator]
-        # @return [Karafka::Processing::ShareGroups::Executor]
-        def executor_for(topic, coordinator)
-          @executors[topic.name] ||= Processing::ShareGroups::Executor.new(
-            @subscription_group.id,
-            @client,
-            coordinator
-          )
+        # Waits for all the jobs from our subscription group to finish before moving forward.
+        def wait
+          @jobs_queue.wait(@subscription_group.id)
         end
 
-        # Closes and resets the client and per-topic caches so the loop can restart cleanly after
-        # an error.
+        # Closes and resets the client, per-topic caches and the jobs queue state so the loop can
+        # restart cleanly after an error.
         def reset
+          # Make sure there are no in-flight jobs before resetting, otherwise a job could reference
+          # a client we are about to close.
+          @jobs_queue.wait(@subscription_group.id)
+          @jobs_queue.clear(@subscription_group.id)
+          @scheduler.on_clear(@subscription_group.id)
           @client.reset
+          @coordinators.reset
           @executors.clear
-          @coordinators.clear
         end
       end
     end

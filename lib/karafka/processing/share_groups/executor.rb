@@ -69,6 +69,11 @@ module Karafka
           consumer.on_after_consume
         end
 
+        # Runs the code needed before the shutdown job is scheduled (in the listener thread)
+        def before_schedule_shutdown
+          consumer.on_before_schedule_shutdown if @consumer
+        end
+
         # Runs the shutdown code when the process is stopping
         def shutdown
           # The consumer may not exist if nothing was ever consumed on this executor

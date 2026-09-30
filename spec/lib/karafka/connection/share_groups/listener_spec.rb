@@ -4,8 +4,8 @@ RSpec.describe_current do
   subject(:listener) { described_class.new(subscription_group, jobs_queue, scheduler) }
 
   let(:subscription_group) { build(:routing_subscription_group) }
-  let(:jobs_queue) { nil }
-  let(:scheduler) { nil }
+  let(:jobs_queue) { Karafka::Processing::ConsumerGroups::JobsQueue.new }
+  let(:scheduler) { Karafka::Processing::Schedulers::Default.new(jobs_queue) }
 
   # The full poll-process-acknowledge loop runs against a broker and is covered by the share-group
   # integration specs. Here we only assert the lifecycle/status surface that the connection

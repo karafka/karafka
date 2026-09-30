@@ -84,9 +84,8 @@ module Karafka
 
           # Idle run handling (no messages passed to the end user)
           #
-          # @note Unlike the consumer-group flow, share-group idle/shutdown runs are driven inline
-          #   by the listener and are not tracked as coordinator jobs, so there is no counter to
-          #   decrement here (only `:consume` is tracked, for the success check).
+          # @note Only `:consume` is tracked by the coordinator (for the success check); shutdown
+          #   jobs are tracked by the jobs queue itself, so there is no counter to decrement here.
           def handle_idle
             nil
           end

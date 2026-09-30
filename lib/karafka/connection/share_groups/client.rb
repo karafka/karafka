@@ -129,6 +129,10 @@ module Karafka
         #
         # @param async [Boolean] should the commit happen async (default) or sync
         def commit(async: true)
+          # Do not flush (nor rebuild the consumer) once closed. Any record left unacknowledged is
+          # redelivered by the broker after its acquisition lock expires.
+          return if @closed
+
           async ? kafka.commit_async : kafka.commit_sync
         end
 
@@ -197,6 +201,10 @@ module Karafka
         # @param message [Karafka::Messages::Message] message to acknowledge
         # @param state [Symbol] `:accept`, `:release` or `:reject`
         def acknowledge(message, state)
+          # Do not acknowledge (nor rebuild the consumer) once closed. The record is redelivered by
+          # the broker after its acquisition lock expires.
+          return if @closed
+
           kafka.acknowledge(message, state)
         end
 
