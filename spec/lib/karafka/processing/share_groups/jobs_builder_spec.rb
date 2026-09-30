@@ -15,6 +15,13 @@ RSpec.describe_current do
     end
   end
 
+  describe "#idle" do
+    it do
+      job = builder.idle(executor)
+      expect(job).to be_a(Karafka::Processing::ShareGroups::Jobs::Idle)
+    end
+  end
+
   describe "#shutdown" do
     it do
       job = builder.shutdown(executor)

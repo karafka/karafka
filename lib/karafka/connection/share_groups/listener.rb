@@ -138,7 +138,7 @@ module Karafka
               subscription_group: @subscription_group
             )
 
-            build_and_schedule_consume_jobs
+            poll_and_schedule
 
             wait
           end
@@ -173,18 +173,29 @@ module Karafka
           sleep(reset_backoff / 1_000.0) && retry
         end
 
-        # Polls a single batch and schedules its consumption on the workers pool, grouped per topic.
+        # Polls a single batch and schedules it on the workers pool: consume jobs when records were
+        # returned, idle jobs (housekeeping) when the poll came back empty.
         #
         # @note We intentionally do not emit `connection.listener.fetch_loop.received` here. That
         #   event carries a consumer-group `MessagesBuffer` (with a partition/eof-aware `#each` and
         #   `#size`) that several shared subscribers depend on; a share poll returns a flat batch
         #   with different semantics. A share-specific received event can be added later once its
         #   payload shape is settled.
-        def build_and_schedule_consume_jobs
+        def poll_and_schedule
           messages = @client.batch_poll
 
-          return if messages.empty?
+          if messages.empty?
+            build_and_schedule_idle_jobs
+          else
+            build_and_schedule_consume_jobs(messages)
+          end
+        end
 
+        # Builds consume jobs for a non-empty poll batch, grouped per topic, and schedules them on
+        # the workers pool.
+        #
+        # @param messages [Array<Rdkafka::ShareConsumer::Message>] raw records from the poll
+        def build_and_schedule_consume_jobs(messages)
           received_at = Time.now
           jobs = []
 
@@ -212,6 +223,26 @@ module Karafka
 
           jobs.each(&:before_schedule)
           @scheduler.on_schedule_consumption(jobs)
+        end
+
+        # Enqueues idle (housekeeping) jobs for the active consumers when a poll returned no
+        # records, so periodic work can run even without new messages. We only run idle for topics
+        # that already have an executor (i.e. that have consumed at least once) - there is no share
+        # assignment API to enumerate, so we do not spin up consumers for topics that never ran.
+        #
+        # @note Idle jobs are tracked by the jobs queue itself (like shutdown jobs), so they are not
+        #   counted on the coordinator.
+        def build_and_schedule_idle_jobs
+          jobs = []
+
+          @executors.each do |executor|
+            jobs << jobs_builder.idle(executor)
+          end
+
+          return if jobs.empty?
+
+          jobs.each(&:before_schedule)
+          @scheduler.on_schedule_idle(jobs)
         end
 
         # Enqueues the shutdown jobs for all the executors that exist in our subscription group.

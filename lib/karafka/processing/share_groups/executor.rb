@@ -69,6 +69,17 @@ module Karafka
           consumer.on_after_consume
         end
 
+        # Runs the code needed before the idle job is scheduled (in the listener thread)
+        def before_schedule_idle
+          consumer.on_before_schedule_idle
+        end
+
+        # Runs the consumer idle housekeeping. This runs when a poll returns no records, so the
+        # consumer can perform periodic work even without new messages to process.
+        def idle
+          consumer.on_idle
+        end
+
         # Runs the code needed before the shutdown job is scheduled (in the listener thread)
         def before_schedule_shutdown
           consumer.on_before_schedule_shutdown if @consumer
