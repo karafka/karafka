@@ -44,6 +44,10 @@ module Karafka
               # @return [false, Array<String>] false if we do not have any subscriptions or array
               #   with all the subscriptions for given subscription group
               def subscriptions
+                # Direct assignments are a consumer-group feature. Share groups (KIP-932) have no
+                # partition ownership and always subscribe to all of their topics.
+                return super if group.share_group?
+
                 topics
                   .select(&:active?)
                   .reject { |topic| topic.direct_assignments.active? }
