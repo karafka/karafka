@@ -15,6 +15,15 @@ module Karafka
     # failure it is always released for redelivery. Acknowledgements are then flushed to the broker
     # asynchronously.
     class ShareGroup < Base
+      # Client methods acknowledging a record with a given state
+      ACKNOWLEDGEMENTS = {
+        accept: :mark_as_accepted,
+        release: :mark_as_released,
+        reject: :mark_as_rejected
+      }.freeze
+
+      private_constant :ACKNOWLEDGEMENTS
+
       # @return [Symbol] group type
       def group_type
         :share
@@ -52,21 +61,23 @@ module Karafka
       end
 
       # Acknowledges a message as accepted (ACCEPT / successfully processed) in an async way - the
-      # acknowledgement is buffered and flushed to the broker on the next commit (which the
-      # framework runs after `#consume`). The message will not be redelivered.
+      # acknowledgement is buffered and flushed to the broker after `#consume`. The message will
+      # not be redelivered.
       #
       # @param message [Karafka::Messages::Message] message to accept
+      # @return [Boolean] true if acknowledged, false if this message was already acknowledged
+      #   (every record can be acknowledged only once)
       def mark_as_accepted(message)
-        client.mark_as_accepted(message)
+        acknowledge(message, :accept)
       end
 
       # Acknowledges a message as accepted (ACCEPT) and flushes acknowledgements synchronously, so
       # the accept is durable before returning.
       #
       # @param message [Karafka::Messages::Message] message to accept
+      # @return [Boolean] true if acknowledged, false if this message was already acknowledged
       def mark_as_accepted!(message)
-        client.mark_as_accepted(message)
-        client.commit!
+        acknowledge(message, :accept, sync: true)
       end
 
       # Releases a message back to the share group for redelivery (RELEASE) in an async way. The
@@ -74,32 +85,57 @@ module Karafka
       # delivery-count limit is reached.
       #
       # @param message [Karafka::Messages::Message] message to release
+      # @return [Boolean] true if acknowledged, false if this message was already acknowledged
       def mark_as_released(message)
-        client.mark_as_released(message)
+        acknowledge(message, :release)
       end
 
       # Releases a message (RELEASE) and flushes acknowledgements synchronously.
       #
       # @param message [Karafka::Messages::Message] message to release
+      # @return [Boolean] true if acknowledged, false if this message was already acknowledged
       def mark_as_released!(message)
-        client.mark_as_released(message)
-        client.commit!
+        acknowledge(message, :release, sync: true)
       end
 
       # Rejects a message so it is not redelivered to this share group (REJECT) in an async way.
       # The broker archives it immediately.
       #
       # @param message [Karafka::Messages::Message] message to reject
+      # @return [Boolean] true if acknowledged, false if this message was already acknowledged
       def mark_as_rejected(message)
-        client.mark_as_rejected(message)
+        acknowledge(message, :reject)
       end
 
       # Rejects a message (REJECT) and flushes acknowledgements synchronously.
       #
       # @param message [Karafka::Messages::Message] message to reject
+      # @return [Boolean] true if acknowledged, false if this message was already acknowledged
       def mark_as_rejected!(message)
-        client.mark_as_rejected(message)
-        client.commit!
+        acknowledge(message, :reject, sync: true)
+      end
+
+      private
+
+      # Acknowledges the message unless it was already acknowledged in the current batch
+      #
+      # @param message [Karafka::Messages::Message] message to acknowledge
+      # @param state [Symbol] `:accept`, `:release` or `:reject`
+      # @param sync [Boolean] should acknowledgements be flushed synchronously afterwards
+      # @return [Boolean] true if acknowledged, false if this message was already acknowledged
+      def acknowledge(message, state, sync: false)
+        return false unless acknowledgements_tracker.acknowledge(message)
+
+        client.public_send(ACKNOWLEDGEMENTS.fetch(state), message)
+        client.commit! if sync
+
+        true
+      end
+
+      # @return [Karafka::Processing::ShareGroups::AcknowledgementsTracker] tracker of this
+      #   consumer acknowledgements within the current batch
+      def acknowledgements_tracker
+        @acknowledgements_tracker ||= Processing::ShareGroups::AcknowledgementsTracker.new
       end
     end
   end

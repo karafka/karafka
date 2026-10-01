@@ -19,8 +19,16 @@ RSpec.describe_current do
   end
 
   describe "the acknowledgement API" do
-    let(:message) { instance_double(Karafka::Messages::Message) }
-    let(:client) { instance_double(Karafka::Connection::ShareGroups::Client) }
+    let(:message) { build(:messages_message) }
+    let(:client) do
+      instance_double(
+        Karafka::Connection::ShareGroups::Client,
+        mark_as_accepted: nil,
+        mark_as_released: nil,
+        mark_as_rejected: nil,
+        commit!: nil
+      )
+    end
 
     before { consumer.client = client }
 
@@ -38,6 +46,28 @@ RSpec.describe_current do
       it "expect #mark_as_rejected to reject the message via the client" do
         expect(client).to receive(:mark_as_rejected).with(message)
         consumer.mark_as_rejected(message)
+      end
+
+      it "expect to return true when acknowledging" do
+        expect(consumer.mark_as_accepted(message)).to be(true)
+      end
+    end
+
+    describe "acknowledging the same message twice" do
+      before { consumer.mark_as_accepted(message) }
+
+      it "expect not to acknowledge it again and to return false" do
+        expect(consumer.mark_as_released(message)).to be(false)
+        expect(consumer.mark_as_rejected!(message)).to be(false)
+        expect(client).not_to have_received(:mark_as_released)
+        expect(client).not_to have_received(:mark_as_rejected)
+        expect(client).not_to have_received(:commit!)
+      end
+
+      it "expect to allow acknowledging it again in the next batch" do
+        consumer.send(:acknowledgements_tracker).clear
+
+        expect(consumer.mark_as_released(message)).to be(true)
       end
     end
 

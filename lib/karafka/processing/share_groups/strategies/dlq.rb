@@ -28,12 +28,12 @@ module Karafka
             if !consumption.success? && !critical_error?(consumption.cause)
               messages.raw.each do |message|
                 next if message.delivery_count <= topic.dead_letter_queue.max_retries
-                next unless client.pending?(message)
+                next if acknowledgements_tracker.acknowledged?(message)
 
                 # The record is gone once rejected, so it has to be dispatched first
                 dispatch_to_dlq(message) if topic.dead_letter_queue.topic
 
-                client.mark_as_rejected(message)
+                mark_as_rejected(message)
               end
             end
 

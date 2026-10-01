@@ -38,9 +38,10 @@ module Karafka
             end
           end
 
-          # Nothing to prepare before consumption for the default share flow
+          # A new batch is about to be consumed, so this consumer starts tracking its
+          # acknowledgements anew
           def handle_before_consume
-            nil
+            acknowledgements_tracker.clear
           end
 
           # Runs the wrapping to execute the appropriate action wrapped with the wrapper code
@@ -79,11 +80,15 @@ module Karafka
           # (release by default); after a failure they are always released for redelivery. The
           # acknowledgements are then flushed to the broker asynchronously.
           def handle_after_consume
-            if coordinator.consumption(self).success?
-              client.settle(messages.raw, topic.acknowledgements.unacknowledged)
+            state = if coordinator.consumption(self).success?
+              topic.acknowledgements.unacknowledged
             else
-              client.settle(messages.raw, :release)
+              :release
             end
+
+            # Records already acknowledged by the consumer are skipped (each record can be
+            # acknowledged only once)
+            messages.raw.each { |message| acknowledge(message, state) }
 
             client.commit
           end

@@ -4,7 +4,9 @@ RSpec.describe_current do
   subject(:executor) { described_class.new(group_id, client, coordinator) }
 
   let(:group_id) { SecureRandom.hex(6) }
-  let(:client) { instance_double(Karafka::Connection::ShareGroups::Client, settle: nil, commit: nil) }
+  let(:client) do
+    instance_double(Karafka::Connection::ShareGroups::Client, mark_as_released: nil, commit: nil)
+  end
   let(:topic) { build(:routing_share_topic) }
   let(:coordinator) { Karafka::Processing::ShareGroups::Coordinator.new(topic, 0) }
   let(:messages) { [build(:messages_message)] }
@@ -41,7 +43,7 @@ RSpec.describe_current do
 
     it "marks the coordinator successful and settles the unacknowledged records" do
       expect(coordinator.success?).to be(true)
-      expect(client).to have_received(:settle).with(kind_of(Array), :release)
+      expect(client).to have_received(:mark_as_released).with(messages.first)
     end
 
     it "exposes the topic and partition of the coordinated records" do

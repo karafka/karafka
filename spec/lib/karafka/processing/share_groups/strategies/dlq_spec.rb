@@ -14,10 +14,10 @@ RSpec.describe_current do
   let(:client) do
     instance_double(
       Karafka::Connection::ShareGroups::Client,
-      settle: nil,
-      commit: nil,
-      pending?: true,
-      mark_as_rejected: nil
+      mark_as_accepted: nil,
+      mark_as_released: nil,
+      mark_as_rejected: nil,
+      commit: nil
     )
   end
 
@@ -40,7 +40,7 @@ RSpec.describe_current do
 
       it { expect(producer).not_to have_received(:produce_async) }
       it { expect(client).not_to have_received(:mark_as_rejected) }
-      it { expect(client).to have_received(:settle).with(messages.raw, :release) }
+      it { expect(client).to have_received(:mark_as_released).with(message) }
     end
 
     context "when consumption failed and retries are exhausted" do
@@ -77,7 +77,7 @@ RSpec.describe_current do
       let(:delivery_count) { 3 }
 
       before do
-        allow(client).to receive(:pending?).and_return(false)
+        consumer.mark_as_accepted(message)
         coordinator.failure!(consumer, StandardError.new)
         consumer.handle_after_consume
       end
@@ -95,7 +95,7 @@ RSpec.describe_current do
       end
 
       it { expect(producer).not_to have_received(:produce_async) }
-      it { expect(client).to have_received(:settle).with(messages.raw, :release) }
+      it { expect(client).to have_received(:mark_as_released).with(message) }
     end
 
     context "when consumption succeeded" do
@@ -107,7 +107,7 @@ RSpec.describe_current do
       end
 
       it { expect(producer).not_to have_received(:produce_async) }
-      it { expect(client).to have_received(:settle).with(messages.raw, :release) }
+      it { expect(client).to have_received(:mark_as_released).with(message) }
     end
   end
 end

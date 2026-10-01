@@ -125,48 +125,6 @@ RSpec.describe_current do
     end
   end
 
-  describe "pending records settling" do
-    let(:first) { build(:messages_message, topic: "t", partition: 0, offset: 1) }
-    let(:second) { build(:messages_message, topic: "t", partition: 0, offset: 2) }
-    let(:polled) do
-      [first, second].map do |message|
-        instance_double(
-          Rdkafka::ShareConsumer::Message,
-          topic: message.topic,
-          partition: message.partition,
-          offset: message.offset
-        )
-      end
-    end
-
-    before do
-      allow(share_consumer).to receive_messages(poll: polled, acknowledge: nil)
-      client.batch_poll(100)
-    end
-
-    it "settles only the records that were not acknowledged" do
-      client.mark_as_accepted(first)
-      client.settle([first, second], :release)
-
-      expect(share_consumer).to have_received(:acknowledge).with(first, :accept)
-      expect(share_consumer).to have_received(:acknowledge).with(second, :release)
-      expect(share_consumer).not_to have_received(:acknowledge).with(first, :release)
-    end
-
-    it "does not settle the same record twice" do
-      client.settle([first, second], :release)
-      client.settle([first, second], :accept)
-
-      expect(share_consumer).not_to have_received(:acknowledge).with(first, :accept)
-    end
-
-    it "forgets pending records once closed" do
-      client.close
-
-      expect(client.pending?(first)).to be(false)
-    end
-  end
-
   describe "#events_poll" do
     before do
       allow(share_consumer).to receive_messages(poll: [], events_poll: 0)

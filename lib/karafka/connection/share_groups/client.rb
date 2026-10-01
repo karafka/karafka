@@ -52,7 +52,6 @@ module Karafka
           @closed = false
           @subscription_group = subscription_group
           @mutex = Mutex.new
-          @messages_tracker = MessagesTracker.new
 
           # Like for consumer groups, while waiting for records we service the events queue and
           # check if we should stop with the tick frequency
@@ -106,10 +105,6 @@ module Karafka
             else
               messages << item
             end
-          end
-
-          @mutex.synchronize do
-            @messages_tracker.track(messages)
           end
 
           messages
@@ -183,31 +178,6 @@ module Karafka
           acknowledge(message, :reject)
         end
 
-        # @param message [Karafka::Messages::Message] record from the last poll
-        # @return [Boolean] is the record still not acknowledged
-        def pending?(message)
-          @mutex.synchronize { @messages_tracker.pending?(message) }
-        end
-
-        # Acknowledges with the given state every record of `messages` that was not acknowledged
-        # yet. Used to settle a processed batch so that no record is left outstanding.
-        #
-        # @param messages [Array<Karafka::Messages::Message>] processed records (raw array, not the
-        #   `Messages` batch, so external `#each` patches are not triggered)
-        # @param state [Symbol] `:accept`, `:release` or `:reject`
-        def settle(messages, state)
-          @mutex.synchronize do
-            return if @closed
-
-            messages.each do |message|
-              next unless @messages_tracker.pending?(message)
-
-              kafka.acknowledge(message, state)
-              @messages_tracker.acknowledged(message)
-            end
-          end
-        end
-
         # Flushes pending acknowledgements to the broker in a non-blocking or blocking way.
         #
         # Mirrors the consumer-group client's `#commit_offsets` convention (async by default, with a
@@ -252,8 +222,6 @@ module Karafka
             return if @closed
 
             @closed = true
-            # Closing the share consumer releases whatever it still holds
-            @messages_tracker.clear
 
             return unless @kafka
 
@@ -300,7 +268,6 @@ module Karafka
             return if @closed
 
             kafka.acknowledge(message, state)
-            @messages_tracker.acknowledged(message)
           end
         end
 
