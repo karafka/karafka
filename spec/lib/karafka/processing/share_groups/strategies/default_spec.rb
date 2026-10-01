@@ -29,6 +29,8 @@ RSpec.describe_current do
   end
 
   describe "#handle_after_consume" do
+    before { coordinator.increment(:consume) }
+
     context "when consumption succeeded" do
       before { coordinator.success!(consumer) }
 
@@ -43,6 +45,25 @@ RSpec.describe_current do
         consumer.handle_after_consume
 
         expect(client).to have_received(:commit).with(no_args)
+      end
+
+      context "when other consumers of the partition did not settle yet" do
+        before { coordinator.increment(:consume) }
+
+        it "leaves the flush to the last of them" do
+          consumer.handle_after_consume
+
+          expect(client).not_to have_received(:commit)
+        end
+      end
+
+      context "when acknowledging fails" do
+        before { allow(client).to receive(:mark_as_released).and_raise(StandardError) }
+
+        it "still flushes the acknowledgements" do
+          expect { consumer.handle_after_consume }.to raise_error(StandardError)
+          expect(client).to have_received(:commit)
+        end
       end
 
       it "does not acknowledge again records the consumer already acknowledged" do

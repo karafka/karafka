@@ -30,6 +30,8 @@ RSpec.describe_current do
   before { message.metadata.delivery_count = delivery_count }
 
   describe "#handle_after_consume" do
+    before { coordinator.increment(:consume) }
+
     context "when consumption failed and retries are not exhausted" do
       let(:delivery_count) { 2 }
 

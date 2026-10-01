@@ -66,7 +66,7 @@ RSpec.describe_current do
     let(:vps) { { partitioner: Karafka::Pro::Processing::ShareGroups::VirtualPartitions::Partitioners::RoundRobin.new, max_partitions: 3 } }
 
     it "expect to split the records across virtual partitions" do
-      expect(yielded.map(&:first)).to match_array([0, 1, 2])
+      expect(yielded.map(&:first)).to contain_exactly(0, 1, 2)
       expect(yielded.flat_map(&:last)).to match_array(messages)
     end
   end

@@ -70,15 +70,16 @@ module Karafka
             coordinator.failure!(self, e)
 
             raise e
-          ensure
-            coordinator.decrement(:consume)
           end
 
           # Settles every record of the batch that the consumer did not acknowledge itself, so that
           # none is left outstanding (librdkafka would refuse the next poll otherwise). After a
           # successful consumption they get the topic `acknowledgements(unacknowledged:)` state
-          # (release by default); after a failure they are always released for redelivery. The
-          # acknowledgements are then flushed to the broker asynchronously.
+          # (release by default); after a failure they are always released for redelivery.
+          #
+          # Once every consumer of the partition (more than one with virtual partitions) settled
+          # its records, the last one flushes the acknowledgements to the broker asynchronously, so
+          # those of the whole partition go out in one request.
           def handle_after_consume
             state = if coordinator.consumption(self).success?
               topic.acknowledgements.unacknowledged
@@ -89,8 +90,8 @@ module Karafka
             # Records already acknowledged by the consumer are skipped (each record can be
             # acknowledged only once)
             messages.raw.each { |message| acknowledge(message, state) }
-
-            client.commit
+          ensure
+            client.commit if coordinator.decrement(:consume).zero?
           end
 
           # Idle run handling (no messages passed to the end user). Runs housekeeping when a batch
