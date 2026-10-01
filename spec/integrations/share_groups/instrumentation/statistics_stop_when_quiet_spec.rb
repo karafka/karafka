@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
-# Share group (KIP-932) should keep publishing statistics after it was quieted (TSTP): the quiet
-# share listener no longer polls for records but keeps servicing the events queue.
+# Share group (KIP-932) statistics stop once the process is quiet (TSTP): unlike a consumer group, a
+# quiet share group closes its client, so it does not acquire records it will not process.
 
 setup_karafka
 
@@ -32,9 +32,8 @@ end
 
 Karafka::App.monitor.subscribe("statistics.emitted") do |event|
   next unless event[:subscription_group_id] == share_sg.id
-  next unless DT.key?(:quiet_at)
 
-  DT[:quiet_stats] << Time.now.to_f
+  DT[DT.key?(:quiet_at) ? :quiet_stats : :stats] << Time.now.to_f
 end
 
 produce(DT.topic, "1")
@@ -46,8 +45,9 @@ Thread.new do
 end
 
 start_karafka_and_wait_until do
-  DT[:quiet_stats].size >= 10
+  # Statistics are emitted every 100ms, so 2 seconds is plenty for them to show up if they did
+  DT.key?(:quiet_at) && Time.now.to_f - DT[:quiet_at] > 2
 end
 
-assert DT[:quiet_stats].size >= 10
-assert(DT[:quiet_stats].all? { |at| at > DT[:quiet_at] })
+assert DT[:stats].size.positive?
+assert DT[:quiet_stats].empty?

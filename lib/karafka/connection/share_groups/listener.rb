@@ -178,6 +178,13 @@ module Karafka
 
           wait_servicing_events(wait_until: -> { @jobs_queue.empty?(@subscription_group.id) })
 
+          # A share consumer that stays in the group keeps acquiring records in the background,
+          # holding them away from other members until their acquisition locks expire. Unlike for
+          # consumer groups there is no rebalance to avoid, so we flush the acknowledgements and
+          # close the client. Only closing releases the records that were already acquired, leaving
+          # the group by unsubscribing does not.
+          @client.stop
+
           quieted!
 
           wait_servicing_events(wait_until: -> { !quiet? })

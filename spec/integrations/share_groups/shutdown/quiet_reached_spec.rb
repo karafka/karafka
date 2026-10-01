@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
-# Share group (KIP-932): once quiet is reached, the share listener stays quiet (not stopped), no
-# new records are consumed, yet `statistics.emitted` keeps flowing.
+# Share group (KIP-932): once quiet is reached, the share listener stays quiet (not stopped) and no
+# new records are consumed. Its client is closed, so it no longer emits statistics either.
 
 setup_karafka
 
@@ -49,7 +49,7 @@ Thread.new do
 
   assert Karafka::Server.listeners.all?(&:quiet?)
   assert_equal %w[1], DT[:consumed]
-  assert DT[:stats].any? { |at| at > quiet_at + 1 }
+  assert DT[:stats].none? { |at| at > quiet_at + 1 }
 
   DT[:checked] = true
 
