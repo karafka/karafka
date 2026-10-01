@@ -52,10 +52,7 @@ module Karafka
           @closed = false
           @subscription_group = subscription_group
           @mutex = Mutex.new
-          # Records delivered by the last poll that were not acknowledged yet. In the explicit
-          # acknowledgement mode librdkafka refuses to poll again until every one of them is
-          # acknowledged, so we need to know which are still outstanding.
-          @pending = {}
+          @messages_tracker = MessagesTracker.new
 
           # Like for consumer groups, while waiting for records we service the events queue and
           # check if we should stop with the tick frequency
@@ -112,7 +109,7 @@ module Karafka
           end
 
           @mutex.synchronize do
-            messages.each { |message| @pending[pending_key(message)] = message }
+            @messages_tracker.track(messages)
           end
 
           messages
@@ -189,7 +186,7 @@ module Karafka
         # @param message [Karafka::Messages::Message] record from the last poll
         # @return [Boolean] is the record still not acknowledged
         def pending?(message)
-          @mutex.synchronize { @pending.key?(pending_key(message)) }
+          @mutex.synchronize { @messages_tracker.pending?(message) }
         end
 
         # Acknowledges with the given state every record of `messages` that was not acknowledged
@@ -203,12 +200,10 @@ module Karafka
             return if @closed
 
             messages.each do |message|
-              key = pending_key(message)
-
-              next unless @pending.key?(key)
+              next unless @messages_tracker.pending?(message)
 
               kafka.acknowledge(message, state)
-              @pending.delete(key)
+              @messages_tracker.acknowledged(message)
             end
           end
         end
@@ -219,13 +214,13 @@ module Karafka
         # @return [Integer] number of released records
         def release_pending
           @mutex.synchronize do
-            return 0 if @closed || @pending.empty?
+            return 0 if @closed || @messages_tracker.empty?
 
-            released = @pending.size
-            @pending.each_value { |message| kafka.acknowledge(message, :release) }
-            @pending.clear
+            pending = @messages_tracker.pending
+            pending.each { |message| kafka.acknowledge(message, :release) }
+            @messages_tracker.clear
 
-            released
+            pending.size
           end
         end
 
@@ -274,7 +269,7 @@ module Karafka
 
             @closed = true
             # Closing the share consumer releases whatever it still holds
-            @pending.clear
+            @messages_tracker.clear
 
             return unless @kafka
 
@@ -321,14 +316,8 @@ module Karafka
             return if @closed
 
             kafka.acknowledge(message, state)
-            @pending.delete(pending_key(message))
+            @messages_tracker.acknowledged(message)
           end
-        end
-
-        # @param message [Karafka::Messages::Message, Rdkafka::ShareConsumer::Message] record
-        # @return [Array] key identifying the record within the share group
-        def pending_key(message)
-          [message.topic, message.partition, message.offset]
         end
 
         # @return [Rdkafka::ShareConsumer] librdkafka share consumer instance
