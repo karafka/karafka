@@ -6,27 +6,25 @@ module Karafka
     # driven by per-record acknowledgements instead of partition offsets - there is no pausing,
     # seeking, eof or revocation coordination here.
     module ShareGroups
-      # Minimal coordinator for share-group consumption. It tracks the running job count and the
-      # success/failure state of a single poll batch, and carries the topic reference the consumer
-      # needs. Unlike the consumer-group coordinator it has no pause tracker, seek offset, eof or
+      # Minimal coordinator for share-group consumption of a single topic partition. Like the
+      # consumer-group coordinator there is one per topic partition; it tracks the running job
+      # count and the success/failure state of the records of that partition in a poll batch.
+      # Unlike the consumer-group coordinator it has no pause tracker, seek offset, eof or
       # revocation state.
-      #
-      # @note A share poll batch may span multiple partitions. `#partition` is therefore reported
-      #   as `-1` (not meaningful at the batch level); per-message partition is always available on
-      #   each message.
       class Coordinator
         include Core::Helpers::Time
 
-        # @return [Karafka::Routing::Topic] topic of the batch being coordinated
+        # @return [Karafka::Routing::Topic] topic of the records being coordinated
         attr_reader :topic
 
-        # @return [Integer] always `-1` for share groups (batches are not partition-scoped)
+        # @return [Integer] partition of the records being coordinated
         attr_reader :partition
 
         # @param topic [Karafka::Routing::Topic]
-        def initialize(topic)
+        # @param partition [Integer]
+        def initialize(topic, partition)
           @topic = topic
-          @partition = -1
+          @partition = partition
           @consumptions = {}
           @running_jobs = Hash.new { |h, k| h[k] = 0 }
           @mutex = Mutex.new

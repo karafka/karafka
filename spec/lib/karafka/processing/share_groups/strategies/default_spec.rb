@@ -12,7 +12,7 @@ RSpec.describe_current do
 
   let(:client) { instance_double(Karafka::Connection::ShareGroups::Client, settle: nil) }
   let(:topic) { build(:routing_share_topic) }
-  let(:coordinator) { Karafka::Processing::ShareGroups::Coordinator.new(topic) }
+  let(:coordinator) { Karafka::Processing::ShareGroups::Coordinator.new(topic, 0) }
   let(:messages) do
     Karafka::Messages::Builders::Messages.call([build(:messages_message)], topic, 0, Time.now)
   end

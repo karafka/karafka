@@ -18,6 +18,7 @@ module Karafka
 
         include Helpers::ConfigImporter.new(
           jobs_builder: %i[internal processing share_groups jobs_builder],
+          partitioner_class: %i[internal processing share_groups partitioner_class],
           reset_backoff: %i[internal connection reset_backoff],
           listener_thread_priority: %i[internal connection listener_thread_priority]
         )
@@ -46,10 +47,12 @@ module Karafka
           @jobs_queue = jobs_queue
           @scheduler = scheduler
           @client = Client.new(@subscription_group)
-          # One executor + coordinator per topic. A share poll batch may span topics; each topic's
-          # records are consumed as one batch by that topic's consumer instance.
+          # Like for consumer groups, records are coordinated and consumed per topic partition (and
+          # further per partitioner group), so the records of a poll batch spanning many
+          # partitions are processed in parallel.
           @coordinators = Processing::ShareGroups::CoordinatorsBuffer.new(subscription_group.topics)
           @executors = Processing::ShareGroups::ExecutorsBuffer.new(@client, subscription_group)
+          @partitioner = partitioner_class.new(subscription_group)
           # Services the rdkafka main queue (statistics, error, OAuth callbacks) without acquiring
           # share records, so callbacks keep flowing even while we are not polling for records.
           @events_poller = Helpers::IntervalRunner.new { |**opts| @client.events_poll(**opts) }
@@ -240,34 +243,37 @@ module Karafka
           @client.commit
         end
 
-        # Builds consume jobs for a non-empty poll batch, grouped per topic, and schedules them on
-        # the workers pool.
+        # Builds consume jobs for a non-empty poll batch and schedules them on the workers pool.
+        # Like for consumer groups, records are grouped per topic partition and each group can be
+        # further divided by the partitioner, every resulting group being one consume job.
         #
         # @param messages [Array<Rdkafka::ShareConsumer::Message>] raw records from the poll
         def build_and_schedule_consume_jobs(messages)
           received_at = Time.now
           jobs = []
 
-          messages.group_by(&:topic).each do |topic_name, raw_messages|
+          messages.group_by { |message| [message.topic, message.partition] }.each do |key, raws|
+            topic_name, partition = key
             topic = @subscription_group.topics.find(topic_name)
 
             # A record for a topic we are not routing (should not happen given our subscription) is
             # skipped; it stays unacknowledged and is released after the batch for redelivery.
             next unless topic
 
-            built = raw_messages.map do |raw_message|
+            built = raws.map do |raw_message|
               message = Messages::Builders::Message.call(raw_message, topic, received_at)
               message.metadata.delivery_count = raw_message.delivery_count
               message
             end
 
-            coordinator = @coordinators.find_or_create(topic_name)
-            executor = @executors.find_or_create(topic_name, coordinator)
-
+            coordinator = @coordinators.find_or_create(topic_name, partition)
             coordinator.start(built)
-            coordinator.increment(:consume)
 
-            jobs << jobs_builder.consume(executor, built)
+            @partitioner.call(topic_name, built, coordinator) do |group_id, partition_messages|
+              coordinator.increment(:consume)
+              executor = @executors.find_or_create(topic_name, partition, group_id, coordinator)
+              jobs << jobs_builder.consume(executor, partition_messages)
+            end
           end
 
           return if jobs.empty?

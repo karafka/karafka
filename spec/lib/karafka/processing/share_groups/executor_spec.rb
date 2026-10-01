@@ -6,7 +6,7 @@ RSpec.describe_current do
   let(:group_id) { SecureRandom.hex(6) }
   let(:client) { instance_double(Karafka::Connection::ShareGroups::Client, settle: nil) }
   let(:topic) { build(:routing_share_topic) }
-  let(:coordinator) { Karafka::Processing::ShareGroups::Coordinator.new(topic) }
+  let(:coordinator) { Karafka::Processing::ShareGroups::Coordinator.new(topic, 0) }
   let(:messages) { [build(:messages_message)] }
   let(:consumed) { [] }
 
@@ -44,9 +44,9 @@ RSpec.describe_current do
       expect(client).to have_received(:settle).with(kind_of(Karafka::Messages::Messages), :release)
     end
 
-    it "exposes the topic and a batch-level partition of -1" do
+    it "exposes the topic and partition of the coordinated records" do
       expect(executor.topic).to eq(topic)
-      expect(executor.partition).to eq(-1)
+      expect(executor.partition).to eq(0)
     end
   end
 

@@ -353,6 +353,8 @@ module Karafka
             # option coordinator_class [Class] work coordinator we want to use for processing
             #   coordination
             setting :coordinator_class, default: Processing::ShareGroups::Coordinator
+            # option partitioner_class [Class] partitioner we use against a batch of data
+            setting :partitioner_class, default: Processing::ShareGroups::Partitioner
             # option executor_class [Class] executor class
             setting :executor_class, default: Processing::ShareGroups::Executor
           end

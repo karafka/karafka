@@ -6,8 +6,8 @@ module Karafka
       # Buffer for share-group executors of a given subscription group. It builds and caches them
       # so they are re-used across poll batches instead of being created each time.
       #
-      # Parallel to {Processing::ConsumerGroups::ExecutorsBuffer}, but keyed by topic name only -
-      # share consumption has no partition or parallel-group dimension.
+      # Mirrors {Processing::ConsumerGroups::ExecutorsBuffer}: executors are kept per topic,
+      # partition and parallel key (the group a partitioner assigned the records to).
       class ExecutorsBuffer
         include Helpers::ConfigImporter.new(
           executor_class: %i[internal processing share_groups executor_class]
@@ -19,14 +19,17 @@ module Karafka
         def initialize(client, subscription_group)
           @client = client
           @subscription_group = subscription_group
-          @buffer = {}
+          # We need two layers here to keep track of topics, partitions and processing groups
+          @buffer = Hash.new { |h, k| h[k] = Hash.new { |h2, k2| h2[k2] = {} } }
         end
 
-        # @param topic_name [String] topic name
+        # @param topic [String] topic name
+        # @param partition [Integer] partition number
+        # @param parallel_key [Integer] parallel group key
         # @param coordinator [Karafka::Processing::ShareGroups::Coordinator]
         # @return [Karafka::Processing::ShareGroups::Executor] found or created executor
-        def find_or_create(topic_name, coordinator)
-          @buffer[topic_name] ||= executor_class.new(
+        def find_or_create(topic, partition, parallel_key, coordinator)
+          @buffer[topic][partition][parallel_key] ||= executor_class.new(
             @subscription_group.id,
             @client,
             coordinator
@@ -35,8 +38,14 @@ module Karafka
 
         # Iterates over all the cached executors
         # @yieldparam [Karafka::Processing::ShareGroups::Executor] given executor
-        def each(&)
-          @buffer.each_value(&)
+        def each
+          @buffer.each_value do |partitions|
+            partitions.each_value do |executors|
+              executors.each_value do |executor|
+                yield(executor)
+              end
+            end
+          end
         end
 
         # Clears the executors buffer. Used for critical errors recovery.

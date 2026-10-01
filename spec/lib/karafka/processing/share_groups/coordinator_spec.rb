@@ -1,15 +1,15 @@
 # frozen_string_literal: true
 
 RSpec.describe_current do
-  subject(:coordinator) { described_class.new(topic) }
+  subject(:coordinator) { described_class.new(topic, 2) }
 
-  let(:topic) { build(:routing_topic) }
+  let(:topic) { build(:routing_share_topic) }
   let(:message) { build(:messages_message) }
   let(:consumer) { Karafka::Consumers::ShareGroup.new }
 
   describe "#topic and #partition" do
     it { expect(coordinator.topic).to eq(topic) }
-    it { expect(coordinator.partition).to eq(-1) }
+    it { expect(coordinator.partition).to eq(2) }
   end
 
   describe "#revoked?" do

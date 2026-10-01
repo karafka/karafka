@@ -4,11 +4,12 @@ RSpec.describe_current do
   subject(:buffer) { described_class.new(client, subscription_group) }
 
   let(:client) { instance_double(Karafka::Connection::ShareGroups::Client) }
-  let(:coordinator) { Karafka::Processing::ShareGroups::Coordinator.new(build(:routing_topic)) }
+  let(:topic) { build(:routing_share_topic) }
+  let(:coordinator) { Karafka::Processing::ShareGroups::Coordinator.new(topic, 0) }
   let(:topic_name) { "topic_name1" }
   let(:subscription_group) { groups.first.subscription_groups.first }
 
-  let(:fetched_executor) { buffer.find_or_create(topic_name, coordinator) }
+  let(:fetched_executor) { buffer.find_or_create(topic_name, 0, 0, coordinator) }
 
   let(:groups) do
     Karafka::Routing::Builder.new.draw do
@@ -30,12 +31,23 @@ RSpec.describe_current do
     end
 
     context "when executor is in a buffer" do
-      let(:existing_executor) { buffer.find_or_create(topic_name, coordinator) }
+      let(:existing_executor) { buffer.find_or_create(topic_name, 0, 0, coordinator) }
 
       before { existing_executor }
 
       it "expect to re-use existing one" do
         expect(fetched_executor).to eq(existing_executor)
+      end
+    end
+
+    context "when asking for another partition or parallel key" do
+      before { fetched_executor }
+
+      it "expect to create separate executors" do
+        other_partition = buffer.find_or_create(topic_name, 1, 0, coordinator)
+        other_key = buffer.find_or_create(topic_name, 0, 1, coordinator)
+
+        expect([fetched_executor, other_partition, other_key].uniq.size).to eq(3)
       end
     end
   end
@@ -57,7 +69,7 @@ RSpec.describe_current do
   end
 
   describe "#clear" do
-    let(:pre_cleaned_executor) { buffer.find_or_create(topic_name, coordinator) }
+    let(:pre_cleaned_executor) { buffer.find_or_create(topic_name, 0, 0, coordinator) }
 
     before do
       pre_cleaned_executor

@@ -20,25 +20,32 @@ RSpec.describe_current do
   describe "#find_or_create" do
     context "when the coordinator is not in the buffer" do
       it "expect to create a new one for the given topic" do
-        coordinator = buffer.find_or_create(topic_name)
+        coordinator = buffer.find_or_create(topic_name, 0)
         expect(coordinator).to be_a(Karafka::Processing::ShareGroups::Coordinator)
         expect(coordinator.topic.name).to eq(topic_name)
+        expect(coordinator.partition).to eq(0)
+      end
+    end
+
+    context "when asking for another partition of the same topic" do
+      it "expect to create a separate coordinator" do
+        expect(buffer.find_or_create(topic_name, 1)).not_to eq(buffer.find_or_create(topic_name, 0))
       end
     end
 
     context "when the coordinator is already in the buffer" do
-      let(:existing) { buffer.find_or_create(topic_name) }
+      let(:existing) { buffer.find_or_create(topic_name, 0) }
 
       before { existing }
 
       it "expect to re-use the existing one" do
-        expect(buffer.find_or_create(topic_name)).to eq(existing)
+        expect(buffer.find_or_create(topic_name, 0)).to eq(existing)
       end
     end
   end
 
   describe "#reset" do
-    let(:pre_reset) { buffer.find_or_create(topic_name) }
+    let(:pre_reset) { buffer.find_or_create(topic_name, 0) }
 
     before do
       pre_reset
@@ -46,7 +53,7 @@ RSpec.describe_current do
     end
 
     it "expect to rebuild after reset" do
-      expect(buffer.find_or_create(topic_name)).not_to eq(pre_reset)
+      expect(buffer.find_or_create(topic_name, 0)).not_to eq(pre_reset)
     end
   end
 end
