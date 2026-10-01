@@ -17,23 +17,26 @@ module Karafka
             dead_letter_queue
           ].freeze
 
-          # After a failure, every record left unacknowledged that was already delivered more
-          # times than allowed is dispatched to the DLQ topic and rejected, so the broker does not
-          # deliver it again. The rest is released for another attempt.
+          # After a failure, the first record the consumer left unacknowledged is considered the
+          # one that broke the processing, same as the first not marked message for consumer
+          # groups. Once it was delivered more times than allowed, it is dispatched to the DLQ
+          # topic and rejected, so the broker does not deliver it again. The rest is released for
+          # another attempt.
           def handle_after_consume
             consumption = coordinator.consumption(self)
 
             # Process-critical errors are never dispatched to the DLQ regardless of the retries
             # state, same as for consumer groups - the records are redelivered after the restart
             if !consumption.success? && !critical_error?(consumption.cause)
-              messages.raw.each do |message|
-                next if message.delivery_count <= topic.dead_letter_queue.max_retries
-                next if acknowledgements_tracker.acknowledged?(message)
+              broken = messages.raw.find do |message|
+                !acknowledgements_tracker.acknowledged?(message)
+              end
 
+              if broken && broken.delivery_count > topic.dead_letter_queue.max_retries
                 # The record is gone once rejected, so it has to be dispatched first
-                dispatch_to_dlq(message) if topic.dead_letter_queue.topic
+                dispatch_to_dlq(broken) if topic.dead_letter_queue.topic
 
-                mark_as_rejected(message)
+                mark_as_rejected(broken)
               end
             end
 

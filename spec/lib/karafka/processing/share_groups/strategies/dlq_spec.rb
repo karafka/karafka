@@ -88,6 +88,32 @@ RSpec.describe_current do
       it { expect(client).not_to have_received(:mark_as_rejected) }
     end
 
+    context "when the batch has more records left unacknowledged" do
+      let(:delivery_count) { 3 }
+      let(:accepted) { build(:messages_message, raw_payload: "accepted") }
+      let(:other) { build(:messages_message, raw_payload: "other") }
+      let(:messages) do
+        Karafka::Messages::Builders::Messages.call([accepted, message, other], topic, 0, Time.now)
+      end
+
+      before do
+        accepted.metadata.delivery_count = 3
+        other.metadata.delivery_count = 3
+        consumer.mark_as_accepted(accepted)
+        coordinator.failure!(consumer, StandardError.new)
+        consumer.handle_after_consume
+      end
+
+      it "dispatches only the first unacknowledged record" do
+        expect(producer).to have_received(:produce_async).once
+        expect(producer).to have_received(:produce_async).with(topic: "dlq", payload: "payload")
+      end
+
+      it { expect(client).to have_received(:mark_as_rejected).with(message).once }
+      it { expect(client).to have_received(:mark_as_released).with(other) }
+      it { expect(client).not_to have_received(:mark_as_rejected).with(other) }
+    end
+
     context "when the failure is process-critical" do
       let(:delivery_count) { 3 }
 
