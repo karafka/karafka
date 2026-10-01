@@ -79,7 +79,7 @@ produce_many(DT.topics[0], elements.first(5) + ["poison"] + elements.last(5))
 
 start_karafka_and_wait_until do
   if DT[:dispatched].size >= 1 && DT[:accepted].uniq.size >= 10
-    DT[:dispatched_at] ||= Time.now
+    DT[:dispatched_at] = Time.now unless DT.key?(:dispatched_at)
 
     # Make sure the broker does not deliver it again
     Time.now - DT[:dispatched_at] > 5

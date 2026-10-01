@@ -64,7 +64,7 @@ produce_many(DT.topic, elements)
 
 start_karafka_and_wait_until do
   if DT[:deliveries].size >= 40
-    DT[:consumed_at] ||= Time.now
+    DT[:consumed_at] = Time.now unless DT.key?(:consumed_at)
 
     # Make sure nothing is delivered again
     Time.now - DT[:consumed_at] > 5
