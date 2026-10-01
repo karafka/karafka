@@ -25,17 +25,7 @@
 # Receipt, viewing, or possession of this software does not convey or
 # imply any license or right beyond those expressly stated above.
 #
-# License: https://karafka.io/docs/Pro-License-Comm/
-# Contact: contact@karafka.io
 
-module Karafka
-  module Pro
-    module Routing
-      module Features
-        # Consumer-group-specific Pro routing features. Parallel to {ShareGroups}.
-        module ConsumerGroups
-        end
-      end
-    end
-  end
+RSpec.describe_current do
+  it { expect(described_class).to be < Karafka::Pro::Routing::Features::Base }
 end

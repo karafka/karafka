@@ -25,17 +25,51 @@
 # Receipt, viewing, or possession of this software does not convey or
 # imply any license or right beyond those expressly stated above.
 #
-# License: https://karafka.io/docs/Pro-License-Comm/
-# Contact: contact@karafka.io
 
-module Karafka
-  module Pro
-    module Routing
-      module Features
-        # Consumer-group-specific Pro routing features. Parallel to {ShareGroups}.
-        module ConsumerGroups
-        end
-      end
+# Share group (KIP-932) virtual partitions with the round robin partitioner: records of a single
+# topic partition are spread across several consumer instances that process them in parallel.
+
+setup_karafka do |config|
+  config.concurrency = 4
+end
+
+class Consumer < Karafka::ShareConsumer
+  def consume
+    started_at = Time.now.to_f
+    sleep(1)
+
+    DT[:batches] << [object_id, started_at, Time.now.to_f]
+
+    messages.each do |message|
+      DT[:accepted] << message.raw_payload
+      mark_as_accepted(message)
     end
   end
 end
+
+draw_routes(create_topics: false) do
+  share_group DT.group do
+    topic DT.topic do
+      consumer Consumer
+      virtual_partitions(partitioner: :round_robin, max_partitions: 4)
+    end
+  end
+end
+
+setup_share_group
+
+elements = DT.uuids(20)
+produce_many(DT.topic, elements)
+
+start_karafka_and_wait_until do
+  DT[:accepted].uniq.size >= 20
+end
+
+assert_equal elements.sort, DT[:accepted].uniq.sort
+assert DT[:batches].map(&:first).uniq.size >= 2
+
+overlapping = DT[:batches].combination(2).any? do |first, second|
+  first[0] != second[0] && first[1] < second[2] && second[1] < first[2]
+end
+
+assert overlapping

@@ -25,15 +25,18 @@
 # Receipt, viewing, or possession of this software does not convey or
 # imply any license or right beyond those expressly stated above.
 #
-# License: https://karafka.io/docs/Pro-License-Comm/
-# Contact: contact@karafka.io
 
 module Karafka
   module Pro
     module Routing
       module Features
-        # Consumer-group-specific Pro routing features. Parallel to {ShareGroups}.
-        module ConsumerGroups
+        module ShareGroups
+          # Virtual Partitions for share groups. Allows to process the records of a single topic
+          # partition from a poll batch in parallel. Mirrors the consumer-group
+          # {ConsumerGroups::VirtualPartitions} API, without the offset related machinery (share
+          # groups acknowledge records individually, so there are no virtual offsets to compute).
+          class VirtualPartitions < Base
+          end
         end
       end
     end

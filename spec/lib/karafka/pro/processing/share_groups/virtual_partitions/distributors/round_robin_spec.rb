@@ -25,17 +25,34 @@
 # Receipt, viewing, or possession of this software does not convey or
 # imply any license or right beyond those expressly stated above.
 #
-# License: https://karafka.io/docs/Pro-License-Comm/
-# Contact: contact@karafka.io
 
-module Karafka
-  module Pro
-    module Routing
-      module Features
-        # Consumer-group-specific Pro routing features. Parallel to {ShareGroups}.
-        module ConsumerGroups
-        end
-      end
-    end
+RSpec.describe_current do
+  subject(:distributor) { described_class.new(config) }
+
+  let(:config) do
+    Karafka::Pro::Routing::Features::ShareGroups::VirtualPartitions::Config.new(
+      active: true,
+      partitioner: :round_robin,
+      max_partitions: 3,
+      reducer: nil,
+      distribution: :consistent
+    )
+  end
+
+  let(:messages) { Array.new(7) { build(:messages_message) } }
+
+  it "expect to spread records evenly one by one" do
+    result = distributor.call(messages)
+
+    expect(result.keys).to eq([0, 1, 2])
+    expect(result[0]).to eq([messages[0], messages[3], messages[6]])
+    expect(result[1]).to eq([messages[1], messages[4]])
+    expect(result[2]).to eq([messages[2], messages[5]])
+  end
+
+  context "when there are fewer records than virtual partitions" do
+    let(:messages) { [build(:messages_message)] }
+
+    it { expect(distributor.call(messages)).to eq(0 => messages) }
   end
 end

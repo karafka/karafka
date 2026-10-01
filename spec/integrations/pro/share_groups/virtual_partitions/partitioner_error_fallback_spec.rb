@@ -25,17 +25,44 @@
 # Receipt, viewing, or possession of this software does not convey or
 # imply any license or right beyond those expressly stated above.
 #
-# License: https://karafka.io/docs/Pro-License-Comm/
-# Contact: contact@karafka.io
 
-module Karafka
-  module Pro
-    module Routing
-      module Features
-        # Consumer-group-specific Pro routing features. Parallel to {ShareGroups}.
-        module ConsumerGroups
-        end
-      end
+# Share group (KIP-932) virtual partitions with a partitioner that raises: the error is reported
+# and the records are processed without the virtual partitioning, so consumption continues.
+
+setup_karafka(allow_errors: %w[virtual_partitions.partitioner.error]) do |config|
+  config.concurrency = 4
+end
+
+Karafka.monitor.subscribe("error.occurred") do |event|
+  DT[:errors] << event[:type]
+end
+
+class Consumer < Karafka::ShareConsumer
+  def consume
+    messages.each do |message|
+      DT[:accepted] << message.raw_payload
+      mark_as_accepted(message)
     end
   end
 end
+
+draw_routes(create_topics: false) do
+  share_group DT.group do
+    topic DT.topic do
+      consumer Consumer
+      virtual_partitions(partitioner: ->(_) { raise StandardError }, max_partitions: 4)
+    end
+  end
+end
+
+setup_share_group
+
+elements = DT.uuids(10)
+produce_many(DT.topic, elements)
+
+start_karafka_and_wait_until do
+  DT[:accepted].uniq.size >= 10
+end
+
+assert_equal elements.sort, DT[:accepted].uniq.sort
+assert DT[:errors].include?("virtual_partitions.partitioner.error")

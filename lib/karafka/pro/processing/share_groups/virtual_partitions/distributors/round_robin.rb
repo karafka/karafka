@@ -25,15 +25,32 @@
 # Receipt, viewing, or possession of this software does not convey or
 # imply any license or right beyond those expressly stated above.
 #
-# License: https://karafka.io/docs/Pro-License-Comm/
-# Contact: contact@karafka.io
 
 module Karafka
   module Pro
-    module Routing
-      module Features
-        # Consumer-group-specific Pro routing features. Parallel to {ShareGroups}.
-        module ConsumerGroups
+    module Processing
+      module ShareGroups
+        # Processing components for share-group virtual partitions
+        module VirtualPartitions
+          # Distributors for share-group virtual partitions
+          module Distributors
+            # Spreads records evenly across the virtual partitions, one by one. Share groups do not
+            # need to preserve any ordering, so this gives the most even split of the work.
+            class RoundRobin < Processing::ConsumerGroups::VirtualPartitions::Distributors::Base
+              # @param messages [Array<Karafka::Messages::Message>] records of a topic partition
+              # @return [Hash{Integer => Array<Karafka::Messages::Message>}] records per virtual
+              #   partition
+              def call(messages)
+                groups = Hash.new { |hash, key| hash[key] = [] }
+
+                messages.each_with_index do |message, index|
+                  groups[index % config.max_partitions] << message
+                end
+
+                groups
+              end
+            end
+          end
         end
       end
     end

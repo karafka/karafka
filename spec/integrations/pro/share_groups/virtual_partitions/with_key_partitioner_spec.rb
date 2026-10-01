@@ -25,17 +25,44 @@
 # Receipt, viewing, or possession of this software does not convey or
 # imply any license or right beyond those expressly stated above.
 #
-# License: https://karafka.io/docs/Pro-License-Comm/
-# Contact: contact@karafka.io
 
-module Karafka
-  module Pro
-    module Routing
-      module Features
-        # Consumer-group-specific Pro routing features. Parallel to {ShareGroups}.
-        module ConsumerGroups
-        end
-      end
+# Share group (KIP-932) virtual partitions with a custom partitioner: records with the same key
+# always land in the same virtual partition, so they are processed by the same consumer instance.
+
+setup_karafka do |config|
+  config.concurrency = 4
+end
+
+class Consumer < Karafka::ShareConsumer
+  def consume
+    messages.each do |message|
+      DT[:keys] << [message.key, object_id]
+      DT[:accepted] << message.raw_payload
+      mark_as_accepted(message)
     end
   end
 end
+
+draw_routes(create_topics: false) do
+  share_group DT.group do
+    topic DT.topic do
+      consumer Consumer
+      virtual_partitions(partitioner: ->(message) { message.key }, max_partitions: 4)
+    end
+  end
+end
+
+setup_share_group
+
+messages = Array.new(40) { |index| { topic: DT.topic, key: "key-#{index % 8}", payload: index.to_s } }
+Karafka.producer.produce_many_sync(messages)
+
+start_karafka_and_wait_until do
+  DT[:accepted].uniq.size >= 40
+end
+
+DT[:keys].group_by(&:first).each_value do |pairs|
+  assert_equal 1, pairs.map(&:last).uniq.size
+end
+
+assert DT[:keys].map(&:last).uniq.size >= 2
