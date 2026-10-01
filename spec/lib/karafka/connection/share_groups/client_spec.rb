@@ -11,7 +11,8 @@ RSpec.describe_current do
       subscribe: nil,
       close: nil,
       commit_sync: true,
-      commit_async: true
+      commit_async: true,
+      events_poll: 0
     )
   end
   let(:rdkafka_config) { instance_double(Rdkafka::Config, share_consumer: share_consumer) }
@@ -45,6 +46,29 @@ RSpec.describe_current do
       allow(share_consumer).to receive(:poll).and_return([message, error])
 
       expect(client.batch_poll(100)).to eq([message])
+    end
+
+    context "when the poll breaker requests a stop" do
+      subject(:client) { described_class.new(subscription_group, -> { false }) }
+
+      before { allow(share_consumer).to receive_messages(poll: [], events_poll: 0) }
+
+      it "does not wait for the whole max wait time" do
+        started_at = Time.now
+        client.batch_poll(60_000)
+
+        expect(Time.now - started_at).to be < 30
+        expect(share_consumer).to have_received(:events_poll)
+      end
+    end
+
+    it "polls in slices not longer than the tick interval" do
+      allow(share_consumer).to receive_messages(poll: [], events_poll: 0)
+
+      client.batch_poll(10)
+
+      expect(share_consumer)
+        .to have_received(:poll).with(satisfy { |timeout| timeout <= 10 }).at_least(:once)
     end
 
     it "subscribes to the subscription group topics when building the consumer" do
@@ -185,10 +209,13 @@ RSpec.describe_current do
     end
 
     it "does not touch the consumer once closed" do
+      calls = 0
+      allow(share_consumer).to receive(:events_poll) { calls += 1 }
+
       client.close
       client.events_poll
 
-      expect(share_consumer).not_to have_received(:events_poll)
+      expect(calls).to eq(0)
     end
   end
 

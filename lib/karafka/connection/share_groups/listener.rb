@@ -46,13 +46,17 @@ module Karafka
           @subscription_group = subscription_group
           @jobs_queue = jobs_queue
           @scheduler = scheduler
-          @client = Client.new(@subscription_group)
+          @client = Client.new(@subscription_group, -> { running? })
           # Like for consumer groups, records are coordinated and consumed per topic partition (and
           # further per partitioner group), so the records of a poll batch spanning many
           # partitions are processed in parallel.
           @coordinators = Processing::ShareGroups::CoordinatorsBuffer.new(subscription_group.topics)
           @executors = Processing::ShareGroups::ExecutorsBuffer.new(@client, subscription_group)
           @partitioner = partitioner_class.new(subscription_group)
+          # We keep one buffer for messages to preserve memory and not allocate extra objects. We
+          # can do this that way because we always first schedule jobs using messages before we
+          # fetch another batch.
+          @messages_buffer = MessagesBuffer.new(subscription_group)
           # Services the rdkafka main queue (statistics, error, OAuth callbacks) without acquiring
           # share records, so callbacks keep flowing even while we are not polling for records.
           @events_poller = Helpers::IntervalRunner.new { |**opts| @client.events_poll(**opts) }
@@ -201,22 +205,24 @@ module Karafka
         # Polls a single batch and schedules it on the workers pool: consume jobs when records were
         # returned, idle jobs (housekeeping) when the poll came back empty.
         #
-        # @note We intentionally do not emit `connection.listener.fetch_loop.received` here. That
-        #   event carries a consumer-group `MessagesBuffer` (with a partition/eof-aware `#each` and
-        #   `#size`) that several shared subscribers depend on; a share poll returns a flat batch
-        #   with different semantics. A share-specific received event can be added later once its
-        #   payload shape is settled.
-        #
         # @return [Boolean] were any records polled
         def poll_and_schedule
-          messages = @client.batch_poll
+          Karafka.monitor.instrument(
+            "connection.listener.fetch_loop.received",
+            caller: self,
+            client: @client,
+            subscription_group: @subscription_group,
+            messages_buffer: @messages_buffer
+          ) do
+            @messages_buffer.remap(@client.batch_poll)
+          end
 
-          if messages.empty?
+          if @messages_buffer.empty?
             build_and_schedule_idle_jobs
 
             false
           else
-            build_and_schedule_consume_jobs(messages)
+            build_and_schedule_consume_jobs
 
             true
           end
@@ -243,33 +249,43 @@ module Karafka
           @client.commit
         end
 
-        # Builds consume jobs for a non-empty poll batch and schedules them on the workers pool.
-        # Like for consumer groups, records are grouped per topic partition and each group can be
-        # further divided by the partitioner, every resulting group being one consume job.
+        # Builds consume jobs for the polled records and schedules them on the workers pool. Like
+        # for consumer groups, records are grouped per topic partition, each group can be further
+        # divided by the partitioner and every resulting group is one consume job.
         #
-        # @param messages [Array<Rdkafka::ShareConsumer::Message>] raw records from the poll
-        def build_and_schedule_consume_jobs(messages)
-          received_at = Time.now
+        # Like for consumer groups, a consumer never gets more than `max_messages` records at once.
+        # A poll may return more (`max.poll.records` is a soft bound), so the records of each
+        # partition are consumed in rounds of at most `max_messages`, one round after another.
+        # All the rounds finish before the next poll, so every record is settled by then.
+        def build_and_schedule_consume_jobs
+          rounds = []
+
+          @messages_buffer.each do |topic_name, partition, messages|
+            messages.each_slice(@subscription_group.max_messages).with_index do |slice, index|
+              (rounds[index] ||= []) << [topic_name, partition, slice]
+            end
+          end
+
+          rounds.each_with_index do |round, index|
+            # The previous round has to finish before the coordinators can start the next one
+            wait if index.positive?
+
+            schedule_consume_round(round)
+          end
+        end
+
+        # Schedules consume jobs for one round of records, at most one slice per topic partition
+        #
+        # @param round [Array<Array(String, Integer, Array<Karafka::Messages::Message>)>] topic
+        #   name, partition and records of each topic partition in this round
+        def schedule_consume_round(round)
           jobs = []
 
-          messages.group_by { |message| [message.topic, message.partition] }.each do |key, raws|
-            topic_name, partition = key
-            topic = @subscription_group.topics.find(topic_name)
-
-            # A record for a topic we are not routing (should not happen given our subscription) is
-            # skipped; it stays unacknowledged and is released after the batch for redelivery.
-            next unless topic
-
-            built = raws.map do |raw_message|
-              message = Messages::Builders::Message.call(raw_message, topic, received_at)
-              message.metadata.delivery_count = raw_message.delivery_count
-              message
-            end
-
+          round.each do |topic_name, partition, slice|
             coordinator = @coordinators.find_or_create(topic_name, partition)
-            coordinator.start(built)
+            coordinator.start(slice)
 
-            @partitioner.call(topic_name, built, coordinator) do |group_id, partition_messages|
+            @partitioner.call(topic_name, slice, coordinator) do |group_id, partition_messages|
               coordinator.increment(:consume)
               executor = @executors.find_or_create(topic_name, partition, group_id, coordinator)
               jobs << jobs_builder.consume(executor, partition_messages)

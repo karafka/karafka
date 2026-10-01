@@ -21,7 +21,8 @@ module Karafka
         include Karafka::Core::Helpers::Time
         include Helpers::ConfigImporter.new(
           logger: %i[logger],
-          shutdown_timeout: %i[shutdown_timeout]
+          shutdown_timeout: %i[shutdown_timeout],
+          tick_interval: %i[internal tick_interval]
         )
 
         # Shared frozen empty result reused for empty/failed polls to avoid allocations
@@ -42,7 +43,10 @@ module Karafka
 
         # @param subscription_group [Karafka::Routing::SubscriptionGroup] subscription group with
         #   all the configuration details needed for us to create a share client
-        def initialize(subscription_group)
+        # @param batch_poll_breaker [Proc] proc that when evaluated to false will cause the batch
+        #   poll to finish early. Like for consumer groups, this allows us to stop without waiting
+        #   for a long poll to finish.
+        def initialize(subscription_group, batch_poll_breaker = -> { true })
           @id = SecureRandom.hex(6)
           @name = ""
           @closed = false
@@ -52,17 +56,40 @@ module Karafka
           # acknowledgement mode librdkafka refuses to poll again until every one of them is
           # acknowledged, so we need to know which are still outstanding.
           @pending = {}
+
+          # Like for consumer groups, while waiting for records we service the events queue and
+          # check if we should stop with the tick frequency
+          @interval_runner = Helpers::IntervalRunner.new do
+            events_poll
+            batch_poll_breaker.call ? :run : :stop
+          end
         end
 
         # Fetches a batch of records within the given time budget.
         #
         # librdkafka's share poll returns a batch of already-acquired records (possibly spanning
-        # partitions). Callbacks (statistics/error) are serviced as part of this call.
+        # partitions). Like for consumer groups, a single native poll never runs longer than the
+        # tick interval, so while waiting for records the events queue (statistics, errors) is
+        # serviced and a stop request ends the poll early instead of waiting for `max_wait_time`.
         #
         # @param timeout [Integer] max time in milliseconds to wait for records
         # @return [Array<Rdkafka::ShareConsumer::Message>] fetched records (may be empty)
         def batch_poll(timeout = @subscription_group.max_wait_time)
-          result = @mutex.synchronize { kafka.poll(timeout) }
+          time_poll = TimeTrackers::Poll.new(timeout)
+          result = nil
+
+          loop do
+            time_poll.start
+
+            poll_tick = [time_poll.remaining, tick_interval].min
+            result = @mutex.synchronize { kafka.poll(poll_tick) }
+
+            time_poll.checkpoint
+
+            break unless result.nil? || result.empty?
+            break if time_poll.exceeded?
+            break if @interval_runner.call == :stop
+          end
 
           return EMPTY_ARRAY if result.nil? || result.empty?
 
