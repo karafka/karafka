@@ -57,7 +57,10 @@ draw_routes(create_topics: false) do
   share_group DT.group do
     topic DT.topic do
       consumer Consumer
-      virtual_partitions(partitioner: :round_robin, max_partitions: 2)
+      virtual_partitions(
+        partitioner: Karafka::Pro::Processing::ShareGroups::VirtualPartitions::Partitioners::RoundRobin.new,
+        max_partitions: 2
+      )
     end
   end
 end

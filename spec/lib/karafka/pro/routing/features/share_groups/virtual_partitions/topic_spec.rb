@@ -42,7 +42,9 @@ RSpec.describe_current do
     end
 
     context "when using round robin" do
-      before { topic.virtual_partitions(partitioner: :round_robin, max_partitions: 4) }
+      let(:partitioner) { Karafka::Pro::Processing::ShareGroups::VirtualPartitions::Partitioners::RoundRobin.new }
+
+      before { topic.virtual_partitions(partitioner: partitioner, max_partitions: 4) }
 
       it { expect(topic.virtual_partitions.active?).to be(true) }
       it { expect(topic.virtual_partitions.max_partitions).to eq(4) }
@@ -54,13 +56,22 @@ RSpec.describe_current do
       it { expect(topic.virtual_partitions.active?).to be(true) }
       it { expect(topic.virtual_partitions.reducer.call("key")).to be_a(Integer) }
     end
+
+    context "when using the default reducer" do
+      before { topic.virtual_partitions(partitioner: ->(_) { 1 }, max_partitions: 4) }
+
+      it "expect to spread integer keys directly with a modulo" do
+        expect((0..7).map { |key| topic.virtual_partitions.reducer.call(key) })
+          .to eq([0, 1, 2, 3, 0, 1, 2, 3])
+      end
+    end
   end
 
   describe "#virtual_partitions?" do
     it { expect(topic.virtual_partitions?).to be(false) }
 
     context "when enabled" do
-      before { topic.virtual_partitions(partitioner: :round_robin) }
+      before { topic.virtual_partitions(partitioner: ->(_) { 1 }) }
 
       it { expect(topic.virtual_partitions?).to be(true) }
     end

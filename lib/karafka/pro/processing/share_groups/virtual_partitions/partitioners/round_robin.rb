@@ -34,22 +34,31 @@ module Karafka
       module ShareGroups
         # Processing components for share-group virtual partitions
         module VirtualPartitions
-          # Distributors for share-group virtual partitions
-          module Distributors
+          # Ready to use partitioners for share-group virtual partitions
+          module Partitioners
             # Spreads records evenly across the virtual partitions, one by one. Share groups do not
             # need to preserve any ordering, so this gives the most even split of the work.
-            class RoundRobin < Processing::ConsumerGroups::VirtualPartitions::Distributors::Base
-              # @param messages [Array<Karafka::Messages::Message>] records of a topic partition
-              # @return [Hash{Integer => Array<Karafka::Messages::Message>}] records per virtual
-              #   partition
-              def call(messages)
-                groups = Hash.new { |hash, key| hash[key] = [] }
+            #
+            # It returns an increasing number per record, which the default share-group virtual
+            # partitions reducer maps to `number % max_partitions`.
+            #
+            # @example
+            #   topic :orders do
+            #     consumer OrdersConsumer
+            #     virtual_partitions(
+            #       partitioner: Karafka::Pro::Processing::ShareGroups::VirtualPartitions::
+            #         Partitioners::RoundRobin.new
+            #     )
+            #   end
+            class RoundRobin
+              def initialize
+                @counter = 0
+              end
 
-                messages.each_with_index do |message, index|
-                  groups[index % config.max_partitions] << message
-                end
-
-                groups
+              # @param _message [Karafka::Messages::Message] record to assign
+              # @return [Integer] next number in the round robin sequence
+              def call(_message)
+                @counter += 1
               end
             end
           end

@@ -29,32 +29,28 @@
 # Contact: contact@karafka.io
 
 RSpec.describe_current do
-  subject(:distributor) { described_class.new(config) }
+  subject(:partitioner) { described_class.new }
 
-  let(:config) do
-    Karafka::Pro::Routing::Features::ShareGroups::VirtualPartitions::Config.new(
-      active: true,
-      partitioner: :round_robin,
-      max_partitions: 3,
-      reducer: nil,
-      distribution: :consistent
-    )
+  let(:message) { build(:messages_message) }
+
+  it "expect to return an increasing number per record" do
+    expect(Array.new(4) { partitioner.call(message) }).to eq([1, 2, 3, 4])
   end
 
-  let(:messages) { Array.new(7) { build(:messages_message) } }
+  context "when used with the default share virtual partitions reducer" do
+    let(:topic) do
+      build(:routing_share_topic).tap do |topic|
+        topic.virtual_partitions(partitioner: partitioner, max_partitions: 3)
+      end
+    end
 
-  it "expect to spread records evenly one by one" do
-    result = distributor.call(messages)
+    let(:messages) { Array.new(7) { build(:messages_message) } }
 
-    expect(result.keys).to eq([0, 1, 2])
-    expect(result[0]).to eq([messages[0], messages[3], messages[6]])
-    expect(result[1]).to eq([messages[1], messages[4]])
-    expect(result[2]).to eq([messages[2], messages[5]])
-  end
+    it "expect to spread records evenly one by one" do
+      groups = topic.virtual_partitions.distributor.call(messages)
 
-  context "when there are fewer records than virtual partitions" do
-    let(:messages) { [build(:messages_message)] }
-
-    it { expect(distributor.call(messages)).to eq(0 => messages) }
+      expect(groups.values.map(&:size).sort).to eq([2, 2, 3])
+      expect(groups.values.flatten).to match_array(messages)
+    end
   end
 end

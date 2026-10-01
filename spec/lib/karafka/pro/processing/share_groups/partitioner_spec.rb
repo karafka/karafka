@@ -63,16 +63,16 @@ RSpec.describe_current do
   end
 
   context "when using round robin" do
-    let(:vps) { { partitioner: :round_robin, max_partitions: 3 } }
+    let(:vps) { { partitioner: Karafka::Pro::Processing::ShareGroups::VirtualPartitions::Partitioners::RoundRobin.new, max_partitions: 3 } }
 
     it "expect to split the records across virtual partitions" do
-      expect(yielded.map(&:first)).to eq([0, 1, 2])
+      expect(yielded.map(&:first)).to match_array([0, 1, 2])
       expect(yielded.flat_map(&:last)).to match_array(messages)
     end
   end
 
   context "when max_partitions is 1" do
-    let(:vps) { { partitioner: :round_robin, max_partitions: 1 } }
+    let(:vps) { { partitioner: Karafka::Pro::Processing::ShareGroups::VirtualPartitions::Partitioners::RoundRobin.new, max_partitions: 1 } }
 
     it { expect(yielded).to eq([[0, messages]]) }
   end

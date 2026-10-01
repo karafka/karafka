@@ -48,20 +48,16 @@ module Karafka
                 active
               end
 
-              # @return [Object] distributor instance for the configured partitioner and
-              #   distribution
+              # @return [Object] distributor instance for the current distribution. The distributors
+              #   are the consumer-group ones, as they only work on the messages and the config.
               def distributor
-                @distributor ||= if partitioner == :round_robin
-                  Processing::ShareGroups::VirtualPartitions::Distributors::RoundRobin.new(self)
+                @distributor ||= case distribution
+                when :balanced
+                  Processing::ConsumerGroups::VirtualPartitions::Distributors::Balanced.new(self)
+                when :consistent
+                  Processing::ConsumerGroups::VirtualPartitions::Distributors::Consistent.new(self)
                 else
-                  case distribution
-                  when :balanced
-                    Processing::ConsumerGroups::VirtualPartitions::Distributors::Balanced.new(self)
-                  when :consistent
-                    Processing::ConsumerGroups::VirtualPartitions::Distributors::Consistent.new(self)
-                  else
-                    raise Karafka::Errors::UnsupportedCaseError, distribution
-                  end
+                  raise Karafka::Errors::UnsupportedCaseError, distribution
                 end
               end
             end

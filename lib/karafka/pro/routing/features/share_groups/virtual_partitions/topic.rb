@@ -48,13 +48,14 @@ module Karafka
               # @param max_partitions [Integer] max number of virtual partitions that can come out
               #   of the records of a single topic partition in a poll batch. Each of them is
               #   processed by its own consumer instance.
-              # @param partitioner [nil, Symbol, #call] nil (disabled), `:round_robin` to spread
-              #   records evenly across the virtual partitions or a callable returning a key per
-              #   record, so records with the same key land in the same virtual partition
+              # @param partitioner [nil, #call] nil or callable partitioner returning a key per
+              #   record (records with the same key land in the same virtual partition). Use
+              #   {Processing::ShareGroups::VirtualPartitions::Partitioners::RoundRobin} to spread
+              #   records evenly.
               # @param reducer [nil, #call] reducer for the partitioner keys. It allows for using a
               #   custom reducer when the default one is not enough.
-              # @param distribution [Symbol] `:consistent` or `:balanced` distribution of keyed
-              #   records (not used with `:round_robin`)
+              # @param distribution [Symbol] `:consistent` or `:balanced` distribution of the
+              #   records
               # @return [Config] virtual partitions config
               def virtual_partitions(
                 max_partitions: Karafka::App.config.concurrency,
@@ -66,9 +67,16 @@ module Karafka
                   active: !partitioner.nil?,
                   max_partitions: max_partitions,
                   partitioner: partitioner,
-                  # If no reducer provided, we use this one. It just runs a modulo on the sum of
-                  # a stringified version, providing fairly good distribution.
-                  reducer: reducer || ->(virtual_key) { virtual_key.to_s.sum % max_partitions },
+                  # If no reducer provided, we use this one. Integer keys (like the round robin
+                  # partitioner ones) are spread directly with a modulo, other keys use a modulo on
+                  # the sum of a stringified version, providing fairly good distribution.
+                  reducer: reducer || lambda { |virtual_key|
+                    if virtual_key.is_a?(Integer)
+                      virtual_key % max_partitions
+                    else
+                      virtual_key.to_s.sum % max_partitions
+                    end
+                  },
                   distribution: distribution
                 )
               end

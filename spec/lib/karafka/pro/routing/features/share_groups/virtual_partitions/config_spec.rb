@@ -44,15 +44,6 @@ RSpec.describe_current do
   let(:distributors) { Karafka::Pro::Processing::ConsumerGroups::VirtualPartitions::Distributors }
 
   describe "#distributor" do
-    context "when using round robin" do
-      let(:partitioner) { :round_robin }
-
-      it "expect to use the round robin distributor" do
-        expect(config.distributor)
-          .to be_a(Karafka::Pro::Processing::ShareGroups::VirtualPartitions::Distributors::RoundRobin)
-      end
-    end
-
     context "when using consistent distribution" do
       it { expect(config.distributor).to be_a(distributors::Consistent) }
     end

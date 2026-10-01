@@ -35,7 +35,7 @@ RSpec.describe_current do
     {
       virtual_partitions: {
         active: true,
-        partitioner: :round_robin,
+        partitioner: Karafka::Pro::Processing::ShareGroups::VirtualPartitions::Partitioners::RoundRobin.new,
         reducer: ->(key) { key },
         max_partitions: 2,
         distribution: :consistent
@@ -43,7 +43,7 @@ RSpec.describe_current do
     }
   end
 
-  context "when using round robin" do
+  context "when using the round robin partitioner" do
     it { expect(validation).to be_success }
   end
 

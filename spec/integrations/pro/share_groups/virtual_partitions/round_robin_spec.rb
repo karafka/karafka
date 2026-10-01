@@ -28,7 +28,7 @@
 # License: https://karafka.io/docs/Pro-License-Comm/
 # Contact: contact@karafka.io
 
-# Share group (KIP-932) virtual partitions with the round robin partitioner: records of a single
+# Share group (KIP-932) virtual partitions with the RoundRobin partitioner: records of a single
 # topic partition are spread across several consumer instances that process them in parallel.
 
 setup_karafka do |config|
@@ -53,7 +53,10 @@ draw_routes(create_topics: false) do
   share_group DT.group do
     topic DT.topic do
       consumer Consumer
-      virtual_partitions(partitioner: :round_robin, max_partitions: 4)
+      virtual_partitions(
+        partitioner: Karafka::Pro::Processing::ShareGroups::VirtualPartitions::Partitioners::RoundRobin.new,
+        max_partitions: 4
+      )
     end
   end
 end
