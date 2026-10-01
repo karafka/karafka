@@ -74,7 +74,15 @@ other = Thread.new do
       DT[:data][message.partition] << message.payload.to_i
 
       consumer.store_offset(message)
-      consumer.commit
+
+      begin
+        consumer.commit
+      # Karafka may join while we are already consuming, moving the group to a new generation
+      # before we commit. Like Karafka, we treat it as an ownership loss and the partition will
+      # be reprocessed from the last committed offset, so continuity is still preserved
+      rescue Rdkafka::RdkafkaError => e
+        raise unless %i[illegal_generation unknown_member_id assignment_lost].include?(e.code)
+      end
 
       break
     end

@@ -77,7 +77,9 @@ produce_many(DT.topic, elements)
 consumer = setup_rdkafka_consumer
 
 thread = Thread.new do
-  sleep(10)
+  # Trigger the rebalance only once we are throttled, so the throttling window is still active
+  # when we get the partition back. A fixed sleep here would depend on how fast the group forms.
+  sleep(0.1) until DT[:offsets].size >= 5
 
   consumer.subscribe(DT.topic)
 

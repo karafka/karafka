@@ -31,7 +31,12 @@
 # Karafka should react to wildcard quiet from commanding
 
 setup_karafka
-setup_web
+setup_web do |config|
+  # The commanding listener uses `assign` with `latest`, so a command dispatched before it resolves
+  # its starting offset would be skipped. Commands topic is fresh per spec, so reading it from the
+  # beginning only removes this race
+  config.commanding.kafka = config.commanding.kafka.merge("auto.offset.reset": "earliest")
+end
 
 class Consumer < Karafka::BaseConsumer
   def consume

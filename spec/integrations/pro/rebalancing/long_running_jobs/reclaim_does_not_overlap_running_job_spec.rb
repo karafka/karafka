@@ -145,12 +145,16 @@ other = Thread.new do
 
   consumer.subscribe(DT.topic)
 
-  consumer.each do |message|
+  # We check the stop flag on every poll and not only on message arrival, because once Karafka
+  # stops, its producer is closed and no new messages may ever arrive for us
+  until DT[:stop].any?
+    message = consumer.poll(100)
+
+    next unless message
+
     DT[:jumped] << message.partition
     consumer.store_offset(message)
     consumer.commit(nil, false)
-
-    break if DT[:stop].any?
   end
 
   consumer.close

@@ -85,8 +85,16 @@ draw_routes do
   end
 end
 
-produce_many(DT.topics[0], DT.uuids(10))
-produce_many(DT.topics[1], DT.uuids(10))
+# Both subscription groups are members of the same consumer group. We produce only once both of
+# them got their assignments, otherwise the first one could lock itself before the second one
+# joins. A locked subscription group does not poll, so it could not take part in the rebalance
+# caused by the second one joining and both would get stuck
+Thread.new do
+  sleep(0.1) until Karafka::App.assignments.size >= 2
+
+  produce_many(DT.topics[0], DT.uuids(10))
+  produce_many(DT.topics[1], DT.uuids(10))
+end
 
 start_karafka_and_wait_until do
   DT[0].size >= 10 && DT[1].size >= 10

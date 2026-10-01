@@ -139,8 +139,15 @@ draw_routes do
   end
 end
 
-produce_many(DT.topics[0], DT.uuids(100))
-produce_many(DT.topics[1], DT.uuids(100))
+# Both subscription groups are members of the same consumer group. We produce only once both of
+# them got their assignments, otherwise the first one to join could consume (and skip) the data
+# before the second one joins and triggers a rebalance
+Thread.new do
+  sleep(0.1) until Karafka::App.assignments.size >= 2
+
+  produce_many(DT.topics[0], DT.uuids(100))
+  produce_many(DT.topics[1], DT.uuids(100))
+end
 
 start_karafka_and_wait_until do
   DT[:total].size >= 200
