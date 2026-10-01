@@ -39,7 +39,7 @@ RSpec.describe_current do
 
       it { expect(producer).not_to have_received(:produce_async) }
       it { expect(client).not_to have_received(:mark_as_rejected) }
-      it { expect(client).to have_received(:settle).with(messages, :release) }
+      it { expect(client).to have_received(:settle).with(messages.raw, :release) }
     end
 
     context "when consumption failed and retries are exhausted" do
@@ -94,7 +94,7 @@ RSpec.describe_current do
       end
 
       it { expect(producer).not_to have_received(:produce_async) }
-      it { expect(client).to have_received(:settle).with(messages, :release) }
+      it { expect(client).to have_received(:settle).with(messages.raw, :release) }
     end
 
     context "when consumption succeeded" do
@@ -106,7 +106,7 @@ RSpec.describe_current do
       end
 
       it { expect(producer).not_to have_received(:produce_async) }
-      it { expect(client).to have_received(:settle).with(messages, :release) }
+      it { expect(client).to have_received(:settle).with(messages.raw, :release) }
     end
   end
 end

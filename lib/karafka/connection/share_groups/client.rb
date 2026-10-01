@@ -168,7 +168,8 @@ module Karafka
         # Acknowledges with the given state every record of `messages` that was not acknowledged
         # yet. Used to settle a processed batch so that no record is left outstanding.
         #
-        # @param messages [Array<Karafka::Messages::Message>] processed records
+        # @param messages [Array<Karafka::Messages::Message>] processed records (raw array, not the
+        #   `Messages` batch, so external `#each` patches are not triggered)
         # @param state [Symbol] `:accept`, `:release` or `:reject`
         def settle(messages, state)
           @mutex.synchronize do

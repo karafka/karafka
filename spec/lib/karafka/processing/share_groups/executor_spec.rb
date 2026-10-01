@@ -41,7 +41,7 @@ RSpec.describe_current do
 
     it "marks the coordinator successful and settles the unacknowledged records" do
       expect(coordinator.success?).to be(true)
-      expect(client).to have_received(:settle).with(kind_of(Karafka::Messages::Messages), :release)
+      expect(client).to have_received(:settle).with(kind_of(Array), :release)
     end
 
     it "exposes the topic and partition of the coordinated records" do

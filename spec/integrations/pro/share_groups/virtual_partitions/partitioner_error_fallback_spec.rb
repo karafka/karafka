@@ -25,6 +25,8 @@
 # Receipt, viewing, or possession of this software does not convey or
 # imply any license or right beyond those expressly stated above.
 #
+# License: https://karafka.io/docs/Pro-License-Comm/
+# Contact: contact@karafka.io
 
 # Share group (KIP-932) virtual partitions with a partitioner that raises: the error is reported
 # and the records are processed without the virtual partitioning, so consumption continues.

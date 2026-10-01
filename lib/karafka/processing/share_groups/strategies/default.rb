@@ -81,9 +81,9 @@ module Karafka
           # @note The listener flushes the acknowledgements once the whole batch is processed.
           def handle_after_consume
             if coordinator.consumption(self).success?
-              client.settle(messages, topic.acknowledgements.unacknowledged)
+              client.settle(messages.raw, topic.acknowledgements.unacknowledged)
             else
-              client.settle(messages, :release)
+              client.settle(messages.raw, :release)
             end
           end
 

@@ -26,7 +26,7 @@ module Karafka
             # Process-critical errors are never dispatched to the DLQ regardless of the retries
             # state, same as for consumer groups - the records are redelivered after the restart
             if !consumption.success? && !critical_error?(consumption.cause)
-              messages.each do |message|
+              messages.raw.each do |message|
                 next if message.delivery_count <= topic.dead_letter_queue.max_retries
                 next unless client.pending?(message)
 

@@ -24,7 +24,7 @@ RSpec.describe_current do
       it "settles unacknowledged records with the topic default (release)" do
         consumer.handle_after_consume
 
-        expect(client).to have_received(:settle).with(messages, :release)
+        expect(client).to have_received(:settle).with(messages.raw, :release)
       end
 
       context "when the topic accepts unacknowledged records" do
@@ -33,7 +33,7 @@ RSpec.describe_current do
         it "accepts them" do
           consumer.handle_after_consume
 
-          expect(client).to have_received(:settle).with(messages, :accept)
+          expect(client).to have_received(:settle).with(messages.raw, :accept)
         end
       end
     end
@@ -47,7 +47,7 @@ RSpec.describe_current do
       it "always releases unacknowledged records" do
         consumer.handle_after_consume
 
-        expect(client).to have_received(:settle).with(messages, :release)
+        expect(client).to have_received(:settle).with(messages.raw, :release)
       end
     end
   end
