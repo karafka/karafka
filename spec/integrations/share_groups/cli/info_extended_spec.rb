@@ -2,7 +2,8 @@
 
 # Karafka CLI info --extended should print share groups (KIP-932) alongside consumer groups: the
 # share groups count, the share group with its subscription groups and topics, and the share
-# topic features (acknowledgements and dead letter queue).
+# topic features (acknowledgements and dead letter queue). Settings share topics do not use
+# (initial offset and pausing) are printed only for consumer group topics.
 
 setup_karafka
 
@@ -47,3 +48,11 @@ assert results.include?("Features:"), results
 assert results.include?("acknowledgements: unacknowledged=:reject"), results
 assert results.include?("dead_letter_queue:"), results
 assert results.include?("share_dlq_target"), results
+
+routing = results.split("========== Config").first
+consumer_group_section, share_group_section = routing.split("Share group: integration_share_group")
+
+assert consumer_group_section.include?("initial_offset:"), results
+assert consumer_group_section.include?("pause_timeout:"), results
+assert !share_group_section.include?("initial_offset:"), results
+assert !share_group_section.include?("pause_timeout:"), results
