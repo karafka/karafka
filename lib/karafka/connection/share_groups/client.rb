@@ -13,8 +13,10 @@ module Karafka
       # offsets. The underlying `Rdkafka::ShareConsumer` is single-threaded by design and services
       # its log, statistics and error callbacks from within `#poll`.
       #
-      # @note This client is not thread-safe for concurrent polling. It is driven by a single
-      #   share-group listener thread (the tight poll-process-acknowledge loop).
+      # @note The underlying share consumer allows only one caller at a time: for example an
+      #   `#acknowledge` from one worker while another worker is in a synchronous commit raises
+      #   `conflict`. Since acknowledgements and commits run from many worker threads, every call
+      #   that touches the native handle is serialized with a mutex.
       class Client
         include Karafka::Core::Helpers::Time
         include Helpers::ConfigImporter.new(
@@ -56,7 +58,7 @@ module Karafka
         # @param timeout [Integer] max time in milliseconds to wait for records
         # @return [Array<Rdkafka::ShareConsumer::Message>] fetched records (may be empty)
         def batch_poll(timeout = @subscription_group.max_wait_time)
-          result = kafka.poll(timeout)
+          result = @mutex.synchronize { kafka.poll(timeout) }
 
           return EMPTY_ARRAY if result.nil? || result.empty?
 
@@ -110,10 +112,12 @@ module Karafka
         # @param safe [Boolean] when true, rescues Rdkafka::RdkafkaError so callers in
         #   shutdown/quiet paths do not trigger a full listener reset.
         def events_poll(timeout = 0, safe: false)
-          # Do not service (nor rebuild) the consumer once closed
-          return if @closed
+          @mutex.synchronize do
+            # Do not service (nor rebuild) the consumer once closed
+            return if @closed
 
-          kafka.events_poll(timeout)
+            kafka.events_poll(timeout)
+          end
 
           Karafka.monitor.instrument(
             "client.events_poll",
@@ -157,11 +161,13 @@ module Karafka
         #
         # @param async [Boolean] should the commit happen async (default) or sync
         def commit(async: true)
-          # Do not flush (nor rebuild the consumer) once closed. Any record left unacknowledged is
-          # redelivered by the broker after its acquisition lock expires.
-          return if @closed
+          @mutex.synchronize do
+            # Do not flush (nor rebuild the consumer) once closed. Any record left unacknowledged
+            # is redelivered by the broker after its acquisition lock expires.
+            return if @closed
 
-          async ? kafka.commit_async : kafka.commit_sync
+            async ? kafka.commit_async : kafka.commit_sync
+          end
         end
 
         # Flushes pending acknowledgements in a synchronous (blocking) way.
@@ -229,11 +235,13 @@ module Karafka
         # @param message [Karafka::Messages::Message] message to acknowledge
         # @param state [Symbol] `:accept`, `:release` or `:reject`
         def acknowledge(message, state)
-          # Do not acknowledge (nor rebuild the consumer) once closed. The record is redelivered by
-          # the broker after its acquisition lock expires.
-          return if @closed
+          @mutex.synchronize do
+            # Do not acknowledge (nor rebuild the consumer) once closed. The record is redelivered
+            # by the broker after its acquisition lock expires.
+            return if @closed
 
-          kafka.acknowledge(message, state)
+            kafka.acknowledge(message, state)
+          end
         end
 
         # @return [Rdkafka::ShareConsumer] librdkafka share consumer instance
