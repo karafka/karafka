@@ -84,9 +84,7 @@ draw_routes do
 end
 
 Thread.new do
-  # Both subscription groups are members of the same consumer group. We start only once both of
-  # them got their assignments, otherwise the rebalance caused by the second one joining would
-  # revoke the first one partition and drop its pause, so it would consume its whole backlog
+  # Produce once both subscription groups are assigned, so no rebalance drops the pause
   sleep(0.1) until Karafka::App.assignments.size >= 2
 
   TOPICS.each { |name| produce(name, DT.uuid) }

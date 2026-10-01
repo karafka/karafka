@@ -139,9 +139,7 @@ draw_routes do
   end
 end
 
-# Both subscription groups are members of the same consumer group. We produce only once both of
-# them got their assignments, otherwise the first one to join could consume (and skip) the data
-# before the second one joins and triggers a rebalance
+# Produce once both subscription groups are assigned
 Thread.new do
   sleep(0.1) until Karafka::App.assignments.size >= 2
 

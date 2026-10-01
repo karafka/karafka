@@ -32,8 +32,7 @@
 # 1. Produces 15 messages (offsets 0-14) to a topic
 # 2. Each message produces async to its own unique target topic
 # 3. mark_as_consumed is called after all async productions
-# 4. On first attempt processing offset 1, inject a failure (offset 1 may or may not share a batch
-#    with offset 0, depending on how Kafka delivers the data)
+# 4. On first attempt processing offset 1, inject a failure
 #
 # We verify that if the transaction completes without error, all async productions
 # have been successfully acknowledged, so the callback cannot indicate failure later.
@@ -65,8 +64,7 @@ class Consumer < Karafka::BaseConsumer
     # Track which offsets we're processing
     first_offset = messages.first.offset
 
-    # Only fail on the first batch that contains offset 1. We do not require it to start from
-    # offset 0, as the first batch may hold only offset 0 when polled before the rest is fetched
+    # Only fail on the first batch that contains offset 1
     should_fail = !DT.key?(:failed) && messages.any? { |message| message.offset == 1 }
 
     handlers = []
@@ -210,7 +208,7 @@ assert_equal 0, DT[:unexpected_failures].size
 # Verify offset committed correctly (15 messages)
 assert_equal 15, fetch_next_offset
 
-# Verify we processed offset 0 at least twice (initial fail + retry) when it was in the failed batch
+# Verify we processed offset 0 at least twice (initial fail + retry) if it was in the failed batch
 offset_0_attempts = DT[:processed_offsets].count(0)
 assert offset_0_attempts >= (DT[:errors].first[:first_offset].zero? ? 2 : 1)
 

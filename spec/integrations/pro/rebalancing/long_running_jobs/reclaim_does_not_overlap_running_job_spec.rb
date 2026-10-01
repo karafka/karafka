@@ -145,8 +145,7 @@ other = Thread.new do
 
   consumer.subscribe(DT.topic)
 
-  # We check the stop flag on every poll and not only on message arrival, because once Karafka
-  # stops, its producer is closed and no new messages may ever arrive for us
+  # Check the stop flag on every poll, as no new messages may arrive once Karafka stops
   until DT[:stop].any?
     message = consumer.poll(100)
 

@@ -18,9 +18,7 @@ Karafka::App.monitor.subscribe("swarm.node.after_fork") do
 end
 
 class Consumer < Karafka::BaseConsumer
-  # We do not hang here, so every node stops gracefully and gets blocked in `at_exit`. A hanging
-  # job would make its node stop forcefully via `exit!`, which skips `at_exit`, and with both
-  # nodes busy (e.g. the partition moving between them on a rebalance) nothing would block
+  # No hanging, so nodes stop gracefully and block in `at_exit` (forceful stop skips it)
   def consume
     WRITER.puts("1")
   end

@@ -109,7 +109,12 @@ draw_routes do
   end
 end
 
-DP.call
+# Produce once all multiplexed connections are assigned, so no rebalance hits a transaction
+Thread.new do
+  sleep(0.1) until Karafka::App.assignments.size >= 5
+
+  DP.call
+end
 
 start_karafka_and_wait_until do
   DT[:accu].values.all? { |acc| acc.size >= 100 }

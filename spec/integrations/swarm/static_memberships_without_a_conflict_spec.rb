@@ -40,10 +40,7 @@ producer = nil
 
 # No specs needed because if fenced, will fail
 start_karafka_and_wait_until(mode: :swarm) do
-  # Groups form without an initial rebalance delay, so the first node may get all the partitions
-  # and drain the initial data before the second one joins. We keep producing so both nodes have
-  # something to consume once assigned. The supervisor closes `Karafka.producer` before forking,
-  # hence a dedicated one created post-fork.
+  # Keep producing so a late joining node also gets data (Karafka.producer is closed pre-fork)
   producer ||= WaterDrop::Producer.new do |producer_config|
     producer_config.kafka = Karafka::Setup::AttributesMap.producer(Karafka::App.config.kafka.dup)
   end

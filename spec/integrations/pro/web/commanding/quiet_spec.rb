@@ -32,9 +32,7 @@
 
 setup_karafka
 setup_web do |config|
-  # The commanding listener uses `assign` with `latest`, so a command dispatched before it resolves
-  # its starting offset would be skipped. Commands topic is fresh per spec, so reading it from the
-  # beginning only removes this race
+  # Do not miss commands dispatched before the listener resolves its offsets
   config.commanding.kafka = config.commanding.kafka.merge("auto.offset.reset": "earliest")
 end
 

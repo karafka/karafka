@@ -85,10 +85,7 @@ draw_routes do
   end
 end
 
-# Both subscription groups are members of the same consumer group. We produce only once both of
-# them got their assignments, otherwise the first one could lock itself before the second one
-# joins. A locked subscription group does not poll, so it could not take part in the rebalance
-# caused by the second one joining and both would get stuck
+# Produce once both subscription groups are assigned, so none locks itself before a rebalance
 Thread.new do
   sleep(0.1) until Karafka::App.assignments.size >= 2
 
