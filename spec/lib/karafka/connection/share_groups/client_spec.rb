@@ -99,6 +99,47 @@ RSpec.describe_current do
     end
   end
 
+  describe "#events_poll" do
+    before do
+      allow(share_consumer).to receive_messages(poll: [], events_poll: 0)
+      client.batch_poll(100)
+    end
+
+    it "services the main queue with the given timeout" do
+      client.events_poll(100)
+
+      expect(share_consumer).to have_received(:events_poll).with(100)
+    end
+
+    it "publishes a client.events_poll instrumentation event" do
+      events = []
+      Karafka.monitor.subscribe("client.events_poll") { |event| events << event }
+
+      client.events_poll
+
+      expect(events.first[:subscription_group]).to eq(subscription_group)
+    end
+
+    it "raises errors by default" do
+      allow(share_consumer).to receive(:events_poll).and_raise(Rdkafka::RdkafkaError.new(-1))
+
+      expect { client.events_poll }.to raise_error(Rdkafka::RdkafkaError)
+    end
+
+    it "swallows errors when safe" do
+      allow(share_consumer).to receive(:events_poll).and_raise(Rdkafka::RdkafkaError.new(-1))
+
+      expect { client.events_poll(safe: true) }.not_to raise_error
+    end
+
+    it "does not touch the consumer once closed" do
+      client.close
+      client.events_poll
+
+      expect(share_consumer).not_to have_received(:events_poll)
+    end
+  end
+
   describe "#close and #closed?" do
     before { allow(share_consumer).to receive(:poll).and_return([]) }
 
