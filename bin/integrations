@@ -25,7 +25,8 @@ ROOT_PATH = Pathname.new(File.expand_path(File.join(File.dirname(__FILE__), '../
 # we limit it. Locally we can run a lot of those, as many of them have sleeps and do not use a lot
 # of CPU. Locally we also cannot go beyond certain limit due to how often and how many topics we
 # create in Kafka. With an overloaded system, we start getting timeouts.
-CONCURRENCY = ENV.key?('CI') ? 5 : Etc.nprocessors * 3
+# Can be overridden with SPECS_CONCURRENCY to tune it without code changes.
+CONCURRENCY = Integer(ENV.fetch('SPECS_CONCURRENCY') { ENV.key?('CI') ? 5 : Etc.nprocessors * 3 })
 
 # How may bytes do we want to keep from the stdout in the buffer for when we need to print it
 MAX_BUFFER_OUTPUT = 307_200
@@ -309,6 +310,15 @@ while finished_scenarios.size < scenarios.size
   end
 
   sleep(0.1)
+end
+
+# Optionally store per-scenario timings (TSV) so runs can be compared and scheduling tuned
+if ENV.key?('SPECS_TIMINGS_FILE')
+  File.open(ENV.fetch('SPECS_TIMINGS_FILE'), 'w') do |file|
+    finished_scenarios.each do |scenario|
+      file.puts([scenario.name, scenario.type, scenario.time_taken.round(2), scenario.success?].join("\t"))
+    end
+  end
 end
 
 # Report longest scenarios

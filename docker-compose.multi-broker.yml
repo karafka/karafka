@@ -27,6 +27,9 @@ services:
       KAFKA_DEFAULT_REPLICATION_FACTOR: 1
       KAFKA_MIN_INSYNC_REPLICAS: 1
       KAFKA_AUTO_CREATE_TOPICS_ENABLE: 'true'
+      # Form new consumer groups immediately instead of waiting the default 3s for more
+      # members. Almost every integration spec creates a fresh group, so this is paid per spec.
+      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
       KAFKA_GROUP_COORDINATOR_REBALANCE_PROTOCOLS: 'classic,consumer,share'
       KAFKA_SHARE_COORDINATOR_STATE_TOPIC_REPLICATION_FACTOR: 3
       KAFKA_SHARE_COORDINATOR_STATE_TOPIC_MIN_ISR: 2
@@ -62,6 +65,9 @@ services:
       KAFKA_DEFAULT_REPLICATION_FACTOR: 1
       KAFKA_MIN_INSYNC_REPLICAS: 1
       KAFKA_AUTO_CREATE_TOPICS_ENABLE: 'true'
+      # Form new consumer groups immediately instead of waiting the default 3s for more
+      # members. Almost every integration spec creates a fresh group, so this is paid per spec.
+      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
       KAFKA_GROUP_COORDINATOR_REBALANCE_PROTOCOLS: 'classic,consumer,share'
       KAFKA_SHARE_COORDINATOR_STATE_TOPIC_REPLICATION_FACTOR: 3
       KAFKA_SHARE_COORDINATOR_STATE_TOPIC_MIN_ISR: 2
@@ -97,6 +103,9 @@ services:
       KAFKA_DEFAULT_REPLICATION_FACTOR: 1
       KAFKA_MIN_INSYNC_REPLICAS: 1
       KAFKA_AUTO_CREATE_TOPICS_ENABLE: 'true'
+      # Form new consumer groups immediately instead of waiting the default 3s for more
+      # members. Almost every integration spec creates a fresh group, so this is paid per spec.
+      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
       KAFKA_GROUP_COORDINATOR_REBALANCE_PROTOCOLS: 'classic,consumer,share'
       KAFKA_SHARE_COORDINATOR_STATE_TOPIC_REPLICATION_FACTOR: 3
       KAFKA_SHARE_COORDINATOR_STATE_TOPIC_MIN_ISR: 2
