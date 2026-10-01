@@ -620,7 +620,9 @@ end
 # @param topic [String] topic name
 # @param group [String] share group name
 # @param partitions [Integer] number of partitions to create
-def setup_share_group(topic = DT.topic, group = DT.group, partitions = 1)
+# @param configs [Hash{String => String}] extra share group configs to set (for example
+#   `"share.record.lock.duration.ms" => "15000"`)
+def setup_share_group(topic = DT.topic, group = DT.group, partitions = 1, configs: {})
   Karafka::Admin.create_topic(topic, partitions, 1)
 
   admin = Rdkafka::Config.new(
@@ -632,7 +634,10 @@ def setup_share_group(topic = DT.topic, group = DT.group, partitions = 1)
       {
         resource_type: Rdkafka::Bindings::RD_KAFKA_RESOURCE_GROUP,
         resource_name: group,
-        configs: [{ name: "share.auto.offset.reset", value: "earliest", op_type: 0 }]
+        configs: [
+          { name: "share.auto.offset.reset", value: "earliest", op_type: 0 },
+          *configs.map { |name, value| { name: name, value: value, op_type: 0 } }
+        ]
       }
     ]
   ).wait(max_wait_timeout_ms: 15_000)

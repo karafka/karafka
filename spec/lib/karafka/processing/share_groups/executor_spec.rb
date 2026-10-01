@@ -5,7 +5,7 @@ RSpec.describe_current do
 
   let(:group_id) { SecureRandom.hex(6) }
   let(:client) do
-    instance_double(Karafka::Connection::ShareGroups::Client, mark_as_released: nil, commit: nil)
+    instance_double(Karafka::Connection::ShareGroups::Client, mark_as_released: true, commit: nil)
   end
   let(:topic) { build(:routing_share_topic) }
   let(:coordinator) { Karafka::Processing::ShareGroups::Coordinator.new(topic, 0) }

@@ -23,9 +23,9 @@ RSpec.describe_current do
     let(:client) do
       instance_double(
         Karafka::Connection::ShareGroups::Client,
-        mark_as_accepted: nil,
-        mark_as_released: nil,
-        mark_as_rejected: nil,
+        mark_as_accepted: true,
+        mark_as_released: true,
+        mark_as_rejected: true,
         commit!: nil
       )
     end
@@ -51,6 +51,43 @@ RSpec.describe_current do
       it "expect to return true when acknowledging" do
         expect(consumer.mark_as_accepted(message)).to be(true)
       end
+    end
+
+    describe "sync acknowledgement outcome" do
+      let(:partition) { Rdkafka::Consumer::Partition.new(message.partition, nil, error) }
+      let(:result) do
+        instance_double(
+          Rdkafka::Consumer::TopicPartitionList,
+          to_h: { message.topic => [partition] }
+        )
+      end
+
+      before { allow(client).to receive(:commit!).and_return(result) }
+
+      context "when the broker accepted the acknowledgements" do
+        let(:error) { 0 }
+
+        it { expect(consumer.mark_as_accepted!(message)).to be(true) }
+      end
+
+      context "when the broker rejected the acknowledgements (lock expired)" do
+        let(:error) { 121 }
+
+        it { expect(consumer.mark_as_accepted!(message)).to be(false) }
+      end
+
+      context "when there was nothing to flush" do
+        let(:result) { nil }
+        let(:error) { 0 }
+
+        it { expect(consumer.mark_as_accepted!(message)).to be(true) }
+      end
+    end
+
+    describe "when the client is closed" do
+      before { allow(client).to receive(:mark_as_accepted).and_return(false) }
+
+      it { expect(consumer.mark_as_accepted(message)).to be(false) }
     end
 
     describe "acknowledging the same message twice" do

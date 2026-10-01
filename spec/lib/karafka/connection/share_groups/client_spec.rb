@@ -12,7 +12,8 @@ RSpec.describe_current do
       close: nil,
       commit_sync: true,
       commit_async: true,
-      events_poll: 0
+      events_poll: 0,
+      "acknowledgement_commit_callback=": nil
     )
   end
   let(:rdkafka_config) { instance_double(Rdkafka::Config, share_consumer: share_consumer) }
@@ -69,6 +70,15 @@ RSpec.describe_current do
 
       expect(share_consumer)
         .to have_received(:poll).with(satisfy { |timeout| timeout <= 10 }).at_least(:once)
+    end
+
+    it "reports acknowledgement commit outcomes through a callback" do
+      allow(share_consumer).to receive(:poll).and_return([])
+
+      client.batch_poll(100)
+
+      expect(share_consumer).to have_received(:acknowledgement_commit_callback=)
+        .with(kind_of(Karafka::Instrumentation::Callbacks::ShareGroups::AcknowledgementCommit))
     end
 
     it "subscribes to the subscription group topics when building the consumer" do

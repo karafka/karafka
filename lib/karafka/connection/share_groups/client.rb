@@ -160,6 +160,7 @@ module Karafka
         #
         # @param message [Karafka::Messages::Message] message to acknowledge. It responds to
         #   `#topic`, `#partition` and `#offset`, which is what the acknowledgement needs.
+        # @return [Boolean] true if acknowledged, false if the client is already closed
         def mark_as_accepted(message)
           acknowledge(message, :accept)
         end
@@ -167,6 +168,7 @@ module Karafka
         # Releases a single record back to the share group for redelivery (RELEASE).
         #
         # @param message [Karafka::Messages::Message] message to release
+        # @return [Boolean] true if acknowledged, false if the client is already closed
         def mark_as_released(message)
           acknowledge(message, :release)
         end
@@ -174,6 +176,7 @@ module Karafka
         # Rejects a single record so it is not redelivered (REJECT).
         #
         # @param message [Karafka::Messages::Message] message to reject
+        # @return [Boolean] true if acknowledged, false if the client is already closed
         def mark_as_rejected(message)
           acknowledge(message, :reject)
         end
@@ -200,6 +203,9 @@ module Karafka
         # Flushes pending acknowledgements in a synchronous (blocking) way.
         #
         # @see #commit
+        # @return [Rdkafka::Consumer::TopicPartitionList, nil] per-partition outcome of the
+        #   acknowledgements (each partition carries an `err` when the broker rejected them) or nil
+        #   when there was nothing to flush or the client is closed
         def commit!
           commit(async: false)
         end
@@ -261,13 +267,16 @@ module Karafka
         #
         # @param message [Karafka::Messages::Message] message to acknowledge
         # @param state [Symbol] `:accept`, `:release` or `:reject`
+        # @return [Boolean] true if acknowledged, false if the client is already closed
         def acknowledge(message, state)
           @mutex.synchronize do
             # Do not acknowledge (nor rebuild the consumer) once closed. The record is redelivered
             # by the broker after its acquisition lock expires.
-            return if @closed
+            return false if @closed
 
             kafka.acknowledge(message, state)
+
+            true
           end
         end
 
@@ -320,6 +329,14 @@ module Karafka
               consumer
             )
           )
+
+          # Reports acknowledgements rejected by the broker (for example of records whose
+          # acquisition lock expired), as their outcome is otherwise only known to librdkafka
+          consumer.acknowledgement_commit_callback =
+            Instrumentation::Callbacks::ShareGroups::AcknowledgementCommit.new(
+              @subscription_group.id,
+              @subscription_group.group.id
+            )
 
           consumer.subscribe(*@subscription_group.subscriptions)
 

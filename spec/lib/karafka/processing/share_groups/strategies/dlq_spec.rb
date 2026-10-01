@@ -14,9 +14,9 @@ RSpec.describe_current do
   let(:client) do
     instance_double(
       Karafka::Connection::ShareGroups::Client,
-      mark_as_accepted: nil,
-      mark_as_released: nil,
-      mark_as_rejected: nil,
+      mark_as_accepted: true,
+      mark_as_released: true,
+      mark_as_rejected: true,
       commit: nil
     )
   end

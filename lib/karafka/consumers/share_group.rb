@@ -75,7 +75,9 @@ module Karafka
       # the accept is durable before returning.
       #
       # @param message [Karafka::Messages::Message] message to accept
-      # @return [Boolean] true if acknowledged, false if this message was already acknowledged
+      # @return [Boolean] true if acknowledged and confirmed by the broker, false if this message
+      #   was already acknowledged or the broker rejected the acknowledgement (for example because
+      #   the acquisition lock of the record expired and it will be delivered again)
       def mark_as_accepted!(message)
         acknowledge(message, :accept, sync: true)
       end
@@ -93,7 +95,8 @@ module Karafka
       # Releases a message (RELEASE) and flushes acknowledgements synchronously.
       #
       # @param message [Karafka::Messages::Message] message to release
-      # @return [Boolean] true if acknowledged, false if this message was already acknowledged
+      # @return [Boolean] true if acknowledged and confirmed by the broker, false if this message
+      #   was already acknowledged or the broker rejected the acknowledgement
       def mark_as_released!(message)
         acknowledge(message, :release, sync: true)
       end
@@ -110,7 +113,8 @@ module Karafka
       # Rejects a message (REJECT) and flushes acknowledgements synchronously.
       #
       # @param message [Karafka::Messages::Message] message to reject
-      # @return [Boolean] true if acknowledged, false if this message was already acknowledged
+      # @return [Boolean] true if acknowledged and confirmed by the broker, false if this message
+      #   was already acknowledged or the broker rejected the acknowledgement
       def mark_as_rejected!(message)
         acknowledge(message, :reject, sync: true)
       end
@@ -122,14 +126,27 @@ module Karafka
       # @param message [Karafka::Messages::Message] message to acknowledge
       # @param state [Symbol] `:accept`, `:release` or `:reject`
       # @param sync [Boolean] should acknowledgements be flushed synchronously afterwards
-      # @return [Boolean] true if acknowledged, false if this message was already acknowledged
+      # @return [Boolean] true if acknowledged (and for sync, confirmed by the broker), false if
+      #   this message was already acknowledged, the client is closed or the broker rejected it
       def acknowledge(message, state, sync: false)
         return false unless acknowledgements_tracker.acknowledge(message)
+        return false unless client.public_send(ACKNOWLEDGEMENTS.fetch(state), message)
+        return true unless sync
 
-        client.public_send(ACKNOWLEDGEMENTS.fetch(state), message)
-        client.commit! if sync
+        confirmed?(client.commit!, message)
+      end
 
-        true
+      # @param result [Rdkafka::Consumer::TopicPartitionList, nil] outcome of a synchronous commit
+      # @param message [Karafka::Messages::Message] acknowledged message
+      # @return [Boolean] did the broker accept the acknowledgements of the message partition
+      def confirmed?(result, message)
+        return true unless result
+
+        partition = result.to_h.fetch(message.topic, []).find do |details|
+          details.partition == message.partition
+        end
+
+        partition.nil? || partition.err.to_i.zero?
       end
 
       # @return [Karafka::Processing::ShareGroups::AcknowledgementsTracker] tracker of this
