@@ -12,8 +12,8 @@ module Karafka
     # {#mark_as_accepted}, {#mark_as_released} or {#mark_as_rejected} per message. Every record left
     # unacknowledged is settled once `#consume` finishes: after a success it gets the topic
     # `acknowledgements(unacknowledged:)` state (released for redelivery by default), after a
-    # failure it is always released for redelivery. Acknowledgements are flushed to the broker once
-    # the whole batch is processed.
+    # failure it is always released for redelivery. Acknowledgements are then flushed to the broker
+    # asynchronously.
     class ShareGroup < Base
       # @return [Symbol] group type
       def group_type

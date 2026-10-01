@@ -134,8 +134,6 @@ module Karafka
             # after back-offs
             when "connection.client.poll.error"
               error "Data polling error occurred: #{error}"
-            when "connection.client.unacknowledged.error"
-              error "Unacknowledged share group records released: #{error}"
             when "connection.client.rebalance_callback.error"
               error "Rebalance callback error occurred: #{error}"
             when "connection.client.unsubscribe.error"

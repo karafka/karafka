@@ -165,11 +165,9 @@ module Karafka
               subscription_group: @subscription_group
             )
 
-            consumed = poll_and_schedule
+            poll_and_schedule
 
             wait
-
-            flush_acknowledgements if consumed
           end
 
           # We are quieting or stopping now. Drain any in-flight consume jobs before running the
@@ -204,8 +202,6 @@ module Karafka
 
         # Polls a single batch and schedules it on the workers pool: consume jobs when records were
         # returned, idle jobs (housekeeping) when the poll came back empty.
-        #
-        # @return [Boolean] were any records polled
         def poll_and_schedule
           Karafka.monitor.instrument(
             "connection.listener.fetch_loop.received",
@@ -219,34 +215,9 @@ module Karafka
 
           if @messages_buffer.empty?
             build_and_schedule_idle_jobs
-
-            false
           else
             build_and_schedule_consume_jobs
-
-            true
           end
-        end
-
-        # Runs once the whole polled batch was processed. Releases any record that is still not
-        # acknowledged (the processing strategies settle every record, so this only happens when
-        # something went wrong outside of the consumption flow) - otherwise the next poll would be
-        # refused. Then flushes the acknowledgements of the batch to the broker.
-        def flush_acknowledgements
-          released = @client.release_pending
-
-          if released.positive?
-            Karafka.monitor.instrument(
-              "error.occurred",
-              caller: self,
-              error: Errors::UnacknowledgedRecordsError.new(
-                "#{released} records were released without being acknowledged"
-              ),
-              type: "connection.client.unacknowledged.error"
-            )
-          end
-
-          @client.commit
         end
 
         # Builds consume jobs for the polled records and schedules them on the workers pool. Like

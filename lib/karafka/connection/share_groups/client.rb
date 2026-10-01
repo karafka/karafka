@@ -208,22 +208,6 @@ module Karafka
           end
         end
 
-        # Releases every record that is still not acknowledged, so the next poll can proceed. This
-        # is a safety net - processed batches are settled by the processing strategies.
-        #
-        # @return [Integer] number of released records
-        def release_pending
-          @mutex.synchronize do
-            return 0 if @closed || @messages_tracker.empty?
-
-            pending = @messages_tracker.pending
-            pending.each { |message| kafka.acknowledge(message, :release) }
-            @messages_tracker.clear
-
-            pending.size
-          end
-        end
-
         # Flushes pending acknowledgements to the broker in a non-blocking or blocking way.
         #
         # Mirrors the consumer-group client's `#commit_offsets` convention (async by default, with a

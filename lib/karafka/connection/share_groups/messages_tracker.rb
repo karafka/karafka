@@ -36,16 +36,6 @@ module Karafka
           @pending.key?(key(message))
         end
 
-        # @return [Array<Rdkafka::ShareConsumer::Message>] records that are still not acknowledged
-        def pending
-          @pending.values
-        end
-
-        # @return [Boolean] are there no records waiting for an acknowledgement
-        def empty?
-          @pending.empty?
-        end
-
         # Stops tracking all the records (for example when the share consumer is closed)
         def clear
           @pending.clear

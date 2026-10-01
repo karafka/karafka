@@ -15,6 +15,7 @@ RSpec.describe_current do
     instance_double(
       Karafka::Connection::ShareGroups::Client,
       settle: nil,
+      commit: nil,
       pending?: true,
       mark_as_rejected: nil
     )

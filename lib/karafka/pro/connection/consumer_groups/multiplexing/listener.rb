@@ -48,7 +48,6 @@ module Karafka
             # @param event [Karafka::Core::Monitoring::Event] event with statistics
             def on_statistics_emitted(event)
               # Share group (KIP-932) clients have no consumer group section in their statistics
-              # and are not multiplexed
               return unless event[:statistics].key?("cgrp")
 
               @manager.notice(

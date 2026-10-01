@@ -76,15 +76,16 @@ module Karafka
           # Settles every record of the batch that the consumer did not acknowledge itself, so that
           # none is left outstanding (librdkafka would refuse the next poll otherwise). After a
           # successful consumption they get the topic `acknowledgements(unacknowledged:)` state
-          # (release by default); after a failure they are always released for redelivery.
-          #
-          # @note The listener flushes the acknowledgements once the whole batch is processed.
+          # (release by default); after a failure they are always released for redelivery. The
+          # acknowledgements are then flushed to the broker asynchronously.
           def handle_after_consume
             if coordinator.consumption(self).success?
               client.settle(messages.raw, topic.acknowledgements.unacknowledged)
             else
               client.settle(messages.raw, :release)
             end
+
+            client.commit
           end
 
           # Idle run handling (no messages passed to the end user). Runs housekeeping when a batch

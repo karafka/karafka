@@ -160,18 +160,10 @@ RSpec.describe_current do
       expect(share_consumer).not_to have_received(:acknowledge).with(first, :accept)
     end
 
-    it "releases everything still pending and reports how many" do
-      client.mark_as_accepted(first)
-
-      expect(client.release_pending).to eq(1)
-      expect(share_consumer).to have_received(:acknowledge).with(polled.last, :release)
-      expect(client.release_pending).to eq(0)
-    end
-
     it "forgets pending records once closed" do
       client.close
 
-      expect(client.release_pending).to eq(0)
+      expect(client.pending?(first)).to be(false)
     end
   end
 

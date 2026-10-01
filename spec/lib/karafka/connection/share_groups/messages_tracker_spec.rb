@@ -7,13 +7,11 @@ RSpec.describe_current do
   let(:second) { build(:messages_message, topic: "t", partition: 0, offset: 2) }
   let(:other_partition) { build(:messages_message, topic: "t", partition: 1, offset: 1) }
 
-  it { expect(tracker).to be_empty }
+  it { expect(tracker.pending?(first)).to be(false) }
 
   context "when records are tracked" do
     before { tracker.track([first, second, other_partition]) }
 
-    it { expect(tracker).not_to be_empty }
-    it { expect(tracker.pending).to eq([first, second, other_partition]) }
     it { expect(tracker.pending?(first)).to be(true) }
 
     it "identifies records by topic, partition and offset" do
@@ -27,13 +25,12 @@ RSpec.describe_current do
 
       it { expect(tracker.pending?(first)).to be(false) }
       it { expect(tracker.pending?(other_partition)).to be(true) }
-      it { expect(tracker.pending).to eq([second, other_partition]) }
+      it { expect(tracker.pending?(second)).to be(true) }
     end
 
     context "when cleared" do
       before { tracker.clear }
 
-      it { expect(tracker).to be_empty }
       it { expect(tracker.pending?(first)).to be(false) }
     end
   end

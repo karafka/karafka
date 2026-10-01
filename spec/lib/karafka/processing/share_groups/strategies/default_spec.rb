@@ -10,7 +10,7 @@ RSpec.describe_current do
     instance
   end
 
-  let(:client) { instance_double(Karafka::Connection::ShareGroups::Client, settle: nil) }
+  let(:client) { instance_double(Karafka::Connection::ShareGroups::Client, settle: nil, commit: nil) }
   let(:topic) { build(:routing_share_topic) }
   let(:coordinator) { Karafka::Processing::ShareGroups::Coordinator.new(topic, 0) }
   let(:messages) do
@@ -25,6 +25,12 @@ RSpec.describe_current do
         consumer.handle_after_consume
 
         expect(client).to have_received(:settle).with(messages.raw, :release)
+      end
+
+      it "flushes the acknowledgements asynchronously" do
+        consumer.handle_after_consume
+
+        expect(client).to have_received(:commit).with(no_args)
       end
 
       context "when the topic accepts unacknowledged records" do
