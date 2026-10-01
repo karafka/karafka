@@ -9,9 +9,11 @@ module Karafka
     # deliberately does not inherit the consumer-group offset/pause/seek/eof/revocation behavior.
     #
     # The acknowledgement mode is explicit: inside `#consume` you call
-    # {#mark_as_accepted}, {#mark_as_released} or {#mark_as_rejected} per message. Accumulated
-    # acknowledgements are flushed to the broker after `#consume` returns successfully. Any record
-    # left unacknowledged is redelivered by the broker after its acquisition lock expires.
+    # {#mark_as_accepted}, {#mark_as_released} or {#mark_as_rejected} per message. Every record left
+    # unacknowledged is settled once `#consume` finishes: after a success it gets the topic
+    # `acknowledgements(unacknowledged:)` state (released for redelivery by default), after a
+    # failure it is always released for redelivery. Acknowledgements are flushed to the broker once
+    # the whole batch is processed.
     class ShareGroup < Base
       # @return [Symbol] group type
       def group_type
@@ -97,14 +99,6 @@ module Karafka
       # @param message [Karafka::Messages::Message] message to reject
       def mark_as_rejected!(message)
         client.mark_as_rejected(message)
-        client.commit!
-      end
-
-      private
-
-      # Flushes the acknowledgements accumulated during `#consume` to the broker. Called by the
-      # processing strategy after a successful consume.
-      def commit_acknowledgements
         client.commit!
       end
     end

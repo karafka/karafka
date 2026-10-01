@@ -73,13 +73,18 @@ module Karafka
             coordinator.decrement(:consume)
           end
 
-          # On success we flush the acknowledgements accumulated during `#consume`. On failure we
-          # intentionally do nothing: unacknowledged records are redelivered by the broker after
-          # their acquisition lock expires.
+          # Settles every record of the batch that the consumer did not acknowledge itself, so that
+          # none is left outstanding (librdkafka would refuse the next poll otherwise). After a
+          # successful consumption they get the topic `acknowledgements(unacknowledged:)` state
+          # (release by default); after a failure they are always released for redelivery.
+          #
+          # @note The listener flushes the acknowledgements once the whole batch is processed.
           def handle_after_consume
-            return unless coordinator.success?
-
-            commit_acknowledgements
+            if coordinator.consumption(self).success?
+              client.settle(messages, topic.acknowledgements.unacknowledged)
+            else
+              client.settle(messages, :release)
+            end
           end
 
           # Idle run handling (no messages passed to the end user). Runs housekeeping when a batch

@@ -158,9 +158,11 @@ module Karafka
               subscription_group: @subscription_group
             )
 
-            poll_and_schedule
+            consumed = poll_and_schedule
 
             wait
+
+            flush_acknowledgements if consumed
           end
 
           # We are quieting or stopping now. Drain any in-flight consume jobs before running the
@@ -201,14 +203,41 @@ module Karafka
         #   `#size`) that several shared subscribers depend on; a share poll returns a flat batch
         #   with different semantics. A share-specific received event can be added later once its
         #   payload shape is settled.
+        #
+        # @return [Boolean] were any records polled
         def poll_and_schedule
           messages = @client.batch_poll
 
           if messages.empty?
             build_and_schedule_idle_jobs
+
+            false
           else
             build_and_schedule_consume_jobs(messages)
+
+            true
           end
+        end
+
+        # Runs once the whole polled batch was processed. Releases any record that is still not
+        # acknowledged (the processing strategies settle every record, so this only happens when
+        # something went wrong outside of the consumption flow) - otherwise the next poll would be
+        # refused. Then flushes the acknowledgements of the batch to the broker.
+        def flush_acknowledgements
+          released = @client.release_pending
+
+          if released.positive?
+            Karafka.monitor.instrument(
+              "error.occurred",
+              caller: self,
+              error: Errors::UnacknowledgedRecordsError.new(
+                "#{released} records were released without being acknowledged"
+              ),
+              type: "connection.client.unacknowledged.error"
+            )
+          end
+
+          @client.commit
         end
 
         # Builds consume jobs for a non-empty poll batch, grouped per topic, and schedules them on
@@ -223,11 +252,13 @@ module Karafka
             topic = @subscription_group.topics.find(topic_name)
 
             # A record for a topic we are not routing (should not happen given our subscription) is
-            # skipped; leaving it unacknowledged lets the broker redeliver/expire it.
+            # skipped; it stays unacknowledged and is released after the batch for redelivery.
             next unless topic
 
             built = raw_messages.map do |raw_message|
-              Messages::Builders::Message.call(raw_message, topic, received_at)
+              message = Messages::Builders::Message.call(raw_message, topic, received_at)
+              message.metadata.delivery_count = raw_message.delivery_count
+              message
             end
 
             coordinator = @coordinators.find_or_create(topic_name)

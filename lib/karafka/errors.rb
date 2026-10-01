@@ -142,6 +142,11 @@ module Karafka
     # is not supported in a given configuration
     UnsupportedOptionError = Class.new(BaseError)
 
+    # Reported when share-group records were still not acknowledged once their batch was processed
+    # and had to be released to allow the next poll. Processing strategies settle every record, so
+    # this indicates that something failed outside of the consumption flow.
+    UnacknowledgedRecordsError = Class.new(BaseError)
+
     # Raised when the routing describes a share group (KIP-932 / Queues for Kafka) and we attempt
     # to actually run it. Share groups can be declared in the routing today, but their runtime is
     # not implemented yet. Inherits from `NotImplementedError` so it reads correctly and can be

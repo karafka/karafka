@@ -48,6 +48,10 @@ module Karafka
           @closed = false
           @subscription_group = subscription_group
           @mutex = Mutex.new
+          # Records delivered by the last poll that were not acknowledged yet. In the explicit
+          # acknowledgement mode librdkafka refuses to poll again until every one of them is
+          # acknowledged, so we need to know which are still outstanding.
+          @pending = {}
         end
 
         # Fetches a batch of records within the given time budget.
@@ -78,6 +82,10 @@ module Karafka
             else
               messages << item
             end
+          end
+
+          @mutex.synchronize do
+            messages.each { |message| @pending[pending_key(message)] = message }
           end
 
           messages
@@ -151,6 +159,42 @@ module Karafka
           acknowledge(message, :reject)
         end
 
+        # Acknowledges with the given state every record of `messages` that was not acknowledged
+        # yet. Used to settle a processed batch so that no record is left outstanding.
+        #
+        # @param messages [Array<Karafka::Messages::Message>] processed records
+        # @param state [Symbol] `:accept`, `:release` or `:reject`
+        def settle(messages, state)
+          @mutex.synchronize do
+            return if @closed
+
+            messages.each do |message|
+              key = pending_key(message)
+
+              next unless @pending.key?(key)
+
+              kafka.acknowledge(message, state)
+              @pending.delete(key)
+            end
+          end
+        end
+
+        # Releases every record that is still not acknowledged, so the next poll can proceed. This
+        # is a safety net - processed batches are settled by the processing strategies.
+        #
+        # @return [Integer] number of released records
+        def release_pending
+          @mutex.synchronize do
+            return 0 if @closed || @pending.empty?
+
+            released = @pending.size
+            @pending.each_value { |message| kafka.acknowledge(message, :release) }
+            @pending.clear
+
+            released
+          end
+        end
+
         # Flushes pending acknowledgements to the broker in a non-blocking or blocking way.
         #
         # Mirrors the consumer-group client's `#commit_offsets` convention (async by default, with a
@@ -195,6 +239,8 @@ module Karafka
             return if @closed
 
             @closed = true
+            # Closing the share consumer releases whatever it still holds
+            @pending.clear
 
             return unless @kafka
 
@@ -241,7 +287,14 @@ module Karafka
             return if @closed
 
             kafka.acknowledge(message, state)
+            @pending.delete(pending_key(message))
           end
+        end
+
+        # @param message [Karafka::Messages::Message, Rdkafka::ShareConsumer::Message] record
+        # @return [Array] key identifying the record within the share group
+        def pending_key(message)
+          [message.topic, message.partition, message.offset]
         end
 
         # @return [Rdkafka::ShareConsumer] librdkafka share consumer instance
