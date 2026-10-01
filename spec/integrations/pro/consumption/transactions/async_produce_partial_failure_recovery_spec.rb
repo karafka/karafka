@@ -32,7 +32,8 @@
 # 1. Produces 15 messages (offsets 0-14) to a topic
 # 2. Each message produces async to its own unique target topic
 # 3. mark_as_consumed is called after all async productions
-# 4. On first attempt processing offset 1, inject a failure
+# 4. On first attempt processing offset 1, inject a failure (offset 1 may or may not share a batch
+#    with offset 0, depending on how Kafka delivers the data)
 #
 # We verify that if the transaction completes without error, all async productions
 # have been successfully acknowledged, so the callback cannot indicate failure later.
@@ -47,7 +48,6 @@ end
 
 # Initialize counters and collections
 DT[:consume_attempts] = 0
-DT[:first_offset_attempts] = 0
 DT[:total_received] = 0
 DT[:processed_offsets] = []
 DT[:successful_attempts] = []
@@ -65,9 +65,9 @@ class Consumer < Karafka::BaseConsumer
     # Track which offsets we're processing
     first_offset = messages.first.offset
 
-    # Only fail on the first time we see offset 0, and only when processing the message at offset 1
-    should_fail = first_offset == 0 && DT[:first_offset_attempts] == 0
-    DT[:first_offset_attempts] += 1 if first_offset == 0
+    # Only fail on the first batch that contains offset 1. We do not require it to start from
+    # offset 0, as the first batch may hold only offset 0 when polled before the rest is fetched
+    should_fail = !DT.key?(:failed) && messages.any? { |message| message.offset == 1 }
 
     handlers = []
 
@@ -76,8 +76,10 @@ class Consumer < Karafka::BaseConsumer
         messages.each do |message|
           DT[:processed_offsets] << message.offset
 
-          # On first attempt when starting from offset 0, inject a failure for offset 1
+          # On the first batch with offset 1, inject a failure for it
           if should_fail && message.offset == 1
+            DT[:failed] = true
+
             # This should cause the entire transaction to fail
             raise StandardError, "Production failure for offset 1 in first attempt"
           end
@@ -180,7 +182,7 @@ assert DT[:failed_attempts].size >= 1
 
 # Verify exactly one error
 assert_equal 1, DT[:errors].size
-assert_equal 0, DT[:errors].first[:first_offset]
+assert DT[:errors].first[:first_offset] <= 1
 assert DT[:errors].first[:message].include?("offset 1")
 
 # Verify all 15 messages were eventually produced and received
@@ -208,9 +210,9 @@ assert_equal 0, DT[:unexpected_failures].size
 # Verify offset committed correctly (15 messages)
 assert_equal 15, fetch_next_offset
 
-# Verify we processed offset 0 at least twice (initial fail + retry)
+# Verify we processed offset 0 at least twice (initial fail + retry) when it was in the failed batch
 offset_0_attempts = DT[:processed_offsets].count(0)
-assert offset_0_attempts >= 2
+assert offset_0_attempts >= (DT[:errors].first[:first_offset].zero? ? 2 : 1)
 
 # Verify we processed offset 1 at least twice (failed on first, succeeded on retry)
 offset_1_attempts = DT[:processed_offsets].count(1)
