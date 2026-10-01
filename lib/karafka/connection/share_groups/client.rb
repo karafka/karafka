@@ -159,6 +159,12 @@ module Karafka
           acknowledge(message, :reject)
         end
 
+        # @param message [Karafka::Messages::Message] record from the last poll
+        # @return [Boolean] is the record still not acknowledged
+        def pending?(message)
+          @mutex.synchronize { @pending.key?(pending_key(message)) }
+        end
+
         # Acknowledges with the given state every record of `messages` that was not acknowledged
         # yet. Used to settle a processed batch so that no record is left outstanding.
         #

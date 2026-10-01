@@ -8,9 +8,9 @@ module Karafka
         # Default share-group processing flow:
         # - runs the user `#consume` (during which the user acknowledges records via
         #   `#mark_as_accepted` / `#mark_as_released` / `#mark_as_rejected`)
-        # - on success, flushes the acknowledgements to the broker
-        # - on failure, does nothing special: any record left unacknowledged is redelivered by the
-        #   broker once its acquisition lock expires (at-least-once)
+        # - on success, settles records left unacknowledged with the topic
+        #   `acknowledgements(unacknowledged:)` state (release by default)
+        # - on failure, releases records left unacknowledged for redelivery (at-least-once)
         module Default
           # No features enabled for this flow
           FEATURES = %i[].freeze

@@ -355,6 +355,8 @@ module Karafka
             setting :coordinator_class, default: Processing::ShareGroups::Coordinator
             # option partitioner_class [Class] partitioner we use against a batch of data
             setting :partitioner_class, default: Processing::ShareGroups::Partitioner
+            # option strategy_selector [Object] processing strategy selector to be used
+            setting :strategy_selector, default: Processing::ShareGroups::StrategySelector.new
             # option executor_class [Class] executor class
             setting :executor_class, default: Processing::ShareGroups::Executor
           end

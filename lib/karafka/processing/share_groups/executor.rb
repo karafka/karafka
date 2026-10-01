@@ -3,11 +3,15 @@
 module Karafka
   module Processing
     module ShareGroups
-      # Builds and drives a share-group consumer for a given topic. There is no eofed/revoked
-      # lifecycle and no partitioner - a poll batch is handed to a single consumer instance which
-      # acknowledges records per message. The processing strategy is {Strategies::Default}.
+      # Builds and drives a share-group consumer for the records of a given topic partition (or
+      # one group of them, when a partitioner divides them further). There is no eofed/revoked
+      # lifecycle - records are acknowledged per message. The processing strategy is picked by the
+      # share-group strategy selector, like for consumer groups.
       class Executor
         extend Forwardable
+        include Helpers::ConfigImporter.new(
+          strategy_selector: %i[internal processing share_groups strategy_selector]
+        )
 
         def_delegators :@coordinator, :topic, :partition
 
@@ -101,7 +105,7 @@ module Karafka
             consumer = topic.consumer_class.new
             # We use the singleton class as the same consumer class may process different topics
             # with different settings
-            consumer.singleton_class.include(Strategies::Default)
+            consumer.singleton_class.include(strategy_selector.find(topic))
 
             consumer.client = @client
             consumer.coordinator = @coordinator
