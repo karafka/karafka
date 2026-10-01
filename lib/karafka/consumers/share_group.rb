@@ -127,10 +127,18 @@ module Karafka
       # @param state [Symbol] `:accept`, `:release` or `:reject`
       # @param sync [Boolean] should acknowledgements be flushed synchronously afterwards
       # @return [Boolean] true if acknowledged (and for sync, confirmed by the broker), false if
-      #   this message was already acknowledged, the client is closed or the broker rejected it
+      #   this message was already acknowledged, is not part of the current batch, the client is
+      #   closed or the broker rejected it
       def acknowledge(message, state, sync: false)
         return false unless acknowledgements_tracker.acknowledge(message)
-        return false unless client.public_send(ACKNOWLEDGEMENTS.fetch(state), message)
+
+        unless client.public_send(ACKNOWLEDGEMENTS.fetch(state), message)
+          # Nothing was acknowledged, so the record is not considered acknowledged either
+          acknowledgements_tracker.forget(message)
+
+          return false
+        end
+
         return true unless sync
 
         confirmed?(client.commit!, message)

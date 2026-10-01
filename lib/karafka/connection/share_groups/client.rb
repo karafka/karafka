@@ -267,7 +267,8 @@ module Karafka
         #
         # @param message [Karafka::Messages::Message] message to acknowledge
         # @param state [Symbol] `:accept`, `:release` or `:reject`
-        # @return [Boolean] true if acknowledged, false if the client is already closed
+        # @return [Boolean] true if acknowledged, false if the client is already closed or the
+        #   record is not currently acquired by this consumer
         def acknowledge(message, state)
           @mutex.synchronize do
             # Do not acknowledge (nor rebuild the consumer) once closed. The record is redelivered
@@ -278,6 +279,13 @@ module Karafka
 
             true
           end
+        rescue Rdkafka::RdkafkaError => e
+          # The record is not currently acquired by this consumer (for example it comes from an
+          # earlier poll), so there is nothing to acknowledge. Like marking a no longer owned
+          # partition for consumer groups, this is reported as a failed acknowledgement.
+          raise unless e.code == :state
+
+          false
         end
 
         # @return [Rdkafka::ShareConsumer] librdkafka share consumer instance

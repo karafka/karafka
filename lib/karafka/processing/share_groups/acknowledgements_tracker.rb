@@ -25,6 +25,13 @@ module Karafka
           @mutex.synchronize { !@acknowledged.add?(key(message)).nil? }
         end
 
+        # Stops considering the record as acknowledged (when acknowledging it did not succeed)
+        #
+        # @param message [Karafka::Messages::Message] record
+        def forget(message)
+          @mutex.synchronize { @acknowledged.delete(key(message)) }
+        end
+
         # @param message [Karafka::Messages::Message] record
         # @return [Boolean] was this record already acknowledged
         def acknowledged?(message)

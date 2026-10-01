@@ -115,6 +115,30 @@ RSpec.describe_current do
 
       expect(share_consumer).to have_received(:acknowledge).with(message, :reject)
     end
+
+    it "expect to return true when acknowledged" do
+      expect(client.mark_as_accepted(message)).to be(true)
+    end
+
+    context "when the record is not acquired by this consumer" do
+      before do
+        allow(share_consumer)
+          .to receive(:acknowledge)
+          .and_raise(Rdkafka::RdkafkaError.new(-172))
+      end
+
+      it { expect(client.mark_as_accepted(message)).to be(false) }
+    end
+
+    context "when acknowledging fails for another reason" do
+      before do
+        allow(share_consumer)
+          .to receive(:acknowledge)
+          .and_raise(Rdkafka::RdkafkaError.new(-185))
+      end
+
+      it { expect { client.mark_as_accepted(message) }.to raise_error(Rdkafka::RdkafkaError) }
+    end
   end
 
   describe "#commit and #commit!" do

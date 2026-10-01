@@ -23,6 +23,16 @@ RSpec.describe_current do
     end
   end
 
+  describe "#forget" do
+    before do
+      tracker.acknowledge(message)
+      tracker.forget(message)
+    end
+
+    it { expect(tracker.acknowledged?(message)).to be(false) }
+    it { expect(tracker.acknowledge(message)).to be(true) }
+  end
+
   describe "#clear" do
     before do
       tracker.acknowledge(message)

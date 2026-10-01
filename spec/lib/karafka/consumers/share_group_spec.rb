@@ -84,10 +84,16 @@ RSpec.describe_current do
       end
     end
 
-    describe "when the client is closed" do
-      before { allow(client).to receive(:mark_as_accepted).and_return(false) }
+    describe "when the client did not acknowledge (closed or record not acquired)" do
+      before { allow(client).to receive(:mark_as_accepted).and_return(false, true) }
 
       it { expect(consumer.mark_as_accepted(message)).to be(false) }
+
+      it "expect not to consider the message acknowledged" do
+        consumer.mark_as_accepted(message)
+
+        expect(consumer.mark_as_accepted(message)).to be(true)
+      end
     end
 
     describe "acknowledging the same message twice" do
