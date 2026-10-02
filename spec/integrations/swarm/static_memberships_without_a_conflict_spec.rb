@@ -36,18 +36,26 @@ end
 end
 
 results = {}
+producer = nil
 
 # No specs needed because if fenced, will fail
 start_karafka_and_wait_until(mode: :swarm) do
-  loop do
+  # Keep producing so a late joining node also gets data (Karafka.producer is closed pre-fork)
+  producer ||= WaterDrop::Producer.new do |producer_config|
+    producer_config.kafka = Karafka::Setup::AttributesMap.producer(Karafka::App.config.kafka.dup)
+  end
+
+  10.times do |partition|
+    producer.produce_sync(topic: DT.topic, payload: "1", partition: partition)
+  end
+
+  while READER.wait_readable(1)
     partition_id, pid = READER.gets.strip.split("-")
     results[pid] ||= Set.new
     results[pid] << partition_id
-
-    break if results.size == 2 && results.values.all? { |sub| sub.size >= 2 }
-
-    sleep(1)
   end
 
-  true
+  results.size == 2 && results.values.all? { |sub| sub.size >= 2 }
 end
+
+producer.close
