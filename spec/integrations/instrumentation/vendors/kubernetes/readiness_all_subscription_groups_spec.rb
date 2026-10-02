@@ -54,7 +54,7 @@ end
 produce_many(DT.topic, DT.uuids(1))
 
 start_karafka_and_wait_until do
-  DT[:consumed].size >= GROUPS_COUNT
+  DT[:consumed].size >= GROUPS_COUNT && DT[:probing].include?("200")
 end
 
 assert DT[:probing].include?("200")

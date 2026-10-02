@@ -47,8 +47,11 @@ draw_routes(Consumer)
 
 produce_many(DT.topic, DT.uuids(1))
 
+consumed = false
+
 start_karafka_and_wait_until(mode: :swarm) do
-  READER.gets
+  consumed ||= !READER.gets.nil?
+  consumed && DT[:probing].include?("500")
 end
 
 assert DT[:probing].include?("500")

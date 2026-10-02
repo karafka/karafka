@@ -145,12 +145,15 @@ other = Thread.new do
 
   consumer.subscribe(DT.topic)
 
-  consumer.each do |message|
+  # Check the stop flag on every poll, as no new messages may arrive once Karafka stops
+  until DT[:stop].any?
+    message = consumer.poll(100)
+
+    next unless message
+
     DT[:jumped] << message.partition
     consumer.store_offset(message)
     consumer.commit(nil, false)
-
-    break if DT[:stop].any?
   end
 
   consumer.close
