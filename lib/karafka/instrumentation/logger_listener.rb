@@ -452,6 +452,12 @@ module Karafka
         when "connection.client.poll.error"
           error "Data polling error occurred: #{details}"
           error backtrace
+        when "connection.client.acknowledgement.error"
+          error "Share group acknowledgements rejected: #{details}"
+          error backtrace
+        when "callbacks.acknowledgement_commit.error"
+          error "callbacks.acknowledgement_commit processing failed due to an error: #{details}"
+          error backtrace
         when "connection.client.rebalance_callback.error"
           error "Rebalance callback error occurred: #{details}"
           error backtrace

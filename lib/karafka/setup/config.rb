@@ -325,8 +325,7 @@ module Karafka
           #   that should terminate the process rather than be retried.
           setting :critical_errors, default: [SystemExit, SignalException, NoMemoryError].freeze
 
-          # Consumer-group-specific processing defaults. When share groups land, a parallel
-          # `share_groups` namespace will hold their equivalents.
+          # Consumer-group-specific processing defaults.
           setting :consumer_groups do
             # option jobs_builder [Object] jobs builder we want to use
             setting :jobs_builder, default: Processing::ConsumerGroups::JobsBuilder.new
@@ -344,6 +343,22 @@ module Karafka
             setting :expansions_selector, default: Processing::ConsumerGroups::ExpansionsSelector.new
             # option [Class] executor class
             setting :executor_class, default: Processing::ConsumerGroups::Executor
+          end
+
+          # Share-group-specific processing defaults (KIP-932). Parallel to `consumer_groups`, but
+          # driven by per-record acknowledgements instead of partition offsets.
+          setting :share_groups do
+            # option jobs_builder [Object] jobs builder we want to use
+            setting :jobs_builder, default: Processing::ShareGroups::JobsBuilder.new
+            # option coordinator_class [Class] work coordinator we want to use for processing
+            #   coordination
+            setting :coordinator_class, default: Processing::ShareGroups::Coordinator
+            # option partitioner_class [Class] partitioner we use against a batch of data
+            setting :partitioner_class, default: Processing::ShareGroups::Partitioner
+            # option strategy_selector [Object] processing strategy selector to be used
+            setting :strategy_selector, default: Processing::ShareGroups::StrategySelector.new
+            # option executor_class [Class] executor class
+            setting :executor_class, default: Processing::ShareGroups::Executor
           end
         end
 

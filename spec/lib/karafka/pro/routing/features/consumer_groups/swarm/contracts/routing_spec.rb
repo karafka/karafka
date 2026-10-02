@@ -42,6 +42,39 @@ RSpec.describe_current do
     it { expect { validation }.to raise_error(validation_error) }
   end
 
+  context "when only share groups are routed" do
+    before do
+      builder.draw do
+        share_group "share-group" do
+          topic "topic1" do
+            consumer Class.new(Karafka::ShareConsumer)
+          end
+        end
+      end
+    end
+
+    it { expect { validation }.not_to raise_error }
+  end
+
+  context "when share groups are routed next to consumer groups that do not match all nodes" do
+    before do
+      builder.draw do
+        share_group "share-group" do
+          topic "topic1" do
+            consumer Class.new(Karafka::ShareConsumer)
+          end
+        end
+
+        topic "topic2" do
+          consumer Class.new(Karafka::BaseConsumer)
+          swarm(nodes: 1..)
+        end
+      end
+    end
+
+    it { expect { validation }.to raise_error(validation_error) }
+  end
+
   context "when routes do not match all the topics" do
     before do
       builder.draw do

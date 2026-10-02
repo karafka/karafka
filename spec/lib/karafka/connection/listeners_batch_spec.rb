@@ -21,23 +21,22 @@ RSpec.describe_current do
     end
   end
 
-  describe "share group guard" do
+  describe "share group dispatch" do
     let(:share_group) { Karafka::Routing::ShareGroups::Group.new("webhooks") }
 
     before do
+      allow(subscription_group).to receive(:group).and_return(share_group)
       allow(Karafka::App).to receive(:subscription_groups).and_return(
         share_group => [subscription_group]
       )
     end
 
-    it "expect to refuse assembling listeners for share groups" do
-      expect { described_class.new(jobs_queue) }
-        .to raise_error(Karafka::Errors::ShareGroupsNotImplementedError, /webhooks/)
+    it "expect to assemble share-group listeners for share groups" do
+      expect(described_class.new(jobs_queue))
+        .to all be_a(Karafka::Connection::ShareGroups::Listener)
     end
   end
 
-  # The share-group guard raises before any listener is built, so there is nothing to shut down.
-  # We reset the stub before the top-level `after` hook so it does not re-trigger the guard.
   after do
     allow(Karafka::App).to receive(:subscription_groups).and_call_original
   end
