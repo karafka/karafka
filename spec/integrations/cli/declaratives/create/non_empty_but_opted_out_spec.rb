@@ -7,14 +7,22 @@ Consumer = Class.new(Karafka::BaseConsumer)
 
 setup_karafka
 
+draw_topics(create_topics: false) do
+  topic(DT.topics[0]) do
+    active false
+  end
+
+  topic(DT.topics[1]) do
+    active false
+  end
+end
+
 draw_routes(create_topics: false) do
   topic DT.topics[0] do
-    config(active: false)
     consumer Consumer
   end
 
   topic DT.topics[1] do
-    config(active: false)
     consumer Consumer
   end
 end

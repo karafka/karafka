@@ -94,6 +94,10 @@ module Karafka
               Builder.prepend(self::Builder)
             end
 
+            if const_defined?("DeclarativesBuilder", false)
+              Karafka::Declaratives::Builder.prepend(self::DeclarativesBuilder)
+            end
+
             if const_defined?("Contracts", false)
               Builder.prepend(Expander.new(self))
             end

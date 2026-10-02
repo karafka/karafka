@@ -8,20 +8,28 @@ setup_karafka
 Karafka::Admin.create_topic(DT.topics[0], 1, 1)
 Karafka::Admin.create_topic(DT.topics[1], 2, 1)
 
-draw_routes(create_topics: false) do
-  topic DT.topics[0] do
-    active(false)
+draw_topics(create_topics: false) do
+  topic(DT.topics[0]) do
+    partitions 1
     config(
-      partitions: 1,
       # This should not be used because it is overwritten by the one below
       "retention.bytes": 100_000,
       "log.retention.bytes": -1
     )
   end
 
+  topic(DT.topics[1]) do
+    partitions 1
+  end
+end
+
+draw_routes(create_topics: false) do
+  topic DT.topics[0] do
+    active(false)
+  end
+
   topic DT.topics[1] do
     active(false)
-    config(partitions: 1)
   end
 end
 

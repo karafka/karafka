@@ -10,24 +10,31 @@ setup_karafka
 Karafka::Admin.create_topic(DT.topics[0], 1, 1)
 Karafka::Admin.create_topic(DT.topics[1], 2, 1)
 
-draw_routes(create_topics: false) do
-  topic DT.topics[0] do
-    active(false)
+draw_topics(create_topics: false) do
+  topic(DT.topics[0]) do
+    partitions 1
     config(
-      partitions: 1,
       "retention.ms": 86_500_000,
       "cleanup.policy": "delete"
     )
   end
 
-  topic DT.topics[1] do
-    active(false)
-
+  topic(DT.topics[1]) do
+    partitions 1
     config(
-      partitions: 1,
       "retention.ms": 76_500_000,
       "cleanup.policy": "compact,delete"
     )
+  end
+end
+
+draw_routes(create_topics: false) do
+  topic DT.topics[0] do
+    active(false)
+  end
+
+  topic DT.topics[1] do
+    active(false)
   end
 end
 

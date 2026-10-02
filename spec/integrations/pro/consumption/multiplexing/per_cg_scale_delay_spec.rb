@@ -52,13 +52,22 @@ class Consumer < Karafka::BaseConsumer
   end
 end
 
+draw_topics(create_topics: false) do
+  topic(DT.topics[0]) do
+    partitions 2
+  end
+
+  topic(DT.topics[1]) do
+    partitions 2
+  end
+end
+
 draw_routes do
   # Registered first: its huge scale_delay must NOT leak into family :b
   subscription_group :a do
     multiplexing(max: 5, min: 1, boot: 5, scale_delay: 300_000)
 
     topic DT.topics[0] do
-      config(partitions: 2)
       consumer Consumer
     end
   end
@@ -67,7 +76,6 @@ draw_routes do
     multiplexing(max: 5, min: 1, boot: 5, scale_delay: 1_000)
 
     topic DT.topics[1] do
-      config(partitions: 2)
       consumer Consumer
     end
   end

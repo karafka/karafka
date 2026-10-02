@@ -8,7 +8,11 @@ setup_karafka do |config|
   config.strict_declarative_topics = true
 end
 
-# Mixed routing with a share group must draw cleanly (consumer topic has declaratives by default)
+draw_topics(create_topics: false) do
+  topic "declared"
+end
+
+# Mixed routing with a share group must draw cleanly (consumer topic is declared)
 draw_routes(create_topics: false) do
   consumer_group "cg" do
     topic "declared" do
@@ -39,7 +43,6 @@ begin
       topic "not-declared" do
         active(false)
         consumer Class.new(Karafka::BaseConsumer)
-        config(active: false)
       end
     end
 
