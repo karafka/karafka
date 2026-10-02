@@ -32,7 +32,7 @@ module Karafka
       def target
         Karafka::Helpers::MultiDelegator
           .delegate(:write, :close)
-          .to(*[$stdout, file].compact)
+          .to($stdout, LazyFile.new { file })
       end
 
       # @return [Pathname] Path to a file to which we should log

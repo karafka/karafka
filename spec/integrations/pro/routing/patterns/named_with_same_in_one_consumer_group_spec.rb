@@ -39,13 +39,13 @@ begin
   draw_routes(create_topics: false) do
     subscription_group :a do
       pattern("super-name1", /non-existing-ever-na/) do
-        consumer Class.new
+        consumer Class.new(Karafka::BaseConsumer)
       end
     end
 
     subscription_group :b do
       pattern("super-name2", /non-existing-ever-na/) do
-        consumer Class.new
+        consumer Class.new(Karafka::BaseConsumer)
       end
     end
   end

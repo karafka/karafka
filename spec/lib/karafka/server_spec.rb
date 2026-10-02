@@ -11,7 +11,7 @@ RSpec.describe_current do
       run!: nil,
       stopped?: true,
       terminated?: true,
-      subscription_groups: { 1 => [] }
+      subscription_groups: { build(:routing_consumer_group) => [] }
     )
 
     # Do not close the real producer as we use it in specs
@@ -19,7 +19,7 @@ RSpec.describe_current do
     allow(Karafka::Runner).to receive(:new).and_return(runner)
     allow(runner).to receive(:call)
 
-    jobs_queue = Karafka::Processing::JobsQueue.new
+    jobs_queue = Karafka::Processing::ConsumerGroups::JobsQueue.new
 
     described_class.listeners = Karafka::Connection::ListenersBatch.new(jobs_queue)
     described_class.workers = instance_double(
@@ -178,7 +178,7 @@ RSpec.describe_current do
       context "when there are active consuming threads (consuming does not want to stop)" do
         let(:active_thread) do
           instance_double(
-            Karafka::Connection::Listener,
+            Karafka::Connection::ConsumerGroups::Listener,
             stopped?: true,
             terminate: true,
             shutdown: true,
@@ -207,7 +207,7 @@ RSpec.describe_current do
       context "when there are active consuming threads but not supervised" do
         let(:active_thread) do
           instance_double(
-            Karafka::Connection::Listener,
+            Karafka::Connection::ConsumerGroups::Listener,
             stopped?: false,
             terminate: true,
             shutdown: true,
@@ -238,7 +238,7 @@ RSpec.describe_current do
       context "when there are active processing workers (processing does not want to stop)" do
         let(:active_thread) do
           instance_double(
-            Karafka::Connection::Listener,
+            Karafka::Connection::ConsumerGroups::Listener,
             alive?: true,
             stopped?: false,
             terminate: true,
@@ -281,7 +281,7 @@ RSpec.describe_current do
       context "when there are active consuming threads (consuming does not want to stop)" do
         let(:active_thread) do
           instance_double(
-            Karafka::Connection::Listener,
+            Karafka::Connection::ConsumerGroups::Listener,
             stopped?: true,
             terminate: true,
             shutdown: true,

@@ -102,10 +102,14 @@ def setup_karafka(
     config.pause.timeout = 1
     config.pause.max_timeout = 1
     config.pause.with_exponential_backoff = false
-    config.max_wait_time = 500
+    config.max_wait_time = 200
     config.shutdown_timeout = 30_000
     config.swarm.nodes = 2
     config.internal.connection.reset_backoff = 1_000
+    # Admin sleeps this long after each async operation (e.g. topic creation) before checking if
+    # its result is visible. Topic creation runs under a cross-process lock, so the default 500ms
+    # is paid by each spec and also serializes all concurrently booting specs
+    config.admin.retry_backoff = 100
 
     # Allows to overwrite any option we're interested in
     yield(config) if block_given?
@@ -208,7 +212,23 @@ def setup_web(migrate: true)
 
   return unless migrate
 
-  Karafka::Web::Installer.new.migrate
+  # On freshly created topics (single-broker KRaft) the initial state we just produced may not
+  # yet be visible to the fresh admin consumer the migrator uses to read it back, so `current!`
+  # can transiently raise a `MissingConsumers*Error`. In the Web processing consumer this
+  # self-heals because `current!` runs in a poll loop, but here `migrate` runs once, so we retry
+  # it until the watermark settles. All migration steps are idempotent, so re-running is safe.
+  attempts = 0
+
+  begin
+    Karafka::Web::Installer.new.migrate
+  rescue Karafka::Web::Errors::BaseError
+    attempts += 1
+
+    raise if attempts > 5
+
+    sleep(1)
+    retry
+  end
 end
 
 # Configures the testing framework in a given spec and allows to run it inline (in the same file)

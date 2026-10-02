@@ -157,5 +157,6 @@ en:
       key_missing: must be present and should be unique within the partition
       key_format: needs to be a non-empty string unique within the partition
       headers_schedule_target_epoch_in_the_past: 'scheduling cannot happen in the past'
+      headers_schedule_target_epoch_too_far_in_future: 'scheduling is too far in the future (schedule_target_epoch must be Unix time in seconds)'
       headers_format: are not correct
       not_a_scheduled_messages_topic: 'the envelope topic is not a scheduled messages topic'

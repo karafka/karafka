@@ -3,8 +3,8 @@
 module Karafka
   module Routing
     module Features
-      # Consumer-group-specific routing features. A parallel `ShareGroups` namespace will hold
-      # share-group-specific feature implementations once KIP-932 lands.
+      # Consumer-group-specific routing features. The parallel {Features::ShareGroups} namespace
+      # holds the share-group (KIP-932) feature implementations.
       module ConsumerGroups
       end
     end

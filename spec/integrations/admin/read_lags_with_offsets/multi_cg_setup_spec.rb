@@ -20,32 +20,32 @@ end
 draw_routes do
   consumer_group CG1 do
     topic DT.topics[0] do
-      consumer Class.new
+      consumer Class.new(Karafka::BaseConsumer)
     end
 
     topic DT.topics[1] do
       active(false)
-      consumer Class.new
+      consumer Class.new(Karafka::BaseConsumer)
     end
 
     topic DT.topics[2] do
-      consumer Class.new
+      consumer Class.new(Karafka::BaseConsumer)
     end
   end
 
   consumer_group CG2 do
     # Same on purpose
     topic DT.topics[0] do
-      consumer Class.new
+      consumer Class.new(Karafka::BaseConsumer)
     end
 
     topic DT.topics[3] do
       active(false)
-      consumer Class.new
+      consumer Class.new(Karafka::BaseConsumer)
     end
 
     topic DT.topics[4] do
-      consumer Class.new
+      consumer Class.new(Karafka::BaseConsumer)
     end
   end
 end

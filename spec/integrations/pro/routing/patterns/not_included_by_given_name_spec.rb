@@ -34,7 +34,7 @@ setup_karafka
 
 draw_routes(create_topics: false) do
   pattern("super-name", /non-existing-ever-na/) do
-    consumer Class.new
+    consumer Class.new(Karafka::BaseConsumer)
   end
 end
 

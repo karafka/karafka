@@ -173,4 +173,10 @@ RSpec.describe_current do
 
     it { expect(check).to be_success }
   end
+
+  context "when there are share group topics without declaratives" do
+    let(:routing) { [{ topics: [{ name: "share-topic" }] }] }
+
+    it { expect(check).to be_success }
+  end
 end

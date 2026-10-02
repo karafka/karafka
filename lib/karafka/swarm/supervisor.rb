@@ -56,6 +56,11 @@ module Karafka
           scope: %w[swarm cli]
         )
 
+        # Fail fast in the supervisor when active share groups (KIP-932) are present. Their
+        # runtime is not implemented yet and without this pre-fork check each node would crash on
+        # its own guard post-fork, putting the supervisor into an endless restart loop
+        Karafka::App.verify_share_groups_inactive!
+
         # Close producer just in case. While it should not be used, we do not want even a
         # theoretical case since librdkafka is not thread-safe.
         # We close it prior to forking just to make sure, there is no issue with initialized

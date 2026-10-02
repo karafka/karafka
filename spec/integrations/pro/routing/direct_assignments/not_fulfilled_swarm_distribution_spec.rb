@@ -42,7 +42,7 @@ failed = false
 begin
   draw_routes(create_topics: false) do
     topic :a do
-      consumer Class.new
+      consumer Class.new(Karafka::BaseConsumer)
       # We want to assign 5 partitions but only 3 are in use
       assign(0..5)
       swarm(
@@ -67,7 +67,7 @@ failed = false
 begin
   draw_routes(create_topics: false) do
     topic :a do
-      consumer Class.new
+      consumer Class.new(Karafka::BaseConsumer)
       # We want to assign 5 partitions but only 3 are in use
       assign(0..3)
       swarm(

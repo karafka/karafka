@@ -57,9 +57,36 @@ module Karafka
 
       # Just a nicer name for the consumer groups
       alias_method :routes, :consumer_groups
-      # Generalized alias - routing entries are "groups" (consumer groups today, other kinds
-      # of groups like KIP-932 share groups in the future).
+      # Generalized alias - routing entries are "groups" (consumer groups and, since KIP-932,
+      # share groups). Returns every group regardless of its type.
       alias_method :groups, :consumer_groups
+
+      # @return [Array<Karafka::Routing::ShareGroups::Group>] all defined share groups (KIP-932).
+      # @note Share groups live in the same routing builder as consumer groups; this is just a
+      #   type-filtered view. Empty unless `share_group` routing blocks are defined.
+      def share_groups
+        routes.share_groups
+      end
+
+      # Ensures no active share group is about to be run. Share groups (KIP-932) can be described
+      # in the routing but their runtime is not implemented yet, so every run seam (listeners
+      # assembly, swarm supervisor pre-fork) refuses to proceed instead of silently doing nothing.
+      # Excluding them (e.g. `--exclude_share_groups`) or not defining them lets the rest of the
+      # app run.
+      #
+      # @raise [Karafka::Errors::ShareGroupsNotImplementedError] when an active share group is
+      #   present in the routing
+      def verify_share_groups_inactive!
+        subscription_groups.each_key do |group|
+          next unless group.share_group?
+
+          raise(
+            Errors::ShareGroupsNotImplementedError,
+            "Share group '#{group.name}' cannot be run yet - share group (KIP-932) runtime " \
+            "support is not implemented. See the KIP-932 roadmap for progress."
+          )
+        end
+      end
 
       # Returns current assignments of this process. Both topics and partitions
       #

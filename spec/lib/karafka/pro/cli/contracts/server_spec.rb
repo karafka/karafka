@@ -35,9 +35,11 @@ RSpec.describe_current do
   let(:config) do
     {
       include_consumer_groups: [],
+      include_share_groups: [],
       include_subscription_groups: [],
       include_topics: [],
       exclude_consumer_groups: [],
+      exclude_share_groups: [],
       exclude_subscription_groups: [],
       exclude_topics: []
     }
@@ -55,10 +57,22 @@ RSpec.describe_current do
     it { expect(contract.call(config)).not_to be_success }
   end
 
+  context "when we want to use a consumer groups wildcard pattern that matches nothing yet" do
+    before { config[:include_consumer_groups] = ["#{rand}-*"] }
+
+    it { expect(contract.call(config)).to be_success }
+  end
+
   context "when we want to exclude consumer groups that are not defined" do
     before { config[:exclude_consumer_groups] = [rand.to_s] }
 
     it { expect(contract.call(config)).not_to be_success }
+  end
+
+  context "when we want to exclude a consumer groups wildcard pattern that matches nothing yet" do
+    before { config[:exclude_consumer_groups] = ["#{rand}-*"] }
+
+    it { expect(contract.call(config)).to be_success }
   end
 
   context "when we want to use topics that are not defined" do
@@ -69,12 +83,18 @@ RSpec.describe_current do
     context "when we have pattern matching defined" do
       before do
         Karafka::App.routes.pattern(/test/) do
-          consumer Class.new
+          consumer Class.new(Karafka::BaseConsumer)
         end
       end
 
       it { expect(contract.call(config)).to be_success }
     end
+  end
+
+  context "when we want to use a topics wildcard pattern that matches nothing yet" do
+    before { config[:include_topics] = ["#{rand}-*"] }
+
+    it { expect(contract.call(config)).to be_success }
   end
 
   context "when we want to exclude topics that are not defined" do
@@ -85,12 +105,18 @@ RSpec.describe_current do
     context "when we have pattern matching defined" do
       before do
         Karafka::App.routes.pattern(/test/) do
-          consumer Class.new
+          consumer Class.new(Karafka::BaseConsumer)
         end
       end
 
       it { expect(contract.call(config)).to be_success }
     end
+  end
+
+  context "when we want to exclude a topics wildcard pattern that matches nothing yet" do
+    before { config[:exclude_topics] = ["#{rand}-*"] }
+
+    it { expect(contract.call(config)).to be_success }
   end
 
   context "when we want to use subscription groups that are not defined" do
@@ -99,10 +125,22 @@ RSpec.describe_current do
     it { expect(contract.call(config)).not_to be_success }
   end
 
+  context "when we want to use a subscription groups wildcard pattern that matches nothing yet" do
+    before { config[:include_subscription_groups] = ["#{rand}-*"] }
+
+    it { expect(contract.call(config)).to be_success }
+  end
+
   context "when we want to exclude subscription groups that are not defined" do
     before { config[:exclude_subscription_groups] = [rand.to_s] }
 
     it { expect(contract.call(config)).not_to be_success }
+  end
+
+  context "when we want to exclude a subscription groups wildcard pattern matching nothing yet" do
+    before { config[:exclude_subscription_groups] = ["#{rand}-*"] }
+
+    it { expect(contract.call(config)).to be_success }
   end
 
   context "when nothing to listen on" do

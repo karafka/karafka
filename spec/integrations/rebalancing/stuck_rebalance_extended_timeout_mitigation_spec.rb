@@ -34,7 +34,7 @@ STALL_SLACK = 5
 # Emulates the `rd_kafka_consumer_close` behavior from the affected librdkafka versions: close
 # blocks until the in-flight rebalance resolves - here that moment does arrive, as the broker
 # fences the staller out after just STALL_MS
-Karafka::Connection::Client.prepend(
+Karafka::Connection::ConsumerGroups::Client.prepend(
   Module.new do
     def close
       sleep(0.1) while DT.key?(:stall_deadline) && Time.now.to_f < DT[:stall_deadline]

@@ -35,6 +35,6 @@ end
 
 payload = DT[:events].last.payload
 
-assert_equal Karafka::Connection::Client, payload[:caller].class, payload[:caller].class
+assert_equal Karafka::Connection::ConsumerGroups::Client, payload[:caller].class, payload[:caller].class
 assert_equal "connection.client.poll.error", payload[:type], payload[:type]
 assert_equal :unknown_topic_or_part, payload[:error].code, payload[:error].code

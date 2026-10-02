@@ -16,7 +16,7 @@ module Karafka
 
         # @param topics [Karafka::Routing::Topics]
         def initialize(topics)
-          @pauses_manager = Connection::PausesManager.new
+          @pauses_manager = Connection::ConsumerGroups::PausesManager.new
           @coordinators = Hash.new { |h, k| h[k] = {} }
           @topics = topics
         end
@@ -46,25 +46,35 @@ module Karafka
         # @param topic_name [String] topic name
         # @param partition [Integer] partition number
         def revoke(topic_name, partition)
-          return unless @coordinators[topic_name].key?(partition)
+          partitions = @coordinators[topic_name] if @coordinators.key?(topic_name)
 
-          # Reset the partition's pause tracker attempt count. The tracker lives in the pauses
-          # manager keyed by topic-partition and would otherwise be reused as-is if we reclaim this
-          # partition, carrying a stale retry attempt count across the rebalance (which, with DLQ,
-          # would send the next failure straight to the dead letter queue, skipping the retries)
+          return unless partitions
+          return unless partitions.key?(partition)
+
+          # Reset (or, if not currently paused, remove) the partition's pause tracker. This
+          # prevents a stale retry attempt count from being reused as-is if we reclaim this
+          # partition (which, with DLQ, would send the next failure straight to the dead letter
+          # queue, skipping the retries) while also keeping `PausesManager#@pauses` from growing
+          # unbounded. See `PausesManager#revoke` for the full reasoning
           @pauses_manager.revoke(@topics.find(topic_name), partition)
 
           # The fact that we delete here does not change the fact that the executor still holds the
           # reference to this coordinator. We delete it here, as we will no longer process any
           # new stuff with it and we may need a new coordinator if we regain this partition, but the
           # coordinator may still be in use
-          @coordinators[topic_name].delete(partition).revoke
+          partitions.delete(partition).revoke
+
+          # Drop the topic entry entirely once it no longer tracks any partitions, so that
+          # `@coordinators` does not grow unbounded across rebalances for topics whose names are
+          # never reused (e.g. regex pattern subscriptions with ephemeral, per-discovery topic
+          # names). Mirrors `PausesManager#delete`
+          @coordinators.delete(topic_name) if partitions.empty?
         end
 
         # Clears coordinators and re-created the pauses manager
         # This should be used only for critical errors recovery
         def reset
-          @pauses_manager = Connection::PausesManager.new
+          @pauses_manager = Connection::ConsumerGroups::PausesManager.new
           @coordinators.clear
         end
       end

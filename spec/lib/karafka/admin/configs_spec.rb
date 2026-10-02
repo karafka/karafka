@@ -109,6 +109,24 @@ RSpec.describe_current do
       end
     end
 
+    # Altering a topic config is applied asynchronously by the broker. On a fresh or slow CI
+    # broker the new value is not always visible on the immediately following describe, so a
+    # precondition established via `alter` in a `before` block can still read as the old value
+    # when the `change` matcher captures the initial state - failing with a spurious "initially
+    # was X". Poll (bounded) until the config actually reflects the expected precondition so the
+    # matcher observes a deterministic `from`.
+    def wait_for_config(reader, expected)
+      50.times do
+        return if reader.call == expected
+
+        sleep(0.1)
+      end
+
+      # Fail loudly instead of proceeding with an unmet precondition, which would otherwise surface
+      # later as a confusing `change` matcher mismatch that points at the wrong cause.
+      raise "Expected config to become #{expected.inspect} but it stayed #{reader.call.inspect}"
+    end
+
     before { Karafka::Admin.create_topic(topic_name, 2, 1) }
 
     context "when there is nothing to alter in a resource" do
@@ -146,6 +164,7 @@ RSpec.describe_current do
         setter = described_class::Resource.new(type: :topic, name: topic_name)
         setter.set(name, 100_000)
         described_class.alter(setter)
+        wait_for_config(described_topic_config, "100000")
 
         resources.first.delete(name)
       end
@@ -164,6 +183,7 @@ RSpec.describe_current do
         setter = described_class::Resource.new(type: :topic, name: topic_name)
         setter.set(name, "delete")
         described_class.alter(setter)
+        wait_for_config(described_topic_config, "delete")
 
         resources.first.append(name, value)
       end
@@ -212,6 +232,7 @@ RSpec.describe_current do
         setter = described_class::Resource.new(type: :topic, name: topic_name)
         setter.set(name, "delete,compact")
         described_class.alter(setter)
+        wait_for_config(described_topic_config, "delete,compact")
 
         resources.first.delete(name, value)
       end

@@ -12,11 +12,11 @@ failed = false
 begin
   draw_routes(create_topics: false) do
     topic "namespace_collision" do
-      consumer Class.new
+      consumer Class.new(Karafka::BaseConsumer)
     end
 
     topic "namespace.collision" do
-      consumer Class.new
+      consumer Class.new(Karafka::BaseConsumer)
     end
   end
 rescue Karafka::Errors::InvalidConfigurationError

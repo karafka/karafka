@@ -36,8 +36,26 @@ RSpec.describe_current do
   end
 
   describe "#consumer" do
+    # A named consumer class that we can redefine under the same constant to simulate a code
+    # reload (Zeitwerk swaps the constant to a fresh class object with the same name)
+    let(:original_consumer) { Class.new(Karafka::BaseConsumer) }
+    let(:reloaded_consumer) { Class.new(Karafka::BaseConsumer) }
+
     context "when persistence is turned on" do
       it { expect(topic.consumer).to eq(topic.consumer_class) }
+
+      context "when the consumer class is redefined under the same name (code reload)" do
+        before do
+          stub_const("ReloadableConsumer", original_consumer)
+          topic.consumer = ReloadableConsumer
+          # Simulate a reload: the constant now points at a fresh class
+          stub_const("ReloadableConsumer", reloaded_consumer)
+        end
+
+        it "expect to keep the originally assigned (cached) class, not re-resolving by name" do
+          expect(topic.consumer).to eq(original_consumer)
+        end
+      end
     end
 
     context "when persistence is off" do
@@ -50,6 +68,22 @@ RSpec.describe_current do
 
         it "expect to return the consumer as it is expected to be an anonymous class" do
           expect(topic.consumer).to eq(topic.consumer_class)
+        end
+      end
+
+      context "when the consumer class is redefined under the same name (code reload)" do
+        before do
+          stub_const("ReloadableConsumer", original_consumer)
+          topic.consumer = ReloadableConsumer
+          # Simulate a reload: the constant now points at a fresh class
+          stub_const("ReloadableConsumer", reloaded_consumer)
+        end
+
+        # This is the code-reload contract: with persistence off we re-fetch the class by name so
+        # a reloaded consumer definition is picked up instead of the stale cached class object
+        it "expect to re-resolve the class by name and return the reloaded class" do
+          expect(topic.consumer).to eq(reloaded_consumer)
+          expect(topic.consumer).not_to eq(original_consumer)
         end
       end
     end

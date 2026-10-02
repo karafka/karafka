@@ -69,21 +69,21 @@ end
 # 'a' routed but not declared -> guards
 draw_and_validate(valid: false) do
   topic "a" do
-    consumer Class.new
+    consumer Class.new(Karafka::BaseConsumer)
   end
 end
 
 # 'a' routed and declared active -> ok
 draw_and_validate(valid: true, declaratives: { "a" => true }) do
   topic "a" do
-    consumer Class.new
+    consumer Class.new(Karafka::BaseConsumer)
   end
 end
 
 # 'a' declared but its DLQ 'dlq' is not -> guards
 draw_and_validate(valid: false, declaratives: { "a" => true }) do
   topic "a" do
-    consumer Class.new
+    consumer Class.new(Karafka::BaseConsumer)
     dead_letter_queue(topic: "dlq")
   end
 end
@@ -91,7 +91,7 @@ end
 # both 'a' and 'dlq' declared active -> ok
 draw_and_validate(valid: true, declaratives: { "a" => true, "dlq" => true }) do
   topic "a" do
-    consumer Class.new
+    consumer Class.new(Karafka::BaseConsumer)
     dead_letter_queue(topic: "dlq")
   end
 end
@@ -99,7 +99,7 @@ end
 # 'dlq' declared inactive -> guards
 draw_and_validate(valid: false, declaratives: { "a" => true, "dlq" => false }) do
   topic "a" do
-    consumer Class.new
+    consumer Class.new(Karafka::BaseConsumer)
     dead_letter_queue(topic: "dlq")
   end
 end
@@ -107,7 +107,7 @@ end
 # Pattern topic is excluded, but its DLQ 'dlq' is still required and is not declared -> guards
 draw_and_validate(valid: false) do
   pattern(/a/) do
-    consumer Class.new
+    consumer Class.new(Karafka::BaseConsumer)
     dead_letter_queue(topic: "dlq")
   end
 end
@@ -115,14 +115,14 @@ end
 # Pattern-only routing has no non-pattern topics to declare -> ok
 draw_and_validate(valid: true) do
   pattern(/a/) do
-    consumer Class.new
+    consumer Class.new(Karafka::BaseConsumer)
   end
 end
 
 # Named pattern is still a virtual pattern topic -> excluded -> ok
 draw_and_validate(valid: true) do
   pattern("a", /a/) do
-    consumer Class.new
+    consumer Class.new(Karafka::BaseConsumer)
   end
 end
 
@@ -131,7 +131,7 @@ Karafka::App.config.strict_declarative_topics = false
 
 draw_and_validate(valid: true, declaratives: { "a" => true, "dlq" => false }) do
   topic "a" do
-    consumer Class.new
+    consumer Class.new(Karafka::BaseConsumer)
     dead_letter_queue(topic: "dlq")
   end
 end

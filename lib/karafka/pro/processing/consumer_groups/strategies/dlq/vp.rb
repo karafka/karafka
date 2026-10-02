@@ -97,7 +97,7 @@ module Karafka
                   # Use custom topic if it was returned from the strategy
                   @_dispatch_to_dlq_topic = target_topic || topic.dead_letter_queue.topic
                 else
-                  raise Karafka::UnsupportedCaseError, flow
+                  raise Karafka::Errors::UnsupportedCaseError, flow
                 end
 
                 yield

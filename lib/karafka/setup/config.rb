@@ -307,7 +307,7 @@ module Karafka
         end
 
         setting :processing do
-          setting :jobs_queue_class, default: Processing::JobsQueue
+          setting :jobs_queue_class, default: Processing::ConsumerGroups::JobsQueue
           # option scheduler [Object] scheduler we will be using
           setting :scheduler_class, default: Processing::Schedulers::Default
           # option worker_job_call_wrapper [Proc, false] callable object that will be used to wrap

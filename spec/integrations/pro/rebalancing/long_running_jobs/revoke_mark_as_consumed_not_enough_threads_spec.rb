@@ -48,6 +48,7 @@ class Consumer < Karafka::BaseConsumer
 
     @slept = true
 
+    DT[:started] << partition
     sleep(15)
 
     # Here we already should be revoked and we should know about it as long as we have enough
@@ -79,7 +80,7 @@ produce_many(DT.topic, DT.uuids(10), partition: 1)
 consumer = setup_rdkafka_consumer
 
 thread = Thread.new do
-  sleep(10)
+  sleep(0.1) until DT[:started].size >= 2
 
   consumer.subscribe(DT.topic)
 

@@ -33,8 +33,8 @@
 
 setup_karafka
 
-Consumer1 = Class.new
-Consumer2 = Class.new
+Consumer1 = Class.new(Karafka::BaseConsumer)
+Consumer2 = Class.new(Karafka::BaseConsumer)
 
 draw_routes(create_topics: false) do
   topic "test" do

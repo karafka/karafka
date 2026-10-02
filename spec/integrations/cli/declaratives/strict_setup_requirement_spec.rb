@@ -41,21 +41,21 @@ end
 # 'a' is routed but has no declarative definition -> strict validation guards
 draw_and_validate(valid: false) do
   topic "a" do
-    consumer Class.new
+    consumer Class.new(Karafka::BaseConsumer)
   end
 end
 
 # 'a' is routed and declared active -> ok
 draw_and_validate(valid: true, declaratives: { "a" => true }) do
   topic "a" do
-    consumer Class.new
+    consumer Class.new(Karafka::BaseConsumer)
   end
 end
 
 # 'a' is declared but its DLQ 'dlq' is not -> strict validation guards
 draw_and_validate(valid: false, declaratives: { "a" => true }) do
   topic "a" do
-    consumer Class.new
+    consumer Class.new(Karafka::BaseConsumer)
     dead_letter_queue(topic: "dlq")
   end
 end
@@ -63,7 +63,7 @@ end
 # both 'a' and its DLQ 'dlq' are declared active -> ok
 draw_and_validate(valid: true, declaratives: { "a" => true, "dlq" => true }) do
   topic "a" do
-    consumer Class.new
+    consumer Class.new(Karafka::BaseConsumer)
     dead_letter_queue(topic: "dlq")
   end
 end
@@ -71,7 +71,7 @@ end
 # 'dlq' is declared inactive (opted out of management) -> strict validation guards
 draw_and_validate(valid: false, declaratives: { "a" => true, "dlq" => false }) do
   topic "a" do
-    consumer Class.new
+    consumer Class.new(Karafka::BaseConsumer)
     dead_letter_queue(topic: "dlq")
   end
 end
@@ -81,7 +81,7 @@ Karafka::App.config.strict_declarative_topics = false
 
 draw_and_validate(valid: true, declaratives: { "a" => true, "dlq" => false }) do
   topic "a" do
-    consumer Class.new
+    consumer Class.new(Karafka::BaseConsumer)
     dead_letter_queue(topic: "dlq")
   end
 end

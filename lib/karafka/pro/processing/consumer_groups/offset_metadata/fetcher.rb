@@ -63,7 +63,7 @@ module Karafka
 
             # Registers a client of a given subscription group, so we can use it for queries later
             # on
-            # @param client [Karafka::Connection::Client]
+            # @param client [Karafka::Connection::ConsumerGroups::Client]
             # @note Since we store the client reference and not the underlying rdkafka consumer
             #   instance, we do not have to deal with the recovery as it is abstracted away
             def register(client)

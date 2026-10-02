@@ -20,7 +20,7 @@ RSpec.describe_current do
       let(:async_scope) { listener }
       let(:listener) do
         instance_double(
-          Karafka::Connection::Listener,
+          Karafka::Connection::ConsumerGroups::Listener,
           start!: nil,
           stopped?: false,
           quiet!: true,

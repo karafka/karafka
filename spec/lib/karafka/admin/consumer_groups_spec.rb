@@ -164,6 +164,79 @@ RSpec.describe Karafka::Admin::ConsumerGroups do
     end
   end
 
+  describe "#list" do
+    subject(:listing) { described_class.list }
+
+    let(:instance) { described_class.new }
+    let(:allowed_states) do
+      %i[unknown preparing_rebalance completing_rebalance stable dead empty]
+    end
+
+    before { allow(described_class).to receive(:new).and_return(instance) }
+
+    context "when the broker responds normally" do
+      before { allow(described_class).to receive(:new).and_call_original }
+
+      it "returns an array of cooked entries" do
+        expect(listing).to be_a(Array)
+
+        listing.each do |entry|
+          expect(entry[:group_id]).to be_a(String)
+          expect(allowed_states).to include(entry[:state])
+        end
+      end
+    end
+
+    context "when normalizing the librdkafka numeric states" do
+      let(:report) do
+        instance_double(
+          Rdkafka::Admin::ListConsumerGroupsReport,
+          errors: [],
+          groups: [
+            {
+              group_id: "g-stable",
+              state: Rdkafka::Bindings::RD_KAFKA_CONSUMER_GROUP_STATE_STABLE
+            },
+            {
+              group_id: "g-empty",
+              state: Rdkafka::Bindings::RD_KAFKA_CONSUMER_GROUP_STATE_EMPTY
+            },
+            { group_id: "g-weird", state: 999 }
+          ]
+        )
+      end
+
+      before { allow(instance).to receive(:with_admin).and_return(report) }
+
+      it "maps each numeric state to its cooked symbol and unknown codes to :unknown" do
+        expect(listing).to eq(
+          [
+            { group_id: "g-stable", state: :stable },
+            { group_id: "g-empty", state: :empty },
+            { group_id: "g-weird", state: :unknown }
+          ]
+        )
+      end
+    end
+
+    context "when the listing is partial with per-broker errors" do
+      let(:error) { Rdkafka::RdkafkaError.new(-1) }
+      let(:report) do
+        instance_double(
+          Rdkafka::Admin::ListConsumerGroupsReport,
+          groups: [],
+          errors: [error]
+        )
+      end
+
+      before { allow(instance).to receive(:with_admin).and_return(report) }
+
+      it "surfaces the first per-broker error instead of returning a partial listing" do
+        expect { listing }.to raise_error(error)
+      end
+    end
+  end
+
   describe "#trigger_rebalance" do
     subject(:trigger) { described_class.trigger_rebalance(group_id) }
 

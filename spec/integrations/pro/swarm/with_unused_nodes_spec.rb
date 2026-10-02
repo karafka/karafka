@@ -41,7 +41,7 @@ begin
     consumer_group "regular" do
       topic "t1" do
         swarm(nodes: (1..2))
-        consumer Class.new
+        consumer Class.new(Karafka::BaseConsumer)
       end
     end
   end

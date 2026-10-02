@@ -10,7 +10,7 @@ module Karafka
           executor_class: %i[internal processing consumer_groups executor_class]
         )
 
-        # @param client [Connection::Client]
+        # @param client [Connection::ConsumerGroups::Client]
         # @param subscription_group [Routing::SubscriptionGroup]
         # @return [ExecutorsBuffer]
         def initialize(client, subscription_group)

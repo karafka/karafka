@@ -12,7 +12,7 @@ def redraw
   AM.clear
 
   draw_routes(create_topics: false) do
-    defaults { consumer Class.new }
+    defaults { consumer Class.new(Karafka::BaseConsumer) }
 
     consumer_group :c1 do
       topic "t1"

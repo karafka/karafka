@@ -41,7 +41,7 @@ RSpec.describe_current do
     context "when defining pattern without any extra settings" do
       before do
         builder.pattern(/test/) do
-          consumer Class.new
+          consumer Class.new(Karafka::BaseConsumer)
         end
       end
 
@@ -53,7 +53,7 @@ RSpec.describe_current do
     context "when defining named pattern without any extra settings" do
       before do
         builder.pattern("my-name", /test/) do
-          consumer Class.new
+          consumer Class.new(Karafka::BaseConsumer)
         end
       end
 
@@ -65,7 +65,7 @@ RSpec.describe_current do
     context "when defining pattern with extra settings" do
       before do
         builder.pattern(/test/) do
-          consumer Class.new
+          consumer Class.new(Karafka::BaseConsumer)
           manual_offset_management(true)
         end
       end
@@ -76,7 +76,7 @@ RSpec.describe_current do
     context "when defining named pattern with extra settings" do
       before do
         builder.pattern("my-name", /test/) do
-          consumer Class.new
+          consumer Class.new(Karafka::BaseConsumer)
           manual_offset_management(true)
         end
       end

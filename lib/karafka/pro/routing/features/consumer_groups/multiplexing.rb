@@ -43,7 +43,7 @@ module Karafka
               # @param _config [Karafka::Core::Configurable::Node] app config node
               def pre_setup(_config)
                 # Make sure we use proper unique validator for topics definitions
-                Karafka::Routing::Contracts::ConsumerGroup.singleton_class.prepend(
+                Karafka::Routing::ConsumerGroups::Contracts::Group.singleton_class.prepend(
                   Patches::Contracts::ConsumerGroup
                 )
               end
@@ -72,7 +72,7 @@ module Karafka
                   # Subscribe for events and possibility to manage via the Pro connection manager
                   # that supports multiplexing
                   Karafka.monitor.subscribe(
-                    Karafka::Pro::Connection::Multiplexing::Listener.new
+                    Karafka::Pro::Connection::ConsumerGroups::Multiplexing::Listener.new
                   )
                 end
               end

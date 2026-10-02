@@ -11,7 +11,7 @@ draw_routes(create_topics: false) do
     topic "topic1" do
       kafka("bootstrap.servers": "cluster1:9092")
 
-      consumer Class.new
+      consumer Class.new(Karafka::BaseConsumer)
     end
   end
 
@@ -19,13 +19,13 @@ draw_routes(create_topics: false) do
     topic "topic1" do
       kafka("bootstrap.servers": "cluster2:9092")
 
-      consumer Class.new
+      consumer Class.new(Karafka::BaseConsumer)
     end
 
     topic "topic2" do
       kafka("bootstrap.servers": "cluster2:9092")
 
-      consumer Class.new
+      consumer Class.new(Karafka::BaseConsumer)
     end
   end
 end

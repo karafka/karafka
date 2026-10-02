@@ -15,19 +15,19 @@ end
 draw_routes(create_topics: false) do
   consumer_group :test1 do
     topic "topic1" do
-      consumer Class.new
+      consumer Class.new(Karafka::BaseConsumer)
       consumer_persistence true
     end
   end
 
   consumer_group :test2 do
     topic "topic1" do
-      consumer Class.new
+      consumer Class.new(Karafka::BaseConsumer)
       consumer_persistence false
     end
 
     topic "topic2" do
-      consumer Class.new
+      consumer Class.new(Karafka::BaseConsumer)
     end
   end
 end

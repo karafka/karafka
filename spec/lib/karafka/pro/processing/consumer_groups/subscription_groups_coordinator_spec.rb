@@ -32,7 +32,7 @@ RSpec.describe_current do
   let(:coordinator) { described_class.instance }
   let(:subscription_group) { build(:routing_subscription_group) }
   let(:lock_id) { "lock_id" }
-  let(:jobs_queue) { Karafka::Pro::Processing::JobsQueue.new }
+  let(:jobs_queue) { Karafka::Pro::Processing::ConsumerGroups::JobsQueue.new }
 
   before do
     allow(coordinator).to receive(:jobs_queue).and_return(jobs_queue)

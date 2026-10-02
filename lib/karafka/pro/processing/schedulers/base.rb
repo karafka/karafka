@@ -42,7 +42,8 @@ module Karafka
         # @note All the `on_` methods can be redefined with a non-thread-safe versions without
         #   locks if needed, however when doing so, ensure that your scheduler is stateless.
         class Base
-          # @param queue [Karafka::Processing::JobsQueue] queue where we want to put the jobs
+          # @param queue [Karafka::Processing::ConsumerGroups::JobsQueue] queue where we want to
+          #   put the jobs
           def initialize(queue)
             @queue = queue
             @mutex = Mutex.new
@@ -156,8 +157,8 @@ module Karafka
 
           private
 
-          # @return [Karafka::Processing::JobsQueue] jobs queue reference for internal usage
-          #   inside of the scheduler
+          # @return [Karafka::Processing::ConsumerGroups::JobsQueue] jobs queue reference for
+          #   internal usage inside of the scheduler
           attr_reader :queue
         end
       end

@@ -37,12 +37,12 @@ failed = false
 begin
   draw_routes(create_topics: false) do
     topic :a do
-      consumer Class.new
+      consumer Class.new(Karafka::BaseConsumer)
       assign(0)
     end
 
     topic :b do
-      consumer Class.new
+      consumer Class.new(Karafka::BaseConsumer)
     end
   end
 rescue Karafka::Errors::InvalidConfigurationError
@@ -59,13 +59,13 @@ begin
   draw_routes(create_topics: false) do
     consumer_group :a do
       topic :a do
-        consumer Class.new
+        consumer Class.new(Karafka::BaseConsumer)
         assign(0)
       end
     end
 
     topic :b do
-      consumer Class.new
+      consumer Class.new(Karafka::BaseConsumer)
     end
   end
 rescue Karafka::Errors::InvalidConfigurationError
@@ -83,13 +83,13 @@ begin
   draw_routes(create_topics: false) do
     subscription_group :a do
       topic :a do
-        consumer Class.new
+        consumer Class.new(Karafka::BaseConsumer)
         assign(0)
       end
     end
 
     topic :b do
-      consumer Class.new
+      consumer Class.new(Karafka::BaseConsumer)
     end
   end
 rescue Karafka::Errors::InvalidConfigurationError

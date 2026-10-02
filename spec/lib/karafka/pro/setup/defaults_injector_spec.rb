@@ -36,7 +36,7 @@ RSpec.describe_current do
 
     Class.new do
       class << self
-        def consumer(kafka_config)
+        def consumer_group(kafka_config)
           kafka_config
         end
 
@@ -57,12 +57,12 @@ RSpec.describe_current do
     end
   end
 
-  describe "#consumer" do
+  describe "#consumer_group" do
     context "when statistics.unassigned.include is not set" do
       let(:kafka_config) { {} }
 
       it "sets it to false" do
-        test_injector.consumer(kafka_config)
+        test_injector.consumer_group(kafka_config)
         expect(kafka_config[:"statistics.unassigned.include"]).to be(false)
       end
     end
@@ -71,14 +71,14 @@ RSpec.describe_current do
       let(:kafka_config) { { "statistics.unassigned.include": true } }
 
       it "does not overwrite it" do
-        test_injector.consumer(kafka_config)
+        test_injector.consumer_group(kafka_config)
         expect(kafka_config[:"statistics.unassigned.include"]).to be(true)
       end
     end
 
     it "calls super" do
       kafka_config = {}
-      result = test_injector.consumer(kafka_config)
+      result = test_injector.consumer_group(kafka_config)
       expect(result).to eq(kafka_config)
     end
   end

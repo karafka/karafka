@@ -9,7 +9,7 @@ draw_routes(create_topics: false) do
     subscription_group "b" do
       topic "c" do
         active false
-        consumer Class.new
+        consumer Class.new(Karafka::BaseConsumer)
       end
     end
   end
@@ -18,7 +18,7 @@ draw_routes(create_topics: false) do
     subscription_group "e" do
       topic "f" do
         active false
-        consumer Class.new
+        consumer Class.new(Karafka::BaseConsumer)
       end
     end
   end

@@ -1,7 +1,7 @@
 ![karafka logo](https://karafka.io/assets/misc/logo/karafka_logotype_transparent2.png)
 
 [![Build Status](https://github.com/karafka/karafka/actions/workflows/ci_linux_ubuntu_x86_64_gnu.yml/badge.svg)](https://github.com/karafka/karafka/actions/workflows/ci_linux_ubuntu_x86_64_gnu.yml)
-[![Gem Version](https://badge.fury.io/rb/karafka.svg)](http://badge.fury.io/rb/karafka)
+[![Gem Version](https://badge.fury.io/rb/karafka.svg)](https://badge.fury.io/rb/karafka)
 [![Join the chat at https://slack.karafka.io](https://raw.githubusercontent.com/karafka/misc/master/slack.svg)](https://slack.karafka.io)
 
 ## About Karafka
@@ -14,8 +14,8 @@ Karafka is a Ruby and Rails multi-threaded efficient Kafka processing framework 
 - Has [ActiveJob backend](https://karafka.io/docs/Active-Job) support (including [ordered jobs](https://karafka.io/docs/Pro-Enhanced-Active-Job#ordered-jobs))
 - Has a seamless [Dead Letter Queue](https://karafka.io/docs/Dead-Letter-Queue/) functionality built-in
 - Supports in-development [code reloading](https://karafka.io/docs/Auto-reload-of-code-changes-in-development)
-- Is powered by [librdkafka](https://github.com/edenhill/librdkafka) (the Apache Kafka C/C++ client library)
-- Has an out-of the box [AppSignal](https://karafka.io/docs/Monitoring-and-Logging/#appsignal-metrics-and-error-tracking) and [StatsD/DataDog](https://karafka.io/docs/Monitoring-and-Logging/#datadog-and-statsd-integration) monitoring with dashboard templates.
+- Is powered by [librdkafka](https://github.com/confluentinc/librdkafka) (the Apache Kafka C/C++ client library)
+- Has out of the box [AppSignal](https://karafka.io/docs/Monitoring-and-Logging/#appsignal-metrics-and-error-tracking), [StatsD/DataDog](https://karafka.io/docs/Monitoring-and-Logging/#datadog-and-statsd-integration) and New Relic monitoring, with dashboard templates for AppSignal and DataDog.
 
 ```ruby
 # Define what topics you want to consume with which consumers in karafka.rb
@@ -57,8 +57,8 @@ We also maintain many [integration specs](https://github.com/karafka/karafka/tre
 1. Add and install Karafka:
 
 ```bash
-# Make sure to install Karafka 2.4
-bundle add karafka --version ">= 2.4.0"
+# Make sure to install Karafka 2.6
+bundle add karafka --version ">= 2.6.0"
 
 bundle exec karafka install
 ```

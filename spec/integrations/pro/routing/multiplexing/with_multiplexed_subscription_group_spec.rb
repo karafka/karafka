@@ -45,7 +45,7 @@ begin
         multiplexing(min: 2, max: 5)
 
         topic "namespace_collision" do
-          consumer Class.new
+          consumer Class.new(Karafka::BaseConsumer)
         end
       end
     end

@@ -4,7 +4,7 @@
 
 setup_karafka
 
-draw_routes(Class.new)
+draw_routes(Class.new(Karafka::BaseConsumer))
 
 statistics_events = []
 

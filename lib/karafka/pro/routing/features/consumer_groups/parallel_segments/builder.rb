@@ -40,7 +40,9 @@ module Karafka
               # @param group_id [String, Symbol] name for consumer group
               # @param block [Proc] proc that should be executed in the proxy context
               def consumer_group(group_id, &block)
-                existing = find { |group| group.name == group_id.to_s }
+                # Same mode filter as in the core Builder#consumer_group - a share group with the
+                # same name must not be mistaken for a reopened consumer group
+                existing = consumer_groups.find { |group| group.name == group_id.to_s }
 
                 # Re-opening a CG should not change its parallel setup
                 if existing
@@ -49,14 +51,14 @@ module Karafka
                   # We build a temp group and a target to check if it has parallel segments
                   # enabled and if so, we do not add it to the routing but instead we build the
                   # appropriate number of parallel segment groups
-                  temp_group = Karafka::Routing::ConsumerGroup.new(group_id.to_s)
+                  temp_group = Karafka::Routing::ConsumerGroups::Group.new(group_id.to_s)
                   temp_target = Karafka::Routing::Proxy.new(temp_group, &block).target
                   config = temp_target.parallel_segments
 
                   if config.active?
                     config.count.times do |i|
                       sub_name = [group_id, config.merge_key, i.to_s].join
-                      sub_group = Karafka::Routing::ConsumerGroup.new(sub_name)
+                      sub_group = Karafka::Routing::ConsumerGroups::Group.new(sub_name)
                       self << Karafka::Routing::Proxy.new(sub_group, &block).target
                     end
                   # If not parallel segments are not active we go with the default flow

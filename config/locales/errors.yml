@@ -104,6 +104,7 @@ en:
       server:
         missing: needs to be present
         consumer_groups_inclusion: Unknown consumer group name
+        share_groups_inclusion: Unknown share group name
         subscription_groups_inclusion: Unknown subscription group name
         topics_inclusion: Unknown topic name
         topics_missing: No topics to subscribe to
@@ -124,6 +125,7 @@ en:
 
     routing:
       without_declarative_definition: lacks explicit declarative topics definition
+      groups_names_not_unique: group names must be unique across all group types (consumer and share groups)
 
       topic:
         kafka: needs to be a hash with kafka scope settings details
@@ -132,6 +134,9 @@ en:
         max_messages_format: 'needs to be an integer bigger than 0'
         max_wait_time_format: 'needs to be an integer bigger than 0'
         name_format: 'needs to be a string with a Kafka accepted format'
+        name_regexp_subscription_not_supported: regexp/pattern topic subscriptions are not supported for share groups (KIP-932) - use an explicit topic name
+        consumer_share_consumer_required: needs to be a share consumer inheriting from Karafka::ShareConsumer
+        consumer_group_consumer_required: needs to be a consumer group consumer inheriting from Karafka::BaseConsumer
         deserializers_format: needs to be present
         consumer_format: needs to be present
         id_format: 'needs to be a string with a Kafka accepted format'

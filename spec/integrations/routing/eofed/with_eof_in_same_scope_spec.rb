@@ -9,7 +9,7 @@ failed = false
 begin
   draw_routes(create_topics: false) do
     topic :topic1 do
-      consumer Class.new
+      consumer Class.new(Karafka::BaseConsumer)
       eofed true
       kafka(
         "bootstrap.servers": "127.0.0.1:9092",

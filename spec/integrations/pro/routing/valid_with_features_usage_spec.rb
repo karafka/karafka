@@ -35,7 +35,7 @@ setup_karafka
 draw_routes(create_topics: false) do
   subscription_group do
     topic "topic1" do
-      consumer Class.new
+      consumer Class.new(Karafka::BaseConsumer)
       dead_letter_queue(topic: "xyz", max_retries: 2)
       manual_offset_management true
       long_running_job true
@@ -43,7 +43,7 @@ draw_routes(create_topics: false) do
   end
 
   topic "topic2" do
-    consumer Class.new
+    consumer Class.new(Karafka::BaseConsumer)
   end
 end
 

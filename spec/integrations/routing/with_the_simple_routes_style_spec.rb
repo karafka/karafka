@@ -7,15 +7,15 @@ setup_karafka
 
 draw_routes(create_topics: false) do
   topic "topic1" do
-    consumer Class.new
+    consumer Class.new(Karafka::BaseConsumer)
   end
 
   topic "topic2" do
-    consumer Class.new
+    consumer Class.new(Karafka::BaseConsumer)
   end
 
   topic "topic3" do
-    consumer Class.new
+    consumer Class.new(Karafka::BaseConsumer)
   end
 end
 
@@ -31,15 +31,15 @@ assert_equal "topic3", Karafka::App.routes.first.topics[2].name
 
 draw_routes(create_topics: false) do
   topic "topic4" do
-    consumer Class.new
+    consumer Class.new(Karafka::BaseConsumer)
   end
 
   topic "topic5" do
-    consumer Class.new
+    consumer Class.new(Karafka::BaseConsumer)
   end
 
   topic "topic6" do
-    consumer Class.new
+    consumer Class.new(Karafka::BaseConsumer)
   end
 end
 

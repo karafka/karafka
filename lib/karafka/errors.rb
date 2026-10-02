@@ -141,5 +141,11 @@ module Karafka
     # Raised when given option/feature is not supported on a given platform or when given option
     # is not supported in a given configuration
     UnsupportedOptionError = Class.new(BaseError)
+
+    # Raised when the routing describes a share group (KIP-932 / Queues for Kafka) and we attempt
+    # to actually run it. Share groups can be declared in the routing today, but their runtime is
+    # not implemented yet. Inherits from `NotImplementedError` so it reads correctly and can be
+    # rescued generically.
+    ShareGroupsNotImplementedError = Class.new(NotImplementedError)
   end
 end

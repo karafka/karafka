@@ -60,22 +60,22 @@ end
 draw_routes do
   # Critical: RF=1
   topic DT.topics[0] do
-    consumer Class.new
+    consumer Class.new(Karafka::BaseConsumer)
   end
 
   # Critical: RF=2, min.insync=2
   topic DT.topics[1] do
-    consumer Class.new
+    consumer Class.new(Karafka::BaseConsumer)
   end
 
   # Warning: RF=3, min.insync=1
   topic DT.topics[2] do
-    consumer Class.new
+    consumer Class.new(Karafka::BaseConsumer)
   end
 
   # Healthy: RF=3, min.insync=2
   topic DT.topics[3] do
-    consumer Class.new
+    consumer Class.new(Karafka::BaseConsumer)
   end
 end
 

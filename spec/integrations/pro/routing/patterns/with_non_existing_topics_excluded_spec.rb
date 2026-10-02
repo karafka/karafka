@@ -35,7 +35,7 @@ setup_karafka
 
 draw_routes(create_topics: false) do
   pattern(/#{DT.topic}/) do
-    consumer Class.new
+    consumer Class.new(Karafka::BaseConsumer)
   end
 end
 

@@ -45,7 +45,12 @@ draw_routes do
   end
 end
 
-DT.topics.first(2).each { |topic_name| produce(topic_name, "block") }
+# Same consumer group, so a blocked first member would hold the second one join until the escape
+Thread.new do
+  sleep(0.1) until Karafka::App.assignments.size >= 2
+
+  DT.topics.first(2).each { |topic_name| produce(topic_name, "block") }
+end
 
 scaled = false
 follow_up_produced = false

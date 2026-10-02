@@ -38,7 +38,7 @@ RSpec.describe_current do
 
   let(:client) do
     instance_double(
-      Karafka::Connection::Client,
+      Karafka::Connection::ConsumerGroups::Client,
       name: client_name
     )
   end

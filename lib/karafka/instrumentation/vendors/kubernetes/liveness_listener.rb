@@ -282,7 +282,7 @@ module Karafka
               # max.poll.interval.ms is set (using the same librdkafka default Karafka injects
               # per subscription group). We dup so we don't mutate the global config.
               kafka_config = Karafka::App.config.kafka.dup
-              Karafka::Setup::DefaultsInjector.consumer(kafka_config)
+              Karafka::Setup::DefaultsInjector.consumer_group(kafka_config)
               kafka_config.fetch(:"max.poll.interval.ms")
             end
 

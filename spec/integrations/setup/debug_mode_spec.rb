@@ -10,18 +10,18 @@ draw_routes(create_topics: false) do
   end
 
   topic "test2" do
-    consumer Class.new
+    consumer Class.new(Karafka::BaseConsumer)
   end
 
   subscription_group :test do
     topic "test3" do
-      consumer Class.new
+      consumer Class.new(Karafka::BaseConsumer)
     end
   end
 
   consumer_group :test2 do
     topic "test4" do
-      consumer Class.new
+      consumer Class.new(Karafka::BaseConsumer)
     end
   end
 end

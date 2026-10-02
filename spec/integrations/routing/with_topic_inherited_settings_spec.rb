@@ -7,7 +7,7 @@ setup_karafka
 
 draw_routes(create_topics: false) do
   topic "topic1" do
-    consumer Class.new
+    consumer Class.new(Karafka::BaseConsumer)
     kafka(
       "enable.partition.eof": true,
       inherit: true
@@ -15,11 +15,11 @@ draw_routes(create_topics: false) do
   end
 
   topic "topic2" do
-    consumer Class.new
+    consumer Class.new(Karafka::BaseConsumer)
   end
 
   topic "topic4" do
-    consumer Class.new
+    consumer Class.new(Karafka::BaseConsumer)
     kafka(
       "enable.partition.eof": true,
       inherit: true

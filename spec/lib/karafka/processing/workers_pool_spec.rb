@@ -8,7 +8,7 @@ RSpec.describe_current do
     pool
   end
 
-  let(:jobs_queue) { Karafka::Processing::JobsQueue.new }
+  let(:jobs_queue) { Karafka::Processing::ConsumerGroups::JobsQueue.new }
   let(:concurrency) { Karafka::App.config.concurrency }
 
   after do

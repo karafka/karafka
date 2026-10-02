@@ -64,6 +64,9 @@ Thread.new do
 end
 
 other = Thread.new do
+  # Join only once Karafka consumes, so our first commit is not hit by its group join
+  sleep(0.1) until DT.key?(:running)
+
   loop do
     consumer = setup_rdkafka_consumer
     consumer.subscribe(DT.topic)

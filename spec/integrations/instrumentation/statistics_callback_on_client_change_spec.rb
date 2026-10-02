@@ -5,7 +5,7 @@
 
 setup_karafka(allow_errors: true)
 
-draw_routes(Class.new, create_topics: false)
+draw_routes(Class.new(Karafka::BaseConsumer), create_topics: false)
 
 def names(stats_events)
   stats_events

@@ -10,7 +10,7 @@ guarded = []
 draw_routes(create_topics: false) do
   consumer_group "existing" do
     topic "regular" do
-      consumer Class.new
+      consumer Class.new(Karafka::BaseConsumer)
     end
   end
 end

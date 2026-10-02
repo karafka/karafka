@@ -42,7 +42,7 @@ Karafka::App
 
 draw_routes(create_topics: false) do
   pattern(/.*/) do
-    consumer Class.new
+    consumer Class.new(Karafka::BaseConsumer)
   end
 end
 

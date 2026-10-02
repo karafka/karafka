@@ -1,0 +1,10 @@
+# frozen_string_literal: true
+
+# Application consumer from which all Karafka share group (KIP-932) consumers should inherit
+# You can rename it if it would conflict with your current code base (in case you're integrating
+# Karafka with other frameworks)
+#
+# Share groups are a separate consumption mode from consumer groups: share consumers acknowledge
+# individual messages (accept/release/reject) instead of committing offsets.
+class ApplicationShareConsumer < Karafka::ShareConsumer
+end

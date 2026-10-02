@@ -34,7 +34,7 @@ setup_karafka
 
 draw_routes(create_topics: false) do
   topic "topic1" do
-    consumer Class.new
+    consumer Class.new(Karafka::BaseConsumer)
     pause(
       timeout: 100,
       max_timeout: 1_000,
@@ -43,7 +43,7 @@ draw_routes(create_topics: false) do
   end
 
   topic "topic2" do
-    consumer Class.new
+    consumer Class.new(Karafka::BaseConsumer)
     pause(
       timeout: 200,
       max_timeout: 2_000,

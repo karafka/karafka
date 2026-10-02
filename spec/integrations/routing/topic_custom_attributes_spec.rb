@@ -6,12 +6,14 @@
 setup_karafka
 
 class CustomAttributes < Karafka::Routing::Features::Base
-  module Topic
-    def custom_attributes(mine: -100, yours: -200)
-      @custom_attributes ||= Config.new(
-        mine: mine,
-        yours: yours
-      )
+  module ConsumerGroups
+    module Topic
+      def custom_attributes(mine: -100, yours: -200)
+        @custom_attributes ||= Config.new(
+          mine: mine,
+          yours: yours
+        )
+      end
     end
   end
 
