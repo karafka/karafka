@@ -10,6 +10,11 @@
 # - regular - can run in parallel, includes all the helpers
 # - pristine - cannot run in parallel, uses custom bundler but includes helpers
 # - poro - cannot run in parallel, uses custom bundler, does not include any helpers
+#
+# Every scenario runs in its own process group, which is killed once the scenario finishes, so
+# scenarios cannot leave hanging processes behind. To run a single spec with the same guarantee,
+# run it through this runner with its path as a filter (bin/integrations path/to/the_spec.rb)
+# instead of running it directly with ruby.
 raise 'This code needs to be executed WITHOUT bundle exec' if Kernel.const_defined?(:Bundler)
 
 require 'open3'
@@ -28,6 +33,11 @@ ROOT_PATH = Pathname.new(File.expand_path(File.join(File.dirname(__FILE__), '../
 # Can be overridden with SPECS_CONCURRENCY to tune it without code changes.
 CONCURRENCY = Integer(ENV.fetch('SPECS_CONCURRENCY') { ENV.key?('CI') ? 5 : Etc.nprocessors * 3 })
 
+# Processes a scenario leaves running after it finished are always killed. On the CI such a
+# scenario also fails, so specs that leave processes behind get fixed instead of being cleaned up
+# silently.
+FAIL_ON_LEFTOVERS = ENV.key?('CI')
+
 # How may bytes do we want to keep from the stdout in the buffer for when we need to print it
 MAX_BUFFER_OUTPUT = 307_200
 
@@ -36,6 +46,9 @@ class Scenario
   # How long a scenario can run before we kill it
   # This is a fail-safe just in case something would hang
   MAX_RUN_TIME = 5 * 60 # 5 minutes tops
+
+  # How long a timed out scenario gets to shut down after TERM before we KILL it
+  KILL_AFTER = 30
 
   # There are rare cases where Karafka may force shutdown for some of the integration cases
   # This includes exactly those
@@ -61,7 +74,7 @@ class Scenario
     'setup/with_kip_848_protocol_incorrect_config_spec.rb' => [1].freeze
   }.freeze
 
-  private_constant :MAX_RUN_TIME, :EXIT_CODES
+  private_constant :MAX_RUN_TIME, :KILL_AFTER, :EXIT_CODES
 
   attr_reader :index
 
@@ -76,11 +89,16 @@ class Scenario
     @stdout_tail = ''
     # Assigns the index for parallel execution in the CI if requested
     @index = index
+    # Processes the scenario left running after it finished and that we killed (if any)
+    @leftovers = []
   end
 
-  # Starts running given scenario in a separate process
+  # Starts running given scenario in a separate process.
+  #
+  # The scenario runs in its own process group, so every process it starts (shell, ruby, forks,
+  # subprocesses) can be found and stopped, also when the scenario process itself is gone.
   def start
-    @stdin, @stdout, @stderr, @wait_thr = Open3.popen3(init_and_build_cmd)
+    @stdin, @stdout, @stderr, @wait_thr = Open3.popen3(init_and_build_cmd, pgroup: true)
     @started_at = current_time
   end
 
@@ -106,14 +124,18 @@ class Scenario
   end
 
   # @return [Boolean] did this scenario finished or is it still running
+  #
+  # @note Once the scenario process exits, every process it left behind (forks, subprocesses) is
+  #   killed, so no scenario can leave hanging processes.
   def finished?
-    # If the thread is running too long, kill it
+    # If the scenario is running too long, stop all of its processes
     if current_time - @started_at > MAX_RUN_TIME
-      begin
-        Process.kill('TERM', pid)
-      # It may finish right after we want to kill it, that's why we ignore this
-      rescue Errno::ESRCH
+      @terminated_at ||= begin
+        signal_group('TERM')
+        current_time
       end
+
+      signal_group('KILL') if current_time - @terminated_at > KILL_AFTER
     end
 
     # We read it so it won't grow as we use our default logger that prints to both test.log and
@@ -124,12 +146,19 @@ class Scenario
     @stdout_tail << buffer
     @stdout_tail = @stdout_tail[-MAX_BUFFER_OUTPUT..-1] || @stdout_tail
 
-    !@wait_thr.alive?
+    return false if @wait_thr.alive?
+
+    @leftovers = group_processes
+    signal_group('KILL') unless @leftovers.empty?
+
+    true
   end
 
   # @return [Boolean] did this scenario finish successfully or not
   def success?
     expected_exit_codes = EXIT_CODES[name] || EXIT_CODES[:default]
+
+    return false if FAIL_ON_LEFTOVERS && !@leftovers.empty?
 
     expected_exit_codes.include?(exit_code)
   end
@@ -152,6 +181,12 @@ class Scenario
 
   # Prints a status report when scenario is finished and stdout if it failed
   def report
+    unless @leftovers.empty?
+      puts
+      puts "Killed processes left running by #{name}:"
+      @leftovers.each { |process| puts "  #{process}" }
+    end
+
     if success?
       print "\e[#{32}m#{'.'}\e[0m"
     else
@@ -230,6 +265,28 @@ class Scenario
         bundle exec ruby -r ./spec/integrations_helper.rb #{@path}
       CMD
     end
+  end
+
+  # Sends a signal to every process of this scenario process group
+  # @param signal [String]
+  def signal_group(signal)
+    Process.kill(signal, -pid)
+  # The group may be gone already
+  rescue Errno::ESRCH
+    nil
+  end
+
+  # @return [Array<String>] live processes (pid and command) of this scenario process group.
+  #   Zombies are skipped, they are no longer running and only wait to be reaped by their parent.
+  def group_processes
+    pids = `pgrep -g #{pid}`.split
+
+    return [] if pids.empty?
+
+    `ps -o pid=,stat=,command= -p #{pids.join(',')}`
+      .lines
+      .map(&:strip)
+      .reject { |line| line.split[1].to_s.start_with?('Z') }
   end
 
   # @return [Float] current machine time
