@@ -178,6 +178,10 @@ loader.eager_load
 # nor included here
 Karafka::Routing::Features::Base.load_all
 
+# Backwards compatible alias for the pre-2.6.2 default deserializers namespace, moved under
+# `Deserializing` to also host the parallel (Ractor) deserialization engine
+Karafka::Deserializers = Karafka::Deserializing::Deserializers
+
 # We need to detect and require (not setup) Pro components during the gem load, because we need
 # to make pro components available in case anyone wants to use them as a base to their own
 # custom components. Otherwise inheritance would not work.

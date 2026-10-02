@@ -1,11 +1,13 @@
 # Karafka Framework Changelog
 
 ## 2.6.2 (Unreleased)
+- **[Breaking]** Move the default deserializers from `Karafka::Deserializers::{Payload,Key,Headers}` to `Karafka::Deserializing::Deserializers::{Payload,Key,Headers}`. `Karafka::Deserializers` is kept as a backwards compatible alias, so existing references keep working.
 - **[Feature]** Add `Instrumentation::Vendors::NewRelic::MetricsListener` for publishing Karafka metrics to New Relic. Context is encoded in the metric name, as New Relic custom metrics do not support tags (svyatmuzyka).
 - **[Feature]** Add `karafka info --extended`, printing the routing tree, global app config and effective Kafka config, with sensitive values redacted.
 - **[Feature]** Add `Kubernetes::ReadinessListener`, serving a readiness probe that reports healthy once all subscription groups poll and not-ready on shutdown or quieting, so pods drain before exiting.
 - **[Feature]** Allow the `--include`/`--exclude` CLI server filters to accept wildcard patterns (e.g. `--exclude-consumer-groups app-a-*`), including topics discovered at runtime by Pro routing patterns.
 - **[Feature]** Add `Karafka::Admin.list_consumer_groups`, a read-only listing of every consumer group in the cluster with its cooked state (`:stable`, `:empty`, `:dead`, `:preparing_rebalance`, `:completing_rebalance`, `:unknown`). Requires karafka-rdkafka `>= 0.30.0`.
+- **[Feature]** Add an opt-in Ractor-based parallel deserialization engine (requires Ruby 4.0+), enabled globally with `config.deserializing.parallel.active = true` and per topic with `deserializing(parallel: true)`. Batches below `min_payloads`, or with the feature disabled, fall back to inline deserialization, so results are unchanged either way.
 - [Enhancement] Defer default log file creation until the first write and keep logging working (to stdout) when the log file cannot be created or written, e.g. on read-only filesystems (ydah).
 - [Enhancement] Build `Setup::DefaultsInjector` (and its Pro extension) on top of `Karafka::Core::Configurable::Injector` so the kafka defaults injection uses the shared ecosystem pattern. Behavior is unchanged. Requires karafka-core `>= 2.6.3`.
 - [Maintenance] Cover the `:max_timestamp` and Integer-timestamp `Admin#read_partition_offsets` offset modes with integration specs.

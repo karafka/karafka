@@ -6,6 +6,11 @@ module Karafka
     # cluster while fetching the data.
     #
     # @note This metadata object refers to per batch metadata, not `#message.metadata`
+    # @!attribute deserialization
+    #   Stores the Future/Immediate for parallel deserialization.
+    #   Defaults to Immediate (no-op), replaced with Future when parallel deserialization
+    #   dispatches.
+    #   @return [Karafka::Deserializing::Parallel::Future, Immediate]
     BatchMetadata = Struct.new(
       :size,
       :first_offset,
@@ -16,6 +21,7 @@ module Karafka
       :created_at,
       :scheduled_at,
       :processed_at,
+      :deserialization,
       keyword_init: true
     ) do
       # This lag describes how long did it take for a message to be consumed from the moment it was
