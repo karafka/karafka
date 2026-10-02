@@ -35,6 +35,8 @@ Consumer = Class.new(Karafka::BaseConsumer)
 setup_karafka
 
 draw_topics(create_topics: false) do
+  topic(DT.topics[0])
+
   topic(DT.topics[1]) do
     partitions 2
     config("cleanup.policy": "compact")
