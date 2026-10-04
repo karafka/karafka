@@ -9,6 +9,12 @@ setup_karafka do |config|
   config.kafka[:debug] = "all"
 end
 
+draw_topics do
+  topic DT.topic do
+    partitions 1
+  end
+end
+
 reader, writer = IO.pipe
 
 pid = fork do
