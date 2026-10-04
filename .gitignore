@@ -11,6 +11,8 @@ db/*.sqlite3
 /log/development.log
 /log/production.log
 /log/test.log
+# Integration specs boot Karafka inside a scratch working dir; never commit its artifacts
+/karafka_dir/
 /tmp/*
 *.gem
 *.~

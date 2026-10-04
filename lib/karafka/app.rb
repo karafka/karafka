@@ -68,11 +68,11 @@ module Karafka
         routes.share_groups
       end
 
-      # Ensures no active share group is about to be run. Share groups (KIP-932) can be described
-      # in the routing but their runtime is not implemented yet, so every run seam (listeners
-      # assembly, swarm supervisor pre-fork) refuses to proceed instead of silently doing nothing.
-      # Excluding them (e.g. `--exclude_share_groups`) or not defining them lets the rest of the
-      # app run.
+      # Ensures no active share group is about to be run under the swarm. Share groups (KIP-932)
+      # run under `karafka server` but are not supported in the swarm supervisor yet (forked-node
+      # share consumer lifecycle is not covered), so the swarm pre-fork seam refuses to proceed
+      # instead of crash-looping each node on its own. Excluding them (e.g.
+      # `--exclude_share_groups`) or not defining them lets the rest of the app run in the swarm.
       #
       # @raise [Karafka::Errors::ShareGroupsNotImplementedError] when an active share group is
       #   present in the routing
@@ -82,8 +82,8 @@ module Karafka
 
           raise(
             Errors::ShareGroupsNotImplementedError,
-            "Share group '#{group.name}' cannot be run yet - share group (KIP-932) runtime " \
-            "support is not implemented. See the KIP-932 roadmap for progress."
+            "Share group '#{group.name}' cannot be run in the swarm yet - run it under " \
+            "`karafka server`. See the KIP-932 roadmap for progress."
           )
         end
       end

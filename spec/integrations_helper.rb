@@ -617,6 +617,38 @@ def produce_many(topic, payloads, details = {})
   Karafka::App.producer.produce_many_sync(messages)
 end
 
+# Prepares a topic + share group for a share-group (KIP-932) integration spec: creates the topic
+# (share consumers do not support auto topic creation in the preview) and points the share group
+# at the earliest record. Share groups default `share.auto.offset.reset` to `latest` broker-side,
+# so without this pre-produced records would not be delivered to a brand-new group.
+# @param topic [String] topic name
+# @param group [String] share group name
+# @param partitions [Integer] number of partitions to create
+# @param configs [Hash{String => String}] extra share group configs to set (for example
+#   `"share.record.lock.duration.ms" => "15000"`)
+def setup_share_group(topic = DT.topic, group = DT.group, partitions = 1, configs: {})
+  Karafka::Admin.create_topic(topic, partitions, 1)
+
+  admin = Rdkafka::Config.new(
+    "bootstrap.servers": Karafka::App.config.kafka.fetch(:"bootstrap.servers")
+  ).admin
+
+  admin.incremental_alter_configs(
+    [
+      {
+        resource_type: Rdkafka::Bindings::RD_KAFKA_RESOURCE_GROUP,
+        resource_name: group,
+        configs: [
+          { name: "share.auto.offset.reset", value: "earliest", op_type: 0 },
+          *configs.map { |name, value| { name: name, value: value, op_type: 0 } }
+        ]
+      }
+    ]
+  ).wait(max_wait_timeout_ms: 15_000)
+
+  admin.close
+end
+
 # Two basic helpers for assertion checking. Since we use only those, it was not worth adding
 # another gem
 

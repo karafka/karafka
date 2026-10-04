@@ -13,6 +13,9 @@ module Karafka
       :topic,
       :raw_headers,
       :raw_key,
+      # How many times a share-group record was delivered (1 on the first delivery). `nil` for
+      # consumer groups, which have no per-record delivery tracking.
+      :delivery_count,
       keyword_init: true
     ) do
       # @return [Object] deserialized key. By default in the raw string format.
