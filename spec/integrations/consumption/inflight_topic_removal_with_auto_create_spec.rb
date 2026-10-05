@@ -35,7 +35,6 @@ start_karafka_and_wait_until do
   DT.key?(:done)
 end
 
-# Exiting with a live admin client crashes librdkafka threads during process teardown
 DT[:thread].join
 
 error = DT[:errors].first

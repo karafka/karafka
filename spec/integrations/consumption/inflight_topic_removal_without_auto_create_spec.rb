@@ -30,7 +30,6 @@ start_karafka_and_wait_until do
   DT[:errors].size >= 1
 end
 
-# Exiting with a live admin client crashes librdkafka threads during process teardown
 DT[:threads].each(&:join)
 
 EXPECTED_ERROR_CODES = %i[unknown_partition unknown_topic_or_part].freeze
