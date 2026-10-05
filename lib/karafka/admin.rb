@@ -588,6 +588,12 @@ module Karafka
         sleep(sleep_time)
 
         return if breaker.call
+
+        # The operation may finish but its effect may never become visible (for example a deleted
+        # topic being re-created by auto-create). Without this we would loop forever
+        next if self.class.monotonic_now - start_time < self.class.max_retries_duration
+
+        raise(Errors::ResultNotVisibleError)
       rescue Rdkafka::AbstractHandle::WaitTimeoutError
         return if breaker.call
 
