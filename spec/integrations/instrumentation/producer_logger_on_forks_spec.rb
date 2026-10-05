@@ -9,11 +9,7 @@ setup_karafka do |config|
   config.kafka[:debug] = "all"
 end
 
-draw_topics do
-  topic DT.topic do
-    partitions 1
-  end
-end
+Karafka::Admin.create_topic(DT.topic, 1, 1)
 
 reader, writer = IO.pipe
 
