@@ -375,6 +375,38 @@ RSpec.describe_current do
     end
   end
 
+  describe "#with_re_wait" do
+    subject(:admin) { described_class.new }
+
+    let(:handler) { -> {} }
+
+    before do
+      allow(described_class).to receive_messages(retry_backoff: 10, max_retries_duration: 200)
+    end
+
+    context "when the handler finishes and the breaker is satisfied" do
+      it "returns" do
+        expect { admin.send(:with_re_wait, handler, -> { true }) }.not_to raise_error
+      end
+    end
+
+    context "when the handler finishes but the result never becomes visible" do
+      it "raises instead of retrying forever" do
+        expect { admin.send(:with_re_wait, handler, -> { false }) }
+          .to raise_error(Karafka::Errors::ResultNotVisibleError)
+      end
+    end
+
+    context "when the handler times out and the result never becomes visible" do
+      let(:handler) { -> { raise Rdkafka::AbstractHandle::WaitTimeoutError } }
+
+      it "raises after the retries duration" do
+        expect { admin.send(:with_re_wait, handler, -> { false }) }
+          .to raise_error(Karafka::Errors::ResultNotVisibleError)
+      end
+    end
+  end
+
   describe "#close" do
     subject(:admin) { described_class.new }
 
