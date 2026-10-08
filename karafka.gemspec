@@ -26,7 +26,7 @@ Gem::Specification.new do |spec|
   spec.add_dependency "waterdrop", ">= 2.10.2", "< 3.0.0"
   spec.add_dependency "zeitwerk", "~> 2.3"
 
-  spec.required_ruby_version = ">= 3.2.0"
+  spec.required_ruby_version = ">= 3.3.0"
 
   gem_files = %w[
     lib/**/*
