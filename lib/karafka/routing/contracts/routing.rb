@@ -34,33 +34,33 @@ module Karafka
           # Do not validate declaratives unless required and explicitly enabled
           next unless Karafka::App.config.strict_declarative_topics
 
-          # Collects declarative topics. Please note, that any topic that has a `#topic` reference,
-          # will be declarative by default unless explicitly disabled. This however does not apply
-          # to the DLQ definitions
-          dec_topics = Set.new
+          # Declarative topic definitions live independently of routing (in the declaratives
+          # repository, populated via `Karafka::App.declaratives.draw`). A routed topic is
+          # considered declaratively managed when it has an active declaration there.
+          declaratives = Karafka::App.declaratives
           # All topics including the DLQ topics names that are marked as active
           topics = Set.new
 
           data.each do |group|
             group[:topics].each do |topic|
-              dec = topic[:declaratives]
+              dlq = topic[:dead_letter_queue]
 
               # Share-group topics (KIP-932) do not support declarative management (nor DLQ), so
               # they are not subject to the strict declarative check
-              next unless dec
+              next unless dlq
 
               pat = topic[:patterns]
               # Ignore pattern topics because they won't exist and should not be declarative managed
               topics << topic[:name] if !pat || !pat[:active]
 
-              dlq = topic[:dead_letter_queue]
               topics << dlq[:topic] if dlq[:active]
-
-              dec_topics << topic[:name] if dec[:active]
             end
           end
 
-          missing_dec = topics - dec_topics
+          missing_dec = topics.reject do |topic_name|
+            declaration = declaratives.find_topic(topic_name)
+            declaration && declaration.active?
+          end
 
           next if missing_dec.empty?
 

@@ -5,6 +5,10 @@
 
 setup_karafka
 
+draw_topics(create_topics: false) do
+  topic DT.topic
+end
+
 draw_routes(create_topics: false) do
   topic DT.topic do
     active false

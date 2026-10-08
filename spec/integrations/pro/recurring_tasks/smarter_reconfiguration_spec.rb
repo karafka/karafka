@@ -38,9 +38,14 @@ code = nil
 # Creating happens in a background thread and we want to catch errors, hence we need to trigger
 # the creation inline
 draw_routes(create_topics: false) do
+  recurring_tasks(true)
+end
+
+# Topic structure is reconfigured through the declaratives DSL, independently of routing
+Karafka::App.declaratives.draw do
   recurring_tasks(true) do |schedules_topic, logs_topic|
-    schedules_topic.config.replication_factor = 2
-    logs_topic.config.replication_factor = 2
+    schedules_topic.replication_factor 2
+    logs_topic.replication_factor 2
   end
 end
 

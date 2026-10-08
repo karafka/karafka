@@ -37,8 +37,8 @@ module Karafka
       end
 
       # Declares a topic with the given name. If a topic with this name was already declared
-      # (via routing bridge or a prior draw call), the existing declaration is returned and
-      # the block is evaluated on it (allowing additive configuration).
+      # (by a prior `draw` call), the existing declaration is returned and the block is evaluated
+      # on it (allowing additive configuration).
       #
       # @param name [String, Symbol] topic name
       # @param block [Proc] optional block evaluated in the topic's context
@@ -47,6 +47,15 @@ module Karafka
         declaration = @repository.find_or_create(name)
         declaration.instance_eval(&@defaults)
         declaration.instance_eval(&block) if block
+
+        # Validate the resulting declaration. This is the canonical validation point for
+        # declarative topics now that the routing `config(...)` bridge (which validated via the
+        # routing Expander) has been retired.
+        Contracts::Topic.new.validate!(
+          { declaratives: declaration.to_h },
+          scope: ["declaratives", declaration.name]
+        )
+
         declaration
       end
 

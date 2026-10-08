@@ -72,7 +72,7 @@ RSpec.describe Karafka::Routing::ShareGroups::Group do
     # Consumer-group-only routing features are prepended onto the consumer topic only and do not
     # leak onto the share topic. Features share groups also need (pausing, deserializers) are
     # duplicated under `Features::ShareGroups::*` and are covered separately below.
-    %i[dead_letter_queue declaratives config].each do |feature|
+    %i[dead_letter_queue manual_offset_management eofed].each do |feature|
       it "expect a consumer topic to respond to :#{feature} and a share topic not to" do
         expect(consumer_topic).to respond_to(feature)
         expect(share_topic).not_to respond_to(feature)
