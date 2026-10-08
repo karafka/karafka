@@ -36,7 +36,6 @@ end
 timeouts = DT[:pauses].map { |pause| pause[:timeout] }
 attempts = DT[:pauses].map { |pause| pause[:attempt] }
 
-# Each retry doubles the previous backoff until it reaches the max backoff
 assert_equal([400, 800, 1_600, 3_200, 5_000, 5_000, 5_000, 5_000], timeouts.first(8))
 assert_equal((attempts.first...(attempts.first + attempts.size)).to_a, attempts)
 
