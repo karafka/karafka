@@ -12,15 +12,17 @@ setup_karafka(allow_errors: true) do |config|
 end
 
 class Consumer < Karafka::BaseConsumer
-  def initialized
-    DT[0] << Time.now.to_f
-  end
-
   def consume
-    DT[0] << Time.now.to_f
+    DT[:consumed_at] << Time.now.to_f
 
     raise StandardError
   end
+end
+
+Karafka::App.monitor.subscribe("consumer.consuming.pause") do |event|
+  next if event[:manual]
+
+  DT[:pauses] << { timeout: event[:timeout], attempt: event[:attempt] }
 end
 
 draw_routes(Consumer)
@@ -28,38 +30,23 @@ draw_routes(Consumer)
 produce(DT.topic, "0")
 
 start_karafka_and_wait_until do
-  DT[0].size >= 10
+  DT[:pauses].size >= 8
 end
 
-# Backoff time before next exception occurrence (not before resume). Because of that and the fact
-# that we run this in parallel, we add some extra time to compensate.
-BACKOFF_RANGES = [
-  0..0.5,
-  0..1.7,
-  0..1.7,
-  0..1.8,
-  1..3,
-  2..5,
-  4..7,
-  5..8
-].freeze
+timeouts = DT[:pauses].map { |pause| pause[:timeout] }
+attempts = DT[:pauses].map { |pause| pause[:attempt] }
 
-previous = nil
+# Each retry doubles the previous backoff until it reaches the max backoff
+assert_equal([400, 800, 1_600, 3_200, 5_000, 5_000, 5_000, 5_000], timeouts.first(8))
+assert_equal((attempts.first...(attempts.first + attempts.size)).to_a, attempts)
 
-DT[0].each_with_index do |timestamp, index|
-  unless previous
-    previous = timestamp
-    next
-  end
+# Wall-clock gaps on a loaded runner can only be longer than the pause, never shorter, so we
+# check only that the next attempt did not start before the backoff ended
+DT[:consumed_at].first(timeouts.size + 1).each_cons(2).with_index do |(previous, current), index|
+  backoff = timeouts[index] / 1_000.0
 
-  backoff = (timestamp - previous)
-  expected_range = BACKOFF_RANGES[index] || BACKOFF_RANGES.last
-
-  assert_equal(
-    true,
-    expected_range.include?(backoff),
-    "Expected #{backoff} to be in range: #{expected_range}"
+  assert(
+    current - previous >= backoff - 0.05,
+    "Expected #{current - previous} to be at least #{backoff}"
   )
-
-  previous = timestamp
 end
