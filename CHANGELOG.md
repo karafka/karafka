@@ -5,7 +5,7 @@
 - **[Feature]** Add `karafka info --extended`, printing the routing tree, global app config and effective Kafka config, with sensitive values redacted.
 - **[Feature]** Add `Kubernetes::ReadinessListener`, serving a readiness probe that reports healthy once all subscription groups poll and not-ready on shutdown or quieting, so pods drain before exiting.
 - **[Feature]** Allow the `--include`/`--exclude` CLI server filters to accept wildcard patterns (e.g. `--exclude-consumer-groups app-a-*`), including topics discovered at runtime by Pro routing patterns.
-- **[Feature]** Add `Karafka::Admin.list_consumer_groups`, a read-only listing of every consumer group in the cluster with its cooked state (`:stable`, `:empty`, `:dead`, `:preparing_rebalance`, `:completing_rebalance`, `:unknown`). Requires karafka-rdkafka `>= 0.30.0`.
+- **[Feature]** Add `Karafka::Admin.list_consumer_groups` to list every consumer group in the cluster with its state. Requires karafka-rdkafka `>= 0.30.0`.
 - [Enhancement] Defer default log file creation until the first write and keep logging working (to stdout) when the log file cannot be created or written, e.g. on read-only filesystems (ydah).
 - [Enhancement] Build `Setup::DefaultsInjector` (and its Pro extension) on top of `Karafka::Core::Configurable::Injector` so the kafka defaults injection uses the shared ecosystem pattern. Behavior is unchanged. Requires karafka-core `>= 2.6.3`.
 - [Maintenance] Cover the `:max_timestamp` and Integer-timestamp `Admin#read_partition_offsets` offset modes with integration specs.
@@ -13,14 +13,14 @@
 - [Maintenance] [Pro] Cover the `JobsQueue` per-group semaphore growth fix under LRJ and async-locking workloads with integration specs.
 - [Maintenance] Run the Rails 8.0 transactional ActiveJob integration spec against Rails `8.0.3`. It was pinned to Rails `7.2.2.1`, so it duplicated the 7.2 run.
 - [Maintenance] Foundational work for Kafka share groups (KIP-932) is in progress (routing layer, consumer class hierarchy, config seams). Not usable yet - share groups can be described in routing but cannot run.
-- [Maintenance] Move consumer-group-specific connection internals under a new `Connection::ConsumerGroups` namespace to prepare for KIP-932 share groups, leaving mode-agnostic plumbing at the `Connection` root. These are internal, non-public constants, so no aliases are kept at the old paths.
+- [Maintenance] Move consumer-group connection internals under a new `Connection::ConsumerGroups` namespace to prepare for KIP-932 share groups. They are internal, so no aliases are kept.
 - [Maintenance] Cover with an integration spec that a forceful shutdown does not reopen the clients of still running listeners.
 - [Maintenance] Cover `Admin.list_consumer_groups` with integration specs for a live group reporting `:stable` and for KIP-848 (consumer protocol) groups.
 - [Maintenance] Cover the `CoordinatorsBuffer` and `PausesManager` revoke-time topic pruning fixes with an integration spec driving real rebalances.
-- [Fix] Stop `Admin` operations from retrying forever when the operation succeeds but its result never becomes visible (e.g. a deleted topic re-created by `allow.auto.create.topics`). They now raise `ResultNotVisibleError` after `admin.max_retries_duration`.
+- [Fix] Stop `Admin` operations from retrying forever when their result never becomes visible. They now raise `ResultNotVisibleError` after `admin.max_retries_duration`.
 - [Fix] Stop `CoordinatorsBuffer#@coordinators` from growing unbounded across rebalances by dropping a topic entry on revoke once it tracks no partitions (mirrors `PausesManager#delete`).
-- [Fix] Use `::JSON.parse` instead of `::ActiveSupport::JSON.decode` in the ActiveJob deserializer, so consuming ActiveJob messages keeps working under the json gem `>= 3.0` (where `ActiveSupport::JSON.decode` passes a now-invalid second argument to `JSON.parse`).
-- [Fix] [Pro] Consumer-group lag compensation now honours the read_committed isolation level when refreshing end offsets (karafka-rdkafka `>= 0.30.0` fixes `Admin#list_offsets` to stop ignoring it), so an in-flight transaction on a paused partition no longer transiently overstates the compensated lag by the number of uncommitted messages.
+- [Fix] Use `::JSON.parse` in the ActiveJob deserializer, so consuming ActiveJob messages works with the json gem `>= 3.0`.
+- [Fix] [Pro] Honour the read_committed isolation level in consumer-group lag compensation, so an in-flight transaction no longer overstates the lag (needs karafka-rdkafka `>= 0.30.0`).
 - [Fix] [Pro] Stabilize the `Karafka::Admin::Recovery` `read_committed_offsets` no-offsets integration spec against a fresh CI broker.
 - [Fix] Stabilize the `Karafka::Admin::Acl` `#create`/`#describe` specs against asynchronous ACL propagation on slow CI.
 - [Fix] Stabilize the empty-topic `read_watermark_offsets` specs against a broker leader-election race.
