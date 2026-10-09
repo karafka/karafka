@@ -119,13 +119,15 @@ module Karafka
 
           events_poll
 
+          max_messages = @subscription_group.max_messages
+
           loop do
             time_poll.start
 
             # Don't fetch more messages if we do not have any time left
             break if time_poll.exceeded?
             # Don't fetch more messages if we've fetched max that we've wanted
-            break if @buffer.size >= @subscription_group.max_messages
+            break if @buffer.size >= max_messages
 
             # Fetch message within our time boundaries
             response = poll(time_poll.remaining)
