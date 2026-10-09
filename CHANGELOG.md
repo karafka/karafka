@@ -164,7 +164,7 @@
 - **[EOL]** Remove Rails 7.1 support according to EOL while not blocking Rails 7.1 usage.
 - [Enhancement] Retry on the KIP-848 `stale_member_epoch` error.
 - [Enhancement] Provide `Karafka::Admin.trigger_rebalance` API to programmatically trigger consumer group rebalances for operational purposes.
-- [Enhancement] Provide `Karafka::Admin.plan_topic_replication` API to generate partition reassignment plans for increasing topic replication factors with automatic broker distribution or manual placement, compatible with `kafka-reassign-partitions.sh` tool.
+- [Enhancement] Provide `Karafka::Admin.plan_topic_replication` to generate partition reassignment plans for increasing a topic replication factor, compatible with `kafka-reassign-partitions.sh`.
 - [Enhancement] Nest pause settings under `config.pause.*` (`timeout`, `max_timeout`, `with_exponential_backoff`). The old flat API (`config.pause_timeout`, etc.) still works and will be removed in Karafka 2.6.
 - [Enhancement] Detect and track involuntary assignment loss during long-running processing that exceeds `max.poll.interval.ms` via `client.events_poll` event and automatically update `Karafka::App.assignments` to reflect reality.
 - [Enhancement] Extend `Karafka::Admin.read_watermark_offsets` to accept either a single topic with partition or a hash of multiple topics with partitions, using a single consumer instance for improved efficiency when querying multiple partitions.
@@ -189,10 +189,10 @@
 - [Maintenance] Add integration specs for WaterDrop connection pool usage from within consumers.
 - [Refactoring] Split the Admin module: topic operations move to `Admin::Topics` and consumer group operations to `Admin::ConsumerGroups`.
 - [Refactoring] Move routing-related contracts from `Karafka::Contracts::` to `Karafka::Routing::Contracts::` namespace and reorganize error message structure in YAML files under `routing:` scope for better code organization and logical grouping.
-- [Refactoring] Move config-related contracts from `Karafka::Contracts::Config` to `Karafka::Setup::Contracts::Config` namespace and reorganize error message structure in YAML files under `setup:` scope for better code organization and logical grouping.
-- [Refactoring] Move CLI server contracts from `Karafka::Contracts::ServerCliOptions` to `Karafka::Cli::Contracts::Server` namespace and reorganize error message structure in YAML files under `cli:` scope for improved naming consistency and logical grouping.
-- [Refactoring] Replace execution mode symbol-based checks with dedicated `ExecutionMode` class providing cleaner API with query methods (`#swarm?`, `#embedded?`) and state change methods (`#swarm!`, `#embedded!`) for improved type safety and code clarity.
-- [Refactoring] Replace connection client mode symbol-based checks with dedicated `Connection::Mode` class providing cleaner API with query methods (`#subscribe?`, `#assign?`) and state change methods (`#subscribe!`, `#assign!`) for improved code clarity.
+- [Refactoring] Move config contracts from `Karafka::Contracts::Config` to `Karafka::Setup::Contracts::Config` and group their error messages under `setup:`.
+- [Refactoring] Move CLI server contracts from `Karafka::Contracts::ServerCliOptions` to `Karafka::Cli::Contracts::Server` and group their error messages under `cli:`.
+- [Refactoring] Replace execution mode symbols with an `ExecutionMode` class (`#swarm?`, `#embedded?`, `#swarm!`, `#embedded!`).
+- [Refactoring] Replace connection client mode symbols with a `Connection::Mode` class (`#subscribe?`, `#assign?`, `#subscribe!`, `#assign!`).
 - [Fix] Improve same timestamp dispatch in scheduled messages on Ruby 3.2.
 - [Fix] Fix incorrect (6 seconds vs 60 seconds) reset of connections on non-recoverable errors.
 - [Fix] Introduce mutex-safe and thread-safe `#inspect` where needed.
@@ -560,7 +560,7 @@ Available [here](https://karafka.io/docs/Upgrades-2.3/).
 - [Enhancement] Provide `#synchronize` API same as in VPs for LRJs to allow for lifecycle events and consumption synchronization.
 
 ## 2.2.12 (2023-11-09)
-- [Enhancement] Rewrite the polling engine to update statistics and error callbacks despite longer non LRJ processing or long `max_wait_time` setups. This change provides stability to the statistics and background error emitting making them time-reliable.
+- [Enhancement] Rewrite the polling engine so statistics and error callbacks are emitted on time despite long non-LRJ processing or a long `max_wait_time`.
 - [Enhancement] Auto-update Inline Insights if new insights are present for all consumers and not only LRJ (OSS and Pro).
 - [Enhancement] Alias `#insights` with `#inline_insights` and `#insights?` with `#inline_insights?`
 
@@ -596,7 +596,7 @@ In the latest Karafka release, there are no breaking changes. However, please no
 2. None of the CLI commands should change but `thor` has been removed so please report if you find any bugs.
 
 ## 2.2.7 (2023-10-07)
-- **[Feature]** Introduce Inline Insights to both OSS and Pro. Inline Insights allow you to get the Kafka insights/metrics from the consumer instance and use them to alter the processing flow. In Pro, there's an extra filter flow allowing to ensure, that the insights exist during consumption.
+- **[Feature]** Introduce Inline Insights to both OSS and Pro to read Kafka metrics from the consumer instance and use them in the processing flow. Pro adds a filter that ensures the insights exist during consumption.
 - [Enhancement] Make sure, that subscription groups ids are unique by including their consumer group id in them similar to how topics ids are handled (not a breaking change).
 - [Enhancement] Expose `#attempt` method on a consumer to directly indicate number of attempt of processing given data.
 - [Enhancement] Support Rails 7.1.
