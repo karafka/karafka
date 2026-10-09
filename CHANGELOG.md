@@ -19,6 +19,7 @@
 - [Maintenance] Cover with an integration spec that a forceful shutdown does not reopen the clients of still running listeners.
 - [Maintenance] Cover `Admin.list_consumer_groups` with integration specs for a live group reporting `:stable` and for KIP-848 (consumer protocol) groups.
 - [Maintenance] Cover the `CoordinatorsBuffer` and `PausesManager` revoke-time topic pruning fixes with an integration spec driving real rebalances.
+- [Maintenance] Cover with an integration spec that the default logger creates no `log/` directory until something is logged.
 - [Fix] Stop `Admin` operations from retrying forever when their result never becomes visible. They now raise `ResultNotVisibleError` after `admin.max_retries_duration`.
 - [Fix] Stop `CoordinatorsBuffer#@coordinators` from growing unbounded across rebalances by dropping a topic entry on revoke once it tracks no partitions (mirrors `PausesManager#delete`).
 - [Fix] Use `::JSON.parse` in the ActiveJob deserializer, so consuming ActiveJob messages works with the json gem `>= 3.0`.
