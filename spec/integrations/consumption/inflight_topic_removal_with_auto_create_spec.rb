@@ -26,7 +26,7 @@ class Consumer < Karafka::BaseConsumer
     return if DT.key?(:thread)
 
     DT[:keeper] = Thread.new do
-      until DT.key?(:delete_time)
+      until DT.key?(:delete_finished)
         begin
           KEEPER.produce_async(topic: DT.topic, payload: "keep")
         rescue WaterDrop::Errors::ProduceError
@@ -38,15 +38,28 @@ class Consumer < Karafka::BaseConsumer
     end
 
     DT[:thread] = Thread.new do
-      started_at = Process.clock_gettime(Process::CLOCK_MONOTONIC)
+      # Kafka may show the deletion before auto-create brings the topic back, and then
+      # `delete_topic` returns normally. We retry until one deletion never becomes visible.
+      5.times do
+        100.times do
+          break if Karafka::Admin.cluster_info.topics.any? { |topic| topic[:topic_name] == DT.topic }
 
-      begin
-        Karafka::Admin.delete_topic(DT.topic)
-      rescue => e
-        DT[:delete_error] = e
-      ensure
-        DT[:delete_time] = Process.clock_gettime(Process::CLOCK_MONOTONIC) - started_at
+          sleep(0.1)
+        end
+
+        started_at = Process.clock_gettime(Process::CLOCK_MONOTONIC)
+
+        begin
+          Karafka::Admin.delete_topic(DT.topic)
+          DT[:visible_deletions] << true
+        rescue => e
+          DT[:delete_error] = e
+          DT[:delete_time] = Process.clock_gettime(Process::CLOCK_MONOTONIC) - started_at
+          break
+        end
       end
+    ensure
+      DT[:delete_finished] = true
     end
 
     sleep(1)
