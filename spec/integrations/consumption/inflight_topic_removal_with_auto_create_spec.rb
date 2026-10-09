@@ -22,6 +22,9 @@ end
 
 class Consumer < Karafka::BaseConsumer
   def consume
+    # The keeper's messages arrive as further batches; start the delete under test only once
+    return if DT.key?(:thread)
+
     DT[:keeper] = Thread.new do
       until DT.key?(:delete_time)
         begin
