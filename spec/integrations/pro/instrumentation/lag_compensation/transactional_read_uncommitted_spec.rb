@@ -85,6 +85,11 @@ end
 Thread.new do
   sleep(0.1) until DT.key?(:paused)
 
+  # Let librdkafka's own statistics for the paused partition freeze first, so only the compensated
+  # lag can pick up the transaction
+  samples = DT[:lags].size
+  sleep(0.1) until DT[:lags].size >= samples + 4
+
   begin
     transactional_producer.transaction do
       OPEN.times { transactional_producer.produce_async(topic: DT.topic, payload: DT.uuid) }
