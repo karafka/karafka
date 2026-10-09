@@ -10,11 +10,7 @@ RSpec.describe_current do
   end
 
   before do
-    # We use different clock in 3.2 that does not require multiplication
-    # @see `::Karafka::Core::Helpers::Time` for more details
-    normalized = (RUBY_VERSION >= "3.2") ? times.map { |time| time * 1_000 } : times
-
-    allow(Process).to receive(:clock_gettime).and_return(*normalized)
+    allow(Process).to receive(:clock_gettime).and_return(*times.map { |time| time * 1_000 })
   end
 
   let(:times) { [0, 0] }
