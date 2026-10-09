@@ -51,6 +51,45 @@ RSpec.describe_current do
         expect(topic.deserializers.headers).to eq(custom_headers_deserializer)
       end
     end
+
+    context "when only the payload deserializer is specified" do
+      let(:custom_payload_deserializer) { rand }
+
+      before { topic.deserializers(payload: custom_payload_deserializer) }
+
+      it { expect(topic.deserializers.payload).to eq(custom_payload_deserializer) }
+      it { expect(topic.deserializers.key).to be_a(default_key_deserializer) }
+      it { expect(topic.deserializers.headers).to be_a(default_headers_deserializer) }
+    end
+
+    context "when nil deserializers are specified" do
+      before { topic.deserializers(payload: nil, key: nil, headers: nil) }
+
+      it { expect(topic.deserializers.payload).to be_nil }
+      it { expect(topic.deserializers.key).to be_nil }
+      it { expect(topic.deserializers.headers).to be_nil }
+    end
+
+    context "when deserializers were already set up" do
+      let(:custom_payload_deserializer) { rand }
+
+      before { topic.deserializers }
+
+      it "keeps the first configuration" do
+        first = topic.deserializers
+
+        expect(topic.deserializers(payload: custom_payload_deserializer)).to be(first)
+      end
+
+      it "does not allocate on repeated calls" do
+        topic.deserializers
+        before = GC.stat(:total_allocated_objects)
+        100.times { topic.deserializers }
+
+        # Defaults built on each call would allocate 3 objects per call
+        expect(GC.stat(:total_allocated_objects) - before).to be < 10
+      end
+    end
   end
 
   describe "#deserializers?" do
