@@ -40,7 +40,7 @@ class Consumer < Karafka::BaseConsumer
     DT[:thread] = Thread.new do
       # Kafka may show the deletion before auto-create brings the topic back, and then
       # `delete_topic` returns normally. We retry until one deletion never becomes visible.
-      5.times do
+      10.times do
         100.times do
           break if Karafka::Admin.cluster_info.topics.any? { |topic| topic[:topic_name] == DT.topic }
 
