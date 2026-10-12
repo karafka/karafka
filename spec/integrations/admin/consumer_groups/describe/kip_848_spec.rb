@@ -1,7 +1,8 @@
 # frozen_string_literal: true
 
-# Karafka::Admin.describe_consumer_group should describe KIP-848 (consumer protocol) groups: stable
-# with the live member holding all the partitions while running and empty after shutdown.
+# Karafka::Admin.describe_consumer_group should describe KIP-848 (consumer protocol) consumer
+# groups: stable with the live member holding all the partitions while running and empty after
+# shutdown.
 
 setup_karafka(consumer_group_protocol: true)
 

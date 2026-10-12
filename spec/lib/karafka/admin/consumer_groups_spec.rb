@@ -245,7 +245,7 @@ RSpec.describe Karafka::Admin::ConsumerGroups do
 
     before { allow(described_class).to receive(:new).and_return(instance) }
 
-    context "when the group does not exist" do
+    context "when the consumer group does not exist" do
       before { allow(described_class).to receive(:new).and_call_original }
 
       it "reports it as dead with no members" do
@@ -308,7 +308,7 @@ RSpec.describe Karafka::Admin::ConsumerGroups do
       end
     end
 
-    context "when the group could not be described" do
+    context "when the consumer group could not be described" do
       let(:error) { Rdkafka::RdkafkaError.new(-1) }
       let(:report) do
         instance_double(
@@ -319,7 +319,63 @@ RSpec.describe Karafka::Admin::ConsumerGroups do
 
       before { allow(instance).to receive(:with_admin).and_return(report) }
 
-      it "raises the group error" do
+      it "raises the consumer group error without retrying" do
+        expect { description }.to raise_error(error)
+        expect(instance).to have_received(:with_admin).once
+      end
+    end
+
+    context "when the coordinator is not ready yet and then becomes ready" do
+      let(:not_ready_report) do
+        instance_double(
+          Rdkafka::Admin::DescribeConsumerGroupsReport,
+          # 16 is the Kafka NOT_COORDINATOR error code
+          groups: [{ group_id: group_id, error: Rdkafka::RdkafkaError.new(16) }]
+        )
+      end
+      let(:ready_report) do
+        instance_double(
+          Rdkafka::Admin::DescribeConsumerGroupsReport,
+          groups: [
+            {
+              group_id: group_id,
+              error: nil,
+              state: Rdkafka::Bindings::RD_KAFKA_CONSUMER_GROUP_STATE_DEAD,
+              partition_assignor: "",
+              coordinator: nil,
+              members: []
+            }
+          ]
+        )
+      end
+
+      before do
+        allow(instance)
+          .to receive(:with_admin)
+          .and_return(not_ready_report, not_ready_report, ready_report)
+      end
+
+      it "retries until the consumer group is described" do
+        expect(description[:state]).to eq(:dead)
+        expect(instance).to have_received(:with_admin).exactly(3).times
+      end
+    end
+
+    context "when the coordinator does not become ready in time" do
+      let(:error) { Rdkafka::RdkafkaError.new(16) }
+      let(:report) do
+        instance_double(
+          Rdkafka::Admin::DescribeConsumerGroupsReport,
+          groups: [{ group_id: group_id, error: error }]
+        )
+      end
+
+      before do
+        allow(instance).to receive(:with_admin).and_return(report)
+        allow(described_class).to receive(:max_retries_duration).and_return(0)
+      end
+
+      it "raises the coordinator error" do
         expect { description }.to raise_error(error)
       end
     end

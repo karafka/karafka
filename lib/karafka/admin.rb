@@ -214,8 +214,8 @@ module Karafka
 
       # Describes a consumer group: its state, assignor, coordinator and members
       #
-      # @param group_id [String] group to describe
-      # @return [Hash] group details
+      # @param group_id [String] consumer group to describe
+      # @return [Hash] consumer group details
       # @see ConsumerGroups.describe
       def describe_consumer_group(group_id)
         new.describe_consumer_group(group_id)
@@ -413,8 +413,8 @@ module Karafka
       consumer_groups_admin.list
     end
 
-    # @param group_id [String] group to describe
-    # @return [Hash] group details
+    # @param group_id [String] consumer group to describe
+    # @return [Hash] consumer group details
     # @see ConsumerGroups#describe
     def describe_consumer_group(group_id)
       consumer_groups_admin.describe(group_id)

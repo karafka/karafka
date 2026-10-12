@@ -26,7 +26,20 @@ module Karafka
         Rdkafka::Bindings::RD_KAFKA_CONSUMER_GROUP_STATE_EMPTY => :empty
       }.freeze
 
-      private_constant :LONG_TIME_AGO, :DAY_IN_SECONDS, :CONSUMER_GROUP_STATES
+      # Consumer group describe errors that mean the coordinator is not ready yet, not that the
+      # consumer group could not be described
+      COORDINATOR_NOT_READY_ERRORS = %i[
+        not_coordinator
+        coordinator_load_in_progress
+        coordinator_not_available
+      ].freeze
+
+      private_constant(
+        :LONG_TIME_AGO,
+        :DAY_IN_SECONDS,
+        :CONSUMER_GROUP_STATES,
+        :COORDINATOR_NOT_READY_ERRORS
+      )
 
       class << self
         # @param group_id [String] group for which we want to move offsets
@@ -81,7 +94,7 @@ module Karafka
           new.list
         end
 
-        # @param group_id [String] group to describe
+        # @param group_id [String] consumer group to describe
         # @see #describe
         def describe(group_id)
           new.describe(group_id)
@@ -551,20 +564,24 @@ module Karafka
       #
       # @param group_id [String] id of the consumer group to describe
       #
-      # @return [Hash] group details with:
+      # @return [Hash] consumer group details with:
       #   - `:group_id` [String] the consumer group id
-      #   - `:state` [Symbol] cooked group state, one of `:unknown`, `:preparing_rebalance`,
-      #     `:completing_rebalance`, `:stable`, `:dead`, `:empty`
+      #   - `:state` [Symbol] cooked consumer group state, one of `:unknown`,
+      #     `:preparing_rebalance`, `:completing_rebalance`, `:stable`, `:dead`, `:empty`
       #   - `:partition_assignor` [String, nil] partition assignor in use (e.g. `"range"`)
-      #   - `:coordinator` [Hash, nil] the group coordinator broker as
+      #   - `:coordinator` [Hash, nil] the consumer group coordinator broker as
       #     `{ id:, host:, port:, rack: }`
-      #   - `:members` [Array<Hash>] current group members, each with `:member_id`, `:client_id`,
-      #     `:group_instance_id`, `:host` and `:assignment` (topic name => array of partitions)
+      #   - `:members` [Array<Hash>] current consumer group members, each with `:member_id`,
+      #     `:client_id`, `:group_instance_id`, `:host` and `:assignment` (topic name => array of
+      #     partitions)
       #
-      # @raise [Rdkafka::RdkafkaError] when the group could not be described
+      # @raise [Rdkafka::RdkafkaError] when the consumer group could not be described
       #
-      # @note A group id the cluster does not know is not an error. Kafka reports it in the
-      #   `:dead` state with no members.
+      # @note A consumer group id the cluster does not know is not an error. Kafka reports it in
+      #   the `:dead` state with no members.
+      #
+      # @note librdkafka does not retry a consumer group coordinator that is not available yet
+      #   (e.g. on a fresh cluster), so we retry it for up to `admin.max_retries_duration`.
       #
       # @example Describe a consumer group
       #   Karafka::Admin::ConsumerGroups.describe('billing')
@@ -575,46 +592,47 @@ module Karafka
       #   #   coordinator: { id: 1, host: '127.0.0.1', port: 9092, rack: nil },
       #   #   members: [
       #   #     {
-      #   #       member_id: 'karafka_production-1f2e...',
-      #   #       client_id: 'karafka_production',
+      #   #       member_id: 'rdkafka-959acf9d-9706-46f8-b127-c63861b351dd',
+      #   #       client_id: 'rdkafka',
       #   #       group_instance_id: nil,
-      #   #       host: '/172.18.0.1',
+      #   #       host: '/172.31.0.1',
       #   #       assignment: { 'payments' => [0, 1, 2] }
       #   #     }
       #   #   ]
       #   # }
       #
-      # @example Check that a group has no live members before changing its offsets
+      # @example Check that a consumer group has no live members before changing its offsets
       #   Karafka::Admin.describe_consumer_group('billing')[:members].empty?
       def describe(group_id)
-        describe_many([group_id]).first
-      end
+        start_time = self.class.monotonic_now
 
-      private
+        group = loop do
+          report = with_admin do |admin|
+            admin
+              .describe_consumer_groups([group_id])
+              .wait(max_wait_timeout_ms: max_wait_time_ms)
+          end
 
-      # @param group_ids [Array<String>] ids of the consumer groups to describe
-      # @return [Array<Hash>] cooked description of each group (see `#describe`)
-      # @raise [Rdkafka::RdkafkaError] when any of the groups could not be described
-      def describe_many(group_ids)
-        report = with_admin do |admin|
-          admin
-            .describe_consumer_groups(group_ids)
-            .wait(max_wait_timeout_ms: max_wait_time_ms)
+          described = report.groups.first
+          error = described[:error]
+
+          break described unless error
+
+          raise(error) unless COORDINATOR_NOT_READY_ERRORS.include?(error.code)
+          raise(error) if self.class.monotonic_now - start_time >= self.class.max_retries_duration
+
+          sleep(self.class.retry_backoff / 1_000.0)
         end
 
-        report.groups.map do |group|
-          raise(group[:error]) if group[:error]
-
-          {
-            group_id: group[:group_id],
-            state: CONSUMER_GROUP_STATES.fetch(group[:state], :unknown),
-            partition_assignor: group[:partition_assignor],
-            coordinator: group[:coordinator],
-            members: group[:members].map do |member|
-              member.slice(:member_id, :client_id, :group_instance_id, :host, :assignment)
-            end
-          }
-        end
+        {
+          group_id: group[:group_id],
+          state: CONSUMER_GROUP_STATES.fetch(group[:state], :unknown),
+          partition_assignor: group[:partition_assignor],
+          coordinator: group[:coordinator],
+          members: group[:members].map do |member|
+            member.slice(:member_id, :client_id, :group_instance_id, :host, :assignment)
+          end
+        }
       end
     end
   end
