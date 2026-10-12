@@ -80,6 +80,12 @@ module Karafka
         def list
           new.list
         end
+
+        # @param group_id [String] group to describe
+        # @see #describe
+        def describe(group_id)
+          new.describe(group_id)
+        end
       end
 
       # Moves the offset on a given group and provided topic to the requested location
@@ -536,6 +542,77 @@ module Karafka
           {
             group_id: group[:group_id],
             state: CONSUMER_GROUP_STATES.fetch(group[:state], :unknown)
+          }
+        end
+      end
+
+      # Describes a single consumer group: its state, partition assignor, coordinator and members
+      # with their current partition assignments.
+      #
+      # @param group_id [String] id of the consumer group to describe
+      #
+      # @return [Hash] group details with:
+      #   - `:group_id` [String] the consumer group id
+      #   - `:state` [Symbol] cooked group state, one of `:unknown`, `:preparing_rebalance`,
+      #     `:completing_rebalance`, `:stable`, `:dead`, `:empty`
+      #   - `:partition_assignor` [String, nil] partition assignor in use (e.g. `"range"`)
+      #   - `:coordinator` [Hash, nil] the group coordinator broker as
+      #     `{ id:, host:, port:, rack: }`
+      #   - `:members` [Array<Hash>] current group members, each with `:member_id`, `:client_id`,
+      #     `:group_instance_id`, `:host` and `:assignment` (topic name => array of partitions)
+      #
+      # @raise [Rdkafka::RdkafkaError] when the group could not be described
+      #
+      # @note A group id the cluster does not know is not an error. Kafka reports it in the
+      #   `:dead` state with no members.
+      #
+      # @example Describe a consumer group
+      #   Karafka::Admin::ConsumerGroups.describe('billing')
+      #   # => {
+      #   #   group_id: 'billing',
+      #   #   state: :stable,
+      #   #   partition_assignor: 'range',
+      #   #   coordinator: { id: 1, host: '127.0.0.1', port: 9092, rack: nil },
+      #   #   members: [
+      #   #     {
+      #   #       member_id: 'karafka_production-1f2e...',
+      #   #       client_id: 'karafka_production',
+      #   #       group_instance_id: nil,
+      #   #       host: '/172.18.0.1',
+      #   #       assignment: { 'payments' => [0, 1, 2] }
+      #   #     }
+      #   #   ]
+      #   # }
+      #
+      # @example Check that a group has no live members before changing its offsets
+      #   Karafka::Admin.describe_consumer_group('billing')[:members].empty?
+      def describe(group_id)
+        describe_many([group_id]).first
+      end
+
+      private
+
+      # @param group_ids [Array<String>] ids of the consumer groups to describe
+      # @return [Array<Hash>] cooked description of each group (see `#describe`)
+      # @raise [Rdkafka::RdkafkaError] when any of the groups could not be described
+      def describe_many(group_ids)
+        report = with_admin do |admin|
+          admin
+            .describe_consumer_groups(group_ids)
+            .wait(max_wait_timeout_ms: max_wait_time_ms)
+        end
+
+        report.groups.map do |group|
+          raise(group[:error]) if group[:error]
+
+          {
+            group_id: group[:group_id],
+            state: CONSUMER_GROUP_STATES.fetch(group[:state], :unknown),
+            partition_assignor: group[:partition_assignor],
+            coordinator: group[:coordinator],
+            members: group[:members].map do |member|
+              member.slice(:member_id, :client_id, :group_instance_id, :host, :assignment)
+            end
           }
         end
       end

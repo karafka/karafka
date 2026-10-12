@@ -237,6 +237,94 @@ RSpec.describe Karafka::Admin::ConsumerGroups do
     end
   end
 
+  describe "#describe" do
+    subject(:description) { described_class.describe(group_id) }
+
+    let(:group_id) { SecureRandom.uuid }
+    let(:instance) { described_class.new }
+
+    before { allow(described_class).to receive(:new).and_return(instance) }
+
+    context "when the group does not exist" do
+      before { allow(described_class).to receive(:new).and_call_original }
+
+      it "reports it as dead with no members" do
+        expect(description[:group_id]).to eq(group_id)
+        expect(description[:state]).to eq(:dead)
+        expect(description[:members]).to eq([])
+      end
+    end
+
+    context "when cooking the librdkafka group description" do
+      let(:coordinator) { { id: 1, host: "127.0.0.1", port: 9092, rack: nil } }
+      let(:report) do
+        instance_double(
+          Rdkafka::Admin::DescribeConsumerGroupsReport,
+          groups: [
+            {
+              group_id: group_id,
+              error: nil,
+              is_simple_consumer_group: false,
+              state: Rdkafka::Bindings::RD_KAFKA_CONSUMER_GROUP_STATE_STABLE,
+              state_name: "Stable",
+              type: Rdkafka::Bindings::RD_KAFKA_CONSUMER_GROUP_TYPE_CLASSIC,
+              type_name: "Classic",
+              partition_assignor: "range",
+              coordinator: coordinator,
+              authorized_operations: nil,
+              members: [
+                {
+                  member_id: "m1",
+                  client_id: "c1",
+                  group_instance_id: nil,
+                  host: "/127.0.0.1",
+                  assignment: { "t1" => [0, 1] },
+                  target_assignment: nil
+                }
+              ]
+            }
+          ]
+        )
+      end
+
+      before { allow(instance).to receive(:with_admin).and_return(report) }
+
+      it "returns the cooked group with a symbol state and plain members" do
+        expect(description).to eq(
+          group_id: group_id,
+          state: :stable,
+          partition_assignor: "range",
+          coordinator: coordinator,
+          members: [
+            {
+              member_id: "m1",
+              client_id: "c1",
+              group_instance_id: nil,
+              host: "/127.0.0.1",
+              assignment: { "t1" => [0, 1] }
+            }
+          ]
+        )
+      end
+    end
+
+    context "when the group could not be described" do
+      let(:error) { Rdkafka::RdkafkaError.new(-1) }
+      let(:report) do
+        instance_double(
+          Rdkafka::Admin::DescribeConsumerGroupsReport,
+          groups: [{ group_id: group_id, error: error }]
+        )
+      end
+
+      before { allow(instance).to receive(:with_admin).and_return(report) }
+
+      it "raises the group error" do
+        expect { description }.to raise_error(error)
+      end
+    end
+  end
+
   describe "#trigger_rebalance" do
     subject(:trigger) { described_class.trigger_rebalance(group_id) }
 
