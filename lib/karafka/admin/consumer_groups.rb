@@ -99,6 +99,12 @@ module Karafka
         def describe(group_id)
           new.describe(group_id)
         end
+
+        # @param group_ids [Array<String>] consumer groups to describe
+        # @see #describe_many
+        def describe_many(group_ids)
+          new.describe_many(group_ids)
+        end
       end
 
       # Moves the offset on a given group and provided topic to the requested location
@@ -564,24 +570,9 @@ module Karafka
       #
       # @param group_id [String] id of the consumer group to describe
       #
-      # @return [Hash] consumer group details with:
-      #   - `:group_id` [String] the consumer group id
-      #   - `:state` [Symbol] cooked consumer group state, one of `:unknown`,
-      #     `:preparing_rebalance`, `:completing_rebalance`, `:stable`, `:dead`, `:empty`
-      #   - `:partition_assignor` [String, nil] partition assignor in use (e.g. `"range"`)
-      #   - `:coordinator` [Hash, nil] the consumer group coordinator broker as
-      #     `{ id:, host:, port:, rack: }`
-      #   - `:members` [Array<Hash>] current consumer group members, each with `:member_id`,
-      #     `:client_id`, `:group_instance_id`, `:host` and `:assignment` (topic name => array of
-      #     partitions)
+      # @return [Hash] consumer group details (see `#describe_many` for the fields)
       #
       # @raise [Rdkafka::RdkafkaError] when the consumer group could not be described
-      #
-      # @note A consumer group id the cluster does not know is not an error. Kafka reports it in
-      #   the `:dead` state with no members.
-      #
-      # @note librdkafka does not retry a consumer group coordinator that is not available yet
-      #   (e.g. on a fresh cluster), so we retry it for up to `admin.max_retries_duration`.
       #
       # @example Describe a consumer group
       #   Karafka::Admin::ConsumerGroups.describe('billing')
@@ -604,26 +595,77 @@ module Karafka
       # @example Check that a consumer group has no live members before changing its offsets
       #   Karafka::Admin.describe_consumer_group('billing')[:members].empty?
       def describe(group_id)
+        describe_many([group_id]).first
+      end
+
+      # Describes consumer groups: their state, partition assignor, coordinator and members with
+      # their current partition assignments.
+      #
+      # @param group_ids [Array<String>] ids of the consumer groups to describe
+      #
+      # @return [Array<Hash>] consumer group details in the order of `group_ids`, each with:
+      #   - `:group_id` [String] the consumer group id
+      #   - `:state` [Symbol] cooked consumer group state, one of `:unknown`,
+      #     `:preparing_rebalance`, `:completing_rebalance`, `:stable`, `:dead`, `:empty`
+      #   - `:partition_assignor` [String, nil] partition assignor in use (e.g. `"range"`)
+      #   - `:coordinator` [Hash, nil] the consumer group coordinator broker as
+      #     `{ id:, host:, port:, rack: }`
+      #   - `:members` [Array<Hash>] current consumer group members, each with `:member_id`,
+      #     `:client_id`, `:group_instance_id`, `:host` and `:assignment` (topic name => array of
+      #     partitions)
+      #
+      # @raise [Rdkafka::RdkafkaError] when any of the consumer groups could not be described
+      #
+      # @note A consumer group id the cluster does not know is not an error. Kafka reports it in
+      #   the `:dead` state with no members.
+      #
+      # @note librdkafka does not retry a consumer group coordinator that is not available yet
+      #   (e.g. on a fresh cluster), so we retry it for up to `admin.max_retries_duration`.
+      #
+      # @example Describe several consumer groups and print their states
+      #   Karafka::Admin.describe_consumer_groups(%w[billing orders-processor]).each do |group|
+      #     puts "#{group[:group_id]}: #{group[:state]} (#{group[:members].size} members)"
+      #   end
+      def describe_many(group_ids)
+        return [] if group_ids.empty?
+
         start_time = self.class.monotonic_now
+        described = {}
+        pending = group_ids.uniq
 
-        group = loop do
-          report = with_admin do |admin|
-            admin
-              .describe_consumer_groups([group_id])
+        with_admin do |admin|
+          until pending.empty?
+            report = admin
+              .describe_consumer_groups(pending)
               .wait(max_wait_timeout_ms: max_wait_time_ms)
+
+            report.groups.each do |group|
+              error = group[:error]
+
+              unless error
+                described[group[:group_id]] = cook_group(group)
+
+                next
+              end
+
+              raise(error) unless COORDINATOR_NOT_READY_ERRORS.include?(error.code)
+              raise(error) if self.class.monotonic_now - start_time >= self.class.max_retries_duration
+            end
+
+            pending -= described.keys
+
+            sleep(self.class.retry_backoff / 1_000.0) unless pending.empty?
           end
-
-          described = report.groups.first
-          error = described[:error]
-
-          break described unless error
-
-          raise(error) unless COORDINATOR_NOT_READY_ERRORS.include?(error.code)
-          raise(error) if self.class.monotonic_now - start_time >= self.class.max_retries_duration
-
-          sleep(self.class.retry_backoff / 1_000.0)
         end
 
+        group_ids.map { |group_id| described.fetch(group_id) }
+      end
+
+      private
+
+      # @param group [Hash] consumer group description from `DescribeConsumerGroupsReport`
+      # @return [Hash] cooked consumer group description
+      def cook_group(group)
         {
           group_id: group[:group_id],
           state: CONSUMER_GROUP_STATES.fetch(group[:state], :unknown),

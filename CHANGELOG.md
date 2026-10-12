@@ -7,7 +7,7 @@
 - **[Feature]** Add `Kubernetes::ReadinessListener`, serving a readiness probe that reports healthy once all subscription groups poll and not-ready on shutdown or quieting, so pods drain before exiting.
 - **[Feature]** Allow the `--include`/`--exclude` CLI server filters to accept wildcard patterns (e.g. `--exclude-consumer-groups app-a-*`), including topics discovered at runtime by Pro routing patterns.
 - **[Feature]** Add `Karafka::Admin.list_consumer_groups` to list every consumer group in the cluster with its state. Requires karafka-rdkafka `>= 0.31.0`.
-- **[Feature]** Add `Karafka::Admin.describe_consumer_group` to read a consumer group's state, coordinator, assignor and members with their partition assignments. Requires karafka-rdkafka `>= 0.31.0`.
+- **[Feature]** Add `Karafka::Admin.describe_consumer_group` and `Karafka::Admin.describe_consumer_groups` to read a consumer group's state, coordinator, assignor and members with their partition assignments. Requires karafka-rdkafka `>= 0.31.0`.
 - [Enhancement] Defer default log file creation until the first write and keep logging working (to stdout) when the log file cannot be created or written, e.g. on read-only filesystems (ydah).
 - [Enhancement] Build `Setup::DefaultsInjector` (and its Pro extension) on top of `Karafka::Core::Configurable::Injector` so the kafka defaults injection uses the shared ecosystem pattern. Behavior is unchanged. Requires karafka-core `>= 2.6.3`.
 - [Enhancement] Stop allocating 6 objects per consumed message: build the default topic deserializers only once and read `max_messages` once per poll batch.

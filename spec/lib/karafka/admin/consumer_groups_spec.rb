@@ -241,142 +241,173 @@ RSpec.describe Karafka::Admin::ConsumerGroups do
     subject(:description) { described_class.describe(group_id) }
 
     let(:group_id) { SecureRandom.uuid }
-    let(:instance) { described_class.new }
-
-    before { allow(described_class).to receive(:new).and_return(instance) }
 
     context "when the consumer group does not exist" do
-      before { allow(described_class).to receive(:new).and_call_original }
-
       it "reports it as dead with no members" do
         expect(description[:group_id]).to eq(group_id)
         expect(description[:state]).to eq(:dead)
         expect(description[:members]).to eq([])
       end
     end
+  end
 
-    context "when cooking the librdkafka group description" do
-      let(:coordinator) { { id: 1, host: "127.0.0.1", port: 9092, rack: nil } }
-      let(:report) do
-        instance_double(
-          Rdkafka::Admin::DescribeConsumerGroupsReport,
-          groups: [
+  describe "#describe_many" do
+    subject(:descriptions) { described_class.describe_many(group_ids) }
+
+    let(:group_ids) { [group_id] }
+    let(:group_id) { SecureRandom.uuid }
+    let(:instance) { described_class.new }
+    let(:admin) { instance_double(Rdkafka::Admin) }
+    let(:coordinator) { { id: 1, host: "127.0.0.1", port: 9092, rack: nil } }
+    # 16 is the Kafka NOT_COORDINATOR error code
+    let(:not_ready_error) { Rdkafka::RdkafkaError.new(16) }
+
+    def group_report(*groups)
+      report = instance_double(Rdkafka::Admin::DescribeConsumerGroupsReport, groups: groups)
+      instance_double(Rdkafka::Admin::DescribeConsumerGroupsHandle, wait: report)
+    end
+
+    def described_group(id, state: Rdkafka::Bindings::RD_KAFKA_CONSUMER_GROUP_STATE_DEAD)
+      {
+        group_id: id,
+        error: nil,
+        is_simple_consumer_group: false,
+        state: state,
+        state_name: "Dead",
+        type: Rdkafka::Bindings::RD_KAFKA_CONSUMER_GROUP_TYPE_CLASSIC,
+        type_name: "Classic",
+        partition_assignor: "range",
+        coordinator: coordinator,
+        authorized_operations: nil,
+        members: []
+      }
+    end
+
+    before do
+      allow(described_class).to receive(:new).and_return(instance)
+      allow(instance).to receive(:with_admin).and_yield(admin)
+    end
+
+    context "when no consumer groups are requested" do
+      let(:group_ids) { [] }
+
+      it { expect(descriptions).to eq([]) }
+    end
+
+    context "when the consumer groups do not exist" do
+      let(:group_ids) { [SecureRandom.uuid, SecureRandom.uuid] }
+
+      before { allow(described_class).to receive(:new).and_call_original }
+
+      it "reports each of them as dead with no members, in the requested order" do
+        expect(descriptions.map { |group| group[:group_id] }).to eq(group_ids)
+        expect(descriptions.map { |group| group[:state] }).to eq(%i[dead dead])
+        expect(descriptions.map { |group| group[:members] }).to eq([[], []])
+      end
+    end
+
+    context "when cooking the librdkafka consumer group description" do
+      let(:group) do
+        described_group(group_id, state: Rdkafka::Bindings::RD_KAFKA_CONSUMER_GROUP_STATE_STABLE)
+          .merge(
+            members: [
+              {
+                member_id: "m1",
+                client_id: "c1",
+                group_instance_id: nil,
+                host: "/127.0.0.1",
+                assignment: { "t1" => [0, 1] },
+                target_assignment: nil
+              }
+            ]
+          )
+      end
+
+      before { allow(admin).to receive(:describe_consumer_groups).and_return(group_report(group)) }
+
+      it "returns the cooked consumer group with a symbol state and plain members" do
+        expect(descriptions).to eq(
+          [
             {
               group_id: group_id,
-              error: nil,
-              is_simple_consumer_group: false,
-              state: Rdkafka::Bindings::RD_KAFKA_CONSUMER_GROUP_STATE_STABLE,
-              state_name: "Stable",
-              type: Rdkafka::Bindings::RD_KAFKA_CONSUMER_GROUP_TYPE_CLASSIC,
-              type_name: "Classic",
+              state: :stable,
               partition_assignor: "range",
               coordinator: coordinator,
-              authorized_operations: nil,
               members: [
                 {
                   member_id: "m1",
                   client_id: "c1",
                   group_instance_id: nil,
                   host: "/127.0.0.1",
-                  assignment: { "t1" => [0, 1] },
-                  target_assignment: nil
+                  assignment: { "t1" => [0, 1] }
                 }
               ]
             }
           ]
         )
       end
+    end
 
-      before { allow(instance).to receive(:with_admin).and_return(report) }
+    context "when the broker returns the consumer groups in a different order" do
+      let(:group_ids) { %w[g1 g2] }
 
-      it "returns the cooked group with a symbol state and plain members" do
-        expect(description).to eq(
-          group_id: group_id,
-          state: :stable,
-          partition_assignor: "range",
-          coordinator: coordinator,
-          members: [
-            {
-              member_id: "m1",
-              client_id: "c1",
-              group_instance_id: nil,
-              host: "/127.0.0.1",
-              assignment: { "t1" => [0, 1] }
-            }
-          ]
-        )
+      before do
+        allow(admin)
+          .to receive(:describe_consumer_groups)
+          .and_return(group_report(described_group("g2"), described_group("g1")))
+      end
+
+      it "returns them in the requested order" do
+        expect(descriptions.map { |group| group[:group_id] }).to eq(%w[g1 g2])
       end
     end
 
-    context "when the consumer group could not be described" do
+    context "when a consumer group could not be described" do
       let(:error) { Rdkafka::RdkafkaError.new(-1) }
-      let(:report) do
-        instance_double(
-          Rdkafka::Admin::DescribeConsumerGroupsReport,
-          groups: [{ group_id: group_id, error: error }]
-        )
+
+      before do
+        allow(admin)
+          .to receive(:describe_consumer_groups)
+          .and_return(group_report({ group_id: group_id, error: error }))
       end
 
-      before { allow(instance).to receive(:with_admin).and_return(report) }
-
       it "raises the consumer group error without retrying" do
-        expect { description }.to raise_error(error)
+        expect { descriptions }.to raise_error(error)
+        expect(admin).to have_received(:describe_consumer_groups).once
+      end
+    end
+
+    context "when a coordinator is not ready yet and then becomes ready" do
+      let(:group_ids) { %w[g1 g2] }
+
+      before do
+        allow(admin)
+          .to receive(:describe_consumer_groups)
+          .and_return(
+            group_report(described_group("g1"), { group_id: "g2", error: not_ready_error }),
+            group_report({ group_id: "g2", error: not_ready_error }),
+            group_report(described_group("g2"))
+          )
+      end
+
+      it "retries only the not ready consumer groups within one admin client" do
+        expect(descriptions.map { |group| group[:group_id] }).to eq(%w[g1 g2])
+        expect(admin).to have_received(:describe_consumer_groups).with(%w[g1 g2]).once
+        expect(admin).to have_received(:describe_consumer_groups).with(%w[g2]).twice
         expect(instance).to have_received(:with_admin).once
       end
     end
 
-    context "when the coordinator is not ready yet and then becomes ready" do
-      let(:not_ready_report) do
-        instance_double(
-          Rdkafka::Admin::DescribeConsumerGroupsReport,
-          # 16 is the Kafka NOT_COORDINATOR error code
-          groups: [{ group_id: group_id, error: Rdkafka::RdkafkaError.new(16) }]
-        )
-      end
-      let(:ready_report) do
-        instance_double(
-          Rdkafka::Admin::DescribeConsumerGroupsReport,
-          groups: [
-            {
-              group_id: group_id,
-              error: nil,
-              state: Rdkafka::Bindings::RD_KAFKA_CONSUMER_GROUP_STATE_DEAD,
-              partition_assignor: "",
-              coordinator: nil,
-              members: []
-            }
-          ]
-        )
-      end
-
+    context "when a coordinator does not become ready in time" do
       before do
-        allow(instance)
-          .to receive(:with_admin)
-          .and_return(not_ready_report, not_ready_report, ready_report)
-      end
-
-      it "retries until the consumer group is described" do
-        expect(description[:state]).to eq(:dead)
-        expect(instance).to have_received(:with_admin).exactly(3).times
-      end
-    end
-
-    context "when the coordinator does not become ready in time" do
-      let(:error) { Rdkafka::RdkafkaError.new(16) }
-      let(:report) do
-        instance_double(
-          Rdkafka::Admin::DescribeConsumerGroupsReport,
-          groups: [{ group_id: group_id, error: error }]
-        )
-      end
-
-      before do
-        allow(instance).to receive(:with_admin).and_return(report)
+        allow(admin)
+          .to receive(:describe_consumer_groups)
+          .and_return(group_report({ group_id: group_id, error: not_ready_error }))
         allow(described_class).to receive(:max_retries_duration).and_return(0)
       end
 
       it "raises the coordinator error" do
-        expect { description }.to raise_error(error)
+        expect { descriptions }.to raise_error(not_ready_error)
       end
     end
   end
