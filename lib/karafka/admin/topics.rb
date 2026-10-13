@@ -447,7 +447,7 @@ module Karafka
         report = with_admin do |admin|
           admin
             .describe_topics(
-              topic_names,
+              topic_names.uniq,
               include_authorized_operations: include_authorized_operations
             )
             .wait(max_wait_timeout_ms: max_wait_time_ms)

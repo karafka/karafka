@@ -99,8 +99,7 @@ module Karafka
       ].freeze
 
       private_constant(
-        :RESOURCE_TYPES_MAP, :RESOURCE_PATTERNS_TYPE_MAP, :OPERATIONS_MAP, :PERMISSION_TYPES_MAP,
-        :ALL_MAPS
+        :RESOURCE_TYPES_MAP, :RESOURCE_PATTERNS_TYPE_MAP, :PERMISSION_TYPES_MAP, :ALL_MAPS
       )
 
       # Class level APIs that operate on Acl instances and/or return Acl instances.

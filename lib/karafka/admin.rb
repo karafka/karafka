@@ -24,21 +24,6 @@ module Karafka
       admin_kafka: %i[admin kafka]
     )
 
-    # Maps the numeric librdkafka ACL operation codes to Ruby symbols (e.g. `:describe_configs`),
-    # so authorized operations are reported with the same names as in `Admin::Acl`
-    AUTHORIZED_OPERATIONS = Rdkafka::Bindings
-      .constants
-      .grep(/\ARD_KAFKA_ACL_OPERATION_/)
-      .to_h do |name|
-        [
-          Rdkafka::Bindings.const_get(name),
-          name.to_s.delete_prefix("RD_KAFKA_ACL_OPERATION_").downcase.to_sym
-        ]
-      end
-      .freeze
-
-    private_constant :AUTHORIZED_OPERATIONS
-
     # Creates a new Admin instance
     #
     # @param kafka [Hash] custom kafka configuration to merge with app defaults.
@@ -628,7 +613,11 @@ module Karafka
     # @param operations [Array<Integer>, nil] librdkafka ACL operation codes
     # @return [Array<Symbol>, nil] operations as symbols or nil when they were not requested
     def map_authorized_operations(operations)
-      operations&.map { |operation| AUTHORIZED_OPERATIONS.fetch(operation, :unknown) }
+      return unless operations
+
+      names = Acl::OPERATIONS_MAP.invert
+
+      operations.map { |operation| names.fetch(operation, :unknown) }
     end
 
     # @return [Karafka::Connection::Proxy] proxy wrapping the current external client handle.

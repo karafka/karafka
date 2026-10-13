@@ -476,6 +476,15 @@ RSpec.describe_current do
       expect(described.last[:partitions].size).to eq(1)
     end
 
+    context "when the same topic is requested more than once" do
+      let(:topic_names) { [name, name] }
+
+      it "returns one entry per requested name" do
+        expect(described.map { |topic| topic[:name] }).to eq([name, name])
+        expect(described.map { |topic| topic[:error] }).to eq([nil, nil])
+      end
+    end
+
     context "when no topics are requested" do
       let(:topic_names) { [] }
 
