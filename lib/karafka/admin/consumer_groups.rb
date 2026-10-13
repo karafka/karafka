@@ -587,7 +587,8 @@ module Karafka
       #   #       client_id: 'rdkafka',
       #   #       group_instance_id: nil,
       #   #       host: '/172.31.0.1',
-      #   #       assignment: { 'payments' => [0, 1, 2] }
+      #   #       assignment: { 'payments' => [0, 1, 2] },
+      #   #       target_assignment: nil
       #   #     }
       #   #   ]
       #   # }
@@ -605,14 +606,15 @@ module Karafka
       #
       # @return [Array<Hash>] consumer group details in the order of `group_ids`, each with:
       #   - `:group_id` [String] the consumer group id
-      #   - `:state` [Symbol] cooked consumer group state, one of `:unknown`,
+      #   - `:state` [Symbol] consumer group state, one of `:unknown`,
       #     `:preparing_rebalance`, `:completing_rebalance`, `:stable`, `:dead`, `:empty`
       #   - `:partition_assignor` [String, nil] partition assignor in use (e.g. `"range"`)
       #   - `:coordinator` [Hash, nil] the consumer group coordinator broker as
       #     `{ id:, host:, port:, rack: }`
       #   - `:members` [Array<Hash>] current consumer group members, each with `:member_id`,
-      #     `:client_id`, `:group_instance_id`, `:host` and `:assignment` (topic name => array of
-      #     partitions)
+      #     `:client_id`, `:group_instance_id`, `:host`, `:assignment` (topic name => array of
+      #     partitions) and `:target_assignment` (partitions the member is moving to during a
+      #     rebalance, in the same format; only KIP-848 consumer groups have it, `nil` otherwise)
       #
       # @raise [Rdkafka::RdkafkaError] when any of the consumer groups could not be described
       #
@@ -643,7 +645,7 @@ module Karafka
               error = group[:error]
 
               unless error
-                described[group[:group_id]] = cook_group(group)
+                described[group[:group_id]] = build_group(group)
 
                 next
               end
@@ -664,16 +666,14 @@ module Karafka
       private
 
       # @param group [Hash] consumer group description from `DescribeConsumerGroupsReport`
-      # @return [Hash] cooked consumer group description
-      def cook_group(group)
+      # @return [Hash] consumer group description with the state as a symbol
+      def build_group(group)
         {
           group_id: group[:group_id],
           state: CONSUMER_GROUP_STATES.fetch(group[:state], :unknown),
           partition_assignor: group[:partition_assignor],
           coordinator: group[:coordinator],
-          members: group[:members].map do |member|
-            member.slice(:member_id, :client_id, :group_instance_id, :host, :assignment)
-          end
+          members: group[:members]
         }
       end
     end

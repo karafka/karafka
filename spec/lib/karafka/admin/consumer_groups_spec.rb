@@ -259,8 +259,7 @@ RSpec.describe Karafka::Admin::ConsumerGroups do
     let(:instance) { described_class.new }
     let(:admin) { instance_double(Rdkafka::Admin) }
     let(:coordinator) { { id: 1, host: "127.0.0.1", port: 9092, rack: nil } }
-    # 16 is the Kafka NOT_COORDINATOR error code
-    let(:not_ready_error) { Rdkafka::RdkafkaError.new(16) }
+    let(:not_ready_error) { Rdkafka::RdkafkaError.new(-1) }
 
     def group_report(*groups)
       report = instance_double(Rdkafka::Admin::DescribeConsumerGroupsReport, groups: groups)
@@ -286,6 +285,7 @@ RSpec.describe Karafka::Admin::ConsumerGroups do
     before do
       allow(described_class).to receive(:new).and_return(instance)
       allow(instance).to receive(:with_admin).and_yield(admin)
+      allow(not_ready_error).to receive(:code).and_return(:not_coordinator)
     end
 
     context "when no consumer groups are requested" do
@@ -306,7 +306,7 @@ RSpec.describe Karafka::Admin::ConsumerGroups do
       end
     end
 
-    context "when cooking the librdkafka consumer group description" do
+    context "when building the consumer group description" do
       let(:group) do
         described_group(group_id, state: Rdkafka::Bindings::RD_KAFKA_CONSUMER_GROUP_STATE_STABLE)
           .merge(
@@ -325,7 +325,7 @@ RSpec.describe Karafka::Admin::ConsumerGroups do
 
       before { allow(admin).to receive(:describe_consumer_groups).and_return(group_report(group)) }
 
-      it "returns the cooked consumer group with a symbol state and plain members" do
+      it "returns the consumer group with a symbol state and its members" do
         expect(descriptions).to eq(
           [
             {
@@ -339,7 +339,8 @@ RSpec.describe Karafka::Admin::ConsumerGroups do
                   client_id: "c1",
                   group_instance_id: nil,
                   host: "/127.0.0.1",
-                  assignment: { "t1" => [0, 1] }
+                  assignment: { "t1" => [0, 1] },
+                  target_assignment: nil
                 }
               ]
             }
