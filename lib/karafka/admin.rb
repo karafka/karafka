@@ -24,6 +24,21 @@ module Karafka
       admin_kafka: %i[admin kafka]
     )
 
+    # Maps the numeric librdkafka ACL operation codes to Ruby symbols (e.g. `:describe_configs`),
+    # so authorized operations are reported with the same names as in `Admin::Acl`
+    AUTHORIZED_OPERATIONS = Rdkafka::Bindings
+      .constants
+      .grep(/\ARD_KAFKA_ACL_OPERATION_/)
+      .to_h do |name|
+        [
+          Rdkafka::Bindings.const_get(name),
+          name.to_s.delete_prefix("RD_KAFKA_ACL_OPERATION_").downcase.to_sym
+        ]
+      end
+      .freeze
+
+    private_constant :AUTHORIZED_OPERATIONS
+
     # Creates a new Admin instance
     #
     # @param kafka [Hash] custom kafka configuration to merge with app defaults.
@@ -158,6 +173,30 @@ module Karafka
         new.topic_info(topic_name)
       end
 
+      # @param topic_name [String] name of the topic to describe
+      # @param include_authorized_operations [Boolean] should we also fetch the operations this
+      #   client is authorized to perform on the topic
+      # @return [Hash] topic details
+      # @see Topics.describe
+      def describe_topic(topic_name, include_authorized_operations: false)
+        new.describe_topic(
+          topic_name,
+          include_authorized_operations: include_authorized_operations
+        )
+      end
+
+      # @param topic_names [Array<String>] names of the topics to describe
+      # @param include_authorized_operations [Boolean] should we also fetch the operations this
+      #   client is authorized to perform on the topics
+      # @return [Array<Hash>] topics details in the order of `topic_names`
+      # @see Topics.describe_many
+      def describe_topics(topic_names, include_authorized_operations: false)
+        new.describe_topics(
+          topic_names,
+          include_authorized_operations: include_authorized_operations
+        )
+      end
+
       # @param group_id [String] id of the group for which we want to move the
       #   existing offset
       # @param topics_with_partitions_and_offsets [Hash] Hash with list of topics and settings
@@ -289,6 +328,14 @@ module Karafka
         new.cluster_info
       end
 
+      # @param include_authorized_operations [Boolean] should we also fetch the operations this
+      #   client is authorized to perform on the cluster
+      # @return [Hash] cluster id, controller and brokers
+      # @see #describe_cluster
+      def describe_cluster(include_authorized_operations: false)
+        new.describe_cluster(include_authorized_operations: include_authorized_operations)
+      end
+
       # Creates consumer instance and yields it. After usage it closes the consumer instance
       # This API can be used in other pieces of code and allows for low-level consumer usage
       #
@@ -358,6 +405,30 @@ module Karafka
     # @see Topics#info
     def topic_info(topic_name)
       topics_admin.info(topic_name)
+    end
+
+    # @param topic_name [String] name of the topic to describe
+    # @param include_authorized_operations [Boolean] should we also fetch the operations this
+    #   client is authorized to perform on the topic
+    # @return [Hash] topic details
+    # @see Topics#describe
+    def describe_topic(topic_name, include_authorized_operations: false)
+      topics_admin.describe(
+        topic_name,
+        include_authorized_operations: include_authorized_operations
+      )
+    end
+
+    # @param topic_names [Array<String>] names of the topics to describe
+    # @param include_authorized_operations [Boolean] should we also fetch the operations this
+    #   client is authorized to perform on the topics
+    # @return [Array<Hash>] topics details in the order of `topic_names`
+    # @see Topics#describe_many
+    def describe_topics(topic_names, include_authorized_operations: false)
+      topics_admin.describe_many(
+        topic_names,
+        include_authorized_operations: include_authorized_operations
+      )
     end
 
     # @param group_id [String] group for which we want to move offsets
@@ -438,6 +509,43 @@ module Karafka
       with_admin(&:metadata)
     end
 
+    # Describes the cluster: its id, the current controller and the brokers (with racks).
+    #
+    # Unlike `#cluster_info`, it does not fetch any topic metadata.
+    #
+    # @param include_authorized_operations [Boolean] should we also fetch the operations this
+    #   client is authorized to perform on the cluster
+    #
+    # @return [Hash] cluster details with:
+    #   - `:cluster_id` [String, nil] the cluster id
+    #   - `:controller` [Hash, nil] the controller broker as `{ id:, host:, port:, rack: }`
+    #   - `:brokers` [Array<Hash>] the cluster brokers, each as `{ id:, host:, port:, rack: }`
+    #   - `:authorized_operations` [Array<Symbol>, nil] operations this client is authorized to
+    #     perform on the cluster (e.g. `:describe`, `:alter_configs`), `nil` unless requested
+    #
+    # @example Describe the cluster
+    #   Karafka::Admin.describe_cluster
+    #   # => {
+    #   #   cluster_id: 'kafka-docker-cluster-1',
+    #   #   controller: { id: 1, host: '127.0.0.1', port: 9092, rack: 'rack-1' },
+    #   #   brokers: [{ id: 1, host: '127.0.0.1', port: 9092, rack: 'rack-1' }],
+    #   #   authorized_operations: nil
+    #   # }
+    def describe_cluster(include_authorized_operations: false)
+      report = with_admin do |admin|
+        admin
+          .describe_cluster(include_authorized_operations: include_authorized_operations)
+          .wait(max_wait_timeout_ms: max_wait_time_ms)
+      end
+
+      {
+        cluster_id: report.cluster_id,
+        controller: report.controller,
+        brokers: report.nodes,
+        authorized_operations: map_authorized_operations(report.authorized_operations)
+      }
+    end
+
     # Creates consumer instance and yields it. After usage it closes the consumer instance
     # This API can be used in other pieces of code and allows for low-level consumer usage
     #
@@ -516,6 +624,12 @@ module Karafka
     end
 
     private
+
+    # @param operations [Array<Integer>, nil] librdkafka ACL operation codes
+    # @return [Array<Symbol>, nil] operations as symbols or nil when they were not requested
+    def map_authorized_operations(operations)
+      operations&.map { |operation| AUTHORIZED_OPERATIONS.fetch(operation, :unknown) }
+    end
 
     # @return [Karafka::Connection::Proxy] proxy wrapping the current external client handle.
     #   For connection clients the handle is resolved on each use as they swap their underlying
