@@ -225,7 +225,7 @@ module Karafka
       #
       # @param group_ids [Array<String>] consumer groups to describe
       # @return [Array<Hash>] consumer group details in the order of `group_ids`
-      # @see ConsumerGroups.describe_many
+      # @see ConsumerGroups.describe
       def describe_consumer_groups(group_ids)
         new.describe_consumer_groups(group_ids)
       end
@@ -426,14 +426,14 @@ module Karafka
     # @return [Hash] consumer group details
     # @see ConsumerGroups#describe
     def describe_consumer_group(group_id)
-      consumer_groups_admin.describe(group_id)
+      consumer_groups_admin.describe(group_id).first
     end
 
     # @param group_ids [Array<String>] consumer groups to describe
     # @return [Array<Hash>] consumer group details in the order of `group_ids`
-    # @see ConsumerGroups#describe_many
+    # @see ConsumerGroups#describe
     def describe_consumer_groups(group_ids)
-      consumer_groups_admin.describe_many(group_ids)
+      consumer_groups_admin.describe(*group_ids)
     end
 
     # @param group_id [String] group id to trigger rebalance for

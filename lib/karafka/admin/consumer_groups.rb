@@ -94,16 +94,10 @@ module Karafka
           new.list
         end
 
-        # @param group_id [String] consumer group to describe
+        # @param group_ids [String, Array<String>] consumer group or groups to describe
         # @see #describe
-        def describe(group_id)
-          new.describe(group_id)
-        end
-
-        # @param group_ids [Array<String>] consumer groups to describe
-        # @see #describe_many
-        def describe_many(group_ids)
-          new.describe_many(group_ids)
+        def describe(*group_ids)
+          new.describe(*group_ids)
         end
       end
 
@@ -565,17 +559,36 @@ module Karafka
         end
       end
 
-      # Describes a single consumer group: its state, partition assignor, coordinator and members
-      # with their current partition assignments.
+      # Describes consumer groups: their state, partition assignor, coordinator and members with
+      # their current partition assignments.
       #
-      # @param group_id [String] id of the consumer group to describe
+      # @param group_ids [String, Array<String>] id of the consumer group to describe or a list of
+      #   them. Multiple consumer groups are described in one request.
       #
-      # @return [Hash] consumer group details (see `#describe_many` for the fields)
+      # @return [Array<Hash>] consumer group details in the order of `group_ids`, each with:
+      #   - `:group_id` [String] the consumer group id
+      #   - `:state` [Symbol] consumer group state, one of `:unknown`,
+      #     `:preparing_rebalance`, `:completing_rebalance`, `:stable`, `:dead`, `:empty`
+      #   - `:partition_assignor` [String, nil] partition assignor in use (e.g. `"range"`)
+      #   - `:coordinator` [Hash, nil] the consumer group coordinator broker as
+      #     `{ id:, host:, port:, rack: }`
+      #   - `:members` [Array<Hash>] current consumer group members, each with `:member_id`,
+      #     `:client_id`, `:group_instance_id`, `:host`, `:assignment` (topic name => array of
+      #     partitions) and `:target_assignment` (partitions the member is moving to during a
+      #     rebalance, in the same format; only KIP-848 consumer groups have it, `nil` otherwise)
       #
-      # @raise [Rdkafka::RdkafkaError] when the consumer group could not be described
+      # @raise [Rdkafka::RdkafkaError] when any of the consumer groups could not be described
+      #
+      # @note Even if you request one consumer group, the result is always an array.
+      #
+      # @note A consumer group id the cluster does not know is not an error. Kafka reports it in
+      #   the `:dead` state with no members.
+      #
+      # @note librdkafka does not retry a consumer group coordinator that is not available yet
+      #   (e.g. on a fresh cluster), so we retry it for up to `admin.max_retries_duration`.
       #
       # @example Describe a consumer group
-      #   Karafka::Admin::ConsumerGroups.describe('billing')
+      #   Karafka::Admin::ConsumerGroups.describe('billing').first
       #   # => {
       #   #   group_id: 'billing',
       #   #   state: :stable,
@@ -593,42 +606,13 @@ module Karafka
       #   #   ]
       #   # }
       #
-      # @example Check that a consumer group has no live members before changing its offsets
-      #   Karafka::Admin.describe_consumer_group('billing')[:members].empty?
-      def describe(group_id)
-        describe_many([group_id]).first
-      end
-
-      # Describes consumer groups: their state, partition assignor, coordinator and members with
-      # their current partition assignments.
-      #
-      # @param group_ids [Array<String>] ids of the consumer groups to describe
-      #
-      # @return [Array<Hash>] consumer group details in the order of `group_ids`, each with:
-      #   - `:group_id` [String] the consumer group id
-      #   - `:state` [Symbol] consumer group state, one of `:unknown`,
-      #     `:preparing_rebalance`, `:completing_rebalance`, `:stable`, `:dead`, `:empty`
-      #   - `:partition_assignor` [String, nil] partition assignor in use (e.g. `"range"`)
-      #   - `:coordinator` [Hash, nil] the consumer group coordinator broker as
-      #     `{ id:, host:, port:, rack: }`
-      #   - `:members` [Array<Hash>] current consumer group members, each with `:member_id`,
-      #     `:client_id`, `:group_instance_id`, `:host`, `:assignment` (topic name => array of
-      #     partitions) and `:target_assignment` (partitions the member is moving to during a
-      #     rebalance, in the same format; only KIP-848 consumer groups have it, `nil` otherwise)
-      #
-      # @raise [Rdkafka::RdkafkaError] when any of the consumer groups could not be described
-      #
-      # @note A consumer group id the cluster does not know is not an error. Kafka reports it in
-      #   the `:dead` state with no members.
-      #
-      # @note librdkafka does not retry a consumer group coordinator that is not available yet
-      #   (e.g. on a fresh cluster), so we retry it for up to `admin.max_retries_duration`.
-      #
       # @example Describe several consumer groups and print their states
-      #   Karafka::Admin.describe_consumer_groups(%w[billing orders-processor]).each do |group|
+      #   Karafka::Admin::ConsumerGroups.describe('billing', 'orders-processor').each do |group|
       #     puts "#{group[:group_id]}: #{group[:state]} (#{group[:members].size} members)"
       #   end
-      def describe_many(group_ids)
+      def describe(*group_ids)
+        group_ids = group_ids.flatten
+
         return [] if group_ids.empty?
 
         start_time = self.class.monotonic_now

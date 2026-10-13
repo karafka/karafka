@@ -238,21 +238,7 @@ RSpec.describe Karafka::Admin::ConsumerGroups do
   end
 
   describe "#describe" do
-    subject(:description) { described_class.describe(group_id) }
-
-    let(:group_id) { SecureRandom.uuid }
-
-    context "when the consumer group does not exist" do
-      it "reports it as dead with no members" do
-        expect(description[:group_id]).to eq(group_id)
-        expect(description[:state]).to eq(:dead)
-        expect(description[:members]).to eq([])
-      end
-    end
-  end
-
-  describe "#describe_many" do
-    subject(:descriptions) { described_class.describe_many(group_ids) }
+    subject(:descriptions) { described_class.describe(*group_ids) }
 
     let(:group_ids) { [group_id] }
     let(:group_id) { SecureRandom.uuid }
@@ -292,6 +278,25 @@ RSpec.describe Karafka::Admin::ConsumerGroups do
       let(:group_ids) { [] }
 
       it { expect(descriptions).to eq([]) }
+    end
+
+    context "when a single consumer group is requested" do
+      before { allow(described_class).to receive(:new).and_call_original }
+
+      it "returns an array with it" do
+        expect(descriptions.map { |group| group[:group_id] }).to eq([group_id])
+        expect(descriptions.map { |group| group[:state] }).to eq(%i[dead])
+      end
+    end
+
+    context "when the consumer groups are requested as an array" do
+      subject(:descriptions) { described_class.describe(group_ids) }
+
+      let(:group_ids) { [SecureRandom.uuid, SecureRandom.uuid] }
+
+      before { allow(described_class).to receive(:new).and_call_original }
+
+      it { expect(descriptions.map { |group| group[:group_id] }).to eq(group_ids) }
     end
 
     context "when the consumer groups do not exist" do
