@@ -423,6 +423,66 @@ RSpec.describe_current do
     end
   end
 
+  describe "#describe" do
+    subject(:topic) { described_class.describe(name) }
+
+    context "when given topic does not exist" do
+      it "returns it with the error instead of raising" do
+        expect(topic[:name]).to eq(name)
+        expect(topic[:topic_id]).to be_nil
+        expect(topic[:partitions]).to eq([])
+        expect(topic[:error].code).to eq(:unknown_topic_or_part)
+      end
+    end
+
+    context "when given topic exists" do
+      before { described_class.create(name, 2, 1) }
+
+      it "returns its topic id and partitions with leaders and replicas" do
+        expect(topic[:error]).to be_nil
+        expect(topic[:topic_id]).to be_a(String)
+        expect(topic[:internal]).to be(false)
+        expect(topic[:partitions].map { |partition| partition[:partition] }).to eq([0, 1])
+        expect(topic[:partitions].first[:leader]).to include(:id, :host, :port, :rack)
+        expect(topic[:partitions].first[:replicas].size).to eq(1)
+        expect(topic[:authorized_operations]).to be_nil
+      end
+    end
+
+    context "when authorized operations are requested" do
+      subject(:topic) { described_class.describe(name, include_authorized_operations: true) }
+
+      before { described_class.create(name, 1, 1) }
+
+      it "returns them as symbols" do
+        expect(topic[:authorized_operations]).to include(:read, :write)
+        expect(topic[:authorized_operations]).to all(be_a(Symbol))
+      end
+    end
+  end
+
+  describe "#describe_many" do
+    subject(:described) { described_class.describe_many(topic_names) }
+
+    let(:missing_name) { generate_topic_name }
+    let(:topic_names) { [missing_name, name] }
+
+    before { described_class.create(name, 1, 1) }
+
+    it "describes existing topics even when one of them does not exist" do
+      expect(described.map { |topic| topic[:name] }).to eq(topic_names)
+      expect(described.first[:error].code).to eq(:unknown_topic_or_part)
+      expect(described.last[:error]).to be_nil
+      expect(described.last[:partitions].size).to eq(1)
+    end
+
+    context "when no topics are requested" do
+      let(:topic_names) { [] }
+
+      it { expect(described).to eq([]) }
+    end
+  end
+
   describe "#read_partition_offsets" do
     subject(:result) do
       described_class.read_partition_offsets({ name => [{ partition: 0, offset: :earliest }] })

@@ -422,4 +422,42 @@ RSpec.describe_current do
       expect { 3.times { admin.close } }.not_to raise_error
     end
   end
+
+  describe "#describe_cluster" do
+    subject(:cluster) { described_class.describe_cluster }
+
+    it "returns the cluster id, controller and brokers" do
+      expect(cluster[:cluster_id]).to be_a(String)
+      expect(cluster[:controller]).to include(:id, :host, :port, :rack)
+      expect(cluster[:brokers]).not_to be_empty
+      expect(cluster[:brokers].map { |broker| broker[:id] }).to include(cluster[:controller][:id])
+    end
+
+    it { expect(cluster[:authorized_operations]).to be_nil }
+
+    context "when authorized operations are requested" do
+      subject(:cluster) { described_class.describe_cluster(include_authorized_operations: true) }
+
+      it "returns them as symbols" do
+        expect(cluster[:authorized_operations]).to include(:describe)
+        expect(cluster[:authorized_operations]).to all(be_a(Symbol))
+      end
+    end
+  end
+
+  describe "#describe_topic" do
+    it "delegates to Admin::Topics#describe" do
+      expect_any_instance_of(Karafka::Admin::Topics)
+        .to receive(:describe).with(name, include_authorized_operations: true)
+      described_class.describe_topic(name, include_authorized_operations: true)
+    end
+  end
+
+  describe "#describe_topics" do
+    it "delegates to Admin::Topics#describe_many" do
+      expect_any_instance_of(Karafka::Admin::Topics)
+        .to receive(:describe_many).with([name], include_authorized_operations: false)
+      described_class.describe_topics([name])
+    end
+  end
 end
