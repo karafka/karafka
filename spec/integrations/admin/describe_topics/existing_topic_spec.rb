@@ -1,13 +1,13 @@
 # frozen_string_literal: true
 
-# Karafka::Admin.describe_topic should return the topic id and every partition with its leader,
+# Karafka::Admin.describe_topics should return the topic id and every partition with its leader,
 # replicas and in-sync replicas.
 
 setup_karafka
 
 Karafka::Admin.create_topic(DT.topic, 3, 1)
 
-topic = Karafka::Admin.describe_topic(DT.topic)
+topic = Karafka::Admin.describe_topics([DT.topic]).first
 broker_ids = Karafka::Admin.cluster_info.brokers.map { |broker| broker[:broker_id] }
 
 assert_equal DT.topic, topic[:name]

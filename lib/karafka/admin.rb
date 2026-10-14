@@ -158,18 +158,6 @@ module Karafka
         new.topic_info(topic_name)
       end
 
-      # @param topic_name [String] name of the topic to describe
-      # @param include_authorized_operations [Boolean] should we also fetch the operations this
-      #   client is authorized to perform on the topic
-      # @return [Hash] topic details
-      # @see Topics.describe
-      def describe_topic(topic_name, include_authorized_operations: false)
-        new.describe_topic(
-          topic_name,
-          include_authorized_operations: include_authorized_operations
-        )
-      end
-
       # @param topic_names [Array<String>] names of the topics to describe
       # @param include_authorized_operations [Boolean] should we also fetch the operations this
       #   client is authorized to perform on the topics
@@ -234,15 +222,6 @@ module Karafka
       # @see ConsumerGroups.list
       def list_consumer_groups
         new.list_consumer_groups
-      end
-
-      # Describes a consumer group: its state, assignor, coordinator and members
-      #
-      # @param group_id [String] consumer group to describe
-      # @return [Hash] consumer group details
-      # @see ConsumerGroups.describe
-      def describe_consumer_group(group_id)
-        new.describe_consumer_group(group_id)
       end
 
       # Describes consumer groups: their state, assignor, coordinator and members
@@ -410,18 +389,6 @@ module Karafka
       topics_admin.info(topic_name)
     end
 
-    # @param topic_name [String] name of the topic to describe
-    # @param include_authorized_operations [Boolean] should we also fetch the operations this
-    #   client is authorized to perform on the topic
-    # @return [Hash] topic details
-    # @see Topics#describe
-    def describe_topic(topic_name, include_authorized_operations: false)
-      topics_admin.describe(
-        topic_name,
-        include_authorized_operations: include_authorized_operations
-      ).first
-    end
-
     # @param topic_names [Array<String>] names of the topics to describe
     # @param include_authorized_operations [Boolean] should we also fetch the operations this
     #   client is authorized to perform on the topics
@@ -476,13 +443,6 @@ module Karafka
     # @see ConsumerGroups#list
     def list_consumer_groups
       consumer_groups_admin.list
-    end
-
-    # @param group_id [String] consumer group to describe
-    # @return [Hash] consumer group details
-    # @see ConsumerGroups#describe
-    def describe_consumer_group(group_id)
-      consumer_groups_admin.describe(group_id).first
     end
 
     # @param group_ids [Array<String>] consumer groups to describe
