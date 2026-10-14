@@ -210,7 +210,7 @@ module Karafka
 
         # Determines which __consumer_offsets partition holds data for a given consumer group. Kafka
         # uses Utils.abs(String#hashCode) % numPartitions where hashCode is Java's 32-bit signed
-        # hash: s[0]*31^(n-1) + s[1]*31^(n-2) + ... + s[n-1], computed with int32 overflow
+        # hash: `s[0]*31^(n-1) + s[1]*31^(n-2) + ... + s[n-1]`, computed with int32 overflow
         # semantics. Utils.abs maps Integer.MIN_VALUE to 0.
         #
         # @param group_id [String] consumer group id
