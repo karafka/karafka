@@ -236,6 +236,24 @@ module Karafka
         new.list_consumer_groups
       end
 
+      # Describes a consumer group: its state, assignor, coordinator and members
+      #
+      # @param group_id [String] consumer group to describe
+      # @return [Hash] consumer group details
+      # @see ConsumerGroups.describe
+      def describe_consumer_group(group_id)
+        new.describe_consumer_group(group_id)
+      end
+
+      # Describes consumer groups: their state, assignor, coordinator and members
+      #
+      # @param group_ids [Array<String>] consumer groups to describe
+      # @return [Array<Hash>] consumer group details in the order of `group_ids`
+      # @see ConsumerGroups.describe
+      def describe_consumer_groups(group_ids)
+        new.describe_consumer_groups(group_ids)
+      end
+
       # Triggers a rebalance for the specified group
       #
       # @param group_id [String] group id to trigger rebalance for
@@ -458,6 +476,20 @@ module Karafka
     # @see ConsumerGroups#list
     def list_consumer_groups
       consumer_groups_admin.list
+    end
+
+    # @param group_id [String] consumer group to describe
+    # @return [Hash] consumer group details
+    # @see ConsumerGroups#describe
+    def describe_consumer_group(group_id)
+      consumer_groups_admin.describe(group_id).first
+    end
+
+    # @param group_ids [Array<String>] consumer groups to describe
+    # @return [Array<Hash>] consumer group details in the order of `group_ids`
+    # @see ConsumerGroups#describe
+    def describe_consumer_groups(group_ids)
+      consumer_groups_admin.describe(*group_ids)
     end
 
     # @param group_id [String] group id to trigger rebalance for

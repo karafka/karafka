@@ -6,7 +6,8 @@
 - **[Feature]** Add `karafka info --extended`, printing the routing tree, global app config and effective Kafka config, with sensitive values redacted.
 - **[Feature]** Add `Kubernetes::ReadinessListener`, serving a readiness probe that reports healthy once all subscription groups poll and not-ready on shutdown or quieting, so pods drain before exiting.
 - **[Feature]** Allow the `--include`/`--exclude` CLI server filters to accept wildcard patterns (e.g. `--exclude-consumer-groups app-a-*`), including topics discovered at runtime by Pro routing patterns.
-- **[Feature]** Add `Karafka::Admin.list_consumer_groups` to list every consumer group in the cluster with its state. Requires karafka-rdkafka `>= 0.30.0`.
+- **[Feature]** Add `Karafka::Admin.list_consumer_groups` to list every consumer group in the cluster with its state. Requires karafka-rdkafka `>= 0.31.0`.
+- **[Feature]** Add `Karafka::Admin.describe_consumer_group` and `Karafka::Admin.describe_consumer_groups` to read a consumer group's state, coordinator, assignor and members with their partition assignments. Requires karafka-rdkafka `>= 0.31.0`.
 - **[Feature]** Add `Karafka::Admin.describe_cluster`, `.describe_topic` and `.describe_topics` to read the cluster id, controller, brokers with racks, topic ids, partition leaders and replicas, and optionally the authorized operations. Requires karafka-rdkafka `>= 0.31.0`.
 - [Enhancement] Defer default log file creation until the first write and keep logging working (to stdout) when the log file cannot be created or written, e.g. on read-only filesystems (ydah).
 - [Enhancement] Build `Setup::DefaultsInjector` (and its Pro extension) on top of `Karafka::Core::Configurable::Injector` so the kafka defaults injection uses the shared ecosystem pattern. Behavior is unchanged. Requires karafka-core `>= 2.6.3`.
@@ -639,11 +640,11 @@ As always, please make sure you have upgraded to the most recent version of `2.1
 
 If you are not using Kafka ACLs, there is no action you need to take.
 
-If you are using Kafka ACLs and you've set up permissions for `karafka_admin` group, please note that this name has now been changed and is subject to [Consumer Name Mapping](https://karafka.io/docs/Consumer-mappers/).
+If you are using Kafka ACLs and you've set up permissions for `karafka_admin` group, please note that this name has now been changed and is subject to [Consumer Name Mapping](https://karafka.io/docs/Upgrades-Karafka-2.4/#consumer-mapper-concept-removal).
 
 That means you must ensure that the new consumer group that by default equals `CLIENT_ID_karafka_admin` has appropriate permissions. Please note that the Web UI also uses this group.
 
-`Karafka::Admin` now has its own set of configuration options available, and you can find more details about that [here](https://karafka.io/docs/Topics-management-and-administration/#configuration).
+`Karafka::Admin` now has its own set of configuration options available, and you can find more details about that [here](https://karafka.io/docs/Infrastructure-Admin-API/#configuration).
 
 If you want to maintain the `2.1` behavior, that is `karafka_admin` admin group, we recommend introducing this case inside your consumer mapper. Assuming you use the default one, the code will look as follows:
 
@@ -1224,7 +1225,7 @@ Karafka 2.0:
 - Introduces fully automatic integration end-to-end [test suite](https://github.com/karafka/karafka/tree/master/spec/integrations) that checks any case I could imagine.
 - Introduces [Virtual Partitions](https://github.com/karafka/karafka/wiki/Pro-Virtual-Partitions) for ability to parallelize work of a single partition.
 - Introduces [Long-Running Jobs](https://github.com/karafka/karafka/wiki/Pro-Long-Running-Jobs) to allow for work that would otherwise exceed the `max.poll.interval.ms`.
-- Introduces the [Enhanced Scheduler](https://github.com/karafka/karafka/wiki/Pro-Enhanced-Scheduler) that uses a non-preemptive LJF (Longest Job First) algorithm instead of a a FIFO (First-In, First-Out) one.
+- Introduces the [Enhanced Scheduler](https://karafka.io/docs/Pro-Consumer-Groups-Enhanced-Reliability/#enhanced-scheduler) that uses a non-preemptive LJF (Longest Job First) algorithm instead of a a FIFO (First-In, First-Out) one.
 - Introduces [Enhanced Active Job adapter](https://github.com/karafka/karafka/wiki/Pro-Enhanced-Active-Job) that is optimized and allows for strong ordering of jobs and more.
 - Introduces seamless [Ruby on Rails integration](https://github.com/karafka/karafka/wiki/Integrating-with-Ruby-on-Rails-and-other-frameworks) via `Rails::Railte` without need for any extra configuration.
 - Provides `#revoked` [method](https://github.com/karafka/karafka/wiki/Consuming-messages#shutdown-and-partition-revocation-handlers) for taking actions upon topic revocation.
@@ -1232,7 +1233,7 @@ Karafka 2.0:
 - Replaces `ruby-kafka` with `librdkafka` as an underlying driver.
 - Introduces official [EOL policies](https://github.com/karafka/karafka/wiki/Versions-Lifecycle-and-EOL).
 - Introduces [benchmarks](https://github.com/karafka/karafka/tree/master/spec/benchmarks) that can be used to profile Karafka.
-- Introduces a requirement that the end user code **needs** to be [thread-safe](https://github.com/karafka/karafka/wiki/FAQ#does-karafka-require-gems-to-be-thread-safe).
+- Introduces a requirement that the end user code **needs** to be [thread-safe](https://karafka.io/docs/Basics-FAQ-Configuration/#does-karafka-require-gems-to-be-thread-safe).
 - Introduces a [Pro subscription](https://github.com/karafka/karafka/wiki/Build-vs-Buy) with a [commercial license](https://github.com/karafka/karafka/blob/master/LICENSE-COMM) to fund further ecosystem development.
 
 ### Deletions
@@ -1247,7 +1248,7 @@ Karafka 2.0:
 - Removes support for using `sidekiq-backend` due to introduction of [multi-threading](https://github.com/karafka/karafka/wiki/Concurrency-and-multithreading).
 - Removes the `Responders` concept in favour of WaterDrop producer usage.
 - Removes completely all the callbacks in favour of finalizer method `#shutdown`.
-- Removes single message consumption mode in favour of [documentation](https://github.com/karafka/karafka/wiki/Consuming-messages#one-at-a-time) on how to do it easily by yourself.
+- Removes single message consumption mode in favour of [documentation](https://karafka.io/docs/Basics-Consuming-Messages/#consuming-messages-one-at-a-time) on how to do it easily by yourself.
 
 ### Changes
 
@@ -1270,7 +1271,7 @@ Karafka 2.0:
 - Renames `Karafka::Params::Metadata` to `Karafka::Messages::Metadata`.
 - Renames `Karafka::Fetcher` to `Karafka::Runner` and align notifications key names.
 - Renames `StdoutListener` to `LoggerListener`.
-- Reorganizes [monitoring and logging](https://github.com/karafka/karafka/wiki/Monitoring-and-logging) to match new concepts.
+- Reorganizes [monitoring and logging](https://karafka.io/docs/Infrastructure-Monitoring-and-Logging/) to match new concepts.
 - Notifies on fatal worker processing errors.
 - Contains updated install templates for Rails and no-non Rails.
 - Changes how the routing style (`0.5`) behaves. It now builds a single consumer group instead of one per topic.
