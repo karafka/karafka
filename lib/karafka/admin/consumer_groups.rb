@@ -27,7 +27,10 @@ module Karafka
       }.freeze
 
       # Consumer group describe errors that mean the coordinator is not ready yet, not that the
-      # consumer group could not be described
+      # consumer group could not be described. They are transient (e.g. on a fresh cluster before
+      # `__consumer_offsets` is loaded) and librdkafka returns them per consumer group without
+      # retrying, so `#describe` retries them for up to `admin.max_retries_duration` instead of
+      # failing.
       COORDINATOR_NOT_READY_ERRORS = %i[
         not_coordinator
         coordinator_load_in_progress
