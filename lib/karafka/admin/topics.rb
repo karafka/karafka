@@ -60,23 +60,12 @@ module Karafka
           new.read_partition_offsets(topic_partition_offsets, isolation_level: isolation_level)
         end
 
-        # @param topic_name [String] name of the topic to describe
-        # @param include_authorized_operations [Boolean] should we also fetch the operations
-        #   this client is authorized to perform on the topic
-        # @see #describe
-        def describe(topic_name, include_authorized_operations: false)
-          new.describe(topic_name, include_authorized_operations: include_authorized_operations)
-        end
-
-        # @param topic_names [Array<String>] names of the topics to describe
+        # @param topic_names [String, Array<String>] topic or topics to describe
         # @param include_authorized_operations [Boolean] should we also fetch the operations
         #   this client is authorized to perform on the topics
-        # @see #describe_many
-        def describe_many(topic_names, include_authorized_operations: false)
-          new.describe_many(
-            topic_names,
-            include_authorized_operations: include_authorized_operations
-          )
+        # @see #describe
+        def describe(*topic_names, include_authorized_operations: false)
+          new.describe(*topic_names, include_authorized_operations: include_authorized_operations)
         end
       end
 
@@ -383,44 +372,13 @@ module Karafka
         end
       end
 
-      # Describes a single topic: its topic id and partitions with their leaders and replicas.
-      #
-      # @param topic_name [String] name of the topic to describe
-      # @param include_authorized_operations [Boolean] should we also fetch the operations this
-      #   client is authorized to perform on the topic
-      #
-      # @return [Hash] topic details (see `#describe_many` for the fields)
-      #
-      # @example Describe a topic
-      #   Karafka::Admin::Topics.describe('events')
-      #   # => {
-      #   #   name: 'events',
-      #   #   topic_id: '7zVJlh/2SuKCqPUdnbl9nQ',
-      #   #   internal: false,
-      #   #   partitions: [
-      #   #     {
-      #   #       partition: 0,
-      #   #       leader: { id: 1, host: '127.0.0.1', port: 9092, rack: 'rack-1' },
-      #   #       replicas: [{ id: 1, host: '127.0.0.1', port: 9092, rack: 'rack-1' }],
-      #   #       isr: [{ id: 1, host: '127.0.0.1', port: 9092, rack: 'rack-1' }]
-      #   #     }
-      #   #   ],
-      #   #   authorized_operations: nil,
-      #   #   error: nil
-      #   # }
-      def describe(topic_name, include_authorized_operations: false)
-        describe_many(
-          [topic_name],
-          include_authorized_operations: include_authorized_operations
-        ).first
-      end
-
       # Describes topics: their topic ids and partitions with their leaders and replicas.
       #
       # A topic that cannot be described (e.g. it does not exist) does not fail the whole call.
       # Its entry carries the `:error` instead.
       #
-      # @param topic_names [Array<String>] names of the topics to describe
+      # @param topic_names [String, Array<String>] name of the topic to describe or a list of
+      #   them. Multiple topics are described in one request.
       # @param include_authorized_operations [Boolean] should we also fetch the operations this
       #   client is authorized to perform on the topics
       #
@@ -437,11 +395,33 @@ module Karafka
       #   - `:error` [Rdkafka::RdkafkaError, nil] why the topic could not be described (e.g.
       #     `unknown_topic_or_part`), `nil` on success
       #
+      # @note Even if you request one topic, the result is always an array.
+      #
+      # @example Describe a topic
+      #   Karafka::Admin::Topics.describe('events').first
+      #   # => {
+      #   #   name: 'events',
+      #   #   topic_id: '7zVJlh/2SuKCqPUdnbl9nQ',
+      #   #   internal: false,
+      #   #   partitions: [
+      #   #     {
+      #   #       partition: 0,
+      #   #       leader: { id: 1, host: '127.0.0.1', port: 9092, rack: 'rack-1' },
+      #   #       replicas: [{ id: 1, host: '127.0.0.1', port: 9092, rack: 'rack-1' }],
+      #   #       isr: [{ id: 1, host: '127.0.0.1', port: 9092, rack: 'rack-1' }]
+      #   #     }
+      #   #   ],
+      #   #   authorized_operations: nil,
+      #   #   error: nil
+      #   # }
+      #
       # @example Find the topics that do not exist
       #   Karafka::Admin.describe_topics(%w[events orders])
       #     .select { |topic| topic[:error] }
       #     .map { |topic| topic[:name] }
-      def describe_many(topic_names, include_authorized_operations: false)
+      def describe(*topic_names, include_authorized_operations: false)
+        topic_names = topic_names.flatten
+
         return [] if topic_names.empty?
 
         report = with_admin do |admin|

@@ -424,7 +424,7 @@ RSpec.describe_current do
   end
 
   describe "#describe" do
-    subject(:topic) { described_class.describe(name) }
+    subject(:topic) { described_class.describe(name).first }
 
     context "when given topic does not exist" do
       it "returns it with the error instead of raising" do
@@ -450,7 +450,9 @@ RSpec.describe_current do
     end
 
     context "when authorized operations are requested" do
-      subject(:topic) { described_class.describe(name, include_authorized_operations: true) }
+      subject(:topic) do
+        described_class.describe(name, include_authorized_operations: true).first
+      end
 
       before { described_class.create(name, 1, 1) }
 
@@ -461,8 +463,8 @@ RSpec.describe_current do
     end
   end
 
-  describe "#describe_many" do
-    subject(:described) { described_class.describe_many(topic_names) }
+  describe "#describe with multiple topics" do
+    subject(:described) { described_class.describe(*topic_names) }
 
     let(:missing_name) { generate_topic_name }
     let(:topic_names) { [missing_name, name] }
@@ -489,6 +491,12 @@ RSpec.describe_current do
       let(:topic_names) { [] }
 
       it { expect(described).to eq([]) }
+    end
+
+    context "when the topics are given as an array" do
+      subject(:described) { described_class.describe(topic_names) }
+
+      it { expect(described.map { |topic| topic[:name] }).to eq(topic_names) }
     end
   end
 

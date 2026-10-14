@@ -174,7 +174,7 @@ module Karafka
       # @param include_authorized_operations [Boolean] should we also fetch the operations this
       #   client is authorized to perform on the topics
       # @return [Array<Hash>] topics details in the order of `topic_names`
-      # @see Topics.describe_many
+      # @see Topics.describe
       def describe_topics(topic_names, include_authorized_operations: false)
         new.describe_topics(
           topic_names,
@@ -419,17 +419,17 @@ module Karafka
       topics_admin.describe(
         topic_name,
         include_authorized_operations: include_authorized_operations
-      )
+      ).first
     end
 
     # @param topic_names [Array<String>] names of the topics to describe
     # @param include_authorized_operations [Boolean] should we also fetch the operations this
     #   client is authorized to perform on the topics
     # @return [Array<Hash>] topics details in the order of `topic_names`
-    # @see Topics#describe_many
+    # @see Topics#describe
     def describe_topics(topic_names, include_authorized_operations: false)
-      topics_admin.describe_many(
-        topic_names,
+      topics_admin.describe(
+        *topic_names,
         include_authorized_operations: include_authorized_operations
       )
     end

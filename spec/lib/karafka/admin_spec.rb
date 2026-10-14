@@ -446,17 +446,21 @@ RSpec.describe_current do
   end
 
   describe "#describe_topic" do
-    it "delegates to Admin::Topics#describe" do
-      expect_any_instance_of(Karafka::Admin::Topics)
-        .to receive(:describe).with(name, include_authorized_operations: true)
-      described_class.describe_topic(name, include_authorized_operations: true)
+    it "delegates to Admin::Topics#describe and returns the first entry" do
+      allow_any_instance_of(Karafka::Admin::Topics)
+        .to receive(:describe)
+        .with(name, include_authorized_operations: true)
+        .and_return([{ name: name }])
+
+      expect(described_class.describe_topic(name, include_authorized_operations: true))
+        .to eq(name: name)
     end
   end
 
   describe "#describe_topics" do
-    it "delegates to Admin::Topics#describe_many" do
+    it "delegates to Admin::Topics#describe" do
       expect_any_instance_of(Karafka::Admin::Topics)
-        .to receive(:describe_many).with([name], include_authorized_operations: false)
+        .to receive(:describe).with(name, include_authorized_operations: false)
       described_class.describe_topics([name])
     end
   end
