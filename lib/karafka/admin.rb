@@ -605,11 +605,7 @@ module Karafka
     # @param operations [Array<Integer>, nil] librdkafka ACL operation codes
     # @return [Array<Symbol>, nil] operations as symbols or nil when they were not requested
     def map_authorized_operations(operations)
-      return unless operations
-
-      names = Acl::OPERATIONS_MAP.invert
-
-      operations.map { |operation| names.fetch(operation, :unknown) }
+      operations && Acl.operation_names(operations)
     end
 
     # @return [Karafka::Connection::Proxy] proxy wrapping the current external client handle.

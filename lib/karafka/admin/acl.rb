@@ -99,7 +99,8 @@ module Karafka
       ].freeze
 
       private_constant(
-        :RESOURCE_TYPES_MAP, :RESOURCE_PATTERNS_TYPE_MAP, :PERMISSION_TYPES_MAP, :ALL_MAPS
+        :RESOURCE_TYPES_MAP, :RESOURCE_PATTERNS_TYPE_MAP, :OPERATIONS_MAP, :PERMISSION_TYPES_MAP,
+        :ALL_MAPS
       )
 
       # Class level APIs that operate on Acl instances and/or return Acl instances.
@@ -126,6 +127,19 @@ module Karafka
         # @see #all
         def all
           new.all
+        end
+      end
+
+      class << self
+        # Maps librdkafka ACL operation codes to the operation names used by Acl rules
+        #
+        # @param operations [Array<Integer>] `Rdkafka::Bindings::RD_KAFKA_ACL_OPERATION_*` codes
+        # @return [Array<Symbol>] operation names (e.g. `:describe_configs`), `:unknown` for a
+        #   code we do not map
+        def operation_names(operations)
+          names = OPERATIONS_MAP.invert
+
+          operations.map { |operation| names.fetch(operation, :unknown) }
         end
       end
 
