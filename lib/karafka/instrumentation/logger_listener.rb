@@ -439,7 +439,7 @@ module Karafka
         # callbacks, so we keep just those frames as a location reference
         when "librdkafka.error"
           error "librdkafka internal error occurred: #{details}"
-          error error.backtrace.to_a.first(2).join("\n")
+          error backtrace.lines.first(2).join.chomp
         # Those can occur when emitted statistics are consumed by the end user and the processing
         # of statistics fails. The statistics are emitted from librdkafka main loop thread and
         # any errors there crash the whole thread
