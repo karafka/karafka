@@ -603,8 +603,17 @@ RSpec.describe_current do
     context "when it is a librdkafka.error" do
       let(:type) { "librdkafka.error" }
       let(:message) { "librdkafka internal error occurred: #{error}" }
+      let(:error) do
+        error = StandardError.new
+        error.set_backtrace(%w[rdkafka/consumer.rb:1 karafka/connection/client.rb:2])
+        error
+      end
 
       it { expect(Karafka.logger).to have_received(:error).with(message) }
+
+      it "expect not to log the backtrace" do
+        expect(Karafka.logger).to have_received(:error).once
+      end
     end
 
     context "when it is a connection.client.poll.error" do

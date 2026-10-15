@@ -435,9 +435,10 @@ module Karafka
         when "app.forceful_stopping.error"
           error "Forceful shutdown error occurred: #{details}"
           error backtrace
+        # The backtrace only shows where the polling thread drained librdkafka callbacks, not the
+        # cause, so we skip it for librdkafka errors
         when "librdkafka.error"
           error "librdkafka internal error occurred: #{details}"
-          error backtrace
         # Those can occur when emitted statistics are consumed by the end user and the processing
         # of statistics fails. The statistics are emitted from librdkafka main loop thread and
         # any errors there crash the whole thread
