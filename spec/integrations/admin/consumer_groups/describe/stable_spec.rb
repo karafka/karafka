@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-# Karafka::Admin.describe_consumer_group should report a running consumer group as stable, with
+# Karafka::Admin.describe_consumer_groups should report a running consumer group as stable, with
 # its live member holding all the partitions and with the coordinator broker.
 
 setup_karafka
@@ -23,7 +23,7 @@ produce_many(DT.topic, DT.uuids(10))
 start_karafka_and_wait_until do
   next false unless DT[0].size >= 10
 
-  DT[:live] = Karafka::Admin.describe_consumer_group(DT.group)
+  DT[:live] = Karafka::Admin.describe_consumer_groups([DT.group]).first
 
   true
 end

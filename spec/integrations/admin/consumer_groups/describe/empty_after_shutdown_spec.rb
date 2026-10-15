@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-# Karafka::Admin.describe_consumer_group should report a consumer group as empty with no members
+# Karafka::Admin.describe_consumer_groups should report a consumer group as empty with no members
 # after a clean shutdown, as it keeps its offsets but has no live members.
 
 setup_karafka
@@ -19,7 +19,7 @@ start_karafka_and_wait_until do
   DT[0].size >= 10
 end
 
-stopped = Karafka::Admin.describe_consumer_group(DT.group)
+stopped = Karafka::Admin.describe_consumer_groups([DT.group]).first
 
 assert_equal DT.group, stopped[:group_id]
 assert_equal :empty, stopped[:state]

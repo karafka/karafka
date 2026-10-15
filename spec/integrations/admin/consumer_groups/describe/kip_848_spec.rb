@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-# Karafka::Admin.describe_consumer_group should describe KIP-848 (consumer protocol) consumer
+# Karafka::Admin.describe_consumer_groups should describe KIP-848 (consumer protocol) consumer
 # groups: stable with the live member holding all the partitions while running and empty after
 # shutdown.
 
@@ -24,7 +24,7 @@ produce_many(DT.topic, DT.uuids(10))
 start_karafka_and_wait_until do
   next false unless DT[0].size >= 10
 
-  DT[:live] = Karafka::Admin.describe_consumer_group(DT.group)
+  DT[:live] = Karafka::Admin.describe_consumer_groups([DT.group]).first
 
   true
 end
@@ -35,7 +35,7 @@ assert_equal :stable, live[:state]
 assert_equal 1, live[:members].size
 assert_equal({ DT.topic => [0, 1] }, live[:members].first[:assignment])
 
-stopped = Karafka::Admin.describe_consumer_group(DT.group)
+stopped = Karafka::Admin.describe_consumer_groups([DT.group]).first
 
 assert_equal :empty, stopped[:state]
 assert_equal [], stopped[:members]
