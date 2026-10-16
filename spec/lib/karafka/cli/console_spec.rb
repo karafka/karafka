@@ -59,9 +59,10 @@ RSpec.describe_current do
 
         it "expect to exit with an error" do
           expect { console_cli.call }
-            .to raise_error(SystemExit)
+            .to raise_error(SystemExit) { |error| expect(error.status).to eq(1) }
             .and output(/needs the irb gem/).to_stdout
 
+          expect(info).not_to have_received(:call)
           expect(console_cli).not_to have_received(:exec)
         end
       end
