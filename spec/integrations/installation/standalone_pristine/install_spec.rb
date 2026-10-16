@@ -32,6 +32,10 @@ Dir.mktmpdir do |dir|
     kr_install = cmd(dir, "bundle exec karafka install")
     assert_equal 0, kr_install[1], kr_install[0]
 
+    boot_file = File.read(File.join(dir, "karafka.rb"))
+    assert boot_file.include?("run the `karafka install`"), boot_file
+    assert !boot_file.include?("karafka:install"), boot_file
+
     kr_run = cmd(dir, "timeout --preserve-status 10 bundle exec karafka server")
     assert_equal 0, kr_run[1], kr_run[0]
   end
