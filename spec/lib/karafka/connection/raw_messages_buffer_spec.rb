@@ -36,7 +36,7 @@ RSpec.describe_current do
 
       it "expect to yield with messages from this topic partition" do
         expect { |block| buffer.each(&block) }
-          .to yield_with_args(message.topic, message.partition, [message], false)
+          .to yield_with_args(message.topic, message.partition, [message], false, [kind_of(Time)])
       end
     end
 
@@ -52,7 +52,7 @@ RSpec.describe_current do
 
       it "expect to yield with messages from this topic partition and eof" do
         expect { |block| buffer.each(&block) }
-          .to yield_with_args(message.topic, message.partition, [message], true)
+          .to yield_with_args(message.topic, message.partition, [message], true, [kind_of(Time)])
       end
     end
 
@@ -68,7 +68,24 @@ RSpec.describe_current do
 
       it "expect to yield with messages from this topic partition without eof" do
         expect { |block| buffer.each(&block) }
-          .to yield_with_args(message.topic, message.partition, [message], false)
+          .to yield_with_args(message.topic, message.partition, [message], false, [kind_of(Time)])
+      end
+    end
+
+    context "when messages are added at different moments" do
+      let(:message) { build(:messages_message) }
+
+      it "expect to record the moment each of them was added" do
+        before_first = Time.now
+        buffer << message
+        between = Time.now
+        buffer << message
+        after_second = Time.now
+
+        buffer.each do |_, _, _, _, received_at|
+          expect(received_at[0]).to be_between(before_first, between)
+          expect(received_at[1]).to be_between(between, after_second)
+        end
       end
     end
 
@@ -81,7 +98,7 @@ RSpec.describe_current do
 
       it "expect to yield with messages from this topic partition" do
         expect { |block| buffer.each(&block) }
-          .to yield_with_args(message.topic, message.partition, [message, message, message], false)
+          .to yield_with_args(message.topic, message.partition, [message, message, message], false, Array.new(3) { kind_of(Time) })
       end
     end
 
@@ -103,8 +120,8 @@ RSpec.describe_current do
       it "expect to yield with messages from given partitions separately" do
         expect { |block| buffer.each(&block) }
           .to yield_successive_args(
-            [message1.topic, message1.partition, [message1], false],
-            [message2.topic, message2.partition, [message2], false]
+            [message1.topic, message1.partition, [message1], false, [kind_of(Time)]],
+            [message2.topic, message2.partition, [message2], false, [kind_of(Time)]]
           )
       end
     end
@@ -127,8 +144,8 @@ RSpec.describe_current do
       it "expect to yield with messages from given topics partitions separately" do
         expect { |block| buffer.each(&block) }
           .to yield_successive_args(
-            [message1.topic, message1.partition, [message1], false],
-            [message2.topic, message2.partition, [message2], false]
+            [message1.topic, message1.partition, [message1], false, [kind_of(Time)]],
+            [message2.topic, message2.partition, [message2], false, [kind_of(Time)]]
           )
       end
     end
@@ -243,6 +260,38 @@ RSpec.describe_current do
 
         buffer.each do |_, _, messages, _|
           expect(messages).to eq([message1, message2, message3, message4])
+        end
+      end
+
+      it "expect to keep the received times of the first occurrences" do
+        received_before = nil
+        buffer.each { |_, _, _, _, received_at| received_before = received_at.dup }
+
+        buffer.uniq!
+
+        buffer.each do |_, _, _, _, received_at|
+          expect(received_at).to eq(received_before.values_at(0, 1, 3, 4))
+        end
+      end
+    end
+
+    context "when there are no duplicates" do
+      before do
+        buffer << message1
+        buffer << message2
+      end
+
+      it { expect { buffer.uniq! }.not_to change(buffer, :size) }
+
+      it "expect not to change messages or their received times" do
+        received_before = nil
+        buffer.each { |_, _, _, _, received_at| received_before = received_at.dup }
+
+        buffer.uniq!
+
+        buffer.each do |_, _, messages, _, received_at|
+          expect(messages).to eq([message1, message2])
+          expect(received_at).to eq(received_before)
         end
       end
     end
