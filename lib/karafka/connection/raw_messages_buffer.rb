@@ -23,8 +23,6 @@ module Karafka
       def initialize
         @size = 0
         @last_polled_at = monotonic_now
-        @received_at = nil
-        @received_at_polled_at = -Float::INFINITY
 
         @groups = Hash.new do |topic_groups, topic|
           topic_groups[topic] = Hash.new do |partition_groups, partition|
@@ -41,20 +39,11 @@ module Karafka
       #
       # @param message [Rdkafka::Consumer::Message] raw rdkafka message
       # @return [Array<Rdkafka::Consumer::Message>] given partition topic sub-buffer array
-      #
-      # @note The message is marked as received at the moment of the last `#polled`. Messages
-      #   polled within the same millisecond share one `Time`, so bursts of prefetched messages
-      #   do not allocate one each.
       def <<(message)
-        if @last_polled_at - @received_at_polled_at >= 1
-          @received_at_polled_at = @last_polled_at
-          @received_at = Time.now
-        end
-
         @size += 1
         partition_state = @groups[message.topic][message.partition]
         partition_state[:messages] << message
-        partition_state[:received_at] << @received_at
+        partition_state[:received_at] << Time.now
         partition_state[:eof] = false
       end
 
