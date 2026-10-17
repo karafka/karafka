@@ -29,7 +29,7 @@ module Karafka
             partition_groups[partition] = {
               eof: false,
               messages: [],
-              received_at: []
+              received_times: []
             }
           end
         end
@@ -43,7 +43,7 @@ module Karafka
         @size += 1
         partition_state = @groups[message.topic][message.partition]
         partition_state[:messages] << message
-        partition_state[:received_at] << Time.now
+        partition_state[:received_times] << Time.now
         partition_state[:eof] = false
       end
 
@@ -70,7 +70,13 @@ module Karafka
       def each
         @groups.each do |topic, partitions|
           partitions.each do |partition, details|
-            yield(topic, partition, details[:messages], details[:eof], details[:received_at])
+            yield(
+              topic,
+              partition,
+              details[:messages],
+              details[:eof],
+              details[:received_times]
+            )
           end
         end
       end
@@ -99,11 +105,11 @@ module Karafka
       def uniq!
         @groups.each_value do |partitions|
           partitions.each_value do |details|
-            pairs = details[:messages].zip(details[:received_at])
+            pairs = details[:messages].zip(details[:received_times])
 
             next unless pairs.uniq! { |message, _| message.offset }
 
-            details[:messages], details[:received_at] = pairs.transpose
+            details[:messages], details[:received_times] = pairs.transpose
           end
         end
 
