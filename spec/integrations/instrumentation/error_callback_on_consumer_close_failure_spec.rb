@@ -3,8 +3,9 @@
 # When closing the librdkafka consumer fails, Karafka should publish it via "error.occurred" for
 # the subscription group of that consumer instead of dropping it.
 #
-# We make the close fail by closing the native consumer before Karafka closes it on shutdown, so
-# librdkafka reports that the consumer is already closed.
+# We close the native consumer from within `#consume`. The next poll then fails with `destroy`,
+# so the listener fetch loop resets the client and `Client#close` fails, as librdkafka reports
+# that the consumer is already closed.
 
 setup_karafka(allow_errors: true)
 
