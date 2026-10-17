@@ -33,6 +33,7 @@
 - [Fix] Stabilize the empty-topic `read_watermark_offsets` specs against a broker leader-election race.
 - [Fix] Stabilize the Kubernetes liveness fenced-out integration spec, which could probe the already closed liveness server during shutdown.
 - [Fix] Stabilize the exponential backoff integration spec by checking the pause timeouts instead of wall-clock upper bounds.
+- [Fix] Point the non-Rails `karafka.rb` install template comment to the `karafka install` command instead of the non-existent `karafka:install`.
 - [Fix] [Pro] Stabilize the throttled virtual partitions integration spec by measuring throttling from the first consumption instead of from startup.
 - [Fix] Make `karafka console` explain that the `irb` gem must be added to the Gemfile, instead of failing with a Bundler error, when irb is not in the bundle (non-Rails apps on Ruby 4.0+).
 
