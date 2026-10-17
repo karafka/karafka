@@ -185,7 +185,7 @@ RSpec.describe_current do
     end
   end
 
-  describe "#close" do
+  describe "#reset" do
     let(:kafka) { instance_double(Rdkafka::Consumer) }
     let(:sg_id) { subscription_group.id }
     let(:error_callbacks) do
@@ -213,23 +213,25 @@ RSpec.describe_current do
       end
 
       it "expect to keep the error callback until the consumer is closed" do
-        client.send(:close)
+        client.reset
 
         expect(registered_on_close).to eq([true])
       end
 
       it "expect to remove the error callback after the close" do
-        client.send(:close)
+        client.reset
 
         expect(error_callbacks).not_to have_key(sg_id)
       end
     end
 
     context "when closing the kafka consumer raises" do
-      before { allow(kafka).to receive(:close).and_raise(Rdkafka::RdkafkaError.new(0)) }
+      let(:error) { Rdkafka::RdkafkaError.new(Rdkafka::Bindings::RD_KAFKA_RESP_ERR__FATAL) }
+
+      before { allow(kafka).to receive(:close).and_raise(error) }
 
       it "expect to remove the error callback anyhow" do
-        expect { client.send(:close) }.to raise_error(Rdkafka::RdkafkaError)
+        expect { client.reset }.to raise_error(Rdkafka::RdkafkaError)
         expect(error_callbacks).not_to have_key(sg_id)
       end
     end
