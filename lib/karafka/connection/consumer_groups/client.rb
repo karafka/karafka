@@ -594,10 +594,16 @@ module Karafka
 
           # Remove callbacks runners that were registered
           Karafka::Core::Instrumentation.statistics_callbacks.delete(sg_id)
-          Karafka::Core::Instrumentation.error_callbacks.delete(sg_id)
           Karafka::Core::Instrumentation.oauthbearer_token_refresh_callbacks.delete(sg_id)
 
-          kafka.close
+          begin
+            kafka.close
+          ensure
+            # Removed only after the close, so errors reported while closing (e.g. a failed close)
+            # still reach this subscription group
+            Karafka::Core::Instrumentation.error_callbacks.delete(sg_id)
+          end
+
           @kafka = nil
           @wrapped_kafka = nil
           @buffer.clear
