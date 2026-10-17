@@ -58,19 +58,19 @@ RSpec.describe_current do
     end
 
     context "when messages were received at different moments" do
-      let(:received_at) { [] }
+      let(:received_times) { [] }
 
       before do
         raw_messages_buffer << raw_message1
         raw_messages_buffer << raw_message2
-        raw_messages_buffer.each { |*, times| received_at.concat(times) }
+        raw_messages_buffer.each { |*, times| received_times.concat(times) }
       end
 
       it "expect to assign to each message the moment it was received" do
         buffer.remap(raw_messages_buffer)
 
         buffer.each do |_, _, messages, _, _|
-          expect(messages.map(&:received_at)).to eq(received_at)
+          expect(messages.map(&:received_at)).to eq(received_times)
         end
       end
 

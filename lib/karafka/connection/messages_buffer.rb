@@ -40,7 +40,7 @@ module Karafka
         clear
         last_polled_at = raw_messages_buffer.last_polled_at
 
-        raw_messages_buffer.each do |topic, partition, messages, eof, received_at|
+        raw_messages_buffer.each do |topic, partition, messages, eof, received_times|
           @size += messages.size
           ktopic = @subscription_group.topics.find(topic)
 
@@ -48,7 +48,7 @@ module Karafka
             Messages::Builders::Message.call(
               messages[index],
               ktopic,
-              received_at[index]
+              received_times[index]
             )
           end
 
