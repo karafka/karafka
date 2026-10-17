@@ -16,7 +16,8 @@ class Consumer < Karafka::BaseConsumer
     DT[:subscription_group_id] = topic.subscription_group.id
 
     client
-      .instance_variable_get(:@kafka)
+      .wrapped_kafka
+      .wrapped
       .instance_variable_get(:@native_kafka)
       .synchronize { |inner| Rdkafka::Bindings.rd_kafka_consumer_close(inner) }
 
