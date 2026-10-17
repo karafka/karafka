@@ -57,6 +57,34 @@ RSpec.describe_current do
       end
     end
 
+    context "when messages were received at different moments" do
+      let(:received_at) { [] }
+
+      before do
+        raw_messages_buffer << raw_message1
+        raw_messages_buffer << raw_message2
+        raw_messages_buffer.each { |*, times| received_at.concat(times) }
+      end
+
+      it "expect to assign to each message the moment it was received" do
+        buffer.remap(raw_messages_buffer)
+
+        buffer.each do |_, _, messages, _, _|
+          expect(messages.map(&:received_at)).to eq(received_at)
+        end
+      end
+
+      it "expect not to use the remap moment as the received moment" do
+        sleep(0.01)
+        remapped_at = Time.now
+        buffer.remap(raw_messages_buffer)
+
+        buffer.each do |_, _, messages, _, _|
+          messages.each { |message| expect(message.received_at).to be < remapped_at }
+        end
+      end
+    end
+
     context "when buffer was not empty" do
       let(:buffer_messages) do
         raw_messages_buffer << raw_message1
