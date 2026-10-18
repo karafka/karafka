@@ -7,6 +7,9 @@
 # so the listener fetch loop resets the client and `Client#close` fails, as librdkafka reports
 # that the consumer is already closed.
 
+# karafka-rdkafka reports a failed close only from the release that defines this reason
+exit 0 unless Rdkafka::Consumer.const_defined?(:CLOSE_ERROR_REASON)
+
 setup_karafka(allow_errors: true)
 
 class Consumer < Karafka::BaseConsumer
@@ -32,7 +35,7 @@ produce(DT.topic, "1")
 Karafka::App.monitor.subscribe("error.occurred") do |event|
   next unless event[:type] == "librdkafka.error"
   next unless event[:error].is_a?(Rdkafka::RdkafkaError)
-  next unless event[:error].broker_message == "Consumer close failed"
+  next unless event[:error].broker_message == Rdkafka::Consumer::CLOSE_ERROR_REASON
 
   DT[:close_errors] << event
 end
