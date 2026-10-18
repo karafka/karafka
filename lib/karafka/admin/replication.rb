@@ -293,10 +293,10 @@ module Karafka
       private
 
       # Fetches topic metadata including partitions and replica information
-      # @param topic [String] name of the topic
+      # @param topic_name [String] name of the topic
       # @return [Hash] topic information with partitions metadata
-      def fetch_topic_info(topic)
-        topics_admin.info(topic)
+      def fetch_topic_info(topic_name)
+        topics_admin.info(topic_name)
       end
 
       # Fetches cluster broker information from Kafka metadata

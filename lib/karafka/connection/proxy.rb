@@ -47,10 +47,10 @@ module Karafka
       # We impose our own custom timeout to make sure, that high-latency clusters and overloaded
       # clusters can handle our requests.
       #
-      # @param topic [String] topic name
+      # @param topic_name [String] topic name
       # @param partition [Integer] partition number
       # @return [Array<Integer, Integer>] watermark offsets
-      def query_watermark_offsets(topic, partition)
+      def query_watermark_offsets(topic_name, partition)
         l_config = proxy_config.query_watermark_offsets
 
         # For newly created topics or in cases where we're trying to get them but there is no
@@ -61,7 +61,7 @@ module Karafka
           wait_time: l_config.wait_time / 1_000.to_f,
           max_attempts: l_config.max_attempts
         ) do
-          @wrapped.query_watermark_offsets(topic, partition, l_config.timeout)
+          @wrapped.query_watermark_offsets(topic_name, partition, l_config.timeout)
         end
       end
 

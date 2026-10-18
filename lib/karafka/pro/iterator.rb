@@ -150,14 +150,14 @@ module Karafka
       #
       # We pause it forever and no longer work with it.
       #
-      # @param name [String] topic name of which partition we want to stop
+      # @param topic_name [String] topic name of which partition we want to stop
       # @param partition [Integer] partition we want to stop processing
-      def stop_partition(name, partition)
-        @stopped_partitions << [name, partition]
+      def stop_partition(topic_name, partition)
+        @stopped_partitions << [topic_name, partition]
 
         @current_consumer.pause(
           Rdkafka::Consumer::TopicPartitionList.new(
-            name => [Rdkafka::Consumer::Partition.new(partition, 0)]
+            topic_name => [Rdkafka::Consumer::Partition.new(partition, 0)]
           )
         )
       end

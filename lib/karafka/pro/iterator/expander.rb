@@ -100,12 +100,12 @@ module Karafka
           @topics ||= ::Karafka::Admin.cluster_info.topics
         end
 
-        # @param name [String] topic name
+        # @param topic_name [String] topic name
         # @return [Integer] number of partitions of the topic we want to iterate over
-        def partition_count(name)
+        def partition_count(topic_name)
           topics
-            .find { |topic| topic.fetch(:topic_name) == name }
-            .tap { |topic| topic || raise(Errors::TopicNotFoundError, name) }
+            .find { |topic| topic.fetch(:topic_name) == topic_name }
+            .tap { |topic| topic || raise(Errors::TopicNotFoundError, topic_name) }
             .fetch(:partitions)
             .size
         end

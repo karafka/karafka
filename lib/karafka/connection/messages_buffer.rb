@@ -79,13 +79,13 @@ module Karafka
       end
 
       # Checks if there are any messages from a given topic partition in the buffer
-      # @param topic [String] topic name
+      # @param topic_name [String] topic name
       # @param partition [Integer] partition number
       # @return [Boolean] true if there is at least one message from this topic partition,
       #   otherwise false
-      def present?(topic, partition)
-        return false unless @groups.include?(topic)
-        return false unless @groups[topic].include?(partition)
+      def present?(topic_name, partition)
+        return false unless @groups.include?(topic_name)
+        return false unless @groups[topic_name].include?(partition)
 
         true
       end
