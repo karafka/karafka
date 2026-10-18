@@ -38,10 +38,10 @@ module Karafka
 
         private_constant :INHERITABLE_ATTRIBUTES
 
-        # @param name [String, Symbol] name of a topic on which we want to listen
+        # @param topic_name [String, Symbol] name of a topic on which we want to listen
         # @param group [Karafka::Routing::Groups::Base] owning group of this topic
-        def initialize(name, group)
-          @name = name.to_s
+        def initialize(topic_name, group)
+          @name = topic_name.to_s
           @group = group
           @attributes = {}
           @active = true

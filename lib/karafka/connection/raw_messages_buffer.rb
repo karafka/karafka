@@ -46,10 +46,10 @@ module Karafka
       end
 
       # Marks given topic partition as one that reached eof
-      # @param topic [String] topic that reached eof
+      # @param topic_name [String] topic that reached eof
       # @param partition [Integer] partition that reached eof
-      def eof(topic, partition)
-        @groups[topic][partition][:eof] = true
+      def eof(topic_name, partition)
+        @groups[topic_name][partition][:eof] = true
       end
 
       # Marks the last polling time that can be accessed via `#last_polled_at`
@@ -73,19 +73,19 @@ module Karafka
 
       # Removes given topic and partition data out of the buffer
       # This is used when there's a partition revocation
-      # @param topic [String] topic we're interested in
+      # @param topic_name [String] topic we're interested in
       # @param partition [Integer] partition of which data we want to remove
-      def delete(topic, partition)
-        return unless @groups.key?(topic)
-        return unless @groups.fetch(topic).key?(partition)
+      def delete(topic_name, partition)
+        return unless @groups.key?(topic_name)
+        return unless @groups.fetch(topic_name).key?(partition)
 
-        topic_data = @groups.fetch(topic)
+        topic_data = @groups.fetch(topic_name)
         topic_data.delete(partition)
 
         recount!
 
         # If there are no more partitions to handle in a given topic, remove it completely
-        @groups.delete(topic) if topic_data.empty?
+        @groups.delete(topic_name) if topic_data.empty?
       end
 
       # Removes duplicated messages from the same partitions

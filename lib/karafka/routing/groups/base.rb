@@ -62,14 +62,14 @@ module Karafka
         end
 
         # Builds a topic representation inside of a current group route
-        # @param name [String, Symbol] name of topic to which we want to subscribe
+        # @param topic_name [String, Symbol] name of topic to which we want to subscribe
         # @return [Karafka::Routing::Topics::Base] newly built topic instance
-        def topic=(name, &)
+        def topic=(topic_name, &)
           # Clear memoized subscription groups since adding a topic requires rebuilding them
           # This is critical for group reopening across multiple draw calls
           @subscription_groups = nil
 
-          topic = topic_class.new(name, self)
+          topic = topic_class.new(topic_name, self)
           @topics << Proxy.new(
             topic,
             builder.defaults,

@@ -40,10 +40,10 @@ module Karafka
         # @return [Array<Hash>] buffer with message hashes for dispatch
         attr_reader :buffer
 
-        # @param topic [String] consumed topic name
+        # @param topic_name [String] consumed topic name
         # @param partition [Integer] consumed partition
-        def initialize(topic, partition)
-          @topic = topic
+        def initialize(topic_name, partition)
+          @topic = topic_name
           @partition = partition
           @buffer = []
           # Source (daily buffer) key aligned 1:1 with each `@buffer` entry, so `#flush` can report

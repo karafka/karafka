@@ -60,11 +60,11 @@ module Karafka
         end
 
         # @param group_id [String] subscription group id the topic partition belongs to
-        # @param topic [String]
+        # @param topic_name [String]
         # @param partition [Integer]
         # @return [Float] p95 processing time of a single message from a single topic partition
-        def processing_time_p95(group_id, topic, partition)
-          values = @processing_times[group_id][topic][partition]
+        def processing_time_p95(group_id, topic_name, partition)
+          values = @processing_times[group_id][topic_name][partition]
 
           return 0 if values.empty?
           return values.first if values.size == 1
