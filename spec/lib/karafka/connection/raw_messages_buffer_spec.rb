@@ -75,16 +75,33 @@ RSpec.describe_current do
     context "when messages are added at different moments" do
       let(:message) { build(:messages_message) }
 
-      it "expect to record the moment each of them was added" do
+      it "expect to record the moment each of them was polled" do
         before_first = Time.now
+        buffer.polled
         buffer << message
+        sleep(0.01)
         between = Time.now
+        buffer.polled
         buffer << message
         after_second = Time.now
 
         buffer.each do |_, _, _, _, received_times|
           expect(received_times[0]).to be_between(before_first, between)
           expect(received_times[1]).to be_between(between, after_second)
+        end
+      end
+    end
+
+    context "when messages are polled within the same millisecond" do
+      let(:message) { build(:messages_message) }
+
+      it "expect to share one received time" do
+        buffer.polled
+        buffer << message
+        buffer << message
+
+        buffer.each do |_, _, _, _, received_times|
+          expect(received_times[0]).to equal(received_times[1])
         end
       end
     end
