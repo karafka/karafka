@@ -2,7 +2,7 @@
 
 RSpec.describe_current do
   let(:routing_topic) { build(:routing_topic) }
-  let(:fetched_message) { build(:kafka_fetched_message) }
+  let(:fetched_message) { build(:kafka_fetched_message, key: rand.to_s) }
   let(:received_at) { Time.now }
 
   describe "#call" do
