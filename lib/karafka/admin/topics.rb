@@ -18,13 +18,13 @@ module Karafka
         end
 
         # @param topic_name [String] topic name
-        # @param partitions [Integer] number of partitions for this topic
+        # @param partition_count [Integer] number of partitions for this topic
         # @param replication_factor [Integer] number of replicas
         # @param topic_config [Hash] topic config details as described in the
         #   `base topic configuration`))
         # @see #create
-        def create(topic_name, partitions, replication_factor, topic_config = {})
-          new.create(topic_name, partitions, replication_factor, topic_config)
+        def create(topic_name, partition_count, replication_factor, topic_config = {})
+          new.create(topic_name, partition_count, replication_factor, topic_config)
         end
 
         # @param topic_name [String] topic name
@@ -34,10 +34,10 @@ module Karafka
         end
 
         # @param topic_name [String] topic name
-        # @param partitions [Integer] total number of partitions we expect to end up with
+        # @param partition_count [Integer] total number of partitions we expect to end up with
         # @see #create_partitions
-        def create_partitions(topic_name, partitions)
-          new.create_partitions(topic_name, partitions)
+        def create_partitions(topic_name, partition_count)
+          new.create_partitions(topic_name, partition_count)
         end
 
         # @param name_or_hash [String, Symbol, Hash] topic name or hash with topics and partitions
@@ -164,15 +164,15 @@ module Karafka
       # Creates Kafka topic with given settings
       #
       # @param topic_name [String] topic name
-      # @param partitions [Integer] number of partitions we expect
+      # @param partition_count [Integer] number of partitions we expect
       # @param replication_factor [Integer] number of replicas
       # @param topic_config [Hash] topic config details as described here:
       #   https://kafka.apache.org/documentation/#topicconfigs
       #
       # @return [void]
-      def create(topic_name, partitions, replication_factor, topic_config = {})
+      def create(topic_name, partition_count, replication_factor, topic_config = {})
         with_admin do |admin|
-          handler = admin.create_topic(topic_name, partitions, replication_factor, topic_config)
+          handler = admin.create_topic(topic_name, partition_count, replication_factor, topic_config)
 
           with_re_wait(
             -> { handler.wait(max_wait_timeout_ms: max_wait_time_ms) },
@@ -200,16 +200,16 @@ module Karafka
       # Creates more partitions for a given topic
       #
       # @param topic_name [String] topic name
-      # @param partitions [Integer] total number of partitions we expect to end up with
+      # @param partition_count [Integer] total number of partitions we expect to end up with
       #
       # @return [void]
-      def create_partitions(topic_name, partitions)
+      def create_partitions(topic_name, partition_count)
         with_admin do |admin|
-          handler = admin.create_partitions(topic_name, partitions)
+          handler = admin.create_partitions(topic_name, partition_count)
 
           with_re_wait(
             -> { handler.wait(max_wait_timeout_ms: max_wait_time_ms) },
-            -> { info(topic_name).fetch(:partition_count) >= partitions }
+            -> { info(topic_name).fetch(:partition_count) >= partition_count }
           )
         end
       end

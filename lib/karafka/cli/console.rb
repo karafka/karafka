@@ -8,6 +8,11 @@ module Karafka
 
       aliases :c
 
+      # Exit code when the console cannot start
+      ERROR_EXIT_CODE = 1
+
+      private_constant :ERROR_EXIT_CODE
+
       class << self
         # @return [String] Console executing command for non-Rails setup
         # @example
@@ -29,7 +34,7 @@ module Karafka
 
         unless rails || irb_available?
           puts "#{red("Karafka console needs the irb gem.")} Add `gem \"irb\"` to your Gemfile."
-          exit(1)
+          exit(ERROR_EXIT_CODE)
         end
 
         Info.new.call

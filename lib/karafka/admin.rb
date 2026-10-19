@@ -117,12 +117,12 @@ module Karafka
       end
 
       # @param topic_name [String] topic name
-      # @param partitions [Integer] number of partitions we expect
+      # @param partition_count [Integer] number of partitions we expect
       # @param replication_factor [Integer] number of replicas
       # @param topic_config [Hash] topic config details
       # @see Topics.create
-      def create_topic(topic_name, partitions, replication_factor, topic_config = {})
-        new.create_topic(topic_name, partitions, replication_factor, topic_config)
+      def create_topic(topic_name, partition_count, replication_factor, topic_config = {})
+        new.create_topic(topic_name, partition_count, replication_factor, topic_config)
       end
 
       # @param topic_name [String] topic name
@@ -132,10 +132,10 @@ module Karafka
       end
 
       # @param topic_name [String] topic name
-      # @param partitions [Integer] total number of partitions we expect to end up with
+      # @param partition_count [Integer] total number of partitions we expect to end up with
       # @see Topics.create_partitions
-      def create_partitions(topic_name, partitions)
-        new.create_partitions(topic_name, partitions)
+      def create_partitions(topic_name, partition_count)
+        new.create_partitions(topic_name, partition_count)
       end
 
       # @param name_or_hash [String, Symbol, Hash] topic name or hash with topics and partitions
@@ -348,12 +348,12 @@ module Karafka
     end
 
     # @param topic_name [String] topic name
-    # @param partitions [Integer] number of partitions for this topic
+    # @param partition_count [Integer] number of partitions for this topic
     # @param replication_factor [Integer] number of replicas
     # @param topic_config [Hash] topic config details
     # @see Topics#create
-    def create_topic(topic_name, partitions, replication_factor, topic_config = {})
-      topics_admin.create(topic_name, partitions, replication_factor, topic_config)
+    def create_topic(topic_name, partition_count, replication_factor, topic_config = {})
+      topics_admin.create(topic_name, partition_count, replication_factor, topic_config)
     end
 
     # @param topic_name [String] topic name
@@ -363,10 +363,10 @@ module Karafka
     end
 
     # @param topic_name [String] topic name
-    # @param partitions [Integer] total number of partitions we expect to end up with
+    # @param partition_count [Integer] total number of partitions we expect to end up with
     # @see Topics#create_partitions
-    def create_partitions(topic_name, partitions)
-      topics_admin.create_partitions(topic_name, partitions)
+    def create_partitions(topic_name, partition_count)
+      topics_admin.create_partitions(topic_name, partition_count)
     end
 
     # @param name_or_hash [String, Symbol, Hash] topic name or hash with topics and partitions
