@@ -21,7 +21,6 @@ group :integrations do
 end
 
 group :test do
-  gem "byebug"
   gem "factory_bot"
   gem "ostruct"
   gem "simplecov"
