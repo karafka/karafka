@@ -30,6 +30,8 @@ end
 
 setup_karafka
 
+Karafka::Admin.create_topic(DT.topic, 1, 1)
+
 Karafka::App.config.producer = WaterDrop::Producer.new do |p_config|
   p_config.kafka = Karafka::Setup::AttributesMap.producer(Karafka::App.config.kafka.dup)
   p_config.monitor = WaterdropTracingMonitor.new
