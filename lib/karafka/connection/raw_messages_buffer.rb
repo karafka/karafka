@@ -14,6 +14,11 @@ module Karafka
     class RawMessagesBuffer
       include Karafka::Core::Helpers::Time
 
+      # Messages polled within this many milliseconds of each other share one received `Time`
+      RECEIVED_AT_SHARING_WINDOW = 10
+
+      private_constant :RECEIVED_AT_SHARING_WINDOW
+
       attr_reader :size
 
       # @return [Float] last polling time in milliseconds (monotonic)
@@ -43,10 +48,10 @@ module Karafka
       # @return [Array<Rdkafka::Consumer::Message>] given partition topic sub-buffer array
       #
       # @note The message is marked as received at the moment of the last `#polled`. Messages
-      #   polled within the same millisecond share one `Time`, so bursts of prefetched messages
-      #   do not allocate one each.
+      #   polled within 10 milliseconds share one `Time`, so bursts of prefetched messages do not
+      #   allocate one each.
       def <<(message)
-        if @last_polled_at - @received_at_polled_at >= 1
+        if @last_polled_at - @received_at_polled_at >= RECEIVED_AT_SHARING_WINDOW
           @received_at_polled_at = @last_polled_at
           @received_at = Time.now
         end

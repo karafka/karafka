@@ -79,7 +79,7 @@ RSpec.describe_current do
         before_first = Time.now
         buffer.polled
         buffer << message
-        sleep(0.01)
+        sleep(0.02)
         between = Time.now
         buffer.polled
         buffer << message
@@ -92,16 +92,36 @@ RSpec.describe_current do
       end
     end
 
-    context "when messages are polled within the same millisecond" do
+    context "when messages are polled within 10 milliseconds" do
       let(:message) { build(:messages_message) }
+
+      before { allow(buffer).to receive(:monotonic_now).and_return(1_000.0, 1_009.9) }
 
       it "expect to share one received time" do
         buffer.polled
         buffer << message
+        buffer.polled
         buffer << message
 
         buffer.each do |_, _, _, _, received_times|
           expect(received_times[0]).to equal(received_times[1])
+        end
+      end
+    end
+
+    context "when messages are polled 10 milliseconds apart" do
+      let(:message) { build(:messages_message) }
+
+      before { allow(buffer).to receive(:monotonic_now).and_return(1_000.0, 1_010.0) }
+
+      it "expect to record a new received time" do
+        buffer.polled
+        buffer << message
+        buffer.polled
+        buffer << message
+
+        buffer.each do |_, _, _, _, received_times|
+          expect(received_times[0]).not_to equal(received_times[1])
         end
       end
     end
