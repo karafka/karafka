@@ -9,6 +9,9 @@ allowed_patterns=(
    # feature flag (Kafka 5.0), but is still functionally required to enable share groups in this
    # version, so the broker logs this deprecation warning on every startup. Expected here.
    "group.coordinator.rebalance.protocols. is deprecated"
+   # Share group (KIP-932) specs that drive records to the delivery count limit (redelivery
+   # exhaustion, dead letter queue) make the broker warn that a record is on its last attempt
+   "is on last delivery attempt in share partition"
    "Performing controller activation"
    "registered with feature metadata.version"
    "Replayed TopicRecord for"

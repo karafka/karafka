@@ -49,12 +49,20 @@ module Karafka
         "statistics.interval.ms": 5_000,
         "client.software.name": "karafka",
         "socket.nagle.disable": true,
-        "client.software.version": CLIENT_SOFTWARE_VERSION
+        "client.software.version": CLIENT_SOFTWARE_VERSION,
+        # Karafka drives per-record acknowledgements (accept/release/reject) itself, so we default
+        # share consumers to explicit acknowledgement mode rather than the implicit
+        # accept-on-next-poll behavior.
+        "share.acknowledgement.mode": "explicit"
       }.freeze
 
       # Dev-only share-group defaults. Same rationale as for the consumer-group ones.
+      #
+      # @note We deliberately do NOT inject `allow.auto.create.topics` here. librdkafka's KIP-932
+      #   preview (2.15) rejects that setting for share consumers (it raises on client creation and
+      #   is slated for the GA release), so unlike consumer groups we cannot rely on broker-side
+      #   auto topic creation for share groups in development.
       SHARE_GROUP_KAFKA_DEV_DEFAULTS = {
-        "allow.auto.create.topics": "true",
         "topic.metadata.refresh.interval.ms": 5_000
       }.freeze
 

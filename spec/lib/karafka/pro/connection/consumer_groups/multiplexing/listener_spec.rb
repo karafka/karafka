@@ -34,7 +34,7 @@ RSpec.describe_current do
   let(:manager) { Karafka::App.config.internal.connection.manager }
   let(:subscription_group_id) { SecureRandom.uuid }
   let(:event) { { subscription_group_id: subscription_group_id, statistics: statistics } }
-  let(:statistics) { { rand => rand } }
+  let(:statistics) { { "cgrp" => { rand => rand } } }
 
   before { allow(manager).to receive(:notice) }
 
@@ -43,6 +43,16 @@ RSpec.describe_current do
       listener.on_statistics_emitted(event)
 
       expect(manager).to have_received(:notice).with(subscription_group_id, statistics)
+    end
+
+    context "when statistics come from a share group client" do
+      let(:statistics) { { "name" => "share" } }
+
+      it "expect not to be noticed" do
+        listener.on_statistics_emitted(event)
+
+        expect(manager).not_to have_received(:notice)
+      end
     end
   end
 end

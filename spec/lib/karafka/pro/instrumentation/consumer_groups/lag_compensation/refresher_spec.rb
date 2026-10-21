@@ -34,7 +34,13 @@ RSpec.describe_current do
   let(:client_name) { SecureRandom.hex(6) }
   let(:sg_id) { SecureRandom.hex(6) }
   let(:registry) { Karafka::Pro::Instrumentation::ConsumerGroups::LagCompensation::Registry.instance }
-  let(:subscription_group) { instance_double(Karafka::Routing::SubscriptionGroup, id: sg_id) }
+  let(:subscription_group) do
+    instance_double(
+      Karafka::Routing::SubscriptionGroup,
+      id: sg_id,
+      group: build(:routing_consumer_group)
+    )
+  end
 
   let(:client) do
     instance_double(

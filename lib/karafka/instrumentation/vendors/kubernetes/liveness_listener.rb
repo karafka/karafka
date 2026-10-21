@@ -267,13 +267,15 @@ module Karafka
           #   max.poll.interval.ms, multiplied by 2 for headroom above the slowest legitimate
           #   rebalance phase. Uses the maximum value across all active subscription groups
           #   (their kafka configs already have librdkafka defaults injected), so per
-          #   subscription group overrides set via the routing DSL are respected. Falls back to
-          #   the root kafka config when no subscription groups are available.
+          #   subscription group overrides set via the routing DSL are respected. Share groups do
+          #   not rebalance, so only consumer groups are taken into account. Falls back to the
+          #   root kafka config when no consumer group subscription groups are available.
           def default_stability_ttl
             max_poll_interval = Karafka::App
               .subscription_groups
               .values
               .flatten
+              .select { |sg| sg.group.consumer_group? }
               .map { |sg| sg.kafka.fetch(:"max.poll.interval.ms") }
               .max
 
