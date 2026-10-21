@@ -14,6 +14,11 @@ module Karafka
     class RawMessagesBuffer
       include Karafka::Core::Helpers::Time
 
+      # Messages polled within this many milliseconds of each other share one received `Time`
+      RECEIVED_AT_SHARING_WINDOW = 10
+
+      private_constant :RECEIVED_AT_SHARING_WINDOW
+
       attr_reader :size
 
       # @return [Float] last polling time in milliseconds (monotonic)
@@ -23,12 +28,15 @@ module Karafka
       def initialize
         @size = 0
         @last_polled_at = monotonic_now
+        @received_at = nil
+        @received_at_polled_at = -Float::INFINITY
 
         @groups = Hash.new do |topic_groups, topic|
           topic_groups[topic] = Hash.new do |partition_groups, partition|
             partition_groups[partition] = {
               eof: false,
-              messages: []
+              messages: [],
+              received_times: []
             }
           end
         end
@@ -38,10 +46,20 @@ module Karafka
       #
       # @param message [Rdkafka::Consumer::Message] raw rdkafka message
       # @return [Array<Rdkafka::Consumer::Message>] given partition topic sub-buffer array
+      #
+      # @note The message is marked as received at the moment of the last `#polled`. Messages
+      #   polled within 10 milliseconds share one `Time`, so bursts of prefetched messages do not
+      #   allocate one each.
       def <<(message)
+        if @last_polled_at - @received_at_polled_at >= RECEIVED_AT_SHARING_WINDOW
+          @received_at_polled_at = @last_polled_at
+          @received_at = Time.now
+        end
+
         @size += 1
         partition_state = @groups[message.topic][message.partition]
         partition_state[:messages] << message
+        partition_state[:received_times] << @received_at
         partition_state[:eof] = false
       end
 
@@ -63,10 +81,18 @@ module Karafka
       # @yieldparam [Integer] partition number
       # @yieldparam [Array<Rdkafka::Consumer::Message>] topic partition aggregated results
       # @yieldparam [Boolean] has polling of this partition reach eof
+      # @yieldparam [Array<Time>] moments when each of the messages was received, in the same
+      #   order as messages
       def each
         @groups.each do |topic, partitions|
           partitions.each do |partition, details|
-            yield(topic, partition, details[:messages], details[:eof])
+            yield(
+              topic,
+              partition,
+              details[:messages],
+              details[:eof],
+              details[:received_times]
+            )
           end
         end
       end
@@ -95,7 +121,11 @@ module Karafka
       def uniq!
         @groups.each_value do |partitions|
           partitions.each_value do |details|
-            details[:messages].uniq!(&:offset)
+            pairs = details[:messages].zip(details[:received_times])
+
+            next unless pairs.uniq! { |message, _| message.offset }
+
+            details[:messages], details[:received_times] = pairs.transpose
           end
         end
 
