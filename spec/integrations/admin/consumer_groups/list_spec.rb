@@ -2,6 +2,7 @@
 
 # Karafka::Admin.list_consumer_groups should list the consumer groups that exist in the cluster
 # together with their cooked (Symbol) state, and must not include groups that never existed.
+# A group with live members should be reported as stable and as empty after shutdown.
 
 setup_karafka
 
@@ -16,7 +17,11 @@ draw_routes(Consumer)
 produce_many(DT.topic, DT.uuids(10))
 
 start_karafka_and_wait_until do
-  DT[0].size >= 10
+  next false unless DT[0].size >= 10
+
+  DT[:live] = Karafka::Admin.list_consumer_groups.find { |group| group[:group_id] == DT.group }
+
+  true
 end
 
 # The cooked states we normalize the librdkafka enum into
@@ -39,6 +44,9 @@ assert_equal DT.group, our[:group_id]
 
 # State must be one of the cooked symbols, never the raw librdkafka integer
 assert ALLOWED_STATES.include?(our[:state]), our[:state]
+
+# While consuming, the group has live members, so it is stable
+assert_equal :stable, DT[:live][:state]
 
 # After a clean shutdown the group has committed offsets but no live members, so it is empty
 assert_equal :empty, our[:state]

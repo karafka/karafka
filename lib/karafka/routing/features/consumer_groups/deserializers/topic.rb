@@ -8,6 +8,12 @@ module Karafka
           # Routing topic deserializers API. It allows to configure deserializers for various
           # components of each message.
           module Topic
+            # Default argument marker, so the default deserializers are built only once instead of
+            # on every call (this method is called for each consumed message)
+            UNSET = Object.new.freeze
+
+            private_constant :UNSET
+
             # This method sets up the extra instance variable to nil before calling
             # the parent class initializer. The explicit initialization
             # to nil is included as an optimization for Ruby's object shapes system,
@@ -21,16 +27,12 @@ module Karafka
             # @param payload [Object] Deserializer for the message payload
             # @param key [Object] deserializer for the message key
             # @param headers [Object] deserializer for the message headers
-            def deserializers(
-              payload: Karafka::Deserializers::Payload.new,
-              key: Karafka::Deserializers::Key.new,
-              headers: Karafka::Deserializers::Headers.new
-            )
+            def deserializers(payload: UNSET, key: UNSET, headers: UNSET)
               @deserializers ||= Config.new(
                 active: true,
-                payload: payload,
-                key: key,
-                headers: headers
+                payload: UNSET.equal?(payload) ? Karafka::Deserializers::Payload.new : payload,
+                key: UNSET.equal?(key) ? Karafka::Deserializers::Key.new : key,
+                headers: UNSET.equal?(headers) ? Karafka::Deserializers::Headers.new : headers
               )
             end
 

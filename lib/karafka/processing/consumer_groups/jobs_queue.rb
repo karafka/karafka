@@ -44,10 +44,7 @@ module Karafka
         #
         # @param group_id [String]
         def register(group_id)
-          # Ruby prior to 3.2 did not have queue with a timeout on `#pop`, that is why for those
           @mutex.synchronize do
-            # versions we use our custom queue wrapper
-            #
             # Initializes this semaphore from the mutex, so it is never auto-created
             # Since we always schedule a job before waiting using semaphores, there won't be any
             # concurrency problems
@@ -161,8 +158,7 @@ module Karafka
         #   blocking jobs from a given group are completed
         #
         # @param group_id [String] id of the group in which jobs we're interested.
-        # @yieldparam [Block] block we want to run before each pop (in case of Ruby pre 3.2) or
-        #   before each pop and on every tick interval.
+        # @yieldparam [Block] block we want to run before each pop and on every tick interval.
         #   This allows us to run extra code that needs to be executed even when we are waiting on
         #   the work to be finished.
         # @note This method is blocking.

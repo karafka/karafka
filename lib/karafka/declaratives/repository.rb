@@ -10,10 +10,10 @@ module Karafka
       end
 
       # Finds an existing declaration or creates a new one for the given topic name
-      # @param name [String, Symbol] topic name
+      # @param topic_name [String, Symbol] topic name
       # @return [Karafka::Declaratives::Topic] the declaration
-      def find_or_create(name)
-        @topics[name.to_s] ||= Topic.new(name)
+      def find_or_create(topic_name)
+        @topics[topic_name.to_s] ||= Topic.new(topic_name)
       end
 
       # @return [Array<Karafka::Declaratives::Topic>] all declarations where active? is true
@@ -21,10 +21,10 @@ module Karafka
         @topics.values.select(&:active?)
       end
 
-      # @param name [String, Symbol] topic name
+      # @param topic_name [String, Symbol] topic name
       # @return [Karafka::Declaratives::Topic, nil] the declaration or nil
-      def find(name)
-        @topics[name.to_s]
+      def find(topic_name)
+        @topics[topic_name.to_s]
       end
 
       # Iterates over all declarations

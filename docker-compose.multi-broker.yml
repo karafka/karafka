@@ -12,6 +12,7 @@ services:
       CLUSTER_ID: kafka-docker-cluster-multi
       KAFKA_NODE_ID: 1
       KAFKA_BROKER_ID: 1
+      KAFKA_BROKER_RACK: rack-1
       KAFKA_PROCESS_ROLES: broker,controller
       # INTERNAL: for inter-broker + CLI tools inside containers
       # EXTERNAL: for host access
@@ -50,6 +51,7 @@ services:
       CLUSTER_ID: kafka-docker-cluster-multi
       KAFKA_NODE_ID: 2
       KAFKA_BROKER_ID: 2
+      KAFKA_BROKER_RACK: rack-1
       KAFKA_PROCESS_ROLES: broker,controller
       KAFKA_LISTENERS: INTERNAL://:29093,EXTERNAL://:9093,CONTROLLER://:19092
       KAFKA_ADVERTISED_LISTENERS: INTERNAL://kafka2:29093,EXTERNAL://127.0.0.1:9093
@@ -86,6 +88,7 @@ services:
       CLUSTER_ID: kafka-docker-cluster-multi
       KAFKA_NODE_ID: 3
       KAFKA_BROKER_ID: 3
+      KAFKA_BROKER_RACK: rack-1
       KAFKA_PROCESS_ROLES: broker,controller
       KAFKA_LISTENERS: INTERNAL://:29094,EXTERNAL://:9094,CONTROLLER://:19092
       KAFKA_ADVERTISED_LISTENERS: INTERNAL://kafka3:29094,EXTERNAL://127.0.0.1:9094

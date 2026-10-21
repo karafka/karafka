@@ -29,11 +29,8 @@ jobs:
           - '3.4'
           - '3.3'
         macos-version:
-          - 'macos-14'
           - 'macos-15'
-        exclude:
-          - ruby: '4.0'
-            macos-version: 'macos-14'
+          - 'macos-26'
     runs-on: ${{ matrix.macos-version }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -81,6 +78,7 @@ jobs:
           # KRaft mode configuration for single-node setup
           process.roles=broker,controller
           node.id=1
+          broker.rack=rack-1
           controller.quorum.voters=1@127.0.0.1:9093
           listeners=PLAINTEXT://0.0.0.0:9092,CONTROLLER://127.0.0.1:9093
           advertised.listeners=PLAINTEXT://127.0.0.1:9092
@@ -116,7 +114,7 @@ jobs:
         run: rm -f Gemfile.lock
 
       - name: Set up Ruby
-        uses: ruby/setup-ruby@14594264cd68ce8a2345dd349bc3d138a4ef85c8 # v1.327.0
+        uses: ruby/setup-ruby@651ff0d62c5c79bed6d53ec518387aae20e72c1a # v1.329.0
         with:
           ruby-version: ${{ matrix.ruby }}
           bundler-cache: true

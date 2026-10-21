@@ -9,6 +9,8 @@ setup_karafka do |config|
   config.kafka[:debug] = "all"
 end
 
+Karafka::Admin.create_topic(DT.topic, 1, 1)
+
 reader, writer = IO.pipe
 
 pid = fork do

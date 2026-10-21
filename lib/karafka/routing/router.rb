@@ -27,17 +27,17 @@ module Karafka
       #
       # This is used in places where we may operate on topics that are not part of the routing
       # but we want to do something on them (display data, iterate over, etc)
-      # @param name [String] name of the topic we are looking for
+      # @param topic_name [String] name of the topic we are looking for
       # @return [Karafka::Routing::Topic]
       #
       # @note Please note, that in case of a new topic, it will have a newly built consumer group
       #   as well, that is not part of the routing.
-      def find_or_initialize_by_name(name)
-        existing_topic = find_by(name: name)
+      def find_or_initialize_by_name(topic_name)
+        existing_topic = find_by(name: topic_name)
 
         return existing_topic if existing_topic
 
-        virtual_topic = Topic.new(name, ConsumerGroup.new(name))
+        virtual_topic = Topic.new(topic_name, ConsumerGroup.new(topic_name))
 
         Karafka::Routing::Proxy.new(
           virtual_topic,

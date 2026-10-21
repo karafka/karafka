@@ -106,36 +106,36 @@ module Karafka
     class << self
       # Delegate topic-related operations to Topics class
 
-      # @param name [String, Symbol] topic name
+      # @param topic_name [String, Symbol] topic name
       # @param partition [Integer] partition
       # @param count [Integer] how many messages we want to get at most
       # @param start_offset [Integer, Time] offset from which we should start
       # @param settings [Hash] kafka extra settings
       # @see Topics.read
-      def read_topic(name, partition, count, start_offset = -1, settings = {})
-        new.read_topic(name, partition, count, start_offset, settings)
+      def read_topic(topic_name, partition, count, start_offset = -1, settings = {})
+        new.read_topic(topic_name, partition, count, start_offset, settings)
       end
 
-      # @param name [String] topic name
-      # @param partitions [Integer] number of partitions we expect
+      # @param topic_name [String] topic name
+      # @param partition_count [Integer] number of partitions we expect
       # @param replication_factor [Integer] number of replicas
       # @param topic_config [Hash] topic config details
       # @see Topics.create
-      def create_topic(name, partitions, replication_factor, topic_config = {})
-        new.create_topic(name, partitions, replication_factor, topic_config)
+      def create_topic(topic_name, partition_count, replication_factor, topic_config = {})
+        new.create_topic(topic_name, partition_count, replication_factor, topic_config)
       end
 
-      # @param name [String] topic name
+      # @param topic_name [String] topic name
       # @see Topics.delete
-      def delete_topic(name)
-        new.delete_topic(name)
+      def delete_topic(topic_name)
+        new.delete_topic(topic_name)
       end
 
-      # @param name [String] topic name
-      # @param partitions [Integer] total number of partitions we expect to end up with
+      # @param topic_name [String] topic name
+      # @param partition_count [Integer] total number of partitions we expect to end up with
       # @see Topics.create_partitions
-      def create_partitions(name, partitions)
-        new.create_partitions(name, partitions)
+      def create_partitions(topic_name, partition_count)
+        new.create_partitions(topic_name, partition_count)
       end
 
       # @param name_or_hash [String, Symbol, Hash] topic name or hash with topics and partitions
@@ -156,6 +156,18 @@ module Karafka
       # @see Topics.info
       def topic_info(topic_name)
         new.topic_info(topic_name)
+      end
+
+      # @param topic_names [Array<String>] names of the topics to describe
+      # @param include_authorized_operations [Boolean] should we also fetch the operations this
+      #   client is authorized to perform on the topics
+      # @return [Array<Hash>] topics details in the order of `topic_names`
+      # @see Topics.describe
+      def describe_topics(topic_names, include_authorized_operations: false)
+        new.describe_topics(
+          topic_names,
+          include_authorized_operations: include_authorized_operations
+        )
       end
 
       # @param group_id [String] id of the group for which we want to move the
@@ -210,6 +222,15 @@ module Karafka
       # @see ConsumerGroups.list
       def list_consumer_groups
         new.list_consumer_groups
+      end
+
+      # Describes consumer groups: their state, assignor, coordinator and members
+      #
+      # @param group_ids [Array<String>] consumer groups to describe
+      # @return [Array<Hash>] consumer group details in the order of `group_ids`
+      # @see ConsumerGroups.describe
+      def describe_consumer_groups(group_ids)
+        new.describe_consumer_groups(group_ids)
       end
 
       # Triggers a rebalance for the specified group
@@ -289,6 +310,14 @@ module Karafka
         new.cluster_info
       end
 
+      # @param include_authorized_operations [Boolean] should we also fetch the operations this
+      #   client is authorized to perform on the cluster
+      # @return [Hash] cluster id, controller and brokers
+      # @see #describe_cluster
+      def describe_cluster(include_authorized_operations: false)
+        new.describe_cluster(include_authorized_operations: include_authorized_operations)
+      end
+
       # Creates consumer instance and yields it. After usage it closes the consumer instance
       # This API can be used in other pieces of code and allows for low-level consumer usage
       #
@@ -308,36 +337,36 @@ module Karafka
 
     # Instance methods - these use the custom kafka configuration
 
-    # @param name [String, Symbol] topic name
+    # @param topic_name [String, Symbol] topic name
     # @param partition [Integer] partition
     # @param count [Integer] how many messages we want to get at most
     # @param start_offset [Integer, Time] offset from which we should start
     # @param settings [Hash] kafka extra settings (optional)
     # @see Topics#read
-    def read_topic(name, partition, count, start_offset = -1, settings = {})
-      topics_admin.read(name, partition, count, start_offset, settings)
+    def read_topic(topic_name, partition, count, start_offset = -1, settings = {})
+      topics_admin.read(topic_name, partition, count, start_offset, settings)
     end
 
-    # @param name [String] topic name
-    # @param partitions [Integer] number of partitions for this topic
+    # @param topic_name [String] topic name
+    # @param partition_count [Integer] number of partitions for this topic
     # @param replication_factor [Integer] number of replicas
     # @param topic_config [Hash] topic config details
     # @see Topics#create
-    def create_topic(name, partitions, replication_factor, topic_config = {})
-      topics_admin.create(name, partitions, replication_factor, topic_config)
+    def create_topic(topic_name, partition_count, replication_factor, topic_config = {})
+      topics_admin.create(topic_name, partition_count, replication_factor, topic_config)
     end
 
-    # @param name [String] topic name
+    # @param topic_name [String] topic name
     # @see Topics#delete
-    def delete_topic(name)
-      topics_admin.delete(name)
+    def delete_topic(topic_name)
+      topics_admin.delete(topic_name)
     end
 
-    # @param name [String] topic name
-    # @param partitions [Integer] total number of partitions we expect to end up with
+    # @param topic_name [String] topic name
+    # @param partition_count [Integer] total number of partitions we expect to end up with
     # @see Topics#create_partitions
-    def create_partitions(name, partitions)
-      topics_admin.create_partitions(name, partitions)
+    def create_partitions(topic_name, partition_count)
+      topics_admin.create_partitions(topic_name, partition_count)
     end
 
     # @param name_or_hash [String, Symbol, Hash] topic name or hash with topics and partitions
@@ -358,6 +387,18 @@ module Karafka
     # @see Topics#info
     def topic_info(topic_name)
       topics_admin.info(topic_name)
+    end
+
+    # @param topic_names [Array<String>] names of the topics to describe
+    # @param include_authorized_operations [Boolean] should we also fetch the operations this
+    #   client is authorized to perform on the topics
+    # @return [Array<Hash>] topics details in the order of `topic_names`
+    # @see Topics#describe
+    def describe_topics(topic_names, include_authorized_operations: false)
+      topics_admin.describe(
+        *topic_names,
+        include_authorized_operations: include_authorized_operations
+      )
     end
 
     # @param group_id [String] group for which we want to move offsets
@@ -404,6 +445,13 @@ module Karafka
       consumer_groups_admin.list
     end
 
+    # @param group_ids [Array<String>] consumer groups to describe
+    # @return [Array<Hash>] consumer group details in the order of `group_ids`
+    # @see ConsumerGroups#describe
+    def describe_consumer_groups(group_ids)
+      consumer_groups_admin.describe(*group_ids)
+    end
+
     # @param group_id [String] group id to trigger rebalance for
     # @see ConsumerGroups#trigger_rebalance
     def trigger_rebalance(group_id)
@@ -436,6 +484,43 @@ module Karafka
     # @return [Rdkafka::Metadata] cluster metadata info
     def cluster_info
       with_admin(&:metadata)
+    end
+
+    # Describes the cluster: its id, the current controller and the brokers (with racks).
+    #
+    # Unlike `#cluster_info`, it does not fetch any topic metadata.
+    #
+    # @param include_authorized_operations [Boolean] should we also fetch the operations this
+    #   client is authorized to perform on the cluster
+    #
+    # @return [Hash] cluster details with:
+    #   - `:cluster_id` [String, nil] the cluster id
+    #   - `:controller` [Hash, nil] the controller broker as `{ id:, host:, port:, rack: }`
+    #   - `:brokers` [Array<Hash>] the cluster brokers, each as `{ id:, host:, port:, rack: }`
+    #   - `:authorized_operations` [Array<Symbol>, nil] operations this client is authorized to
+    #     perform on the cluster (e.g. `:describe`, `:alter_configs`), `nil` unless requested
+    #
+    # @example Describe the cluster
+    #   Karafka::Admin.describe_cluster
+    #   # => {
+    #   #   cluster_id: 'kafka-docker-cluster-1',
+    #   #   controller: { id: 1, host: '127.0.0.1', port: 9092, rack: 'rack-1' },
+    #   #   brokers: [{ id: 1, host: '127.0.0.1', port: 9092, rack: 'rack-1' }],
+    #   #   authorized_operations: nil
+    #   # }
+    def describe_cluster(include_authorized_operations: false)
+      report = with_admin do |admin|
+        admin
+          .describe_cluster(include_authorized_operations: include_authorized_operations)
+          .wait(max_wait_timeout_ms: max_wait_time_ms)
+      end
+
+      {
+        cluster_id: report.cluster_id,
+        controller: report.controller,
+        brokers: report.nodes,
+        authorized_operations: map_authorized_operations(report.authorized_operations)
+      }
     end
 
     # Creates consumer instance and yields it. After usage it closes the consumer instance
@@ -517,6 +602,12 @@ module Karafka
 
     private
 
+    # @param operations [Array<Integer>, nil] librdkafka ACL operation codes
+    # @return [Array<Symbol>, nil] operations as symbols or nil when they were not requested
+    def map_authorized_operations(operations)
+      operations && Acl.operation_names(operations)
+    end
+
     # @return [Karafka::Connection::Proxy] proxy wrapping the current external client handle.
     #   For connection clients the handle is resolved on each use as they swap their underlying
     #   rdkafka instance across recovery resets while remaining operational
@@ -588,6 +679,12 @@ module Karafka
         sleep(sleep_time)
 
         return if breaker.call
+
+        # The operation may finish but its effect may never become visible (for example a deleted
+        # topic being re-created by auto-create). Without this we would loop forever
+        next if self.class.monotonic_now - start_time < self.class.max_retries_duration
+
+        raise(Errors::ResultNotVisibleError)
       rescue Rdkafka::AbstractHandle::WaitTimeoutError
         return if breaker.call
 

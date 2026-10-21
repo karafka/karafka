@@ -38,6 +38,23 @@ RSpec.describe_current do
     }
   end
 
+  describe ".operation_names" do
+    it "maps librdkafka operation codes to the operation names" do
+      expect(
+        described_class.operation_names(
+          [
+            Rdkafka::Bindings::RD_KAFKA_ACL_OPERATION_READ,
+            Rdkafka::Bindings::RD_KAFKA_ACL_OPERATION_DESCRIBE_CONFIGS
+          ]
+        )
+      ).to eq(%i[read describe_configs])
+    end
+
+    it "maps a code it does not know to :unknown" do
+      expect(described_class.operation_names([999])).to eq(%i[unknown])
+    end
+  end
+
   describe "#new" do
     context "when trying to create with attribute that cannot be mapped" do
       let(:resource_type) { :nothing_useful }
