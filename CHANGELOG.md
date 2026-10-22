@@ -43,6 +43,7 @@
 - [Fix] Remove the subscription group error callback only after the consumer is closed, so errors reported while closing it (e.g. a failed close) are published via `error.occurred`.
 - [Fix] Stabilize the producer monitor overwrite integration spec by creating its topic before producing.
 - [Fix] Set `Message#received_at` to the moment each message was polled, not the moment its batch was built, so it no longer trails by up to `max_wait_time` on low traffic topics (#2292).
+- [Fix] Stop the listener from failing with `NoMethodError` on JRuby when it checks a subscription group's jobs while workers complete them.
 
 ## 2.6.1 (2026-08-24)
 - **[Feature]** [Pro] Add an opt-in envelope encryption mode for Messages At Rest (`config.encryption.mode = :envelope`, requires openssl `>= 3.0`) without the RSA payload size limit. Upgrade all consuming processes before enabling.
