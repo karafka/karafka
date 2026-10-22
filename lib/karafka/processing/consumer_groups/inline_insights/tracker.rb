@@ -64,9 +64,6 @@ module Karafka
           #
           # We iterate over those topics and partitions and store topics partitions data only.
           #
-          # Changes are made on a copy that replaces the accumulator once complete, so `#find` can
-          # read without a lock and never sees a Hash that is being changed.
-          #
           # @param group_id [String] id of the group for which statistics were emitted.
           # @param statistics [Hash] librdkafka enriched statistics
           def add(group_id, statistics)
