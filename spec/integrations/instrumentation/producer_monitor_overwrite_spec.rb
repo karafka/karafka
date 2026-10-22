@@ -34,6 +34,9 @@ Karafka::Admin.create_topic(DT.topic, 1, 1)
 
 Karafka::App.config.producer = WaterDrop::Producer.new do |p_config|
   p_config.kafka = Karafka::Setup::AttributesMap.producer(Karafka::App.config.kafka.dup)
+  # The topic exists already; a producer metadata request that may auto-create it can race the
+  # creation and log TOPIC_ALREADY_EXISTS on the broker
+  p_config.kafka[:"allow.auto.create.topics"] = false
   p_config.monitor = WaterdropTracingMonitor.new
 end
 
