@@ -60,6 +60,34 @@ RSpec.describe_current do
       expect { result }.to change { tracker.find(topic, partition) }.from({})
     end
 
+    context "when tracked statistics expire" do
+      let(:now) { [0] }
+      let(:next_statistics) do
+        {
+          "topics" => {
+            "topic_name" => {
+              "partitions" => { "6" => { "some_key" => "other_value", "fetch_state" => "active" } }
+            }
+          }
+        }
+      end
+
+      before do
+        allow(tracker).to receive(:monotonic_now) { now.first }
+        tracker.add(group_id, statistics)
+        now[0] = 5 * 60 * 1_000 + 1
+        tracker.add(group_id, next_statistics)
+      end
+
+      it "evicts them on the next add" do
+        expect(tracker.find(topic, partition)).to eq({})
+      end
+
+      it "keeps the statistics from the next add" do
+        expect(tracker.find(topic, 6)).to eq("some_key" => "other_value", "fetch_state" => "active")
+      end
+    end
+
     context "when find runs while statistics are being added" do
       let(:next_details) { { "some_key" => "next_value", "fetch_state" => "active" } }
       let(:other_details) { { "fetch_state" => "active" } }
