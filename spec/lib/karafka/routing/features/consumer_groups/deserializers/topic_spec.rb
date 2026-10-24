@@ -82,6 +82,9 @@ RSpec.describe_current do
       end
 
       it "does not allocate on repeated calls" do
+        skip("GC.stat has no total_allocated_objects on this Ruby") unless
+          GC.stat.key?(:total_allocated_objects)
+
         topic.deserializers
         before = GC.stat(:total_allocated_objects)
         100.times { topic.deserializers }
