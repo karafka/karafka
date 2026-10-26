@@ -510,6 +510,12 @@ module Karafka
           {}
         end
 
+        # librdkafka errors about a specific message (e.g. a decompression failure) carry its
+        # topic, partition and offset
+        error = event[:error]
+        message_details = error.respond_to?(:details) ? error.details : nil
+        details = details.merge(message_details) if message_details.is_a?(Hash)
+
         return nil if details.empty?
 
         "[#{details.map { |label, value| "#{label}: #{value}" }.join(", ")}]"
