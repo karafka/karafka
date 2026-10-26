@@ -5,11 +5,11 @@
 
 setup_karafka
 
+# Probe: with this method, rdkafka also passes the result of every commit to the callback
 Karafka::Instrumentation::Callbacks::ConsumerGroups::OffsetCommit.prepend(
   Module.new do
-    def on_offsets_committed(error, tpl)
+    def on_offsets_committed(error, _tpl)
       DT[:results] << error&.code
-      super
     end
   end
 )

@@ -19,16 +19,14 @@ module Karafka
             @client_id = client_id
           end
 
-          # Publishes an error when the offset commit failed
+          # Publishes a failed offset commit
           #
-          # @param error [Rdkafka::RdkafkaError, nil] commit error or nil on success
+          # @param error [Rdkafka::RdkafkaError] commit error
           # @param tpl [Rdkafka::Consumer::TopicPartitionList] offsets of the commit
-          # @note We do not consider `no_offset` as an error. Every commit with nothing new stored
-          #   reports it, same as in `Connection::Proxy#commit_offsets`.
-          def on_offsets_committed(error, tpl)
-            return unless error
-            return if error.code == :no_offset
-
+          # @note rdkafka calls it only for failed commits: not on success and not on `no_offset`
+          #   (nothing new to commit), same as `Connection::Proxy#commit_offsets` ignores it. The
+          #   offsets of the other commits are then not converted to Ruby at all.
+          def on_offsets_commit_failed(error, tpl)
             instrument("connection.client.commit_offsets.error", error, tpl)
           rescue => e
             instrument("callbacks.offset_commit.error", e, tpl)
