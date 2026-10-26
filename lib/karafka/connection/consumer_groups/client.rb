@@ -82,6 +82,10 @@ module Karafka
             @subscription_group,
             id
           )
+          @offset_commit_callback = Instrumentation::Callbacks::ConsumerGroups::OffsetCommit.new(
+            @subscription_group,
+            id
+          )
           @mode = Mode.new
 
           @interval_runner = Helpers::IntervalRunner.new do
@@ -771,6 +775,7 @@ module Karafka
 
           config = Rdkafka::Config.new(@subscription_group.kafka)
           config.consumer_rebalance_listener = @rebalance_callback
+          config.consumer_offset_commit_listener = @offset_commit_callback
           # We want to manage the events queue independently from the messages queue. Thanks to that
           # we can ensure, that we get statistics and errors often enough even when not polling
           # new messages. This allows us to report statistics while data is still being processed

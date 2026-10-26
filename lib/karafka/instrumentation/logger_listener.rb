@@ -460,6 +460,11 @@ module Karafka
         when "connection.client.unsubscribe.error"
           error "Client unsubscribe error occurred: #{details}"
           error backtrace
+        when "connection.client.commit_offsets.error"
+          error "Offsets commit error occurred: #{details}"
+        when "callbacks.offset_commit.error"
+          error "callbacks.offset_commit processing failed due to an error: #{details}"
+          error backtrace
         when "parallel_segments.reducer.error"
           error "Parallel segments reducer error occurred: #{details}"
           error backtrace
