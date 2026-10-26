@@ -44,7 +44,7 @@ module Karafka
         :coordinator_load_in_progress
       ].freeze
 
-      private_constant :RETRYABLE_DEFAULT_ERRORS
+      private_constant :RETRYABLE_DEFAULT_ERRORS, :COMMIT_ASSIGNMENT_LOST_ERRORS
 
       attr_accessor :wrapped
 

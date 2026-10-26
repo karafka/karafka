@@ -26,7 +26,7 @@ RSpec.describe_current do
 
   describe "#on_offsets_commit_failed" do
     context "when the commit failed" do
-      let(:error) { Rdkafka::RdkafkaError.new(3) }
+      let(:error) { Rdkafka::RdkafkaError.new(Rdkafka::Bindings::RD_KAFKA_RESP_ERR__FATAL) }
 
       before { callback.on_offsets_commit_failed(error, tpl) }
 
@@ -45,15 +45,11 @@ RSpec.describe_current do
       end
     end
 
-    {
-      assignment_lost: -142,
-      unknown_member_id: 25,
-      illegal_generation: 22,
-      no_offset: -168,
-      coordinator_load_in_progress: 14
-    }.each do |name, code|
-      context "when the commit failed with #{name} that the proxy handles without raising" do
-        before { callback.on_offsets_commit_failed(Rdkafka::RdkafkaError.new(code), tpl) }
+    Karafka::Connection::Proxy::COMMIT_HANDLED_ERRORS.each do |code|
+      context "when the commit failed with #{code} that the proxy handles without raising" do
+        let(:error) { instance_double(Rdkafka::RdkafkaError, code: code) }
+
+        before { callback.on_offsets_commit_failed(error, tpl) }
 
         it { expect(tracked_errors).to be_empty }
       end
@@ -67,7 +63,9 @@ RSpec.describe_current do
       end
 
       it "expect to contain in, notify and continue as we do not want to crash rdkafka" do
-        expect { callback.on_offsets_commit_failed(Rdkafka::RdkafkaError.new(3), tpl) }
+        error = Rdkafka::RdkafkaError.new(Rdkafka::Bindings::RD_KAFKA_RESP_ERR__FATAL)
+
+        expect { callback.on_offsets_commit_failed(error, tpl) }
           .not_to raise_error
         expect(tracked_errors.last[:type]).to eq("callbacks.offset_commit.error")
       end
