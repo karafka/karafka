@@ -45,6 +45,20 @@ RSpec.describe_current do
       end
     end
 
+    {
+      assignment_lost: -142,
+      unknown_member_id: 25,
+      illegal_generation: 22,
+      no_offset: -168,
+      coordinator_load_in_progress: 14
+    }.each do |name, code|
+      context "when the commit failed with #{name} that the proxy handles without raising" do
+        before { callback.on_offsets_commit_failed(Rdkafka::RdkafkaError.new(code), tpl) }
+
+        it { expect(tracked_errors).to be_empty }
+      end
+    end
+
     context "when an error.occurred subscriber fails on the commit error" do
       before do
         monitor.subscribe("error.occurred") do |event|
