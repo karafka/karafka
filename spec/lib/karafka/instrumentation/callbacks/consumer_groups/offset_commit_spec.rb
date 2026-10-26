@@ -24,26 +24,11 @@ RSpec.describe_current do
 
   after { Karafka::App.config.monitor = previous_monitor }
 
-  describe "#on_offsets_committed" do
-    context "when the commit succeeded" do
-      before { callback.on_offsets_committed(nil, tpl) }
-
-      it { expect(tracked_errors).to be_empty }
-    end
-
-    context "when there was nothing to commit" do
-      before do
-        error = Rdkafka::RdkafkaError.new(-168)
-        callback.on_offsets_committed(error, tpl)
-      end
-
-      it { expect(tracked_errors).to be_empty }
-    end
-
+  describe "#on_offsets_commit_failed" do
     context "when the commit failed" do
       let(:error) { Rdkafka::RdkafkaError.new(3) }
 
-      before { callback.on_offsets_committed(error, tpl) }
+      before { callback.on_offsets_commit_failed(error, tpl) }
 
       it "expect to publish the error with the commit details" do
         expect(tracked_errors.size).to eq(1)
@@ -68,7 +53,7 @@ RSpec.describe_current do
       end
 
       it "expect to contain in, notify and continue as we do not want to crash rdkafka" do
-        expect { callback.on_offsets_committed(Rdkafka::RdkafkaError.new(3), tpl) }
+        expect { callback.on_offsets_commit_failed(Rdkafka::RdkafkaError.new(3), tpl) }
           .not_to raise_error
         expect(tracked_errors.last[:type]).to eq("callbacks.offset_commit.error")
       end
