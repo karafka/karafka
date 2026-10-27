@@ -187,7 +187,14 @@ module Karafka
           #   a mutex on a miss (copy-on-write), so lock-free reads always see a complete Hash, also
           #   on Ruby engines without a GVL (JRuby). Misses happen once per job class.
           def fetch_job_type(job_class)
-            @job_types_cache[job_class] || @job_types_mutex.synchronize do
+            @job_types_cache[job_class] || cache_job_type(job_class)
+          end
+
+          # Builds the job type and stores it in a new frozen copy of the cache
+          # @param job_class [Class] job class
+          # @return [String]
+          def cache_job_type(job_class)
+            @job_types_mutex.synchronize do
               @job_types_cache[job_class] || begin
                 job_type = job_class.to_s.split("::").last
                 @job_types_cache = @job_types_cache.merge(job_class => job_type).freeze
