@@ -169,19 +169,20 @@ module Karafka
             listener.join([deadline - monotonic_now, 0].max / 1_000.0)
           end
 
+          skipped = []
+
           listeners.each do |listener|
-            if listener.alive?
-              Karafka.monitor.instrument(
-                "app.forceful_stopping.listener_skipped",
-                caller: self,
-                listener: listener,
-                subscription_group: listener.subscription_group
-              )
+            listener.alive? ? skipped << listener : listener.shutdown
+          end
 
-              next
-            end
-
-            listener.shutdown
+          # Reported after all the shutdowns, so a failing subscriber cannot prevent any of them
+          skipped.each do |listener|
+            Karafka.monitor.instrument(
+              "app.forceful_stopping.listener_skipped",
+              caller: self,
+              listener: listener,
+              subscription_group: listener.subscription_group
+            )
           end
         rescue => e
           # If anything wrong happened during shutdown, we also want to record it

@@ -309,6 +309,56 @@ RSpec.describe_current do
         end
       end
 
+      context "when a subscriber of the skipped listener report fails" do
+        let(:alive_listener) do
+          instance_double(
+            Karafka::Connection::ConsumerGroups::Listener,
+            id: "listener-1",
+            subscription_group: build(:routing_subscription_group),
+            alive?: true,
+            join: nil,
+            stopped?: false,
+            terminate: true,
+            shutdown: true,
+            active?: true
+          )
+        end
+
+        let(:ended_listener) do
+          instance_double(
+            Karafka::Connection::ConsumerGroups::Listener,
+            alive?: false,
+            stopped?: false,
+            terminate: true,
+            shutdown: true,
+            active?: true
+          )
+        end
+
+        before do
+          listeners = [alive_listener, ended_listener]
+          batch = instance_double(
+            Karafka::Connection::ListenersBatch,
+            active: listeners,
+            all?: false,
+            select: listeners
+          )
+          allow(batch).to receive(:each) { |&block| listeners.each(&block) }
+          allow(Karafka.monitor).to receive(:instrument).and_call_original
+          allow(Karafka.monitor)
+            .to receive(:instrument)
+            .with("app.forceful_stopping.listener_skipped", any_args)
+            .and_raise(StandardError)
+          described_class.listeners = batch
+          server_class.stop
+        end
+
+        it "expect to still shut down the listener whose thread has ended" do
+          expect(alive_listener).not_to have_received(:shutdown)
+          expect(ended_listener).to have_received(:shutdown)
+        end
+      end
+
       context "when there are active processing workers (processing does not want to stop)" do
         let(:active_thread) do
           instance_double(
