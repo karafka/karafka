@@ -30,6 +30,7 @@ module Karafka
         app.stopping
         app.stopped
         app.terminated
+        app.forceful_stopping.listener_skipped
 
         client.pause
         client.resume

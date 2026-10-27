@@ -293,14 +293,19 @@ RSpec.describe_current do
             select: [listener]
           )
           allow(batch).to receive(:each) { |&block| [listener].each(&block) }
-          allow(Karafka.logger).to receive(:warn)
+          allow(Karafka.monitor).to receive(:instrument).and_call_original
           described_class.listeners = batch
           server_class.stop
         end
 
-        it "expect not to shut down its client from another thread and to log it" do
+        it "expect not to shut down its client from another thread and to report it" do
           expect(listener).not_to have_received(:shutdown)
-          expect(Karafka.logger).to have_received(:warn).with(/listener-1 .* still running/)
+          expect(Karafka.monitor).to have_received(:instrument).with(
+            "app.forceful_stopping.listener_skipped",
+            caller: server_class,
+            listener: listener,
+            subscription_group: listener.subscription_group
+          )
         end
       end
 

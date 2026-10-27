@@ -48,7 +48,7 @@
 - [Fix] Stop the listener from failing with `NoMethodError` on JRuby when it checks a subscription group's jobs while workers complete them.
 - [Fix] Stop `#inline_insights` from returning no data on JRuby while another thread adds or evicts partition statistics.
 - [Fix] Stop `Admin` operations from retrying forever when their result never becomes visible. They now raise `ResultNotVisibleError` after `admin.max_retries_duration`.
-- [Fix] Do not call a listener's client from the forceful shutdown thread while the terminated listener thread is still inside a call on it. Such a listener is now skipped and logged instead of shut down from a second thread.
+- [Fix] Stop forceful shutdown from using a listener's client from two threads at once on JRuby. A listener still running after termination now keeps its client open and is reported via `app.forceful_stopping.listener_skipped`.
 
 ## 2.6.1 (2026-08-24)
 - **[Feature]** [Pro] Add an opt-in envelope encryption mode for Messages At Rest (`config.encryption.mode = :envelope`, requires openssl `>= 3.0`) without the RSA payload size limit. Upgrade all consuming processes before enabling.

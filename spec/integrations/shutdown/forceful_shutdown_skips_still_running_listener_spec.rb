@@ -2,7 +2,7 @@
 
 # On a forceful shutdown, a terminated listener thread that is still inside a call on its client
 # after half of `forceful_shutdown_wait` must not be shut down from another thread. It is skipped
-# and a warning is logged, while the other listener is still shut down.
+# and reported, while the other listener is still shut down.
 #
 # Two subscription groups share one worker. The first consumes a message, then the second's
 # consumer hangs. On stop, the first group's shutdown job waits behind the hanging job, so its
@@ -10,7 +10,7 @@
 # 10 seconds, like a native call that `Thread#terminate` cannot interrupt.
 #
 # This spec is registered in `bin/integrations` as expecting exit code 2 (forceful shutdown).
-# A listener shut down while its thread was alive, or no warning, exits with code 10 instead.
+# A listener shut down while its thread was alive, or no report, exits with code 10 instead.
 
 setup_karafka(allow_errors: true) do |config|
   config.concurrency = 1
@@ -39,22 +39,12 @@ Karafka::Connection::ConsumerGroups::Listener.prepend(
   end
 )
 
-Karafka.logger.singleton_class.prepend(
-  Module.new do
-    def warn(message = nil, &)
-      DT[:warnings] << message if message.to_s.include?("still running after termination")
-
-      super
-    end
-  end
-)
-
 Kernel.singleton_class.prepend(
   Module.new do
     def exit!(code = false)
-      if DT[:shutdown_alive] != [false] || DT[:warnings].size != 1
+      if DT[:shutdown_alive] != [false] || DT[:skipped].size != 1
         Karafka.logger.error(
-          "Listener shutdowns (thread alive?): #{DT[:shutdown_alive]}, warnings: #{DT[:warnings]}"
+          "Listener shutdowns (thread alive?): #{DT[:shutdown_alive]}, skipped: #{DT[:skipped]}"
         )
         code = 10
       end
@@ -94,6 +84,10 @@ end
 
 Karafka.monitor.subscribe("error.occurred") do |event|
   DT[:stopping_error] = true if event[:type] == "app.stopping.error"
+end
+
+Karafka.monitor.subscribe("app.forceful_stopping.listener_skipped") do |event|
+  DT[:skipped] << event[:listener].id
 end
 
 produce(DT.topics[0], "1")

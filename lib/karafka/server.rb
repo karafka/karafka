@@ -158,9 +158,9 @@ module Karafka
         # indefinitely even with risk of VM crash as this is a last resort.
         Thread.new do
           # A terminated listener thread may still be inside a native call on its client (a poll).
-          # Calling that client from here at the same time would use one consumer from two threads,
-          # so we first let those calls end, within half of the wait, and skip the listeners whose
-          # threads are still alive. Their clients stay open, as they do when this wait runs out.
+          # Calling that client from here at the same time would use one consumer from two threads.
+          # Half of the wait goes to those calls, so the other half remains for the client shutdown.
+          # Clients of listeners that are still alive stay open, as when this wait runs out.
           deadline = monotonic_now + (forceful_shutdown_wait / 2)
 
           listeners.each do |listener|
@@ -171,9 +171,11 @@ module Karafka
 
           listeners.each do |listener|
             if listener.alive?
-              Karafka.logger.warn(
-                "Listener #{listener.id} for #{listener.subscription_group.name} is still " \
-                "running after termination, its client will not be shut down"
+              Karafka.monitor.instrument(
+                "app.forceful_stopping.listener_skipped",
+                caller: self,
+                listener: listener,
+                subscription_group: listener.subscription_group
               )
 
               next
