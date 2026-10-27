@@ -234,7 +234,7 @@ module Karafka
 
         # Pauses given partition and moves back to last successful offset processed.
         #
-        # @param topic [String] topic name
+        # @param topic_name [String] topic name
         # @param partition [Integer] partition
         # @param offset [Integer, nil] offset of the message on which we want to pause (this message
         #   will be reprocessed after getting back to processing) or nil if we want to pause and
@@ -246,7 +246,7 @@ module Karafka
         #   librdkafka buffers and continue from the last cursor offset
         # @note We accept the timeout value on this layer to have a cohesive pause/resume
         #   instrumentation, where all the details are available. It is especially needed, when
-        def pause(topic, partition, offset = nil, timeout = 0)
+        def pause(topic_name, partition, offset = nil, timeout = 0)
           @mutex.synchronize do
             # Do not pause if the client got closed, would not change anything
             return if @closed
@@ -255,7 +255,7 @@ module Karafka
 
             # Here we do not use our cached tpls because we should not try to pause something we do
             # not own anymore.
-            tpl = topic_partition_list(topic, partition)
+            tpl = topic_partition_list(topic_name, partition)
 
             return unless tpl
 
@@ -263,13 +263,13 @@ module Karafka
               "client.pause",
               caller: self,
               subscription_group: @subscription_group,
-              topic: topic,
+              topic: topic_name,
               partition: partition,
               offset: offset,
               timeout: timeout
             )
 
-            @paused_tpls[topic][partition] = tpl
+            @paused_tpls[topic_name][partition] = tpl
 
             kafka.pause(tpl)
 
@@ -278,7 +278,7 @@ module Karafka
             # when we just want to pause before further processing without changing the offsets
             return unless offset
 
-            pause_msg = Messages::Seek.new(topic, partition, offset)
+            pause_msg = Messages::Seek.new(topic_name, partition, offset)
 
             internal_seek(pause_msg)
           end
@@ -286,9 +286,9 @@ module Karafka
 
         # Resumes processing of a give topic partition after it was paused.
         #
-        # @param topic [String] topic name
+        # @param topic_name [String] topic name
         # @param partition [Integer] partition
-        def resume(topic, partition)
+        def resume(topic_name, partition)
           @mutex.synchronize do
             return if @closed
 
@@ -296,19 +296,19 @@ module Karafka
             internal_commit_offsets(async: true)
 
             # If we were not able, let's try to reuse the one we have (if we have)
-            tpl = topic_partition_list(topic, partition) || @paused_tpls[topic][partition]
+            tpl = topic_partition_list(topic_name, partition) || @paused_tpls[topic_name][partition]
 
             return unless tpl
 
             # If we did not have it, it means we never paused this partition, thus no resume should
             # happen in the first place
-            return unless @paused_tpls[topic].delete(partition)
+            return unless @paused_tpls[topic_name].delete(partition)
 
             Karafka.monitor.instrument(
               "client.resume",
               caller: self,
               subscription_group: @subscription_group,
-              topic: topic,
+              topic: topic_name,
               partition: partition
             )
 
@@ -457,11 +457,11 @@ module Karafka
 
         # Reads watermark offsets for given topic
         #
-        # @param topic [String] topic name
+        # @param topic_name [String] topic name
         # @param partition [Integer] partition number
         # @return [Array<Integer, Integer>] watermark offsets (low, high)
-        def query_watermark_offsets(topic, partition)
-          @wrapped_kafka.query_watermark_offsets(topic, partition)
+        def query_watermark_offsets(topic_name, partition)
+          @wrapped_kafka.query_watermark_offsets(topic_name, partition)
         end
 
         # Resolves offsets of many partitions with one batched request instead of one broker
@@ -626,30 +626,30 @@ module Karafka
           )
         end
 
-        # @param topic [String]
+        # @param topic_name [String]
         # @param partition [Integer]
         # @return [Rdkafka::Consumer::TopicPartitionList]
-        def topic_partition_list(topic, partition)
+        def topic_partition_list(topic_name, partition)
           rdkafka_partition = kafka
             .assignment
-            .to_h[topic]
+            .to_h[topic_name]
             &.detect { |part| part.partition == partition }
 
           return unless rdkafka_partition
 
-          Rdkafka::Consumer::TopicPartitionList.new({ topic => [rdkafka_partition] })
+          Rdkafka::Consumer::TopicPartitionList.new({ topic_name => [rdkafka_partition] })
         end
 
-        # @param topic [String]
+        # @param topic_name [String]
         # @param partition [Integer]
         # @return [Integer] current position within topic partition or `-1` if it could not be
         #   established. It may be `-1` in case we lost the assignment or we did not yet fetch data
         #   for this topic partition
-        def topic_partition_position(topic, partition)
+        def topic_partition_position(topic_name, partition)
           rd_partition = Rdkafka::Consumer::Partition.new(partition, nil, 0)
-          tpl = Rdkafka::Consumer::TopicPartitionList.new(topic => [rd_partition])
+          tpl = Rdkafka::Consumer::TopicPartitionList.new(topic_name => [rd_partition])
 
-          kafka.position(tpl).to_h.fetch(topic).first.offset || -1
+          kafka.position(tpl).to_h.fetch(topic_name).first.offset || -1
         end
 
         # Performs a single poll operation and handles retries and errors

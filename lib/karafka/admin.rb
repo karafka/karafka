@@ -106,36 +106,36 @@ module Karafka
     class << self
       # Delegate topic-related operations to Topics class
 
-      # @param name [String, Symbol] topic name
+      # @param topic_name [String, Symbol] topic name
       # @param partition [Integer] partition
       # @param count [Integer] how many messages we want to get at most
       # @param start_offset [Integer, Time] offset from which we should start
       # @param settings [Hash] kafka extra settings
       # @see Topics.read
-      def read_topic(name, partition, count, start_offset = -1, settings = {})
-        new.read_topic(name, partition, count, start_offset, settings)
+      def read_topic(topic_name, partition, count, start_offset = -1, settings = {})
+        new.read_topic(topic_name, partition, count, start_offset, settings)
       end
 
-      # @param name [String] topic name
-      # @param partitions [Integer] number of partitions we expect
+      # @param topic_name [String] topic name
+      # @param partition_count [Integer] number of partitions we expect
       # @param replication_factor [Integer] number of replicas
       # @param topic_config [Hash] topic config details
       # @see Topics.create
-      def create_topic(name, partitions, replication_factor, topic_config = {})
-        new.create_topic(name, partitions, replication_factor, topic_config)
+      def create_topic(topic_name, partition_count, replication_factor, topic_config = {})
+        new.create_topic(topic_name, partition_count, replication_factor, topic_config)
       end
 
-      # @param name [String] topic name
+      # @param topic_name [String] topic name
       # @see Topics.delete
-      def delete_topic(name)
-        new.delete_topic(name)
+      def delete_topic(topic_name)
+        new.delete_topic(topic_name)
       end
 
-      # @param name [String] topic name
-      # @param partitions [Integer] total number of partitions we expect to end up with
+      # @param topic_name [String] topic name
+      # @param partition_count [Integer] total number of partitions we expect to end up with
       # @see Topics.create_partitions
-      def create_partitions(name, partitions)
-        new.create_partitions(name, partitions)
+      def create_partitions(topic_name, partition_count)
+        new.create_partitions(topic_name, partition_count)
       end
 
       # @param name_or_hash [String, Symbol, Hash] topic name or hash with topics and partitions
@@ -337,36 +337,36 @@ module Karafka
 
     # Instance methods - these use the custom kafka configuration
 
-    # @param name [String, Symbol] topic name
+    # @param topic_name [String, Symbol] topic name
     # @param partition [Integer] partition
     # @param count [Integer] how many messages we want to get at most
     # @param start_offset [Integer, Time] offset from which we should start
     # @param settings [Hash] kafka extra settings (optional)
     # @see Topics#read
-    def read_topic(name, partition, count, start_offset = -1, settings = {})
-      topics_admin.read(name, partition, count, start_offset, settings)
+    def read_topic(topic_name, partition, count, start_offset = -1, settings = {})
+      topics_admin.read(topic_name, partition, count, start_offset, settings)
     end
 
-    # @param name [String] topic name
-    # @param partitions [Integer] number of partitions for this topic
+    # @param topic_name [String] topic name
+    # @param partition_count [Integer] number of partitions for this topic
     # @param replication_factor [Integer] number of replicas
     # @param topic_config [Hash] topic config details
     # @see Topics#create
-    def create_topic(name, partitions, replication_factor, topic_config = {})
-      topics_admin.create(name, partitions, replication_factor, topic_config)
+    def create_topic(topic_name, partition_count, replication_factor, topic_config = {})
+      topics_admin.create(topic_name, partition_count, replication_factor, topic_config)
     end
 
-    # @param name [String] topic name
+    # @param topic_name [String] topic name
     # @see Topics#delete
-    def delete_topic(name)
-      topics_admin.delete(name)
+    def delete_topic(topic_name)
+      topics_admin.delete(topic_name)
     end
 
-    # @param name [String] topic name
-    # @param partitions [Integer] total number of partitions we expect to end up with
+    # @param topic_name [String] topic name
+    # @param partition_count [Integer] total number of partitions we expect to end up with
     # @see Topics#create_partitions
-    def create_partitions(name, partitions)
-      topics_admin.create_partitions(name, partitions)
+    def create_partitions(topic_name, partition_count)
+      topics_admin.create_partitions(topic_name, partition_count)
     end
 
     # @param name_or_hash [String, Symbol, Hash] topic name or hash with topics and partitions

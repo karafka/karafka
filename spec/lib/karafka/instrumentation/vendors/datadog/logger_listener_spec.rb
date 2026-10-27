@@ -241,6 +241,83 @@ RSpec.describe_current do
     end
   end
 
+  describe "#on_worker_process" do
+    subject(:trigger) { nil }
+
+    let(:span_class) { Struct.new(:resource) }
+    let(:client) do
+      span_class = self.span_class
+
+      Class.new do
+        define_method(:trace) { |*| span_class.new }
+        define_method(:log_correlation) { "" }
+      end.new
+    end
+    # Logging is stubbed on the class so no RSpec double records calls from other threads
+    let(:listener_class) do
+      Class.new(described_class) do
+        attr_reader :logs
+
+        def initialize(...)
+          super
+          @logs = Queue.new
+        end
+
+        private
+
+        def push_tags
+        end
+
+        def pop_tags
+        end
+
+        def info(message)
+          @logs << message
+        end
+      end
+    end
+    let(:executor) { Struct.new(:topic).new(Struct.new(:consumer, :name).new("Consumer", "topic")) }
+    let(:job_class) do
+      job_class = Struct.new(:id, :executor) do
+        class << self
+          def action
+            :consume
+          end
+        end
+      end
+
+      stub_const("DatadogSpecJob", job_class)
+    end
+    let(:worker_event) do
+      Karafka::Core::Monitoring::Event.new("worker.process", { job: job_class.new("id", executor) })
+    end
+
+    it "builds the job type once when another worker misses the cache meanwhile" do
+      listener = listener_class.new { |config| config.client = client }
+      worker_event = self.worker_event
+      builds = Queue.new
+      other_worker = nil
+
+      job_class.define_singleton_method(:to_s) do
+        builds << true
+
+        if builds.size == 1
+          other_worker = Thread.new { listener.on_worker_process(worker_event) }
+          100.times { other_worker.stop? ? break : sleep(0.01) }
+        end
+
+        super()
+      end
+
+      listener.on_worker_process(worker_event)
+      other_worker.join
+
+      expect(builds.size).to eq(1)
+      expect(Array.new(listener.logs.size) { listener.logs.pop }.uniq)
+        .to eq(["[id] DatadogSpecJob job for Consumer on topic started"])
+    end
+  end
+
   describe "error types coverage" do
     subject(:trigger) { nil }
 

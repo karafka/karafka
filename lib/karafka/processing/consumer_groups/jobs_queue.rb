@@ -18,6 +18,11 @@ module Karafka
           tick_interval: %i[internal tick_interval]
         )
 
+        # Jobs of a group that has nothing in processing
+        EMPTY_ARRAY = [].freeze
+
+        private_constant :EMPTY_ARRAY
+
         # Set via writer because of a circular dependency: the queue must exist before the pool
         # (workers need the queue at construction), but the queue needs the pool for concurrency.
         attr_writer :pool
@@ -201,8 +206,11 @@ module Karafka
         # @return [Boolean] should we keep waiting or not
         # @note We do not wait for non-blocking jobs. Their flow should allow for `poll` running
         #   as they may exceed `max.poll.interval`
+        # @note Reads under the lock because workers remove completed jobs from the same Array
         def wait?(group_id)
-          !@in_processing[group_id].all?(&:non_blocking?)
+          @mutex.synchronize do
+            !@in_processing.fetch(group_id, EMPTY_ARRAY).all?(&:non_blocking?)
+          end
         end
       end
     end

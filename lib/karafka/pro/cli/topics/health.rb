@@ -126,15 +126,15 @@ module Karafka
           end
 
           # Builds an issue hash with consistent structure
-          # @param topic [String] topic name
+          # @param topic_name [String] topic name
           # @param rf [Integer] replication factor
           # @param min_isr [Integer] min.insync.replicas
           # @param severity [Symbol] :critical or :warning
           # @param message [String] human-readable issue description
           # @return [Hash] issue details
-          def build_issue(topic, rf, min_isr, severity, message)
+          def build_issue(topic_name, rf, min_isr, severity, message)
             {
-              topic: topic,
+              topic: topic_name,
               rf: rf,
               min_isr: min_isr,
               severity: severity,

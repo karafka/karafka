@@ -14,6 +14,11 @@ module Karafka
     class RawMessagesBuffer
       include Karafka::Core::Helpers::Time
 
+      # Messages polled within this many milliseconds of each other share one received `Time`
+      RECEIVED_AT_SHARING_WINDOW = 10
+
+      private_constant :RECEIVED_AT_SHARING_WINDOW
+
       attr_reader :size
 
       # @return [Float] last polling time in milliseconds (monotonic)
@@ -23,12 +28,15 @@ module Karafka
       def initialize
         @size = 0
         @last_polled_at = monotonic_now
+        @received_at = nil
+        @received_at_polled_at = -Float::INFINITY
 
         @groups = Hash.new do |topic_groups, topic|
           topic_groups[topic] = Hash.new do |partition_groups, partition|
             partition_groups[partition] = {
               eof: false,
-              messages: []
+              messages: [],
+              received_times: []
             }
           end
         end
@@ -38,18 +46,28 @@ module Karafka
       #
       # @param message [Rdkafka::Consumer::Message] raw rdkafka message
       # @return [Array<Rdkafka::Consumer::Message>] given partition topic sub-buffer array
+      #
+      # @note The message is marked as received at the moment of the last `#polled`. Messages
+      #   polled within 10 milliseconds share one `Time`, so bursts of prefetched messages do not
+      #   allocate one each.
       def <<(message)
+        if @last_polled_at - @received_at_polled_at >= RECEIVED_AT_SHARING_WINDOW
+          @received_at_polled_at = @last_polled_at
+          @received_at = Time.now
+        end
+
         @size += 1
         partition_state = @groups[message.topic][message.partition]
         partition_state[:messages] << message
+        partition_state[:received_times] << @received_at
         partition_state[:eof] = false
       end
 
       # Marks given topic partition as one that reached eof
-      # @param topic [String] topic that reached eof
+      # @param topic_name [String] topic that reached eof
       # @param partition [Integer] partition that reached eof
-      def eof(topic, partition)
-        @groups[topic][partition][:eof] = true
+      def eof(topic_name, partition)
+        @groups[topic_name][partition][:eof] = true
       end
 
       # Marks the last polling time that can be accessed via `#last_polled_at`
@@ -63,29 +81,37 @@ module Karafka
       # @yieldparam [Integer] partition number
       # @yieldparam [Array<Rdkafka::Consumer::Message>] topic partition aggregated results
       # @yieldparam [Boolean] has polling of this partition reach eof
+      # @yieldparam [Array<Time>] moments when each of the messages was received, in the same
+      #   order as messages
       def each
         @groups.each do |topic, partitions|
           partitions.each do |partition, details|
-            yield(topic, partition, details[:messages], details[:eof])
+            yield(
+              topic,
+              partition,
+              details[:messages],
+              details[:eof],
+              details[:received_times]
+            )
           end
         end
       end
 
       # Removes given topic and partition data out of the buffer
       # This is used when there's a partition revocation
-      # @param topic [String] topic we're interested in
+      # @param topic_name [String] topic we're interested in
       # @param partition [Integer] partition of which data we want to remove
-      def delete(topic, partition)
-        return unless @groups.key?(topic)
-        return unless @groups.fetch(topic).key?(partition)
+      def delete(topic_name, partition)
+        return unless @groups.key?(topic_name)
+        return unless @groups.fetch(topic_name).key?(partition)
 
-        topic_data = @groups.fetch(topic)
+        topic_data = @groups.fetch(topic_name)
         topic_data.delete(partition)
 
         recount!
 
         # If there are no more partitions to handle in a given topic, remove it completely
-        @groups.delete(topic) if topic_data.empty?
+        @groups.delete(topic_name) if topic_data.empty?
       end
 
       # Removes duplicated messages from the same partitions
@@ -95,7 +121,11 @@ module Karafka
       def uniq!
         @groups.each_value do |partitions|
           partitions.each_value do |details|
-            details[:messages].uniq!(&:offset)
+            pairs = details[:messages].zip(details[:received_times])
+
+            next unless pairs.uniq! { |message, _| message.offset }
+
+            details[:messages], details[:received_times] = pairs.transpose
           end
         end
 

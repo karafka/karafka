@@ -35,7 +35,6 @@ unless ENV["PRISTINE_MODE"]
   require "bundler"
   Bundler.setup(:default, :test, :integrations)
   require_relative "../lib/karafka"
-  require "byebug"
 end
 
 require "digest"
