@@ -265,16 +265,28 @@ RSpec.describe_current do
 
         private
 
-        def push_tags = nil
+        def push_tags
+        end
 
-        def pop_tags = nil
+        def pop_tags
+        end
 
-        def info(message) = @logs << message
+        def info(message)
+          @logs << message
+        end
       end
     end
     let(:executor) { Struct.new(:topic).new(Struct.new(:consumer, :name).new("Consumer", "topic")) }
     let(:job_class) do
-      stub_const("DatadogSpecJob", Struct.new(:id, :executor) { def self.action = :consume })
+      job_class = Struct.new(:id, :executor) do
+        class << self
+          def action
+            :consume
+          end
+        end
+      end
+
+      stub_const("DatadogSpecJob", job_class)
     end
     let(:worker_event) do
       Karafka::Core::Monitoring::Event.new("worker.process", { job: job_class.new("id", executor) })
