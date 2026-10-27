@@ -1,8 +1,9 @@
 # frozen_string_literal: true
 
-# When restoring CurrentAttributes from a job payload fails part way (here because of an
-# attribute the consumer does not declare, e.g. during a rolling deploy), the values already
-# set must be reset, so they do not leak into the next job processed on the same worker thread.
+# When restoring CurrentAttributes from a job payload fails part way (here on an attribute the
+# consumer does not declare, e.g. during a rolling deploy, after a declared one was already set),
+# the values already set must be reset, so they do not leak into the next job processed on the
+# same worker thread.
 
 setup_karafka(allow_errors: true) do |config|
   config.concurrency = 1

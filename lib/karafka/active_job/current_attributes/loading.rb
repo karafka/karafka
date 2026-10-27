@@ -21,35 +21,25 @@ module Karafka
               # Registered before any write, so values set before a failing one are reset as well
               resetable << cattr_klass
 
-              validate_cattr_attributes!(cattr_klass, attributes)
+              unless attributes.is_a?(Hash)
+                raise ArgumentError, "#{cattr_klass} attributes must be a Hash"
+              end
 
               attributes.each do |name, value|
-                cattr_klass.public_send("#{name}=", value)
+                setter = "#{name}="
+
+                # Instance writers only, so class level ones (like `defaults=`) cannot be called
+                unless cattr_klass.method_defined?(setter)
+                  raise ArgumentError, "#{cattr_klass} has no attribute #{name}"
+                end
+
+                cattr_klass.public_send(setter, value)
               end
             end
 
             yield(job)
           ensure
             resetable.each(&:reset)
-          end
-        end
-
-        private
-
-        # Makes sure that only declared attributes are restored
-        #
-        # @param cattr_klass [Class] current attributes class
-        # @param attributes [Object] attributes extracted from the job payload
-        # @raise [ArgumentError] when attributes are not a Hash or contain undeclared attributes
-        def validate_cattr_attributes!(cattr_klass, attributes)
-          unless attributes.is_a?(Hash)
-            raise ArgumentError, "#{cattr_klass} attributes must be a Hash"
-          end
-
-          attributes.each_key do |name|
-            next if cattr_klass.defaults.key?(name.to_sym)
-
-            raise ArgumentError, "#{cattr_klass} has no attribute #{name}"
           end
         end
       end

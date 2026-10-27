@@ -9,6 +9,7 @@ module Karafka
 
   class CurrentAttrSecondTest < ActiveSupport::CurrentAttributes # :nodoc:
     attribute :tenant, :account
+    attribute "region"
 
     def account=(value)
       super
@@ -142,7 +143,8 @@ RSpec.describe_current do
         executed << [
           Karafka::CurrentAttrTest.user_id,
           Karafka::CurrentAttrSecondTest.tenant,
-          Karafka::CurrentAttrSecondTest.account
+          Karafka::CurrentAttrSecondTest.account,
+          Karafka::CurrentAttrSecondTest.region
         ]
       end
 
@@ -153,16 +155,17 @@ RSpec.describe_current do
       let(:cattrs) do
         {
           "cattr_0" => { "user_id" => 1 },
-          "cattr_1" => { "tenant" => "t1", "account" => "a1" }
+          "cattr_1" => { "tenant" => "t1", "account" => "a1", "region" => "eu" }
         }
       end
 
       it "expect to set them for the job and reset them afterwards" do
         consumer.consume
 
-        expect(executed).to eq([[1, "t1", "a1"]])
+        expect(executed).to eq([[1, "t1", "a1", "eu"]])
         expect(Karafka::CurrentAttrTest.user_id).to be_nil
         expect(Karafka::CurrentAttrSecondTest.tenant).to be_nil
+        expect(Karafka::CurrentAttrSecondTest.region).to be_nil
       end
     end
 
