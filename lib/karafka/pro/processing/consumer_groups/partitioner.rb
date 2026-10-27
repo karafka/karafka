@@ -34,14 +34,14 @@ module Karafka
       module ConsumerGroups
         # Pro partitioner that can distribute work based on the virtual partitioner settings
         class Partitioner < Karafka::Processing::ConsumerGroups::Partitioner
-          # @param topic [String] topic name
+          # @param topic_name [String] topic name
           # @param messages [Array<Karafka::Messages::Message>] karafka messages
           # @param coordinator [Karafka::Pro::Processing::ConsumerGroups::Coordinator]
           #   processing coordinator that will be used with those messages
           # @yieldparam [Integer] group id
           # @yieldparam [Array<Karafka::Messages::Message>] karafka messages
-          def call(topic, messages, coordinator)
-            ktopic = @subscription_group.topics.find(topic)
+          def call(topic_name, messages, coordinator)
+            ktopic = @subscription_group.topics.find(topic_name)
 
             vps = ktopic.virtual_partitions
 

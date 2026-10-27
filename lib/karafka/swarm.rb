@@ -14,7 +14,8 @@ module Karafka
 
         raise(
           Errors::UnsupportedOptionError,
-          "Swarm mode not supported on this platform"
+          "Swarm mode needs Process.fork, which this Ruby does not support (e.g. JRuby). " \
+          "Use `karafka server` instead."
         )
       end
 

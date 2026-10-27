@@ -22,13 +22,13 @@ module Karafka
 
         # Finds or creates an executor based on the provided details
         #
-        # @param topic [String] topic name
+        # @param topic_name [String] topic name
         # @param partition [Integer] partition number
         # @param parallel_key [String] parallel group key
         # @param coordinator [Karafka::Processing::ConsumerGroups::Coordinator]
         # @return [Executor, Pro::Processing::ConsumerGroups::Executor] consumer executor
-        def find_or_create(topic, partition, parallel_key, coordinator)
-          @buffer[topic][partition][parallel_key] ||= executor_class.new(
+        def find_or_create(topic_name, partition, parallel_key, coordinator)
+          @buffer[topic_name][partition][parallel_key] ||= executor_class.new(
             @subscription_group.id,
             @client,
             coordinator
@@ -36,35 +36,35 @@ module Karafka
         end
 
         # Finds all existing executors for given topic partition or creates one for it
-        # @param topic [String] topic name
+        # @param topic_name [String] topic name
         # @param partition [Integer] partition number
         # @param coordinator [Karafka::Processing::ConsumerGroups::Coordinator]
         # @return [Array<Executor, Pro::Processing::ConsumerGroups::Executor>]
-        def find_all_or_create(topic, partition, coordinator)
-          existing = find_all(topic, partition)
+        def find_all_or_create(topic_name, partition, coordinator)
+          existing = find_all(topic_name, partition)
 
           return existing unless existing.empty?
 
-          [find_or_create(topic, partition, 0, coordinator)]
+          [find_or_create(topic_name, partition, 0, coordinator)]
         end
 
         # Revokes executors of a given topic partition, so they won't be used anymore for incoming
         # messages
         #
-        # @param topic [String] topic name
+        # @param topic_name [String] topic name
         # @param partition [Integer] partition number
-        def revoke(topic, partition)
-          @buffer[topic][partition].clear
+        def revoke(topic_name, partition)
+          @buffer[topic_name][partition].clear
         end
 
         # Finds all the executors available for a given topic partition
         #
-        # @param topic [String] topic name
+        # @param topic_name [String] topic name
         # @param partition [Integer] partition number
         # @return [Array<Executor, Pro::Processing::ConsumerGroups::Executor>] executors in use for
         #   this topic + partition
-        def find_all(topic, partition)
-          @buffer[topic][partition].values
+        def find_all(topic_name, partition)
+          @buffer[topic_name][partition].values
         end
 
         # Iterates over all available executors and yields them together with topic and partition

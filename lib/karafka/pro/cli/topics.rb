@@ -36,6 +36,14 @@ module Karafka
       module Topics
         # Extends the base topics command to add health action support
         module Extension
+          # Exit code when the health check found no issues
+          HEALTHY_EXIT_CODE = 0
+
+          # Exit code when the health check found issues. 1 is what Ruby uses when it crashes
+          ISSUES_EXIT_CODE = 2
+
+          private_constant :HEALTHY_EXIT_CODE, :ISSUES_EXIT_CODE
+
           # @param action [String] action we want to take
           def call(action = "help")
             if action == "health"
@@ -44,8 +52,7 @@ module Karafka
 
               return unless detailed_exit_code
 
-              # Exit with code 2 if issues found, code 0 if all healthy
-              issues_found ? exit(2) : exit(0)
+              exit(issues_found ? ISSUES_EXIT_CODE : HEALTHY_EXIT_CODE)
             else
               super
             end

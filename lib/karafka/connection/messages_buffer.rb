@@ -38,12 +38,9 @@ module Karafka
       # @param raw_messages_buffer [RawMessagesBuffer] buffer with raw messages
       def remap(raw_messages_buffer)
         clear
-        # Since it happens "right after" we've received the messages, it is close enough it time
-        # to be used as the moment we received messages.
-        received_at = Time.now
         last_polled_at = raw_messages_buffer.last_polled_at
 
-        raw_messages_buffer.each do |topic, partition, messages, eof|
+        raw_messages_buffer.each do |topic, partition, messages, eof, received_times|
           @size += messages.size
           ktopic = @subscription_group.topics.find(topic)
 
@@ -51,7 +48,7 @@ module Karafka
             Messages::Builders::Message.call(
               messages[index],
               ktopic,
-              received_at
+              received_times[index]
             )
           end
 
@@ -79,13 +76,13 @@ module Karafka
       end
 
       # Checks if there are any messages from a given topic partition in the buffer
-      # @param topic [String] topic name
+      # @param topic_name [String] topic name
       # @param partition [Integer] partition number
       # @return [Boolean] true if there is at least one message from this topic partition,
       #   otherwise false
-      def present?(topic, partition)
-        return false unless @groups.include?(topic)
-        return false unless @groups[topic].include?(partition)
+      def present?(topic_name, partition)
+        return false unless @groups.include?(topic_name)
+        return false unless @groups[topic_name].include?(partition)
 
         true
       end

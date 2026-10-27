@@ -130,6 +130,19 @@ module Karafka
         end
       end
 
+      class << self
+        # Maps librdkafka ACL operation codes to the operation names used by Acl rules
+        #
+        # @param operations [Array<Integer>] `Rdkafka::Bindings::RD_KAFKA_ACL_OPERATION_*` codes
+        # @return [Array<Symbol>] operation names (e.g. `:describe_configs`), `:unknown` for a
+        #   code we do not map
+        def operation_names(operations)
+          names = OPERATIONS_MAP.invert
+
+          operations.map { |operation| names.fetch(operation, :unknown) }
+        end
+      end
+
       # Creates (unless already present) a given ACL rule in Kafka
       # @param acl [Acl]
       # @return [Array<Acl>] created acls
