@@ -49,7 +49,6 @@ class FollowingJob < ActiveJob::Base
   end
 end
 
-# A job produced by a version of the app where Current declares one more attribute
 payload = RestoredJob.new.serialize.merge(
   "cattr_0" => { "tenant" => "leaked-tenant", "region" => "eu" }
 )
