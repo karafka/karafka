@@ -54,7 +54,7 @@ module Karafka
 
           # Initializes the tracker with empty accumulator
           def initialize
-            @accu = {}
+            @accu = EMPTY_HASH
             @mutex = Mutex.new
           end
 
@@ -68,16 +68,20 @@ module Karafka
           # @param statistics [Hash] librdkafka enriched statistics
           def add(group_id, statistics)
             @mutex.synchronize do
+              accu = @accu.dup
+
               statistics.fetch("topics", EMPTY_HASH).each do |topic_name, t_details|
                 t_details.fetch("partitions", EMPTY_HASH).each do |partition_id, p_details|
                   next unless track?(partition_id, p_details)
 
                   key = "#{group_id}_#{topic_name}_#{partition_id}"
-                  @accu[key] = [monotonic_now, p_details]
+                  accu[key] = [monotonic_now, p_details]
                 end
               end
 
-              evict
+              evict(accu)
+
+              @accu = accu.freeze
             end
           end
 
@@ -87,9 +91,10 @@ module Karafka
           # @param partition [Integer]
           # @return [Hash] hash with given topic partition statistics or empty hash if not present
           #
-          # @note We do not enclose it with a mutex mainly because the only thing that could happen
-          #   here that would be a race-condition is a miss that anyhow we need to support due to
-          #   how librdkafka ships metrics and a potential removal of data on heavily revoked LRJ.
+          # @note We do not enclose it with a mutex because writers never change the accumulator
+          #   in place. They replace it with a new frozen one, so we always read a complete
+          #   snapshot. A miss is still possible due to how librdkafka ships metrics and a potential
+          #   removal of data on heavily revoked LRJ.
           def find(topic, partition)
             key = "#{topic.group.id}_#{topic.name}_#{partition}"
             @accu.fetch(key, EMPTY_ARRAY).last || EMPTY_HASH
@@ -97,14 +102,16 @@ module Karafka
 
           # Clears the tracker
           def clear
-            @mutex.synchronize { @accu.clear }
+            @mutex.synchronize { @accu = EMPTY_HASH }
           end
 
           private
 
           # Evicts expired data from the cache
-          def evict
-            @accu.delete_if { |_, details| monotonic_now - details.first > TTL }
+          #
+          # @param accu [Hash] accumulator copy that is not yet visible to readers
+          def evict(accu)
+            accu.delete_if { |_, details| monotonic_now - details.first > TTL }
           end
 
           # Should we track given partition

@@ -50,6 +50,9 @@ module Karafka
 
       # Creates needed number of forks, installs signals and starts supervision
       def run
+        # Checked here too, not only in the CLI, so a direct run fails before any work
+        Karafka::Swarm.ensure_supported!
+
         # Validate the CLI provided options the same way as we do for the regular server
         cli_contract.validate!(
           activity_manager.to_h,
@@ -94,8 +97,9 @@ module Karafka
           control
         end
 
-      # If the cli contract validation failed reraise immediately and stop the process
-      rescue Karafka::Errors::InvalidConfigurationError => e
+      # If swarm is not supported or the cli contract validation failed reraise immediately and
+      # stop the process
+      rescue Karafka::Errors::UnsupportedOptionError, Karafka::Errors::InvalidConfigurationError => e
         raise e
       # If anything went wrong during supervision, signal this and die
       # Supervisor is meant to be thin and not cause any issues. If you encounter this case
