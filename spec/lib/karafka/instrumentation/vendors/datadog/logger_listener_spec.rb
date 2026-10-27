@@ -244,7 +244,6 @@ RSpec.describe_current do
   describe "#on_worker_process" do
     subject(:trigger) { nil }
 
-    let(:threads_count) { 8 }
     let(:span_class) { Struct.new(:resource) }
     let(:client) do
       span_class = self.span_class
@@ -254,56 +253,56 @@ RSpec.describe_current do
         define_method(:log_correlation) { "" }
       end.new
     end
-    # Logging is stubbed on the class so no RSpec double records calls from many threads
+    # Logging is stubbed on the class so no RSpec double records calls from other threads
     let(:listener_class) do
       Class.new(described_class) do
+        attr_reader :logs
+
+        def initialize(...)
+          super
+          @logs = Queue.new
+        end
+
         private
 
         def push_tags = nil
 
         def pop_tags = nil
 
-        def info(*) = nil
+        def info(message) = @logs << message
       end
     end
     let(:executor) { Struct.new(:topic).new(Struct.new(:consumer, :name).new("Consumer", "topic")) }
-    let(:job_classes) do
-      Array.new(6) do |i|
-        stub_const(
-          "DatadogSpecJob#{i}",
-          Struct.new(:id, :executor) { def self.action = :consume }
-        )
-      end
+    let(:job_class) do
+      stub_const("DatadogSpecJob", Struct.new(:id, :executor) { def self.action = :consume })
+    end
+    let(:worker_event) do
+      Karafka::Core::Monitoring::Event.new("worker.process", { job: job_class.new("id", executor) })
     end
 
-    it "keeps the job types cache consistent when workers fill it at once" do
-      caches = Array.new(500) do
-        listener = listener_class.new { |config| config.client = client }
-        start = Queue.new
+    it "builds the job type once when another worker misses the cache meanwhile" do
+      listener = listener_class.new { |config| config.client = client }
+      worker_event = self.worker_event
+      builds = Queue.new
+      other_worker = nil
 
-        threads = Array.new(threads_count) do
-          Thread.new do
-            start.pop
+      job_class.define_singleton_method(:to_s) do
+        builds << true
 
-            job_classes.shuffle.each do |job_class|
-              job = job_class.new("id", executor)
-              listener.on_worker_process(
-                Karafka::Core::Monitoring::Event.new("worker.process", { job: job })
-              )
-            end
-          end
+        if builds.size == 1
+          other_worker = Thread.new { listener.on_worker_process(worker_event) }
+          100.times { other_worker.stop? ? break : sleep(0.01) }
         end
 
-        threads_count.times { start << true }
-        threads.each(&:join)
-
-        cache = listener.instance_variable_get(:@job_types_cache)
-        [cache.size, cache.keys.uniq.size, cache.values.sort]
+        super()
       end
 
-      job_types = Array.new(6) { |i| "DatadogSpecJob#{i}" }
+      listener.on_worker_process(worker_event)
+      other_worker.join
 
-      expect(caches.uniq).to eq([[6, 6, job_types]])
+      expect(builds.size).to eq(1)
+      expect(Array.new(listener.logs.size) { listener.logs.pop }.uniq)
+        .to eq(["[id] DatadogSpecJob job for Consumer on topic started"])
     end
   end
 
