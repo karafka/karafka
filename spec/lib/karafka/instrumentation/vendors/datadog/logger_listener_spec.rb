@@ -241,6 +241,72 @@ RSpec.describe_current do
     end
   end
 
+  describe "#on_worker_process" do
+    subject(:trigger) { nil }
+
+    let(:threads_count) { 8 }
+    let(:span_class) { Struct.new(:resource) }
+    let(:client) do
+      span_class = self.span_class
+
+      Class.new do
+        define_method(:trace) { |*| span_class.new }
+        define_method(:log_correlation) { "" }
+      end.new
+    end
+    # Logging is stubbed on the class so no RSpec double records calls from many threads
+    let(:listener_class) do
+      Class.new(described_class) do
+        private
+
+        def push_tags = nil
+
+        def pop_tags = nil
+
+        def info(*) = nil
+      end
+    end
+    let(:executor) { Struct.new(:topic).new(Struct.new(:consumer, :name).new("Consumer", "topic")) }
+    let(:job_classes) do
+      Array.new(6) do |i|
+        stub_const(
+          "DatadogSpecJob#{i}",
+          Struct.new(:id, :executor) { def self.action = :consume }
+        )
+      end
+    end
+
+    it "keeps the job types cache consistent when workers fill it at once" do
+      caches = Array.new(500) do
+        listener = listener_class.new { |config| config.client = client }
+        start = Queue.new
+
+        threads = Array.new(threads_count) do
+          Thread.new do
+            start.pop
+
+            job_classes.shuffle.each do |job_class|
+              job = job_class.new("id", executor)
+              listener.on_worker_process(
+                Karafka::Core::Monitoring::Event.new("worker.process", { job: job })
+              )
+            end
+          end
+        end
+
+        threads_count.times { start << true }
+        threads.each(&:join)
+
+        cache = listener.instance_variable_get(:@job_types_cache)
+        [cache.size, cache.keys.uniq.size, cache.values.sort]
+      end
+
+      job_types = Array.new(6) { |i| "DatadogSpecJob#{i}" }
+
+      expect(caches.uniq).to eq([[6, 6, job_types]])
+    end
+  end
+
   describe "error types coverage" do
     subject(:trigger) { nil }
 

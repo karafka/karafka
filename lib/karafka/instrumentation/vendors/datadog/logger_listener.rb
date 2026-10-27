@@ -34,7 +34,8 @@ module Karafka
           def initialize(&block)
             configure
             setup(&block) if block
-            @job_types_cache = {}
+            @job_types_cache = {}.freeze
+            @job_types_mutex = Mutex.new
           end
 
           # @note We define this alias to be consistent with `WaterDrop#setup`
@@ -182,11 +183,17 @@ module Karafka
           # Takes the job class and extracts the job type.
           # @param job_class [Class] job class
           # @return [String]
-          # @note It does not have to be thread-safe despite running in multiple threads because
-          #   the assignment race condition is irrelevant here since the same value will be
-          #   assigned.
+          # @note Workers call it concurrently. The cache is a frozen Hash replaced as a whole under
+          #   a mutex on a miss (copy-on-write), so lock-free reads always see a complete Hash, also
+          #   on Ruby engines without a GVL (JRuby). Misses happen once per job class.
           def fetch_job_type(job_class)
-            @job_types_cache[job_class] ||= job_class.to_s.split("::").last
+            @job_types_cache[job_class] || @job_types_mutex.synchronize do
+              @job_types_cache[job_class] || begin
+                job_type = job_class.to_s.split("::").last
+                @job_types_cache = @job_types_cache.merge(job_class => job_type).freeze
+                job_type
+              end
+            end
           end
         end
       end
