@@ -91,6 +91,7 @@
 - [Enhancement] Raise the swarm supervisor `SHUTDOWN_GRACE_PERIOD` from 1s to 15s so forked nodes have time to finish cleanup before forceful termination.
 - [Enhancement] Move consumer-group-specific internals under a `ConsumerGroups` namespace to prepare for KIP-932 share groups. User-provided classes are unaffected.
 - [Enhancement] Nest consumer-group-specific processing config under `config.internal.processing.consumer_groups`; shared settings stay at `config.internal.processing`.
+- [Change] Require `waterdrop` `>= 2.10.2` for fixes in statistics handling and polling defaults.
 - [Change] Require `karafka-rdkafka` `>= 0.28.0` for `list_offsets`-based batched lag reads.
 - [Change] Require `karafka-rdkafka` `>= 0.27.1` for the `poll_batch`/`poll_batch_nb` fix that caused `TopicNotFoundError` crashes on `partition_eof`.
 - [Change] Remove the public `custom_kafka` reader from `Karafka::Admin` (internal, unused by any public API).
