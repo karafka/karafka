@@ -159,7 +159,7 @@ RSpec.describe_current do
         allow(Karafka::App).to receive_messages(
           stopped?: false,
           terminated?: false,
-          stop!: nil
+          stop!: true
         )
         allow(described_class).to receive(:sleep)
         allow(Kernel).to receive(:exit!)
@@ -272,7 +272,7 @@ RSpec.describe_current do
         allow(Karafka::App).to receive_messages(
           stopped?: false,
           terminated?: false,
-          stop!: nil
+          stop!: true
         )
         allow(described_class).to receive(:sleep)
         allow(Kernel).to receive(:exit!)
@@ -308,6 +308,36 @@ RSpec.describe_current do
           expect(described_class).to have_received(:sleep).with(0.1).exactly(5).times
           expect(Kernel).to have_received(:exit!).with(2)
         end
+      end
+    end
+
+    context "when another stop runs between the check and the transition of the first one" do
+      let(:timeout_ms) { 1_000 }
+      let(:nested_stops) { [] }
+
+      before do
+        # Earlier examples can leave the app terminated, which blocks `run!`
+        Karafka::App.config.internal.status.reset!
+        Karafka::App.config.internal.status.run!
+
+        allow(Karafka::App).to receive_messages(stopped?: false, terminated?: false)
+        allow(described_class).to receive(:sleep)
+
+        allow(Karafka::App).to receive(:stop!).and_wrap_original do |original|
+          if nested_stops.empty?
+            nested_stops << true
+            server_class.stop
+          end
+
+          original.call
+        end
+
+        server_class.stop
+      end
+
+      it "expect to run the stop sequence only once" do
+        expect(nested_stops).to eq([true])
+        expect(Karafka::App.producer).to have_received(:close).once
       end
     end
   end

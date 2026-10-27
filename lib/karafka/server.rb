@@ -104,12 +104,9 @@ module Karafka
       #   lock them forever. If you need to run Karafka shutdown from within workers threads,
       #   please start a separate thread to do so.
       def stop
-        # Initialize the stopping process only if Karafka was running
-        return if Karafka::App.stopping?
-        return if Karafka::App.stopped?
-        return if Karafka::App.terminated?
-
-        Karafka::App.stop!
+        # Initialize the stopping process only if Karafka was running. The check and the
+        # transition are one atomic step, so only one of concurrent callers runs the stop sequence
+        return unless Karafka::App.stop!
 
         timeout = shutdown_timeout
 

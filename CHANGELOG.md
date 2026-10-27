@@ -34,6 +34,7 @@
 - [Fix] Stop `CoordinatorsBuffer#@coordinators` from growing unbounded across rebalances by dropping a topic entry on revoke once it tracks no partitions (mirrors `PausesManager#delete`).
 - [Fix] Use `::JSON.parse` in the ActiveJob deserializer, so consuming ActiveJob messages works with the json gem `>= 3.0`.
 - [Fix] [Pro] Honour the read_committed isolation level in consumer-group lag compensation, so an in-flight transaction no longer overstates the lag (needs karafka-rdkafka `>= 0.30.0`).
+- [Fix] Run the `Karafka::Server.stop` sequence once when two stops are requested at the same time (e.g. TERM then INT on JRuby): the state check and the `stopping` transition are now one atomic step.
 - [Fix] [Pro] Stabilize the `Karafka::Admin::Recovery` `read_committed_offsets` no-offsets integration spec against a fresh CI broker.
 - [Fix] Stabilize the `Karafka::Admin::Acl` `#create`/`#describe` specs against asynchronous ACL propagation on slow CI.
 - [Fix] Stabilize the empty-topic `read_watermark_offsets` specs against a broker leader-election race.
