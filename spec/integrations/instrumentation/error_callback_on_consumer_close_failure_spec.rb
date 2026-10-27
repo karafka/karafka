@@ -3,25 +3,26 @@
 # When closing the librdkafka consumer fails, Karafka should publish it via "error.occurred" for
 # the subscription group of that consumer instead of dropping it.
 #
-# We close the native consumer from within `#consume`. The next poll then fails with `destroy`,
-# so the listener fetch loop resets the client and `Client#close` fails, as librdkafka reports
-# that the consumer is already closed.
+# Once a message is consumed, `rd_kafka_consumer_close` runs twice per call. On shutdown the
+# second close fails, as librdkafka reports that the consumer is already closed.
 
 setup_karafka(allow_errors: true)
 
+module DoubleConsumerClose
+  def rd_kafka_consumer_close(inner)
+    return super unless DT.key?(:consumed)
+
+    super
+    super
+  end
+end
+
+Rdkafka::Bindings.singleton_class.prepend(DoubleConsumerClose)
+
 class Consumer < Karafka::BaseConsumer
   def consume
-    return if DT.key?(:native_closed)
-
     DT[:subscription_group_id] = topic.subscription_group.id
-
-    client
-      .wrapped_kafka
-      .wrapped
-      .instance_variable_get(:@native_kafka)
-      .synchronize { |inner| Rdkafka::Bindings.rd_kafka_consumer_close(inner) }
-
-    DT[:native_closed] = true
+    DT[:consumed] = true
   end
 end
 
@@ -38,7 +39,7 @@ Karafka::App.monitor.subscribe("error.occurred") do |event|
 end
 
 start_karafka_and_wait_until do
-  DT.key?(:native_closed)
+  DT.key?(:consumed)
 end
 
 assert_equal 1, DT[:close_errors].size
