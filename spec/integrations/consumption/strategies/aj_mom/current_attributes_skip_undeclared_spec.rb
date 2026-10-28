@@ -4,7 +4,7 @@
 # during a rolling deploy), it is skipped, the job runs with the declared ones, and those are reset
 # so they do not leak into the next job processed on the same worker thread.
 
-setup_karafka(allow_errors: true) do |config|
+setup_karafka do |config|
   config.concurrency = 1
 end
 
@@ -13,13 +13,7 @@ setup_active_job
 require "karafka/active_job/current_attributes"
 
 draw_routes do
-  active_job_topic DT.topic do
-    dead_letter_queue topic: DT.topics[1], max_retries: 0
-  end
-
-  topic DT.topics[1] do
-    active(false)
-  end
+  active_job_topic DT.topic
 end
 
 class Current < ActiveSupport::CurrentAttributes
@@ -27,10 +21,6 @@ class Current < ActiveSupport::CurrentAttributes
 end
 
 Karafka::ActiveJob::CurrentAttributes.persist(Current)
-
-Karafka.monitor.subscribe("error.occurred") do |event|
-  DT[:errors] << event[:error].class
-end
 
 class RestoredJob < ActiveJob::Base
   queue_as DT.topic
@@ -61,4 +51,3 @@ end
 
 assert_equal [nil], DT[:following_tenant], DT[:following_tenant]
 assert_equal ["restored-tenant"], DT[:restored_tenant]
-assert_equal [], DT[:errors]
