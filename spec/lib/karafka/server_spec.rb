@@ -340,6 +340,32 @@ RSpec.describe_current do
         expect(Karafka::App.producer).to have_received(:close).once
       end
     end
+
+    %w[app.stopping app.stopped].each do |event|
+      context "when stop is called from an #{event} subscriber" do
+        let(:timeout_ms) { 1_000 }
+        let(:nested_results) { [] }
+        let(:listener) { ->(_) { nested_results << server_class.stop } }
+
+        before do
+          # Earlier examples can leave the app terminated, which blocks `run!`
+          Karafka::App.config.internal.status.reset!
+          Karafka::App.config.internal.status.run!
+
+          allow(Karafka::App).to receive(:stopped?).and_call_original
+          allow(Karafka::App).to receive(:terminated?).and_call_original
+          allow(described_class).to receive(:sleep)
+
+          Karafka.monitor.subscribe(event, &listener)
+          server_class.stop
+        end
+
+        it "expect to return without running the stop sequence again" do
+          expect(nested_results).to eq([nil])
+          expect(Karafka::App.producer).to have_received(:close).once
+        end
+      end
+    end
   end
 
   describe "#quiet" do
