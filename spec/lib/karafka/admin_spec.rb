@@ -375,6 +375,38 @@ RSpec.describe_current do
     end
   end
 
+  describe "#with_re_wait" do
+    subject(:admin) { described_class.new }
+
+    let(:handler) { -> {} }
+
+    before do
+      allow(described_class).to receive_messages(retry_backoff: 10, max_retries_duration: 200)
+    end
+
+    context "when the handler finishes and the breaker is satisfied" do
+      it "returns" do
+        expect { admin.send(:with_re_wait, handler, -> { true }) }.not_to raise_error
+      end
+    end
+
+    context "when the handler finishes but the result never becomes visible" do
+      it "raises instead of retrying forever" do
+        expect { admin.send(:with_re_wait, handler, -> { false }) }
+          .to raise_error(Karafka::Errors::ResultNotVisibleError)
+      end
+    end
+
+    context "when the handler times out and the result never becomes visible" do
+      let(:handler) { -> { raise Rdkafka::AbstractHandle::WaitTimeoutError } }
+
+      it "raises after the retries duration" do
+        expect { admin.send(:with_re_wait, handler, -> { false }) }
+          .to raise_error(Karafka::Errors::ResultNotVisibleError)
+      end
+    end
+  end
+
   describe "#close" do
     subject(:admin) { described_class.new }
 
@@ -388,6 +420,36 @@ RSpec.describe_current do
 
     it "can be called multiple times without error" do
       expect { 3.times { admin.close } }.not_to raise_error
+    end
+  end
+
+  describe "#describe_cluster" do
+    subject(:cluster) { described_class.describe_cluster }
+
+    it "returns the cluster id, controller and brokers" do
+      expect(cluster[:cluster_id]).to be_a(String)
+      expect(cluster[:controller]).to include(:id, :host, :port, :rack)
+      expect(cluster[:brokers]).not_to be_empty
+      expect(cluster[:brokers].map { |broker| broker[:id] }).to include(cluster[:controller][:id])
+    end
+
+    it { expect(cluster[:authorized_operations]).to be_nil }
+
+    context "when authorized operations are requested" do
+      subject(:cluster) { described_class.describe_cluster(include_authorized_operations: true) }
+
+      it "returns them as symbols" do
+        expect(cluster[:authorized_operations]).to include(:describe)
+        expect(cluster[:authorized_operations]).to all(be_a(Symbol))
+      end
+    end
+  end
+
+  describe "#describe_topics" do
+    it "delegates to Admin::Topics#describe" do
+      expect_any_instance_of(Karafka::Admin::Topics)
+        .to receive(:describe).with(name, include_authorized_operations: false)
+      described_class.describe_topics([name])
     end
   end
 end

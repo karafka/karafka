@@ -2,7 +2,7 @@
 
 RSpec.describe_current do
   let(:routing_topic) { build(:routing_topic) }
-  let(:fetched_message) { build(:kafka_fetched_message) }
+  let(:fetched_message) { build(:kafka_fetched_message, key: rand.to_s) }
   let(:received_at) { Time.now }
 
   describe "#call" do
@@ -20,6 +20,11 @@ RSpec.describe_current do
     it { expect(result.metadata.timestamp).to eq fetched_message.timestamp }
     it { expect(result.timestamp).to eq fetched_message.timestamp }
     it { expect(result.received_at).to eq received_at }
+    it { expect(result.metadata.topic).to eq routing_topic.name }
+    it { expect(result.metadata.deserializers).to eq routing_topic.deserializers }
+    it { expect(result.metadata.raw_key).to eq fetched_message.key }
+    it { expect(result.metadata.raw_headers).to eq fetched_message.headers }
+    it { expect(result.metadata.message).to equal(result) }
 
     context "when message does not have headers" do
       it { expect(result.metadata.headers).to eq({}) }

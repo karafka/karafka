@@ -130,9 +130,12 @@ end
 # the other member assignments
 assert_equal baseline, DT[:other_assignments], "no rebalance was expected on a rolling restart"
 
-# The other member went empty -> whole topic -> one partition (Karafka joining) and stayed there
-assert_equal [0, 1], DT[:other_assignments][1]
-assert_equal 1, DT[:other_assignments].last.size
+# The other member went whole topic -> one partition (Karafka joining) and stayed there. An initial
+# empty assignment is only observed if the group took a while to form, so we skip it
+history = DT[:other_assignments].drop_while(&:empty?)
+
+assert_equal [0, 1], history.first
+assert_equal 1, history.last.size
 
 # Karafka must have consumed from the very same partition in both runs (assignment preserved
 # across the restart)

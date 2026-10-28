@@ -43,6 +43,7 @@ class Consumer < Karafka::BaseConsumer
   def consume
     # Ensure we exceed max poll interval, if that happens and this would not work async we would
     # be kicked out of the group
+    DT[:started] << true
     sleep(15)
 
     DT[0] << messages.first.raw_payload
@@ -60,7 +61,7 @@ end
 consumer = setup_rdkafka_consumer
 
 Thread.new do
-  sleep(10)
+  sleep(0.1) until DT[:started].size >= 1
 
   consumer.subscribe(DT.topic)
   consumer.poll(1_000)

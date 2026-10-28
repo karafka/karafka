@@ -8,6 +8,11 @@ module Karafka
 
       aliases :c
 
+      # Exit code when the console cannot start
+      ERROR_EXIT_CODE = 1
+
+      private_constant :ERROR_EXIT_CODE
+
       class << self
         # @return [String] Console executing command for non-Rails setup
         # @example
@@ -25,11 +30,30 @@ module Karafka
 
       # Start the Karafka console
       def call
+        rails = Karafka.rails?
+
+        unless rails || irb_available?
+          puts "#{red("Karafka console needs the irb gem.")} Add `gem \"irb\"` to your Gemfile."
+          exit(ERROR_EXIT_CODE)
+        end
+
         Info.new.call
 
-        command = Karafka.rails? ? self.class.rails_console : self.class.console
+        command = rails ? self.class.rails_console : self.class.console
 
         exec "KARAFKA_CONSOLE=true #{command}"
+      end
+
+      private
+
+      # @return [Boolean] true if `bundle exec irb` can find irb
+      # @note Since Ruby 4.0 irb is a bundled gem, so in a Bundler context it is available only
+      #   when listed in the Gemfile. Rails brings it as a railties dependency.
+      def irb_available?
+        Gem.bin_path("irb", "irb")
+        true
+      rescue Gem::Exception, Gem::LoadError
+        false
       end
     end
   end

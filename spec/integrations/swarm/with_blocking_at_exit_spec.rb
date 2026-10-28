@@ -18,9 +18,9 @@ Karafka::App.monitor.subscribe("swarm.node.after_fork") do
 end
 
 class Consumer < Karafka::BaseConsumer
+  # No hanging, so nodes stop gracefully and block in `at_exit` (forceful stop skips it)
   def consume
     WRITER.puts("1")
-    sleep
   end
 end
 

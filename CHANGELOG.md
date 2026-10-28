@@ -2,26 +2,55 @@
 
 ## 2.6.2 (Unreleased)
 - **[Breaking]** Move the default deserializers from `Karafka::Deserializers::{Payload,Key,Headers}` to `Karafka::Deserializing::Deserializers::{Payload,Key,Headers}`. `Karafka::Deserializers` is kept as a backwards compatible alias, so existing references keep working.
+- **[EOL]** Drop Ruby 3.2 support; require Ruby 3.3+.
 - **[Feature]** Add `Instrumentation::Vendors::NewRelic::MetricsListener` for publishing Karafka metrics to New Relic. Context is encoded in the metric name, as New Relic custom metrics do not support tags (svyatmuzyka).
 - **[Feature]** Add `karafka info --extended`, printing the routing tree, global app config and effective Kafka config, with sensitive values redacted.
 - **[Feature]** Add `Kubernetes::ReadinessListener`, serving a readiness probe that reports healthy once all subscription groups poll and not-ready on shutdown or quieting, so pods drain before exiting.
 - **[Feature]** Allow the `--include`/`--exclude` CLI server filters to accept wildcard patterns (e.g. `--exclude-consumer-groups app-a-*`), including topics discovered at runtime by Pro routing patterns.
-- **[Feature]** Add `Karafka::Admin.list_consumer_groups`, a read-only listing of every consumer group in the cluster with its cooked state (`:stable`, `:empty`, `:dead`, `:preparing_rebalance`, `:completing_rebalance`, `:unknown`). Requires karafka-rdkafka `>= 0.30.0`.
+- **[Feature]** Add `Karafka::Admin.list_consumer_groups` to list every consumer group in the cluster with its state. Requires karafka-rdkafka `>= 0.31.0`.
+- **[Feature]** Add `Karafka::Admin.describe_consumer_groups` to read consumer groups' state, coordinator, assignor and members with their partition assignments. Requires karafka-rdkafka `>= 0.31.0`.
+- **[Feature]** Add `Karafka::Admin.describe_cluster` and `.describe_topics` to read the cluster id, controller, brokers with racks, topic ids, partition leaders and replicas, and optionally the authorized operations. Requires karafka-rdkafka `>= 0.31.0`.
 - **[Feature]** Add an opt-in Ractor-based parallel deserialization engine (requires Ruby 4.0+), enabled globally with `config.deserializing.parallel.active = true` and per topic with `deserializing(parallel: true)`. Batches below `min_payloads`, or with the feature disabled, fall back to inline deserialization, so results are unchanged either way.
 - [Enhancement] Defer default log file creation until the first write and keep logging working (to stdout) when the log file cannot be created or written, e.g. on read-only filesystems (ydah).
-- [Enhancement] Build `Setup::DefaultsInjector` (and its Pro extension) on top of `Karafka::Core::Configurable::Injector` so the kafka defaults injection uses the shared ecosystem pattern. Behavior is unchanged. Requires karafka-core `>= 2.6.3`.
+- [Enhancement] Build `Setup::DefaultsInjector` (and its Pro extension) on `Karafka::Core::Configurable::Injector`. Behavior is unchanged. Requires karafka-core `>= 2.6.3`.
+- [Enhancement] Stop allocating 6 objects per consumed message: build the default topic deserializers only once and read `max_messages` once per poll batch.
+- [Enhancement] Stop allocating a keyword `Hash` per consumed message when building its metadata.
+- [Enhancement] Log only the top two backtrace lines for `librdkafka.error` in the `LoggerListener`, so unreachable brokers no longer flood the logs.
+- [Change] Raise a clear `UnsupportedOptionError` naming JRuby when Swarm runs on a Ruby without `Process.fork`, also when `Swarm::Supervisor#run` is called directly, before any work is done.
+- [Maintenance] Cover `karafka install --share_groups` with an integration spec: it generates `ApplicationShareConsumer` and the app boots with it.
 - [Maintenance] Cover the `:max_timestamp` and Integer-timestamp `Admin#read_partition_offsets` offset modes with integration specs.
 - [Maintenance] Cover the untested New Relic `MetricsListener` paths with integration specs: revoked and shutdown metrics, overridden listener methods, and an empty metrics list.
 - [Maintenance] [Pro] Cover the `JobsQueue` per-group semaphore growth fix under LRJ and async-locking workloads with integration specs.
 - [Maintenance] Run the Rails 8.0 transactional ActiveJob integration spec against Rails `8.0.3`. It was pinned to Rails `7.2.2.1`, so it duplicated the 7.2 run.
 - [Maintenance] Foundational work for Kafka share groups (KIP-932) is in progress (routing layer, consumer class hierarchy, config seams). Not usable yet - share groups can be described in routing but cannot run.
-- [Maintenance] Move consumer-group-specific connection internals (`Client`, `Listener`, `PausesManager`, `Mode`, and the Pro multiplexing manager/listener) under a `Connection::ConsumerGroups` namespace to prepare for KIP-932 share groups, leaving mode-agnostic plumbing (`Manager`, `Conductor`, `Status`, `Proxy`, `ListenersBatch`, message buffers) at the `Connection` root. These are internal, non-public constants, so no aliases are kept at the old paths.
-- [Fix] Stop `CoordinatorsBuffer#@coordinators` from growing unbounded across rebalances by dropping the topic entry on revoke once it tracks no partitions (mirrors `PausesManager#delete`); the revoke existence guard is now non-mutating so it no longer creates empty entries for unknown topics.
-- [Fix] Use `::JSON.parse` instead of `::ActiveSupport::JSON.decode` in the ActiveJob deserializer, so consuming ActiveJob messages keeps working under the json gem `>= 3.0` (where `ActiveSupport::JSON.decode` passes a now-invalid second argument to `JSON.parse`).
-- [Fix] [Pro] Consumer-group lag compensation now honours the read_committed isolation level when refreshing end offsets (karafka-rdkafka `>= 0.30.0` fixes `Admin#list_offsets` to stop ignoring it), so an in-flight transaction on a paused partition no longer transiently overstates the compensated lag by the number of uncommitted messages.
+- [Maintenance] Move consumer-group connection internals under a new `Connection::ConsumerGroups` namespace to prepare for KIP-932 share groups. They are internal, so no aliases are kept.
+- [Maintenance] Cover with an integration spec that a forceful shutdown does not reopen the clients of still running listeners.
+- [Maintenance] Cover `Admin.list_consumer_groups` with integration specs for a live group reporting `:stable` and for KIP-848 (consumer protocol) groups.
+- [Maintenance] Cover the `CoordinatorsBuffer` and `PausesManager` revoke-time topic pruning fixes with an integration spec driving real rebalances.
+- [Maintenance] Cover with an integration spec that the default logger creates no `log/` directory until something is logged.
+- [Maintenance] Cover `Admin.describe_topics(include_authorized_operations: true)` with an integration spec.
+- [Maintenance] Rename positional String topic parameters (`name`, `topic`) to `topic_name` across `Admin`, connection, routing and Pro internals. Positional, so callers are not affected.
+- [Maintenance] Align with the ecosystem naming conventions: name the positional partition count of `Admin.create_topic` / `.create_partitions` (and `Admin::Topics`) `partition_count`, and use named constants for the `karafka console` and Pro `topics health` exit codes.
+- [Maintenance] Drop `byebug` from the test bundle and stop requiring it in the spec helpers.
+- [Maintenance] Run the CLI swarm and deserializers allocation specs on JRuby.
+- [Fix] Stop `CoordinatorsBuffer#@coordinators` from growing unbounded across rebalances by dropping a topic entry on revoke once it tracks no partitions (mirrors `PausesManager#delete`).
+- [Fix] Use `::JSON.parse` in the ActiveJob deserializer, so consuming ActiveJob messages works with the json gem `>= 3.0`.
+- [Fix] [Pro] Honour the read_committed isolation level in consumer-group lag compensation, so an in-flight transaction no longer overstates the lag (needs karafka-rdkafka `>= 0.30.0`).
 - [Fix] [Pro] Stabilize the `Karafka::Admin::Recovery` `read_committed_offsets` no-offsets integration spec against a fresh CI broker.
 - [Fix] Stabilize the `Karafka::Admin::Acl` `#create`/`#describe` specs against asynchronous ACL propagation on slow CI.
 - [Fix] Stabilize the empty-topic `read_watermark_offsets` specs against a broker leader-election race.
+- [Fix] Stabilize the Kubernetes liveness fenced-out integration spec, which could probe the already closed liveness server during shutdown.
+- [Fix] Stabilize the exponential backoff integration spec by checking the pause timeouts instead of wall-clock upper bounds.
+- [Fix] Point the non-Rails `karafka.rb` install template comment to the `karafka install` command instead of the non-existent `karafka:install`.
+- [Fix] [Pro] Stabilize the throttled virtual partitions integration spec by measuring throttling from the first consumption instead of from startup.
+- [Fix] Make `karafka console` explain that the `irb` gem must be added to the Gemfile, instead of failing with a Bundler error, when irb is not in the bundle (non-Rails apps on Ruby 4.0+).
+- [Fix] Remove the subscription group error callback only after the consumer is closed, so errors reported while closing it (e.g. a failed close) are published via `error.occurred`.
+- [Fix] Stabilize the producer monitor overwrite integration spec by creating its topic before producing.
+- [Fix] Set `Message#received_at` to the moment each message was polled, not the moment its batch was built, so it no longer trails by up to `max_wait_time` on low traffic topics (#2292).
+- [Fix] Stop the listener from failing with `NoMethodError` on JRuby when it checks a subscription group's jobs while workers complete them.
+- [Fix] Stop `#inline_insights` from returning no data on JRuby while another thread adds or evicts partition statistics.
+- [Fix] Stop `Admin` operations from retrying forever when their result never becomes visible. They now raise `ResultNotVisibleError` after `admin.max_retries_duration`.
+- [Fix] Keep the Datadog `LoggerListener` job types cache consistent on JRuby when many workers fill it at once.
 
 ## 2.6.1 (2026-08-24)
 - **[Feature]** [Pro] Add an opt-in envelope encryption mode for Messages At Rest (`config.encryption.mode = :envelope`, requires openssl `>= 3.0`) without the RSA payload size limit. Upgrade all consuming processes before enabling.
@@ -65,6 +94,7 @@
 - [Enhancement] Raise the swarm supervisor `SHUTDOWN_GRACE_PERIOD` from 1s to 15s so forked nodes have time to finish cleanup before forceful termination.
 - [Enhancement] Move consumer-group-specific internals under a `ConsumerGroups` namespace to prepare for KIP-932 share groups. User-provided classes are unaffected.
 - [Enhancement] Nest consumer-group-specific processing config under `config.internal.processing.consumer_groups`; shared settings stay at `config.internal.processing`.
+- [Change] Require `waterdrop` `>= 2.10.2` for fixes in statistics handling and polling defaults.
 - [Change] Require `karafka-rdkafka` `>= 0.28.0` for `list_offsets`-based batched lag reads.
 - [Change] Require `karafka-rdkafka` `>= 0.27.1` for the `poll_batch`/`poll_batch_nb` fix that caused `TopicNotFoundError` crashes on `partition_eof`.
 - [Change] Remove the public `custom_kafka` reader from `Karafka::Admin` (internal, unused by any public API).
@@ -129,8 +159,8 @@
 - [Fix] Preserve producer-specific kafka settings (e.g., `enable.idempotence`) when recreating the producer in swarm forks.
 
 ## 2.5.6 (2026-02-28)
-- **[Feature]** Add `karafka topics health` command to check Kafka topics for replication and durability issues, detecting no redundancy (RF=1), zero fault tolerance (RF≤min.insync), and low durability (min.insync=1) configurations with color-coded severity grouping and actionable recommendations (Pro).
-- [Enhancement] Optimize license loading process by reading license files directly from the gem directory instead of requiring the entire gem, reducing initialization overhead and adding support for user-defined License modules.
+- **[Feature]** Add the `karafka topics health` command to find topics with replication and durability risks (RF=1, RF≤min.insync, min.insync=1), with recommendations (Pro).
+- [Enhancement] Load license files directly from the gem directory instead of requiring the whole gem, for faster initialization, and support user-defined License modules.
 - [Change] Migrate Admin `AbstractHandle#wait` calls from deprecated `max_wait_timeout` (seconds) to `max_wait_timeout_ms` (milliseconds) to align with `karafka-rdkafka` `0.24.0`.
 - [Change] Require `karafka-rdkafka` `>=` `0.24.0` to support the new `max_wait_timeout_ms` API.
 - [Fix] Fix LRJ partition freeze when filter returns `applied? true` with `action :skip`, causing partition to remain paused for ~31,709 years instead of resuming after processing.
@@ -139,17 +169,17 @@
 - [Feature] Add multi-cluster Admin support via `Karafka::Admin.new(kafka: { ... })` allowing operations against different Kafka clusters while maintaining backward compatibility with existing class-method API.
 
 ## 2.5.4 (2025-12-28)
-- [Enhancement] Align Datadog logger listener error handling with the main logger listener by adding missing error types and replacing `UnsupportedCaseError` with generic error logging to support dynamic errors reporting.
+- [Enhancement] Align Datadog logger listener error handling with the main logger listener: log all error types, including dynamic ones, instead of raising `UnsupportedCaseError`.
 - [Enhancement] Align Appsignal metrics listener `USER_CONSUMER_ERROR_TYPES` with all consumer error types for complete error tracking.
 - [Enhancement] Reduce gem package size by excluding development files (spec, examples, CI configs, dev scripts) from the gem build.
 - [Fix] Multiple route draws don't seem to work.
-- [Fix] Fix internal code compatibility with external libraries that prepend modules to `Messages#each` method (e.g., DataDog tracing) by introducing `Messages#raw` for internal iteration that bypasses patched enumerable methods.
+- [Fix] Fix compatibility with libraries that prepend modules to `Messages#each` (e.g., DataDog tracing). Internal iteration now uses the new `Messages#raw`.
 - [Maintenance] Removed `base64` dependency.
 - [Maintenance] Add `ErrorTypesChecker` spec support module to programmatically verify listener error type coverage against source code definitions.
 
 ## 2.5.3 (2025-11-14)
 - [Enhancement] Dynamically support `librdkafka` fatal errors with correct reported details.
-- [Enhancement] Add `producer` block API to setup for simplified WaterDrop producer configuration without manual producer instance creation, using a transparent ConfigProxy during setup to avoid polluting the permanent config API.
+- [Enhancement] Add a `producer` block API to setup to configure the WaterDrop producer without creating the producer instance manually.
 - [Change] Require `waterdrop` `>=` `2.8.14` to support new features.
 - [Change] Require `karafka-rdkafka` `>=` `0.23.1` to support new rebalance protocol.
 
@@ -157,10 +187,10 @@
 - **[EOL]** Remove Rails 7.1 support according to EOL while not blocking Rails 7.1 usage.
 - [Enhancement] Retry on the KIP-848 `stale_member_epoch` error.
 - [Enhancement] Provide `Karafka::Admin.trigger_rebalance` API to programmatically trigger consumer group rebalances for operational purposes.
-- [Enhancement] Provide `Karafka::Admin.plan_topic_replication` API to generate partition reassignment plans for increasing topic replication factors with automatic broker distribution or manual placement, compatible with `kafka-reassign-partitions.sh` tool.
-- [Enhancement] Nest pause configuration under `config.pause.*` namespace (`config.pause.timeout`, `config.pause.max_timeout`, `config.pause.with_exponential_backoff`) while maintaining backwards compatibility with the old flat API (`config.pause_timeout`, etc.) via delegation methods that will be removed in Karafka 2.6.
+- [Enhancement] Provide `Karafka::Admin.plan_topic_replication` to generate partition reassignment plans for increasing a topic replication factor, compatible with `kafka-reassign-partitions.sh`.
+- [Enhancement] Nest pause settings under `config.pause.*` (`timeout`, `max_timeout`, `with_exponential_backoff`). The old flat API (`config.pause_timeout`, etc.) still works and will be removed in Karafka 2.6.
 - [Enhancement] Detect and track involuntary assignment loss during long-running processing that exceeds `max.poll.interval.ms` via `client.events_poll` event and automatically update `Karafka::App.assignments` to reflect reality.
-- [Enhancement] Extend `Karafka::Admin.read_watermark_offsets` to accept either a single topic with partition or a hash of multiple topics with partitions, using a single consumer instance for improved efficiency when querying multiple partitions.
+- [Enhancement] Allow `Karafka::Admin.read_watermark_offsets` to take a single topic with partition or a hash of topics with partitions, using one consumer instance for all of them.
 - [Enhancement] Add configurable `Karafka::ActiveJob::Deserializer` to support custom serialization formats (Avro, Protobuf, etc.) for ActiveJob payloads.
 - [Fix] Fix ActiveJob Continuation invalid class reference bug.
 
@@ -180,12 +210,12 @@
 - [Enhancement] Optimize the messages buffer array memory allocation pattern.
 - [Maintenance] Add basic direct DD integration spec via DD gem karafka monitoring feature.
 - [Maintenance] Add integration specs for WaterDrop connection pool usage from within consumers.
-- [Refactoring] Comprehensive Admin module refactoring: Extract topic operations into Admin::Topics class and consumer group operations into Admin::ConsumerGroups class with proper inheritance hierarchy, cross-class method usage optimization, and constants moved to appropriate locations where they are actually used.
-- [Refactoring] Move routing-related contracts from `Karafka::Contracts::` to `Karafka::Routing::Contracts::` namespace and reorganize error message structure in YAML files under `routing:` scope for better code organization and logical grouping.
-- [Refactoring] Move config-related contracts from `Karafka::Contracts::Config` to `Karafka::Setup::Contracts::Config` namespace and reorganize error message structure in YAML files under `setup:` scope for better code organization and logical grouping.
-- [Refactoring] Move CLI server contracts from `Karafka::Contracts::ServerCliOptions` to `Karafka::Cli::Contracts::Server` namespace and reorganize error message structure in YAML files under `cli:` scope for improved naming consistency and logical grouping.
-- [Refactoring] Replace execution mode symbol-based checks with dedicated `ExecutionMode` class providing cleaner API with query methods (`#swarm?`, `#embedded?`) and state change methods (`#swarm!`, `#embedded!`) for improved type safety and code clarity.
-- [Refactoring] Replace connection client mode symbol-based checks with dedicated `Connection::Mode` class providing cleaner API with query methods (`#subscribe?`, `#assign?`) and state change methods (`#subscribe!`, `#assign!`) for improved code clarity.
+- [Refactoring] Split the Admin module: topic operations move to `Admin::Topics` and consumer group operations to `Admin::ConsumerGroups`.
+- [Refactoring] Move routing-related contracts from `Karafka::Contracts::` to `Karafka::Routing::Contracts::` and their error messages under the `routing:` scope in the YAML files.
+- [Refactoring] Move config contracts from `Karafka::Contracts::Config` to `Karafka::Setup::Contracts::Config` and group their error messages under `setup:`.
+- [Refactoring] Move CLI server contracts from `Karafka::Contracts::ServerCliOptions` to `Karafka::Cli::Contracts::Server` and group their error messages under `cli:`.
+- [Refactoring] Replace execution mode symbols with an `ExecutionMode` class (`#swarm?`, `#embedded?`, `#swarm!`, `#embedded!`).
+- [Refactoring] Replace connection client mode symbols with a `Connection::Mode` class (`#subscribe?`, `#assign?`, `#subscribe!`, `#assign!`).
 - [Fix] Improve same timestamp dispatch in scheduled messages on Ruby 3.2.
 - [Fix] Fix incorrect (6 seconds vs 60 seconds) reset of connections on non-recoverable errors.
 - [Fix] Introduce mutex-safe and thread-safe `#inspect` where needed.
@@ -540,7 +570,7 @@ Available [here](https://karafka.io/docs/Upgrades-2.3/).
 - [Enhancement] Provide a `finished?` method to the jobs for advanced reference based job schedulers.
 - [Enhancement] Provide `client.reset` notification event.
 - [Enhancement] Remove all usage of concurrent-ruby from Karafka
-- [Change] Replace single #before_schedule with appropriate methods and events for scheduling various types of work. This is needed as we may run different framework logic on those and, second, for accurate job tracking with advanced schedulers.
+- [Change] Replace the single `#before_schedule` with separate methods and events per type of scheduled work, for accurate job tracking with advanced schedulers.
 - [Change] Rename `before_enqueue` to `before_schedule` to reflect what it does and when (internal).
 - [Change] Remove not needed error catchers for strategies code. This code if errors, should be considered critical and should not be silenced.
 - [Change] Remove not used notifications events.
@@ -553,7 +583,7 @@ Available [here](https://karafka.io/docs/Upgrades-2.3/).
 - [Enhancement] Provide `#synchronize` API same as in VPs for LRJs to allow for lifecycle events and consumption synchronization.
 
 ## 2.2.12 (2023-11-09)
-- [Enhancement] Rewrite the polling engine to update statistics and error callbacks despite longer non LRJ processing or long `max_wait_time` setups. This change provides stability to the statistics and background error emitting making them time-reliable.
+- [Enhancement] Rewrite the polling engine so statistics and error callbacks are emitted on time despite long non-LRJ processing or a long `max_wait_time`.
 - [Enhancement] Auto-update Inline Insights if new insights are present for all consumers and not only LRJ (OSS and Pro).
 - [Enhancement] Alias `#insights` with `#inline_insights` and `#insights?` with `#inline_insights?`
 
@@ -563,7 +593,7 @@ Available [here](https://karafka.io/docs/Upgrades-2.3/).
 - [Enhancement] Provide new alias to `karafka server`, that is: `karafka consumer`.
 
 ## 2.2.10 (2023-11-02)
-- [Enhancement] Allow for running `#pause` without specifying the offset (provide offset or `:consecutive`). This allows for pausing on the consecutive message (last received + 1), so after resume we will get last message received + 1 effectively not using `#seek` and not purging `librdafka` buffer preserving on networking. Please be mindful that this uses notion of last message passed from **librdkafka**, and not the last one available in the consumer (`messages.last`). While for regular cases they will be the same, when using things like DLQ, LRJs, VPs or Filtering API, those may not be the same.
+- [Enhancement] Allow `#pause` without an offset (or with `:consecutive`) to pause on the message after the last one received from **librdkafka**, without `#seek` or a buffer purge. With DLQ, LRJ, VPs or the Filtering API, this may differ from `messages.last`.
 - [Enhancement] **Drastically** improve network efficiency of operating with LRJ by using the `:consecutive` offset as default strategy for running LRJs without moving the offset in place and purging the data.
 - [Enhancement] Do not "seek in place". When pausing and/or seeking to the same location as the current position, do nothing not to purge buffers and not to move to the same place where we are.
 - [Fix] Pattern regexps should not be part of declaratives even when configured.
@@ -580,7 +610,7 @@ In the latest Karafka release, there are no breaking changes. However, please no
 - **[Feature]** Introduce Appsignal integration for errors and metrics tracking.
 - [Enhancement] Expose `#synchronize` for VPs to allow for locks when cross-VP consumers work is needed.
 - [Enhancement] Provide `#collapse_until!` direct consumer API to allow for collapsed virtual partitions consumer operations together with the Filtering API for advanced use-cases.
-- [Refactor] Reorganize how rebalance events are propagated from `librdkafka` to Karafka. Replace `connection.client.rebalance_callback` with `rebalance.partitions_assigned` and `rebalance.partitions_revoked`. Introduce two extra events: `rebalance.partitions_assign` and `rebalance.partitions_revoke` to handle pre-rebalance future work.
+- [Refactor] Replace `connection.client.rebalance_callback` with `rebalance.partitions_assigned` and `rebalance.partitions_revoked`, and add the pre-rebalance `rebalance.partitions_assign` and `rebalance.partitions_revoke` events.
 - [Refactor] Remove `thor` as a CLI layer and rely on Ruby `OptParser`
 
 ### Upgrade Notes
@@ -589,7 +619,7 @@ In the latest Karafka release, there are no breaking changes. However, please no
 2. None of the CLI commands should change but `thor` has been removed so please report if you find any bugs.
 
 ## 2.2.7 (2023-10-07)
-- **[Feature]** Introduce Inline Insights to both OSS and Pro. Inline Insights allow you to get the Kafka insights/metrics from the consumer instance and use them to alter the processing flow. In Pro, there's an extra filter flow allowing to ensure, that the insights exist during consumption.
+- **[Feature]** Introduce Inline Insights to both OSS and Pro to read Kafka metrics from the consumer instance and use them in the processing flow. Pro adds a filter that ensures the insights exist during consumption.
 - [Enhancement] Make sure, that subscription groups ids are unique by including their consumer group id in them similar to how topics ids are handled (not a breaking change).
 - [Enhancement] Expose `#attempt` method on a consumer to directly indicate number of attempt of processing given data.
 - [Enhancement] Support Rails 7.1.
@@ -598,7 +628,7 @@ In the latest Karafka release, there are no breaking changes. However, please no
 - [Enhancement] Retry `Karafka::Admin#read_watermark_offsets` fetching upon `not_leader_for_partition` that can occur mostly on newly created topics in KRaft and after crashes during leader selection.
 
 ## 2.2.5 (2023-09-25)
-- [Enhancement] Ensure, that when topic related operations end, the result is usable. There were few cases where admin operations on topics would finish successfully but internal Kafka caches would not report changes for a short period of time.
+- [Enhancement] Make sure topic admin operations finish only when the result is usable, as Kafka caches could briefly not report the change.
 - [Enhancement] Stabilize cooperative-sticky early shutdown procedure.
 - [Fix] use `#nil?` instead of `#present?` on `DataDog::Tracing::SpanOperation` (vitellochris)
 - [Maintenance] Align connection clearing API with Rails 7.1 deprecation warning.
@@ -631,11 +661,11 @@ As always, please make sure you have upgraded to the most recent version of `2.1
 
 If you are not using Kafka ACLs, there is no action you need to take.
 
-If you are using Kafka ACLs and you've set up permissions for `karafka_admin` group, please note that this name has now been changed and is subject to [Consumer Name Mapping](https://karafka.io/docs/Consumer-mappers/).
+If you are using Kafka ACLs and you've set up permissions for `karafka_admin` group, please note that this name has now been changed and is subject to [Consumer Name Mapping](https://karafka.io/docs/Upgrades-Karafka-2.4/#consumer-mapper-concept-removal).
 
 That means you must ensure that the new consumer group that by default equals `CLIENT_ID_karafka_admin` has appropriate permissions. Please note that the Web UI also uses this group.
 
-`Karafka::Admin` now has its own set of configuration options available, and you can find more details about that [here](https://karafka.io/docs/Topics-management-and-administration/#configuration).
+`Karafka::Admin` now has its own set of configuration options available, and you can find more details about that [here](https://karafka.io/docs/Infrastructure-Admin-API/#configuration).
 
 If you want to maintain the `2.1` behavior, that is `karafka_admin` admin group, we recommend introducing this case inside your consumer mapper. Assuming you use the default one, the code will look as follows:
 
@@ -685,7 +715,7 @@ If you want to maintain the `2.1` behavior, that is `karafka_admin` admin group,
 - [Change] Require `waterdrop` `>= 2.6.6` due to extra `LoggerListener` API.
 
 ## 2.1.8 (2023-07-29)
-- [Enhancement] Introduce `Karafka::BaseConsumer#used?` method to indicate, that at least one invocation of `#consume` took or will take place. This can be used as a replacement to the non-direct `messages.count` check for shutdown and revocation to ensure, that the consumption took place or is taking place (in case of running LRJ).
+- [Enhancement] Add `Karafka::BaseConsumer#used?` to check that `#consume` ran or will run (e.g. with LRJ). It replaces the indirect `messages.count` check on shutdown and revocation.
 - [Enhancement] Make `messages#to_a` return copy of the underlying array to prevent scenarios, where the mutation impacts offset management.
 - [Enhancement] Mitigate a librdkafka `cooperative-sticky` rebalance crash issue.
 - [Enhancement] Provide ability to overwrite `consumer_persistence` per subscribed topic. This is mostly useful for plugins and extensions developers.
@@ -773,7 +803,7 @@ If you want to maintain the `2.1` behavior, that is `karafka_admin` admin group,
 - [Enhancement] Prevent user originating errors related to statistics processing after listener loop crash from potentially crashing the listener loop and hanging Karafka process.
 
 ## 2.0.40 (2023-04-13)
-- [Enhancement] Introduce `Karafka::Messages::Messages#empty?` method to handle Idle related cases where shutdown or revocation would be called on an empty messages set. This method allows for checking if there are any messages in the messages batch.
+- [Enhancement] Introduce `Karafka::Messages::Messages#empty?` to check for an empty messages batch, as in Idle cases where shutdown or revocation runs without messages.
 - [Refactor] Require messages builder to accept partition and do not fetch it from messages.
 - [Refactor] Use empty messages set for internal APIs (Idle) (so there always is `Karafka::Messages::Messages`)
 - [Refactor] Allow for empty messages set initialization with -1001 and -1 on metadata (similar to `librdkafka`)
@@ -898,7 +928,7 @@ end
 
 ## 2.0.28 (2023-01-25)
 - **[Feature]** Provide the ability to use Dead Letter Queue with Virtual Partitions.
-- [Enhancement] Collapse Virtual Partitions upon retryable error to a single partition. This allows dead letter queue to operate and mitigate issues arising from work virtualization. This removes uncertainties upon errors that can be retried and processed. Affects given topic partition virtualization only for multi-topic and multi-partition parallelization. It also minimizes potential "flickering" where given data set has potentially many corrupted messages. The collapse will last until all the messages from the collective corrupted batch are processed. After that, virtualization will resume.
+- [Enhancement] Collapse Virtual Partitions to a single partition upon a retryable error, so the DLQ can work. Virtualization resumes after the failed batch is processed.
 - [Enhancement] Introduce `#collapsed?` consumer method available for consumers using Virtual Partitions.
 - [Enhancement] Allow for customization of DLQ dispatched message details in Pro (#1266) via the `#enhance_dlq_message` consumer method.
 - [Enhancement] Include `original_consumer_group` in the DLQ dispatched messages in Pro.
@@ -926,7 +956,7 @@ class KarafkaApp < Karafka::App
 - [Enhancement] Early terminate on `read_topic` when reaching the last offset available on the request time.
 - [Enhancement] Introduce a `quiet` state that indicates that Karafka is not only moving to quiet mode but actually that it reached it and no work will happen anymore in any of the consumer groups.
 - [Enhancement] Use Karafka defined routes topics when possible for `read_topic` admin API.
-- [Enhancement] Introduce `client.pause` and `client.resume` instrumentation hooks for tracking client topic partition pausing and resuming. This is alongside of `consumer.consuming.pause` that can be used to track both manual and automatic pausing with more granular consumer related details. The `client.*` should be used for low level tracking.
+- [Enhancement] Add the `client.pause` and `client.resume` instrumentation hooks for low-level tracking of partition pausing and resuming. Use `consumer.consuming.pause` for consumer-level details.
 - [Enhancement] Replace `LoggerListener` pause notification with one based on `client.pause` instead of `consumer.consuming.pause`.
 - [Enhancement] Expand `LoggerListener` with `client.resume` notification.
 - [Enhancement] Replace random anonymous subscription groups ids with stable once.
@@ -975,7 +1005,7 @@ end
 ## 2.0.23 (2022-12-07)
 - [Maintenance] Align with `waterdrop` and `karafka-core`
 - [Enhancement] Provide `Admin#read_topic` API to get topic data without subscribing.
-- [Enhancement] Upon an end user `#pause`, do not commit the offset in automatic offset management mode. This will prevent from a scenario where pause is needed but during it a rebalance occurs and a different assigned process starts not from the pause location but from the automatic offset that may be different. This still allows for using the `#mark_as_consumed`.
+- [Enhancement] Do not commit the offset on a user `#pause` in automatic offset management mode, so a rebalance during the pause does not resume from a different offset. `#mark_as_consumed` still works.
 - [Fix] Fix a scenario where manual `#pause` would be overwritten by a resume initiated by the strategy.
 - [Fix] Fix a scenario where manual `#pause` in LRJ would cause infinite pause.
 
@@ -1007,7 +1037,7 @@ end
 - [Fix] Fix an issue where upon fast startup of multiple subscription groups from the same consumer group, a ghost queue would be created due to problems in `Concurrent::Hash`.
 
 ## 2.0.18 (2022-11-18)
-- **[Feature]** Support quiet mode via `TSTP` signal. When used, Karafka will finish processing current messages, run `shutdown` jobs, and switch to a quiet mode where no new work is being accepted. At the same time, it will keep the consumer group quiet, and thus no rebalance will be triggered. This can be particularly useful during deployments.
+- **[Feature]** Support quiet mode via the `TSTP` signal: Karafka finishes current work, runs `shutdown` jobs and accepts no new work, without triggering a rebalance. Useful during deployments.
 - [Enhancement] Trigger `#revoked` for jobs in case revocation would happen during shutdown when jobs are still running. This should ensure, we get a notion of revocation for Pro LRJ jobs even when revocation happening upon shutdown (#1150).
 - [Enhancement] Stabilize the shutdown procedure for consumer groups with many subscription groups that have non-aligned processing cost per batch.
 - [Enhancement] Remove double loading of Karafka via Rails railtie.
@@ -1216,7 +1246,7 @@ Karafka 2.0:
 - Introduces fully automatic integration end-to-end [test suite](https://github.com/karafka/karafka/tree/master/spec/integrations) that checks any case I could imagine.
 - Introduces [Virtual Partitions](https://github.com/karafka/karafka/wiki/Pro-Virtual-Partitions) for ability to parallelize work of a single partition.
 - Introduces [Long-Running Jobs](https://github.com/karafka/karafka/wiki/Pro-Long-Running-Jobs) to allow for work that would otherwise exceed the `max.poll.interval.ms`.
-- Introduces the [Enhanced Scheduler](https://github.com/karafka/karafka/wiki/Pro-Enhanced-Scheduler) that uses a non-preemptive LJF (Longest Job First) algorithm instead of a a FIFO (First-In, First-Out) one.
+- Introduces the [Enhanced Scheduler](https://karafka.io/docs/Pro-Consumer-Groups-Enhanced-Reliability/#enhanced-scheduler) that uses a non-preemptive LJF (Longest Job First) algorithm instead of a a FIFO (First-In, First-Out) one.
 - Introduces [Enhanced Active Job adapter](https://github.com/karafka/karafka/wiki/Pro-Enhanced-Active-Job) that is optimized and allows for strong ordering of jobs and more.
 - Introduces seamless [Ruby on Rails integration](https://github.com/karafka/karafka/wiki/Integrating-with-Ruby-on-Rails-and-other-frameworks) via `Rails::Railte` without need for any extra configuration.
 - Provides `#revoked` [method](https://github.com/karafka/karafka/wiki/Consuming-messages#shutdown-and-partition-revocation-handlers) for taking actions upon topic revocation.
@@ -1224,7 +1254,7 @@ Karafka 2.0:
 - Replaces `ruby-kafka` with `librdkafka` as an underlying driver.
 - Introduces official [EOL policies](https://github.com/karafka/karafka/wiki/Versions-Lifecycle-and-EOL).
 - Introduces [benchmarks](https://github.com/karafka/karafka/tree/master/spec/benchmarks) that can be used to profile Karafka.
-- Introduces a requirement that the end user code **needs** to be [thread-safe](https://github.com/karafka/karafka/wiki/FAQ#does-karafka-require-gems-to-be-thread-safe).
+- Introduces a requirement that the end user code **needs** to be [thread-safe](https://karafka.io/docs/Basics-FAQ-Configuration/#does-karafka-require-gems-to-be-thread-safe).
 - Introduces a [Pro subscription](https://github.com/karafka/karafka/wiki/Build-vs-Buy) with a [commercial license](https://github.com/karafka/karafka/blob/master/LICENSE-COMM) to fund further ecosystem development.
 
 ### Deletions
@@ -1239,7 +1269,7 @@ Karafka 2.0:
 - Removes support for using `sidekiq-backend` due to introduction of [multi-threading](https://github.com/karafka/karafka/wiki/Concurrency-and-multithreading).
 - Removes the `Responders` concept in favour of WaterDrop producer usage.
 - Removes completely all the callbacks in favour of finalizer method `#shutdown`.
-- Removes single message consumption mode in favour of [documentation](https://github.com/karafka/karafka/wiki/Consuming-messages#one-at-a-time) on how to do it easily by yourself.
+- Removes single message consumption mode in favour of [documentation](https://karafka.io/docs/Basics-Consuming-Messages/#consuming-messages-one-at-a-time) on how to do it easily by yourself.
 
 ### Changes
 
@@ -1262,7 +1292,7 @@ Karafka 2.0:
 - Renames `Karafka::Params::Metadata` to `Karafka::Messages::Metadata`.
 - Renames `Karafka::Fetcher` to `Karafka::Runner` and align notifications key names.
 - Renames `StdoutListener` to `LoggerListener`.
-- Reorganizes [monitoring and logging](https://github.com/karafka/karafka/wiki/Monitoring-and-logging) to match new concepts.
+- Reorganizes [monitoring and logging](https://karafka.io/docs/Infrastructure-Monitoring-and-Logging/) to match new concepts.
 - Notifies on fatal worker processing errors.
 - Contains updated install templates for Rails and no-non Rails.
 - Changes how the routing style (`0.5`) behaves. It now builds a single consumer group instead of one per topic.

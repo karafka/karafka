@@ -40,11 +40,11 @@ module Karafka
       # (via routing bridge or a prior draw call), the existing declaration is returned and
       # the block is evaluated on it (allowing additive configuration).
       #
-      # @param name [String, Symbol] topic name
+      # @param topic_name [String, Symbol] topic name
       # @param block [Proc] optional block evaluated in the topic's context
       # @return [Karafka::Declaratives::Topic] the declaration
-      def topic(name, &block)
-        declaration = @repository.find_or_create(name)
+      def topic(topic_name, &block)
+        declaration = @repository.find_or_create(topic_name)
         declaration.instance_eval(&@defaults)
         declaration.instance_eval(&block) if block
         declaration
@@ -55,10 +55,10 @@ module Karafka
         @repository.active
       end
 
-      # @param name [String, Symbol] topic name
+      # @param topic_name [String, Symbol] topic name
       # @return [Karafka::Declaratives::Topic, nil] specific topic declaration
-      def find_topic(name)
-        @repository.find(name)
+      def find_topic(topic_name)
+        @repository.find(topic_name)
       end
     end
   end

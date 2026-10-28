@@ -52,8 +52,10 @@ listener.send(:start)
 
 Karafka.monitor.subscribe(listener)
 
+# Stop probing once the 500 is captured. The app shutdown (and the liveness server close) is
+# triggered by this 500, so probing past it would race against the closed server
 Thread.new do
-  until Karafka::App.stopping?
+  until DT[:probing].include?("500")
     sleep(1)
     uri = URI.parse("http://127.0.0.1:9013/")
     response = Net::HTTP.get_response(uri)

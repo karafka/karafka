@@ -77,7 +77,8 @@ produce_many(DT.topic, elements)
 consumer = setup_rdkafka_consumer
 
 thread = Thread.new do
-  sleep(10)
+  # Rebalance once throttled, so the throttling window is still active after reassignment
+  sleep(0.1) until DT[:offsets].size >= 5
 
   consumer.subscribe(DT.topic)
 

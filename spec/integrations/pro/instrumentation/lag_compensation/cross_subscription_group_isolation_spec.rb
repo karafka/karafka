@@ -83,9 +83,12 @@ draw_routes do
   end
 end
 
-TOPICS.each { |name| produce(name, DT.uuid) }
-
 Thread.new do
+  # Produce once both subscription groups are assigned, so no rebalance drops the pause
+  sleep(0.1) until Karafka::App.assignments.size >= 2
+
+  TOPICS.each { |name| produce(name, DT.uuid) }
+
   sleep(0.1) until DT.key?(:"paused_#{TOPICS[0]}") && DT.key?(:"paused_#{TOPICS[1]}")
 
   BACKLOGS.each do |index, count|

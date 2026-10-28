@@ -47,7 +47,7 @@ module Karafka
           class VirtualOffsetManager
             attr_reader :groups
 
-            # @param topic [String]
+            # @param topic_name [String]
             # @param partition [Integer]
             # @param offset_metadata_strategy [Symbol] what metadata should we select. That is,
             #   should we use the most recent or one picked from the offset that is going to be
@@ -56,8 +56,8 @@ module Karafka
             # @note We need topic and partition because we use a seek message (virtual) for real
             #   offset management. We could keep real message reference but this can be memory
             #   consuming and not worth it.
-            def initialize(topic, partition, offset_metadata_strategy)
-              @topic = topic
+            def initialize(topic_name, partition, offset_metadata_strategy)
+              @topic = topic_name
               @partition = partition
               @groups = []
               @marked = {}

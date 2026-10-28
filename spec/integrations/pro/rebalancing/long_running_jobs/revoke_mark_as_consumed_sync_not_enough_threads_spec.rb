@@ -46,6 +46,7 @@ class Consumer < Karafka::BaseConsumer
 
     DT["#{partition}-revoked"] << revoked?
 
+    DT[:started] << partition
     sleep(15)
 
     @slept = true
@@ -83,7 +84,7 @@ end
 consumer = setup_rdkafka_consumer
 
 Thread.new do
-  sleep(10)
+  sleep(0.1) until DT[:started].size >= 2
 
   consumer.subscribe(DT.topic)
 

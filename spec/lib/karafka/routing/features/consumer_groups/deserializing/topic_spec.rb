@@ -51,6 +51,48 @@ RSpec.describe_current do
         expect(topic.deserializing.headers).to eq(custom_headers_deserializer)
       end
     end
+
+    context "when only the payload deserializer is specified" do
+      let(:custom_payload_deserializer) { rand }
+
+      before { topic.deserializing(payload: custom_payload_deserializer) }
+
+      it { expect(topic.deserializing.payload).to eq(custom_payload_deserializer) }
+      it { expect(topic.deserializing.key).to be_a(default_key_deserializer) }
+      it { expect(topic.deserializing.headers).to be_a(default_headers_deserializer) }
+    end
+
+    context "when nil deserializers are specified" do
+      before { topic.deserializing(payload: nil, key: nil, headers: nil) }
+
+      it { expect(topic.deserializing.payload).to be_nil }
+      it { expect(topic.deserializing.key).to be_nil }
+      it { expect(topic.deserializing.headers).to be_nil }
+    end
+
+    context "when deserializing was already set up" do
+      let(:custom_payload_deserializer) { rand }
+
+      before { topic.deserializing }
+
+      it "keeps the first configuration" do
+        first = topic.deserializing
+
+        expect(topic.deserializing(payload: custom_payload_deserializer)).to be(first)
+      end
+
+      it "does not allocate on repeated calls" do
+        skip("GC.stat has no total_allocated_objects on this Ruby") unless
+          GC.stat.key?(:total_allocated_objects)
+
+        topic.deserializing
+        before = GC.stat(:total_allocated_objects)
+        100.times { topic.deserializing }
+
+        # Defaults built on each call would allocate 3 objects per call
+        expect(GC.stat(:total_allocated_objects) - before).to be < 10
+      end
+    end
   end
 
   describe "#deserializers (backwards compatible alias)" do

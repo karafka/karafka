@@ -37,7 +37,6 @@ unless ENV["PRISTINE_MODE"]
   require "bundler"
   Bundler.setup(:default, :test, :integrations)
   require_relative "../lib/karafka"
-  require "byebug"
 end
 
 require "digest"
@@ -104,10 +103,14 @@ def setup_karafka(
     config.pause.timeout = 1
     config.pause.max_timeout = 1
     config.pause.with_exponential_backoff = false
-    config.max_wait_time = 500
+    config.max_wait_time = 200
     config.shutdown_timeout = 30_000
     config.swarm.nodes = 2
     config.internal.connection.reset_backoff = 1_000
+    # Admin sleeps this long after each async operation (e.g. topic creation) before checking if
+    # its result is visible. Topic creation runs under a cross-process lock, so the default 500ms
+    # is paid by each spec and also serializes all concurrently booting specs
+    config.admin.retry_backoff = 100
 
     # Allows to overwrite any option we're interested in
     yield(config) if block_given?

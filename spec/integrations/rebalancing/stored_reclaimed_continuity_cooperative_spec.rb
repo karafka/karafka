@@ -74,7 +74,13 @@ other = Thread.new do
       DT[:data][message.partition] << message.payload.to_i
 
       consumer.store_offset(message)
-      consumer.commit
+
+      begin
+        consumer.commit
+      # Karafka joining may bump the generation, which is an ownership loss like in Karafka
+      rescue Rdkafka::RdkafkaError => e
+        raise unless %i[illegal_generation unknown_member_id assignment_lost].include?(e.code)
+      end
 
       break
     end

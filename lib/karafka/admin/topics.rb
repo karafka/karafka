@@ -7,37 +7,37 @@ module Karafka
     # introspection
     class Topics < Admin
       class << self
-        # @param name [String, Symbol] topic name
+        # @param topic_name [String, Symbol] topic name
         # @param partition [Integer] partition
         # @param count [Integer] how many messages we want to get at most
         # @param start_offset [Integer, Time] offset from which we should start
         # @param settings [Hash] kafka extra settings (optional)
         # @see #read
-        def read(name, partition, count, start_offset = -1, settings = {})
-          new.read(name, partition, count, start_offset, settings)
+        def read(topic_name, partition, count, start_offset = -1, settings = {})
+          new.read(topic_name, partition, count, start_offset, settings)
         end
 
-        # @param name [String] topic name
-        # @param partitions [Integer] number of partitions for this topic
+        # @param topic_name [String] topic name
+        # @param partition_count [Integer] number of partitions for this topic
         # @param replication_factor [Integer] number of replicas
         # @param topic_config [Hash] topic config details as described in the
         #   `base topic configuration`))
         # @see #create
-        def create(name, partitions, replication_factor, topic_config = {})
-          new.create(name, partitions, replication_factor, topic_config)
+        def create(topic_name, partition_count, replication_factor, topic_config = {})
+          new.create(topic_name, partition_count, replication_factor, topic_config)
         end
 
-        # @param name [String] topic name
+        # @param topic_name [String] topic name
         # @see #delete
-        def delete(name)
-          new.delete(name)
+        def delete(topic_name)
+          new.delete(topic_name)
         end
 
-        # @param name [String] topic name
-        # @param partitions [Integer] total number of partitions we expect to end up with
+        # @param topic_name [String] topic name
+        # @param partition_count [Integer] total number of partitions we expect to end up with
         # @see #create_partitions
-        def create_partitions(name, partitions)
-          new.create_partitions(name, partitions)
+        def create_partitions(topic_name, partition_count)
+          new.create_partitions(topic_name, partition_count)
         end
 
         # @param name_or_hash [String, Symbol, Hash] topic name or hash with topics and partitions
@@ -59,11 +59,19 @@ module Karafka
         def read_partition_offsets(topic_partition_offsets, isolation_level: nil)
           new.read_partition_offsets(topic_partition_offsets, isolation_level: isolation_level)
         end
+
+        # @param topic_names [String, Array<String>] topic or topics to describe
+        # @param include_authorized_operations [Boolean] should we also fetch the operations
+        #   this client is authorized to perform on the topics
+        # @see #describe
+        def describe(*topic_names, include_authorized_operations: false)
+          new.describe(*topic_names, include_authorized_operations: include_authorized_operations)
+        end
       end
 
       # Allows us to read messages from the topic
       #
-      # @param name [String, Symbol] topic name
+      # @param topic_name [String, Symbol] topic name
       # @param partition [Integer] partition
       # @param count [Integer] how many messages we want to get at most
       # @param start_offset [Integer, Time] offset from which we should start. If -1 is provided
@@ -73,7 +81,7 @@ module Karafka
       # @param settings [Hash] kafka extra settings (optional)
       #
       # @return [Array<Karafka::Messages::Message>] array with messages
-      def read(name, partition, count, start_offset = -1, settings = {})
+      def read(topic_name, partition, count, start_offset = -1, settings = {})
         messages = []
         tpl = Rdkafka::Consumer::TopicPartitionList.new
         low_offset, high_offset = nil
@@ -81,9 +89,9 @@ module Karafka
 
         with_consumer(settings) do |consumer|
           # Convert the time offset (if needed)
-          start_offset = resolve_offset(consumer, name.to_s, partition, start_offset)
+          start_offset = resolve_offset(consumer, topic_name.to_s, partition, start_offset)
 
-          low_offset, high_offset = consumer.query_watermark_offsets(name, partition)
+          low_offset, high_offset = consumer.query_watermark_offsets(topic_name, partition)
 
           if start_offset.negative?
             start_offset = if time_based
@@ -114,7 +122,7 @@ module Karafka
           start_offset = possible_range.first
           count = possible_range.size
 
-          tpl.add_topic_and_partitions_with_offsets(name, partition => start_offset)
+          tpl.add_topic_and_partitions_with_offsets(topic_name, partition => start_offset)
           consumer.assign(tpl)
 
           # We should poll as long as we don't have all the messages that we need or as long as
@@ -142,7 +150,7 @@ module Karafka
         # Use topic from routes if we can match it or create a dummy one
         # Dummy one is used in case we cannot match the topic with routes. This can happen
         # when admin API is used to read topics that are not part of the routing
-        topic = Karafka::Routing::Router.find_or_initialize_by_name(name)
+        topic = Karafka::Routing::Router.find_or_initialize_by_name(topic_name)
 
         messages.map! do |message|
           Messages::Builders::Message.call(
@@ -155,53 +163,53 @@ module Karafka
 
       # Creates Kafka topic with given settings
       #
-      # @param name [String] topic name
-      # @param partitions [Integer] number of partitions we expect
+      # @param topic_name [String] topic name
+      # @param partition_count [Integer] number of partitions we expect
       # @param replication_factor [Integer] number of replicas
       # @param topic_config [Hash] topic config details as described here:
       #   https://kafka.apache.org/documentation/#topicconfigs
       #
       # @return [void]
-      def create(name, partitions, replication_factor, topic_config = {})
+      def create(topic_name, partition_count, replication_factor, topic_config = {})
         with_admin do |admin|
-          handler = admin.create_topic(name, partitions, replication_factor, topic_config)
+          handler = admin.create_topic(topic_name, partition_count, replication_factor, topic_config)
 
           with_re_wait(
             -> { handler.wait(max_wait_timeout_ms: max_wait_time_ms) },
-            -> { names.include?(name) }
+            -> { names.include?(topic_name) }
           )
         end
       end
 
       # Deleted a given topic
       #
-      # @param name [String] topic name
+      # @param topic_name [String] topic name
       #
       # @return [void]
-      def delete(name)
+      def delete(topic_name)
         with_admin do |admin|
-          handler = admin.delete_topic(name)
+          handler = admin.delete_topic(topic_name)
 
           with_re_wait(
             -> { handler.wait(max_wait_timeout_ms: max_wait_time_ms) },
-            -> { !names.include?(name) }
+            -> { !names.include?(topic_name) }
           )
         end
       end
 
       # Creates more partitions for a given topic
       #
-      # @param name [String] topic name
-      # @param partitions [Integer] total number of partitions we expect to end up with
+      # @param topic_name [String] topic name
+      # @param partition_count [Integer] total number of partitions we expect to end up with
       #
       # @return [void]
-      def create_partitions(name, partitions)
+      def create_partitions(topic_name, partition_count)
         with_admin do |admin|
-          handler = admin.create_partitions(name, partitions)
+          handler = admin.create_partitions(topic_name, partition_count)
 
           with_re_wait(
             -> { handler.wait(max_wait_timeout_ms: max_wait_time_ms) },
-            -> { info(name).fetch(:partition_count) >= partitions }
+            -> { info(topic_name).fetch(:partition_count) >= partition_count }
           )
         end
       end
@@ -364,6 +372,84 @@ module Karafka
         end
       end
 
+      # Describes topics: their topic ids and partitions with their leaders and replicas.
+      #
+      # A topic that cannot be described (e.g. it does not exist) does not fail the whole call.
+      # Its entry carries the `:error` instead.
+      #
+      # @param topic_names [String, Array<String>] name of the topic to describe or a list of
+      #   them. Multiple topics are described in one request.
+      # @param include_authorized_operations [Boolean] should we also fetch the operations this
+      #   client is authorized to perform on the topics
+      #
+      # @return [Array<Hash>] topics details in the order of `topic_names`, each with:
+      #   - `:name` [String] the topic name
+      #   - `:topic_id` [String, nil] the topic id (base64), `nil` when the topic could not be
+      #     described
+      #   - `:internal` [Boolean] whether it is an internal topic (e.g. `__consumer_offsets`)
+      #   - `:partitions` [Array<Hash>] each with `:partition` [Integer], `:leader` [Hash, nil],
+      #     `:replicas` [Array<Hash>] and `:isr` [Array<Hash>], where brokers are
+      #     `{ id:, host:, port:, rack: }`
+      #   - `:authorized_operations` [Array<Symbol>, nil] operations this client is authorized to
+      #     perform on the topic (e.g. `:read`, `:write`), `nil` unless requested
+      #   - `:error` [Rdkafka::RdkafkaError, nil] why the topic could not be described (e.g.
+      #     `unknown_topic_or_part`), `nil` on success
+      #
+      # @note Even if you request one topic, the result is always an array.
+      #
+      # @example Describe a topic
+      #   Karafka::Admin::Topics.describe('events').first
+      #   # => {
+      #   #   name: 'events',
+      #   #   topic_id: '7zVJlh/2SuKCqPUdnbl9nQ',
+      #   #   internal: false,
+      #   #   partitions: [
+      #   #     {
+      #   #       partition: 0,
+      #   #       leader: { id: 1, host: '127.0.0.1', port: 9092, rack: 'rack-1' },
+      #   #       replicas: [{ id: 1, host: '127.0.0.1', port: 9092, rack: 'rack-1' }],
+      #   #       isr: [{ id: 1, host: '127.0.0.1', port: 9092, rack: 'rack-1' }]
+      #   #     }
+      #   #   ],
+      #   #   authorized_operations: nil,
+      #   #   error: nil
+      #   # }
+      #
+      # @example Find the topics that do not exist
+      #   Karafka::Admin.describe_topics(%w[events orders])
+      #     .select { |topic| topic[:error] }
+      #     .map { |topic| topic[:name] }
+      def describe(*topic_names, include_authorized_operations: false)
+        topic_names = topic_names.flatten
+
+        return [] if topic_names.empty?
+
+        report = with_admin do |admin|
+          admin
+            .describe_topics(
+              topic_names.uniq,
+              include_authorized_operations: include_authorized_operations
+            )
+            .wait(max_wait_timeout_ms: max_wait_time_ms)
+        end
+
+        described = report.topics.to_h do |topic|
+          [
+            topic[:name],
+            {
+              name: topic[:name],
+              topic_id: topic[:topic_id],
+              internal: topic[:is_internal],
+              partitions: topic[:partitions],
+              authorized_operations: map_authorized_operations(topic[:authorized_operations]),
+              error: topic[:error]
+            }
+          ]
+        end
+
+        topic_names.map { |topic_name| described.fetch(topic_name) }
+      end
+
       private
 
       # @return [Array<String>] topics names
@@ -374,21 +460,21 @@ module Karafka
       # Resolves the offset if offset is in a time format. Otherwise returns the offset without
       # resolving.
       # @param consumer [::Rdkafka::Consumer]
-      # @param name [String, Symbol] expected topic name
+      # @param topic_name [String, Symbol] expected topic name
       # @param partition [Integer]
       # @param offset [Integer, Time]
       # @return [Integer] expected offset
-      def resolve_offset(consumer, name, partition, offset)
+      def resolve_offset(consumer, topic_name, partition, offset)
         if offset.is_a?(Time)
           tpl = Rdkafka::Consumer::TopicPartitionList.new
           tpl.add_topic_and_partitions_with_offsets(
-            name, partition => offset
+            topic_name, partition => offset
           )
 
           real_offsets = consumer.offsets_for_times(tpl)
           detected_offset = real_offsets
             .to_h
-            .fetch(name)
+            .fetch(topic_name)
             .find { |p_data| p_data.partition == partition }
 
           detected_offset&.offset || raise(Errors::InvalidTimeBasedOffsetError)

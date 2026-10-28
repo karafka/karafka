@@ -14,9 +14,9 @@ module Karafka
       # Topics declared via the standalone DSL leave this nil (treated as default cluster).
       attr_accessor :bootstrap_servers
 
-      # @param name [String, Symbol] topic name
-      def initialize(name)
-        @name = name.to_s
+      # @param topic_name [String, Symbol] topic name
+      def initialize(topic_name)
+        @name = topic_name.to_s
         @active = true
         @partitions = 1
         @replication_factor = 1

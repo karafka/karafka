@@ -85,8 +85,13 @@ draw_routes do
   end
 end
 
-produce_many(DT.topics[0], DT.uuids(10))
-produce_many(DT.topics[1], DT.uuids(10))
+# Produce once both subscription groups are assigned, so none locks itself before a rebalance
+Thread.new do
+  sleep(0.1) until Karafka::App.assignments.size >= 2
+
+  produce_many(DT.topics[0], DT.uuids(10))
+  produce_many(DT.topics[1], DT.uuids(10))
+end
 
 start_karafka_and_wait_until do
   DT[0].size >= 10 && DT[1].size >= 10

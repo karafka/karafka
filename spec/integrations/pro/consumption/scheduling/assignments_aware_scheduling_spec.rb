@@ -139,8 +139,13 @@ draw_routes do
   end
 end
 
-produce_many(DT.topics[0], DT.uuids(100))
-produce_many(DT.topics[1], DT.uuids(100))
+# Produce once both subscription groups are assigned
+Thread.new do
+  sleep(0.1) until Karafka::App.assignments.size >= 2
+
+  produce_many(DT.topics[0], DT.uuids(100))
+  produce_many(DT.topics[1], DT.uuids(100))
+end
 
 start_karafka_and_wait_until do
   DT[:total].size >= 200

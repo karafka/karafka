@@ -185,6 +185,58 @@ RSpec.describe_current do
     end
   end
 
+  describe "#reset" do
+    let(:kafka) { instance_double(Rdkafka::Consumer) }
+    let(:sg_id) { subscription_group.id }
+    let(:error_callbacks) do
+      Karafka::Core::Instrumentation.error_callbacks.instance_variable_get(:@callbacks)
+    end
+
+    before do
+      client.instance_variable_set(:@kafka, kafka)
+      Karafka::Core::Instrumentation.statistics_callbacks.add(sg_id, -> {})
+      Karafka::Core::Instrumentation.error_callbacks.add(sg_id, -> {})
+      Karafka::Core::Instrumentation.oauthbearer_token_refresh_callbacks.add(sg_id, -> {})
+    end
+
+    after do
+      Karafka::Core::Instrumentation.statistics_callbacks.delete(sg_id)
+      Karafka::Core::Instrumentation.error_callbacks.delete(sg_id)
+      Karafka::Core::Instrumentation.oauthbearer_token_refresh_callbacks.delete(sg_id)
+    end
+
+    context "when closing the kafka consumer" do
+      let(:registered_on_close) { [] }
+
+      before do
+        allow(kafka).to receive(:close) { registered_on_close << error_callbacks.key?(sg_id) }
+      end
+
+      it "expect to keep the error callback until the consumer is closed" do
+        client.reset
+
+        expect(registered_on_close).to eq([true])
+      end
+
+      it "expect to remove the error callback after the close" do
+        client.reset
+
+        expect(error_callbacks).not_to have_key(sg_id)
+      end
+    end
+
+    context "when closing the kafka consumer raises" do
+      let(:error) { Rdkafka::RdkafkaError.new(Rdkafka::Bindings::RD_KAFKA_RESP_ERR__FATAL) }
+
+      before { allow(kafka).to receive(:close).and_raise(error) }
+
+      it "expect to remove the error callback anyhow" do
+        expect { client.reset }.to raise_error(Rdkafka::RdkafkaError)
+        expect(error_callbacks).not_to have_key(sg_id)
+      end
+    end
+  end
+
   describe "#inspect" do
     let(:client_name) { "test-consumer-1" }
 

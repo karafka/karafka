@@ -12,16 +12,17 @@ module Karafka
           # @param received_at [Time] moment when we've received the message
           # @return [Karafka::Messages::Message] message object with payload and metadata
           def call(kafka_message, topic, received_at)
-            metadata = Karafka::Messages::Metadata.new(
-              timestamp: kafka_message.timestamp,
-              offset: kafka_message.offset,
-              deserializers: topic.deserializers,
-              partition: kafka_message.partition,
-              topic: topic.name,
-              received_at: received_at,
-              raw_headers: kafka_message.headers,
-              raw_key: kafka_message.key
-            )
+            # Set field by field: `Metadata` is a `keyword_init` Struct, so `new` with keywords
+            # would allocate an extra Hash for every consumed message
+            metadata = Karafka::Messages::Metadata.allocate
+            metadata.timestamp = kafka_message.timestamp
+            metadata.offset = kafka_message.offset
+            metadata.deserializers = topic.deserializers
+            metadata.partition = kafka_message.partition
+            metadata.topic = topic.name
+            metadata.received_at = received_at
+            metadata.raw_headers = kafka_message.headers
+            metadata.raw_key = kafka_message.key
 
             # Get the raw payload
             payload = kafka_message.payload

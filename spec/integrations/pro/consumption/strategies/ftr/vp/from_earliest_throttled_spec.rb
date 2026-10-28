@@ -37,9 +37,13 @@ setup_karafka do |config|
 end
 
 class Consumer < Karafka::BaseConsumer
+  include Karafka::Core::Helpers::Time
+
   def consume
     # just a check that we have this api method included in the strategy
     collapsed?
+
+    DT[:consumed_at] << monotonic_now
 
     messages.each do |message|
       DT[object_id] << message.offset
@@ -59,17 +63,18 @@ end
 
 produce_many(DT.topic, DT.uuids(100))
 
-started_at = Time.now.to_f
-
 start_karafka_and_wait_until do
-  DT.data.values.map(&:size).sum >= 100
+  DT.data.except(:consumed_at).values.map(&:size).sum >= 100
 end
 
-time_taken = Time.now.to_f - started_at
+consumed_at = DT.data.delete(:consumed_at)
+time_taken = consumed_at.max - consumed_at.min
 
 # Make sure we do not process fast and things are throttled.
-# 5 x 5 seconds of throttle is at least 25 seconds
-assert time_taken > 25
+# At most 20 messages per 5 seconds means 100 messages span at least 4 full intervals (20 seconds)
+# from the first to the last consumption. We measure from the first consumption because the
+# startup time before it varies between runners.
+assert time_taken >= 19_000, time_taken
 
 # Since Ruby hash function is slightly nondeterministic, not all the threads may always be used
 # but in general more than 5 need to be always
