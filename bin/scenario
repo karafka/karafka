@@ -23,6 +23,17 @@ ARGV.each do |filter|
   specs.delete_if { |name| !name.include?(filter) }
 end
 
+# Remove specs that require Ruby 4.0+ (Ractor::Port) when running on older Ruby
+if RUBY_VERSION.split('.').first.to_i < 4
+  RUBY_4_REQUIRED_SPECS = [
+    'deserialization/parallel/'
+  ].freeze
+
+  specs.delete_if do |spec|
+    RUBY_4_REQUIRED_SPECS.any? { |required| spec.include?(required) }
+  end
+end
+
 raise ArgumentError, "No integration specs with filters: #{ARGV.join(', ')}" if specs.empty?
 raise ArgumentError, "Many specs found with filters: #{ARGV.join(', ')}" if specs.size != 1
 

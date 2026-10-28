@@ -68,11 +68,11 @@ Tracker.run(messages_count: MAX_MESSAGES_PER_PARTITION * PARTITIONS_COUNT) do
   $stop = nil
   $total = 0
 
-  Karafka::App.config.internal.status.reset!
+  reset_karafka_state!
   Karafka::Server.run
 
   $stop - $start
 end
 
-# Time taken: 44.05786718800664
-# Messages per second: 11348.71095476245
+# Time taken: 29.18828277895227
+# Messages per second: 17130.161571565663

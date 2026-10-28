@@ -1,6 +1,7 @@
 # Karafka Framework Changelog
 
 ## 2.6.2 (Unreleased)
+- **[Breaking]** Move the default deserializers from `Karafka::Deserializers::{Payload,Key,Headers}` to `Karafka::Deserializing::Deserializers::{Payload,Key,Headers}`. `Karafka::Deserializers` is kept as a backwards compatible alias, so existing references keep working.
 - **[EOL]** Drop Ruby 3.2 support; require Ruby 3.3+.
 - **[Feature]** Add `Instrumentation::Vendors::NewRelic::MetricsListener` for publishing Karafka metrics to New Relic. Context is encoded in the metric name, as New Relic custom metrics do not support tags (svyatmuzyka).
 - **[Feature]** Add `karafka info --extended`, printing the routing tree, global app config and effective Kafka config, with sensitive values redacted.
@@ -9,6 +10,7 @@
 - **[Feature]** Add `Karafka::Admin.list_consumer_groups` to list every consumer group in the cluster with its state. Requires karafka-rdkafka `>= 0.31.0`.
 - **[Feature]** Add `Karafka::Admin.describe_consumer_groups` to read consumer groups' state, coordinator, assignor and members with their partition assignments. Requires karafka-rdkafka `>= 0.31.0`.
 - **[Feature]** Add `Karafka::Admin.describe_cluster` and `.describe_topics` to read the cluster id, controller, brokers with racks, topic ids, partition leaders and replicas, and optionally the authorized operations. Requires karafka-rdkafka `>= 0.31.0`.
+- **[Feature]** Add an opt-in Ractor-based parallel deserialization engine (requires Ruby 4.0+), enabled globally with `config.deserializing.parallel.active = true` and per topic with `deserializing(parallel: true)`. Batches below `min_payloads`, or with the feature disabled, fall back to inline deserialization, so results are unchanged either way.
 - [Enhancement] Defer default log file creation until the first write and keep logging working (to stdout) when the log file cannot be created or written, e.g. on read-only filesystems (ydah).
 - [Enhancement] Build `Setup::DefaultsInjector` (and its Pro extension) on `Karafka::Core::Configurable::Injector`. Behavior is unchanged. Requires karafka-core `>= 2.6.3`.
 - [Enhancement] Stop allocating 6 objects per consumed message: build the default topic deserializers only once and read `max_messages` once per poll batch.
