@@ -31,6 +31,7 @@
 # Parallel segments should work correctly with dynamically matched topics from patterns
 
 setup_karafka do |config|
+  config.kafka[:"allow.auto.create.topics"] = true
   config.kafka[:"topic.metadata.refresh.interval.ms"] = 2_000
   config.concurrency = 5
 end

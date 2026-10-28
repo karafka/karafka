@@ -4,6 +4,7 @@
 # processing workers available as it should happen from one of the main threads.
 
 setup_karafka do |config|
+  config.kafka[:"allow.auto.create.topics"] = true
   config.concurrency = 1
   # Publish every one second to check if this is going to be as often within the time-frame of
   # the processing as expected
