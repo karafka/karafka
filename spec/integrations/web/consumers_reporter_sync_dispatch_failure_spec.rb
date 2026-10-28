@@ -21,8 +21,12 @@ Karafka::Web.config.producer = WaterDrop::Producer.new do |producer_config|
   }
 end
 
+# The producers reporter dispatches sync on the same producer, so only count the consumers reports
 Karafka::Web.producer.monitor.subscribe("error.occurred") do |event|
-  DT[:failures] << event[:error] if event[:type] == "messages.produce_many_sync"
+  next unless event[:type] == "messages.produce_many_sync"
+  next unless event[:messages].first[:topic] == Karafka::Web.config.topics.consumers.reports.name
+
+  DT[:failures] << event[:error]
 end
 
 class Consumer < Karafka::BaseConsumer
