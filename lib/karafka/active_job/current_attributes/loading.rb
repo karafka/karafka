@@ -26,7 +26,10 @@ module Karafka
               # Registered before any write, so values set before a failing one are reset as well
               resetable << cattr_klass
 
-              CONTRACT.validate!({ attributes: attributes }, scope: [key])
+              # The contract allocates on each call, so it runs only to report an invalid shape
+              unless attributes.is_a?(Hash)
+                CONTRACT.validate!({ attributes: attributes }, scope: [key])
+              end
 
               attributes.each do |name, value|
                 setter = "#{name}="
