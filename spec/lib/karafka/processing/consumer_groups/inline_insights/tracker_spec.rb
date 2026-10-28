@@ -125,6 +125,22 @@ RSpec.describe_current do
     end
   end
 
+  describe ".exists?" do
+    subject(:result) { described_class.exists?(topic, partition) }
+
+    context "when statistics exist" do
+      before { tracker.add(group_id, statistics) }
+
+      it { expect(result).to be(true) }
+    end
+
+    context "when statistics do not exist" do
+      before { tracker.clear }
+
+      it { expect(result).to be(false) }
+    end
+  end
+
   describe "#clear" do
     before { tracker.add(group_id, statistics) }
 
