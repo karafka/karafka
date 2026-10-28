@@ -15,6 +15,7 @@
 - [Enhancement] Stop allocating a keyword `Hash` per consumed message when building its metadata.
 - [Enhancement] Log only the top two backtrace lines for `librdkafka.error` in the `LoggerListener`, so unreachable brokers no longer flood the logs.
 - [Change] Raise a clear `UnsupportedOptionError` naming JRuby when Swarm runs on a Ruby without `Process.fork`, also when `Swarm::Supervisor#run` is called directly, before any work is done.
+- [Maintenance] Cover `karafka install --share_groups` with an integration spec: it generates `ApplicationShareConsumer` and the app boots with it.
 - [Maintenance] Cover the `:max_timestamp` and Integer-timestamp `Admin#read_partition_offsets` offset modes with integration specs.
 - [Maintenance] Cover the untested New Relic `MetricsListener` paths with integration specs: revoked and shutdown metrics, overridden listener methods, and an empty metrics list.
 - [Maintenance] [Pro] Cover the `JobsQueue` per-group semaphore growth fix under LRJ and async-locking workloads with integration specs.
@@ -29,7 +30,7 @@
 - [Maintenance] Rename positional String topic parameters (`name`, `topic`) to `topic_name` across `Admin`, connection, routing and Pro internals. Positional, so callers are not affected.
 - [Maintenance] Align with the ecosystem naming conventions: name the positional partition count of `Admin.create_topic` / `.create_partitions` (and `Admin::Topics`) `partition_count`, and use named constants for the `karafka console` and Pro `topics health` exit codes.
 - [Maintenance] Drop `byebug` from the test bundle and stop requiring it in the spec helpers.
-- [Fix] Stop `Admin` operations from retrying forever when their result never becomes visible. They now raise `ResultNotVisibleError` after `admin.max_retries_duration`.
+- [Maintenance] Run the CLI swarm and deserializers allocation specs on JRuby.
 - [Fix] Stop `CoordinatorsBuffer#@coordinators` from growing unbounded across rebalances by dropping a topic entry on revoke once it tracks no partitions (mirrors `PausesManager#delete`).
 - [Fix] Use `::JSON.parse` in the ActiveJob deserializer, so consuming ActiveJob messages works with the json gem `>= 3.0`.
 - [Fix] [Pro] Honour the read_committed isolation level in consumer-group lag compensation, so an in-flight transaction no longer overstates the lag (needs karafka-rdkafka `>= 0.30.0`).
@@ -47,6 +48,8 @@
 - [Fix] Stop the listener from failing with `NoMethodError` on JRuby when it checks a subscription group's jobs while workers complete them.
 - [Fix] Stop `#inline_insights` from returning no data on JRuby while another thread adds or evicts partition statistics.
 - [Fix] Restore `InlineInsights::Tracker.exists?`, which raised `NoMethodError` because its delegated `#exists?` was removed.
+- [Fix] Stop `Admin` operations from retrying forever when their result never becomes visible. They now raise `ResultNotVisibleError` after `admin.max_retries_duration`.
+- [Fix] Keep the Datadog `LoggerListener` job types cache consistent on JRuby when many workers fill it at once.
 
 ## 2.6.1 (2026-08-24)
 - **[Feature]** [Pro] Add an opt-in envelope encryption mode for Messages At Rest (`config.encryption.mode = :envelope`, requires openssl `>= 3.0`) without the RSA payload size limit. Upgrade all consuming processes before enabling.
@@ -90,6 +93,7 @@
 - [Enhancement] Raise the swarm supervisor `SHUTDOWN_GRACE_PERIOD` from 1s to 15s so forked nodes have time to finish cleanup before forceful termination.
 - [Enhancement] Move consumer-group-specific internals under a `ConsumerGroups` namespace to prepare for KIP-932 share groups. User-provided classes are unaffected.
 - [Enhancement] Nest consumer-group-specific processing config under `config.internal.processing.consumer_groups`; shared settings stay at `config.internal.processing`.
+- [Change] Require `waterdrop` `>= 2.10.2` for fixes in statistics handling and polling defaults.
 - [Change] Require `karafka-rdkafka` `>= 0.28.0` for `list_offsets`-based batched lag reads.
 - [Change] Require `karafka-rdkafka` `>= 0.27.1` for the `poll_batch`/`poll_batch_nb` fix that caused `TopicNotFoundError` crashes on `partition_eof`.
 - [Change] Remove the public `custom_kafka` reader from `Karafka::Admin` (internal, unused by any public API).
