@@ -6,6 +6,7 @@ RSpec.describe_current do
       Array.new(3) do
         instance_double(Karafka::Messages::Message).tap do |msg|
           allow(msg).to receive(:payload=)
+          allow(msg).to receive(:deserialized?).and_return(false)
         end
       end
     end
@@ -28,6 +29,25 @@ RSpec.describe_current do
 
         expect(messages[0]).to have_received(:payload=).with("payload1")
         expect(messages[1]).to have_received(:payload=).with("payload2")
+        expect(messages[2]).to have_received(:payload=).with("payload3")
+      end
+    end
+
+    context "when a message was already deserialized inline" do
+      let(:results) { %w[payload1 payload2 payload3] }
+
+      before { allow(messages[1]).to receive(:deserialized?).and_return(true) }
+
+      it "does not replace its payload" do
+        described_class.call(messages, results)
+
+        expect(messages[1]).not_to have_received(:payload=)
+      end
+
+      it "still injects into the other messages" do
+        described_class.call(messages, results)
+
+        expect(messages[0]).to have_received(:payload=).with("payload1")
         expect(messages[2]).to have_received(:payload=).with("payload3")
       end
     end

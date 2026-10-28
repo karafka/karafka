@@ -360,7 +360,7 @@ module Karafka
                 coordinator.pause_tracker.increment
               end
 
-              # On Ruby < 4.0 the deserialization attribute is nil (Ractor pool not loaded)
+              # Batch metadata built outside of the builder may have no deserialization set
               deser = messages.metadata.deserialization
               Deserializing::Parallel::Injector.call(messages, deser.retrieve) if deser
             end

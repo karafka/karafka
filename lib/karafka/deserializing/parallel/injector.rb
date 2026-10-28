@@ -9,7 +9,8 @@ module Karafka
         class << self
           # Injects deserialized payloads into messages
           # Messages that failed during parallel deserialization are skipped (left untouched)
-          # so lazy deserialization will retry them during consumption
+          # so lazy deserialization will retry them during consumption. Messages deserialized
+          # inline in the meantime are skipped as well, so their payload is not replaced
           #
           # @param messages [Enumerable<Karafka::Messages::Message>] messages to inject into
           # @param results [Array] deserialized results in same order as messages
@@ -21,6 +22,7 @@ module Karafka
 
               # Skip errors - leave message untouched for lazy deserialization to retry
               next if result.equal?(DESERIALIZATION_ERROR)
+              next if message.deserialized?
 
               message.payload = result
             end
