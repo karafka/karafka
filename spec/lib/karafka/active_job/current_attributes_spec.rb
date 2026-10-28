@@ -159,9 +159,10 @@ RSpec.describe_current do
       context "when one of the attributes is not declared" do
         let(:cattrs) { { "cattr_0" => { "user_id" => 1, "nope" => 2 } } }
 
-        it "expect to raise without running the job and leave no values behind" do
-          expect { consumer.consume }.to raise_error(ArgumentError, /nope/)
-          expect(executed).to be_empty
+        it "expect to skip it, run the job and leave no values behind" do
+          consumer.consume
+
+          expect(executed).to eq([[1, nil, nil, nil]])
           expect(Karafka::CurrentAttrTest.user_id).to be_nil
         end
       end
@@ -169,10 +170,12 @@ RSpec.describe_current do
       context "when a key names a class level writer that is not an attribute" do
         let(:cattrs) { { "cattr_0" => { "defaults" => { "user_id" => 1 } } } }
 
-        it "expect to raise and not change the class" do
+        it "expect to skip it and not change the class" do
           defaults = Karafka::CurrentAttrTest.defaults
 
-          expect { consumer.consume }.to raise_error(ArgumentError, /defaults/)
+          consumer.consume
+
+          expect(executed).to eq([[nil, nil, nil, nil]])
           expect(Karafka::CurrentAttrTest.defaults).to be(defaults)
         end
       end
@@ -181,7 +184,7 @@ RSpec.describe_current do
         let(:cattrs) { { "cattr_0" => [["user_id", 1], ["nope", 2]] } }
 
         it "expect to raise and leave no values behind" do
-          expect { consumer.consume }.to raise_error(ArgumentError, /must be a Hash/)
+          expect { consumer.consume }.to raise_error(Karafka::Errors::InvalidConfigurationError)
           expect(executed).to be_empty
           expect(Karafka::CurrentAttrTest.user_id).to be_nil
         end
@@ -192,7 +195,7 @@ RSpec.describe_current do
           let(:cattrs) { { "cattr_0" => attributes } }
 
           it "expect to raise" do
-            expect { consumer.consume }.to raise_error(ArgumentError, /must be a Hash/)
+            expect { consumer.consume }.to raise_error(Karafka::Errors::InvalidConfigurationError)
             expect(executed).to be_empty
           end
         end
@@ -223,8 +226,10 @@ RSpec.describe_current do
           }
         end
 
-        it "expect to reset all classes" do
-          expect { consumer.consume }.to raise_error(ArgumentError, /nope/)
+        it "expect to skip it, run the job and reset all classes" do
+          consumer.consume
+
+          expect(executed).to eq([[1, "t1", nil, nil]])
           expect(Karafka::CurrentAttrTest.user_id).to be_nil
           expect(Karafka::CurrentAttrSecondTest.tenant).to be_nil
         end

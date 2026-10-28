@@ -1,9 +1,8 @@
 # frozen_string_literal: true
 
-# When restoring CurrentAttributes from a job payload fails part way (here on an attribute the
-# consumer does not declare, e.g. during a rolling deploy, after a declared one was already set),
-# the values already set must be reset, so they do not leak into the next job processed on the
-# same worker thread.
+# When a job payload carries a CurrentAttributes attribute the consumer does not declare (e.g.
+# during a rolling deploy), it is skipped, the job runs with the declared ones, and those are reset
+# so they do not leak into the next job processed on the same worker thread.
 
 setup_karafka(allow_errors: true) do |config|
   config.concurrency = 1
@@ -50,7 +49,7 @@ class FollowingJob < ActiveJob::Base
 end
 
 payload = RestoredJob.new.serialize.merge(
-  "cattr_0" => { "tenant" => "leaked-tenant", "region" => "eu" }
+  "cattr_0" => { "tenant" => "restored-tenant", "region" => "eu" }
 )
 
 Karafka.producer.produce_sync(topic: DT.topic, payload: payload.to_json)
@@ -61,5 +60,5 @@ start_karafka_and_wait_until do
 end
 
 assert_equal [nil], DT[:following_tenant], DT[:following_tenant]
-assert_equal [], DT[:restored_tenant]
-assert DT[:errors].include?(ArgumentError), DT[:errors]
+assert_equal ["restored-tenant"], DT[:restored_tenant]
+assert_equal [], DT[:errors]
