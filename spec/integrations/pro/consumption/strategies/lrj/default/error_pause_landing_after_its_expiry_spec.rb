@@ -36,7 +36,11 @@ setup_karafka(allow_errors: %w[consumer.consume.error])
 
 module SlowErrorPause
   def pause(*)
-    sleep(1) if DT[:attempts].size == 1 && !DT.key?(:delayed) && (DT[:delayed] = true)
+    if DT[:attempts].size == 1 && !DT.key?(:delayed)
+      DT[:delayed] = true
+
+      sleep(1)
+    end
 
     super
   end

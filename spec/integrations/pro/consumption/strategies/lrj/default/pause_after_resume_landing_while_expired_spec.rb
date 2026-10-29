@@ -39,7 +39,11 @@ module SlowUserPause
   def pause(*)
     super
 
-    sleep(1) if DT.key?(:user_pause) && !DT.key?(:delayed) && (DT[:delayed] = true)
+    if DT.key?(:user_pause) && !DT.key?(:delayed)
+      DT[:delayed] = true
+
+      sleep(1)
+    end
   end
 end
 
