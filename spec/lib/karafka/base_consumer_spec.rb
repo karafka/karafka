@@ -618,6 +618,7 @@ RSpec.describe_current do
       consumer.messages = messages
 
       allow(coordinator.pause_tracker).to receive(:pause)
+      allow(coordinator.pause_tracker).to receive(:hold)
       allow(client).to receive(:pause)
     end
 
@@ -660,9 +661,24 @@ RSpec.describe_current do
     context "when the tracker pause could expire before the client pause lands" do
       before { consumer.send(:pause, 100) }
 
-      it "expect to pause via client before pausing the tracker" do
+      it "expect to hold the tracker until the client pause lands" do
+        expect(coordinator.pause_tracker).to have_received(:hold).ordered
         expect(client).to have_received(:pause).ordered
         expect(coordinator.pause_tracker).to have_received(:pause).ordered
+      end
+    end
+
+    context "when the client pause fails" do
+      before do
+        allow(client).to receive(:pause).and_raise(StandardError)
+        allow(coordinator.pause_tracker).to receive(:pause).and_call_original
+        allow(coordinator.pause_tracker).to receive(:hold).and_call_original
+      end
+
+      it "expect to still pause the tracker with the timeout" do
+        expect { consumer.send(:pause, 100, 2_000) }.to raise_error(StandardError)
+        expect(coordinator.pause_tracker).to have_received(:pause).with(2_000)
+        expect(coordinator.pause_tracker.current_timeout).to eq(2_000)
       end
     end
   end
