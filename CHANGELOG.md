@@ -51,6 +51,7 @@
 - [Fix] Stop `#inline_insights` from returning no data on JRuby while another thread adds or evicts partition statistics.
 - [Fix] Restore `InlineInsights::Tracker.exists?`, which raised `NoMethodError` because its delegated `#exists?` was removed.
 - [Fix] Stop `Admin` operations from retrying forever when their result never becomes visible. They now raise `ResultNotVisibleError` after `admin.max_retries_duration`.
+- [Fix] Pause the client before the pause tracker, so a retry pause of a non-blocking (e.g. LRJ) job can no longer expire and be resumed before the client pause lands, leaving the partition paused forever.
 - [Fix] Keep the Datadog `LoggerListener` job types cache consistent on JRuby when many workers fill it at once.
 - [Fix] [Pro] Stabilize the `lost_assignment_with_offset_storage` transactions spec.
 

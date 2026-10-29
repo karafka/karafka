@@ -232,7 +232,7 @@ RSpec.describe_current do
 
         expect(client)
           .to have_received(:pause)
-          .with(topic.name, first_message.partition, offset, 500)
+          .with(topic.name, first_message.partition, offset, 1_000)
       end
 
       it "expect to pause with time tracker" do
@@ -268,7 +268,7 @@ RSpec.describe_current do
 
         expect(client)
           .to have_received(:pause)
-          .with(topic.name, first_message.partition, offset, 500)
+          .with(topic.name, first_message.partition, offset, 1_000)
       end
 
       it "expect to track this with an instrumentation" do
@@ -300,7 +300,7 @@ RSpec.describe_current do
 
         expect(client)
           .to have_received(:pause)
-          .with(topic.name, first_message.partition, offset, 500)
+          .with(topic.name, first_message.partition, offset, 1_000)
       end
 
       # The shutdown escalation itself is handled by the auto-subscribed
@@ -633,9 +633,9 @@ RSpec.describe_current do
 
       before { consumer.send(:pause, 100) }
 
-      it "expect to pause via client and use pause tracker without any arguments" do
+      it "expect to pause via client and use pause tracker with the backoff interval" do
         expect(client).to have_received(:pause).with(*expected_args)
-        expect(coordinator.pause_tracker).to have_received(:pause).with(no_args)
+        expect(coordinator.pause_tracker).to have_received(:pause).with(500)
       end
     end
 
@@ -645,7 +645,7 @@ RSpec.describe_current do
           messages.metadata.topic,
           messages.metadata.partition,
           100,
-          500
+          2_000
         ]
       end
 
@@ -654,6 +654,15 @@ RSpec.describe_current do
       it "expect to pause via client and use pause tracker with provided timeout" do
         expect(client).to have_received(:pause).with(*expected_args)
         expect(coordinator.pause_tracker).to have_received(:pause).with(2_000)
+      end
+    end
+
+    context "when the tracker pause could expire before the client pause lands" do
+      before { consumer.send(:pause, 100) }
+
+      it "expect to pause via client before pausing the tracker" do
+        expect(client).to have_received(:pause).ordered
+        expect(coordinator.pause_tracker).to have_received(:pause).ordered
       end
     end
   end

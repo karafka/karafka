@@ -130,16 +130,21 @@ module Karafka
       #   or other advanced options the consecutive offset may not be the one you want to pause on.
       #   Test it well to ensure, that this behaviour is expected by you.
       def pause(offset, timeout = nil, manual_pause = true)
-        timeout ? coordinator.pause_tracker.pause(timeout) : coordinator.pause_tracker.pause
+        timeout ||= coordinator.pause_tracker.backoff_interval
 
         offset = nil if offset == :consecutive
 
+        # The client pause has to land before the tracker pause. Once the tracker pause expires,
+        # the listener resumes the partition, so a client pause landing after that (for example
+        # with a short timeout and a non-blocking job) would never be resumed.
         client.pause(
           topic.name,
           partition,
           offset,
-          coordinator.pause_tracker.current_timeout
+          timeout
         )
+
+        coordinator.pause_tracker.pause(timeout)
 
         # Indicate, that user took a manual action of pausing
         coordinator.manual_pause if manual_pause

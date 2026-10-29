@@ -106,9 +106,7 @@ module Karafka
         end
       end
 
-      private
-
-      # Computers the exponential backoff
+      # Computes the exponential backoff
       # @return [Integer] backoff in milliseconds
       def backoff_interval
         backoff_factor = @exponential_backoff ? 2**@attempt : 1
