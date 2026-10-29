@@ -68,16 +68,22 @@ class Hanging < Karafka::BaseConsumer
   end
 end
 
+# Separate consumer groups, so the second one joining does not revoke the first one's partition.
+# A revocation job waiting behind the hanging job would keep the first listener from pinging.
 draw_routes do
-  subscription_group :a do
-    topic DT.topics[0] do
-      consumer Normal
+  consumer_group DT.groups[0] do
+    subscription_group :a do
+      topic DT.topics[0] do
+        consumer Normal
+      end
     end
   end
 
-  subscription_group :b do
-    topic DT.topics[1] do
-      consumer Hanging
+  consumer_group DT.groups[1] do
+    subscription_group :b do
+      topic DT.topics[1] do
+        consumer Hanging
+      end
     end
   end
 end
