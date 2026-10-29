@@ -4,7 +4,9 @@
 # This should operate even if topic is not created as it may be in the future.
 # Even if not created, we should still be able to operate, start and stop
 
-setup_karafka
+setup_karafka do |config|
+  config.kafka[:"allow.auto.create.topics"] = true
+end
 
 class Consumer < Karafka::BaseConsumer
   def consume

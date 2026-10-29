@@ -30,7 +30,9 @@
 
 # When we have inactive topics, they should be ok without consumer defined
 
-setup_karafka
+setup_karafka do |config|
+  config.kafka[:"allow.auto.create.topics"] = true
+end
 
 draw_routes(create_topics: false) do
   consumer_group "a" do

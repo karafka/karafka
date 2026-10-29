@@ -32,6 +32,7 @@
 # be picked up and operable even when topics are created after the subscription starts
 
 setup_karafka do |config|
+  config.kafka[:"allow.auto.create.topics"] = true
   config.kafka[:"topic.metadata.refresh.interval.ms"] = 2_000
 end
 

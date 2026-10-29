@@ -31,7 +31,9 @@
 # When we define a pattern that gets assigned a matcher topic and this matcher topic is part of
 # the topics we want to include (by assigned name) it should be ok
 
-setup_karafka
+setup_karafka do |config|
+  config.kafka[:"allow.auto.create.topics"] = true
+end
 
 draw_routes(create_topics: false) do
   pattern(/non-existing-ever-na/) do

@@ -31,6 +31,7 @@
 # We should be able to multiplex a pattern and things should operate as expected
 
 setup_karafka do |config|
+  config.kafka[:"allow.auto.create.topics"] = true
   config.concurrency = 10
 end
 

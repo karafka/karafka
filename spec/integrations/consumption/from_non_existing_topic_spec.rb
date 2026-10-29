@@ -2,7 +2,9 @@
 
 # Karafka in dev should pick up new topic creation fairly fast. It should not wait for 5 minutes
 
-setup_karafka
+setup_karafka do |config|
+  config.kafka[:"allow.auto.create.topics"] = true
+end
 
 class Consumer < Karafka::BaseConsumer
   def consume
