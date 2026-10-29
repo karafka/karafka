@@ -4,6 +4,8 @@ source "https://rubygems.org"
 
 gemspec
 
+gem "rake"
+
 # Karafka gem does not require activejob, karafka-web or fugit to work
 # They are added here because they are part of the integration suite
 # Since some of those are only needed for some specs, they should never be required automatically
