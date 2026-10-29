@@ -66,8 +66,8 @@
 - [Fix] Remove the accidental shim for the pre-2.6.0 `config.internal.processing.*` paths; use `config.internal.processing.consumer_groups.*` instead. Requires `karafka-testing >= 2.6.2`.
 - [Fix] Stop `PausesManager#@pauses` from growing unbounded across rebalances; unpaused trackers are now removed on revocation (added `PausesManager#delete`).
 - [Fix] Allow-list a benign `TOPIC_ALREADY_EXISTS` broker warning in the unexpected patterns loop spec.
-- [Fix] [Pro] Fix unbounded memory growth from `Pro::Processing::JobsQueue`'s per-group semaphore accumulating unconsumed `#tick` signals under non-blocking/LRJ and async-locking workloads.
-- [Fix] [Pro] Stop `Pro::Processing::JobsQueue#unlock` from decrementing the `waiting` counter before confirming the job was tracked, which corrupted the counter after a group reset.
+- [Fix] [Pro] Fix unbounded memory growth in `Pro::Processing::JobsQueue` under non-blocking/LRJ and async-locking workloads.
+- [Fix] [Pro] Fix `Pro::Processing::JobsQueue#unlock` corrupting the `waiting` counter after a group reset.
 - [Fix] Stop `Swarm::Node#signal` from signaling the stale pid of an already-dead node, which the OS may have reassigned to another process.
 
 ## 2.6.0 (2026-08-05)
@@ -114,7 +114,7 @@
 - [Fix] Evict a partition's `PerformanceTracker` samples on revoke (Pro). **Breaking (internal API):** `processing_time_p95` now takes the subscription group id first.
 - [Fix] Fall back to current offset metadata instead of raising `KeyError` in Virtual Partitions `VirtualOffsetManager#markable` under the `:exact` strategy (Pro).
 - [Fix] Leave tombstone records (nil payload) untouched on produce/consume instead of crashing in encryption, so they stay valid for log compaction (Pro).
-- [Fix] Recompute the `Pro::Processing::JobsQueue#clear` async-locking fast-path flag from the remaining groups' locks, so another group's active `lock_async` is no longer ignored (Pro).
+- [Fix] Fix `Pro::Processing::JobsQueue#clear` ignoring another group's active `lock_async` (Pro).
 - [Fix] Reset the per-partition retry attempt counter on revocation, so a message reclaimed after a rebalance is not dispatched to the DLQ early.
 - [Fix] Reset ActiveJob `CurrentAttributes` in an `ensure`, so a failed job's attributes don't leak into the next job on the same worker.
 - [Fix] Return `false` from `#mark_as_consumed`, `#mark_as_consumed!`, and `#commit_offsets!` when the partition was lost (previously could return `true`).
