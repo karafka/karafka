@@ -185,7 +185,7 @@ RSpec.describe Karafka::BaseConsumer, type: :pro do
 
         expect(client)
           .to have_received(:pause)
-          .with(topic.name, first_message.partition, offset, 500)
+          .with(topic.name, first_message.partition, offset, 1_000)
       end
 
       it "expect to pause with time tracker" do
@@ -251,7 +251,7 @@ RSpec.describe Karafka::BaseConsumer, type: :pro do
 
         expect(client)
           .to have_received(:pause)
-          .with(topic.name, first_message.partition, offset, 500)
+          .with(topic.name, first_message.partition, offset, 1_000)
       end
 
       it "expect to pause with time tracker" do
@@ -360,7 +360,7 @@ RSpec.describe Karafka::BaseConsumer, type: :pro do
 
         expect(client)
           .to have_received(:pause)
-          .with(topic.name, first_message.partition, offset, 500)
+          .with(topic.name, first_message.partition, offset, 1_000)
       end
 
       it "expect to pause with time tracker" do
