@@ -195,6 +195,22 @@ module Karafka
         share.acknowledgement.mode
       ].freeze
 
+      # Consumer-group / offset-management attributes that librdkafka's KIP-932 share consumer
+      # preview does not support and rejects on client creation (they are broker-side for the
+      # share protocol) or that simply have no meaning without partition offsets. We subtract them
+      # from the shared consumer attributes so they cannot leak into a share consumer from the
+      # global kafka config.
+      SHARE_GROUP_EXCLUDED = %i[
+        allow.auto.create.topics
+        group.protocol
+        group.protocol.type
+        heartbeat.interval.ms
+        session.timeout.ms
+        offset.store.method
+        offset.store.path
+        offset.store.sync.interval.ms
+      ].freeze
+
       # Producer only attributes on top of {COMMON}.
       PRODUCER_SPECIFIC = %i[
         acks
@@ -235,7 +251,9 @@ module Karafka
       CONSUMER_GROUP = (COMMON + CONSUMER_COMMON + CONSUMER_GROUP_SPECIFIC).sort.freeze
 
       # List of rdkafka share consumer (KIP-932) accepted attributes
-      SHARE_GROUP = (COMMON + CONSUMER_COMMON + SHARE_GROUP_SPECIFIC).sort.freeze
+      SHARE_GROUP = (
+        COMMON + CONSUMER_COMMON + SHARE_GROUP_SPECIFIC - SHARE_GROUP_EXCLUDED
+      ).sort.freeze
 
       # List of rdkafka producer accepted attributes
       PRODUCER = (COMMON + PRODUCER_SPECIFIC).sort.freeze

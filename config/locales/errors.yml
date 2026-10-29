@@ -171,6 +171,9 @@ en:
           This ensures proper Kafka metrics reporting and avoids name collisions.
           To disable this validation, set config.strict_topics_namespacing to false.
 
+        acknowledgements.active_format: 'needs to be true'
+        acknowledgements.unacknowledged_format: 'needs to be either :release, :accept or :reject'
+
         deserializers.active_format: 'needs to be true'
         deserializers.payload_format: 'needs to respond to #call'
         deserializers.key_format: 'needs to respond to #call'

@@ -21,6 +21,9 @@ module Karafka
                   .subscription_groups
                   .values
                   .flat_map(&:itself)
+                  # Inline insights is a consumer-group feature; share-group topics do not carry
+                  # the `#inline_insights?` predicate, so we only consider consumer-group ones
+                  .select { |subscription_group| subscription_group.group.consumer_group? }
                   .flat_map(&:topics)
                   .flat_map(&:to_a)
                   .any?(&:inline_insights?)

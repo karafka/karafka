@@ -63,6 +63,24 @@ RSpec.describe_current do
   before { allow(subscription_group).to receive(:topics).and_return(topics) }
 
   describe "#subscriptions" do
+    context "when it is a share group subscription group" do
+      subject(:subscription_group) do
+        Karafka::Routing::Builder.new.draw do
+          share_group :share_group_name do
+            topic :share_topic do
+              consumer Class.new(Karafka::ShareConsumer)
+            end
+          end
+        end.first.subscription_groups.first
+      end
+
+      before { allow(subscription_group).to receive(:topics).and_call_original }
+
+      it "subscribes to all active topics without using direct assignments" do
+        expect(subscription_group.subscriptions).to eq(["share_topic"])
+      end
+    end
+
     context "when there are active topics without direct assignments" do
       it "returns an array of subscription names" do
         expect(subscription_group.subscriptions).to eq(["active_topic"])

@@ -156,6 +156,9 @@ module Karafka
       #   5 seconds during processing plus prior to each messages poll. It takes
       #   0.6 microseconds per call.
       def on_client_events_poll(event)
+        # Share groups have no partition assignments to lose
+        return unless event[:subscription_group].group.consumer_group?
+
         client = event[:caller]
 
         # Only clear assignments if they were actually lost

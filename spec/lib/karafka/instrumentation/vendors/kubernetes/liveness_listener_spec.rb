@@ -292,7 +292,16 @@ RSpec.describe_current do
     def sg_with(max_poll_interval)
       instance_double(
         Karafka::Routing::SubscriptionGroup,
+        group: instance_double(Karafka::Routing::ConsumerGroup, consumer_group?: true),
         kafka: { "max.poll.interval.ms": max_poll_interval }
+      )
+    end
+
+    def share_sg
+      instance_double(
+        Karafka::Routing::SubscriptionGroup,
+        group: instance_double(Karafka::Routing::ShareGroups::Group, consumer_group?: false),
+        kafka: {}
       )
     end
 
@@ -316,6 +325,27 @@ RSpec.describe_current do
         it "does not fall back to the root kafka config" do
           expect(Karafka::Setup::DefaultsInjector).not_to receive(:consumer)
           stability_ttl
+        end
+      end
+
+      context "when share groups are routed next to consumer groups" do
+        before do
+          allow(Karafka::App).to receive(:subscription_groups).and_return(
+            cg1: [sg_with(300_000)],
+            sg1: [share_sg]
+          )
+        end
+
+        it "derives the default from the consumer groups only" do
+          expect(stability_ttl).to eq(300_000 * 2)
+        end
+      end
+
+      context "when only share groups are routed" do
+        before { allow(Karafka::App).to receive(:subscription_groups).and_return(sg1: [share_sg]) }
+
+        it "falls back to the root config max.poll.interval.ms times 2" do
+          expect(stability_ttl).to eq(300_000 * 2)
         end
       end
 

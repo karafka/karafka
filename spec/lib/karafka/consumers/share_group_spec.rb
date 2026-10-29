@@ -18,27 +18,130 @@ RSpec.describe_current do
     end
   end
 
-  describe "the not-yet-implemented acknowledgement API" do
-    let(:message) { instance_double(Karafka::Messages::Message) }
-
-    it "expect #mark_accepted to raise NotImplementedError" do
-      expect { consumer.mark_accepted(message) }.to raise_error(NotImplementedError)
+  describe "the acknowledgement API" do
+    let(:message) { build(:messages_message) }
+    let(:client) do
+      instance_double(
+        Karafka::Connection::ShareGroups::Client,
+        mark_as_accepted: true,
+        mark_as_released: true,
+        mark_as_rejected: true,
+        commit!: nil
+      )
     end
 
-    it "expect #mark_released to raise NotImplementedError" do
-      expect { consumer.mark_released(message) }.to raise_error(NotImplementedError)
+    before { consumer.client = client }
+
+    describe "async (flushed on the next commit)" do
+      it "expect #mark_as_accepted to accept the message via the client" do
+        expect(client).to receive(:mark_as_accepted).with(message)
+        consumer.mark_as_accepted(message)
+      end
+
+      it "expect #mark_as_released to release the message via the client" do
+        expect(client).to receive(:mark_as_released).with(message)
+        consumer.mark_as_released(message)
+      end
+
+      it "expect #mark_as_rejected to reject the message via the client" do
+        expect(client).to receive(:mark_as_rejected).with(message)
+        consumer.mark_as_rejected(message)
+      end
+
+      it "expect to return true when acknowledging" do
+        expect(consumer.mark_as_accepted(message)).to be(true)
+      end
     end
 
-    it "expect #mark_released with a delay to raise NotImplementedError" do
-      expect { consumer.mark_released(message, delay: 1_000) }.to raise_error(NotImplementedError)
+    describe "sync acknowledgement outcome" do
+      let(:partition) { Rdkafka::Consumer::Partition.new(message.partition, nil, error) }
+      let(:result) do
+        instance_double(
+          Rdkafka::Consumer::TopicPartitionList,
+          to_h: { message.topic => [partition] }
+        )
+      end
+
+      before { allow(client).to receive(:commit!).and_return(result) }
+
+      context "when the broker accepted the acknowledgements" do
+        let(:error) { 0 }
+
+        it { expect(consumer.mark_as_accepted!(message)).to be(true) }
+      end
+
+      context "when the broker rejected the acknowledgements (lock expired)" do
+        let(:error) { 121 }
+
+        it { expect(consumer.mark_as_accepted!(message)).to be(false) }
+      end
+
+      context "when there was nothing to flush" do
+        let(:result) { nil }
+        let(:error) { 0 }
+
+        it { expect(consumer.mark_as_accepted!(message)).to be(true) }
+      end
     end
 
-    it "expect #mark_rejected to raise NotImplementedError" do
-      expect { consumer.mark_rejected(message) }.to raise_error(NotImplementedError)
+    describe "when the client did not acknowledge (closed or record not acquired)" do
+      before { allow(client).to receive(:mark_as_accepted).and_return(false, true) }
+
+      it { expect(consumer.mark_as_accepted(message)).to be(false) }
+
+      it "expect not to consider the message acknowledged" do
+        consumer.mark_as_accepted(message)
+
+        expect(consumer.mark_as_accepted(message)).to be(true)
+      end
     end
 
-    it "expect #extend_lock! to raise NotImplementedError" do
-      expect { consumer.extend_lock!(message) }.to raise_error(NotImplementedError)
+    describe "acknowledging the same message twice" do
+      before { consumer.mark_as_accepted(message) }
+
+      it "expect not to acknowledge it again and to return false" do
+        expect(consumer.mark_as_released(message)).to be(false)
+        expect(consumer.mark_as_rejected!(message)).to be(false)
+        expect(client).not_to have_received(:mark_as_released)
+        expect(client).not_to have_received(:mark_as_rejected)
+        expect(client).not_to have_received(:commit!)
+      end
+
+      it "expect to allow acknowledging it again in the next batch" do
+        consumer.send(:acknowledgements_tracker).clear
+
+        expect(consumer.mark_as_released(message)).to be(true)
+      end
+    end
+
+    describe "sync (flushed immediately)" do
+      it "expect #mark_as_accepted! to accept and commit synchronously" do
+        expect(client).to receive(:mark_as_accepted).with(message).ordered
+        expect(client).to receive(:commit!).ordered
+        consumer.mark_as_accepted!(message)
+      end
+
+      it "expect #mark_as_released! to release and commit synchronously" do
+        expect(client).to receive(:mark_as_released).with(message).ordered
+        expect(client).to receive(:commit!).ordered
+        consumer.mark_as_released!(message)
+      end
+
+      it "expect #mark_as_rejected! to reject and commit synchronously" do
+        expect(client).to receive(:mark_as_rejected).with(message).ordered
+        expect(client).to receive(:commit!).ordered
+        consumer.mark_as_rejected!(message)
+      end
+    end
+  end
+
+  describe "not-yet-available API" do
+    # Delayed release and lock extension (RENEW) are Pro/future features and are intentionally
+    # absent from the core share consumer rather than present as raising stubs.
+    %i[extend_lock! renew].each do |method_name|
+      it "expect not to respond to :#{method_name}" do
+        expect(consumer).not_to respond_to(method_name)
+      end
     end
   end
 
@@ -47,7 +150,7 @@ RSpec.describe_current do
     # the consumer-group offset/pause/seek/eof/revocation API must not be present.
     %i[
       pause resume seek seek_offset eofed? revoked? retrying? attempt retry_after_pause
-      on_consume on_after_consume on_eofed on_revoked
+      on_eofed on_revoked
     ].each do |method_name|
       it "expect not to respond to :#{method_name}" do
         expect(consumer).not_to respond_to(method_name)

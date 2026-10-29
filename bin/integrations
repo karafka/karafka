@@ -71,7 +71,10 @@ class Scenario
     'cli/declaratives/create/new_with_exit_code_spec.rb' => [2].freeze,
     'cli/declaratives/plan/when_changes_with_detailed_exit_code_spec.rb' => [2].freeze,
     'cli/declaratives/align/incorrectly_spec.rb' => [1].freeze,
-    'setup/with_kip_848_protocol_incorrect_config_spec.rb' => [1].freeze
+    'setup/with_kip_848_protocol_incorrect_config_spec.rb' => [1].freeze,
+    'share_groups/shutdown/forceful_shutdown_spec.rb' => [2].freeze,
+    'share_groups/shutdown/forceful_shutdown_on_hanging_shutdown_spec.rb' => [2].freeze,
+    'share_groups/shutdown/sub_second_shutdown_timeout_spec.rb' => [0, 2].freeze
   }.freeze
 
   private_constant :MAX_RUN_TIME, :KILL_AFTER, :EXIT_CODES
