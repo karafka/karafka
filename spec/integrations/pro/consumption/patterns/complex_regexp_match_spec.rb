@@ -32,6 +32,7 @@
 # https://github.com/ccxvii/minilibs/blob/master/regexp.c
 
 setup_karafka do |config|
+  config.kafka[:"allow.auto.create.topics"] = true
   config.kafka[:"topic.metadata.refresh.interval.ms"] = 2_000
 end
 

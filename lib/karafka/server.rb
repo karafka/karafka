@@ -106,11 +106,14 @@ module Karafka
       #   please start a separate thread to do so.
       def stop
         # Initialize the stopping process only if Karafka was running
+        # Lock-free checks keep a stop from an `app.stopping`/`app.stopped` subscriber (status
+        # mutex already held) from re-entering the transition
         return if Karafka::App.stopping?
         return if Karafka::App.stopped?
         return if Karafka::App.terminated?
-
-        Karafka::App.stop!
+        # The check and the transition are one atomic step, so only one of concurrent callers
+        # runs the stop sequence
+        return unless Karafka::App.stop!
 
         timeout = shutdown_timeout
 

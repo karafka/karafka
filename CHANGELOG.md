@@ -31,9 +31,11 @@
 - [Maintenance] Align with the ecosystem naming conventions: name the positional partition count of `Admin.create_topic` / `.create_partitions` (and `Admin::Topics`) `partition_count`, and use named constants for the `karafka console` and Pro `topics health` exit codes.
 - [Maintenance] Drop `byebug` from the test bundle and stop requiring it in the spec helpers.
 - [Maintenance] Run the CLI swarm and deserializers allocation specs on JRuby.
+- [Maintenance] Declare `rake` in the `Gemfile`. It came only through `karafka-rdkafka`, which will stop depending on it for precompiled platform gems.
 - [Fix] Stop `CoordinatorsBuffer#@coordinators` from growing unbounded across rebalances by dropping a topic entry on revoke once it tracks no partitions (mirrors `PausesManager#delete`).
 - [Fix] Use `::JSON.parse` in the ActiveJob deserializer, so consuming ActiveJob messages works with the json gem `>= 3.0`.
 - [Fix] [Pro] Honour the read_committed isolation level in consumer-group lag compensation, so an in-flight transaction no longer overstates the lag (needs karafka-rdkafka `>= 0.30.0`).
+- [Fix] Run the `Karafka::Server.stop` sequence once when two stops are requested at the same time (e.g. TERM then INT on JRuby): the state check and the `stopping` transition are now one atomic step.
 - [Fix] [Pro] Stabilize the `Karafka::Admin::Recovery` `read_committed_offsets` no-offsets integration spec against a fresh CI broker.
 - [Fix] Stabilize the `Karafka::Admin::Acl` `#create`/`#describe` specs against asynchronous ACL propagation on slow CI.
 - [Fix] Stabilize the empty-topic `read_watermark_offsets` specs against a broker leader-election race.
@@ -47,9 +49,11 @@
 - [Fix] Set `Message#received_at` to the moment each message was polled, not the moment its batch was built, so it no longer trails by up to `max_wait_time` on low traffic topics (#2292).
 - [Fix] Stop the listener from failing with `NoMethodError` on JRuby when it checks a subscription group's jobs while workers complete them.
 - [Fix] Stop `#inline_insights` from returning no data on JRuby while another thread adds or evicts partition statistics.
+- [Fix] Restore `InlineInsights::Tracker.exists?`, which raised `NoMethodError` because its delegated `#exists?` was removed.
 - [Fix] Stop `Admin` operations from retrying forever when their result never becomes visible. They now raise `ResultNotVisibleError` after `admin.max_retries_duration`.
 - [Fix] Keep the Datadog `LoggerListener` job types cache consistent on JRuby when many workers fill it at once.
 - [Fix] Stop forceful shutdown from using a listener's client from two threads at once on JRuby. A listener still running after termination now keeps its client open and is reported via `app.forceful_stopping.listener_skipped`.
+- [Fix] [Pro] Stabilize the `lost_assignment_with_offset_storage` transactions spec.
 
 ## 2.6.1 (2026-08-24)
 - **[Feature]** [Pro] Add an opt-in envelope encryption mode for Messages At Rest (`config.encryption.mode = :envelope`, requires openssl `>= 3.0`) without the RSA payload size limit. Upgrade all consuming processes before enabling.
@@ -66,8 +70,8 @@
 - [Fix] Remove the accidental shim for the pre-2.6.0 `config.internal.processing.*` paths; use `config.internal.processing.consumer_groups.*` instead. Requires `karafka-testing >= 2.6.2`.
 - [Fix] Stop `PausesManager#@pauses` from growing unbounded across rebalances; unpaused trackers are now removed on revocation (added `PausesManager#delete`).
 - [Fix] Allow-list a benign `TOPIC_ALREADY_EXISTS` broker warning in the unexpected patterns loop spec.
-- [Fix] [Pro] Fix unbounded memory growth from `Pro::Processing::JobsQueue`'s per-group semaphore accumulating unconsumed `#tick` signals under non-blocking/LRJ and async-locking workloads.
-- [Fix] [Pro] Stop `Pro::Processing::JobsQueue#unlock` from decrementing the `waiting` counter before confirming the job was tracked, which corrupted the counter after a group reset.
+- [Fix] [Pro] Fix unbounded memory growth in `Pro::Processing::JobsQueue` under non-blocking/LRJ and async-locking workloads.
+- [Fix] [Pro] Fix `Pro::Processing::JobsQueue#unlock` corrupting the `waiting` counter after a group reset.
 - [Fix] Stop `Swarm::Node#signal` from signaling the stale pid of an already-dead node, which the OS may have reassigned to another process.
 
 ## 2.6.0 (2026-08-05)
@@ -114,7 +118,7 @@
 - [Fix] Evict a partition's `PerformanceTracker` samples on revoke (Pro). **Breaking (internal API):** `processing_time_p95` now takes the subscription group id first.
 - [Fix] Fall back to current offset metadata instead of raising `KeyError` in Virtual Partitions `VirtualOffsetManager#markable` under the `:exact` strategy (Pro).
 - [Fix] Leave tombstone records (nil payload) untouched on produce/consume instead of crashing in encryption, so they stay valid for log compaction (Pro).
-- [Fix] Recompute the `Pro::Processing::JobsQueue#clear` async-locking fast-path flag from the remaining groups' locks, so another group's active `lock_async` is no longer ignored (Pro).
+- [Fix] Fix `Pro::Processing::JobsQueue#clear` ignoring another group's active `lock_async` (Pro).
 - [Fix] Reset the per-partition retry attempt counter on revocation, so a message reclaimed after a rebalance is not dispatched to the DLQ early.
 - [Fix] Reset ActiveJob `CurrentAttributes` in an `ensure`, so a failed job's attributes don't leak into the next job on the same worker.
 - [Fix] Return `false` from `#mark_as_consumed`, `#mark_as_consumed!`, and `#commit_offsets!` when the partition was lost (previously could return `true`).

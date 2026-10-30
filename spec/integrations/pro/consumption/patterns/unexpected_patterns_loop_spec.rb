@@ -34,6 +34,7 @@
 TOPIC_NAME = "it-not-funny-at-all-#{SecureRandom.uuid}".freeze
 
 setup_karafka(allow_errors: %w[consumer.consume.error]) do |config|
+  config.kafka[:"allow.auto.create.topics"] = true
   config.kafka[:"topic.metadata.refresh.interval.ms"] = 2_000
 end
 

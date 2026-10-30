@@ -93,7 +93,10 @@ def setup_karafka(
       # out of the consumer group if it is not delivered fast enough
       "heartbeat.interval.ms": 1_000,
       "queue.buffering.max.ms": 5,
-      "partition.assignment.strategy": "range,roundrobin"
+      "partition.assignment.strategy": "range,roundrobin",
+      # Broker auto-create can start two CreateTopics for one topic and log TOPIC_ALREADY_EXISTS.
+      # Specs create their topics upfront. Specs that test auto-create turn it back on.
+      "allow.auto.create.topics": false
     }
     config.client_id = DT.group
     # Prevents conflicts when running in parallel
