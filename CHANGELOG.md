@@ -2,6 +2,7 @@
 
 ## 2.6.2 (Unreleased)
 - **[EOL]** Drop Ruby 3.2 support; require Ruby 3.3+.
+- **[EOL]** Remove Rails `8.0` specs due to upcoming EOL.
 - **[Feature]** Add `Instrumentation::Vendors::NewRelic::MetricsListener` for publishing Karafka metrics to New Relic. Context is encoded in the metric name, as New Relic custom metrics do not support tags (svyatmuzyka).
 - **[Feature]** Add `karafka info --extended`, printing the routing tree, global app config and effective Kafka config, with sensitive values redacted.
 - **[Feature]** Add `Kubernetes::ReadinessListener`, serving a readiness probe that reports healthy once all subscription groups poll and not-ready on shutdown or quieting, so pods drain before exiting.
@@ -19,7 +20,6 @@
 - [Maintenance] Cover the `:max_timestamp` and Integer-timestamp `Admin#read_partition_offsets` offset modes with integration specs.
 - [Maintenance] Cover the untested New Relic `MetricsListener` paths with integration specs: revoked and shutdown metrics, overridden listener methods, and an empty metrics list.
 - [Maintenance] [Pro] Cover the `JobsQueue` per-group semaphore growth fix under LRJ and async-locking workloads with integration specs.
-- [Maintenance] Run the Rails 8.0 transactional ActiveJob integration spec against Rails `8.0.3`. It was pinned to Rails `7.2.2.1`, so it duplicated the 7.2 run.
 - [Maintenance] Foundational work for Kafka share groups (KIP-932) is in progress (routing layer, consumer class hierarchy, config seams). Not usable yet - share groups can be described in routing but cannot run.
 - [Maintenance] Move consumer-group connection internals under a new `Connection::ConsumerGroups` namespace to prepare for KIP-932 share groups. They are internal, so no aliases are kept.
 - [Maintenance] Cover with an integration spec that a forceful shutdown does not reopen the clients of still running listeners.
