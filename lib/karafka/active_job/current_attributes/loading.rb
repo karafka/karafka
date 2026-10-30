@@ -7,7 +7,7 @@ module Karafka
       # for the time of the job execution
       module Loading
         # Validates the restored attributes shape before any of them is set
-        CONTRACT = AttributesContract.new
+        CONTRACT = Contracts::Attributes.new
 
         private_constant :CONTRACT
 
