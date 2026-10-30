@@ -38,6 +38,7 @@
 # bounded (the least-recently-assigned topics are evicted).
 
 setup_karafka do |config|
+  config.kafka[:"allow.auto.create.topics"] = true
   # Discover newly produced-to topics quickly so the pattern picks them up within the run.
   config.kafka[:"topic.metadata.refresh.interval.ms"] = 2_000
 end
