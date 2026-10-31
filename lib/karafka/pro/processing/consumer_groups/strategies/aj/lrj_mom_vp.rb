@@ -41,7 +41,7 @@ module Karafka
             module LrjMomVp
               include Strategies::Default
               include Strategies::Vp::Default
-              include Strategies::Lrj::Pausing
+              include Strategies::Lrj::Base
 
               # Features for this strategy
               FEATURES = %i[

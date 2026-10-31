@@ -34,9 +34,9 @@ module Karafka
       module ConsumerGroups
         module Strategies
           module Lrj
-            # Pausing for long-running jobs. Included only by the LRJ strategies, so the other
-            # strategies keep the regular `#pause`.
-            module Pausing
+            # Shared behaviour of the long-running job strategies. Included only by the LRJ
+            # strategies, so the other strategies keep the regular `#pause`.
+            module Base
               # Pauses the current topic partition and holds the pause tracker until the client
               # pause lands
               #
