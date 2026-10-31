@@ -634,6 +634,28 @@ RSpec.describe_current do
         it { expect(result.find { |r| r[:partition] == 0 }[:offset]).to eq(2) }
         it { expect(result.find { |r| r[:partition] == 1 }[:offset]).to eq(0) }
       end
+
+      context "with multiple partitions in one call and one of them failing" do
+        subject(:result) do
+          described_class.delete_records(
+            { name => [{ partition: 0, offset: 3 }, { partition: 1, offset: 100 }] }
+          )
+        end
+
+        it "raises naming the failed partition and still deletes from the other one" do
+          expect { result }.to raise_error(Rdkafka::RdkafkaTopicPartitionListError) do |error|
+            expect(error.code).to eq(:offset_out_of_range)
+            expect(error.message).to include("partition 1 of '#{name}'")
+
+            partitions = error.topic_partition_list.to_h.fetch(name)
+            expect(partitions.find { |p| p.partition == 0 }.offset).to eq(3)
+            expect(partitions.find { |p| p.partition == 0 }.err).to eq(0)
+            expect(partitions.find { |p| p.partition == 1 }.err).not_to eq(0)
+          end
+
+          expect(described_class.read_watermark_offsets(name, 0)).to eq([3, 5])
+        end
+      end
     end
   end
 

@@ -375,8 +375,11 @@ module Karafka
       #   - `:partition` [Integer]
       #   - `:offset` [Integer] the new low watermark offset of the partition
       #
-      # @raise [Rdkafka::RdkafkaError] on per-partition errors (e.g. `offset_out_of_range` when
-      #   the offset is above the high watermark) or connection issues
+      # @raise [Rdkafka::RdkafkaTopicPartitionListError] on a per-partition error (e.g.
+      #   `offset_out_of_range` when the offset is above the high watermark). Its message names
+      #   the failed topic and partition and its `#topic_partition_list` holds the result (new
+      #   low watermark or error) of every requested partition
+      # @raise [Rdkafka::RdkafkaError] on connection issues
       #
       # @note This operation is destructive and irreversible. Deleted messages cannot be
       #   recovered.
@@ -406,7 +409,13 @@ module Karafka
 
         report.offsets.to_h.flat_map do |topic, partitions|
           partitions.map do |partition|
-            raise Rdkafka::RdkafkaError.new(partition.err) unless partition.err.zero?
+            unless partition.err.zero?
+              raise Rdkafka::RdkafkaTopicPartitionListError.new(
+                partition.err,
+                report.offsets,
+                "Error deleting records for partition #{partition.partition} of '#{topic}'"
+              )
+            end
 
             { topic: topic, partition: partition.partition, offset: partition.offset }
           end

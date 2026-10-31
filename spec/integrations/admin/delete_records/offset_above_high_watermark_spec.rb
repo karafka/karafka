@@ -13,7 +13,7 @@ error = nil
 
 begin
   Karafka::Admin.delete_records({ DT.topic => [{ partition: 0, offset: 100 }] })
-rescue Rdkafka::RdkafkaError => e
+rescue Rdkafka::RdkafkaTopicPartitionListError => e
   error = e
 end
 
