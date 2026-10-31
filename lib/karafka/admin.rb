@@ -152,6 +152,14 @@ module Karafka
         new.read_partition_offsets(topic_partition_offsets, isolation_level: isolation_level)
       end
 
+      # @param topic_partition_offsets [Hash{String => Array<Hash>}] topics with partition specs
+      # @return [Array<Hash>] new low watermark offsets of the partitions
+      # @note This operation is destructive and irreversible.
+      # @see Topics.delete_records
+      def delete_records(topic_partition_offsets)
+        new.delete_records(topic_partition_offsets)
+      end
+
       # @param topic_name [String] name of the topic we're interested in
       # @see Topics.info
       def topic_info(topic_name)
@@ -381,6 +389,14 @@ module Karafka
     # @see Topics#read_partition_offsets
     def read_partition_offsets(topic_partition_offsets, isolation_level: nil)
       topics_admin.read_partition_offsets(topic_partition_offsets, isolation_level: isolation_level)
+    end
+
+    # @param topic_partition_offsets [Hash{String => Array<Hash>}] topics with partition specs
+    # @return [Array<Hash>] new low watermark offsets of the partitions
+    # @note This operation is destructive and irreversible.
+    # @see Topics#delete_records
+    def delete_records(topic_partition_offsets)
+      topics_admin.delete_records(topic_partition_offsets)
     end
 
     # @param topic_name [String] name of the topic we're interested in
