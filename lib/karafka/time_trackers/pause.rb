@@ -63,6 +63,15 @@ module Karafka
         end
       end
 
+      # Marks the pause as started without an end, so it does not expire until the next `#pause`
+      # sets its timeout
+      def hold
+        @mutex.synchronize do
+          @started_at = monotonic_now
+          @ends_at = Float::INFINITY
+        end
+      end
+
       # Increments the number of attempt by 1
       def increment
         @mutex.synchronize do
@@ -106,9 +115,7 @@ module Karafka
         end
       end
 
-      private
-
-      # Computers the exponential backoff
+      # Computes the exponential backoff
       # @return [Integer] backoff in milliseconds
       def backoff_interval
         backoff_factor = @exponential_backoff ? 2**@attempt : 1
