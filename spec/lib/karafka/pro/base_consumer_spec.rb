@@ -185,7 +185,7 @@ RSpec.describe Karafka::BaseConsumer, type: :pro do
 
         expect(client)
           .to have_received(:pause)
-          .with(topic.name, first_message.partition, offset, 1_000)
+          .with(topic.name, first_message.partition, offset, 500)
       end
 
       it "expect to pause with time tracker" do
@@ -251,7 +251,7 @@ RSpec.describe Karafka::BaseConsumer, type: :pro do
 
         expect(client)
           .to have_received(:pause)
-          .with(topic.name, first_message.partition, offset, 1_000)
+          .with(topic.name, first_message.partition, offset, 500)
       end
 
       it "expect to pause with time tracker" do
@@ -438,6 +438,65 @@ RSpec.describe Karafka::BaseConsumer, type: :pro do
           expect(event.payload[:error]).to eq(StandardError)
           expect(event.payload[:type]).to eq("consumer.consume.error")
         end
+      end
+    end
+  end
+
+  describe "#pause" do
+    let(:pause_tracker) { coordinator.pause_tracker }
+
+    before do
+      consumer.messages = messages
+      allow(pause_tracker).to receive_messages(pause: nil, hold: nil)
+    end
+
+    context "when not LRJ" do
+      before { consumer.pause(100) }
+
+      it "expect not to hold the tracker" do
+        expect(pause_tracker).not_to have_received(:hold)
+        expect(pause_tracker).to have_received(:pause).with(no_args)
+      end
+    end
+
+    context "when LRJ and we pause without providing the timeout" do
+      before do
+        topic.long_running_job true
+        consumer.pause(100)
+      end
+
+      it "expect to hold the tracker until the client pause lands" do
+        expect(pause_tracker).to have_received(:hold).ordered
+        expect(client).to have_received(:pause).with(topic.name, 0, 100, 500).ordered
+        expect(pause_tracker).to have_received(:pause).with(500).ordered
+      end
+    end
+
+    context "when LRJ and we pause providing the timeout" do
+      before do
+        topic.long_running_job true
+        consumer.pause(:consecutive, 2_000)
+      end
+
+      it "expect to pause the client and the tracker with provided timeout" do
+        expect(client).to have_received(:pause).with(topic.name, 0, nil, 2_000)
+        expect(pause_tracker).to have_received(:pause).with(2_000)
+      end
+    end
+
+    context "when LRJ and the client pause fails" do
+      before do
+        topic.long_running_job true
+        allow(client).to receive(:pause).and_raise(StandardError)
+        allow(pause_tracker).to receive(:pause).and_call_original
+        allow(pause_tracker).to receive(:hold).and_call_original
+      end
+
+      it "expect to still pause the tracker with the timeout" do
+        expect { consumer.pause(100, 2_000) }.to raise_error(StandardError)
+        expect(pause_tracker).to have_received(:pause).with(2_000)
+        expect(pause_tracker.current_timeout).to eq(2_000)
+        expect(pause_tracker.paused?).to be(true)
       end
     end
   end
