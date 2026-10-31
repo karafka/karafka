@@ -193,6 +193,10 @@ en:
         declaratives.replication_factor_format: needs to be more or equal to 1
         declaratives.details_format: needs to be a hash with only symbol keys
 
+    current_attributes:
+      missing: needs to be present
+      attributes_format: needs to be a hash
+
     job_options:
       missing: needs to be present
       dispatch_method_format: needs to be either :produce_async or :produce_sync
