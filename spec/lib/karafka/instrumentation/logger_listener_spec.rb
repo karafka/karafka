@@ -638,6 +638,22 @@ RSpec.describe_current do
         expect(details).to include(con_client.subscription_group.id)
         expect(details).to include(con_client.subscription_group.group.id)
       end
+
+      context "when the error carries the message topic, partition and offset" do
+        let(:error) do
+          Rdkafka::RdkafkaError.new(
+            -170,
+            broker_message: "Decompression (codec 0x4) of message at 7 of 77 bytes failed",
+            details: { topic: "orders", partition: 3, offset: 7 }
+          )
+        end
+
+        it "expects to log them" do
+          expect(Karafka.logger).to have_received(:error).with(
+            a_string_including("topic: orders, partition: 3, offset: 7")
+          )
+        end
+      end
     end
 
     context "when it is a callbacks.statistics.error" do
