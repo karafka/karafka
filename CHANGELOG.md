@@ -52,6 +52,7 @@
 - [Fix] Restore `InlineInsights::Tracker.exists?`, which raised `NoMethodError` because its delegated `#exists?` was removed.
 - [Fix] Stop `Admin` operations from retrying forever when their result never becomes visible. They now raise `ResultNotVisibleError` after `admin.max_retries_duration`.
 - [Fix] Keep the Datadog `LoggerListener` job types cache consistent on JRuby when many workers fill it at once.
+- [Fix] Stop forceful shutdown from using a listener's client from two threads at once on JRuby. A listener still running after termination now keeps its client open and is reported via `app.forceful_stopping.listener_skipped`.
 - [Fix] [Pro] Stabilize the `lost_assignment_with_offset_storage` transactions spec.
 - [Fix] Reset ActiveJob current attributes also when restoring them from the job payload fails part way, so values set before the failure no longer stay on the worker thread. Attributes the consumer does not declare are now skipped and a non-Hash attributes payload raises `Karafka::Errors::InvalidConfigurationError`.
 

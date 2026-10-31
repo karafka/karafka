@@ -3,6 +3,7 @@
 module Karafka
   # Karafka consuming server class
   class Server
+    extend Karafka::Core::Helpers::Time
     extend Helpers::ConfigImporter.new(
       cli_contract: %i[internal cli contract],
       activity_manager: %i[internal routing activity_manager],
@@ -159,7 +160,33 @@ module Karafka
         # we assigned to it and force shutdown as we prefer to stop the process rather than wait
         # indefinitely even with risk of VM crash as this is a last resort.
         Thread.new do
-          listeners.each(&:shutdown)
+          # A terminated listener thread may still be inside a native call on its client (a poll).
+          # Calling that client from here at the same time would use one consumer from two threads.
+          # Half of the wait goes to those calls, so the other half remains for the client shutdown.
+          # Clients of listeners that are still alive stay open, as when this wait runs out.
+          deadline = monotonic_now + (forceful_shutdown_wait / 2)
+
+          listeners.each do |listener|
+            next unless listener.alive?
+
+            listener.join([deadline - monotonic_now, 0].max / 1_000.0)
+          end
+
+          skipped = []
+
+          listeners.each do |listener|
+            listener.alive? ? skipped << listener : listener.shutdown
+          end
+
+          # Reported after all the shutdowns, so a failing subscriber cannot prevent any of them
+          skipped.each do |listener|
+            Karafka.monitor.instrument(
+              "app.forceful_stopping.listener_skipped",
+              caller: self,
+              listener: listener,
+              subscription_group: listener.subscription_group
+            )
+          end
         rescue => e
           # If anything wrong happened during shutdown, we also want to record it
           Karafka.monitor.instrument(
