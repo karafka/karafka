@@ -202,6 +202,20 @@ RSpec.describe_current do
       it { expect(Karafka.logger).to have_received(:error).with(message) }
     end
 
+    context "when it is a connection.client.commit_offsets.error" do
+      let(:type) { "connection.client.commit_offsets.error" }
+      let(:message) { "Offsets commit error occurred: #{error}" }
+
+      it { expect(Karafka.logger).to have_received(:error).with(message) }
+    end
+
+    context "when it is a callbacks.offset_commit.error" do
+      let(:type) { "callbacks.offset_commit.error" }
+      let(:message) { "callbacks.offset_commit processing failed due to an error: #{error}" }
+
+      it { expect(Karafka.logger).to have_received(:error).with(message) }
+    end
+
     context "when it is a parallel_segments.reducer.error" do
       let(:type) { "parallel_segments.reducer.error" }
       let(:message) { "Parallel segments reducer error occurred: #{error}" }

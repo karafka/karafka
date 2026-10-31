@@ -28,7 +28,23 @@ module Karafka
         stale_member_epoch
       ].freeze
 
-      private_constant :RETRYABLE_DEFAULT_ERRORS
+      # Offset commit errors after which we no longer own the partitions. The commit then returns
+      # false instead of raising
+      COMMIT_ASSIGNMENT_LOST_ERRORS = %i[
+        assignment_lost
+        unknown_member_id
+        illegal_generation
+      ].freeze
+
+      # Offset commit errors that `#commit_offsets` handles without raising, so they are not
+      # reported as errors
+      COMMIT_HANDLED_ERRORS = [
+        *COMMIT_ASSIGNMENT_LOST_ERRORS,
+        :no_offset,
+        :coordinator_load_in_progress
+      ].freeze
+
+      private_constant :RETRYABLE_DEFAULT_ERRORS, :COMMIT_ASSIGNMENT_LOST_ERRORS
 
       attr_accessor :wrapped
 
@@ -182,11 +198,7 @@ module Karafka
         true
       rescue Rdkafka::RdkafkaError => e
         case e.code
-        when :assignment_lost
-          return false
-        when :unknown_member_id
-          return false
-        when :illegal_generation
+        when *COMMIT_ASSIGNMENT_LOST_ERRORS
           return false
         when :no_offset
           return true
