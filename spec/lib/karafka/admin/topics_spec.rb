@@ -649,8 +649,10 @@ RSpec.describe_current do
 
             partitions = error.topic_partition_list.to_h.fetch(name)
             expect(partitions.find { |p| p.partition == 0 }.offset).to eq(3)
-            expect(partitions.find { |p| p.partition == 0 }.err).to eq(0)
-            expect(partitions.find { |p| p.partition == 1 }.err).not_to eq(0)
+            expect(partitions.find { |p| p.partition == 0 }.err)
+              .to eq(Rdkafka::Bindings::RD_KAFKA_RESP_ERR_NO_ERROR)
+            expect(Rdkafka::RdkafkaError.new(partitions.find { |p| p.partition == 1 }.err).code)
+              .to eq(:offset_out_of_range)
           end
 
           expect(described_class.read_watermark_offsets(name, 0)).to eq([3, 5])

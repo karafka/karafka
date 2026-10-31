@@ -25,9 +25,9 @@ assert error.message.include?("partition 1 of '#{DT.topic}'")
 
 results = error.topic_partition_list.to_h.fetch(DT.topic).to_h { |p| [p.partition, p] }
 
-assert_equal 0, results[0].err
+assert_equal Rdkafka::Bindings::RD_KAFKA_RESP_ERR_NO_ERROR, results[0].err
 assert_equal 3, results[0].offset
-assert_not_equal 0, results[1].err
+assert_equal :offset_out_of_range, Rdkafka::RdkafkaError.new(results[1].err).code
 
 assert_equal [3, 5], Karafka::Admin.read_watermark_offsets(DT.topic, 0)
 assert_equal [0, 5], Karafka::Admin.read_watermark_offsets(DT.topic, 1)
