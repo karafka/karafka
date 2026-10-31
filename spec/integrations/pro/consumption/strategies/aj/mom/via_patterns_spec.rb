@@ -62,6 +62,8 @@ start_karafka_and_wait_until do
   sleep(2)
 
   unless @sent
+    Karafka::Admin.create_topic(DT.topics[0], 1, 1)
+    Karafka::Admin.create_topic(DT.topics[1], 1, 1)
     Job1.perform_later
     Job2.perform_later
     @sent = true
