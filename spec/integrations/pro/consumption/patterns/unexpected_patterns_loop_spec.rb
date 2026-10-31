@@ -62,6 +62,8 @@ end
 start_karafka_and_wait_until do
   unless @created
     sleep(5)
+    Karafka::Admin.create_topic(TOPIC_NAME, 1, 1)
+    Karafka::Admin.create_topic("#{TOPIC_NAME}.dlq", 1, 1)
     produce_many(TOPIC_NAME, DT.uuids(1))
     @created = true
   end
