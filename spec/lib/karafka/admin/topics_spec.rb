@@ -569,6 +569,74 @@ RSpec.describe_current do
     end
   end
 
+  describe "#delete_records" do
+    subject(:result) do
+      described_class.delete_records({ name => [{ partition: 0, offset: offset }] })
+    end
+
+    let(:offset) { 3 }
+
+    context "when topic does not exist" do
+      it { expect { result }.to raise_error(Rdkafka::RdkafkaError) }
+    end
+
+    context "when topic exists and has messages" do
+      before do
+        described_class.create(name, 2, 1)
+        PRODUCERS.regular.produce_many_sync(
+          Array.new(5) { { topic: name, payload: "x", partition: 0 } }
+        )
+      end
+
+      it { expect(result).to eq([{ topic: name, partition: 0, offset: 3 }]) }
+
+      it "moves the low watermark and keeps the messages from the offset onwards" do
+        result
+
+        expect(described_class.read_watermark_offsets(name, 0)).to eq([3, 5])
+        expect(described_class.read(name, 0, 10, 0).map(&:offset)).to eq([3, 4])
+      end
+
+      context "with :end" do
+        let(:offset) { :end }
+
+        it { expect(result).to eq([{ topic: name, partition: 0, offset: 5 }]) }
+      end
+
+      context "with offset above the high watermark" do
+        let(:offset) { 100 }
+
+        it "raises and keeps the messages" do
+          expect { result }.to raise_error(Rdkafka::RdkafkaError) do |error|
+            expect(error.code).to eq(:offset_out_of_range)
+          end
+
+          expect(described_class.read_watermark_offsets(name, 0)).to eq([0, 5])
+        end
+      end
+
+      context "with a partition that does not exist" do
+        subject(:result) do
+          described_class.delete_records({ name => [{ partition: 5, offset: 1 }] })
+        end
+
+        it { expect { result }.to raise_error(Rdkafka::RdkafkaError) }
+      end
+
+      context "with multiple partitions in one call" do
+        subject(:result) do
+          described_class.delete_records(
+            { name => [{ partition: 0, offset: 2 }, { partition: 1, offset: :end }] }
+          )
+        end
+
+        it { expect(result.size).to eq(2) }
+        it { expect(result.find { |r| r[:partition] == 0 }[:offset]).to eq(2) }
+        it { expect(result.find { |r| r[:partition] == 1 }[:offset]).to eq(0) }
+      end
+    end
+  end
+
   describe "#read_watermark_offsets" do
     subject(:offsets) { described_class.read_watermark_offsets(name, partition) }
 

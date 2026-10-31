@@ -60,6 +60,12 @@ module Karafka
           new.read_partition_offsets(topic_partition_offsets, isolation_level: isolation_level)
         end
 
+        # @param topic_partition_offsets [Hash{String => Array<Hash>}] topics with partition specs
+        # @see #delete_records
+        def delete_records(topic_partition_offsets)
+          new.delete_records(topic_partition_offsets)
+        end
+
         # @param topic_names [String, Array<String>] topic or topics to describe
         # @param include_authorized_operations [Boolean] should we also fetch the operations
         #   this client is authorized to perform on the topics
@@ -351,6 +357,59 @@ module Karafka
         with_admin do |admin|
           handle = admin.list_offsets(topic_partition_offsets, isolation_level: isolation_level)
           handle.wait(max_wait_timeout_ms: max_wait_time_ms).offsets
+        end
+      end
+
+      # Deletes all messages in the given partitions below the given offsets by moving their low
+      # watermark (log start offset) forward. The programmatic equivalent of
+      # `kafka-delete-records.sh`.
+      #
+      # @param topic_partition_offsets [Hash{String => Array<Hash>}] hash with topic names as keys
+      #   and arrays of partition specs as values. Each spec must have:
+      #   - `:partition` [Integer] the partition number
+      #   - `:offset` [Integer, Symbol] messages below this offset are deleted (the message at
+      #     this offset is kept), or `:end` to delete all the messages currently in the partition
+      #
+      # @return [Array<Hash>] array of result hashes, each containing:
+      #   - `:topic` [String]
+      #   - `:partition` [Integer]
+      #   - `:offset` [Integer] the new low watermark offset of the partition
+      #
+      # @raise [Rdkafka::RdkafkaError] on per-partition errors (e.g. `offset_out_of_range` when
+      #   the offset is above the high watermark) or connection issues
+      #
+      # @note This operation is destructive and irreversible. Deleted messages cannot be
+      #   recovered.
+      #
+      # @note When deleting from many partitions, a failure on one of them does not stop the
+      #   deletion on the others. The error is raised once all of them were processed.
+      #
+      # @example Delete messages below offset 100 in partition 0 and all messages in partition 1
+      #   Karafka::Admin::Topics.delete_records(
+      #     {
+      #       'events' => [
+      #         { partition: 0, offset: 100 },
+      #         { partition: 1, offset: :end }
+      #       ]
+      #     }
+      #   )
+      #   # => [
+      #   #   { topic: 'events', partition: 0, offset: 100 },
+      #   #   { topic: 'events', partition: 1, offset: 250 }
+      #   # ]
+      def delete_records(topic_partition_offsets)
+        report = with_admin do |admin|
+          admin
+            .delete_records(topic_partition_offsets)
+            .wait(max_wait_timeout_ms: max_wait_time_ms)
+        end
+
+        report.offsets.to_h.flat_map do |topic, partitions|
+          partitions.map do |partition|
+            raise Rdkafka::RdkafkaError.new(partition.err) unless partition.err.zero?
+
+            { topic: topic, partition: partition.partition, offset: partition.offset }
+          end
         end
       end
 
