@@ -360,7 +360,7 @@ RSpec.describe Karafka::BaseConsumer, type: :pro do
 
         expect(client)
           .to have_received(:pause)
-          .with(topic.name, first_message.partition, offset, 1_000)
+          .with(topic.name, first_message.partition, offset, 500)
       end
 
       it "expect to pause with time tracker" do
@@ -460,6 +460,8 @@ RSpec.describe Karafka::BaseConsumer, type: :pro do
     end
 
     context "when LRJ and we pause without providing the timeout" do
+      let(:strategy) { Karafka::Pro::Processing::ConsumerGroups::Strategies::Lrj::Default }
+
       before do
         topic.long_running_job true
         consumer.pause(100)
@@ -473,6 +475,8 @@ RSpec.describe Karafka::BaseConsumer, type: :pro do
     end
 
     context "when LRJ and we pause providing the timeout" do
+      let(:strategy) { Karafka::Pro::Processing::ConsumerGroups::Strategies::Lrj::Default }
+
       before do
         topic.long_running_job true
         consumer.pause(:consecutive, 2_000)
@@ -485,6 +489,8 @@ RSpec.describe Karafka::BaseConsumer, type: :pro do
     end
 
     context "when LRJ and the client pause fails" do
+      let(:strategy) { Karafka::Pro::Processing::ConsumerGroups::Strategies::Lrj::Default }
+
       before do
         topic.long_running_job true
         allow(client).to receive(:pause).and_raise(StandardError)

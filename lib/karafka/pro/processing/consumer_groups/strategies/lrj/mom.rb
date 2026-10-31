@@ -39,6 +39,7 @@ module Karafka
             # - Manual offset management enabled
             module Mom
               include Strategies::Default
+              include Strategies::Lrj::Pausing
 
               # Features for this strategy
               FEATURES = %i[
