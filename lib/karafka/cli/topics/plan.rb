@@ -180,7 +180,6 @@ module Karafka
           end
 
           @topics_to_alter = {}
-          @unknown_configs = {}
 
           return @topics_to_alter if topics_to_check.empty?
 
@@ -192,6 +191,9 @@ module Karafka
 
             # We only apply in-place changes so we start from our config
             declarative_config.each do |declarative_name, declarative_value|
+              # Unknown configs are never applied, so they are reported separately
+              next if unknown_configs.fetch(declarative, {}).key?(declarative_name)
+
               @topics_to_alter[declarative] ||= {}
 
               @topics_to_alter[declarative][declarative_name] ||= {
@@ -203,7 +205,6 @@ module Karafka
               # declarative name can be a synonym. In such cases we remap it during the discovery
               # below
               final_name = declarative_name
-              known = false
 
               topic_c.configs.each do |config|
                 names = config.synonyms.map(&:name) << config.name
@@ -212,18 +213,7 @@ module Karafka
 
                 # Always use a non-synonym name if differs
                 final_name = config.name
-                known = true
                 scoped[:from] = config.value
-              end
-
-              # Cluster returns all the topic configs, so a name it does not know is not a
-              # config that could ever be applied
-              unless known
-                @topics_to_alter[declarative].delete(declarative_name)
-                @unknown_configs[declarative] ||= {}
-                @unknown_configs[declarative][declarative_name] = declarative_value
-
-                next
               end
 
               # Aligns the name in case synonym was used
@@ -241,14 +231,6 @@ module Karafka
           end
 
           @topics_to_alter
-        end
-
-        # @return [Hash] Hash where keys are existing topics and values are their declared configs
-        #   (names with values) that are unknown to the cluster
-        def unknown_configs
-          topics_to_alter
-
-          @unknown_configs
         end
       end
     end

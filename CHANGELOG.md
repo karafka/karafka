@@ -15,7 +15,7 @@
 - [Enhancement] Stop allocating a keyword `Hash` per consumed message when building its metadata.
 - [Enhancement] Log only the top two backtrace lines for `librdkafka.error` in the `LoggerListener`, so unreachable brokers no longer flood the logs.
 - [Change] Raise a clear `UnsupportedOptionError` naming JRuby when Swarm runs on a Ruby without `Process.fork`, also when `Swarm::Supervisor#run` is called directly, before any work is done.
-- [Change] Fail `karafka topics align` and `migrate` (exit 1) when an existing declarative topic has config keys the cluster does not know (e.g. a typo), naming them, instead of skipping them silently. `plan` lists such keys as unknown and fails too, instead of reporting them as pending changes forever. A `migrate` of an app with such a key now fails.
+- [Change] Fail `karafka topics align` and `migrate` (exit 1) when an existing declarative topic has config keys the cluster does not know (e.g. a typo), naming them, instead of skipping them silently. `plan` lists such keys as unknown and fails too, instead of reporting them as pending changes forever.
 - [Maintenance] Cover `karafka install --share_groups` with an integration spec: it generates `ApplicationShareConsumer` and the app boots with it.
 - [Maintenance] Cover the `:max_timestamp` and Integer-timestamp `Admin#read_partition_offsets` offset modes with integration specs.
 - [Maintenance] Cover the untested New Relic `MetricsListener` paths with integration specs: revoked and shutdown metrics, overridden listener methods, and an empty metrics list.
