@@ -2,6 +2,7 @@
 
 ## 2.6.2 (Unreleased)
 - **[EOL]** Drop Ruby 3.2 support; require Ruby 3.3+.
+- **[EOL]** Drop Rails 7.0 and 7.1 compatibility; require Rails 7.2+.
 - **[Feature]** Add `Instrumentation::Vendors::NewRelic::MetricsListener` for publishing Karafka metrics to New Relic. Context is encoded in the metric name, as New Relic custom metrics do not support tags (svyatmuzyka).
 - **[Feature]** Add `karafka info --extended`, printing the routing tree, global app config and effective Kafka config, with sensitive values redacted.
 - **[Feature]** Add `Kubernetes::ReadinessListener`, serving a readiness probe that reports healthy once all subscription groups poll and not-ready on shutdown or quieting, so pods drain before exiting.
