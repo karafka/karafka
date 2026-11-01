@@ -24,16 +24,9 @@ module Karafka
             return false
           end
 
+          validate_configs_known!
+
           resources_to_migrate = build_resources_to_migrate
-
-          unless unknown_configs.empty?
-            unknown_configs.each do |topic_name, names|
-              puts "#{red("Failed")} because topic #{topic_name} has configuration unknown to " \
-                "the cluster: #{names.join(", ")}."
-            end
-
-            raise Errors::CommandValidationError
-          end
 
           if resources_to_migrate.empty?
             puts "#{yellow("Skipping")} because there are no configurations to align."
@@ -75,12 +68,6 @@ module Karafka
           @candidate_topics
         end
 
-        # @return [Hash{String => Array<String>}] topics names with desired config names that the
-        #   cluster does not know and that would never be applied
-        def unknown_configs
-          @unknown_configs ||= {}
-        end
-
         # Iterates over configs of all the candidate topics and prepares alignment resources for
         # a single request to Kafka
         # @return [Array<Karafka::Admin::Configs::Resource>] all topics with config change requests
@@ -107,13 +94,6 @@ module Karafka
             desired_configs = t_candidate.declaratives.details.dup
             desired_configs.transform_values!(&:to_s)
             desired_configs.transform_keys!(&:to_s)
-
-            known_names = topic_with_configs.configs.flat_map do |config|
-              config.synonyms.map(&:name) << config.name
-            end
-
-            unknown_names = desired_configs.keys - known_names
-            unknown_configs[topic_with_configs.name] = unknown_names unless unknown_names.empty?
 
             topic_with_configs.configs.each do |config|
               names = config.synonyms.map(&:name) << config.name

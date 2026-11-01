@@ -7,7 +7,11 @@ module Karafka
       class Migrate < Base
         # Runs the migration
         # @return [Boolean] true if there were any changes applied
+        # @raise [Karafka::Errors::CommandValidationError] when any existing topic has
+        #   configuration unknown to the cluster. Nothing is applied then.
         def call
+          validate_configs_known!
+
           any_changes = false
 
           if Topics::Create.new.call

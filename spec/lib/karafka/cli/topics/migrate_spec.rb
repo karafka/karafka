@@ -14,6 +14,22 @@ RSpec.describe_current do
       allow(Karafka::Cli::Topics::Align).to receive(:new).and_return(topics_align)
 
       allow(migrate_topics).to receive(:wait) # Stubbing the wait method to prevent delays in tests
+      allow(migrate_topics).to receive(:validate_configs_known!)
+    end
+
+    context "when an existing topic has configuration unknown to the cluster" do
+      before do
+        allow(migrate_topics)
+          .to receive(:validate_configs_known!)
+          .and_raise(Karafka::Errors::CommandValidationError)
+      end
+
+      it "raises before any operation runs" do
+        expect { migrate_topics.call }.to raise_error(Karafka::Errors::CommandValidationError)
+        expect(topics_create).not_to have_received(:call)
+        expect(topics_repartition).not_to have_received(:call)
+        expect(topics_align).not_to have_received(:call)
+      end
     end
 
     context "when no operations make changes" do
