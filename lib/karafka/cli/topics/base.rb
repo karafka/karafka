@@ -49,7 +49,7 @@ module Karafka
         # know. Such configuration would never be applied, so we stop before changing anything.
         #
         # @raise [Karafka::Errors::CommandValidationError] when unknown configuration is present
-        def validate_configs_known!
+        def ensure_configs_exist_in_cluster!
           return if unknown_configs.empty?
 
           unknown_configs.each do |topic, configs|
@@ -62,37 +62,19 @@ module Karafka
 
         # @return [Hash{Karafka::Declaratives::Topic => Hash{String => String}}] existing
         #   declarative topics with their configs (names with values) that the cluster does not
-        #   know. Cluster returns all the topic configs, so such configs could never be applied.
+        #   know and so could never be applied
         def unknown_configs
           @unknown_configs ||= begin
-            unknown = {}
-
             topics = declaratives_routing_topics.select do |topic|
               !topic.declaratives.details.empty? && existing_topics_names.include?(topic.name)
             end
 
-            resources = topics.map do |topic|
-              Admin::Configs::Resource.new(type: :topic, name: topic.name)
+            cluster_configs = ClusterConfigs.new(topics.first.name) unless topics.empty?
+
+            topics.each_with_object({}) do |topic, unknown|
+              configs = cluster_configs.unknown(topic.declaratives.details)
+              unknown[topic] = configs unless configs.empty?
             end
-
-            unless resources.empty?
-              Admin::Configs.describe(resources).each.with_index do |topic_with_configs, index|
-                topic = topics[index]
-
-                known_names = topic_with_configs.configs.flat_map do |config|
-                  config.synonyms.map(&:name) << config.name
-                end
-
-                desired_configs = topic.declaratives.details.to_h do |name, value|
-                  [name.to_s, value.to_s]
-                end
-
-                configs = desired_configs.except(*known_names)
-                unknown[topic] = configs unless configs.empty?
-              end
-            end
-
-            unknown
           end
         end
 

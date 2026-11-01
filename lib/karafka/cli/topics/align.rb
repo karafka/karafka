@@ -24,7 +24,7 @@ module Karafka
             return false
           end
 
-          validate_configs_known!
+          ensure_configs_exist_in_cluster!
 
           resources_to_migrate = build_resources_to_migrate
 

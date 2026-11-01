@@ -10,7 +10,7 @@ module Karafka
         # @raise [Karafka::Errors::CommandValidationError] when any existing topic has
         #   configuration unknown to the cluster. Nothing is applied then.
         def call
-          validate_configs_known!
+          ensure_configs_exist_in_cluster!
 
           any_changes = false
 
