@@ -8,9 +8,14 @@ module Karafka
       class Plan < Base
         # Figures out scope of changes that need to happen
         # @return [Boolean] true if running migrate would change anything, false otherwise
+        # @raise [Karafka::Errors::CommandValidationError] when any existing topic has
+        #   configuration unknown to the cluster, as migrate would fail on it
         def call
           # If no changes at all, just print and stop
-          if topics_to_create.empty? && topics_to_repartition.empty? && topics_to_alter.empty?
+          if topics_to_create.empty? &&
+              topics_to_repartition.empty? &&
+              topics_to_alter.empty? &&
+              unknown_configs.empty?
             puts "Karafka will #{yellow("not")} perform any actions. No changes needed."
 
             return false
@@ -93,13 +98,28 @@ module Karafka
               configs.each do |name, changes|
                 from = changes.fetch(:from)
                 to = changes.fetch(:to)
-                action = changes.fetch(:action)
-                type = (action == :change) ? yellow("~") : green("+")
-                puts "    #{type} #{name}: \"#{red(from)}\" #{grey("=>")} \"#{green(to)}\""
+                puts "    #{yellow("~")} #{name}: \"#{red(from)}\" #{grey("=>")} \"#{green(to)}\""
               end
 
               puts
             end
+          end
+
+          unless unknown_configs.empty?
+            puts "Following topics configuration is unknown to the cluster and cannot be applied:"
+            puts
+
+            unknown_configs.each do |topic, configs|
+              puts "  #{red("!")} #{topic.name}:"
+
+              configs.each do |name, value|
+                puts "    #{red("!")} #{name}: \"#{value}\""
+              end
+
+              puts
+            end
+
+            raise Errors::CommandValidationError
           end
 
           changes
@@ -160,6 +180,7 @@ module Karafka
           end
 
           @topics_to_alter = {}
+          @unknown_configs = {}
 
           return @topics_to_alter if topics_to_check.empty?
 
@@ -169,20 +190,20 @@ module Karafka
             declarative_config.transform_keys!(&:to_s)
             declarative_config.transform_values!(&:to_s)
 
-            # We only apply additive/in-place changes so we start from our config
+            # We only apply in-place changes so we start from our config
             declarative_config.each do |declarative_name, declarative_value|
               @topics_to_alter[declarative] ||= {}
 
               @topics_to_alter[declarative][declarative_name] ||= {
                 from: "",
-                to: declarative_value,
-                action: :add
+                to: declarative_value
               }
 
               scoped = @topics_to_alter[declarative][declarative_name]
               # declarative name can be a synonym. In such cases we remap it during the discovery
               # below
               final_name = declarative_name
+              known = false
 
               topic_c.configs.each do |config|
                 names = config.synonyms.map(&:name) << config.name
@@ -191,8 +212,18 @@ module Karafka
 
                 # Always use a non-synonym name if differs
                 final_name = config.name
-                scoped[:action] = :change
+                known = true
                 scoped[:from] = config.value
+              end
+
+              # Cluster returns all the topic configs, so a name it does not know is not a
+              # config that could ever be applied
+              unless known
+                @topics_to_alter[declarative].delete(declarative_name)
+                @unknown_configs[declarative] ||= {}
+                @unknown_configs[declarative][declarative_name] = declarative_value
+
+                next
               end
 
               # Aligns the name in case synonym was used
@@ -210,6 +241,14 @@ module Karafka
           end
 
           @topics_to_alter
+        end
+
+        # @return [Hash] Hash where keys are existing topics and values are their declared configs
+        #   (names with values) that are unknown to the cluster
+        def unknown_configs
+          topics_to_alter
+
+          @unknown_configs
         end
       end
     end
