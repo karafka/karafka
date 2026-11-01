@@ -134,6 +134,16 @@ RSpec.describe_current do
 
           expect(client).to have_received(:pause)
         end
+
+        it "expect #pause to hold the pause tracker until the client pause lands" do
+          allow(coordinator.pause_tracker).to receive_messages(hold: nil, pause: nil)
+
+          consumer.pause(0, 100)
+
+          expect(coordinator.pause_tracker).to have_received(:hold).ordered
+          expect(client).to have_received(:pause).ordered
+          expect(coordinator.pause_tracker).to have_received(:pause).with(100).ordered
+        end
       end
     end
 
@@ -156,6 +166,14 @@ RSpec.describe_current do
           consumer.send(:handle_before_schedule_consume)
 
           expect(client).not_to have_received(:pause)
+        end
+
+        it "expect #pause not to hold the pause tracker" do
+          allow(coordinator.pause_tracker).to receive(:hold)
+
+          consumer.pause(0, 100)
+
+          expect(coordinator.pause_tracker).not_to have_received(:hold)
         end
       end
     end
