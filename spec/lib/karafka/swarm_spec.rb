@@ -15,7 +15,7 @@ RSpec.describe_current do
     before { allow(Process).to receive(:respond_to?).with(:fork).and_return(false) }
 
     it "expect to raise that unsupported" do
-      expect { swarm.ensure_supported! }.to raise_error(Karafka::Errors::UnsupportedOptionError)
+      expect { swarm.ensure_supported! }.to raise_error(Karafka::Errors::UnsupportedOptionError, RUBY_ENGINE)
     end
   end
 
