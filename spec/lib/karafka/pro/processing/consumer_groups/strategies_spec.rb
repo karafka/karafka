@@ -144,6 +144,14 @@ RSpec.describe_current do
           expect(client).to have_received(:pause).ordered
           expect(coordinator.pause_tracker).to have_received(:pause).with(100).ordered
         end
+
+        it "expect #pause to still pause the pause tracker when the client pause fails" do
+          allow(client).to receive(:pause).and_raise(StandardError)
+
+          expect { consumer.pause(0, 2_000) }.to raise_error(StandardError)
+          expect(coordinator.pause_tracker.paused?).to be(true)
+          expect(coordinator.pause_tracker.current_timeout).to eq(2_000)
+        end
       end
     end
 

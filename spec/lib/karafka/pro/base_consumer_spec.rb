@@ -487,24 +487,6 @@ RSpec.describe Karafka::BaseConsumer, type: :pro do
         expect(pause_tracker).to have_received(:pause).with(2_000)
       end
     end
-
-    context "when LRJ and the client pause fails" do
-      let(:strategy) { Karafka::Pro::Processing::ConsumerGroups::Strategies::Lrj::Default }
-
-      before do
-        topic.long_running_job true
-        allow(client).to receive(:pause).and_raise(StandardError)
-        allow(pause_tracker).to receive(:pause).and_call_original
-        allow(pause_tracker).to receive(:hold).and_call_original
-      end
-
-      it "expect to still pause the tracker with the timeout" do
-        expect { consumer.pause(100, 2_000) }.to raise_error(StandardError)
-        expect(pause_tracker).to have_received(:pause).with(2_000)
-        expect(pause_tracker.current_timeout).to eq(2_000)
-        expect(pause_tracker.paused?).to be(true)
-      end
-    end
   end
 
   context "when revocation happens" do
