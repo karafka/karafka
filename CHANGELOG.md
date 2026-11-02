@@ -9,6 +9,7 @@
 - **[Feature]** Add `Karafka::Admin.list_consumer_groups` to list every consumer group in the cluster with its state. Requires karafka-rdkafka `>= 0.31.0`.
 - **[Feature]** Add `Karafka::Admin.describe_consumer_groups` to read consumer groups' state, coordinator, assignor and members with their partition assignments. Requires karafka-rdkafka `>= 0.31.0`.
 - **[Feature]** Add `Karafka::Admin.describe_cluster` and `.describe_topics` to read the cluster id, controller, brokers with racks, topic ids, partition leaders and replicas, and optionally the authorized operations. Requires karafka-rdkafka `>= 0.31.0`.
+- **[Feature]** Add `Karafka::Admin.delete_records` to delete the messages of given partitions below a given offset (or all of them with `:end`) by moving their low watermark. It is destructive and irreversible.
 - [Enhancement] Defer default log file creation until the first write and keep logging working (to stdout) when the log file cannot be created or written, e.g. on read-only filesystems (ydah).
 - [Enhancement] Build `Setup::DefaultsInjector` (and its Pro extension) on `Karafka::Core::Configurable::Injector`. Behavior is unchanged. Requires karafka-core `>= 2.6.3`.
 - [Enhancement] Stop allocating 6 objects per consumed message: build the default topic deserializers only once and read `max_messages` once per poll batch.
