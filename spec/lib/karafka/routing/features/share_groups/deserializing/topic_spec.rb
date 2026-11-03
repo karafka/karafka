@@ -1,11 +1,9 @@
 # frozen_string_literal: true
 
 RSpec.describe_current do
-  subject(:topic) do
-    build(:routing_topic).tap do |topic|
-      topic.singleton_class.prepend described_class
-    end
-  end
+  subject(:topic) { Karafka::Routing::ShareGroups::Topic.new(:events, group) }
+
+  let(:group) { Karafka::Routing::ShareGroups::Group.new("webhooks") }
 
   let(:default_payload_deserializer) { Karafka::Deserializing::Deserializers::Payload }
   let(:default_key_deserializer) { Karafka::Deserializing::Deserializers::Key }
@@ -56,6 +54,12 @@ RSpec.describe_current do
   describe "#deserializers" do
     it "is an alias for #deserializing" do
       expect(topic.deserializers).to eq(topic.deserializing)
+    end
+  end
+
+  describe "#deserializers?" do
+    it "is an alias for #deserializing?" do
+      expect(topic.deserializers?).to be true
     end
   end
 
