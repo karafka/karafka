@@ -161,6 +161,69 @@ RSpec.describe_current do
           expect(deserialized.first).to eq("PAYLOAD_0")
         end
       end
+
+      context "when work fails in a way that cannot be rescued per payload" do
+        let(:error) { Karafka::Deserializing::Parallel::DESERIALIZATION_ERROR }
+        let(:upcase) do
+          Class.new do
+            def call(message)
+              message.raw_payload.upcase
+            end
+          end.new.freeze
+        end
+        let(:messages) do
+          Array.new(100) do |i|
+            instance_double(Karafka::Messages::Message, raw_payload: "payload_#{i}")
+          end
+        end
+
+        before { pool.start(2, min_payloads: 50) }
+
+        def retrieve(deserializer)
+          Timeout.timeout(5) do
+            pool.dispatch_async(messages, deserializer, distributor).retrieve
+          end
+        end
+
+        context "when the deserializer cannot be copied into a Ractor" do
+          let(:deserializer) { ->(message) { message.raw_payload } }
+
+          it "marks all as errors and keeps the pool working" do
+            expect(retrieve(deserializer)).to all(eq(error))
+            expect(retrieve(upcase).first).to eq("PAYLOAD_0")
+          end
+        end
+
+        context "when results cannot be copied out of a Ractor" do
+          let(:deserializer) do
+            Class.new do
+              def call(_message)
+                Hash.new { |hash, key| hash[key] = 1 }
+              end
+            end.new.freeze
+          end
+
+          it "marks all as errors and keeps the pool working" do
+            expect(retrieve(deserializer)).to all(eq(error))
+            expect(retrieve(upcase).first).to eq("PAYLOAD_0")
+          end
+        end
+
+        context "when the deserializer raises a non-StandardError" do
+          let(:deserializer) do
+            Class.new do
+              def call(_message)
+                raise NotImplementedError
+              end
+            end.new.freeze
+          end
+
+          it "marks all as errors and keeps the pool working" do
+            expect(retrieve(deserializer)).to all(eq(error))
+            expect(retrieve(upcase).first).to eq("PAYLOAD_0")
+          end
+        end
+      end
     end
   end
 end

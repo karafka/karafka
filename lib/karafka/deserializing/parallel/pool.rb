@@ -34,6 +34,7 @@ module Karafka
           @work_queue = nil
           @coordinator = nil
           @min_payloads = 50
+          @pid = nil
         end
 
         # Starts the pool with the specified number of workers and the coordinator thread
@@ -45,10 +46,7 @@ module Karafka
 
             @size = concurrency
             @min_payloads = min_payloads
-            @ready_port = Ractor::Port.new
-            @work_queue = Thread::Queue.new
-            create_workers
-            start_coordinator
+            launch
             @started = true
           end
         end
@@ -61,8 +59,11 @@ module Karafka
         # Resets the pool state. This is used in the test suite
         def reset!
           @mutex.synchronize do
-            stop_coordinator
-            stop_workers
+            # Workers of a parent process cannot be stopped from a forked one
+            if @pid == ::Process.pid
+              stop_coordinator
+              stop_workers
+            end
 
             @workers = []
             @size = 0
@@ -71,6 +72,7 @@ module Karafka
             @work_queue = nil
             @coordinator = nil
             @min_payloads = 50
+            @pid = nil
           end
         end
 
@@ -85,6 +87,9 @@ module Karafka
           return Immediate.instance if messages.empty?
           return Immediate.instance unless @started
           return Immediate.instance if messages.size < @min_payloads
+
+          # Workers and the coordinator thread do not survive a fork (swarm nodes)
+          relaunch unless @pid == ::Process.pid
 
           payloads = messages.map(&:raw_payload)
           batches = distributor.call(payloads, @size, min_payloads: @min_payloads)
@@ -109,6 +114,23 @@ module Karafka
 
         private
 
+        # Creates the workers and the coordinator for the current process
+        def launch
+          @ready_port = Ractor::Port.new
+          @work_queue = Thread::Queue.new
+          @workers = []
+          create_workers
+          start_coordinator
+          @pid = ::Process.pid
+        end
+
+        # Spawns a new set of workers and a coordinator in a forked process
+        def relaunch
+          @mutex.synchronize do
+            launch unless @pid == ::Process.pid
+          end
+        end
+
         # Starts the background coordinator thread
         # Waits for work in the queue, then waits for a ready worker, then dispatches
         def start_coordinator
@@ -122,12 +144,28 @@ module Karafka
               ready = @ready_port.receive
 
               # 3. Dispatch work to the ready worker
-              ready[:port].send(work.freeze)
+              dispatch(ready, work)
             end
           end
 
           @coordinator.name = "karafka.parallel_deser.coordinator"
           @coordinator.abort_on_exception = true
+        end
+
+        # Sends work to a ready worker. When the work cannot be copied into a Ractor (for example
+        # a Proc deserializer), the batch gets error markers so it is deserialized inline and the
+        # worker goes back to the pool
+        # @param ready [Hash] ready signal of the worker
+        # @param work [Hash] batch work
+        def dispatch(ready, work)
+          ready[:port].send(work.freeze)
+        rescue
+          @ready_port.send(ready)
+
+          work[:result_port].send({
+            offset: work[:offset],
+            results: Array.new(work[:data].size, DESERIALIZATION_ERROR).freeze
+          }.freeze)
         end
 
         # Stops the coordinator thread, if running, and waits for it to finish
@@ -191,15 +229,20 @@ module Karafka
 
               results = msg[:data].map do |payload|
                 deserializer.call(proxy_class.new(raw_payload: payload))
-              rescue
+              rescue StandardError, ScriptError
                 err_marker
               end
 
-              # Send results to caller's port
-              msg[:result_port].send({
-                offset: msg[:offset],
-                results: results.freeze
-              }.freeze)
+              # The caller waits for an answer for every batch, so results that cannot be copied
+              # out of the Ractor are replaced with error markers and deserialized inline
+              begin
+                msg[:result_port].send({ offset: msg[:offset], results: results.freeze }.freeze)
+              rescue
+                msg[:result_port].send({
+                  offset: msg[:offset],
+                  results: Array.new(results.size, err_marker).freeze
+                }.freeze)
+              end
             end
           end
         end

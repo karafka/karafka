@@ -79,6 +79,15 @@ RSpec.describe_current do
         executor.before_schedule_consume(messages)
         expect(consumer.messages.metadata.deserialization).to eq(immediate)
       end
+
+      context "when a message is already deserialized" do
+        before { messages.first.payload = {} }
+
+        it "expect not to dispatch to the pool" do
+          executor.before_schedule_consume(messages)
+          expect(pool).not_to have_received(:dispatch_async)
+        end
+      end
     end
   end
 

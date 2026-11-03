@@ -57,6 +57,19 @@ RSpec.describe_current do
       it { expect(config.parallel?).to be(true) }
     end
 
+    context "when globally enabled but a custom messages parser is used" do
+      let(:parallel) { true }
+
+      before do
+        allow(Karafka::App.config.deserializing.parallel).to receive(:active).and_return(true)
+        allow(Karafka::App.config.internal.messages)
+          .to receive(:parser)
+          .and_return(Class.new(Karafka::Messages::Parser).new)
+      end
+
+      it { expect(config.parallel?).to be(false) }
+    end
+
     context "when called multiple times" do
       let(:parallel) { true }
 
