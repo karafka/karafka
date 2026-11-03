@@ -18,7 +18,7 @@ RSpec.describe_current do
       end
 
       it "raises an unsupported option error" do
-        expect { supervisor.run }.to raise_error(Karafka::Errors::UnsupportedOptionError, /JRuby/)
+        expect { supervisor.run }.to raise_error(Karafka::Errors::UnsupportedOptionError, RUBY_ENGINE)
       end
 
       it "does not close the producer or init librdkafka" do

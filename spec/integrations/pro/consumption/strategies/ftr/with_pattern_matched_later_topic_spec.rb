@@ -31,6 +31,7 @@
 # Karafka should throttle and wait also on topics that are detected via patterns later on
 
 setup_karafka do |config|
+  config.kafka[:"allow.auto.create.topics"] = true
   config.kafka[:"topic.metadata.refresh.interval.ms"] = 2_000
 end
 

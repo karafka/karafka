@@ -123,6 +123,24 @@ RSpec.describe_current do
     end
   end
 
+  describe "transition result" do
+    before { status_manager.run! }
+
+    it { expect(status_manager.stop!).to be(true) }
+
+    context "when already in this state" do
+      before { status_manager.stop! }
+
+      it { expect(status_manager.stop!).to be(false) }
+    end
+
+    context "when already in a later state" do
+      before { status_manager.stopped! }
+
+      it { expect(status_manager.stop!).to be(false) }
+    end
+  end
+
   describe "stopped!" do
     context "when we set it to stopped" do
       before do

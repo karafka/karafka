@@ -52,6 +52,9 @@ draw_routes do
   end
 end
 
+Karafka::Admin.create_topic(DT.topics[0], 1, 1)
+Karafka::Admin.create_topic(DT.topics[1], 1, 1)
+
 produce_many(DT.topics[0], DT.uuids(1))
 produce_many(DT.topics[1], DT.uuids(1))
 

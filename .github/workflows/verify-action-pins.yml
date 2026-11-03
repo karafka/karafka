@@ -10,7 +10,14 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - name: Check SHA pins
         run: |
-          if grep -E -r "uses: .*/.*@(v[0-9]+|main|master)($|[[:space:]]|$)" --include="*.yml" --include="*.yaml" .github/workflows/ | grep -v "#"; then
+          # Every remote action must be pinned to a full 40-character commit SHA. Local actions
+          # (./) and docker:// images are not checked.
+          unpinned=$(grep -E -rn --include="*.yml" --include="*.yaml" \
+            "^[[:space:]]*(-[[:space:]]+)?uses:[[:space:]]*['\"]?[^.'\"[:space:]]" .github/workflows/ \
+            | grep -Ev "uses:[[:space:]]*['\"]?docker://" \
+            | grep -Ev "@[0-9a-f]{40}['\"]?([[:space:]]|$)" || true)
+          if [ -n "$unpinned" ]; then
+            echo "$unpinned"
             echo "::error::Actions should use SHA pins, not tags or branch names"
             exit 1
           fi
