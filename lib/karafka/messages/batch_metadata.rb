@@ -8,9 +8,8 @@ module Karafka
     # @note This metadata object refers to per batch metadata, not `#message.metadata`
     # @!attribute deserialization
     #   Stores the Future/Immediate for parallel deserialization.
-    #   Defaults to Immediate (no-op), replaced with Future when parallel deserialization
-    #   dispatches.
-    #   @return [Karafka::Deserializing::Parallel::Future, Immediate]
+    #   `nil` unless parallel deserialization dispatched this batch.
+    #   @return [Karafka::Deserializing::Parallel::Future, Immediate, nil]
     BatchMetadata = Struct.new(
       :size,
       :first_offset,

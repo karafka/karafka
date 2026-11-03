@@ -32,9 +32,7 @@ module Karafka
               # When this batch was built and scheduled for execution
               scheduled_at: scheduled_at,
               # This needs to be set to a correct value prior to processing starting
-              processed_at: nil,
-              # Default to Immediate (no-op) - replaced with Future if parallel deserialization
-              deserialization: Deserializing::Parallel::Immediate.instance
+              processed_at: nil
             )
           end
 
