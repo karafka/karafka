@@ -353,8 +353,7 @@ module Karafka
             # If parallel deserialization was dispatched for this batch, retrieve the Ractor pool
             # results now and inject them into the messages. Without this, results are silently
             # discarded and messages fall back to inline deserialization on the worker thread,
-            # paying the shipping cost for nothing. It is `nil` when parallel deserialization is
-            # not used for this batch.
+            # paying the shipping cost for nothing.
             def handle_before_consume
               coordinator.on_started do
                 coordinator.pause_tracker.increment

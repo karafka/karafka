@@ -3,9 +3,8 @@
 module Karafka
   module Deserializing
     module Parallel
-      # Immediate (no-op) deserialization result for when parallel deserialization
-      # didn't happen (thresholds not met, feature disabled, etc.)
-      # Allows code to always call .retrieve without nil checks
+      # Immediate (no-op) deserialization result for a batch the pool did not dispatch (pool not
+      # started or batch below `min_payloads`)
       class Immediate
         # Singleton instance for efficiency
         INSTANCE = new.freeze

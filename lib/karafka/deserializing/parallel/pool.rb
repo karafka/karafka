@@ -177,8 +177,6 @@ module Karafka
         end
 
         # Stops all the Ractor workers, if any, and waits for them to finish
-        # Mirrors the coordinator's own dispatch protocol: grab a ready worker, send it
-        # the stop signal, repeat for every worker in the pool
         def stop_workers
           @size.times do
             ready = @ready_port.receive

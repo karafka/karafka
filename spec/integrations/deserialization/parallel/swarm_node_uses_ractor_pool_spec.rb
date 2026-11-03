@@ -3,8 +3,6 @@
 # Swarm nodes are forked after setup started the Ractor pool. Each node should run its own
 # workers and use their results instead of hanging on the pool of the supervisor.
 
-exit 0 if RUBY_VERSION < "4.0"
-
 setup_karafka do |config|
   config.deserializing.parallel.active = true
   config.deserializing.parallel.concurrency = 2

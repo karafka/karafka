@@ -145,7 +145,6 @@ module Karafka
             coordinator.pause_tracker.increment
 
             # If parallel deserialization was dispatched, retrieve and inject results now.
-            # It is `nil` when parallel deserialization is not used for this batch.
             deser = messages.metadata.deserialization
             Deserializing::Parallel::Injector.call(messages, deser.retrieve) if deser
           end

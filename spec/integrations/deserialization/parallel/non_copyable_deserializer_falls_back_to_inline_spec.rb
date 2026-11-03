@@ -3,8 +3,6 @@
 # A deserializer that cannot be copied into a Ractor (a lambda) should not crash the process.
 # Such batches should fall back to inline deserialization.
 
-exit 0 if RUBY_VERSION < "4.0"
-
 setup_karafka do |config|
   config.concurrency = 1
   config.deserializing.parallel.active = true

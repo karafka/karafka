@@ -162,7 +162,7 @@ RSpec.describe_current do
         end
       end
 
-      context "when work fails in a way that cannot be rescued per payload" do
+      context "when work fails inside or on the way to a Ractor" do
         let(:error) { Karafka::Deserializing::Parallel::DESERIALIZATION_ERROR }
         let(:upcase) do
           Class.new do

@@ -3,8 +3,6 @@
 # Karafka should use the results produced by Ractor workers instead of deserializing inline
 # on the worker thread. The deserializer tags its output with the Ractor it ran in.
 
-exit 0 if RUBY_VERSION < "4.0"
-
 setup_karafka do |config|
   config.concurrency = 1
   config.deserializing.parallel.active = true
