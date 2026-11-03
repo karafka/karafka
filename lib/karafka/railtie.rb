@@ -45,19 +45,7 @@ if Karafka.rails?
         # Inherit the logger level from Rails, otherwise would always run with the debug level
         stdout_logger.level = Rails.logger.level
 
-        rails71plus = Rails.gem_version >= Gem::Version.new("7.1.0")
-
-        # Rails 7.1 replaced the broadcast module with a broadcast logger
-        # While 7.1 is EOL, we keep this for users who may still use it without official support
-        if rails71plus
-          Rails.logger.broadcast_to(stdout_logger)
-        else
-          Rails.logger.extend(
-            ActiveSupport::Logger.broadcast(
-              stdout_logger
-            )
-          )
-        end
+        Rails.logger.broadcast_to(stdout_logger)
       end
 
       initializer "karafka.configure_rails_auto_load_paths" do |app|
@@ -66,8 +54,6 @@ if Karafka.rails?
       end
 
       initializer "karafka.require_karafka_boot_file" do |app|
-        rails6plus = Rails.gem_version >= Gem::Version.new("6.0.0")
-
         # If the boot file location is set to "false", we should not raise an exception and we
         # should just not load karafka stuff. Setting this explicitly to false indicates, that
         # karafka is part of the supply chain but it is not a first class citizen of a given
@@ -82,16 +68,9 @@ if Karafka.rails?
           raise(Karafka::Errors::MissingBootFileError, karafka_boot_file)
         end
 
-        if rails6plus
-          app.reloader.to_prepare do
-            # Load Karafka boot file, so it can be used in Rails server context
-            require karafka_boot_file
-          end
-        else
-          # Load Karafka main setup for older Rails versions
-          app.config.after_initialize do
-            require karafka_boot_file
-          end
+        app.reloader.to_prepare do
+          # Load Karafka boot file, so it can be used in Rails server context
+          require karafka_boot_file
         end
       end
 
