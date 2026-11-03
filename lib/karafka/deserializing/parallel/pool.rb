@@ -229,7 +229,11 @@ module Karafka
 
               results = msg[:data].map do |payload|
                 deserializer.call(proxy_class.new(raw_payload: payload))
-              rescue StandardError, ScriptError
+              # Same as the inline consume path: any failure falls back to inline deserialization,
+              # where it is handled as a regular consumer error
+              # rubocop:disable Lint/RescueException
+              rescue Exception
+                # rubocop:enable Lint/RescueException
                 err_marker
               end
 

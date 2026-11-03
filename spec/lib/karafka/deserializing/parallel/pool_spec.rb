@@ -209,6 +209,21 @@ RSpec.describe_current do
           end
         end
 
+        context "when the deserializer overflows the stack" do
+          let(:deserializer) do
+            Class.new do
+              def call(message)
+                call(message)
+              end
+            end.new.freeze
+          end
+
+          it "marks all as errors and keeps the pool working" do
+            expect(retrieve(deserializer)).to all(eq(error))
+            expect(retrieve(upcase).first).to eq("PAYLOAD_0")
+          end
+        end
+
         context "when the deserializer raises a non-StandardError" do
           let(:deserializer) do
             Class.new do
