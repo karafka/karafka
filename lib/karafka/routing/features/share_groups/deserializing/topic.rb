@@ -4,7 +4,7 @@ module Karafka
   module Routing
     module Features
       module ShareGroups
-        class Deserializers < Base
+        class Deserializing < Base
           # Routing topic deserializers API. It allows to configure deserializers for various
           # components of each message.
           module Topic
@@ -13,7 +13,7 @@ module Karafka
             # to nil is included as an optimization for Ruby's object shapes system,
             # which improves memory layout and access performance.
             def initialize(...)
-              @deserializers = nil
+              @deserializing = nil
               super
             end
 
@@ -21,12 +21,12 @@ module Karafka
             # @param payload [Object] Deserializer for the message payload
             # @param key [Object] deserializer for the message key
             # @param headers [Object] deserializer for the message headers
-            def deserializers(
-              payload: Karafka::Deserializers::Payload.new,
-              key: Karafka::Deserializers::Key.new,
-              headers: Karafka::Deserializers::Headers.new
+            def deserializing(
+              payload: Karafka::Deserializing::Deserializers::Payload.new,
+              key: Karafka::Deserializing::Deserializers::Key.new,
+              headers: Karafka::Deserializing::Deserializers::Headers.new
             )
-              @deserializers ||= Config.new(
+              @deserializing ||= Config.new(
                 active: true,
                 payload: payload,
                 key: key,
@@ -34,23 +34,29 @@ module Karafka
               )
             end
 
+            # Backwards compatible alias for deserializing
+            alias_method :deserializers, :deserializing
+
             # Supports pre 2.4 format where only payload deserializer could be defined. We do not
             # retire this format because it is not bad when users do not do anything advanced with
             # key or headers
             # @param payload [Object] payload deserializer
             def deserializer(payload)
-              deserializers(payload: payload)
+              deserializing(payload: payload)
             end
 
-            # @return [Boolean] Deserializers are always active
-            def deserializers?
-              deserializers.active?
+            # @return [Boolean] Deserializing is always active
+            def deserializing?
+              deserializing.active?
             end
+
+            # Backwards compatible alias for deserializing?
+            alias_method :deserializers?, :deserializing?
 
             # @return [Hash] topic setup hash
             def to_h
               super.merge(
-                deserializers: deserializers.to_h
+                deserializing: deserializing.to_h
               ).freeze
             end
           end

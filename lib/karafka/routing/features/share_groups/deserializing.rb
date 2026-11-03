@@ -7,7 +7,7 @@ module Karafka
         # Namespace for feature allowing to configure deserializers for payload, key and headers.
         # Mirrors {Features::ConsumerGroups::Deserializers} - share groups process message payloads,
         # keys and headers just like consumer groups.
-        class Deserializers < Base
+        class Deserializing < Base
         end
       end
     end

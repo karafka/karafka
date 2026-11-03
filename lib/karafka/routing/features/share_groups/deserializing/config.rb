@@ -4,7 +4,7 @@ module Karafka
   module Routing
     module Features
       module ShareGroups
-        class Deserializers < Base
+        class Deserializing < Base
           # Config of this feature
           Config = Struct.new(
             :active,

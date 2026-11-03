@@ -70,7 +70,7 @@ RSpec.describe Karafka::Routing::ShareGroups::Group do
     end
 
     # Consumer-group-only routing features are prepended onto the consumer topic only and do not
-    # leak onto the share topic. Features share groups also need (pausing, deserializers) are
+    # leak onto the share topic. Features share groups also need (pausing, deserializing) are
     # duplicated under `Features::ShareGroups::*` and are covered separately below.
     %i[dead_letter_queue declaratives config].each do |feature|
       it "expect a consumer topic to respond to :#{feature} and a share topic not to" do
@@ -100,17 +100,15 @@ RSpec.describe Karafka::Routing::ShareGroups::Group do
 
     # Deserializers are provided for both modes in the same format (a per-mode feature prepended
     # onto each topic class), since share groups also process message payloads, keys and headers.
-    it "expect both consumer and share topics to expose active deserializers" do
-      expect(consumer_topic).to respond_to(:deserializers)
-      expect(share_topic).to respond_to(:deserializers)
-      expect(share_topic.deserializers).to be_active
+    it "expect both consumer and share topics to expose active deserializing" do
+      expect(consumer_topic).to respond_to(:deserializing)
+      expect(share_topic).to respond_to(:deserializing)
+      expect(share_topic.deserializing).to be_active
     end
 
-    it "expect the share topic to_h to include pause and deserializers" do
-      # The consumer-group feature is `deserializing` (it carries the extra `parallel` option),
-      # while share groups keep the plain `deserializers` one, so the emitted keys differ
+    it "expect the share topic to_h to include pause and deserializing" do
       expect(consumer_topic.to_h).to include(:deserializing, :pause)
-      expect(share_topic.to_h).to include(:deserializers, :pause)
+      expect(share_topic.to_h).to include(:deserializing, :pause)
     end
   end
 

@@ -7,22 +7,22 @@ RSpec.describe_current do
     end
   end
 
-  let(:default_payload_deserializer) { Karafka::Deserializers::Payload }
-  let(:default_key_deserializer) { Karafka::Deserializers::Key }
-  let(:default_headers_deserializer) { Karafka::Deserializers::Headers }
+  let(:default_payload_deserializer) { Karafka::Deserializing::Deserializers::Payload }
+  let(:default_key_deserializer) { Karafka::Deserializing::Deserializers::Key }
+  let(:default_headers_deserializer) { Karafka::Deserializing::Deserializers::Headers }
 
-  describe "#deserializers" do
+  describe "#deserializing" do
     context "when using default deserializers" do
       it "sets default payload deserializer" do
-        expect(topic.deserializers.payload).to be_a(default_payload_deserializer)
+        expect(topic.deserializing.payload).to be_a(default_payload_deserializer)
       end
 
       it "sets default key deserializer" do
-        expect(topic.deserializers.key).to be_a(default_key_deserializer)
+        expect(topic.deserializing.key).to be_a(default_key_deserializer)
       end
 
       it "sets default headers deserializer" do
-        expect(topic.deserializers.headers).to be_a(default_headers_deserializer)
+        expect(topic.deserializing.headers).to be_a(default_headers_deserializer)
       end
     end
 
@@ -32,7 +32,7 @@ RSpec.describe_current do
       let(:custom_headers_deserializer) { rand }
 
       before do
-        topic.deserializers(
+        topic.deserializing(
           payload: custom_payload_deserializer,
           key: custom_key_deserializer,
           headers: custom_headers_deserializer
@@ -40,28 +40,34 @@ RSpec.describe_current do
       end
 
       it "overrides default payload deserializer" do
-        expect(topic.deserializers.payload).to eq(custom_payload_deserializer)
+        expect(topic.deserializing.payload).to eq(custom_payload_deserializer)
       end
 
       it "overrides default key deserializer" do
-        expect(topic.deserializers.key).to eq(custom_key_deserializer)
+        expect(topic.deserializing.key).to eq(custom_key_deserializer)
       end
 
       it "overrides default headers deserializer" do
-        expect(topic.deserializers.headers).to eq(custom_headers_deserializer)
+        expect(topic.deserializing.headers).to eq(custom_headers_deserializer)
       end
     end
   end
 
-  describe "#deserializers?" do
+  describe "#deserializers" do
+    it "is an alias for #deserializing" do
+      expect(topic.deserializers).to eq(topic.deserializing)
+    end
+  end
+
+  describe "#deserializing?" do
     it "returns true" do
-      expect(topic.deserializers?).to be true
+      expect(topic.deserializing?).to be true
     end
   end
 
   describe "#to_h" do
     it "includes deserializers in the topic hash" do
-      expect(topic.to_h[:deserializers]).to eq(topic.deserializers.to_h)
+      expect(topic.to_h[:deserializing]).to eq(topic.deserializing.to_h)
     end
   end
 end
