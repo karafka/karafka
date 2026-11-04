@@ -30,7 +30,6 @@ module Karafka
         app.stopping
         app.stopped
         app.terminated
-        app.forceful_stopping.listener_skipped
 
         client.pause
         client.resume
@@ -49,6 +48,7 @@ module Karafka
         connection.listener.quiet
         connection.listener.stopping
         connection.listener.stopped
+        connection.listener.shutdown.skipped
 
         consumer.initialize
         consumer.initialized

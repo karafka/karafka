@@ -65,6 +65,18 @@ module Karafka
         messages_count.zero? ? debug(message) : info(message)
       end
 
+      # Logs a listener that forceful shutdown skips, as its terminated thread is still running
+      #
+      # @param event [Karafka::Core::Monitoring::Event] event details including payload
+      def on_connection_listener_shutdown_skipped(event)
+        listener = event[:listener]
+
+        warn <<~MSG.tr("\n", " ").strip!
+          Listener #{listener.id} for #{event[:subscription_group].name} is still running
+          after termination, its client will not be shut down
+        MSG
+      end
+
       # Prints info about the fact that a given job has started
       #
       # @param event [Karafka::Core::Monitoring::Event] event details including payload
@@ -236,18 +248,6 @@ module Karafka
       # @param event [Karafka::Core::Monitoring::Event] event details including payload
       def on_app_stopped(event)
         info "[#{event[:server_id]}] Stopped Karafka server"
-      end
-
-      # Logs a listener that forceful shutdown skips, as its terminated thread is still running
-      #
-      # @param event [Karafka::Core::Monitoring::Event] event details including payload
-      def on_app_forceful_stopping_listener_skipped(event)
-        listener = event[:listener]
-
-        warn <<~MSG.tr("\n", " ").strip!
-          Listener #{listener.id} for #{event[:subscription_group].name} is still running
-          after termination, its client will not be shut down
-        MSG
       end
 
       # Logs info about partitions we have lost

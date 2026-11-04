@@ -301,7 +301,7 @@ RSpec.describe_current do
         it "expect not to shut down its client from another thread and to report it" do
           expect(listener).not_to have_received(:shutdown)
           expect(Karafka.monitor).to have_received(:instrument).with(
-            "app.forceful_stopping.listener_skipped",
+            "connection.listener.shutdown.skipped",
             caller: server_class,
             listener: listener,
             subscription_group: listener.subscription_group
@@ -347,7 +347,7 @@ RSpec.describe_current do
           allow(Karafka.monitor).to receive(:instrument).and_call_original
           allow(Karafka.monitor)
             .to receive(:instrument)
-            .with("app.forceful_stopping.listener_skipped", any_args)
+            .with("connection.listener.shutdown.skipped", any_args)
             .and_raise(StandardError)
           described_class.listeners = batch
           server_class.stop

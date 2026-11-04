@@ -92,7 +92,7 @@ Karafka.monitor.subscribe("error.occurred") do |event|
   DT[:stopping_error] = true if event[:type] == "app.stopping.error"
 end
 
-Karafka.monitor.subscribe("app.forceful_stopping.listener_skipped") do |event|
+Karafka.monitor.subscribe("connection.listener.shutdown.skipped") do |event|
   DT[:skipped] << event[:listener].id
 end
 

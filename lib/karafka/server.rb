@@ -181,7 +181,7 @@ module Karafka
           # Reported after all the shutdowns, so a failing subscriber cannot prevent any of them
           skipped.each do |listener|
             Karafka.monitor.instrument(
-              "app.forceful_stopping.listener_skipped",
+              "connection.listener.shutdown.skipped",
               caller: self,
               listener: listener,
               subscription_group: listener.subscription_group
