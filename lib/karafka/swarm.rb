@@ -9,13 +9,12 @@ module Karafka
   module Swarm
     class << self
       # Raises an error if swarm is not supported on a given platform
+      #
+      # @raise [Errors::UnsupportedOptionError] with the Ruby engine name when it has no fork
       def ensure_supported!
         return if supported?
 
-        raise(
-          Errors::UnsupportedOptionError,
-          "Swarm mode not supported on this platform"
-        )
+        raise(Errors::UnsupportedOptionError, RUBY_ENGINE)
       end
 
       # @return [Boolean] true if fork API is available, otherwise false

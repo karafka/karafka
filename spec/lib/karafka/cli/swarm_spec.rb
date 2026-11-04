@@ -15,6 +15,7 @@ RSpec.describe_current do
       allow(server_cli).to receive(:register_exclusions)
       allow(supervisor.class).to receive(:new).and_return(supervisor)
       allow(supervisor).to receive(:run)
+      allow(Karafka::Swarm).to receive(:supported?).and_return(true)
     end
 
     context "when we run in foreground (not daemonized)" do

@@ -89,6 +89,48 @@ module Karafka
               ensure
                 coordinator.decrement(:revoked)
               end
+
+              # Pauses the current topic partition and holds the pause tracker until the client
+              # pause lands
+              #
+              # @param offset [Integer, Symbol] offset from which we want to restart the
+              #   processing or `:consecutive` if we want to pause and continue without changing
+              #   the consecutive offset (cursor position)
+              # @param timeout [Integer, nil] how long in milliseconds do we want to pause or nil
+              #   to use the default exponential pausing strategy defined for retries
+              # @param manual_pause [Boolean] Flag to differentiate between user pause and
+              #   system/strategy based pause
+              #
+              # @note Same as `Lrj::Default#pause`, which this strategy does not include
+              def pause(offset, timeout = nil, manual_pause = true)
+                pause_tracker = coordinator.pause_tracker
+                timeout ||= pause_tracker.backoff_interval
+
+                offset = nil if offset == :consecutive
+
+                pause_tracker.hold
+
+                begin
+                  client.pause(topic.name, partition, offset, timeout)
+                ensure
+                  pause_tracker.pause(timeout)
+                end
+
+                # Indicate, that user took a manual action of pausing
+                coordinator.manual_pause if manual_pause
+
+                monitor.instrument(
+                  "consumer.consuming.pause",
+                  caller: self,
+                  manual: manual_pause,
+                  topic: topic.name,
+                  partition: partition,
+                  subscription_group: topic.subscription_group,
+                  offset: offset,
+                  timeout: timeout,
+                  attempt: attempt
+                )
+              end
             end
           end
         end

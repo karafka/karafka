@@ -255,6 +255,45 @@ RSpec.describe_current do
       it "expect not to wait" do
         queue.wait(group_id)
       end
+
+      it "expect not to start tracking this group" do
+        queue.wait(group_id)
+
+        expect(queue.in_processing).not_to have_key(group_id)
+      end
+    end
+
+    context "when another thread uses the queue while wait checks the jobs" do
+      let(:job) { OpenStruct.new(group_id: 2, id: 1, call: true) }
+      let(:readers) { [] }
+      let(:blocked) { [] }
+
+      before do
+        allow(job).to receive(:non_blocking?) do
+          reader = Thread.new { queue.statistics }
+          readers << reader
+
+          100.times do
+            break if reader.status == "sleep" || !reader.alive?
+
+            sleep(0.01)
+          end
+
+          blocked << (reader.status == "sleep")
+
+          true
+        end
+
+        queue << job
+      end
+
+      after { readers.each(&:join) }
+
+      it "expect the other thread to wait until the check is done" do
+        queue.wait(job.group_id)
+
+        expect(blocked).to eq([true])
+      end
     end
   end
 

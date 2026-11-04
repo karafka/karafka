@@ -7,15 +7,12 @@ module Karafka
 
     class << self
       # Notifies the Ruby virtual machine that the boot sequence is finished, and that now is a
-      # good time to optimize the application. In case of older Ruby versions, runs compacting,
-      # which is part of the full warmup introduced in Ruby 3.3.
+      # good time to optimize the application.
       def warmup
         # Per recommendation, this should not run in children nodes
         return if Karafka::App.config.swarm.node
 
         monitor.instrument("app.before_warmup", caller: self)
-
-        return GC.compact unless ::Process.respond_to?(:warmup)
 
         ::Process.warmup
       end

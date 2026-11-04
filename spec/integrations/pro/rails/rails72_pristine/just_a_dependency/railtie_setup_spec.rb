@@ -28,7 +28,7 @@
 # License: https://karafka.io/docs/Pro-License-Comm/
 # Contact: contact@karafka.io
 
-# Karafka+Pro should work with Rails 7 using the default setup
+# Karafka+Pro should work with Rails 7.2 using the default setup
 
 # Load all the Railtie stuff like when `rails server`
 ENV["KARAFKA_CLI"] = "true"

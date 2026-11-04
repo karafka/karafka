@@ -105,6 +105,39 @@ RSpec.describe_current do
       it { expect(tracker.paused?).to be(false) }
       it { expect(tracker.attempt).to eq(0) }
     end
+
+    context "when held over timeout" do
+      let(:times) { [0.763, 1.764] }
+
+      before { tracker.hold }
+
+      it { expect(tracker.expired?).to be(false) }
+      it { expect(tracker.paused?).to be(true) }
+    end
+
+    context "when expired and held" do
+      before do
+        tracker.pause
+        tracker.expire
+        tracker.hold
+      end
+
+      it { expect(tracker.expired?).to be(false) }
+      it { expect(tracker.paused?).to be(true) }
+    end
+
+    context "when held and paused over timeout" do
+      let(:times) { [0.763, 0.764, 1.764] }
+
+      before do
+        tracker.hold
+        tracker.pause
+      end
+
+      it { expect(tracker.expired?).to be(true) }
+      it { expect(tracker.paused?).to be(true) }
+      it { expect(tracker.current_timeout).to eq(10) }
+    end
   end
 
   context "when max timeout defined and no exponential backoff" do

@@ -31,6 +31,7 @@
 # Karafka should use default deserializers when defaults exist and topic is detected
 
 setup_karafka do |config|
+  config.kafka[:"allow.auto.create.topics"] = true
   config.kafka[:"topic.metadata.refresh.interval.ms"] = 2_000
 end
 
