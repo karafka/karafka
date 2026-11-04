@@ -192,7 +192,7 @@ RSpec.describe_current do
   describe "#on_statistics_emitted" do
     context "when join_state is steady" do
       it "clears any existing non-steady tracking for that subscription group" do
-        listener.on_statistics_emitted(stats_event(join_state: "wait-assn"))
+        listener.on_statistics_emitted(stats_event(join_state: "wait-assign-call"))
         expect(listener_instabilities).not_to be_empty
 
         listener.on_statistics_emitted(stats_event(join_state: "steady"))
@@ -200,7 +200,7 @@ RSpec.describe_current do
       end
 
       it "clears the join_states entry when the consumer recovers" do
-        listener.on_statistics_emitted(stats_event(join_state: "wait-assn"))
+        listener.on_statistics_emitted(stats_event(join_state: "wait-assign-call"))
         expect(listener_join_states).not_to be_empty
 
         listener.on_statistics_emitted(stats_event(join_state: "steady"))
@@ -228,7 +228,7 @@ RSpec.describe_current do
         first_tick = listener_instabilities["sg1"]
 
         sleep(0.01)
-        listener.on_statistics_emitted(stats_event(join_state: "wait-assn"))
+        listener.on_statistics_emitted(stats_event(join_state: "wait-assign-call"))
         expect(listener_instabilities["sg1"]).to be > first_tick
       end
     end
@@ -256,7 +256,7 @@ RSpec.describe_current do
       end
 
       it "clears any existing instability entry on rdkafka client reset" do
-        listener.on_statistics_emitted(stats_event(join_state: "wait-assn"))
+        listener.on_statistics_emitted(stats_event(join_state: "wait-assign-call"))
         expect(listener_instabilities).not_to be_empty
 
         listener.on_statistics_emitted(stats_event(join_state: "init"))
@@ -264,7 +264,7 @@ RSpec.describe_current do
       end
 
       it "clears the join_states entry on rdkafka client reset" do
-        listener.on_statistics_emitted(stats_event(join_state: "wait-assn"))
+        listener.on_statistics_emitted(stats_event(join_state: "wait-assign-call"))
         expect(listener_join_states).not_to be_empty
 
         listener.on_statistics_emitted(stats_event(join_state: "init"))
@@ -279,7 +279,7 @@ RSpec.describe_current do
       end
 
       it "clears any existing instability entry so the prior timer cannot fire later" do
-        listener.on_statistics_emitted(stats_event(join_state: "wait-assn"))
+        listener.on_statistics_emitted(stats_event(join_state: "wait-assign-call"))
         expect(listener_instabilities).not_to be_empty
 
         listener.on_statistics_emitted(stats_event(join_state: "wait-metadata"))
@@ -287,7 +287,7 @@ RSpec.describe_current do
       end
 
       it "clears the join_states entry when the consumer moves into wait-metadata" do
-        listener.on_statistics_emitted(stats_event(join_state: "wait-assn"))
+        listener.on_statistics_emitted(stats_event(join_state: "wait-assign-call"))
         expect(listener_join_states).not_to be_empty
 
         listener.on_statistics_emitted(stats_event(join_state: "wait-metadata"))
@@ -346,7 +346,7 @@ RSpec.describe_current do
       before { allow(listener).to receive(:node).and_return(node) }
 
       it "returns status code 4" do
-        listener.on_statistics_emitted(stats_event(join_state: "wait-assn"))
+        listener.on_statistics_emitted(stats_event(join_state: "wait-assign-call"))
         expect(listener.send(:status)).to eq(4)
       end
     end
