@@ -119,7 +119,8 @@ module Karafka
             unassigned = unassigned?(subscription_group_id, cgrp)
 
             times = []
-            # stateage is in microseconds
+            # Broker stateage is in microseconds, so we convert it to milliseconds. The cgrp
+            # stateage and rebalance_age are already in milliseconds
             # We monitor broker changes to make sure we do not introduce extra friction
             times << (statistics["brokers"].values.map { |stats| stats["stateage"] }.min / 1_000)
             times << cgrp["stateage"]
