@@ -106,6 +106,33 @@ RSpec.describe_current do
 
       it { expect { proxy }.to raise_error(Karafka::Errors::InvalidConfigurationError) }
     end
+
+    context "when envelope overrides headers with all the schedule headers" do
+      let(:envelope) { { topic: "proxy_topic", headers: schedule_headers } }
+      let(:schedule_headers) do
+        {
+          "schedule_schema_version" => "1.0.0",
+          "schedule_target_epoch" => (epoch + 60).to_s,
+          "schedule_source_type" => "schedule",
+          "schedule_target_topic" => "target_topic"
+        }
+      end
+
+      it { expect { proxy }.not_to raise_error }
+
+      %w[
+        schedule_schema_version
+        schedule_target_epoch
+        schedule_source_type
+        schedule_target_topic
+      ].each do |header|
+        context "when #{header} is missing" do
+          before { schedule_headers.delete(header) }
+
+          it { expect { proxy }.to raise_error(Karafka::Errors::InvalidConfigurationError) }
+        end
+      end
+    end
   end
 
   describe ".cancel" do
