@@ -54,6 +54,15 @@ module Karafka
                 # @param builder [Karafka::Routing::Builder]
                 # @param scope [Array<String>]
                 def validate!(builder, scope: [])
+                  # Swarm node assignments are a consumer-group feature. When only share groups
+                  # (KIP-932) are routed, there is nothing to distribute across the nodes, so there
+                  # is nothing to validate either.
+                  consumer_groups_active = builder.consumer_groups.any? do |group|
+                    group.topics.any?(&:active?)
+                  end
+
+                  return if !consumer_groups_active && builder.any?(&:share_group?)
+
                   nodes_setup = Hash.new do |h, node_id|
                     h[node_id] = { active: false, node_id: node_id }
                   end

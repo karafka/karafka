@@ -4,61 +4,163 @@ module Karafka
   module Consumers
     # Share-group consumer (KIP-932 / Queues for Kafka).
     #
-    # This is currently a shell: the share-group runtime is not implemented yet, so the per-record
-    # acknowledgement API is defined only as stubs that raise. The startup guard
-    # ({Karafka::App.verify_share_groups_inactive!}) prevents any share group from actually running
-    # until the runtime lands, so these methods are never reached at runtime today. They exist so
-    # the public consumer surface is stable and share consumers can already be defined and
-    # introspected.
+    # Share consumers acquire individual records under time-bounded broker leases and acknowledge
+    # them per record (accept/release/reject) instead of committing partition offsets. This class
+    # deliberately does not inherit the consumer-group offset/pause/seek/eof/revocation behavior.
     #
-    # It deliberately does not inherit the consumer-group offset/pause/seek/eof/revocation behavior
-    # - share consumers acknowledge individual records (accept/release/reject) instead of
-    # committing partition offsets.
+    # The acknowledgement mode is explicit: inside `#consume` you call
+    # {#mark_as_accepted}, {#mark_as_released} or {#mark_as_rejected} per message. Every record left
+    # unacknowledged is settled once `#consume` finishes: after a success it gets the topic
+    # `acknowledgements(unacknowledged:)` state (released for redelivery by default), after a
+    # failure it is always released for redelivery. Acknowledgements are then flushed to the broker
+    # asynchronously.
     class ShareGroup < Base
-      # Message used for the not-yet-implemented acknowledgement API
-      NOT_IMPLEMENTED_MESSAGE = "Share group (KIP-932) runtime is not implemented yet"
+      # Client methods acknowledging a record with a given state
+      ACKNOWLEDGEMENTS = {
+        accept: :mark_as_accepted,
+        release: :mark_as_released,
+        reject: :mark_as_rejected
+      }.freeze
 
-      private_constant :NOT_IMPLEMENTED_MESSAGE
+      private_constant :ACKNOWLEDGEMENTS
 
       # @return [Symbol] group type
       def group_type
         :share
       end
 
-      # Acknowledges a message as successfully processed (ACCEPT).
+      # Executes the default share consumer flow.
       #
-      # @param _message [Karafka::Messages::Message] message to accept
-      # @raise [NotImplementedError] until the share-group runtime lands
-      def mark_accepted(_message)
-        raise NotImplementedError, NOT_IMPLEMENTED_MESSAGE
+      # @private
+      #
+      # @note The containment is intentionally broad (`Exception`): an error escaping here would
+      #   bypass `#on_after_consume`, skipping the acknowledgement flush.
+      def on_consume
+        handle_consume
+      rescue Exception => e
+        monitor.instrument(
+          "error.occurred",
+          error: e,
+          caller: self,
+          type: "consumer.consume.error"
+        )
       end
 
-      # Releases a message back to the share group for redelivery (RELEASE), optionally after a
-      # delay.
+      # Runs the post-consumption flow (flushing acknowledgements).
       #
-      # @param _message [Karafka::Messages::Message] message to release
-      # @param delay [Integer, nil] optional delay in milliseconds before the message becomes
-      #   available for redelivery
-      # @raise [NotImplementedError] until the share-group runtime lands
-      def mark_released(_message, delay: nil)
-        raise NotImplementedError, NOT_IMPLEMENTED_MESSAGE
+      # @private
+      def on_after_consume
+        handle_after_consume
+      rescue Exception => e
+        monitor.instrument(
+          "error.occurred",
+          error: e,
+          caller: self,
+          type: "consumer.after_consume.error"
+        )
       end
 
-      # Rejects a message so it is not redelivered to this share group (REJECT).
+      # Acknowledges a message as accepted (ACCEPT / successfully processed) in an async way - the
+      # acknowledgement is buffered and flushed to the broker after `#consume`. The message will
+      # not be redelivered.
       #
-      # @param _message [Karafka::Messages::Message] message to reject
-      # @raise [NotImplementedError] until the share-group runtime lands
-      def mark_rejected(_message)
-        raise NotImplementedError, NOT_IMPLEMENTED_MESSAGE
+      # @param message [Karafka::Messages::Message] message to accept
+      # @return [Boolean] true if acknowledged, false if this message was already acknowledged
+      #   (every record can be acknowledged only once)
+      def mark_as_accepted(message)
+        acknowledge(message, :accept)
       end
 
-      # Extends the acquisition lock on a message being processed (RENEW), buying more time before
-      # the broker considers it available for redelivery.
+      # Acknowledges a message as accepted (ACCEPT) and flushes acknowledgements synchronously, so
+      # the accept is durable before returning.
       #
-      # @param _message [Karafka::Messages::Message] message whose lock we want to extend
-      # @raise [NotImplementedError] until the share-group runtime lands
-      def extend_lock!(_message)
-        raise NotImplementedError, NOT_IMPLEMENTED_MESSAGE
+      # @param message [Karafka::Messages::Message] message to accept
+      # @return [Boolean] true if acknowledged and confirmed by the broker, false if this message
+      #   was already acknowledged or the broker rejected the acknowledgement (for example because
+      #   the acquisition lock of the record expired and it will be delivered again)
+      def mark_as_accepted!(message)
+        acknowledge(message, :accept, sync: true)
+      end
+
+      # Releases a message back to the share group for redelivery (RELEASE) in an async way. The
+      # broker will hand it to a consumer again (delivery count increments) until the
+      # delivery-count limit is reached.
+      #
+      # @param message [Karafka::Messages::Message] message to release
+      # @return [Boolean] true if acknowledged, false if this message was already acknowledged
+      def mark_as_released(message)
+        acknowledge(message, :release)
+      end
+
+      # Releases a message (RELEASE) and flushes acknowledgements synchronously.
+      #
+      # @param message [Karafka::Messages::Message] message to release
+      # @return [Boolean] true if acknowledged and confirmed by the broker, false if this message
+      #   was already acknowledged or the broker rejected the acknowledgement
+      def mark_as_released!(message)
+        acknowledge(message, :release, sync: true)
+      end
+
+      # Rejects a message so it is not redelivered to this share group (REJECT) in an async way.
+      # The broker archives it immediately.
+      #
+      # @param message [Karafka::Messages::Message] message to reject
+      # @return [Boolean] true if acknowledged, false if this message was already acknowledged
+      def mark_as_rejected(message)
+        acknowledge(message, :reject)
+      end
+
+      # Rejects a message (REJECT) and flushes acknowledgements synchronously.
+      #
+      # @param message [Karafka::Messages::Message] message to reject
+      # @return [Boolean] true if acknowledged and confirmed by the broker, false if this message
+      #   was already acknowledged or the broker rejected the acknowledgement
+      def mark_as_rejected!(message)
+        acknowledge(message, :reject, sync: true)
+      end
+
+      private
+
+      # Acknowledges the message unless it was already acknowledged in the current batch
+      #
+      # @param message [Karafka::Messages::Message] message to acknowledge
+      # @param state [Symbol] `:accept`, `:release` or `:reject`
+      # @param sync [Boolean] should acknowledgements be flushed synchronously afterwards
+      # @return [Boolean] true if acknowledged (and for sync, confirmed by the broker), false if
+      #   this message was already acknowledged, is not part of the current batch, the client is
+      #   closed or the broker rejected it
+      def acknowledge(message, state, sync: false)
+        return false unless acknowledgements_tracker.acknowledge(message)
+
+        unless client.public_send(ACKNOWLEDGEMENTS.fetch(state), message)
+          # Nothing was acknowledged, so the record is not considered acknowledged either
+          acknowledgements_tracker.forget(message)
+
+          return false
+        end
+
+        return true unless sync
+
+        confirmed?(client.commit!, message)
+      end
+
+      # @param result [Rdkafka::Consumer::TopicPartitionList, nil] outcome of a synchronous commit
+      # @param message [Karafka::Messages::Message] acknowledged message
+      # @return [Boolean] did the broker accept the acknowledgements of the message partition
+      def confirmed?(result, message)
+        return true unless result
+
+        partition = result.to_h.fetch(message.topic, []).find do |details|
+          details.partition == message.partition
+        end
+
+        partition.nil? || partition.err.to_i.zero?
+      end
+
+      # @return [Karafka::Processing::ShareGroups::AcknowledgementsTracker] tracker of this
+      #   consumer acknowledgements within the current batch
+      def acknowledgements_tracker
+        @acknowledgements_tracker ||= Processing::ShareGroups::AcknowledgementsTracker.new
       end
     end
   end

@@ -183,18 +183,25 @@ module Karafka
       # Appends topic details to lines
       # @param topic [Karafka::Routing::Topic]
       # @param lines [Array<String>] output accumulator
+      #
+      # @note Share group topics do not use the initial offset (the share group
+      #   `share.auto.offset.reset` config applies) nor pausing, so those are skipped for them.
       def topic_info(topic, lines)
+        consumer_group = topic.group.consumer_group?
         topic_active = topic.active? ? "active" : "inactive"
         lines << ""
         lines << "    Topic: #{topic.name} (#{topic_active})"
         lines << "      consumer: #{topic.consumer}"
         lines << "      max_messages: #{topic.max_messages}"
         lines << "      max_wait_time: #{topic.max_wait_time}"
-        lines << "      initial_offset: #{topic.initial_offset}"
+        lines << "      initial_offset: #{topic.initial_offset}" if consumer_group
         lines << "      consumer_persistence: #{topic.consumer_persistence}"
-        lines << "      pause_timeout: #{topic.pause.timeout}"
-        lines << "      pause_max_timeout: #{topic.pause.max_timeout}"
-        lines << "      pause_with_exponential_backoff: #{topic.pause.with_exponential_backoff}"
+
+        if consumer_group
+          lines << "      pause_timeout: #{topic.pause.timeout}"
+          lines << "      pause_max_timeout: #{topic.pause.max_timeout}"
+          lines << "      pause_with_exponential_backoff: #{topic.pause.with_exponential_backoff}"
+        end
 
         topic_kafka = topic.kafka
 

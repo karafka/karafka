@@ -356,6 +356,33 @@ RSpec.describe_current do
       end
     end
 
+    context "when running with --extended and a share group" do
+      before do
+        Karafka::App.config.license.token = false
+        allow(info_cli).to receive(:options).and_return(extended: true)
+
+        Karafka::App.consumer_groups.draw do
+          share_group :share_test_group do
+            topic :share_test_topic do
+              consumer Class.new(Karafka::ShareConsumer)
+            end
+          end
+        end
+      end
+
+      it "expect to print the share topic details" do
+        info_cli.call
+        expect(Karafka.logger).to have_received(:info).with(/Share group: share_test_group/)
+        expect(Karafka.logger).to have_received(:info).with(/^ {6}consumer_persistence:/)
+      end
+
+      it "expect not to print the settings share topics do not use" do
+        info_cli.call
+        expect(Karafka.logger).not_to have_received(:info).with(/^ {6}initial_offset:/)
+        expect(Karafka.logger).not_to have_received(:info).with(/^ {6}pause_timeout:/)
+      end
+    end
+
     context "when running with --extended and config settings" do
       before do
         Karafka::App.config.license.token = false

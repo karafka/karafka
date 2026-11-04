@@ -134,6 +134,10 @@ module Karafka
           inject_client_id(kafka)
 
           kafka[:"group.id"] ||= @group.id
+          # Acquire about as many records per poll as we will hand to the consumer at once, so
+          # records do not wait (with their acquisition locks ticking) for their processing round.
+          # This is a soft bound in librdkafka, the listener enforces `max_messages` exactly.
+          kafka[:"max.poll.records"] ||= max_messages
         else
           kafka = Setup::AttributesMap.consumer_group(@topics.first.kafka.dup)
 

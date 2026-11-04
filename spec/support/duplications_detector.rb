@@ -45,6 +45,7 @@ class DuplicationsDetector
   # @param event [Karafka::Core::Monitoring::Event]
   def on_consumer_consume(event)
     consumer = event[:caller]
+
     topic_name = consumer.topic.name
     partition = consumer.partition
 

@@ -41,6 +41,7 @@ module Karafka
         processing/consumer_groups/strategies/base
         routing/features/base
         routing/features/consumer_groups
+        routing/features/share_groups
         encryption
         encryption/cipher
         encryption/setup/config
@@ -138,6 +139,8 @@ module Karafka
           icfg.processing.consumer_groups.jobs_builder = Processing::ConsumerGroups::JobsBuilder.new
           icfg.processing.consumer_groups.strategy_selector = Processing::ConsumerGroups::StrategySelector.new
           icfg.processing.consumer_groups.expansions_selector = Processing::ConsumerGroups::ExpansionsSelector.new
+
+          icfg.processing.share_groups.partitioner_class = Processing::ShareGroups::Partitioner
 
           icfg.active_job.consumer_class = ActiveJob::Consumer
           icfg.active_job.dispatcher = ActiveJob::Dispatcher.new

@@ -1,9 +1,10 @@
 # frozen_string_literal: true
 
-# The share-group consumer (KIP-932) exists as a subclassable shell: it can be defined and
-# introspected as a share consumer and exposes the acknowledgement API as not-yet-implemented
-# stubs, but share groups still cannot be RUN (the startup guard raises). Consumer-group consumers
-# are entirely unaffected by the introduction of the consumer class hierarchy.
+# The share-group consumer (KIP-932) can be defined and introspected as a share consumer and
+# exposes the per-record acknowledgement API (mark_as_accepted/released/rejected, sync and async).
+# Advanced parts (delayed release, lock extension) are Pro/future and are simply not present.
+# Share groups cannot run in the swarm yet (the swarm guard raises). Consumer-group consumers are
+# entirely unaffected by the consumer class hierarchy.
 
 setup_karafka
 
@@ -24,30 +25,17 @@ assert_equal :share, share_consumer.group_type
 assert share_consumer.share_group?
 assert !share_consumer.consumer_group?
 
-# (b) The acknowledgement API stubs raise until the runtime lands
-message = Object.new
-
-%i[mark_accepted mark_rejected extend_lock!].each do |ack_method|
-  raised = false
-
-  begin
-    share_consumer.public_send(ack_method, message)
-  rescue NotImplementedError
-    raised = true
-  end
-
-  assert raised, ack_method
+# (b) The acknowledgement API is present, with async and sync (bang) variants
+%i[
+  mark_as_accepted mark_as_accepted!
+  mark_as_released mark_as_released!
+  mark_as_rejected mark_as_rejected!
+].each do |ack_method|
+  assert share_consumer.respond_to?(ack_method), ack_method
 end
 
-released_raised = false
-
-begin
-  share_consumer.mark_released(message, delay: 1_000)
-rescue NotImplementedError
-  released_raised = true
-end
-
-assert released_raised
+# (b.1) Advanced parts (delayed release, lock extension) are Pro/future and are not present
+assert !share_consumer.respond_to?(:extend_lock!)
 
 # (c) Existing consumer-group consumers are unaffected
 class CgConsumer < Karafka::BaseConsumer
@@ -99,7 +87,7 @@ assert rejected
 
 clear_app_draws
 
-# (e) Share groups still cannot run - the startup guard raises even with a valid share consumer
+# (e) Share groups run under `karafka server` but not in the swarm yet - the swarm guard raises
 guarded = false
 
 draw_routes(create_topics: false) do

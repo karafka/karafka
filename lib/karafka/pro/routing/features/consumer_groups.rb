@@ -32,8 +32,7 @@ module Karafka
   module Pro
     module Routing
       module Features
-        # Consumer-group-specific Pro routing features. A parallel `ShareGroups` namespace will
-        # hold share-group-specific feature implementations once KIP-932 lands.
+        # Consumer-group-specific Pro routing features. Parallel to {ShareGroups}.
         module ConsumerGroups
         end
       end

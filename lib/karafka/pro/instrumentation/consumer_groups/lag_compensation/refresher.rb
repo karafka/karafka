@@ -105,6 +105,8 @@ module Karafka
               # Never run during shutdown or quieting: blocking broker queries at that time
               # would eat into the shutdown time budget for no benefit
               return if Karafka::App.done?
+              # Share groups have no paused partitions to refresh
+              return unless event[:subscription_group].group.consumer_group?
 
               state = state_for(event[:subscription_group].id)
 
