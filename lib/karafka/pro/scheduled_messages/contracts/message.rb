@@ -73,7 +73,7 @@ module Karafka
           required(:headers) do |val|
             next false unless val.is_a?(Hash)
 
-            if val["schedule_source_type"] == "message"
+            if val["schedule_source_type"] == "schedule"
               (val.keys & EXPECTED_SCHEDULE_HEADERS).size >= 4
             else
               (val.keys & EXPECTED_CANCEL_HEADERS).size >= 2

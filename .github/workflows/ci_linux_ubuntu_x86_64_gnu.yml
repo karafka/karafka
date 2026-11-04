@@ -18,7 +18,14 @@ env:
   BUNDLE_JOBS: 4
 
 jobs:
+  # Docs-only pull requests skip the jobs below; the Success job still reports success,
+  # so the required check does not stay pending
+  changes:
+    uses: ./.github/workflows/ci_changes.yml
+
   karafka-checksum:
+    needs: changes
+    if: needs.changes.outputs.code == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 5
     strategy:
@@ -36,6 +43,8 @@ jobs:
         run: bin/verify_license_integrity
 
   rubocop:
+    needs: changes
+    if: needs.changes.outputs.code == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 5
     strategy:
@@ -47,15 +56,17 @@ jobs:
         with:
           fetch-depth: 0
       - name: Set up Ruby
-        uses: ruby/setup-ruby@26e5b7d197ebf60545ee9667bcbace0be11ccaec # v1.334.0
+        uses: ruby/setup-ruby@7f797815d8adceb1c412e7abefdd1ab4abc47a5f # v1.335.0
         with:
-          ruby-version: '4.0.8'
+          ruby-version: '4.0.9'
           bundler-cache: true
           cache-version: 2
       - name: Run RuboCop
         run: bundle exec rubocop
 
   yard-lint:
+    needs: changes
+    if: needs.changes.outputs.code == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 5
     strategy:
@@ -67,15 +78,17 @@ jobs:
         with:
           fetch-depth: 0
       - name: Set up Ruby
-        uses: ruby/setup-ruby@26e5b7d197ebf60545ee9667bcbace0be11ccaec # v1.334.0
+        uses: ruby/setup-ruby@7f797815d8adceb1c412e7abefdd1ab4abc47a5f # v1.335.0
         with:
-          ruby-version: '4.0.8'
+          ruby-version: '4.0.9'
           bundler-cache: true
           cache-version: 2
       - name: Run yard-lint
         run: bundle exec yard-lint lib/
 
   lostconf:
+    needs: changes
+    if: needs.changes.outputs.code == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 5
     strategy:
@@ -97,6 +110,8 @@ jobs:
   # We do not split RSpec specs to OSS and Pro like integrations because they do not overload
   # Kafka heavily, compute total coverage for specs and are fast enough
   specs:
+    needs: changes
+    if: needs.changes.outputs.code == 'true'
     timeout-minutes: 15
     runs-on: ubuntu-latest
     strategy:
@@ -128,7 +143,7 @@ jobs:
         run: rm -f Gemfile.lock
 
       - name: Set up Ruby
-        uses: ruby/setup-ruby@26e5b7d197ebf60545ee9667bcbace0be11ccaec # v1.334.0
+        uses: ruby/setup-ruby@7f797815d8adceb1c412e7abefdd1ab4abc47a5f # v1.335.0
         with:
           ruby-version: ${{matrix.ruby}}
           bundler-cache: true
@@ -151,6 +166,8 @@ jobs:
         run: bundle exec bin/verify_topics_naming
 
   integrations_oss:
+    needs: changes
+    if: needs.changes.outputs.code == 'true'
     timeout-minutes: 30
     runs-on: ubuntu-latest
     strategy:
@@ -181,7 +198,7 @@ jobs:
           done
 
       - name: Set up Ruby
-        uses: ruby/setup-ruby@26e5b7d197ebf60545ee9667bcbace0be11ccaec # v1.334.0
+        uses: ruby/setup-ruby@7f797815d8adceb1c412e7abefdd1ab4abc47a5f # v1.335.0
         with:
           # Do not use cache here as we run bundle install also later in some of the integration
           # tests and we need to be able to run it without cache
@@ -227,6 +244,8 @@ jobs:
         run: bundle exec bin/verify_topics_naming
 
   integrations_pro:
+    needs: changes
+    if: needs.changes.outputs.code == 'true'
     timeout-minutes: 45
     runs-on: ubuntu-latest
     strategy:
@@ -254,7 +273,7 @@ jobs:
           done
 
       - name: Set up Ruby
-        uses: ruby/setup-ruby@26e5b7d197ebf60545ee9667bcbace0be11ccaec # v1.334.0
+        uses: ruby/setup-ruby@7f797815d8adceb1c412e7abefdd1ab4abc47a5f # v1.335.0
         with:
           ruby-version: ${{matrix.ruby}}
           bundler: 'latest'
@@ -301,6 +320,7 @@ jobs:
     runs-on: ubuntu-latest
     if: always()
     needs:
+      - changes
       - karafka-checksum
       - rubocop
       - yard-lint
@@ -309,10 +329,12 @@ jobs:
       - integrations_oss
       - integrations_pro
     steps:
+      # Skipped jobs are fine only when the change is docs-only
       - name: Check all jobs passed
         if: |
+          needs.changes.result != 'success' ||
           contains(needs.*.result, 'failure') ||
           contains(needs.*.result, 'cancelled') ||
-          contains(needs.*.result, 'skipped')
+          (needs.changes.outputs.code != 'false' && contains(needs.*.result, 'skipped'))
         run: exit 1
       - run: echo "All CI checks passed!"

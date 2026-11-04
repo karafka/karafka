@@ -28,7 +28,7 @@
 # License: https://karafka.io/docs/Pro-License-Comm/
 # Contact: contact@karafka.io
 
-# Karafka+Pro should work with Rails 7 using the default setup
+# Karafka+Pro should refuse to enable recurring tasks when fugit is not installed
 
 # Load all the Railtie stuff like when `rails server`
 ENV["KARAFKA_CLI"] = "true"
