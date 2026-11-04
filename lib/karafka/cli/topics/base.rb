@@ -69,10 +69,10 @@ module Karafka
               !topic.declaratives.details.empty? && existing_topics_names.include?(topic.name)
             end
 
-            cluster_configs = Cluster::Configs.new(topics.first.name) unless topics.empty?
+            topics_configs = Cluster::TopicsConfigs.new(topics.first.name) unless topics.empty?
 
             topics.each_with_object({}) do |topic, unknown|
-              configs = cluster_configs.unknown(topic.declaratives.details)
+              configs = topics_configs.unknown(topic.declaratives.details)
               unknown[topic] = configs unless configs.empty?
             end
           end

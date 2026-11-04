@@ -9,7 +9,7 @@ module Karafka
         #
         # All topics of a cluster share the same set of configuration names, so we describe one
         # existing topic and reuse its names for any other topic.
-        class Configs
+        class TopicsConfigs
           # @param topic_name [String] name of any existing topic
           def initialize(topic_name)
             @topic_name = topic_name
