@@ -64,18 +64,10 @@ module Karafka
         #   declarative topics with their configs (names with values) that the cluster does not
         #   know and so could never be applied
         def unknown_configs
-          @unknown_configs ||= begin
-            topics = declaratives_routing_topics.select do |topic|
-              !topic.declaratives.details.empty? && existing_topics_names.include?(topic.name)
-            end
-
-            topics_configs = Cluster::TopicsConfigs.new(topics.first.name) unless topics.empty?
-
-            topics.each_with_object({}) do |topic, unknown|
-              configs = topics_configs.unknown(topic.declaratives.details)
-              unknown[topic] = configs unless configs.empty?
-            end
-          end
+          @unknown_configs ||= UnknownConfigs.new(
+            declaratives_routing_topics,
+            existing_topics_names
+          ).call
         end
 
         # @return [Array<Hash>] existing topics details

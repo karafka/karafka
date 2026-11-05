@@ -25,15 +25,6 @@ module Karafka
               end
             end
           end
-
-          # @param configs [Hash] topic configs (names with values)
-          # @return [Hash{String => String}] configs with names the cluster does not know. Names
-          #   and values are strings, as the cluster returns them.
-          def unknown(configs)
-            configs
-              .to_h { |name, value| [name.to_s, value.to_s] }
-              .except(*names)
-          end
         end
       end
     end

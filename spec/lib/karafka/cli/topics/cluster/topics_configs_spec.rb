@@ -11,20 +11,4 @@ RSpec.describe_current do
     it { expect(topics_configs.names).to include("retention.ms", "cleanup.policy") }
     it { expect(topics_configs.names).to include("log.retention.bytes") }
   end
-
-  describe "#unknown" do
-    let(:configs) do
-      {
-        "retention.ms": 86_400_000,
-        "log.retention.bytes": 1_000,
-        "retention.msx": 86_400_000
-      }
-    end
-
-    it "expect to return only configs the cluster does not know, as strings" do
-      expect(topics_configs.unknown(configs)).to eq("retention.msx" => "86400000")
-    end
-
-    it { expect(topics_configs.unknown("retention.ms": 1)).to eq({}) }
-  end
 end
