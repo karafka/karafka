@@ -17,7 +17,7 @@
 - [Enhancement] Stop allocating a keyword `Hash` per consumed message when building its metadata.
 - [Enhancement] Log only the top two backtrace lines for `librdkafka.error` in the `LoggerListener`, so unreachable brokers no longer flood the logs.
 - [Change] Raise `UnsupportedOptionError` with the Ruby engine name (e.g. `jruby`) when Swarm runs on a Ruby without `Process.fork`, also when `Swarm::Supervisor#run` is called directly, before any work is done.
-- [Change] Require `karafka-rdkafka` `>=` `0.32.0`. A failed consumer close (in practice, after a fatal error, e.g. a fence by a static membership conflict) is now reported as a `librdkafka.error` on `error.occurred` instead of being dropped. A fatal error seen when polling is then reported twice: as `connection.client.poll.error` and again on close.
+- [Change] Require `karafka-rdkafka` `>=` `0.32.0`. A failed consumer close is now reported as a `librdkafka.error` on `error.occurred` instead of being dropped. A close fails in practice only after a fatal error, e.g. when the consumer was fenced by a static membership conflict. Such an error is usually reported first when polling, so it is reported twice: as `connection.client.poll.error` and again on close.
 - [Change] Fail `karafka topics align` and `migrate` (exit 1) when an existing declarative topic has config keys the cluster does not know (e.g. a typo), naming them, instead of skipping them silently. `plan` lists such keys as unknown and fails too.
 - [Maintenance] Cover `karafka install --share_groups` with an integration spec: it generates `ApplicationShareConsumer` and the app boots with it.
 - [Maintenance] Cover the `:max_timestamp` and Integer-timestamp `Admin#read_partition_offsets` offset modes with integration specs.
