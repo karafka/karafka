@@ -15,12 +15,16 @@ module Karafka
       #   configuration of existing topics.
       class Align < Base
         # @return [Boolean] true if there were any changes applied, otherwise false
+        # @raise [Karafka::Errors::CommandValidationError] when any existing topic has
+        #   configuration unknown to the cluster. Nothing is applied then.
         def call
           if candidate_topics.empty?
             puts "#{yellow("Skipping")} because no declarative topics exist."
 
             return false
           end
+
+          ensure_configs_exist_in_cluster!
 
           resources_to_migrate = build_resources_to_migrate
 
