@@ -30,7 +30,7 @@
 
 # When a declared CurrentAttributes writer raises after setting its value while a job is being
 # restored, all the values already set must be reset, so they do not leak into the next job
-# processed on the same worker thread. Covers the Pro ActiveJob consumer.
+# processed on the same worker thread.
 
 setup_karafka(allow_errors: true) do |config|
   config.concurrency = 1

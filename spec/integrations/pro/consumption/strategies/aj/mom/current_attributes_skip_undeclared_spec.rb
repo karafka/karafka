@@ -30,8 +30,7 @@
 
 # When a job payload carries a CurrentAttributes attribute the consumer does not declare (e.g.
 # during a rolling deploy), it is skipped, the job runs with the declared ones, and those are reset
-# so they do not leak into the next job processed on the same worker thread. Covers the Pro
-# ActiveJob consumer.
+# so they do not leak into the next job processed on the same worker thread.
 
 setup_karafka do |config|
   config.concurrency = 1
