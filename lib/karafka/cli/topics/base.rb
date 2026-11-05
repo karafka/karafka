@@ -45,6 +45,31 @@ module Karafka
           end
         end
 
+        # Fails when any existing declarative topic has configuration that the cluster does not
+        # know. Such configuration would never be applied, so we stop before changing anything.
+        #
+        # @raise [Karafka::Errors::CommandValidationError] when unknown configuration is present
+        def ensure_configs_exist_in_cluster!
+          return if unknown_configs.empty?
+
+          unknown_configs.each do |topic, configs|
+            puts "#{red("Failed")} because topic #{topic.name} has configuration unknown to " \
+              "the cluster: #{configs.keys.join(", ")}."
+          end
+
+          raise Errors::CommandValidationError
+        end
+
+        # @return [Hash{Karafka::Declaratives::Topic => Hash{String => String}}] existing
+        #   declarative topics with their configs (names with values) that the cluster does not
+        #   know and so could never be applied
+        def unknown_configs
+          @unknown_configs ||= UnknownConfigs.new(
+            declaratives_routing_topics,
+            existing_topics_names
+          ).call
+        end
+
         # @return [Array<Hash>] existing topics details
         def existing_topics
           @existing_topics ||= Admin.cluster_info.topics
