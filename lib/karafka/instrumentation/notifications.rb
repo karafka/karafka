@@ -48,6 +48,7 @@ module Karafka
         connection.listener.quiet
         connection.listener.stopping
         connection.listener.stopped
+        connection.listener.shutdown.skipped
 
         consumer.initialize
         consumer.initialized

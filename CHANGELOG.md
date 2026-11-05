@@ -63,6 +63,7 @@
 - [Fix] Reset ActiveJob current attributes also when restoring them from the job payload fails part way, so values set before the failure no longer stay on the worker thread. Attributes the consumer does not declare are now skipped and a non-Hash attributes payload raises `Karafka::Errors::InvalidConfigurationError`.
 - [Fix] [Pro] Stop an LRJ retry pause from staying paused forever when the listener resumed the partition before the client pause landed.
 - [Fix] [Pro] Validate all four schedule headers of scheduled messages. Only the cancel headers were checked, so a schedule missing `schedule_target_topic` passed and one missing `schedule_target_epoch` raised `KeyError`.
+- [Fix] Stop forceful shutdown from using a listener's client from two threads at once on JRuby. A listener still running after termination now keeps its client open and is reported via `connection.listener.shutdown.skipped`.
 
 ## 2.6.1 (2026-08-24)
 - **[Feature]** [Pro] Add an opt-in envelope encryption mode for Messages At Rest (`config.encryption.mode = :envelope`, requires openssl `>= 3.0`) without the RSA payload size limit. Upgrade all consuming processes before enabling.
