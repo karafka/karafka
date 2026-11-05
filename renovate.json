@@ -60,5 +60,11 @@
     ]
   },
   "automerge": true,
-  "platformAutomerge": true
+  "platformAutomerge": true,
+  "osvVulnerabilityAlerts": true,
+  "vulnerabilityAlerts": {
+    "labels": [
+      "security"
+    ]
+  }
 }
