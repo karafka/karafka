@@ -9,8 +9,8 @@
 # NOT fire, which means this stuck state goes undetected by stability_ttl.
 #
 # This is a known design boundary: stability_ttl targets consumers frozen in a mid-join
-# state (e.g. stuck in "wait-assn" due to KAFKA-19862), not consumers that never start
-# the join protocol because the topic is missing. This is NOT a false positive - the
+# state (e.g. stuck due to KAFKA-19862), not consumers that never start the join protocol
+# because the topic is missing. This is NOT a false positive - the
 # probe stays healthy (200) - but users should be aware of this scope limitation.
 
 require "net/http"
