@@ -141,6 +141,7 @@ module Karafka
           icfg.processing.consumer_groups.expansions_selector = Processing::ConsumerGroups::ExpansionsSelector.new
 
           icfg.processing.share_groups.partitioner_class = Processing::ShareGroups::Partitioner
+          icfg.processing.share_groups.strategy_selector = Processing::ShareGroups::StrategySelector.new
 
           icfg.active_job.consumer_class = ActiveJob::Consumer
           icfg.active_job.dispatcher = ActiveJob::Dispatcher.new
