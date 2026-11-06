@@ -58,20 +58,15 @@ Karafka::Pro::Processing::ConsumerGroups::VirtualPartitions::Estimator
 
 def run_cli(*args)
   ARGV.replace(args)
-  output = StringIO.new
-  original = $stdout
-  $stdout = output
   status = 0
 
-  begin
+  output = capture_stdout do
     Karafka::Cli.start
   rescue SystemExit => e
     status = e.status
-  ensure
-    $stdout = original
   end
 
-  [output.string, status]
+  [output, status]
 end
 
 report, status = run_cli("vps", "estimate-report", target_file)
