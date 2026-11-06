@@ -68,8 +68,8 @@ def summary(result)
 end
 
 assert_equal(
-  [[DT.groups[0], DT.topics[0], 2], [DT.groups[1], DT.topics[1], 3]],
-  summary(query).sort
+  [[DT.groups[0], DT.topics[0], 2], [DT.groups[1], DT.topics[1], 3]].sort,
+  summary(query)
 )
 
 assert_equal(
