@@ -64,7 +64,7 @@
 - [Fix] [Pro] Stop an LRJ retry pause from staying paused forever when the listener resumed the partition before the client pause landed.
 - [Fix] [Pro] Validate all four schedule headers of scheduled messages. Only the cancel headers were checked, so a schedule missing `schedule_target_topic` passed and one missing `schedule_target_epoch` raised `KeyError`.
 - [Fix] Stop forceful shutdown from using a listener's client from two threads at once on JRuby. A listener still running after termination now keeps its client open and is reported via `connection.listener.shutdown.skipped`.
-- [Fix] Fail `karafka topics plan` and `migrate` (exit 1) also when a declarative topic to be created has config keys the cluster does not know. `plan --detailed-exitcode` exited 2 for it and `migrate` failed on the broker after creating other topics.
+- [Fix] Fail every `karafka topics` command except `help` (exit 1) when any declarative topic, also one that does not exist or that the command skips, has config keys the cluster does not know. `plan --detailed-exitcode` exited 2 for a topic to be created, `migrate` failed on the broker after creating other topics, and `create`, `delete`, `reset`, `repartition` and `align` ignored such keys on topics they skip or do not configure.
 
 ## 2.6.1 (2026-08-24)
 - **[Feature]** [Pro] Add an opt-in envelope encryption mode for Messages At Rest (`config.encryption.mode = :envelope`, requires openssl `>= 3.0`) without the RSA payload size limit. Upgrade all consuming processes before enabling.

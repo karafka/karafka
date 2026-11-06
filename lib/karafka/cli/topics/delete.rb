@@ -6,7 +6,11 @@ module Karafka
       # Deletes routing based topics
       class Delete < Base
         # @return [Boolean] true if any topic was deleted, otherwise false
+        # @raise [Karafka::Errors::CommandValidationError] when any topic has configuration
+        #   unknown to the cluster. Nothing is applied then.
         def call
+          ensure_configs_exist_in_cluster!
+
           any_deleted = false
 
           declaratives_routing_topics.each do |topic|
