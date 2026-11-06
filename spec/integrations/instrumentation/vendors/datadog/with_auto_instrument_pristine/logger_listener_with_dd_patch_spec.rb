@@ -52,6 +52,6 @@ start_karafka_and_wait_until do
   DT[:consumed].sum >= 10
 end
 
-assert Datadog::Tracing::Contrib::Karafka::Patcher.patched?
+assert Datadog::Tracing::Contrib::Karafka::Patcher.patch_successful
 assert_equal [nil], DT[:open_traces].uniq, DT[:open_traces]
 assert_equal 1, strio.string.scan("dd-trace-rb Karafka integration is active").size

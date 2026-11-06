@@ -23,6 +23,7 @@ RSpec.describe_current do
     end
 
     allow(active_span).to receive(:set_error)
+    allow(Karafka.logger).to receive(:warn)
     allow(Karafka.logger).to receive(:error)
     allow(Karafka.logger).to receive(:fatal)
     allow(Karafka.logger).to receive(:respond_to?).with(:push_tags).and_return(false)
@@ -221,6 +222,13 @@ RSpec.describe_current do
       let(:message) { "Virtual partitions partitioner error occurred: #{error}" }
 
       it { expect(Karafka.logger).to have_received(:error).with(message) }
+    end
+
+    context "when it is a lag_compensation.refresher.error" do
+      let(:type) { "lag_compensation.refresher.error" }
+      let(:message) { "Lag compensation refresher error occurred: #{error}" }
+
+      it { expect(Karafka.logger).to have_received(:warn).with(message) }
     end
 
     context "when it is an unrecognized error type" do
@@ -436,7 +444,7 @@ RSpec.describe_current do
       before do
         stub_const(
           "Datadog::Tracing::Contrib::Karafka::Patcher",
-          Module.new { def self.patched? = true }
+          Module.new { def self.patch_successful = true }
         )
 
         2.times do
@@ -450,11 +458,32 @@ RSpec.describe_current do
       end
     end
 
+    context "when dd-trace-rb Karafka integration patch failed" do
+      before do
+        stub_const(
+          "Datadog::Tracing::Contrib::Karafka::Patcher",
+          Module.new do
+            def self.patched? = true
+
+            def self.patch_successful = false
+          end
+        )
+
+        instrument("worker.process")
+      end
+
+      it { expect(Karafka.logger).not_to have_received(:warn) }
+    end
+
     context "when dd-trace-rb Karafka integration is loaded but not active" do
       before do
         stub_const(
           "Datadog::Tracing::Contrib::Karafka::Patcher",
-          Module.new { def self.patched? = false }
+          Module.new do
+            def self.patched? = false
+
+            def self.patch_successful = false
+          end
         )
 
         instrument("worker.process")

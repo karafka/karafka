@@ -215,7 +215,8 @@ module Karafka
               @dd_patch_checked = true
 
               return unless defined?(::Datadog::Tracing::Contrib::Karafka::Patcher)
-              return unless ::Datadog::Tracing::Contrib::Karafka::Patcher.patched?
+              # `patched?` is also true when the patch failed (e.g. Karafka loaded after dd-trace)
+              return unless ::Datadog::Tracing::Contrib::Karafka::Patcher.patch_successful
 
               warn(
                 "dd-trace-rb Karafka integration is active together with the Karafka Datadog " \
