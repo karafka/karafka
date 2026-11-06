@@ -52,10 +52,19 @@ end
 status, result = run("lags", "--unknown", "x")
 assert_equal 2, status
 assert_equal "invalid_args", result["error"]
+assert_equal({ "unknown" => "is not an argument of this action" }, result["details"]["errors"])
 
 status, result = run("topics", "--per_page", "0")
 assert_equal 2, status
 assert_equal "invalid_args", result["error"]
+
+# A value that cannot be parsed and a value out of range give the same per-argument error
+_, parsed = run("topics", "--per_page", "abc")
+assert_equal result["details"], parsed["details"]
+assert_equal(
+  { "per_page" => "needs to be an integer between 1 and 1000" },
+  result["details"]["errors"]
+)
 
 status, result = run("topic")
 assert_equal 2, status

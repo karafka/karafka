@@ -708,6 +708,13 @@ RSpec.describe_current do
       it { expect(Karafka.logger).to have_received(:error).with(message) }
     end
 
+    context "when it is an action.execute.error" do
+      let(:type) { "action.execute.error" }
+      let(:message) { "Action execution error occurred: #{error}" }
+
+      it { expect(Karafka.logger).to have_received(:error).with(message) }
+    end
+
     context "when it is a virtual_partitions.partitioner.error" do
       let(:type) { "virtual_partitions.partitioner.error" }
       let(:message) { "Virtual partitions partitioner error occurred: #{error}" }

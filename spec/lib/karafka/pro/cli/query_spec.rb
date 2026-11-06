@@ -118,6 +118,39 @@ RSpec.describe_current do
     it { expect(exit_status("spec")).to eq(2) }
   end
 
+  context "when the command line cannot be parsed" do
+    def details(*argv)
+      exit_status(*argv)
+
+      result["details"]
+    end
+
+    it "expect to key an unknown flag by its argument name" do
+      expect(details("spec", "--other-flag", "x"))
+        .to eq("errors" => { "other_flag" => "is not an argument of this action" })
+    end
+
+    it "expect to key a wrong value by the declared argument name" do
+      expect(details("spec", "--topic_name", "x", "--count", "x"))
+        .to eq("errors" => { "count" => "has a wrong type or format" })
+    end
+
+    it "expect a dashed flag to use the declared argument name" do
+      expect(details("spec", "--topic_name", "x", "--count", "x").fetch("errors").keys)
+        .to eq(details("spec", "--topic-name", "x", "--count", "x").fetch("errors").keys)
+    end
+
+    it "expect a flag without a value to be reported as required" do
+      expect(details("spec", "--topic_name"))
+        .to eq("errors" => { "topic_name" => "is required" })
+    end
+
+    it "expect a positional argument to be reported as unknown" do
+      expect(details("spec", "orders"))
+        .to eq("errors" => { "orders" => "is not an argument of this action" })
+    end
+  end
+
   context "when flags come before the action" do
     it { expect(exit_status("--json", "spec")).to eq(2) }
 

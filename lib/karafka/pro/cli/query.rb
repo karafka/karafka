@@ -61,8 +61,15 @@ module Karafka
         # Arguments accepted when listing the actions
         CATALOG_ARGS = %w[help --json --help -h].freeze
 
+        # Contract error keys matching command line parsing errors
+        PARSE_ERRORS = {
+          OptionParser::InvalidArgument => "format",
+          OptionParser::MissingArgument => "missing"
+        }.freeze
+
         private_constant(
           :CATALOG_ARGS,
+          :PARSE_ERRORS,
           :FAILURE_EXIT_CODE,
           :INVALID_EXIT_CODE,
           :NOT_FOUND_EXIT_CODE,
@@ -110,7 +117,7 @@ module Karafka
             return Actions::Result.new(
               success: false,
               error: "invalid_args",
-              details: { errors: { unexpected => "needs an action before it" } },
+              details: { errors: { argument_name(unexpected) => "needs an action before it" } },
               meta: {}
             )
           end
@@ -139,7 +146,7 @@ module Karafka
           Actions::Result.new(
             success: false,
             error: "invalid_args",
-            details: { errors: { e.args.first => e.reason } },
+            details: { errors: parse_errors(e) },
             meta: {}
           )
         end
@@ -170,6 +177,24 @@ module Karafka
           raise(OptionParser::NeedlessArgument, extra.first) unless extra.empty?
 
           help ? :help : args
+        end
+
+        # Builds errors in the same shape and with the same messages as the arguments contract
+        #
+        # @param error [OptionParser::ParseError] command line parsing error
+        # @return [Hash{String => String}] error message per argument name
+        def parse_errors(error)
+          name = argument_name(error.args.first)
+          key = PARSE_ERRORS.find { |klass, _| error.is_a?(klass) }&.last || "unknown"
+          messages = Actions::Contracts::Arguments.config.error_messages
+
+          { name => messages.fetch("#{name}_#{key}") { messages.fetch(key) } }
+        end
+
+        # @param arg [String] command line argument (like `--per-page`)
+        # @return [String] argument name (like `per_page`)
+        def argument_name(arg)
+          arg.to_s.delete_prefix("--").tr("-", "_")
         end
       end
     end
