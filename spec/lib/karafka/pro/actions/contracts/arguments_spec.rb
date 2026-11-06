@@ -41,7 +41,7 @@ RSpec.describe_current do
 
   it { expect(contract.call({ name: "x" })).to be_success }
   it { expect(contract.call({ name: "x", count: 1, pattern: "^a" })).to be_success }
-  it { expect(contract.call({}).errors).to eq(name: "is required") }
+  it { expect(contract.call({}).errors).to eq(name: "needs to be present") }
   it { expect(contract.call({ name: "x", other: 1 }).errors).to eq(other: "is not an argument of this action") }
   it { expect(contract.call({ name: 1 }).errors).to eq(name: "has a wrong type or format") }
   it { expect(contract.call({ name: "x", count: "1" }).errors).to eq(count: "has a wrong type or format") }

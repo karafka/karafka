@@ -137,7 +137,7 @@ RSpec.describe_current do
   end
 
   context "when a required argument is missing" do
-    it { expect(runner.call("spec").to_h[:details]).to eq(errors: { name: "is required" }) }
+    it { expect(runner.call("spec").to_h[:details]).to eq(errors: { name: "needs to be present" }) }
   end
 
   context "when an argument is not declared" do

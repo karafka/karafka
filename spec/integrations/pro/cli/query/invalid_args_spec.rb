@@ -69,7 +69,7 @@ assert_equal(
 status, result = run("topic")
 assert_equal 2, status
 assert_equal "invalid_args", result["error"]
-assert_equal({ "topic_name" => "is required" }, result["details"]["errors"])
+assert_equal({ "topic_name" => "needs to be present" }, result["details"]["errors"])
 
 status, result = run("delete")
 assert_equal 2, status

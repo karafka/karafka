@@ -152,7 +152,7 @@ RSpec.describe_current do
 
     it "expect a flag without a value to be reported as required" do
       expect(details("spec", "--topic_name"))
-        .to eq("errors" => { "topic_name" => "is required" })
+        .to eq("errors" => { "topic_name" => "needs to be present" })
     end
 
     it "expect a positional argument to be reported as unknown" do
