@@ -50,7 +50,13 @@ module Karafka
         # @param per_page [Integer, nil] page size
         # @return [Base::Page] lags page
         def call(consumer_group_id: nil, topic_name: nil, page: nil, per_page: nil)
-          lags = admin.read_lags_with_offsets(groups_with_topics(consumer_group_id, topic_name))
+          groups = groups_with_topics(consumer_group_id, topic_name)
+
+          # Admin reads all the routed consumer groups when given none, so we must not ask
+          # when the filters match nothing
+          return paginate([], page: page, per_page: per_page) if groups.empty?
+
+          lags = admin.read_lags_with_offsets(groups)
           rows = []
 
           lags.each do |group_id, topics|

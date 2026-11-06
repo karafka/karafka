@@ -86,9 +86,22 @@ RSpec.describe_current do
     expect(admin).to have_received(:read_lags_with_offsets).with("external" => %w[x])
   end
 
-  it "expect not to query a consumer group without topics" do
-    action.call(consumer_group_id: "external")
+  context "when the filters match nothing" do
+    it "expect not to fall back to all the routed consumer groups for an unknown group" do
+      expect(action.call(consumer_group_id: "external").rows).to eq([])
+      expect(admin).not_to have_received(:read_lags_with_offsets)
+    end
 
-    expect(admin).to have_received(:read_lags_with_offsets).with({})
+    it "expect not to fall back to all the routed consumer groups for an unrouted topic" do
+      expect(action.call(topic_name: "unrouted").rows).to eq([])
+      expect(admin).not_to have_received(:read_lags_with_offsets)
+    end
+
+    it "expect not to fall back when nothing is routed" do
+      allow(Karafka::App.routes).to receive(:consumer_groups).and_return([])
+
+      expect(action.call.rows).to eq([])
+      expect(admin).not_to have_received(:read_lags_with_offsets)
+    end
   end
 end

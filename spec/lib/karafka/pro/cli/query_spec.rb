@@ -32,8 +32,8 @@ RSpec.describe_current do
   subject(:command) { described_class.new }
 
   let(:registry) { Karafka::Pro::Actions::Registry.new }
-  let(:output) { StringIO.new }
-  let(:result) { JSON.parse(output.string) }
+  let(:stdout_file) { Tempfile.create("query").tap { |file| file.sync = true } }
+  let(:result) { JSON.parse(File.read(stdout_file.path)) }
   let(:action) do
     Class.new(Karafka::Pro::Actions::Read) do
       action_name "spec"
@@ -51,7 +51,7 @@ RSpec.describe_current do
     Karafka::Pro::Actions.post_setup(Karafka::App.config)
     registry.add(action)
     allow(Karafka::Pro::Actions).to receive(:registry).and_return(registry)
-    $stdout = output
+    $stdout = stdout_file
   end
 
   after { $stdout = STDOUT }
@@ -116,6 +116,37 @@ RSpec.describe_current do
 
   context "when a required flag is missing" do
     it { expect(exit_status("spec")).to eq(2) }
+  end
+
+  context "when flags come before the action" do
+    it { expect(exit_status("--json", "spec")).to eq(2) }
+
+    it "expect to print invalid_args instead of the catalog" do
+      exit_status("--json", "spec")
+
+      expect(result).to include("error" => "invalid_args", "details" => { "value" => "spec" })
+    end
+  end
+
+  context "when the action writes to stdout" do
+    let(:action) do
+      Class.new(Karafka::Pro::Actions::Read) do
+        action_name "spec"
+
+        def call
+          $stdout.puts("log line")
+          Karafka.logger.info("log line")
+          { done: true }
+        end
+      end
+    end
+
+    it "expect stdout to hold only the envelope" do
+      expect { run("spec") }.to output(/log line/).to_stderr_from_any_process
+
+      expect(File.read(stdout_file.path).lines.size).to eq(1)
+      expect(result["data"]).to eq("done" => true)
+    end
   end
 
   context "when the action is unknown" do

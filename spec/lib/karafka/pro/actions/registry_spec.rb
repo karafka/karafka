@@ -76,6 +76,12 @@ RSpec.describe_current do
   context "when adding something that is not a read action" do
     it { expect { registry.add(Karafka::Pro::Actions::Base) }.to raise_error(errors::InvalidActionError) }
     it { expect { registry.add(Class.new) }.to raise_error(errors::InvalidActionError) }
+
+    it "expect to reject a Base subclass that is not a read action" do
+      write = Class.new(Karafka::Pro::Actions::Base) { action_name "write" }
+
+      expect { registry.add(write) }.to raise_error(errors::InvalidActionError)
+    end
   end
 
   context "when fetching an unknown action" do

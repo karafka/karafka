@@ -46,8 +46,8 @@ RSpec.describe_current do
   end
   let(:configs) do
     [
-      config_class.new(name: "retention.ms", value: "1000"),
-      config_class.new(name: "sasl.password", value: "secret"),
+      config_class.new(name: "retention.ms", value: "1000", read_only: 1),
+      config_class.new(name: "sasl.password", value: "secret", default: 1),
       config_class.new(name: "other", value: "hidden", sensitive: 1)
     ]
   end
@@ -75,13 +75,13 @@ RSpec.describe_current do
     )
   end
 
-  it "expect to redact sensitive configs" do
-    values = action.call(topic_name: "orders")[:configs].to_h { |c| [c[:name], c[:value]] }
-
-    expect(values).to eq(
-      "retention.ms" => "1000",
-      "sasl.password" => "[REDACTED]",
-      "other" => "[REDACTED]"
+  it "expect to return configs with sensitive values redacted" do
+    expect(action.call(topic_name: "orders")[:configs]).to eq(
+      [
+        { name: "retention.ms", value: "1000", default: false, read_only: true, sensitive: false },
+        { name: "sasl.password", value: "[REDACTED]", default: true, read_only: false, sensitive: false },
+        { name: "other", value: "[REDACTED]", default: false, read_only: false, sensitive: true }
+      ]
     )
   end
 

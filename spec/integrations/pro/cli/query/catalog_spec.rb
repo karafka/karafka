@@ -34,12 +34,12 @@ setup_karafka
 
 ARGV.replace(%w[query --help --json])
 
-output = StringIO.new
+output = Tempfile.create("query").tap { |file| file.sync = true }
 $stdout = output
 Karafka::Cli.start
 $stdout = STDOUT
 
-result = JSON.parse(output.string)
+result = JSON.parse(File.read(output.path))
 actions = result["data"]["actions"].to_h { |action| [action["name"], action] }
 
 assert_equal true, result["ok"]

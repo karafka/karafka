@@ -44,21 +44,21 @@ pattern = "^(#{DT.topics[0..2].join("|")})$"
 
 ARGV.replace(["query", "topics", "--pattern", pattern, "--per_page", "2"])
 
-output = StringIO.new
+output = Tempfile.create("query").tap { |file| file.sync = true }
 $stdout = output
 Karafka::Cli.start
 $stdout = STDOUT
 
-first = JSON.parse(output.string)
+first = JSON.parse(File.read(output.path))
 
 ARGV.replace(["query", "topics", "--pattern", pattern, "--per_page", "2", "--page", "2"])
 
-output = StringIO.new
+output = Tempfile.create("query").tap { |file| file.sync = true }
 $stdout = output
 Karafka::Cli.start
 $stdout = STDOUT
 
-second = JSON.parse(output.string)
+second = JSON.parse(File.read(output.path))
 
 topics = (first["data"] + second["data"]).to_h { |topic| [topic["topic"], topic["partition_count"]] }
 

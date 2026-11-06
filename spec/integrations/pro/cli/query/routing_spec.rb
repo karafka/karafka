@@ -45,12 +45,12 @@ end
 
 ARGV.replace(%w[query routing])
 
-output = StringIO.new
+output = Tempfile.create("query").tap { |file| file.sync = true }
 $stdout = output
 Karafka::Cli.start
 $stdout = STDOUT
 
-result = JSON.parse(output.string)
+result = JSON.parse(File.read(output.path))
 row = result["data"].first
 
 assert_equal true, result["ok"]
@@ -62,4 +62,4 @@ assert_equal "QueryRoutingConsumer", row["consumer"]
 definition_line = File.readlines(__FILE__).index { |line| line.start_with?("class Query") } + 1
 
 assert_equal definition_line, row["source_location"]["line"]
-assert row["source_location"]["path"].end_with?("routing_spec.rb")
+assert_equal "spec/integrations/pro/cli/query/routing_spec.rb", row["source_location"]["path"]

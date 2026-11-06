@@ -34,7 +34,7 @@ setup_karafka
 
 def run(*argv)
   ARGV.replace(["query", *argv])
-  output = StringIO.new
+  output = Tempfile.create("query").tap { |file| file.sync = true }
   status = nil
   $stdout = output
 
@@ -46,7 +46,7 @@ def run(*argv)
 
   $stdout = STDOUT
 
-  [status, JSON.parse(output.string)]
+  [status, JSON.parse(File.read(output.path))]
 end
 
 status, result = run("lags", "--unknown", "x")

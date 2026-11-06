@@ -35,7 +35,7 @@ setup_karafka
 
 ARGV.replace(["query", "topic", "--topic_name", DT.topic])
 
-output = StringIO.new
+output = Tempfile.create("query").tap { |file| file.sync = true }
 status = nil
 $stdout = output
 
@@ -47,7 +47,7 @@ end
 
 $stdout = STDOUT
 
-result = JSON.parse(output.string)
+result = JSON.parse(File.read(output.path))
 
 assert_equal 3, status
 assert_equal false, result["ok"]

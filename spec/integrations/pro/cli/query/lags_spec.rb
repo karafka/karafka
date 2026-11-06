@@ -44,12 +44,12 @@ Karafka::Admin.seek_consumer_group(DT.group, { DT.topic => { 0 => 4 } })
 
 ARGV.replace(["query", "lags", "--topic_name", DT.topic, "--json"])
 
-output = StringIO.new
+output = Tempfile.create("query").tap { |file| file.sync = true }
 $stdout = output
 Karafka::Cli.start
 $stdout = STDOUT
 
-result = JSON.parse(output.string)
+result = JSON.parse(File.read(output.path))
 
 assert_equal 1, result["schema_version"]
 assert_equal true, result["ok"]

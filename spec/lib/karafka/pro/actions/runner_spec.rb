@@ -86,6 +86,17 @@ RSpec.describe_current do
       expect(result[:meta][:has_more]).to be(false)
     end
 
+    it "expect no more pages when the last page is full" do
+      result = runner.call("spec", { per_page: 5 }).to_h
+
+      expect(result[:data]).to eq([1, 2, 3, 4, 5])
+      expect(result[:meta][:has_more]).to be(false)
+    end
+
+    it "expect more pages when one row is left" do
+      expect(runner.call("spec", { per_page: 4 }).to_h[:meta][:has_more]).to be(true)
+    end
+
     it "expect to return no rows past the last page" do
       expect(runner.call("spec", { page: 9 }).to_h[:data]).to eq([])
     end

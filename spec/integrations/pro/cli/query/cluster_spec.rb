@@ -34,12 +34,12 @@ setup_karafka
 
 ARGV.replace(%w[query cluster])
 
-output = StringIO.new
+output = Tempfile.create("query").tap { |file| file.sync = true }
 $stdout = output
 Karafka::Cli.start
 $stdout = STDOUT
 
-result = JSON.parse(output.string)
+result = JSON.parse(File.read(output.path))
 
 assert_equal true, result["ok"]
 assert result["data"]["cluster_id"].is_a?(String)

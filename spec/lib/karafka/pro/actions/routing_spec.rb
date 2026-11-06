@@ -38,7 +38,10 @@ RSpec.describe_current do
     Struct.new(:id, :group_type, :subscription_groups).new("cg", :consumer, [subscription_group])
   end
 
-  before { allow(Karafka::App).to receive(:routes).and_return([group]) }
+  before do
+    allow(Karafka::App).to receive(:routes).and_return([group])
+    allow(Karafka).to receive(:root).and_return(Karafka.gem_root)
+  end
 
   it "expect to return routed topics with consumers source location" do
     row = action.call.first
@@ -51,8 +54,17 @@ RSpec.describe_current do
       active: true,
       consumer: "Karafka::Pro::BaseConsumer"
     )
-    expect(row[:source_location][:path]).to end_with("lib/karafka/pro/base_consumer.rb")
+    expect(row[:source_location][:path]).to eq("lib/karafka/pro/base_consumer.rb")
     expect(row[:source_location][:line]).to be_a(Integer)
+  end
+
+  context "when the consumer is defined outside of the application root" do
+    before { allow(Karafka).to receive(:root).and_return(Pathname.new("/nonexistent")) }
+
+    it "expect to return the absolute path" do
+      expect(action.call.first[:source_location][:path])
+        .to eq(Karafka.gem_root.join("lib/karafka/pro/base_consumer.rb").to_s)
+    end
   end
 
   context "when the consumer is anonymous" do

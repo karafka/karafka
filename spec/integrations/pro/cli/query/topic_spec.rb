@@ -43,12 +43,12 @@ produce_many(DT.topic, DT.uuids(5), partition: 1)
 
 ARGV.replace(["query", "topic", "--topic-name", DT.topic])
 
-output = StringIO.new
+output = Tempfile.create("query").tap { |file| file.sync = true }
 $stdout = output
 Karafka::Cli.start
 $stdout = STDOUT
 
-result = JSON.parse(output.string)
+result = JSON.parse(File.read(output.path))
 data = result["data"]
 
 assert_equal true, result["ok"]

@@ -70,9 +70,16 @@ module Karafka
           @options = {}
         end
 
+        # Arguments accepted when listing the actions
+        CATALOG_ARGS = %w[help --json --help -h].freeze
+
+        private_constant :CATALOG_ARGS
+
         # @param action_name [String, nil] action to run. Lists available actions when not given
         def call(action_name = nil)
-          result = (action_name && action_name != "help") ? run(action_name) : catalog
+          result = with_logs_on_stderr do
+            (action_name && action_name != "help") ? run(action_name) : catalog
+          end
 
           $stdout.puts(JSON.generate(result.to_h))
 
@@ -81,8 +88,34 @@ module Karafka
 
         private
 
+        # Points the process stdout at stderr while running, so logs (Karafka, librdkafka and
+        # custom loggers) do not mix with the envelope
+        def with_logs_on_stderr
+          stdout = $stdout.dup
+          $stdout.flush
+          $stdout.reopen($stderr)
+
+          yield
+        ensure
+          $stdout.flush
+          $stdout.reopen(stdout)
+          stdout.close
+        end
+
         # @return [Actions::Result] available actions with their arguments schemas
         def catalog
+          # Flags given before an action (`query --json lags`) would otherwise list the actions
+          unexpected = ARGV[1..].to_a.find { |arg| !CATALOG_ARGS.include?(arg) }
+
+          if unexpected
+            return Actions::Result.new(
+              ok: false,
+              error: "invalid_args",
+              details: { value: unexpected },
+              meta: {}
+            )
+          end
+
           Actions::Result.new(
             ok: true,
             data: { actions: Actions.registry.map(&:to_h) },
