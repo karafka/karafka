@@ -1,0 +1,7 @@
+# frozen_string_literal: true
+
+source "https://rubygems.org"
+
+# Karafka goes first, so dd-trace-rb can patch it when auto-instrumentation is required
+gem "karafka", path: ENV.fetch("KARAFKA_GEM_DIR")
+gem "datadog", "~> 2.0", require: "datadog/auto_instrument"
