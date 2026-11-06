@@ -206,7 +206,10 @@ RSpec.describe_current do
       "summary is not an object" => { "summary" => 1 },
       "summary active_vps is not an object" => {
         "summary" => { "batches" => 1, "active_vps" => [1] }
-      }
+      },
+      "summary batches is an array" => { "summary" => { "batches" => [1] } },
+      "summary batches is a boolean" => { "summary" => { "batches" => true } },
+      "summary batches is a string" => { "summary" => { "batches" => "1" } }
     }.each do |description, overrides|
       context "when #{description}" do
         before do

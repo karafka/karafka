@@ -126,7 +126,8 @@ module Karafka
           end
 
           # @param report [Hash] parsed report
-          # @return [Boolean] are all the sections the renderer reads Hashes when present
+          # @return [Boolean] are all the sections the renderer reads Hashes and the summary batches
+          #   count an Integer when present
           def valid_structure?(report)
             partitions = report["partitions"]
             summary = report["summary"]
@@ -135,7 +136,14 @@ module Karafka
               optional_hash?(partitions) &&
               (partitions || {}).each_value.all? { |stats| stats.is_a?(Hash) } &&
               optional_hash?(summary) &&
-              optional_hash?((summary || {})["active_vps"])
+              optional_hash?((summary || {})["active_vps"]) &&
+              optional_integer?((summary || {})["batches"])
+          end
+
+          # @param value [Object]
+          # @return [Boolean] is the value an Integer or nil
+          def optional_integer?(value)
+            value.nil? || value.is_a?(Integer)
           end
 
           # @param value [Object]
