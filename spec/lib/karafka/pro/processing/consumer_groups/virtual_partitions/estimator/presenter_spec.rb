@@ -31,7 +31,7 @@
 RSpec.describe_current do
   subject(:report) { described_class.new(result).to_s }
 
-  let(:estimator) { Karafka::Pro::Processing::ConsumerGroups::VirtualPartitions::Estimator.new }
+  let(:estimator) { Karafka::Pro::Processing::ConsumerGroups::VirtualPartitions::Estimator.new(concurrency: 5) }
 
   let(:messages) do
     Array.new(200) do |i|

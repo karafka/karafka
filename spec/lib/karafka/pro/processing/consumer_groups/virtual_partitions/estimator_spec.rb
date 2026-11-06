@@ -29,7 +29,7 @@
 # Contact: contact@karafka.io
 
 RSpec.describe_current do
-  subject(:estimator) { described_class.new(**settings) }
+  subject(:estimator) { described_class.new(concurrency: 5, **settings) }
 
   let(:settings) { {} }
   let(:distributors) { Karafka::Pro::Processing::ConsumerGroups::VirtualPartitions::Distributors }
@@ -50,7 +50,7 @@ RSpec.describe_current do
 
   describe "#initialize" do
     context "when settings are invalid" do
-      let(:settings) { { concurrency: 0 } }
+      subject(:estimator) { described_class.new(concurrency: 0) }
 
       it do
         expect { estimator }.to raise_error(Karafka::Errors::InvalidConfigurationError)
@@ -71,11 +71,11 @@ RSpec.describe_current do
 
     let(:messages) { build_messages(Array.new(200) { |i| "key-#{i % 20}" }) }
 
-    it "uses the default concurrency and batch size" do
-      expect(result[:settings]).to eq(
-        concurrency: 5,
+    it "uses the app concurrency and max messages by default" do
+      expect(described_class.new.analyze(messages)[:settings]).to eq(
+        concurrency: Karafka::App.config.concurrency,
         distribution: :consistent,
-        batch_size: 100,
+        batch_size: Karafka::App.config.max_messages,
         sample_size: 10_000,
         custom_partitioner: false,
         custom_reducer: false
@@ -107,7 +107,7 @@ RSpec.describe_current do
         end
       end
 
-      collect.call(estimator.class.new(details: true).analyze(messages))
+      collect.call(described_class.new(details: true).analyze(messages))
 
       expect(values.grep(String)).to eq(["orders"])
     end
