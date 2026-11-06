@@ -67,5 +67,36 @@ RSpec.describe_current do
         expect(Karafka::Admin).to have_received(:create_topic).twice
       end
     end
+
+    context "when a topic has configuration unknown to the cluster" do
+      before do
+        allow(create_topics)
+          .to receive(:unknown_configs)
+          .and_return(declaratives_routing_topics[1] => { "retention.msx" => "1" })
+      end
+
+      it "raises and does not create any topics" do
+        expect { create_topics.call }.to raise_error(Karafka::Errors::CommandValidationError)
+        expect(Karafka::Admin).not_to have_received(:create_topic)
+      end
+    end
+
+    context "when describing a declared topic configuration is not allowed" do
+      let(:existing_topics_names) { %w[topic_0] }
+      let(:error) { Rdkafka::RdkafkaError.new(Rdkafka::Bindings::RD_KAFKA_RESP_ERR__FATAL) }
+
+      before do
+        allow(declaratives_routing_topics[0].declaratives)
+          .to receive(:details)
+          .and_return("retention.ms": 1)
+        allow(error).to receive(:code).and_return(:topic_authorization_failed)
+        allow(Karafka::Admin::Configs).to receive(:describe).and_raise(error)
+      end
+
+      it "raises a validation error and does not create any topics" do
+        expect { create_topics.call }.to raise_error(Karafka::Errors::CommandValidationError)
+        expect(Karafka::Admin).not_to have_received(:create_topic)
+      end
+    end
   end
 end
