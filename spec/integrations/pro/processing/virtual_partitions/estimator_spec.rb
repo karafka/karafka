@@ -29,7 +29,7 @@
 # Contact: contact@karafka.io
 
 # The Virtual Partitions estimator should sample all partitions of a topic and estimate them
-# without printing anything
+# without printing anything, and save the result as a JSON report when asked
 
 setup_karafka
 
@@ -55,7 +55,9 @@ estimator = Karafka::Pro::Processing::ConsumerGroups::VirtualPartitions::Estimat
   batch_size: 10
 )
 
-result = estimator.call(DT.topics[0])
+target_file = File.join(Dir.mktmpdir, "report.json")
+
+result = estimator.call(DT.topics[0], target_file: target_file)
 
 assert_equal DT.topics[0], result[:topic_name]
 assert_equal [0, 1], result[:partitions].keys
@@ -69,11 +71,18 @@ assert_equal 50, result[:summary][:messages]
 assert_equal 5, result[:summary][:batches]
 assert result.frozen?
 
-report = Karafka::Pro::Processing::ConsumerGroups::VirtualPartitions::Estimator::Presenter
-  .new(result)
-  .to_s
+report = JSON.parse(File.read(target_file))
 
-assert report.include?("Virtual Partitions estimate for topic: #{DT.topics[0]}")
+assert_equal(
+  Karafka::Pro::Processing::ConsumerGroups::VirtualPartitions::Estimator::FORMAT_VERSION,
+  report["format_version"]
+)
+assert_equal JSON.parse(result.to_json), report
+assert_equal DT.topics[0], report["topic_name"]
+assert_equal %w[0 1], report["partitions"].keys
+assert_equal 30, report["partitions"]["0"]["messages"]
+assert_equal 50, report["summary"]["messages"]
+assert_equal result[:summary][:score], report["summary"]["score"]
 
 result = estimator.call(DT.topics[0], partitions: [1])
 
