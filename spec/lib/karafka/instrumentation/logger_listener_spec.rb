@@ -532,7 +532,7 @@ RSpec.describe_current do
 
         it "expects to log the consumer topic and partition" do
           expect(Karafka.logger).to have_received(:error).with(
-            a_string_including("topic: #{consumer.topic.name}, partition: 0")
+            a_string_including("topic: #{consumer.topic.name}, partition: #{consumer.partition}")
           )
         end
 
@@ -691,9 +691,13 @@ RSpec.describe_current do
           )
         end
 
-        it "expects to log them" do
+        it "expects to log them after our own context" do
           expect(Karafka.logger).to have_received(:error).with(
-            a_string_including("topic: orders, partition: 3, offset: 7")
+            a_string_ending_with(
+              "[consumer_group: #{con_client.subscription_group.group.id}, " \
+              "subscription_group: #{con_client.subscription_group.id}, " \
+              "topic: orders, partition: 3, offset: 7]"
+            )
           )
         end
       end

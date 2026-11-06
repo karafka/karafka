@@ -522,8 +522,8 @@ module Karafka
           {}
         end
 
-        # Our own context (consumer, client, listener) wins on overlapping keys
-        details = extract_rdkafka_error_details(event[:error]).merge(details)
+        # Our own context (consumer, client, listener) stays first and wins on overlapping keys
+        details = details.merge(extract_rdkafka_error_details(event[:error])) { |_, own, _| own }
 
         return nil if details.empty?
 
