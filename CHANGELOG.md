@@ -65,6 +65,7 @@
 - [Fix] [Pro] Validate all four schedule headers of scheduled messages. Only the cancel headers were checked, so a schedule missing `schedule_target_topic` passed and one missing `schedule_target_epoch` raised `KeyError`.
 - [Fix] Stop forceful shutdown from using a listener's client from two threads at once on JRuby. A listener still running after termination now keeps its client open and is reported via `connection.listener.shutdown.skipped`.
 - [Fix] Make the Datadog `LoggerListener` finish its own job span, not the active one, also on job errors. With dd-trace-rb's Karafka integration active too (e.g. `datadog/auto_instrument`), jobs nested into one never-ending trace and memory grew without limit. It now warns once when both are active.
+- [Fix] Log `lag_compensation.refresher.error` in the Datadog `LoggerListener` through `Karafka.logger` at `warn` level, not to stderr via `Kernel#warn`.
 
 ## 2.6.1 (2026-08-24)
 - **[Feature]** [Pro] Add an opt-in envelope encryption mode for Messages At Rest (`config.encryption.mode = :envelope`, requires openssl `>= 3.0`) without the RSA payload size limit. Upgrade all consuming processes before enabling.

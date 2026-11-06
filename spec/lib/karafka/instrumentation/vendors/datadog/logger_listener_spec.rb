@@ -444,7 +444,13 @@ RSpec.describe_current do
       before do
         stub_const(
           "Datadog::Tracing::Contrib::Karafka::Patcher",
-          Module.new { def self.patch_successful = true }
+          Module.new do
+            class << self
+              def patch_successful
+                true
+              end
+            end
+          end
         )
 
         2.times do
@@ -463,9 +469,15 @@ RSpec.describe_current do
         stub_const(
           "Datadog::Tracing::Contrib::Karafka::Patcher",
           Module.new do
-            def self.patched? = true
+            class << self
+              def patched?
+                true
+              end
 
-            def self.patch_successful = false
+              def patch_successful
+                false
+              end
+            end
           end
         )
 
@@ -480,9 +492,15 @@ RSpec.describe_current do
         stub_const(
           "Datadog::Tracing::Contrib::Karafka::Patcher",
           Module.new do
-            def self.patched? = false
+            class << self
+              def patched?
+                false
+              end
 
-            def self.patch_successful = false
+              def patch_successful
+                false
+              end
+            end
           end
         )
 
