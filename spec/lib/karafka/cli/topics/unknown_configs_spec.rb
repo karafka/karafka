@@ -41,6 +41,47 @@ RSpec.describe_current do
     it { expect(unknown_configs.call).to eq(missing_topic => { "retention.msx" => "1" }) }
   end
 
+  context "when a topic that does not exist in the cluster uses a synonym config name" do
+    let(:missing_topic) { Karafka::Declaratives::Topic.new(generate_topic_name) }
+    let(:declaratives_topics) { [existing_topic, missing_topic] }
+
+    before do
+      existing_topic.details = { "log.retention.bytes": 1_000 }
+      missing_topic.details = { "retention.ms": 1, "log.retention.bytes": 1_000 }
+    end
+
+    it "expect to report the synonym only for the topic that would be created" do
+      expect(unknown_configs.call).to eq(missing_topic => { "log.retention.bytes" => "1000" })
+    end
+  end
+
+  context "when only new topics are declared and describing another topic is not allowed" do
+    let(:missing_topic) { Karafka::Declaratives::Topic.new(generate_topic_name) }
+    let(:declaratives_topics) { [missing_topic] }
+    # 29 is topic_authorization_failed
+    let(:error) { Rdkafka::RdkafkaError.new(29) }
+
+    before do
+      missing_topic.details = { "retention.msx": 1 }
+      allow(Karafka::Admin::Configs).to receive(:describe).and_raise(error)
+    end
+
+    it { expect(unknown_configs.call).to eq({}) }
+  end
+
+  context "when describing another topic fails for a different reason" do
+    let(:missing_topic) { Karafka::Declaratives::Topic.new(generate_topic_name) }
+    let(:declaratives_topics) { [missing_topic] }
+    let(:error) { Rdkafka::RdkafkaError.new(Rdkafka::Bindings::RD_KAFKA_RESP_ERR__FATAL) }
+
+    before do
+      missing_topic.details = { "retention.msx": 1 }
+      allow(Karafka::Admin::Configs).to receive(:describe).and_raise(error)
+    end
+
+    it { expect { unknown_configs.call }.to raise_error(error) }
+  end
+
   context "when the cluster has no topics" do
     let(:existing_topics_names) { [] }
 

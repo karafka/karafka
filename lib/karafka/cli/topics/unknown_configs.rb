@@ -18,19 +18,23 @@ module Karafka
         #   topics with their configs (names with values) that the cluster does not know. Names
         #   and values are strings, as the cluster returns them.
         # @note Config names are read from an existing topic, so nothing is reported when the
-        #   cluster has no topics at all.
+        #   cluster has no topics or when we are not allowed to describe any of them.
         def call
           topics = @declaratives_topics.reject { |topic| topic.declaratives.details.empty? }
 
-          return {} if topics.empty? || @existing_topics_names.empty?
+          return {} if topics.empty?
 
-          # Prefer one of our topics, so we describe a topic we are expected to have access to
-          reference = (topics.map(&:name) & @existing_topics_names).first
-          reference ||= @existing_topics_names.first
+          topics_configs = find_topics_configs(topics)
 
-          names = Cluster::TopicsConfigs.new(reference).names
+          return {} unless topics_configs
 
           topics.each_with_object({}) do |topic, unknown|
+            names = if @existing_topics_names.include?(topic.name)
+              topics_configs.names_with_synonyms
+            else
+              topics_configs.names
+            end
+
             configs = topic
               .declaratives
               .details
@@ -39,6 +43,30 @@ module Karafka
 
             unknown[topic] = configs unless configs.empty?
           end
+        end
+
+        private
+
+        # @param topics [Array<Karafka::Declaratives::Topic>] declarative topics with configs
+        # @return [Cluster::TopicsConfigs, nil] configs of one of our existing topics, otherwise
+        #   of any other existing topic. `nil` when there is no topic we can describe.
+        def find_topics_configs(topics)
+          own = (topics.map(&:name) & @existing_topics_names).first
+
+          return Cluster::TopicsConfigs.new(own) if own
+
+          other = @existing_topics_names.first
+
+          return nil unless other
+
+          topics_configs = Cluster::TopicsConfigs.new(other)
+          # Read it here, as we may not be allowed to describe a topic that is not ours
+          topics_configs.names
+          topics_configs
+        rescue Rdkafka::RdkafkaError => e
+          raise unless e.code == :topic_authorization_failed
+
+          nil
         end
       end
     end
