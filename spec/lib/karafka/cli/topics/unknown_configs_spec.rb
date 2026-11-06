@@ -55,6 +55,16 @@ RSpec.describe_current do
     end
   end
 
+  context "when an existing topic uses a synonym config name and is checked as new" do
+    subject(:unknown_configs) do
+      described_class.new(declaratives_topics, existing_topics_names, as_new: true)
+    end
+
+    before { existing_topic.details = { "retention.ms": 1, "log.retention.bytes": 1_000 } }
+
+    it { expect(unknown_configs.call).to eq(existing_topic => { "log.retention.bytes" => "1000" }) }
+  end
+
   context "when only new topics are declared and describing another topic is not allowed" do
     let(:missing_topic) { Karafka::Declaratives::Topic.new(generate_topic_name) }
     let(:declaratives_topics) { [missing_topic] }

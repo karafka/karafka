@@ -64,10 +64,21 @@ module Karafka
         #   topics with their configs (names with values) that the cluster does not know and so
         #   could never be applied
         def unknown_configs
-          @unknown_configs ||= UnknownConfigs.new(
-            declaratives_routing_topics,
-            existing_topics_names
-          ).call
+          @unknown_configs ||= find_unknown_configs
+        end
+
+        # @param as_new [Boolean] checks every topic as one to be created
+        # @return [Hash{Karafka::Declaratives::Topic => Hash{String => String}}] declarative
+        #   topics with their configs that the cluster does not know
+        # @raise [Karafka::Errors::CommandValidationError] when we could not read the topics
+        #   configuration from the cluster (e.g. not allowed to describe a declared topic)
+        def find_unknown_configs(as_new: false)
+          UnknownConfigs.new(declaratives_routing_topics, existing_topics_names, as_new: as_new).call
+        rescue Rdkafka::RdkafkaError => e
+          puts "Checking topics configuration #{red("failed")}:"
+          puts e
+
+          raise Errors::CommandValidationError, cause: e
         end
 
         # @return [Array<Hash>] existing topics details

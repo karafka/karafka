@@ -9,9 +9,12 @@ module Karafka
       class UnknownConfigs
         # @param declaratives_topics [Array<Karafka::Declaratives::Topic>] declarative topics
         # @param existing_topics_names [Array<String>] names of topics that exist in the cluster
-        def initialize(declaratives_topics, existing_topics_names)
+        # @param as_new [Boolean] checks every topic as one to be created, also an existing one.
+        #   Synonyms are then not accepted, as creating a topic rejects them.
+        def initialize(declaratives_topics, existing_topics_names, as_new: false)
           @declaratives_topics = declaratives_topics
           @existing_topics_names = existing_topics_names
+          @as_new = as_new
         end
 
         # @return [Hash{Karafka::Declaratives::Topic => Hash{String => String}}] declarative
@@ -29,7 +32,7 @@ module Karafka
           return {} unless topics_configs
 
           topics.each_with_object({}) do |topic, unknown|
-            names = if @existing_topics_names.include?(topic.name)
+            names = if !@as_new && @existing_topics_names.include?(topic.name)
               topics_configs.names_with_synonyms
             else
               topics_configs.names
