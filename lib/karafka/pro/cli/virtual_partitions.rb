@@ -28,39 +28,40 @@
 # License: https://karafka.io/docs/Pro-License-Comm/
 # Contact: contact@karafka.io
 
-RSpec.describe_current do
-  subject(:report) { described_class.new(result).to_s }
+module Karafka
+  module Pro
+    module Cli
+      # CLI entry-point for Virtual Partitions related commands
+      class VirtualPartitions < Karafka::Cli::Base
+        desc "Allows for Virtual Partitions estimate reports display"
 
-  let(:estimator) { Karafka::Pro::Processing::ConsumerGroups::VirtualPartitions::Estimator.new(concurrency: 5) }
+        aliases :vps
 
-  let(:messages) do
-    Array.new(200) do |i|
-      build(:messages_message, raw_key: "key-#{i % 20}", offset: i, topic: "orders")
+        # Exit code when the command fails
+        ERROR_EXIT_CODE = 1
+
+        private_constant :ERROR_EXIT_CODE
+
+        # @param action [String] action we want to take
+        def call(action = "estimate-report")
+          case action
+          when "estimate-report"
+            EstimateReport.new(report_path).call
+          else
+            raise ArgumentError, "Invalid virtual partitions action: #{action}"
+          end
+        rescue Karafka::Errors::CommandValidationError => e
+          puts e.message
+          exit(ERROR_EXIT_CODE)
+        end
+
+        private
+
+        # @return [String, nil] report path given after the action
+        def report_path
+          ARGV[2].to_s.start_with?("-") ? nil : ARGV[2]
+        end
+      end
     end
-  end
-
-  let(:result) { estimator.analyze(messages) }
-
-  it { expect(report).to be_a(String) }
-  it { expect(report).not_to include("\e[") }
-  it { expect(report).to include("Virtual Partitions estimate for topic: orders") }
-  it { expect(report).to include("concurrency: 5") }
-  it { expect(report).to include("verdict: #{result[:summary][:verdict]}") }
-  it { expect(report).to include("GVL") }
-  it { expect(report.lines.grep(/\A  0 /).size).to eq(1) }
-
-  context "when there are no messages" do
-    let(:messages) { [] }
-
-    it { expect(report).to include("No messages to analyze.") }
-    it { expect(report).not_to include("\e[") }
-  end
-
-  context "when a partition is empty" do
-    let(:result) do
-      estimator.analyze(messages).merge(partitions: { 0 => { messages: 0, batches: 0 } })
-    end
-
-    it { expect(report.lines.grep(/\A  0 +0 +0 +- /).size).to eq(1) }
   end
 end

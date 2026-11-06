@@ -37,8 +37,8 @@ module Karafka
           #
           # It samples the most recent messages of each partition, slices them into batches the
           # way a consumer would receive them and runs each batch through the real Virtual
-          # Partitions distributors. It returns plain data only and prints nothing. Use
-          # {Estimator::Presenter} to turn the result into a readable report.
+          # Partitions distributors. It returns plain data only and prints nothing. The result can
+          # be saved as a JSON report and displayed with `karafka vps estimate-report`.
           #
           # It does not read the topic routing Virtual Partitions setup. It does not matter if the
           # topic already uses Virtual Partitions or not.
@@ -47,17 +47,21 @@ module Karafka
           #   estimate does not apply to them.
           #
           # @note The estimate assumes the same processing cost for each message. It does not
-          #   model the GVL (CPU-bound work does not run in parallel in one process) or the worker
-          #   pool that is shared with other partitions and topics.
+          #   model the worker pool that is shared with other partitions and topics.
           #
-          # @example Estimate for all partitions of a topic
+          # @example
           #   vps = Karafka::Pro::Processing::ConsumerGroups::VirtualPartitions
           #   estimator = vps::Estimator.new(
           #     partitioner: ->(message) { message.headers["order_id"] }
           #   )
-          #   result = estimator.call("orders")
-          #   puts vps::Estimator::Presenter.new(result).to_s
+          #   estimator.call("orders", target_file: "report.json")
+          #   # then, in the shell: bundle exec karafka vps estimate-report
           class Estimator
+            # Version of the result structure. Raise it whenever the result structure changes in a
+            # way the report renderer depends on (keys renamed, removed or added, or a value type or
+            # meaning changed).
+            FORMAT_VERSION = 1
+
             # Minimum score for the `:recommended` verdict
             RECOMMENDED_SCORE = 70
 
@@ -132,8 +136,10 @@ module Karafka
             #
             # @param topic_name [String] name of the topic
             # @param partitions [Array<Integer>, nil] partitions to sample. All when `nil`.
+            # @param target_file [String, Pathname, nil] path to write the JSON report to. Nothing
+            #   is written when nil.
             # @return [Hash] frozen estimation result
-            def call(topic_name, partitions: nil)
+            def call(topic_name, partitions: nil, target_file: nil)
               partitions ||= Array.new(
                 Karafka::Admin.topic_info(topic_name).fetch(:partition_count)
               ) { |partition| partition }
@@ -146,18 +152,22 @@ module Karafka
 
               iterator.each { |message| messages[message.partition] << message }
 
-              build_result(topic_name, messages)
+              save(build_result(topic_name, messages), target_file)
             end
 
             # Estimates given messages without connecting to Kafka
             #
             # @param messages [Array<Karafka::Messages::Message>] messages of one topic
+            # @param target_file [String, Pathname, nil] path to write the JSON report to. Nothing
+            #   is written when nil.
             # @return [Hash] frozen estimation result
-            def analyze(messages)
-              build_result(
+            def analyze(messages, target_file: nil)
+              result = build_result(
                 messages.first&.topic,
                 messages.group_by(&:partition)
               )
+
+              save(result, target_file)
             end
 
             private
@@ -180,6 +190,7 @@ module Karafka
               end
 
               deep_freeze(
+                format_version: FORMAT_VERSION,
                 topic_name: topic_name.dup,
                 settings: {
                   concurrency: @concurrency,
@@ -192,6 +203,15 @@ module Karafka
                 partitions: partitions,
                 summary: aggregate(all_batches, details: false)
               )
+            end
+
+            # @param result [Hash] estimation result
+            # @param target_file [String, Pathname, nil]
+            # @return [Hash] the given result
+            def save(result, target_file)
+              File.write(target_file, JSON.pretty_generate(result)) if target_file
+
+              result
             end
 
             # Runs one batch through the distributor the way the real processing does

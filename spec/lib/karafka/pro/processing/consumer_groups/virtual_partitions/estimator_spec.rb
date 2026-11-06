@@ -82,6 +82,8 @@ RSpec.describe_current do
       )
     end
 
+    it { expect(result.keys.first).to eq(:format_version) }
+    it { expect(result[:format_version]).to eq(described_class::FORMAT_VERSION) }
     it { expect(result[:topic_name]).to eq("orders") }
     it { expect(result[:partitions].keys).to eq([0]) }
     it { expect(result[:partitions][0][:messages]).to eq(200) }
@@ -95,6 +97,18 @@ RSpec.describe_current do
       expect(result[:settings]).to be_frozen
       expect(result[:partitions][0]).to be_frozen
       expect(result[:partitions][0][:active_vps]).to be_frozen
+    end
+
+    it "survives JSON serialization" do
+      parsed = JSON.parse(result.to_json)
+
+      expect(parsed["format_version"]).to eq(described_class::FORMAT_VERSION)
+      expect(parsed["topic_name"]).to eq("orders")
+      expect(parsed["settings"]["distribution"]).to eq("consistent")
+      expect(parsed["partitions"]["0"]["messages"]).to eq(200)
+      expect(parsed["partitions"]["0"]["verdict"]).to eq(result[:partitions][0][:verdict].to_s)
+      expect(parsed["summary"]["score"]).to eq(result[:summary][:score])
+      expect(parsed["summary"]["active_vps"]).to eq(result[:summary][:active_vps].transform_keys(&:to_s))
     end
 
     it "does not freeze the topic of the messages" do
@@ -243,6 +257,14 @@ RSpec.describe_current do
       it { expect(result[:partitions][0][:batches_details].first[:first_offset]).to eq(0) }
       it { expect(result[:partitions][0][:batches_details].last[:last_offset]).to eq(199) }
 
+      it "survives JSON serialization" do
+        details = JSON.parse(result.to_json)["partitions"]["0"]["batches_details"]
+
+        expect(details.size).to eq(2)
+        expect(details.first["first_offset"]).to eq(0)
+        expect(details.first["group_sizes"]).to eq(result[:partitions][0][:batches_details].first[:group_sizes])
+      end
+
       context "when messages are not in offset order" do
         let(:messages) { build_messages(Array.new(200) { |i| "key-#{i % 20}" }).reverse }
 
@@ -266,6 +288,62 @@ RSpec.describe_current do
       it { expect(result[:partitions][1][:batches]).to eq(2) }
       it { expect(result[:summary][:batches]).to eq(3) }
       it { expect(result[:summary][:messages]).to eq(200) }
+    end
+
+    context "with target_file" do
+      subject(:result) { estimator.analyze(messages, target_file: target_file) }
+
+      let(:dir) { Dir.mktmpdir }
+      let(:target_file) { File.join(dir, "report.json") }
+
+      after { FileUtils.rm_rf(dir) }
+
+      it "writes the JSON report and returns the frozen result" do
+        expect(result).to be_frozen
+        expect(JSON.parse(File.read(target_file))).to eq(JSON.parse(result.to_json))
+        expect(JSON.parse(File.read(target_file))["format_version"])
+          .to eq(described_class::FORMAT_VERSION)
+      end
+
+      it "returns the same data as without target_file" do
+        expect(result).to eq(estimator.analyze(messages))
+      end
+
+      context "when given as a Pathname" do
+        let(:target_file) { Pathname.new(dir).join("report.json") }
+
+        it "writes the JSON report there" do
+          expected = JSON.parse(result.to_json)
+
+          expect(JSON.parse(File.read(target_file))).to eq(expected)
+        end
+      end
+
+      context "when the file already exists" do
+        before { File.write(target_file, "old content" * 1_000) }
+
+        it "writes the JSON report there" do
+          expected = JSON.parse(result.to_json)
+
+          expect(JSON.parse(File.read(target_file))).to eq(expected)
+        end
+      end
+
+      context "when the directory does not exist" do
+        let(:target_file) { File.join(dir, "missing", "report.json") }
+
+        it { expect { result }.to raise_error(Errno::ENOENT) }
+      end
+    end
+
+    context "when target_file is not given" do
+      it "writes nothing" do
+        allow(File).to receive(:write)
+
+        result
+
+        expect(File).not_to have_received(:write)
+      end
     end
 
     context "when there are no messages" do
@@ -338,6 +416,20 @@ RSpec.describe_current do
       expect(result[:partitions][0]).to include(messages: 0, batches: 0, score: nil, verdict: nil)
       expect(result[:partitions][1][:messages]).to eq(30)
       expect(result[:topic_name]).to eq(topic_name)
+    end
+
+    context "with target_file" do
+      let(:dir) { Dir.mktmpdir }
+      let(:target_file) { File.join(dir, "report.json") }
+
+      after { FileUtils.rm_rf(dir) }
+
+      it "writes the JSON report and returns the frozen result" do
+        result = estimator.call(topic_name, target_file: target_file)
+
+        expect(result).to be_frozen
+        expect(JSON.parse(File.read(target_file))).to eq(JSON.parse(result.to_json))
+      end
     end
 
     context "when partitions are given" do
