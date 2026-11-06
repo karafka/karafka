@@ -58,11 +58,11 @@ RSpec.describe_current do
   context "when only new topics are declared and describing another topic is not allowed" do
     let(:missing_topic) { Karafka::Declaratives::Topic.new(generate_topic_name) }
     let(:declaratives_topics) { [missing_topic] }
-    # 29 is topic_authorization_failed
-    let(:error) { Rdkafka::RdkafkaError.new(29) }
+    let(:error) { Rdkafka::RdkafkaError.new(Rdkafka::Bindings::RD_KAFKA_RESP_ERR__FATAL) }
 
     before do
       missing_topic.details = { "retention.msx": 1 }
+      allow(error).to receive(:code).and_return(:topic_authorization_failed)
       allow(Karafka::Admin::Configs).to receive(:describe).and_raise(error)
     end
 
