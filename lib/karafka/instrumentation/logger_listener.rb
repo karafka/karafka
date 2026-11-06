@@ -571,10 +571,9 @@ module Karafka
       def extract_rdkafka_error_details(error)
         return {} unless error.is_a?(Rdkafka::RdkafkaError)
 
-        error
-          .details
-          .slice(:topic, :partition, :offset)
-          .reject { |_, value| value.is_a?(Integer) && value.negative? }
+        # Negative values (e.g. -1001 for no position) are kept: they carry information and match
+        # how we log offsets elsewhere
+        error.details.slice(:topic, :partition, :offset)
       end
     end
   end

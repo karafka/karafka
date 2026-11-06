@@ -743,13 +743,10 @@ RSpec.describe_current do
           )
         end
 
-        it "expects to log the topic" do
-          expect(Karafka.logger).to have_received(:error).with(a_string_including("topic: orders"))
-        end
-
-        it "expects not to log the placeholder values" do
-          expect(Karafka.logger).not_to have_received(:error).with(a_string_including("partition"))
-          expect(Karafka.logger).not_to have_received(:error).with(a_string_including("offset"))
+        it "expects to log them as they are" do
+          expect(Karafka.logger).to have_received(:error).with(
+            a_string_including("topic: orders, partition: -1, offset: -1001")
+          )
         end
       end
 
