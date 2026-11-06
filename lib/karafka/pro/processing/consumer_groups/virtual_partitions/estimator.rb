@@ -125,10 +125,7 @@ module Karafka
               @batch_size = batch_size
               @sample_size = sample_size
               @details = details
-
-              @distributor = DISTRIBUTORS.fetch(distribution).new(
-                DistributorConfig.new(@partitioner, @reducer, concurrency)
-              )
+              @distributor_class = DISTRIBUTORS.fetch(distribution)
             end
 
             # Reads the most recent messages of the topic partitions and estimates them
@@ -183,7 +180,7 @@ module Karafka
               end
 
               deep_freeze(
-                topic: topic,
+                topic: topic.dup,
                 settings: {
                   concurrency: @concurrency,
                   distribution: @distribution,
@@ -205,11 +202,19 @@ module Karafka
               collapsed = false
 
               begin
-                keys = batch.map { |message| @partitioner.call(message) }
-                groups = (@concurrency > 1) ? @distributor.call(batch) : { 0 => batch }
+                keys = batch.to_h { |message| [message, @partitioner.call(message)] }
+
+                groups = if @concurrency > 1
+                  # Reuses the computed keys, so the partitioner runs once per message
+                  @distributor_class
+                    .new(DistributorConfig.new(keys.method(:fetch), @reducer, @concurrency))
+                    .call(batch)
+                else
+                  { 0 => batch }
+                end
               rescue
                 collapsed = @concurrency > 1
-                keys = []
+                keys = {}
                 groups = { 0 => batch }
               end
 
@@ -223,8 +228,8 @@ module Karafka
                 last_offset: batch.last.offset,
                 messages: size,
                 collapsed: collapsed,
-                unique_keys: keys.uniq.size,
-                null_keys: keys.count(nil),
+                unique_keys: keys.each_value.uniq.size,
+                null_keys: keys.each_value.count(nil),
                 active_vps: active_vps,
                 group_sizes: sizes,
                 utilization: [active_vps * 100.0 / @concurrency, 100.0].min,

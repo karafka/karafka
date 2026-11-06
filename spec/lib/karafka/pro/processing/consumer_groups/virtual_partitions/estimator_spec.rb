@@ -97,6 +97,14 @@ RSpec.describe_current do
       expect(result[:partitions][0][:active_vps]).to be_frozen
     end
 
+    it "does not freeze the topic of the messages" do
+      topic = +"orders"
+
+      estimator.analyze(build_messages(%w[a b], topic: topic))
+
+      expect(topic).not_to be_frozen
+    end
+
     it "does not include key values" do
       values = []
       collect = lambda do |object|
@@ -158,6 +166,74 @@ RSpec.describe_current do
 
       it { expect(result[:summary][:collapsed_batches]).to eq(1) }
       it { expect(result[:summary][:active_vps]).to eq(min: 1, median: 5, max: 5) }
+    end
+
+    context "when partitioner raises with concurrency of 1" do
+      let(:settings) { { concurrency: 1, partitioner: ->(_) { raise StandardError } } }
+
+      it { expect(result[:summary][:collapsed_batches]).to eq(0) }
+    end
+
+    context "when the partitioner is not deterministic" do
+      let(:settings) { { batch_size: 10, partitioner: ->(_) { calls << calls.size } } }
+      let(:messages) { build_messages(Array.new(10) { "same" }) }
+      let(:calls) { [] }
+
+      it "runs it once per message" do
+        result
+
+        expect(calls.size).to eq(10)
+      end
+    end
+
+    context "with a partly spread batch with null keys" do
+      let(:settings) { { concurrency: 4, batch_size: 8, reducer: ->(key) { key.to_i % 4 } } }
+      let(:messages) { build_messages(["0", "0", "0", "0", "1", "1", nil, nil]) }
+
+      it "computes the exact metrics" do
+        expect(result[:summary]).to include(
+          avg_unique_keys: 3.0,
+          avg_null_keys: 2.0,
+          avg_active_vps: 2.0,
+          avg_utilization: 50.0,
+          avg_load_imbalance: 50.0,
+          avg_parallelization: 33.3,
+          avg_speedup: 1.3,
+          poor_batches: 0,
+          single_vp_batches: 0,
+          score: 50,
+          verdict: :maybe
+        )
+      end
+    end
+
+    context "with a load imbalance above 100%" do
+      let(:settings) { { concurrency: 4, batch_size: 10, reducer: ->(key) { key.to_i % 4 } } }
+      let(:messages) { build_messages(Array.new(7) { "0" } + %w[1 2 3]) }
+
+      it "does not let the imbalance lower the score below its weight" do
+        expect(result[:summary]).to include(
+          avg_utilization: 100.0,
+          avg_load_imbalance: 103.9,
+          avg_parallelization: 35.7,
+          score: 61,
+          verdict: :maybe
+        )
+      end
+    end
+
+    context "with a slightly uneven batch" do
+      let(:settings) { { concurrency: 4, batch_size: 9, reducer: ->(key) { key.to_i % 4 } } }
+      let(:messages) { build_messages(%w[0 0 0 1 1 2 2 3 3]) }
+
+      it "computes the exact metrics" do
+        expect(result[:summary]).to include(
+          avg_load_imbalance: 19.2,
+          avg_parallelization: 75.0,
+          score: 89,
+          verdict: :recommended
+        )
+      end
     end
 
     context "with details" do
@@ -228,6 +304,14 @@ RSpec.describe_current do
       allow(Karafka::Pro::Iterator).to receive(:new).and_return(iterator)
       allow(iterator).to receive(:each) { |&block| messages.each(&block) }
       allow(Karafka::Admin).to receive(:topic_info).and_return(partition_count: 2)
+    end
+
+    it "does not freeze the given topic" do
+      topic = +"orders"
+
+      estimator.call(topic)
+
+      expect(topic).not_to be_frozen
     end
 
     it "samples all partitions through the iterator" do

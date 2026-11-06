@@ -166,6 +166,6 @@ en:
       batch_size_format: needs to be an integer bigger than 0
       sample_size_format: needs to be an integer bigger than 0
       distribution_format: needs to be either :consistent or :balanced
-      partitioner_format: needs to respond to #call when given
-      reducer_format: needs to respond to #call when given
+      partitioner_format: 'needs to respond to #call when given'
+      reducer_format: 'needs to respond to #call when given'
       details_format: needs to be a boolean

@@ -86,12 +86,21 @@ RSpec.describe_current do
     before { config[:partitioner] = "key" }
 
     it { expect(contract.call(config)).not_to be_success }
+
+    it "explains the error" do
+      expect(contract.call(config).errors)
+        .to eq(partitioner: "needs to respond to #call when given")
+    end
   end
 
   context "when reducer does not respond to call" do
     before { config[:reducer] = 1 }
 
     it { expect(contract.call(config)).not_to be_success }
+
+    it "explains the error" do
+      expect(contract.call(config).errors).to eq(reducer: "needs to respond to #call when given")
+    end
   end
 
   context "when details is not a boolean" do
