@@ -522,11 +522,8 @@ module Karafka
           {}
         end
 
-        # librdkafka errors about a specific message (e.g. a decompression failure) carry its
-        # topic, partition and offset
-        error = event[:error]
-        message_details = error.respond_to?(:details) ? error.details : nil
-        details = details.merge(message_details) if message_details.is_a?(Hash)
+        # Our own context (consumer, client, listener) wins on overlapping keys
+        details = extract_rdkafka_error_details(event[:error]).merge(details)
 
         return nil if details.empty?
 
@@ -562,6 +559,22 @@ module Karafka
           consumer_group: listener.subscription_group.group.id,
           subscription_group: listener.subscription_group.id
         }
+      end
+
+      # Topic, partition and offset of the message a librdkafka error is about (e.g. a
+      # decompression failure). Only librdkafka errors are used: other errors, including those
+      # raised in user code, can define `#details` with any content, and it must not reach the
+      # logs or replace our own context.
+      #
+      # @param error [Object] error from the event payload
+      # @return [Hash] message location details or an empty hash
+      def extract_rdkafka_error_details(error)
+        return {} unless error.is_a?(Rdkafka::RdkafkaError)
+
+        error
+          .details
+          .slice(:topic, :partition, :offset)
+          .reject { |_, value| value.is_a?(Integer) && value.negative? }
       end
     end
   end
