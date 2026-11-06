@@ -6,8 +6,10 @@ module Karafka
     module ConsumerGroups
       # An abstraction layer on top of the rdkafka consumer.
       #
-      # It is threadsafe and provides some security measures so we won't end up operating on a
-      # closed consumer instance as it causes Ruby VM process to crash.
+      # One thread, the listener, polls and closes it. Workers may call `#pause`, `#seek`,
+      # `#store_offset`, `#commit_offsets` and `#assignment_lost?` from their own threads. It also
+      # provides some security measures so we won't end up operating on a closed consumer instance
+      # as it causes Ruby VM process to crash.
       class Client
         include Karafka::Core::Helpers::Time
         include Helpers::ConfigImporter.new(

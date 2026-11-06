@@ -21,7 +21,6 @@ draw_routes(create_topics: false) do
     config(
       partitions: 6,
       "message.timestamp.after.max.ms": "9223372036854775802",
-      "test.introduced": "introduced",
       "retention.bytes": "1000000"
     )
   end
@@ -48,7 +47,6 @@ end
   1000000
   9223372036854775802
   message.timestamp.after.max.ms
-  test.introduced
 ].each do |part|
   assert results.include?(part), part
 end

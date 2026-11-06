@@ -42,7 +42,7 @@ assert_equal "healthy", initial["status"]
 assert_equal false, initial["errors"]["stability_ttl_exceeded"]
 
 # Simulate consumer stuck in non-steady join state
-listener.on_statistics_emitted(stats_event(join_state: "wait-assn"))
+listener.on_statistics_emitted(stats_event(join_state: "wait-assign-call"))
 
 # Wait for the stability TTL (300ms) to expire
 sleep(0.5)
