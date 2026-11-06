@@ -1,0 +1,81 @@
+# frozen_string_literal: true
+
+# Karafka Pro - Source Available Commercial Software
+# Copyright (c) 2017-present Maciej Mensfeld. All rights reserved.
+#
+# This software is NOT open source. It is source-available commercial software
+# requiring a paid license for use. It is NOT covered by LGPL.
+#
+# The author retains all right, title, and interest in this software,
+# including all copyrights, patents, and other intellectual property rights.
+# No patent rights are granted under this license.
+#
+# PROHIBITED:
+# - Use without a valid commercial license
+# - Redistribution, modification, or derivative works without authorization
+# - Reverse engineering, decompilation, or disassembly of this software
+# - Use as training data for AI/ML models or inclusion in datasets
+# - Scraping, crawling, or automated collection for any purpose
+#
+# PERMITTED:
+# - Reading, referencing, and linking for personal or commercial use
+# - Runtime retrieval by AI assistants, coding agents, and RAG systems
+#   for the purpose of providing contextual help to Karafka users
+#
+# Receipt, viewing, or possession of this software does not convey or
+# imply any license or right beyond those expressly stated above.
+#
+# License: https://karafka.io/docs/Pro-License-Comm/
+# Contact: contact@karafka.io
+
+RSpec.describe_current do
+  subject(:validation) { described_class.new.call(config) }
+
+  let(:config) do
+    {
+      dead_letter_queue: {
+        active: true,
+        max_retries: 3,
+        topic: "dlq",
+        dispatch_method: :produce_async
+      }
+    }
+  end
+
+  context "when config is valid" do
+    it { expect(validation).to be_success }
+  end
+
+  context "when topic is false (reject without dispatch)" do
+    before { config[:dead_letter_queue][:topic] = false }
+
+    it { expect(validation).to be_success }
+  end
+
+  context "when topic has an invalid name" do
+    before { config[:dead_letter_queue][:topic] = "invalid topic" }
+
+    it { expect(validation).not_to be_success }
+  end
+
+  context "when not active and without a topic" do
+    before do
+      config[:dead_letter_queue][:active] = false
+      config[:dead_letter_queue][:topic] = nil
+    end
+
+    it { expect(validation).to be_success }
+  end
+
+  context "when max_retries is negative" do
+    before { config[:dead_letter_queue][:max_retries] = -1 }
+
+    it { expect(validation).not_to be_success }
+  end
+
+  context "when dispatch_method is not supported" do
+    before { config[:dead_letter_queue][:dispatch_method] = :produce }
+
+    it { expect(validation).not_to be_success }
+  end
+end
