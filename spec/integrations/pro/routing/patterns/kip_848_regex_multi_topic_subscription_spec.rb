@@ -46,6 +46,7 @@ TOPIC1 = "#{DT.topic}-1"
 TOPIC2 = "#{DT.topic}-2"
 
 setup_karafka(consumer_group_protocol: true) do |config|
+  config.kafka[:"allow.auto.create.topics"] = true
   config.kafka[:"topic.metadata.refresh.interval.ms"] = 2_000
 end
 

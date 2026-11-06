@@ -40,7 +40,7 @@ RSpec.describe_current do
     end
 
     it "initializes with an empty tasks hash" do
-      expect(schedule.instance_variable_get(:@tasks)).to be_empty
+      expect(schedule.tasks).to be_empty
     end
   end
 
@@ -99,7 +99,7 @@ RSpec.describe_current do
       task = schedule.find(task_id)
 
       expect(task.id).to eq(task_id)
-      expect(task.send(:instance_variable_get, :@cron).original).to eq(cron_expression)
+      expect(task.cron.original).to eq(cron_expression)
     end
 
     it "overwrites a task with the same id if scheduled again" do
@@ -107,7 +107,7 @@ RSpec.describe_current do
       new_cron_expression = "0 * * * *" # Every hour
 
       expect { schedule.schedule(id: task_id, cron: new_cron_expression) }
-        .to change { schedule.find(task_id).send(:instance_variable_get, :@cron).original }
+        .to change { schedule.find(task_id).cron.original }
         .from(cron_expression)
         .to(new_cron_expression)
     end

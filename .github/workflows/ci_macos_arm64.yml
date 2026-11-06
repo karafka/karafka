@@ -19,7 +19,14 @@ env:
   CONFLUENT_VERSION: "8.0.0"
 
 jobs:
+  # Docs-only pull requests skip the jobs below; the Success job still reports success,
+  # so the required check does not stay pending
+  changes:
+    uses: ./.github/workflows/ci_changes.yml
+
   swarm-macos:
+    needs: changes
+    if: needs.changes.outputs.code == 'true'
     timeout-minutes: 30
     strategy:
       fail-fast: false
@@ -114,7 +121,7 @@ jobs:
         run: rm -f Gemfile.lock
 
       - name: Set up Ruby
-        uses: ruby/setup-ruby@b1da4809b005e0178fe08a1d57317bffc00b7b4c # v1.332.0
+        uses: ruby/setup-ruby@de492cf36cbab201753d720ce4f4e336cd688c94 # v1.336.0
         with:
           ruby-version: ${{ matrix.ruby }}
           bundler-cache: true
@@ -138,12 +145,15 @@ jobs:
     runs-on: ubuntu-latest
     if: always()
     needs:
+      - changes
       - swarm-macos
     steps:
+      # Skipped jobs are fine only when the change is docs-only
       - name: Check all jobs passed
         if: |
+          needs.changes.result != 'success' ||
           contains(needs.*.result, 'failure') ||
           contains(needs.*.result, 'cancelled') ||
-          contains(needs.*.result, 'skipped')
+          (needs.changes.outputs.code != 'false' && contains(needs.*.result, 'skipped'))
         run: exit 1
       - run: echo "All macOS ARM64 Swarm CI checks passed!"

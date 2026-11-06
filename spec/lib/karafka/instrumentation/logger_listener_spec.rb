@@ -30,6 +30,7 @@ RSpec.describe_current do
 
     allow(Karafka.logger).to receive(:debug)
     allow(Karafka.logger).to receive(:info)
+    allow(Karafka.logger).to receive(:warn)
     allow(Karafka.logger).to receive(:error)
     allow(Karafka.logger).to receive(:fatal)
 
@@ -88,6 +89,31 @@ RSpec.describe_current do
       it "expect logger not to log" do
         expect(Karafka.logger).not_to have_received(:debug).with(message)
       end
+    end
+  end
+
+  describe "#on_connection_listener_shutdown_skipped" do
+    subject(:trigger) { listener.on_connection_listener_shutdown_skipped(event) }
+
+    let(:connection_listener) do
+      instance_double(Karafka::Connection::ConsumerGroups::Listener, id: "id")
+    end
+
+    let(:payload) do
+      {
+        caller: Karafka::Server,
+        listener: connection_listener,
+        subscription_group: subscription_group
+      }
+    end
+
+    let(:message) do
+      "Listener id for #{subscription_group.name} is still running after termination, " \
+        "its client will not be shut down"
+    end
+
+    it "expect logger to log on warn" do
+      expect(Karafka.logger).to have_received(:warn).with(message)
     end
   end
 

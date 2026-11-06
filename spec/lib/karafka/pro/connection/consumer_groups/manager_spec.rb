@@ -439,4 +439,262 @@ RSpec.describe_current do
       end
     end
   end
+
+  # With KIP-848 (group.protocol=consumer), a healthy listener that never gets an assignment stays
+  # in the "init" join state with a rebalance age of 0 and should not block scaling
+  describe "unassigned KIP-848 listeners" do
+    # Plain methods instead of lets keep us below the memoized helpers limit
+    def now
+      1_000_000
+    end
+
+    def change
+      manager.instance_variable_get(:@changes)[subscription_group2.id]
+    end
+
+    # Overridden in contexts that need a slightly different cgrp state
+    def cgrp_overrides
+      {}
+    end
+
+    # What librdkafka reports for a healthy member that the broker never assigned anything to
+    def unassigned_statistics
+      statistics.dup.tap do |stats|
+        stats["cgrp"] = stats["cgrp"].merge(
+          "state" => "up",
+          "join_state" => "init",
+          "rebalance_age" => 0,
+          "assignment_size" => 0
+        ).merge(cgrp_overrides)
+      end
+    end
+
+    def use_consumer_protocol(subscription_group)
+      kafka = subscription_group.kafka.merge("group.protocol": "consumer")
+      allow(subscription_group).to receive(:kafka).and_return(kafka)
+    end
+
+    before { allow(manager).to receive(:monotonic_now) { now } }
+
+    describe "#notice" do
+      context "when the group uses the consumer protocol" do
+        before do
+          use_consumer_protocol(subscription_group2)
+          manager.register(listeners)
+          manager.notice(subscription_group2.id, unassigned_statistics)
+        end
+
+        it { expect(change[:unassigned]).to be(true) }
+        it { expect(change[:join_state_changed_at]).to eq(now) }
+
+        it "expect to measure state age from the time spent in init, not rebalance age" do
+          expect(change[:state_age]).to eq(0)
+
+          allow(manager).to receive(:monotonic_now).and_return(now + 5_000)
+          manager.notice(subscription_group2.id, unassigned_statistics)
+
+          expect(change[:state_age]).to eq(5_000)
+        end
+
+        it "expect to cap the state age with other ages" do
+          allow(manager).to receive(:monotonic_now).and_return(now + 50_000_000)
+          manager.notice(subscription_group2.id, unassigned_statistics)
+
+          expect(change[:state_age]).to eq(unassigned_statistics["cgrp"]["stateage"])
+        end
+
+        it "expect not to reset the init timer when join state does not change" do
+          allow(manager).to receive(:monotonic_now).and_return(now + 5_000)
+          manager.notice(subscription_group2.id, unassigned_statistics)
+
+          expect(change[:join_state_changed_at]).to eq(now)
+        end
+
+        it "expect to reset the init timer when join state changes" do
+          allow(manager).to receive(:monotonic_now).and_return(now + 5_000)
+          manager.notice(subscription_group2.id, statistics)
+          allow(manager).to receive(:monotonic_now).and_return(now + 6_000)
+          manager.notice(subscription_group2.id, unassigned_statistics)
+
+          expect(change[:join_state_changed_at]).to eq(now + 6_000)
+          expect(change[:state_age]).to eq(0)
+        end
+
+        it "expect to stop being unassigned once it gets an assignment" do
+          manager.notice(subscription_group2.id, statistics)
+
+          expect(change[:unassigned]).to be(false)
+          expect(change[:state_age]).to eq(13_995)
+        end
+      end
+
+      context "when the group uses the consumer protocol but has an assignment" do
+        def cgrp_overrides
+          { "assignment_size" => 1 }
+        end
+
+        before do
+          use_consumer_protocol(subscription_group2)
+          manager.register(listeners)
+          manager.notice(subscription_group2.id, unassigned_statistics)
+        end
+
+        it { expect(change[:unassigned]).to be(false) }
+        it { expect(change[:state_age]).to eq(0) }
+      end
+
+      context "when the group uses the consumer protocol but its state is not up" do
+        def cgrp_overrides
+          { "state" => "wait-coord" }
+        end
+
+        before do
+          use_consumer_protocol(subscription_group2)
+          manager.register(listeners)
+          manager.notice(subscription_group2.id, unassigned_statistics)
+        end
+
+        it { expect(change[:unassigned]).to be(false) }
+      end
+
+      context "when the group uses the consumer protocol but is not in init" do
+        def cgrp_overrides
+          { "join_state" => "wait-join" }
+        end
+
+        before do
+          use_consumer_protocol(subscription_group2)
+          manager.register(listeners)
+          manager.notice(subscription_group2.id, unassigned_statistics)
+        end
+
+        it { expect(change[:unassigned]).to be(false) }
+      end
+
+      context "when the group uses the classic protocol" do
+        before do
+          manager.register(listeners)
+          allow(manager).to receive(:monotonic_now).and_return(now + 5_000)
+          manager.notice(subscription_group2.id, unassigned_statistics)
+        end
+
+        it { expect(change[:unassigned]).to be(false) }
+        it { expect(change[:state_age]).to eq(0) }
+      end
+    end
+
+    describe "scaling" do
+      let(:listener_g13) { listener_class.new(subscription_group5, jobs_queue, nil) }
+
+      let(:subscription_group5) do
+        build(:routing_subscription_group, name: "g1", topics: [build(:routing_topic)])
+      end
+
+      let(:listeners) do
+        batch = Karafka::Connection::ListenersBatch.new(nil)
+        batch.instance_variable_set(
+          :@batch,
+          [listener_g11, listener_g12, listener_g13, listener_g21, listener_g22]
+        )
+        batch
+      end
+
+      def scale_delay
+        1_000
+      end
+
+      before do
+        allow(app).to receive_messages(done?: false, assignments: assignments)
+
+        subscription_group1.multiplexing.scale_delay = scale_delay
+        subscription_group1.multiplexing.active = true
+        subscription_group1.multiplexing.min = 1
+        subscription_group1.multiplexing.max = 5
+        # Boots g11 and g12 only, so g13 is the one available for an upscale
+        subscription_group1.multiplexing.boot = 2
+      end
+
+      # Registers the listeners and runs one control loop with g11 steady and g12 in the given
+      # state for the given time
+      def control_with(g12_statistics, elapsed)
+        manager.register(listeners)
+
+        listener_g11.running!
+        listener_g12.running!
+        listener_g13.stopped!
+
+        manager.notice(subscription_group1.id, statistics)
+        manager.notice(subscription_group2.id, g12_statistics)
+
+        allow(manager).to receive(:monotonic_now).and_return(now + elapsed)
+        manager.notice(subscription_group2.id, g12_statistics)
+        manager.control
+      end
+
+      context "when upscaling with an unassigned consumer protocol listener" do
+        def assignments
+          { routing_topic1 => [0, 1, 2] }
+        end
+
+        before { allow(manager).to receive(:scale_down) }
+
+        context "when it has been unassigned for at least the scale delay" do
+          before do
+            use_consumer_protocol(subscription_group2)
+            control_with(unassigned_statistics, scale_delay)
+          end
+
+          it { expect(listener_g13).to have_received(:start!).once }
+        end
+
+        context "when it has been unassigned for less than the scale delay" do
+          before do
+            use_consumer_protocol(subscription_group2)
+            control_with(unassigned_statistics, scale_delay - 1)
+          end
+
+          it { expect(listener_g13).not_to have_received(:start!) }
+        end
+
+        context "when the group uses the classic protocol" do
+          before { control_with(unassigned_statistics, scale_delay) }
+
+          it { expect(listener_g13).not_to have_received(:start!) }
+        end
+      end
+
+      context "when downscaling with an unassigned consumer protocol listener" do
+        def assignments
+          { routing_topic1 => [0] }
+        end
+
+        before { allow(manager).to receive(:scale_up) }
+
+        context "when it has been unassigned for at least the scale delay" do
+          before do
+            use_consumer_protocol(subscription_group2)
+            control_with(unassigned_statistics, scale_delay)
+          end
+
+          it { expect(listener_g11).not_to have_received(:stop!) }
+          it { expect(listener_g12).to have_received(:stop!) }
+        end
+
+        context "when it has been unassigned for less than the scale delay" do
+          before do
+            use_consumer_protocol(subscription_group2)
+            control_with(unassigned_statistics, scale_delay - 1)
+          end
+
+          it { expect(listener_g12).not_to have_received(:stop!) }
+        end
+
+        context "when the group uses the classic protocol" do
+          before { control_with(unassigned_statistics, scale_delay) }
+
+          it { expect(listener_g12).not_to have_received(:stop!) }
+        end
+      end
+    end
+  end
 end
