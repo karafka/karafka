@@ -37,11 +37,28 @@ module Karafka
         coordinator_not_available
       ].freeze
 
+      # Committed offsets fetch errors that are transient. On top of the coordinator ones,
+      # `unstable_offset_commit` means a transaction that commits offsets for the consumer group
+      # is still pending and the committed offsets become stable once it finishes.
+      OFFSETS_FETCH_RETRYABLE_ERRORS = (
+        COORDINATOR_NOT_READY_ERRORS + %i[unstable_offset_commit]
+      ).freeze
+
+      # Errors with which Kafka rejects an offsets change of a consumer group that has active
+      # members. Brokers report it as `unknown_member_id` per partition, as the change does not
+      # come from any of the consumer group members.
+      CONSUMER_GROUP_NOT_EMPTY_ERRORS = %i[
+        non_empty_group
+        unknown_member_id
+      ].freeze
+
       private_constant(
         :LONG_TIME_AGO,
         :DAY_IN_SECONDS,
         :CONSUMER_GROUP_STATES,
-        :COORDINATOR_NOT_READY_ERRORS
+        :COORDINATOR_NOT_READY_ERRORS,
+        :OFFSETS_FETCH_RETRYABLE_ERRORS,
+        :CONSUMER_GROUP_NOT_EMPTY_ERRORS
       )
 
       class << self
@@ -113,8 +130,9 @@ module Karafka
       #
       # @return [void]
       #
-      # @note This method should **not** be executed on a running group as it creates a
-      #   "fake" consumer and uses it to move offsets.
+      # @raise [Karafka::Errors::ConsumerGroupNotEmptyError] when the consumer group has active
+      #   members. Kafka accepts offset changes only for consumer groups without members, so this
+      #   method should **not** be executed on a running consumer group.
       #
       # @example Move a single topic partition nr 1 offset to 100
       #   Karafka::Admin::ConsumerGroups.seek('group-id', { 'topic' => { 1 => 100 } })
@@ -198,54 +216,10 @@ module Karafka
           end
         end
 
-        settings = { "group.id": group_id }
+        # If we have any time based stuff to resolve, we need to do it prior to commits
+        resolve_time_based_offsets(time_tpl, tpl) unless time_tpl.empty?
 
-        with_consumer(settings) do |consumer|
-          # If we have any time based stuff to resolve, we need to do it prior to commits
-          unless time_tpl.empty?
-            real_offsets = consumer.offsets_for_times(time_tpl)
-
-            # Collect all partitions where the timestamp is beyond the last message
-            # (negative offset returned) so we can fetch their HWMs in a single batch
-            # admin call instead of one per-partition consumer call
-            real_offsets_by_topic = real_offsets.to_h
-            hwm_specs = {}
-            real_offsets_by_topic.each do |name, results|
-              results.each do |result|
-                raise(Errors::InvalidTimeBasedOffsetError) unless result
-                next unless result.offset.negative?
-
-                (hwm_specs[name] ||= []) << { partition: result.partition, offset: :latest }
-              end
-            end
-
-            hwms = {}
-            unless hwm_specs.empty?
-              with_admin do |admin|
-                admin.list_offsets(hwm_specs).wait(max_wait_timeout_ms: max_wait_time_ms).offsets.each do |r|
-                  (hwms[r[:topic]] ||= {})[r[:partition]] = r[:offset]
-                end
-              end
-            end
-
-            real_offsets_by_topic.each do |name, results|
-              results.each do |result|
-                partition = result.partition
-                # If offset is negative the timestamp was beyond the last message; use HWM
-                offset = result.offset.negative? ? hwms.dig(name, partition) : result.offset
-
-                # Since now we have proper offsets, we can add this to the final tpl for commit
-                tpl.to_h[name] ||= []
-                tpl.to_h[name] << Rdkafka::Consumer::Partition.new(partition, offset)
-                tpl.to_h[name].reverse!
-                tpl.to_h[name].uniq!(&:partition)
-                tpl.to_h[name].reverse!
-              end
-            end
-          end
-
-          consumer.commit_offsets(tpl, async: false)
-        end
+        commit_offsets(group_id, tpl)
       end
 
       # Takes group and its topics and copies all the offsets to a new named group
@@ -256,8 +230,9 @@ module Karafka
       #
       # @return [Boolean] true if anything was migrated, otherwise false
       #
-      # @note This method should **not** be executed on a running group as it creates a
-      #   "fake" consumer and uses it to move offsets.
+      # @raise [Karafka::Errors::ConsumerGroupNotEmptyError] when the new consumer group has
+      #   active members. Kafka accepts offset changes only for consumer groups without members,
+      #   so this method should **not** be executed on a running consumer group.
       #
       # @note If new group exists, old offsets will be added to it.
       def copy(previous_name, new_name, topics)
@@ -297,8 +272,9 @@ module Karafka
       # @return [Boolean] true if rename (and optionally removal) was ok or false if there was
       #   nothing really to rename
       #
-      # @note This method should **not** be executed on a running group as it creates a
-      #   "fake" consumer and uses it to move offsets.
+      # @raise [Karafka::Errors::ConsumerGroupNotEmptyError] when the new consumer group has
+      #   active members. Kafka accepts offset changes only for consumer groups without members,
+      #   so this method should **not** be executed on a running consumer group.
       #
       # @note After migration unless `delete_previous` is set to `false`, old group will be
       #   removed.
@@ -422,10 +398,6 @@ module Karafka
       #
       # @note This lag reporting is for committed lags and is "Kafka-centric", meaning that this
       #   represents lags from Kafka perspective and not the consumer. They may differ.
-      #
-      # @note When this instance operates on an external client, every queried group runs
-      #   through that single consumer identity, so query it only about the external client's
-      #   own group.
       def read_lags_with_offsets(groups_with_topics = {}, active_topics_only: true)
         # We first fetch all the topics with partitions count that exist in the cluster so we
         # do not query for topics that do not exist and so we can get partitions count for all
@@ -460,31 +432,10 @@ module Karafka
         groups_lags = Hash.new { |h, k| h[k] = {} }
         groups_offs = Hash.new { |h, k| h[k] = {} }
 
-        queryable_groups.each do |group, topics|
-          # Do not add to tpl topics that do not exist
-          next if topics.empty?
+        # Do not query groups whose requested topics do not exist
+        queryable_groups.delete_if { |_, topics| topics.empty? }
 
-          tpl = Rdkafka::Consumer::TopicPartitionList.new
-
-          with_consumer("group.id": group) do |consumer|
-            topics.each { |topic| tpl.add_topic(topic, existing_topics[topic]) }
-
-            commit_offsets = consumer.committed(tpl)
-
-            commit_offsets.to_h.each do |topic, partitions|
-              groups_offs[group][topic] = {}
-
-              partitions.each do |partition|
-                # -1 when no offset is stored
-                groups_offs[group][topic][partition.partition] = partition.offset || -1
-              end
-            end
-
-            consumer.lag(commit_offsets).each do |topic, partitions_lags|
-              groups_lags[group][topic] = partitions_lags
-            end
-          end
-        end
+        read_committed(queryable_groups, existing_topics, groups_offs, groups_lags)
 
         groups_with_topics.each do |group, topics|
           groups_lags[group]
@@ -651,6 +602,178 @@ module Karafka
       end
 
       private
+
+      # Resolves time based offsets into real offsets and adds them to the commit tpl
+      #
+      # @param time_tpl [Rdkafka::Consumer::TopicPartitionList] partitions with `Time` offsets
+      # @param tpl [Rdkafka::Consumer::TopicPartitionList] tpl to which resolved offsets go
+      def resolve_time_based_offsets(time_tpl, tpl)
+        time_specs = time_tpl.to_h.transform_values do |partitions|
+          partitions.map do |partition|
+            { partition: partition.partition, offset: (partition.offset.to_f * 1_000).to_i }
+          end
+        end
+
+        with_admin do |admin|
+          real_offsets = admin
+            .list_offsets(time_specs, isolation_level: isolation_level)
+            .wait(max_wait_timeout_ms: max_wait_time_ms)
+            .offsets
+
+          # Collect all partitions where the timestamp is beyond the last message
+          # (negative offset returned) so we can fetch their HWMs in a single batch
+          hwm_specs = {}
+          real_offsets.each do |result|
+            next unless result[:offset].negative?
+
+            (hwm_specs[result[:topic]] ||= []) << { partition: result[:partition], offset: :latest }
+          end
+
+          hwms = {}
+          unless hwm_specs.empty?
+            admin.list_offsets(hwm_specs).wait(max_wait_timeout_ms: max_wait_time_ms).offsets.each do |r|
+              (hwms[r[:topic]] ||= {})[r[:partition]] = r[:offset]
+            end
+          end
+
+          real_offsets.each do |result|
+            name = result[:topic]
+            partition = result[:partition]
+            # If offset is negative the timestamp was beyond the last message; use HWM
+            offset = result[:offset].negative? ? hwms.dig(name, partition) : result[:offset]
+
+            # Since now we have proper offsets, we can add this to the final tpl for commit
+            tpl.to_h[name] ||= []
+            tpl.to_h[name] << Rdkafka::Consumer::Partition.new(partition, offset)
+            tpl.to_h[name].reverse!
+            tpl.to_h[name].uniq!(&:partition)
+            tpl.to_h[name].reverse!
+          end
+        end
+      end
+
+      # Commits offsets of a consumer group by altering them from outside of the consumer group
+      #
+      # @param group_id [String] consumer group id
+      # @param tpl [Rdkafka::Consumer::TopicPartitionList] offsets to commit
+      #
+      # @raise [Errors::ConsumerGroupNotEmptyError] when the consumer group has active members
+      def commit_offsets(group_id, tpl)
+        # Same as consumer commits, we skip partitions without a valid offset, as Kafka rejects
+        # them in an offsets change
+        alterable = Rdkafka::Consumer::TopicPartitionList.new
+
+        tpl.to_h.each do |topic, partitions|
+          valid = partitions.select { |partition| partition.offset.is_a?(Integer) && partition.offset >= 0 }
+
+          alterable.to_h[topic] = valid unless valid.empty?
+        end
+
+        return if alterable.empty?
+
+        with_admin do |admin|
+          with_retries(COORDINATOR_NOT_READY_ERRORS) do
+            admin
+              .alter_consumer_group_offsets(group_id, alterable)
+              .wait(max_wait_timeout_ms: max_wait_time_ms)
+          end
+        rescue Rdkafka::RdkafkaError => e
+          raise unless CONSUMER_GROUP_NOT_EMPTY_ERRORS.include?(e.code)
+
+          raise(
+            Errors::ConsumerGroupNotEmptyError,
+            "Consumer group '#{group_id}' has active members, stop it before changing its offsets"
+          )
+        end
+      end
+
+      # Reads committed offsets and lags of each consumer group from outside of it
+      #
+      # @param groups_with_topics [Hash{String => Array<String>}] groups with existing topics
+      # @param existing_topics [Hash{String => Integer}] existing topics with partition counts
+      # @param groups_offs [Hash] committed offsets per group, topic and partition to fill
+      # @param groups_lags [Hash] lags per group, topic and partition to fill
+      #
+      # @note Same as consumers, under `read_committed` we fetch only stable committed offsets
+      #   and compute lags against the last stable offset
+      def read_committed(groups_with_topics, existing_topics, groups_offs, groups_lags)
+        level = isolation_level
+        require_stable = level == IsolationLevels::READ_COMMITTED
+
+        with_admin do |admin|
+          groups_with_topics.each do |group, topics|
+            tpl = Rdkafka::Consumer::TopicPartitionList.new
+            topics.each { |topic| tpl.add_topic(topic, existing_topics[topic]) }
+
+            report = with_retries(OFFSETS_FETCH_RETRYABLE_ERRORS) do
+              admin
+                .list_consumer_group_offsets(group, tpl, require_stable_offsets: require_stable)
+                .wait(max_wait_timeout_ms: max_wait_time_ms)
+            end
+
+            latest_specs = {}
+
+            report.partitions.each do |details|
+              topic = details[:topic]
+              partition = details[:partition]
+              offset = details[:offset]
+
+              # -1 when no offset is stored
+              (groups_offs[group][topic] ||= {})[partition] = offset || -1
+              groups_lags[group][topic] ||= {}
+
+              next unless offset
+
+              (latest_specs[topic] ||= []) << { partition: partition, offset: :latest }
+            end
+
+            next if latest_specs.empty?
+
+            admin
+              .list_offsets(latest_specs, isolation_level: level)
+              .wait(max_wait_timeout_ms: max_wait_time_ms)
+              .offsets
+              .each do |result|
+                topic = result[:topic]
+                partition = result[:partition]
+
+                groups_lags[group][topic][partition] =
+                  result[:offset] - groups_offs[group][topic][partition]
+              end
+          end
+        end
+      end
+
+      # Runs the block and retries it on given transient errors for up to
+      # `admin.max_retries_duration`
+      #
+      # @param errors [Array<Symbol>] codes of `Rdkafka::RdkafkaError` to retry on
+      # @return [Object] result of the block
+      def with_retries(errors)
+        start_time = self.class.monotonic_now
+
+        begin
+          yield
+        rescue Rdkafka::RdkafkaError => e
+          raise unless errors.include?(e.code)
+          raise if self.class.monotonic_now - start_time >= self.class.max_retries_duration
+
+          sleep(self.class.retry_backoff / 1_000.0)
+
+          retry
+        end
+      end
+
+      # @return [Integer] isolation level a consumer of this admin instance would use. When not
+      #   configured, librdkafka reads committed, so we mirror that default here.
+      def isolation_level
+        kafka = self.class.app_kafka.merge(self.class.admin_kafka, @custom_kafka)
+
+        case kafka.fetch(:"isolation.level", "read_committed").to_s
+        when "read_uncommitted" then IsolationLevels::READ_UNCOMMITTED
+        else IsolationLevels::READ_COMMITTED
+        end
+      end
 
       # @param group [Hash] consumer group description from `DescribeConsumerGroupsReport`
       # @return [Hash] consumer group description with the state as a symbol

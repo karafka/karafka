@@ -1,8 +1,7 @@
 # frozen_string_literal: true
 
 # An external rdkafka admin instance should serve all admin-based operations without dedicated
-# per-operation instances and should stay open and usable afterwards. Consumer-based operations
-# on the same admin instance keep working via the dedicated consumers fallback.
+# per-operation instances and should stay open and usable afterwards.
 
 setup_karafka
 
@@ -35,8 +34,7 @@ produce_many(TOPIC, DT.uuids(5), partition: 0)
 watermarks = admin.read_watermark_offsets({ TOPIC => [0] })
 assert_equal [0, 5], watermarks.fetch(TOPIC).fetch(0)
 
-# Consumer-based operations are not capable of running on the external admin and fall back to
-# dedicated consumer instances, still fully operational
+# Consumer group offsets are read via the external admin as well
 lags = admin.read_lags_with_offsets({ "nonexisting-group" => [TOPIC] })
 assert_equal(
   { offset: -1, lag: -1 },

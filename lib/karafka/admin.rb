@@ -51,8 +51,8 @@ module Karafka
     #   admin = Karafka::Admin.new(kafka: { 'bootstrap.servers': 'other-cluster:9092' })
     #   admin.cluster_info
     #
-    # @example Read lags of a running consumer via its own client connection
-    #   admin = Karafka::Admin.new(external_client: client)
+    # @example Read consumer group lags via an existing rdkafka admin instance
+    #   admin = Karafka::Admin.new(external_client: rdkafka_admin)
     #   admin.read_lags_with_offsets({ 'my-group' => ['events'] })
     def initialize(kafka: {}, external_client: nil)
       @custom_kafka = kafka
