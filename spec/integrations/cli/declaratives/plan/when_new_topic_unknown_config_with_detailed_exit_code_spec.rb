@@ -30,6 +30,6 @@ assert_equal 1, DT[:status]
 assert results.include?("Following topics will be created:")
 assert results.include?('retention.ms: "86400000"')
 assert results.include?("Following topics configuration is unknown to the cluster")
-assert results.include?("! retention.msx: \"86400000\"")
-assert !results.include?("+ retention.msx:")
+# Listed only as unknown, not as config of the topic to be created
+assert_equal 1, results.scan('retention.msx: "86400000"').size
 assert !Karafka::Admin.cluster_info.topics.map { |topic| topic[:topic_name] }.include?(DT.topic)
