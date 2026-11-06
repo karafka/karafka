@@ -124,7 +124,7 @@ rescue => e
     success: false,
     error_class: e.class.name,
     error_message: e.message,
-    expected_failure: e.message.include?("active") || e.message.include?("member")
+    expected_failure: e.is_a?(Karafka::Errors::ConsumerGroupNotEmptyError)
   }
 end
 

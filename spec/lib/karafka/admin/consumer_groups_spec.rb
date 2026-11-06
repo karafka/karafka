@@ -82,7 +82,11 @@ RSpec.describe Karafka::Admin::ConsumerGroups do
       let(:instance) { described_class.new }
       let(:admin) { instance_double(Rdkafka::Admin) }
       let(:handle) { instance_double(Rdkafka::Admin::AlterConsumerGroupOffsetsHandle) }
-      let(:error) { Rdkafka::RdkafkaError.new(25) }
+      let(:error) do
+        Rdkafka::RdkafkaError.new(Rdkafka::Bindings::RD_KAFKA_RESP_ERR__STATE).tap do |rdkafka_error|
+          allow(rdkafka_error).to receive(:code).and_return(:unknown_member_id)
+        end
+      end
 
       before do
         allow(described_class).to receive(:new).and_return(instance)
@@ -131,7 +135,11 @@ RSpec.describe Karafka::Admin::ConsumerGroups do
       end
 
       context "when the coordinator is not ready yet and then becomes ready" do
-        let(:error) { Rdkafka::RdkafkaError.new(16) }
+        let(:error) do
+          Rdkafka::RdkafkaError.new(Rdkafka::Bindings::RD_KAFKA_RESP_ERR__STATE).tap do |rdkafka_error|
+            allow(rdkafka_error).to receive(:code).and_return(:not_coordinator)
+          end
+        end
 
         before do
           allow(described_class).to receive(:retry_backoff).and_return(1)
@@ -268,7 +276,11 @@ RSpec.describe Karafka::Admin::ConsumerGroups do
       let(:admin) { instance_double(Rdkafka::Admin) }
       let(:handle) { instance_double(Rdkafka::Admin::ListConsumerGroupOffsetsHandle) }
       let(:cgs_t) { { "group" => [name] } }
-      let(:error) { Rdkafka::RdkafkaError.new(88) }
+      let(:error) do
+        Rdkafka::RdkafkaError.new(Rdkafka::Bindings::RD_KAFKA_RESP_ERR__STATE).tap do |rdkafka_error|
+          allow(rdkafka_error).to receive(:code).and_return(:unstable_offset_commit)
+        end
+      end
       let(:report) do
         instance_double(
           Rdkafka::Admin::ListConsumerGroupOffsetsReport,

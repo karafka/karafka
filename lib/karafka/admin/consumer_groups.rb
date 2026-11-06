@@ -432,10 +432,10 @@ module Karafka
         groups_lags = Hash.new { |h, k| h[k] = {} }
         groups_offs = Hash.new { |h, k| h[k] = {} }
 
-        # Do not query groups whose requested topics do not exist
+        # Do not query consumer groups whose requested topics do not exist
         queryable_groups.delete_if { |_, topics| topics.empty? }
 
-        read_committed(queryable_groups, existing_topics, groups_offs, groups_lags)
+        read_offsets_and_lags(queryable_groups, existing_topics, groups_offs, groups_lags)
 
         groups_with_topics.each do |group, topics|
           groups_lags[group]
@@ -661,8 +661,7 @@ module Karafka
       #
       # @raise [Errors::ConsumerGroupNotEmptyError] when the consumer group has active members
       def commit_offsets(group_id, tpl)
-        # Same as consumer commits, we skip partitions without an offset or with a negative one,
-        # as Kafka rejects them in an offsets change. Any other value goes to Kafka as it is
+        # We skip partitions without an offset or with a negative one, as Kafka rejects them
         alterable = Rdkafka::Consumer::TopicPartitionList.new
 
         tpl.to_h.each do |topic, partitions|
@@ -688,23 +687,21 @@ module Karafka
         rescue Rdkafka::RdkafkaError => e
           raise unless CONSUMER_GROUP_NOT_EMPTY_ERRORS.include?(e.code)
 
-          raise(
-            Errors::ConsumerGroupNotEmptyError,
-            "Consumer group '#{group_id}' has active members, stop it before changing its offsets"
-          )
+          raise(Errors::ConsumerGroupNotEmptyError, group_id)
         end
       end
 
       # Reads committed offsets and lags of each consumer group from outside of it
       #
-      # @param groups_with_topics [Hash{String => Array<String>}] groups with existing topics
+      # @param groups_with_topics [Hash{String => Array<String>}] consumer groups with existing
+      #   topics
       # @param existing_topics [Hash{String => Integer}] existing topics with partition counts
-      # @param groups_offs [Hash] committed offsets per group, topic and partition to fill
-      # @param groups_lags [Hash] lags per group, topic and partition to fill
+      # @param groups_offs [Hash] committed offsets per consumer group, topic and partition to fill
+      # @param groups_lags [Hash] lags per consumer group, topic and partition to fill
       #
       # @note Same as consumers, under `read_committed` we fetch only stable committed offsets
       #   and compute lags against the last stable offset
-      def read_committed(groups_with_topics, existing_topics, groups_offs, groups_lags)
+      def read_offsets_and_lags(groups_with_topics, existing_topics, groups_offs, groups_lags)
         level = isolation_level
         require_stable = level == IsolationLevels::READ_COMMITTED
 
