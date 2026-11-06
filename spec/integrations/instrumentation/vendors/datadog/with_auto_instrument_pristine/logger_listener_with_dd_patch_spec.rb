@@ -34,9 +34,14 @@ end
 
 Karafka.monitor.subscribe(trace_listener)
 
+# Runs after the listener, on the worker thread, once the job is done
+Karafka.monitor.subscribe("worker.completed") do |event|
+  DT[:open_traces] << Datadog::Tracing.active_trace&.id if event[:job]
+end
+
 class Consumer < Karafka::BaseConsumer
   def consume
-    DT[:traces] << Datadog::Tracing.active_trace&.id
+    DT[:consumed] << messages.size
   end
 end
 
@@ -44,10 +49,9 @@ draw_routes(Consumer)
 produce_many(DT.topic, DT.uuids(10))
 
 start_karafka_and_wait_until do
-  DT[:traces].size >= 10
+  DT[:consumed].sum >= 10
 end
 
 assert Datadog::Tracing::Contrib::Karafka::Patcher.patched?
-assert !DT[:traces].include?(nil), DT[:traces]
-assert_equal DT[:traces].size, DT[:traces].uniq.size, DT[:traces]
+assert_equal [nil], DT[:open_traces].uniq, DT[:open_traces]
 assert_equal 1, strio.string.scan("dd-trace-rb Karafka integration is active").size
