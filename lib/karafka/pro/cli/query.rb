@@ -191,10 +191,10 @@ module Karafka
           { name => messages.fetch("#{name}_#{key}") { messages.fetch(key) } }
         end
 
-        # @param arg [String] command line argument (like `--per-page`)
+        # @param arg [String] command line argument (like `--per-page` or `--per-page=abc`)
         # @return [String] argument name (like `per_page`)
         def argument_name(arg)
-          arg.to_s.delete_prefix("--").tr("-", "_")
+          arg.to_s.split("=", 2).first.to_s.sub(/\A-+/, "").tr("-", "_")
         end
       end
     end

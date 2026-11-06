@@ -140,6 +140,16 @@ RSpec.describe_current do
         .to eq(details("spec", "--topic-name", "x", "--count", "x").fetch("errors").keys)
     end
 
+    it "expect a flag with an inline value to use the declared argument name" do
+      expect(details("spec", "--topic_name", "x", "--count=x"))
+        .to eq("errors" => { "count" => "has a wrong type or format" })
+    end
+
+    it "expect a single dash flag to use its name" do
+      expect(details("spec", "-x"))
+        .to eq("errors" => { "x" => "is not an argument of this action" })
+    end
+
     it "expect a flag without a value to be reported as required" do
       expect(details("spec", "--topic_name"))
         .to eq("errors" => { "topic_name" => "is required" })
@@ -158,6 +168,12 @@ RSpec.describe_current do
       exit_status("--json", "spec")
 
       expect(result).to include("error" => "invalid_args", "details" => { "errors" => { "spec" => "needs an action before it" } })
+    end
+
+    it "expect to key a flag before the action by its argument name" do
+      exit_status("--per-page=5", "spec")
+
+      expect(result["details"]).to eq("errors" => { "per_page" => "needs an action before it" })
     end
   end
 
