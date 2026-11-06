@@ -27,7 +27,24 @@ RSpec.describe_current do
     let(:missing_topic) { Karafka::Declaratives::Topic.new(generate_topic_name) }
     let(:declaratives_topics) { [existing_topic, missing_topic] }
 
-    before { missing_topic.details = { "retention.msx": 1 } }
+    before { missing_topic.details = { "retention.ms": 1, "retention.msx": 1 } }
+
+    it { expect(unknown_configs.call).to eq(missing_topic => { "retention.msx" => "1" }) }
+  end
+
+  context "when only topics that do not exist in the cluster are declared" do
+    let(:missing_topic) { Karafka::Declaratives::Topic.new(generate_topic_name) }
+    let(:declaratives_topics) { [missing_topic] }
+
+    before { missing_topic.details = { "retention.ms": 1, "retention.msx": 1 } }
+
+    it { expect(unknown_configs.call).to eq(missing_topic => { "retention.msx" => "1" }) }
+  end
+
+  context "when the cluster has no topics" do
+    let(:existing_topics_names) { [] }
+
+    before { existing_topic.details = { "retention.msx": 1 } }
 
     it { expect(unknown_configs.call).to eq({}) }
   end

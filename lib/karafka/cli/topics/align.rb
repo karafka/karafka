@@ -120,6 +120,13 @@ module Karafka
 
           resources_to_migrate.to_a
         end
+
+        # @return [Hash{Karafka::Declaratives::Topic => Hash{String => String}}] existing
+        #   declarative topics with their configs (names with values) that the cluster does not
+        #   know. Topics that do not exist are skipped by align, so they are not checked.
+        def unknown_configs
+          @unknown_configs ||= UnknownConfigs.new(candidate_topics, existing_topics_names).call
+        end
       end
     end
   end
