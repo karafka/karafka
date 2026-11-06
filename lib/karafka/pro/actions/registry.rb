@@ -57,7 +57,7 @@ module Karafka
           end
         end
 
-        # @param name [String] action name
+        # @param name [String, Symbol] action name
         # @return [Class] registered action
         def fetch(name)
           @actions.fetch(name.to_s) { raise(Errors::UnknownActionError, name) }

@@ -34,6 +34,29 @@
 require "open3"
 require "json"
 
+# The runner copies this scenario into a temporary directory, so the boot file and the license
+# stub are written there
+File.write("karafka.rb", <<~RUBY)
+  class KarafkaApp < Karafka::App
+    setup do |config|
+      # Nothing listens here, so every broker call fails and librdkafka logs errors
+      config.kafka = { "bootstrap.servers": "127.0.0.1:9090" }
+      config.client_id = "query-unreachable"
+    end
+  end
+RUBY
+
+# Activates Pro with the license token from the environment, as the integrations helper does
+File.write("license.rb", <<~RUBY)
+  module Karafka
+    module License
+      def self.token = ENV.fetch("KARAFKA_PRO_LICENSE_TOKEN")
+
+      def self.version = "1.0.0"
+    end
+  end
+RUBY
+
 env = { "RUBYOPT" => "#{ENV["RUBYOPT"]} -r#{File.join(Dir.pwd, "license.rb")}" }
 # Writes the lockfile first, so bundler does not print its resolution on the CLI stdout
 _, install_output, install_status = Open3.capture3("bundle install")
