@@ -39,19 +39,14 @@ module Karafka
         # Error messages may contain data from payloads, so we only expose their beginning
         MAX_ERROR_MESSAGE_SIZE = 500
 
-        # Ruby classes that given argument types accept
-        TYPES = {
-          string: String,
-          integer: Integer
-        }.freeze
-
-        private_constant :MAX_ERROR_MESSAGE_SIZE, :TYPES
+        private_constant :MAX_ERROR_MESSAGE_SIZE
 
         # @param adapter [String] name of the interface running the actions (like `cli`)
         # @param registry [Registry] registry with actions we can run
         def initialize(adapter:, registry: Actions.registry)
           @adapter = adapter
           @registry = registry
+          @pagination_contract = Contracts::Pagination.new
         end
 
         # @param name [String] name of the action
@@ -60,7 +55,7 @@ module Karafka
         def call(name, args = {})
           payload = { action: name.to_s, args: args, adapter: @adapter }
 
-          Karafka.monitor.instrument("actions.action.executed", payload) do
+          Karafka.monitor.instrument("action.executed", payload) do
             payload[:result] = execute(name.to_s, args)
           end
         end
@@ -73,7 +68,12 @@ module Karafka
         def execute(name, args)
           started_at = monotonic_now
           action = @registry.fetch(name)
-          output = action.new.call(**normalize(action, args))
+          args = args.transform_keys(&:to_sym)
+          errors = validate(action, args)
+
+          return failure("invalid_args", { errors: errors }, started_at) unless errors.empty?
+
+          output = action.new.call(**args)
           meta = { sources: action.sources, query_time_ms: elapsed(started_at) }
 
           if output.is_a?(Base::Page)
@@ -81,14 +81,20 @@ module Karafka
             output = output.rows
           end
 
-          Result.new(ok: true, data: output, meta: meta)
+          Result.new(success: true, data: output, meta: meta)
         rescue Errors::UnknownActionError => e
           failure("unknown_action", { action: e.message }, started_at)
-        rescue Errors::InvalidArgsError => e
-          failure("invalid_args", { value: e.message }, started_at)
         rescue Errors::NotFoundError => e
           failure("not_found", { value: e.message }, started_at)
         rescue => e
+          Karafka.monitor.instrument(
+            "error.occurred",
+            caller: self,
+            error: e,
+            action: name,
+            type: "action.execute.error"
+          )
+
           failure(
             "failed",
             { class: e.class.name, message: e.message.to_s[0, MAX_ERROR_MESSAGE_SIZE] },
@@ -96,29 +102,18 @@ module Karafka
           )
         end
 
-        # Checks the arguments against the action declarations
+        # Checks the arguments with contracts. The errors go to the envelope as they are, so we do
+        # not raise them as an error message string
         #
         # @param action [Class] action class
-        # @param args [Hash] raw arguments
-        # @return [Hash{Symbol => Object}] arguments for the action
-        def normalize(action, args)
-          args = args.transform_keys(&:to_sym)
-          declared = action.args
+        # @param args [Hash{Symbol => Object}] action arguments
+        # @return [Hash{Symbol => String}] errors per argument, empty when all are valid
+        def validate(action, args)
+          result = Contracts::Arguments.new(action.args).call(args)
 
-          args.each do |name, value|
-            details = declared.fetch(name) { raise(Errors::InvalidArgsError, name) }
+          return result.errors unless result.success?
 
-            raise(Errors::InvalidArgsError, name) unless value.is_a?(TYPES.fetch(details[:type]))
-          end
-
-          declared.each do |name, details|
-            next unless details[:required]
-            next if args.key?(name)
-
-            raise(Errors::InvalidArgsError, name)
-          end
-
-          args
+          @pagination_contract.call(args).errors
         end
 
         # @param error [String] error code
@@ -127,7 +122,7 @@ module Karafka
         # @return [Result] failed result
         def failure(error, details, started_at)
           Result.new(
-            ok: false,
+            success: false,
             error: error,
             details: details,
             meta: { query_time_ms: elapsed(started_at) }

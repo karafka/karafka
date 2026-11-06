@@ -160,3 +160,10 @@ en:
       headers_schedule_target_epoch_too_far_in_future: 'scheduling is too far in the future (schedule_target_epoch must be Unix time in seconds)'
       headers_format: are not correct
       not_a_scheduled_messages_topic: 'the envelope topic is not a scheduled messages topic'
+
+    actions:
+      unknown: is not an argument of this action
+      missing: is required
+      format: has a wrong type or format
+      page_format: needs to be an integer of at least 1
+      per_page_format: needs to be an integer between 1 and 1000

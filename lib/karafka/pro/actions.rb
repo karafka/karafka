@@ -63,7 +63,7 @@ module Karafka
         # @param _config [Karafka::Core::Configurable::Node] root node config
         def post_setup(_config)
           bus = Karafka.monitor.notifications_bus
-          bus.register_event("actions.action.executed") unless bus.available_events.include?("actions.action.executed")
+          bus.register_event("action.executed") unless bus.available_events.include?("action.executed")
 
           CORE.each { |action| registry.add(action) }
         end

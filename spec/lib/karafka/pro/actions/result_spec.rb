@@ -30,7 +30,7 @@
 
 RSpec.describe_current do
   context "when successful" do
-    subject(:result) { described_class.new(ok: true, data: [1], meta: { query_time_ms: 1 }) }
+    subject(:result) { described_class.new(success: true, data: [1], meta: { query_time_ms: 1 }) }
 
     it "expect to build the success envelope" do
       expect(result.to_h).to eq(
@@ -44,7 +44,7 @@ RSpec.describe_current do
 
   context "when failed" do
     subject(:result) do
-      described_class.new(ok: false, error: "not_found", details: { value: "x" }, meta: {})
+      described_class.new(success: false, error: "not_found", details: { value: "x" }, meta: {})
     end
 
     it { expect(result.error).to eq("not_found") }

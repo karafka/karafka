@@ -36,9 +36,6 @@ module Karafka
         # Base for all the actions errors
         BaseError = Class.new(::Karafka::Errors::BaseError)
 
-        # Raised when arguments given to an action are not valid
-        InvalidArgsError = Class.new(BaseError)
-
         # Raised when the resource an action is asked about does not exist
         NotFoundError = Class.new(BaseError)
 

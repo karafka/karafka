@@ -58,7 +58,11 @@ module Karafka
           "not_found" => NOT_FOUND_EXIT_CODE
         }.freeze
 
+        # Arguments accepted when listing the actions
+        CATALOG_ARGS = %w[help --json --help -h].freeze
+
         private_constant(
+          :CATALOG_ARGS,
           :FAILURE_EXIT_CODE,
           :INVALID_EXIT_CODE,
           :NOT_FOUND_EXIT_CODE,
@@ -70,11 +74,6 @@ module Karafka
           @options = {}
         end
 
-        # Arguments accepted when listing the actions
-        CATALOG_ARGS = %w[help --json --help -h].freeze
-
-        private_constant :CATALOG_ARGS
-
         # @param action_name [String, nil] action to run. Lists available actions when not given
         def call(action_name = nil)
           result = with_logs_on_stderr do
@@ -83,7 +82,7 @@ module Karafka
 
           $stdout.puts(JSON.generate(result.to_h))
 
-          exit(EXIT_CODES.fetch(result.error)) unless result.ok
+          exit(EXIT_CODES.fetch(result.error)) unless result.success?
         end
 
         private
@@ -109,15 +108,15 @@ module Karafka
 
           if unexpected
             return Actions::Result.new(
-              ok: false,
+              success: false,
               error: "invalid_args",
-              details: { value: unexpected },
+              details: { errors: { unexpected => "needs an action before it" } },
               meta: {}
             )
           end
 
           Actions::Result.new(
-            ok: true,
+            success: true,
             data: { actions: Actions.registry.map(&:to_h) },
             meta: {}
           )
@@ -133,11 +132,16 @@ module Karafka
 
           args = parse_args(action)
 
-          return Actions::Result.new(ok: true, data: action.to_h, meta: {}) if args == :help
+          return Actions::Result.new(success: true, data: action.to_h, meta: {}) if args == :help
 
           runner.call(action_name, args)
         rescue OptionParser::ParseError => e
-          Actions::Result.new(ok: false, error: "invalid_args", details: { value: e.args.first })
+          Actions::Result.new(
+            success: false,
+            error: "invalid_args",
+            details: { errors: { e.args.first => e.reason } },
+            meta: {}
+          )
         end
 
         # @param action [Class] action class

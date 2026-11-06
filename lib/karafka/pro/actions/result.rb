@@ -36,30 +36,32 @@ module Karafka
         # Version of the envelope and actions output shape. Change it whenever the shape changes.
         SCHEMA_VERSION = 1
 
-        # @return [Boolean] did the action succeed
-        attr_reader :ok
-
         # @return [String, nil] error code on failure
         attr_reader :error
 
-        # @param ok [Boolean] did the action succeed
+        # @param success [Boolean] did the action succeed
         # @param data [Object] action output
         # @param meta [Hash] execution details
         # @param error [String, nil] error code on failure
         # @param details [Hash, nil] error details
-        def initialize(ok:, data: nil, meta: {}, error: nil, details: nil)
-          @ok = ok
+        def initialize(success:, data: nil, meta: {}, error: nil, details: nil)
+          @success = success
           @data = data
           @meta = meta
           @error = error
           @details = details
         end
 
+        # @return [Boolean] did the action succeed
+        def success?
+          @success
+        end
+
         # @return [Hash] envelope
         def to_h
-          envelope = { schema_version: SCHEMA_VERSION, ok: @ok }
+          envelope = { schema_version: SCHEMA_VERSION, ok: @success }
 
-          if @ok
+          if @success
             envelope[:data] = @data
           else
             envelope[:error] = @error

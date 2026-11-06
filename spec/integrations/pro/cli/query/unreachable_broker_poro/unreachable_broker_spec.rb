@@ -46,13 +46,14 @@ File.write("karafka.rb", <<~RUBY)
   end
 RUBY
 
-# Activates Pro with the license token from the environment, as the integrations helper does
 File.write("license.rb", <<~RUBY)
   module Karafka
     module License
-      def self.token = ENV.fetch("KARAFKA_PRO_LICENSE_TOKEN")
+      class << self
+        def token = ENV.fetch("KARAFKA_PRO_LICENSE_TOKEN")
 
-      def self.version = "1.0.0"
+        def version = "1.0.0"
+      end
     end
   end
 RUBY

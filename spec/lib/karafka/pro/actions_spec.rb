@@ -29,19 +29,15 @@
 # Contact: contact@karafka.io
 
 RSpec.describe_current do
-  let(:actions_dir) { Karafka.core_root.join("pro/actions") }
+  let(:registry) { Karafka::Pro::Actions::Registry.new }
   let(:read_actions) do
-    Karafka::Pro::Actions::Registry
-      .new
-      .tap { |registry| described_class.send(:const_get, :CORE).each { |a| registry.add(a) } }
-      .to_a
+    described_class.post_setup(Karafka::App.config)
+    registry.to_a
   end
 
+  before { allow(described_class).to receive(:registry).and_return(registry) }
+
   describe ".post_setup" do
-    let(:registry) { Karafka::Pro::Actions::Registry.new }
-
-    before { allow(described_class).to receive(:registry).and_return(registry) }
-
     it "expect to register core actions" do
       described_class.post_setup(Karafka::App.config)
 
@@ -52,13 +48,11 @@ RSpec.describe_current do
       2.times { described_class.post_setup(Karafka::App.config) }
 
       expect(Karafka.monitor.notifications_bus.available_events)
-        .to include("actions.action.executed")
+        .to include("action.executed")
     end
   end
 
   describe "read-only guarantees" do
-    # Anything that could reach a write: Admin (also relative `Admin::` inside `module Karafka`),
-    # raw rdkafka clients, producers and commanding. `ReadOnlyAdmin` and `admin` do not match.
     let(:forbidden) { /\bAdmin\b|Rdkafka|WaterDrop|[Pp]roducer|Commanding/ }
 
     it "expect every core action to be a read action" do
@@ -206,8 +200,8 @@ RSpec.describe_current do
     end
 
     it "expect the envelope keys to match the snapshot" do
-      success = Karafka::Pro::Actions::Result.new(ok: true, data: [], meta: {})
-      failure = Karafka::Pro::Actions::Result.new(ok: false, error: "failed", details: {})
+      success = Karafka::Pro::Actions::Result.new(success: true, data: [], meta: {})
+      failure = Karafka::Pro::Actions::Result.new(success: false, error: "failed", details: {})
 
       expect(success.to_h.keys).to eq(%i[schema_version ok data meta])
       expect(failure.to_h.keys).to eq(%i[schema_version ok error details meta])

@@ -124,7 +124,7 @@ RSpec.describe_current do
     it "expect to print invalid_args instead of the catalog" do
       exit_status("--json", "spec")
 
-      expect(result).to include("error" => "invalid_args", "details" => { "value" => "spec" })
+      expect(result).to include("error" => "invalid_args", "details" => { "errors" => { "spec" => "needs an action before it" } })
     end
   end
 

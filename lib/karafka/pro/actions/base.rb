@@ -34,21 +34,19 @@ module Karafka
       # Base for all the actions. Holds the declarations (name, description and arguments) used
       # by adapters to parse input and to describe the action.
       #
-      # @note Do not inherit from this class directly. Use `Read` (or `Write` once it exists).
+      # @note Do not inherit from this class directly. Use `Read`.
       class Base
-        # Mapping of argument types to their JSON Schema types
+        # Mapping of argument types to their JSON Schema types and formats
         JSON_TYPES = {
-          string: "string",
-          integer: "integer"
+          string: { type: "string" },
+          integer: { type: "integer" },
+          regexp: { type: "string", format: "regex" }
         }.freeze
 
         # Default page size for paginated actions
         DEFAULT_PER_PAGE = 100
 
-        # Biggest page size we allow for paginated actions
-        MAX_PER_PAGE = 1_000
-
-        private_constant :DEFAULT_PER_PAGE, :MAX_PER_PAGE
+        private_constant :DEFAULT_PER_PAGE
 
         # Paginated subset of action rows with pagination details
         Page = Struct.new(:rows, :page, :per_page, :has_more)
@@ -89,7 +87,7 @@ module Karafka
           # Declares `page` and `per_page` arguments used for paginating unbounded results
           def paginated
             arg :page, type: :integer, description: "Page number, starting from 1"
-            arg :per_page, type: :integer, description: "Rows per page (max #{MAX_PER_PAGE})"
+            arg :per_page, type: :integer, description: "Rows per page (max #{Contracts::Pagination::MAX_PER_PAGE})"
           end
 
           # @return [Hash{Symbol => Hash}] arguments declarations, including the inherited ones
@@ -104,7 +102,7 @@ module Karafka
               properties: args.to_h do |name, details|
                 [
                   name.to_s,
-                  { type: JSON_TYPES.fetch(details[:type]), description: details[:description] }
+                  JSON_TYPES.fetch(details[:type]).merge(description: details[:description])
                 ]
               end,
               required: args.select { |_, details| details[:required] }.keys.map(&:to_s),
@@ -138,9 +136,6 @@ module Karafka
         def paginate(rows, page: nil, per_page: nil)
           page ||= 1
           per_page ||= DEFAULT_PER_PAGE
-
-          raise(Errors::InvalidArgsError, page) unless page.positive?
-          raise(Errors::InvalidArgsError, per_page) unless per_page.between?(1, MAX_PER_PAGE)
 
           offset = (page - 1) * per_page
 

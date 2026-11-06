@@ -63,9 +63,4 @@ RSpec.describe_current do
     expect(page.rows.size).to eq(1)
     expect(page.has_more).to be(false)
   end
-
-  it "expect to reject an invalid pattern" do
-    expect { action.call(pattern: "(") }
-      .to raise_error(Karafka::Pro::Actions::Errors::InvalidArgsError, "(")
-  end
 end

@@ -37,7 +37,7 @@ module Karafka
         description "Topics in the cluster with their partition counts, sorted by name"
         sources :broker
 
-        arg :pattern, type: :string, description: "Regular expression topic names must match"
+        arg :pattern, type: :regexp, description: "Regular expression topic names must match"
         paginated
 
         # @param pattern [String, nil] regular expression topic names must match
@@ -45,7 +45,7 @@ module Karafka
         # @param per_page [Integer, nil] page size
         # @return [Base::Page] topics page
         def call(pattern: nil, page: nil, per_page: nil)
-          matcher = build_matcher(pattern)
+          matcher = pattern && Regexp.new(pattern)
 
           topics = admin.cluster_info.topics.filter_map do |topic|
             next if matcher && !matcher.match?(topic[:topic_name])
@@ -59,18 +59,6 @@ module Karafka
           topics.sort_by! { |topic| topic[:topic] }
 
           paginate(topics, page: page, per_page: per_page)
-        end
-
-        private
-
-        # @param pattern [String, nil] regular expression source
-        # @return [Regexp, nil] matcher or nil when there is no pattern
-        def build_matcher(pattern)
-          return nil unless pattern
-
-          Regexp.new(pattern)
-        rescue RegexpError
-          raise(Errors::InvalidArgsError, pattern)
         end
       end
     end

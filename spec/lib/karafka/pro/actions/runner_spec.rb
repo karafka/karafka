@@ -102,12 +102,30 @@ RSpec.describe_current do
     end
 
     it "expect to reject a page size above the limit" do
-      expect(runner.call("spec", { per_page: 1_001 }).error).to eq("invalid_args")
+      expect(runner.call("spec", { per_page: 1_001 }).to_h[:details])
+        .to eq(errors: { per_page: "needs to be an integer between 1 and 1000" })
     end
 
     it "expect to reject a page below one" do
       expect(runner.call("spec", { page: 0 }).error).to eq("invalid_args")
     end
+  end
+
+  context "when a regexp argument is not a valid regular expression" do
+    let(:action) do
+      Class.new(Karafka::Pro::Actions::Read) do
+        action_name "spec"
+        arg :pattern, type: :regexp, description: "Pattern"
+
+        def call(pattern:)
+          pattern
+        end
+      end
+    end
+
+    it { expect(runner.call("spec", { pattern: "(" }).to_h[:details]).to eq(errors: { pattern: "has a wrong type or format" }) }
+    it { expect(runner.call("spec", { pattern: "^a" }).to_h[:data]).to eq("^a") }
+    it { expect(action.schema[:properties]["pattern"]).to include(type: "string", format: "regex") }
   end
 
   context "when the action is unknown" do
@@ -119,15 +137,21 @@ RSpec.describe_current do
   end
 
   context "when a required argument is missing" do
-    it { expect(runner.call("spec").to_h[:details]).to eq(value: "name") }
+    it { expect(runner.call("spec").to_h[:details]).to eq(errors: { name: "is required" }) }
   end
 
   context "when an argument is not declared" do
-    it { expect(runner.call("spec", { name: "x", other: 1 }).to_h[:details]).to eq(value: "other") }
+    it "expect to name the unknown argument" do
+      expect(runner.call("spec", { name: "x", other: 1 }).to_h[:details])
+        .to eq(errors: { other: "is not an argument of this action" })
+    end
   end
 
   context "when an argument has a wrong type" do
-    it { expect(runner.call("spec", { name: "x", count: "2" }).error).to eq("invalid_args") }
+    it "expect to report the wrong type" do
+      expect(runner.call("spec", { name: "x", count: "2" }).to_h[:details])
+        .to eq(errors: { count: "has a wrong type or format" })
+    end
   end
 
   context "when the action fails" do
@@ -146,6 +170,21 @@ RSpec.describe_current do
     it { expect(result[:error]).to eq("failed") }
     it { expect(result[:details][:class]).to eq("StandardError") }
     it { expect(result[:details][:message].size).to eq(500) }
+
+    it "expect to report the error on error.occurred" do
+      errors = []
+      listener = ->(event) { errors << event }
+      Karafka.monitor.subscribe("error.occurred", &listener)
+
+      result
+
+      expect(errors.size).to eq(1)
+      expect(errors.first[:type]).to eq("action.execute.error")
+      expect(errors.first[:action]).to eq("spec")
+      expect(errors.first[:error]).to be_a(StandardError)
+    ensure
+      Karafka.monitor.unsubscribe(listener)
+    end
   end
 
   context "when the action raises not found" do
@@ -166,10 +205,10 @@ RSpec.describe_current do
     let(:events) { [] }
 
     before do
-      Karafka.monitor.subscribe("actions.action.executed") { |event| events << event }
+      Karafka.monitor.subscribe("action.executed") { |event| events << event }
     end
 
-    after { Karafka.monitor.notifications_bus.clear("actions.action.executed") }
+    after { Karafka.monitor.notifications_bus.clear("action.executed") }
 
     it "expect to publish the execution with its result" do
       result = runner.call("spec", { name: "x" })
