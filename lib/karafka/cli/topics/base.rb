@@ -23,10 +23,20 @@ module Karafka
 
           yield
         rescue Rdkafka::RdkafkaError => e
-          puts "#{operation_message} #{red("failed")}:"
-          puts e
+          raise_failed(operation_message, e)
+        end
 
-          raise Errors::CommandValidationError, cause: e
+        # Prints a failed operation with its error and raises the mapped error for proper exit
+        # code status handling
+        #
+        # @param operation_message [String] message of the operation that failed
+        # @param error [Rdkafka::RdkafkaError] error that failed it
+        # @raise [Karafka::Errors::CommandValidationError] always
+        def raise_failed(operation_message, error)
+          puts "#{operation_message} #{red("failed")}:"
+          puts error
+
+          raise Errors::CommandValidationError, cause: error
         end
 
         # @return [Array<Karafka::Declaratives::Topic>] all available topics that can be managed
@@ -75,10 +85,7 @@ module Karafka
         def find_unknown_configs(as_new: false)
           UnknownConfigs.new(declaratives_routing_topics, existing_topics_names, as_new: as_new).call
         rescue Rdkafka::RdkafkaError => e
-          puts "Checking topics configuration #{red("failed")}:"
-          puts e
-
-          raise Errors::CommandValidationError, cause: e
+          raise_failed("Checking topics configuration", e)
         end
 
         # @return [Array<Hash>] existing topics details
