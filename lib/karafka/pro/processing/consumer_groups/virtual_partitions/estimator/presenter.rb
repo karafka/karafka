@@ -88,7 +88,7 @@ module Karafka
               # @return [String] multi-line plain text report
               def to_s
                 [
-                  "Virtual Partitions estimate for topic: #{@result[:topic]}",
+                  "Virtual Partitions estimate for topic: #{@result[:topic_name]}",
                   "",
                   "Settings:",
                   *@result[:settings].map { |name, value| "  #{name}: #{value}" },

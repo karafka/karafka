@@ -130,23 +130,23 @@ module Karafka
 
             # Reads the most recent messages of the topic partitions and estimates them
             #
-            # @param topic [String] topic name
+            # @param topic_name [String] name of the topic
             # @param partitions [Array<Integer>, nil] partitions to sample. All when `nil`.
             # @return [Hash] frozen estimation result
-            def call(topic, partitions: nil)
+            def call(topic_name, partitions: nil)
               partitions ||= Array.new(
-                Karafka::Admin.topic_info(topic).fetch(:partition_count)
+                Karafka::Admin.topic_info(topic_name).fetch(:partition_count)
               ) { |partition| partition }
 
               messages = partitions.to_h { |partition| [partition, []] }
 
               iterator = Karafka::Pro::Iterator.new(
-                { topic => partitions.to_h { |partition| [partition, -@sample_size] } }
+                { topic_name => partitions.to_h { |partition| [partition, -@sample_size] } }
               )
 
               iterator.each { |message| messages[message.partition] << message }
 
-              build_result(topic, messages)
+              build_result(topic_name, messages)
             end
 
             # Estimates given messages without connecting to Kafka
@@ -162,10 +162,10 @@ module Karafka
 
             private
 
-            # @param topic [String, nil]
+            # @param topic_name [String, nil]
             # @param partitions_messages [Hash{Integer => Array<Karafka::Messages::Message>}]
             # @return [Hash]
-            def build_result(topic, partitions_messages)
+            def build_result(topic_name, partitions_messages)
               all_batches = []
 
               partitions = partitions_messages.sort.to_h do |partition, messages|
@@ -180,7 +180,7 @@ module Karafka
               end
 
               deep_freeze(
-                topic: topic.dup,
+                topic_name: topic_name.dup,
                 settings: {
                   concurrency: @concurrency,
                   distribution: @distribution,

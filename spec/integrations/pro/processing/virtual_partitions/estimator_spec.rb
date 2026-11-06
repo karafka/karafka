@@ -57,7 +57,7 @@ estimator = Karafka::Pro::Processing::ConsumerGroups::VirtualPartitions::Estimat
 
 result = estimator.call(DT.topics[0])
 
-assert_equal DT.topics[0], result[:topic]
+assert_equal DT.topics[0], result[:topic_name]
 assert_equal [0, 1], result[:partitions].keys
 assert_equal 30, result[:partitions][0][:messages]
 assert_equal 3, result[:partitions][0][:batches]

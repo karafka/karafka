@@ -82,7 +82,7 @@ RSpec.describe_current do
       )
     end
 
-    it { expect(result[:topic]).to eq("orders") }
+    it { expect(result[:topic_name]).to eq("orders") }
     it { expect(result[:partitions].keys).to eq([0]) }
     it { expect(result[:partitions][0][:messages]).to eq(200) }
     it { expect(result[:partitions][0][:batches]).to eq(2) }
@@ -98,11 +98,11 @@ RSpec.describe_current do
     end
 
     it "does not freeze the topic of the messages" do
-      topic = +"orders"
+      topic_name = +"orders"
 
-      estimator.analyze(build_messages(%w[a b], topic: topic))
+      estimator.analyze(build_messages(%w[a b], topic: topic_name))
 
-      expect(topic).not_to be_frozen
+      expect(topic_name).not_to be_frozen
     end
 
     it "does not include key values" do
@@ -242,6 +242,17 @@ RSpec.describe_current do
       it { expect(result[:partitions][0][:batches_details].size).to eq(2) }
       it { expect(result[:partitions][0][:batches_details].first[:first_offset]).to eq(0) }
       it { expect(result[:partitions][0][:batches_details].last[:last_offset]).to eq(199) }
+
+      context "when messages are not in offset order" do
+        let(:messages) { build_messages(Array.new(200) { |i| "key-#{i % 20}" }).reverse }
+
+        it "batches them in offset order" do
+          details = result[:partitions][0][:batches_details]
+
+          expect(details.map { |batch| [batch[:first_offset], batch[:last_offset]] })
+            .to eq([[0, 99], [100, 199]])
+        end
+      end
     end
 
     context "when messages come from many partitions" do
@@ -295,7 +306,7 @@ RSpec.describe_current do
   end
 
   describe "#call" do
-    let(:topic) { "orders" }
+    let(:topic_name) { "orders" }
     let(:iterator) { instance_double(Karafka::Pro::Iterator) }
     let(:messages) { build_messages(Array.new(30) { |i| i.to_s }, partition: 1) }
     let(:settings) { { sample_size: 50 } }
@@ -306,35 +317,35 @@ RSpec.describe_current do
       allow(Karafka::Admin).to receive(:topic_info).and_return(partition_count: 2)
     end
 
-    it "does not freeze the given topic" do
-      topic = +"orders"
+    it "does not freeze the given topic name" do
+      topic_name = +"orders"
 
-      estimator.call(topic)
+      estimator.call(topic_name)
 
-      expect(topic).not_to be_frozen
+      expect(topic_name).not_to be_frozen
     end
 
     it "samples all partitions through the iterator" do
-      estimator.call(topic)
+      estimator.call(topic_name)
 
       expect(Karafka::Pro::Iterator)
-        .to have_received(:new).with({ topic => { 0 => -50, 1 => -50 } })
+        .to have_received(:new).with({ topic_name => { 0 => -50, 1 => -50 } })
     end
 
     it "reports empty partitions" do
-      result = estimator.call(topic)
+      result = estimator.call(topic_name)
 
       expect(result[:partitions][0]).to include(messages: 0, batches: 0, score: nil, verdict: nil)
       expect(result[:partitions][1][:messages]).to eq(30)
-      expect(result[:topic]).to eq(topic)
+      expect(result[:topic_name]).to eq(topic_name)
     end
 
     context "when partitions are given" do
       it "samples only them" do
-        estimator.call(topic, partitions: [1])
+        estimator.call(topic_name, partitions: [1])
 
         expect(Karafka::Admin).not_to have_received(:topic_info)
-        expect(Karafka::Pro::Iterator).to have_received(:new).with({ topic => { 1 => -50 } })
+        expect(Karafka::Pro::Iterator).to have_received(:new).with({ topic_name => { 1 => -50 } })
       end
     end
   end
