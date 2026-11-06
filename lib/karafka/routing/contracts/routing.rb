@@ -45,8 +45,8 @@ module Karafka
             group[:topics].each do |topic|
               dec = topic[:declaratives]
 
-              # Share-group topics (KIP-932) do not support declarative management (nor DLQ), so
-              # they are not subject to the strict declarative check
+              # Share-group topics (KIP-932) do not support declarative management, so they and
+              # their DLQ topics (Pro) are not subject to the strict declarative check
               next unless dec
 
               pat = topic[:patterns]
