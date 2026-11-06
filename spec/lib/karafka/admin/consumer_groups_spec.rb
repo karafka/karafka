@@ -19,7 +19,27 @@ RSpec.describe Karafka::Admin::ConsumerGroups do
 
     context "when given consumer group does not exist" do
       it "expect not to throw error and operate" do
-        expect { seeking }.not_to raise_error
+        expect(seeking).to be(true)
+      end
+    end
+
+    context "when seeking to an unknown target" do
+      let(:offset) { "earliestt" }
+
+      it { expect { seeking }.to raise_error(TypeError) }
+    end
+
+    context "when seeking to a Float offset" do
+      let(:offset) { 5.0 }
+
+      before { PRODUCERS.regular.produce_many_sync(Array.new(10) { { topic: topic, payload: "1" } }) }
+
+      it "expect to change the offset to it" do
+        seeking
+
+        expect(described_class.read_lags_with_offsets({ cg_id => [topic] })).to eq(
+          cg_id => { topic => { 0 => { offset: 5, lag: 5 } } }
+        )
       end
     end
 
@@ -43,7 +63,7 @@ RSpec.describe Karafka::Admin::ConsumerGroups do
     context "when there is nothing to seek" do
       let(:map) { {} }
 
-      it { expect { seeking }.not_to raise_error }
+      it { expect(seeking).to be(true) }
     end
 
     context "when seeking to a negative offset" do
@@ -68,6 +88,27 @@ RSpec.describe Karafka::Admin::ConsumerGroups do
         allow(described_class).to receive(:new).and_return(instance)
         allow(instance).to receive(:with_admin).and_yield(admin)
         allow(admin).to receive(:alter_consumer_group_offsets).and_return(handle)
+      end
+
+      context "when seeking to a time" do
+        let(:offset) { Time.now - 60 }
+        let(:list_handle) { instance_double(Rdkafka::Admin::ListOffsetsHandle) }
+        let(:report) { instance_double(Rdkafka::Admin::ListOffsetsReport) }
+
+        before do
+          allow(admin).to receive(:list_offsets).and_return(list_handle)
+          allow(list_handle).to receive(:wait).and_return(report)
+          allow(report).to receive(:offsets).and_return([{ topic: topic, partition: 0, offset: 2 }])
+          allow(handle).to receive(:wait)
+        end
+
+        it "expect to resolve it with the configured isolation level" do
+          seeking
+
+          expect(admin)
+            .to have_received(:list_offsets)
+            .with(anything, isolation_level: Karafka::Admin::IsolationLevels::READ_COMMITTED)
+        end
       end
 
       context "when the consumer group has active members" do

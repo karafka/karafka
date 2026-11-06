@@ -128,7 +128,7 @@ module Karafka
       #   where to move given consumer. It allows us to move particular partitions or whole
       #   topics if we want to reset all partitions to for example a point in time.
       #
-      # @return [void]
+      # @return [true]
       #
       # @raise [Karafka::Errors::ConsumerGroupNotEmptyError] when the consumer group has active
       #   members. Kafka accepts offset changes only for consumer groups without members, so this
@@ -657,19 +657,25 @@ module Karafka
       # @param group_id [String] consumer group id
       # @param tpl [Rdkafka::Consumer::TopicPartitionList] offsets to commit
       #
+      # @return [true]
+      #
       # @raise [Errors::ConsumerGroupNotEmptyError] when the consumer group has active members
       def commit_offsets(group_id, tpl)
-        # Same as consumer commits, we skip partitions without a valid offset, as Kafka rejects
-        # them in an offsets change
+        # Same as consumer commits, we skip partitions without an offset or with a negative one,
+        # as Kafka rejects them in an offsets change. Any other value goes to Kafka as it is
         alterable = Rdkafka::Consumer::TopicPartitionList.new
 
         tpl.to_h.each do |topic, partitions|
-          valid = partitions.select { |partition| partition.offset.is_a?(Integer) && partition.offset >= 0 }
+          valid = partitions.reject do |partition|
+            offset = partition.offset
+
+            offset.nil? || (offset.is_a?(Numeric) && offset.negative?)
+          end
 
           alterable.to_h[topic] = valid unless valid.empty?
         end
 
-        return if alterable.empty?
+        return true if alterable.empty?
 
         with_admin do |admin|
           with_retries(COORDINATOR_NOT_READY_ERRORS) do
@@ -677,6 +683,8 @@ module Karafka
               .alter_consumer_group_offsets(group_id, alterable)
               .wait(max_wait_timeout_ms: max_wait_time_ms)
           end
+
+          true
         rescue Rdkafka::RdkafkaError => e
           raise unless CONSUMER_GROUP_NOT_EMPTY_ERRORS.include?(e.code)
 
