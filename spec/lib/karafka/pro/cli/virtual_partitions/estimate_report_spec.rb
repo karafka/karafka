@@ -80,16 +80,18 @@ RSpec.describe_current do
     end
 
     context "with 11 or more partitions" do
-      let(:messages) do
-        Array.new(12) { |partition| build_messages(%w[a b c], partition: partition) }.flatten
+      before do
+        estimator.analyze(messages, target_file: path)
+        report = JSON.parse(File.read(path))
+        stats = report["partitions"]["0"]
+        report["partitions"] = %w[10 2 0 11].to_h { |partition| [partition, stats] }
+        write_report(report)
       end
-
-      before { estimator.analyze(messages, target_file: path) }
 
       it "lists them in numeric order" do
         partitions = printed.lines.filter_map { |line| line[/\A  (\d+) /, 1] }
 
-        expect(partitions).to eq(Array.new(12) { |partition| partition.to_s })
+        expect(partitions).to eq(%w[0 2 10 11])
       end
     end
 
@@ -191,6 +193,32 @@ RSpec.describe_current do
               "Unsupported estimate report format_version: #{found} " \
               "(expected #{estimator_class::FORMAT_VERSION}). " \
               "Generate the report again with the Karafka version used to display it."
+            )
+            .and output("").to_stdout
+        end
+      end
+    end
+
+    {
+      "settings is not an object" => { "settings" => "x" },
+      "partitions is not an object" => { "partitions" => [1, 2] },
+      "a partition is null" => { "partitions" => { "0" => nil } },
+      "summary is not an object" => { "summary" => 1 },
+      "summary active_vps is not an object" => {
+        "summary" => { "batches" => 1, "active_vps" => [1] }
+      }
+    }.each do |description, overrides|
+      context "when #{description}" do
+        before do
+          estimator.analyze(messages, target_file: path)
+          write_report(JSON.parse(File.read(path)).merge(overrides))
+        end
+
+        it "fails without printing the report" do
+          expect { action.call }
+            .to raise_error(
+              Karafka::Errors::CommandValidationError,
+              "Estimate report is not valid: #{path}"
             )
             .and output("").to_stdout
         end

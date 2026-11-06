@@ -305,6 +305,12 @@ RSpec.describe_current do
           .to eq(described_class::FORMAT_VERSION)
       end
 
+      it "pretty prints the JSON report" do
+        result
+
+        expect(File.read(target_file)).to include("{\n  \"format_version\": 1,\n")
+      end
+
       it "returns the same data as without target_file" do
         expect(result).to eq(estimator.analyze(messages))
       end

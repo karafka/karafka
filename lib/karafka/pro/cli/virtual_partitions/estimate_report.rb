@@ -85,7 +85,7 @@ module Karafka
           # Reads, validates and prints the report
           #
           # @raise [Karafka::Errors::CommandValidationError] when the file is missing, is not
-          #   valid JSON or has an unsupported `format_version`
+          #   valid JSON, has an unsupported `format_version` or an invalid structure
           def call
             report = load_report
 
@@ -111,14 +111,37 @@ module Karafka
             expected = Processing::ConsumerGroups::VirtualPartitions::Estimator::FORMAT_VERSION
             found = report.is_a?(Hash) ? report.fetch("format_version", nil) : nil
 
-            return report if found.is_a?(Integer) && found == expected
+            unless found.is_a?(Integer) && found == expected
+              found = found.nil? ? "missing" : found.inspect
 
-            found = found.nil? ? "missing" : found.inspect
+              fail!(
+                "Unsupported estimate report format_version: #{found} (expected #{expected}). " \
+                "Generate the report again with the Karafka version used to display it."
+              )
+            end
 
-            fail!(
-              "Unsupported estimate report format_version: #{found} (expected #{expected}). " \
-              "Generate the report again with the Karafka version used to display it."
-            )
+            fail!("Estimate report is not valid: #{@path}") unless valid_structure?(report)
+
+            report
+          end
+
+          # @param report [Hash] parsed report
+          # @return [Boolean] are all the sections the renderer reads Hashes when present
+          def valid_structure?(report)
+            partitions = report["partitions"]
+            summary = report["summary"]
+
+            optional_hash?(report["settings"]) &&
+              optional_hash?(partitions) &&
+              (partitions || {}).each_value.all? { |stats| stats.is_a?(Hash) } &&
+              optional_hash?(summary) &&
+              optional_hash?((summary || {})["active_vps"])
+          end
+
+          # @param value [Object]
+          # @return [Boolean] is the value a Hash or nil
+          def optional_hash?(value)
+            value.nil? || value.is_a?(Hash)
           end
 
           # @param message [String]
