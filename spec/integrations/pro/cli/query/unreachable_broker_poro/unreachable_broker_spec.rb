@@ -34,7 +34,11 @@
 require "open3"
 require "json"
 
-env = { "RUBYOPT" => "-r#{File.join(Dir.pwd, "license.rb")}" }
+env = { "RUBYOPT" => "#{ENV["RUBYOPT"]} -r#{File.join(Dir.pwd, "license.rb")}" }
+# Writes the lockfile first, so bundler does not print its resolution on the CLI stdout
+_, install_output, install_status = Open3.capture3("bundle install")
+raise "bundle install failed: #{install_output}" unless install_status.success?
+
 stdout, stderr, status = Open3.capture3(env, "bundle exec karafka query cluster")
 
 result = JSON.parse(stdout)

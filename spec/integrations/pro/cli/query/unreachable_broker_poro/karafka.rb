@@ -33,6 +33,5 @@ class KarafkaApp < Karafka::App
     # Nothing listens here, so every broker call fails and librdkafka logs errors
     config.kafka = { "bootstrap.servers": "127.0.0.1:9090" }
     config.client_id = "query-unreachable"
-    config.admin.max_wait_time = 2_000
   end
 end
