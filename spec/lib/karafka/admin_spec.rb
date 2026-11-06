@@ -5,17 +5,47 @@ RSpec.describe_current do
   let(:topics) { described_class.cluster_info.topics.map { |tp| tp[:topic_name] } }
 
   describe "#create_topic" do
+    let(:defaults) { { validate_only: false, operation_timeout_ms: nil, request_timeout_ms: nil } }
+
     it "delegates to Admin::Topics#create" do
       expect_any_instance_of(Karafka::Admin::Topics)
-        .to receive(:create).with(name, 2, 1, {})
+        .to receive(:create).with(name, 2, 1, {}, **defaults)
       described_class.create_topic(name, 2, 1)
     end
 
     it "passes through topic_config parameter" do
       config = { "cleanup.policy" => "compact" }
       expect_any_instance_of(Karafka::Admin::Topics)
-        .to receive(:create).with(name, 2, 1, config)
+        .to receive(:create).with(name, 2, 1, config, **defaults)
       described_class.create_topic(name, 2, 1, config)
+    end
+
+    it "passes through topic_config given without braces" do
+      expect_any_instance_of(Karafka::Admin::Topics)
+        .to receive(:create).with(name, 2, 1, {}, **defaults, "cleanup.policy" => "compact")
+      described_class.create_topic(name, 2, 1, "cleanup.policy" => "compact")
+    end
+
+    it "passes through validate_only and the admin timeouts" do
+      expect_any_instance_of(Karafka::Admin::Topics)
+        .to receive(:create)
+        .with(
+          name,
+          2,
+          1,
+          {},
+          validate_only: true,
+          operation_timeout_ms: 1_000,
+          request_timeout_ms: 2_000
+        )
+      described_class.create_topic(
+        name,
+        2,
+        1,
+        validate_only: true,
+        operation_timeout_ms: 1_000,
+        request_timeout_ms: 2_000
+      )
     end
   end
 
@@ -51,8 +81,28 @@ RSpec.describe_current do
 
     it "delegates to Admin::Topics#create_partitions" do
       expect_any_instance_of(Karafka::Admin::Topics)
-        .to receive(:create_partitions).with(name, partitions)
+        .to receive(:create_partitions)
+        .with(name, partitions, validate_only: false, operation_timeout_ms: nil, request_timeout_ms: nil)
       described_class.create_partitions(name, partitions)
+    end
+
+    it "passes through validate_only and the admin timeouts" do
+      expect_any_instance_of(Karafka::Admin::Topics)
+        .to receive(:create_partitions)
+        .with(
+          name,
+          partitions,
+          validate_only: true,
+          operation_timeout_ms: 1_000,
+          request_timeout_ms: 2_000
+        )
+      described_class.create_partitions(
+        name,
+        partitions,
+        validate_only: true,
+        operation_timeout_ms: 1_000,
+        request_timeout_ms: 2_000
+      )
     end
   end
 

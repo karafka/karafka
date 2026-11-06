@@ -22,9 +22,32 @@ module Karafka
         # @param replication_factor [Integer] number of replicas
         # @param topic_config [Hash] topic config details as described in the
         #   `base topic configuration`))
+        # @param validate_only [Boolean] should the broker only validate the request
+        # @param operation_timeout_ms [Integer, nil] broker operation timeout
+        # @param request_timeout_ms [Integer, nil] request timeout
+        # @param braceless_topic_config [Hash] topic config details given without braces
+        # @option braceless_topic_config [String] any topic config name, e.g. `"cleanup.policy"`
         # @see #create
-        def create(topic_name, partition_count, replication_factor, topic_config = {})
-          new.create(topic_name, partition_count, replication_factor, topic_config)
+        def create(
+          topic_name,
+          partition_count,
+          replication_factor,
+          topic_config = {},
+          validate_only: false,
+          operation_timeout_ms: nil,
+          request_timeout_ms: nil,
+          **braceless_topic_config
+        )
+          new.create(
+            topic_name,
+            partition_count,
+            replication_factor,
+            topic_config,
+            validate_only: validate_only,
+            operation_timeout_ms: operation_timeout_ms,
+            request_timeout_ms: request_timeout_ms,
+            **braceless_topic_config
+          )
         end
 
         # @param topic_name [String] topic name
@@ -35,9 +58,24 @@ module Karafka
 
         # @param topic_name [String] topic name
         # @param partition_count [Integer] total number of partitions we expect to end up with
+        # @param validate_only [Boolean] should the broker only validate the request
+        # @param operation_timeout_ms [Integer, nil] broker operation timeout
+        # @param request_timeout_ms [Integer, nil] request timeout
         # @see #create_partitions
-        def create_partitions(topic_name, partition_count)
-          new.create_partitions(topic_name, partition_count)
+        def create_partitions(
+          topic_name,
+          partition_count,
+          validate_only: false,
+          operation_timeout_ms: nil,
+          request_timeout_ms: nil
+        )
+          new.create_partitions(
+            topic_name,
+            partition_count,
+            validate_only: validate_only,
+            operation_timeout_ms: operation_timeout_ms,
+            request_timeout_ms: request_timeout_ms
+          )
         end
 
         # @param name_or_hash [String, Symbol, Hash] topic name or hash with topics and partitions
@@ -174,11 +212,45 @@ module Karafka
       # @param replication_factor [Integer] number of replicas
       # @param topic_config [Hash] topic config details as described here:
       #   https://kafka.apache.org/documentation/#topicconfigs
+      # @param validate_only [Boolean] when true, the broker only validates the request and does
+      #   not create the topic
+      # @param operation_timeout_ms [Integer, nil] how long the broker waits for the topic creation
+      #   to complete before it responds (librdkafka default when nil)
+      # @param request_timeout_ms [Integer, nil] overall request timeout (librdkafka default when
+      #   nil)
+      # @param braceless_topic_config [Hash] topic config details given without braces, e.g.
+      #   `create("t", 1, 1, "cleanup.policy" => "compact")`, merged into `topic_config`
+      # @option braceless_topic_config [String] any topic config name, e.g. `"cleanup.policy"`
       #
       # @return [void]
-      def create(topic_name, partition_count, replication_factor, topic_config = {})
+      #
+      # @example Check that a topic could be created without creating it
+      #   Karafka::Admin::Topics.create("events", 6, 3, validate_only: true)
+      def create(
+        topic_name,
+        partition_count,
+        replication_factor,
+        topic_config = {},
+        validate_only: false,
+        operation_timeout_ms: nil,
+        request_timeout_ms: nil,
+        **braceless_topic_config
+      )
+        topic_config = topic_config.merge(braceless_topic_config) unless braceless_topic_config.empty?
+
         with_admin do |admin|
-          handler = admin.create_topic(topic_name, partition_count, replication_factor, topic_config)
+          handler = admin.create_topic(
+            topic_name,
+            partition_count,
+            replication_factor,
+            topic_config,
+            validate_only: validate_only,
+            operation_timeout_ms: operation_timeout_ms,
+            request_timeout_ms: request_timeout_ms
+          )
+
+          # A validated topic is never created, so there is no result to wait for
+          next handler.wait(max_wait_timeout_ms: max_wait_time_ms) if validate_only
 
           with_re_wait(
             -> { handler.wait(max_wait_timeout_ms: max_wait_time_ms) },
@@ -207,11 +279,32 @@ module Karafka
       #
       # @param topic_name [String] topic name
       # @param partition_count [Integer] total number of partitions we expect to end up with
+      # @param validate_only [Boolean] when true, the broker only validates the request and does
+      #   not add the partitions
+      # @param operation_timeout_ms [Integer, nil] how long the broker waits for the partitions to
+      #   be created before it responds (librdkafka default when nil)
+      # @param request_timeout_ms [Integer, nil] overall request timeout (librdkafka default when
+      #   nil)
       #
       # @return [void]
-      def create_partitions(topic_name, partition_count)
+      def create_partitions(
+        topic_name,
+        partition_count,
+        validate_only: false,
+        operation_timeout_ms: nil,
+        request_timeout_ms: nil
+      )
         with_admin do |admin|
-          handler = admin.create_partitions(topic_name, partition_count)
+          handler = admin.create_partitions(
+            topic_name,
+            partition_count,
+            validate_only: validate_only,
+            operation_timeout_ms: operation_timeout_ms,
+            request_timeout_ms: request_timeout_ms
+          )
+
+          # Validated partitions are never added, so there is no result to wait for
+          next handler.wait(max_wait_timeout_ms: max_wait_time_ms) if validate_only
 
           with_re_wait(
             -> { handler.wait(max_wait_timeout_ms: max_wait_time_ms) },
