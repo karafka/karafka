@@ -1,8 +1,8 @@
 # frozen_string_literal: true
 
-# A running consumer should be able to read its own group lags and offsets through its own
-# connection client provided as the external client, without dedicated per-call consumer
-# instances and without disturbing the ongoing consumption in any way.
+# A running consumer should be able to read its own consumer group lags and offsets with its
+# connection client provided as the external client. Consumer group offsets are read via the admin
+# API, so the client is not used for that and the ongoing consumption is not disturbed in any way.
 
 setup_karafka
 

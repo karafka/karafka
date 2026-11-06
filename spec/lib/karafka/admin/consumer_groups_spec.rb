@@ -19,7 +19,27 @@ RSpec.describe Karafka::Admin::ConsumerGroups do
 
     context "when given consumer group does not exist" do
       it "expect not to throw error and operate" do
-        expect { seeking }.not_to raise_error
+        expect(seeking).to be(true)
+      end
+    end
+
+    context "when seeking to an unknown target" do
+      let(:offset) { "earliestt" }
+
+      it { expect { seeking }.to raise_error(TypeError) }
+    end
+
+    context "when seeking to a Float offset" do
+      let(:offset) { 5.0 }
+
+      before { PRODUCERS.regular.produce_many_sync(Array.new(10) { { topic: topic, payload: "1" } }) }
+
+      it "expect to change the offset to it" do
+        seeking
+
+        expect(described_class.read_lags_with_offsets({ cg_id => [topic] })).to eq(
+          cg_id => { topic => { 0 => { offset: 5, lag: 5 } } }
+        )
       end
     end
 
@@ -37,6 +57,105 @@ RSpec.describe Karafka::Admin::ConsumerGroups do
 
       it "expect not to throw error and operate" do
         expect { seeking }.not_to raise_error
+      end
+    end
+
+    context "when there is nothing to seek" do
+      let(:map) { {} }
+
+      it { expect(seeking).to be(true) }
+    end
+
+    context "when seeking to a negative offset" do
+      let(:offset) { -1 }
+
+      it "expect to skip it" do
+        seeking
+
+        expect(described_class.read_lags_with_offsets({ cg_id => [topic] })).to eq(
+          cg_id => { topic => { 0 => { offset: -1, lag: -1 } } }
+        )
+      end
+    end
+
+    context "when altering the offsets" do
+      let(:instance) { described_class.new }
+      let(:admin) { instance_double(Rdkafka::Admin) }
+      let(:handle) { instance_double(Rdkafka::Admin::AlterConsumerGroupOffsetsHandle) }
+      let(:error) do
+        Rdkafka::RdkafkaError.new(Rdkafka::Bindings::RD_KAFKA_RESP_ERR__STATE).tap do |rdkafka_error|
+          allow(rdkafka_error).to receive(:code).and_return(:unknown_member_id)
+        end
+      end
+
+      before do
+        allow(described_class).to receive(:new).and_return(instance)
+        allow(instance).to receive(:with_admin).and_yield(admin)
+        allow(admin).to receive(:alter_consumer_group_offsets).and_return(handle)
+      end
+
+      context "when seeking to a time" do
+        let(:offset) { Time.now - 60 }
+        let(:list_handle) { instance_double(Rdkafka::Admin::ListOffsetsHandle) }
+        let(:report) { instance_double(Rdkafka::Admin::ListOffsetsReport) }
+
+        before do
+          allow(admin).to receive(:list_offsets).and_return(list_handle)
+          allow(list_handle).to receive(:wait).and_return(report)
+          allow(report).to receive(:offsets).and_return([{ topic: topic, partition: 0, offset: 2 }])
+          allow(handle).to receive(:wait)
+        end
+
+        it "expect to resolve it with the configured isolation level" do
+          seeking
+
+          expect(admin)
+            .to have_received(:list_offsets)
+            .with(anything, isolation_level: Karafka::Admin::IsolationLevels::READ_COMMITTED)
+        end
+      end
+
+      context "when the consumer group has active members" do
+        before { allow(handle).to receive(:wait).and_raise(error) }
+
+        it "expect to raise a consumer group not empty error" do
+          expect { seeking }.to raise_error(
+            Karafka::Errors::ConsumerGroupNotEmptyError,
+            /#{cg_id}/
+          )
+        end
+      end
+
+      context "when Kafka rejects the change with another error" do
+        let(:error) { Rdkafka::RdkafkaError.new(Rdkafka::Bindings::RD_KAFKA_RESP_ERR__STATE) }
+
+        before { allow(handle).to receive(:wait).and_raise(error) }
+
+        it { expect { seeking }.to raise_error(error) }
+      end
+
+      context "when the coordinator is not ready yet and then becomes ready" do
+        let(:error) do
+          Rdkafka::RdkafkaError.new(Rdkafka::Bindings::RD_KAFKA_RESP_ERR__STATE).tap do |rdkafka_error|
+            allow(rdkafka_error).to receive(:code).and_return(:not_coordinator)
+          end
+        end
+
+        before do
+          allow(described_class).to receive(:retry_backoff).and_return(1)
+
+          calls = 0
+          allow(handle).to receive(:wait) do
+            calls += 1
+            raise(error) if calls == 1
+          end
+        end
+
+        it "expect to retry the alter" do
+          seeking
+
+          expect(handle).to have_received(:wait).twice
+        end
       end
     end
   end
@@ -135,6 +254,70 @@ RSpec.describe Karafka::Admin::ConsumerGroups do
       it { expect(results).to eq("doesnotexist" => { name => { 0 => { lag: -1, offset: -1 } } }) }
     end
 
+    context "when querying existing topic with a CG that consumed it" do
+      before do
+        Karafka::Admin::Topics.create(name, 2, 1)
+        3.times { PRODUCERS.regular.produce_sync(topic: name, payload: "1", partition: 0) }
+        described_class.seek(cg_id, name => { 0 => 1 })
+      end
+
+      let(:cg_id) { SecureRandom.uuid }
+      let(:cgs_t) { { cg_id => [name] } }
+
+      it "expect to return committed offsets and lags" do
+        expect(results).to eq(
+          cg_id => { name => { 0 => { offset: 1, lag: 2 }, 1 => { offset: -1, lag: -1 } } }
+        )
+      end
+    end
+
+    context "when the committed offsets are not stable yet and then become stable" do
+      let(:instance) { described_class.new }
+      let(:admin) { instance_double(Rdkafka::Admin) }
+      let(:handle) { instance_double(Rdkafka::Admin::ListConsumerGroupOffsetsHandle) }
+      let(:cgs_t) { { "group" => [name] } }
+      let(:error) do
+        Rdkafka::RdkafkaError.new(Rdkafka::Bindings::RD_KAFKA_RESP_ERR__STATE).tap do |rdkafka_error|
+          allow(rdkafka_error).to receive(:code).and_return(:unstable_offset_commit)
+        end
+      end
+      let(:report) do
+        instance_double(
+          Rdkafka::Admin::ListConsumerGroupOffsetsReport,
+          partitions: [{ topic: name, partition: 0, offset: nil, metadata: nil, error: nil }]
+        )
+      end
+
+      before do
+        allow(described_class).to receive_messages(new: instance, retry_backoff: 1)
+        allow(instance).to receive(:with_admin).and_yield(admin)
+        allow(admin).to receive_messages(
+          metadata: instance_double(
+            Rdkafka::Metadata,
+            topics: [{ topic_name: name, partition_count: 1 }]
+          ),
+          list_consumer_group_offsets: handle
+        )
+
+        calls = 0
+        allow(handle).to receive(:wait) do
+          calls += 1
+          raise(error) if calls == 1
+
+          report
+        end
+      end
+
+      it "expect to retry and ask for stable offsets" do
+        expect(results).to eq("group" => { name => { 0 => { offset: -1, lag: -1 } } })
+        expect(handle).to have_received(:wait).twice
+        expect(admin)
+          .to have_received(:list_consumer_group_offsets)
+          .with("group", anything, require_stable_offsets: true)
+          .twice
+      end
+    end
+
     context "when running on an external client" do
       subject(:results) do
         described_class
@@ -145,6 +328,7 @@ RSpec.describe Karafka::Admin::ConsumerGroups do
       before do
         Karafka::Admin::Topics.create(name, 1, 1)
         PRODUCERS.regular.produce_sync(topic: name, payload: "1")
+        allow(external_client).to receive(:committed).and_call_original
       end
 
       after { external_client.close }
@@ -157,8 +341,9 @@ RSpec.describe Karafka::Admin::ConsumerGroups do
 
       let(:cgs_t) { { "doesnotexist" => [name] } }
 
-      it "expect to read via the external client and leave it open" do
+      it "expect to read via the admin API and leave the external client untouched and open" do
         expect(results).to eq("doesnotexist" => { name => { 0 => { lag: -1, offset: -1 } } })
+        expect(external_client).not_to have_received(:committed)
         expect(external_client.closed?).to be(false)
       end
     end
