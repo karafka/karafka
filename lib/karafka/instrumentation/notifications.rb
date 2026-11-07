@@ -34,6 +34,7 @@ module Karafka
         client.pause
         client.resume
         client.reset
+        client.unknown_topic
         client.events_poll
 
         connection.listener.before_fetch_loop

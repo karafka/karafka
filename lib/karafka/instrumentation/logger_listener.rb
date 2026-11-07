@@ -155,6 +155,16 @@ module Karafka
         MSG
       end
 
+      # Prints info about a subscribed topic that does not exist yet
+      #
+      # @param event [Karafka::Core::Monitoring::Event] event details including payload
+      def on_client_unknown_topic(event)
+        topic = event[:topic] || "unknown"
+        client = event[:caller]
+
+        info "[#{client.id}] Topic #{topic} does not exist yet. Waiting for it to be created."
+      end
+
       # Prints info about retry of processing after an error
       #
       # @param event [Karafka::Core::Monitoring::Event] event details including payload
