@@ -27,7 +27,6 @@ module Karafka
         return super unless respond_to_missing?(method_name)
 
         if @target.respond_to?(:"#{method_name}=")
-          # Values assigned in the block win over the defaults, as the defaults run after it
           if @applying_defaults
             return if @assigned.include?(method_name)
           else
