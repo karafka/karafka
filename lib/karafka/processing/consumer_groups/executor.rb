@@ -52,6 +52,8 @@ module Karafka
           @group_id = group_id
           @client = client
           @coordinator = coordinator
+          # Topic of a coordinator never changes, so this is resolved once instead of per batch
+          @parallel_deserializing = coordinator.topic.deserializing.parallel?
         end
 
         # Allows us to prepare the consumer in the listener thread prior to the job being send to be
@@ -75,6 +77,26 @@ module Karafka
             # but good enough
             Time.now
           )
+
+          # Early dispatch to Ractor pool if parallel deserialization enabled
+          # This allows Ractors to work while the job waits in the queue
+          #
+          # IMPORTANT: This runs AFTER filtering (coordinator.start filters before this is called)
+          # so we only dispatch non-filtered messages.
+          #
+          # IMPORTANT: If ANY message is already deserialized (e.g., user accessed payload
+          # in filtering API), skip early dispatch and fall back to normal flow.
+          # This prevents double-deserialization and respects user's filter logic.
+          # Dispatch returns Future (if thresholds met) or Immediate (if not)
+          # Either way, calling .retrieve in worker thread will do the right thing
+          if @parallel_deserializing && consumer.messages.none?(&:deserialized?)
+            consumer.messages.metadata.deserialization =
+              Deserializing::Parallel::Pool.instance.dispatch_async(
+                consumer.messages,
+                topic.deserializing.payload,
+                topic.deserializing.distributor
+              )
+          end
 
           consumer.on_before_schedule_consume
         end

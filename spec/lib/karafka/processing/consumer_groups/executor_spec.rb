@@ -19,7 +19,7 @@ RSpec.describe_current do
   before { allow(topic.consumer).to receive(:new).and_return(consumer) }
 
   describe "#id" do
-    let(:executor2) { described_class.new(group_id, client, topic) }
+    let(:executor2) { described_class.new(group_id, client, coordinator) }
 
     it { expect(executor.id).to be_a(String) }
 
@@ -57,6 +57,37 @@ RSpec.describe_current do
     it "expect to run consumer on_before_schedule_consume" do
       executor.before_schedule_consume(messages)
       expect(consumer).to have_received(:on_before_schedule_consume).with(no_args)
+    end
+
+    context "when parallel deserialization is off" do
+      it "expect not to dispatch to the pool" do
+        executor.before_schedule_consume(messages)
+        expect(consumer.messages.metadata.deserialization).to be_nil
+      end
+    end
+
+    context "when parallel deserialization is on" do
+      let(:pool) { Karafka::Deserializing::Parallel::Pool.instance }
+      let(:immediate) { Karafka::Deserializing::Parallel::Immediate.instance }
+
+      before do
+        allow(topic.deserializing).to receive(:parallel?).and_return(true)
+        allow(pool).to receive(:dispatch_async).and_return(immediate)
+      end
+
+      it "expect to dispatch to the pool and store the result" do
+        executor.before_schedule_consume(messages)
+        expect(consumer.messages.metadata.deserialization).to eq(immediate)
+      end
+
+      context "when a message is already deserialized" do
+        before { messages.first.payload = {} }
+
+        it "expect not to dispatch to the pool" do
+          executor.before_schedule_consume(messages)
+          expect(pool).not_to have_received(:dispatch_async)
+        end
+      end
     end
   end
 

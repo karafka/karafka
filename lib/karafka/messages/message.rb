@@ -40,6 +40,14 @@ module Karafka
         @payload
       end
 
+      # Sets the deserialized payload and marks the message as deserialized
+      # Used by parallel deserializing to inject pre-computed results
+      # @param payload [Object] the deserialized payload
+      def payload=(payload)
+        @payload = payload
+        @deserialized = true
+      end
+
       # @return [Boolean] did we deserialize payload already
       def deserialized?
         @deserialized

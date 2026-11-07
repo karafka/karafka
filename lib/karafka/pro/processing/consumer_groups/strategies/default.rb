@@ -349,10 +349,18 @@ module Karafka
 
             # Increment number of attempts per one "full" job. For all VP on a single topic
             # partition this also should run once.
+            #
+            # If parallel deserialization was dispatched for this batch, retrieve the Ractor pool
+            # results now and inject them into the messages. Without this, results are silently
+            # discarded and messages fall back to inline deserialization on the worker thread,
+            # paying the shipping cost for nothing.
             def handle_before_consume
               coordinator.on_started do
                 coordinator.pause_tracker.increment
               end
+
+              deser = messages.metadata.deserialization
+              Deserializing::Parallel::Injector.call(messages, deser.retrieve) if deser
             end
 
             # Run the user consumption code

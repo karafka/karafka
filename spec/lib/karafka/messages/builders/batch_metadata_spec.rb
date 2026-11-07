@@ -22,6 +22,7 @@ RSpec.describe_current do
     it { expect(result.last_offset).to eq kafka_batch.last.offset }
     it { expect(result.topic).to eq routing_topic.name }
     it { expect(result.deserializers).to eq routing_topic.deserializers }
+    it { expect(result.deserialization).to be_nil }
     it { expect(result.scheduled_at).to eq(scheduled_at) }
 
     it "expect to have processed_at set to nil, since not yet picked up" do
