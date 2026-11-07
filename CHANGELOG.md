@@ -67,6 +67,7 @@
 - [Fix] [Pro] Stop an LRJ retry pause from staying paused forever when the listener resumed the partition before the client pause landed.
 - [Fix] [Pro] Validate all four schedule headers of scheduled messages. Only the cancel headers were checked, so a schedule missing `schedule_target_topic` passed and one missing `schedule_target_epoch` raised `KeyError`.
 - [Fix] Stop forceful shutdown from using a listener's client from two threads at once on JRuby. A listener still running after termination now keeps its client open and is reported via `connection.listener.shutdown.skipped`.
+- [Fix] Stop routing `defaults` from overwriting a topic's own `consumer`, `kafka`, `max_messages`, `max_wait_time`, `initial_offset` and `consumer_persistence`. A topic that sets one of them now keeps its value; previously the `defaults` value won.
 
 ## 2.6.1 (2026-08-24)
 - **[Feature]** [Pro] Add an opt-in envelope encryption mode for Messages At Rest (`config.encryption.mode = :envelope`, requires openssl `>= 3.0`) without the RSA payload size limit. Upgrade all consuming processes before enabling.
