@@ -334,7 +334,7 @@ module Karafka
       # @raise [Karafka::Errors::ConsumerGroupSubscribedToTopicError] when the consumer group has
       #   active members subscribed to any of the topics. Kafka keeps the offsets of those topics,
       #   so offsets of a running consumer are never lost. Its message names the consumer group and
-      #   the rejected partitions.
+      #   all the rejected partitions (`topic#partition`).
       #
       # @note Kafka handles each topic on its own. When some of the topics are rejected because
       #   the consumer group is subscribed to them, offsets of the other topics from the same
@@ -361,16 +361,27 @@ module Karafka
 
         with_admin do |admin|
           with_retries(COORDINATOR_NOT_READY_ERRORS) do
-            admin
-              .delete_consumer_group_offsets(group_id, tpl)
-              .wait(max_wait_timeout_ms: max_wait_time_ms)
+            handle = admin.delete_consumer_group_offsets(group_id, tpl)
+            # We read the report first, as the error raised by the handle names only the first
+            # rejected partition
+            report = handle.wait(max_wait_timeout_ms: max_wait_time_ms, raise_response_error: false)
+
+            rejected = (report&.partitions || []).select do |partition|
+              CONSUMER_GROUP_SUBSCRIBED_ERRORS.include?(partition[:error]&.code)
+            end
+
+            unless rejected.empty?
+              raise(
+                Errors::ConsumerGroupSubscribedToTopicError,
+                "#{group_id}: #{rejected.map { |details| "#{details[:topic]}##{details[:partition]}" }.join(", ")}"
+              )
+            end
+
+            # Raises any other error of the deletion
+            handle.wait(max_wait_timeout_ms: max_wait_time_ms)
           end
 
           true
-        rescue Rdkafka::RdkafkaError => e
-          raise unless CONSUMER_GROUP_SUBSCRIBED_ERRORS.include?(e.code)
-
-          raise(Errors::ConsumerGroupSubscribedToTopicError, "#{group_id}: #{e.message}")
         end
       end
 

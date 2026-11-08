@@ -288,25 +288,35 @@ RSpec.describe Karafka::Admin::ConsumerGroups do
     end
 
     context "when Kafka rejects the deletion" do
-      let(:topics) { { name => [0] } }
+      let(:topics) { { name => [0, 1] } }
       let(:instance) { described_class.new }
       let(:admin) { instance_double(Rdkafka::Admin) }
       let(:handle) { instance_double(Rdkafka::Admin::DeleteConsumerGroupOffsetsHandle) }
-      let(:error) { Rdkafka::RdkafkaError.new(86, broker_message: "Failed for partition 0") }
+      let(:report) { instance_double(Rdkafka::Admin::DeleteConsumerGroupOffsetsReport) }
+      let(:partitions) { [] }
 
       before do
         allow(described_class).to receive(:new).and_return(instance)
         allow(instance).to receive(:with_admin).and_yield(admin)
         allow(admin).to receive(:delete_consumer_group_offsets).and_return(handle)
+        allow(report).to receive(:partitions).and_return(partitions)
+        allow(handle).to receive(:wait).with(hash_including(raise_response_error: false)).and_return(report)
       end
 
-      context "when the consumer group is subscribed to the topic" do
-        before { allow(handle).to receive(:wait).and_raise(error) }
+      context "when the consumer group is subscribed to some of the topics" do
+        let(:subscribed) { Rdkafka::RdkafkaError.new(86) }
+        let(:partitions) do
+          [
+            { topic: name, partition: 0, offset: -1, error: subscribed },
+            { topic: name, partition: 1, offset: -1, error: subscribed },
+            { topic: name2, partition: 0, offset: -1, error: nil }
+          ]
+        end
 
-        it "expect to raise a consumer group subscribed to topic error" do
+        it "expect to raise an error naming every rejected partition only" do
           expect { deletion }.to raise_error(
             Karafka::Errors::ConsumerGroupSubscribedToTopicError,
-            /#{cg_id}.*Failed for partition 0/m
+            "#{cg_id}: #{name}#0, #{name}#1"
           )
         end
       end
@@ -314,7 +324,7 @@ RSpec.describe Karafka::Admin::ConsumerGroups do
       context "when Kafka rejects it with another error" do
         let(:error) { Rdkafka::RdkafkaError.new(Rdkafka::Bindings::RD_KAFKA_RESP_ERR__STATE) }
 
-        before { allow(handle).to receive(:wait).and_raise(error) }
+        before { allow(handle).to receive(:wait).with(max_wait_timeout_ms: anything).and_raise(error) }
 
         it { expect { deletion }.to raise_error(error) }
       end
@@ -326,7 +336,7 @@ RSpec.describe Karafka::Admin::ConsumerGroups do
           allow(described_class).to receive(:retry_backoff).and_return(1)
 
           calls = 0
-          allow(handle).to receive(:wait) do
+          allow(handle).to receive(:wait).with(max_wait_timeout_ms: anything) do
             calls += 1
             raise(error) if calls == 1
           end
@@ -334,7 +344,7 @@ RSpec.describe Karafka::Admin::ConsumerGroups do
 
         it "expect to retry the deletion" do
           expect(deletion).to be(true)
-          expect(handle).to have_received(:wait).twice
+          expect(admin).to have_received(:delete_consumer_group_offsets).twice
         end
       end
     end

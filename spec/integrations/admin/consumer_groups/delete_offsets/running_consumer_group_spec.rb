@@ -18,10 +18,11 @@ draw_routes(Consumer)
 
 removed_topic = DT.topics[1]
 
+Karafka::Admin.create_partitions(DT.topic, 2)
 Karafka::Admin.create_topic(removed_topic, 2, 1)
 Karafka::Admin.seek_consumer_group(DT.group, { removed_topic => { 0 => 5, 1 => 7 } })
 
-produce_many(DT.topic, DT.uuids(10))
+produce_many(DT.topic, DT.uuids(10), partition: 0)
 
 start_karafka_and_wait_until do
   next false unless DT[:offsets].size >= 10
@@ -40,8 +41,8 @@ start_karafka_and_wait_until do
 end
 
 assert DT[:error].is_a?(Karafka::Errors::ConsumerGroupSubscribedToTopicError)
-assert DT[:error].message.include?(DT.group)
-assert DT[:error].message.include?(DT.topic)
+# Both subscribed partitions are rejected and named, the not subscribed topic is not
+assert_equal "#{DT.group}: #{DT.topic}#0, #{DT.topic}#1", DT[:error].message
 
 offsets = Karafka::Admin.read_lags_with_offsets({ DT.group => [DT.topic, removed_topic] })
 
