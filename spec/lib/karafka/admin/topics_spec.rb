@@ -32,6 +32,107 @@ RSpec.describe_current do
 
       it { expect(topics).to include(name) }
     end
+
+    context "when only validating the topic creation" do
+      before { described_class.create(name, 2, 1, validate_only: true) }
+
+      it { expect(topics).not_to include(name) }
+    end
+
+    context "when only validating the creation of a topic that already exists" do
+      before { described_class.create(name, 1, 1) }
+
+      it do
+        expect { described_class.create(name, 2, 1, validate_only: true) }
+          .to raise_error(Rdkafka::RdkafkaError, /topic_already_exists/)
+      end
+    end
+
+    context "when only validating the creation of a topic with an invalid config" do
+      it do
+        expect { described_class.create(name, 1, 1, { "cleanup.policy" => "na" }, validate_only: true) }
+          .to raise_error(Rdkafka::RdkafkaError)
+      end
+
+      it "expect not to create it" do
+        expect { described_class.create(name, 1, 1, { "cleanup.policy" => "na" }, validate_only: true) }
+          .to raise_error(Rdkafka::RdkafkaError)
+
+        expect(topics).not_to include(name)
+      end
+    end
+
+    context "when creating topic with the admin timeouts" do
+      let(:rdkafka_calls) { [] }
+
+      before do
+        allow_any_instance_of(Rdkafka::Admin)
+          .to receive(:create_topic)
+          .and_wrap_original do |original, *args, **kwargs|
+            rdkafka_calls << [args, kwargs]
+            original.call(*args, **kwargs)
+          end
+
+        described_class.create(
+          name,
+          1,
+          1,
+          operation_timeout_ms: 10_000,
+          request_timeout_ms: 15_000
+        )
+      end
+
+      it { expect(topics).to include(name) }
+
+      it "expect to pass them to rdkafka" do
+        expect(rdkafka_calls).to eq(
+          [
+            [
+              [name, 1, 1, {}],
+              { validate_only: false, operation_timeout_ms: 10_000, request_timeout_ms: 15_000 }
+            ]
+          ]
+        )
+      end
+    end
+
+    context "when creating topic with a topic config given without braces" do
+      let(:cleanup_policy) do
+        resource = Karafka::Admin::Configs::Resource.new(type: :topic, name: name)
+
+        Karafka::Admin::Configs.describe(resource).first.configs.find do |config|
+          config.name == "cleanup.policy"
+        end.value
+      end
+
+      before { described_class.create(name, 1, 1, "cleanup.policy" => "compact") }
+
+      it { expect(topics).to include(name) }
+      it { expect(cleanup_policy).to eq("compact") }
+    end
+
+    context "when creating topic with a topic config given with and without braces" do
+      let(:configs) do
+        resource = Karafka::Admin::Configs::Resource.new(type: :topic, name: name)
+
+        Karafka::Admin::Configs.describe(resource).first.configs.to_h do |config|
+          [config.name, config.value]
+        end
+      end
+
+      before do
+        described_class.create(
+          name,
+          1,
+          1,
+          { "cleanup.policy" => "compact" },
+          "retention.ms" => "86400000"
+        )
+      end
+
+      it { expect(configs["cleanup.policy"]).to eq("compact") }
+      it { expect(configs["retention.ms"]).to eq("86400000") }
+    end
   end
 
   describe "#delete and #cluster_info" do
@@ -403,6 +504,64 @@ RSpec.describe_current do
 
       it "expect to create them" do
         expect(details[:partition_count]).to eq(7)
+      end
+    end
+
+    context "when only validating the partitions upscale" do
+      let(:details) { Karafka::Admin.cluster_info.topics.find { |tp| tp[:topic_name] == name } }
+
+      before do
+        described_class.create(name, 2, 1)
+        described_class.create_partitions(name, 7, validate_only: true)
+      end
+
+      it "expect not to create them" do
+        expect(details[:partition_count]).to eq(2)
+      end
+    end
+
+    context "when only validating the partitions downscale" do
+      before { described_class.create(name, 2, 1) }
+
+      it do
+        expect { described_class.create_partitions(name, 1, validate_only: true) }
+          .to raise_error(Rdkafka::RdkafkaError)
+      end
+    end
+
+    context "when upscaling partitions with the admin timeouts" do
+      let(:rdkafka_calls) { [] }
+      let(:details) { Karafka::Admin.cluster_info.topics.find { |tp| tp[:topic_name] == name } }
+
+      before do
+        described_class.create(name, 2, 1)
+
+        allow_any_instance_of(Rdkafka::Admin)
+          .to receive(:create_partitions)
+          .and_wrap_original do |original, *args, **kwargs|
+            rdkafka_calls << [args, kwargs]
+            original.call(*args, **kwargs)
+          end
+
+        described_class.create_partitions(
+          name,
+          3,
+          operation_timeout_ms: 10_000,
+          request_timeout_ms: 15_000
+        )
+      end
+
+      it { expect(details[:partition_count]).to eq(3) }
+
+      it "expect to pass them to rdkafka" do
+        expect(rdkafka_calls).to eq(
+          [
+            [
+              [name, 3],
+              { validate_only: false, operation_timeout_ms: 10_000, request_timeout_ms: 15_000 }
+            ]
+          ]
+        )
       end
     end
   end

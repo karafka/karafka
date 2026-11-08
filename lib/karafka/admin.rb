@@ -120,9 +120,32 @@ module Karafka
       # @param partition_count [Integer] number of partitions we expect
       # @param replication_factor [Integer] number of replicas
       # @param topic_config [Hash] topic config details
+      # @param validate_only [Boolean] should the broker only validate the request
+      # @param operation_timeout_ms [Integer, nil] broker operation timeout
+      # @param request_timeout_ms [Integer, nil] request timeout
+      # @param braceless_topic_config [Hash] topic config details given without braces
+      # @option braceless_topic_config [String] any topic config name, e.g. `"cleanup.policy"`
       # @see Topics.create
-      def create_topic(topic_name, partition_count, replication_factor, topic_config = {})
-        new.create_topic(topic_name, partition_count, replication_factor, topic_config)
+      def create_topic(
+        topic_name,
+        partition_count,
+        replication_factor,
+        topic_config = {},
+        validate_only: false,
+        operation_timeout_ms: nil,
+        request_timeout_ms: nil,
+        **braceless_topic_config
+      )
+        new.create_topic(
+          topic_name,
+          partition_count,
+          replication_factor,
+          topic_config,
+          validate_only: validate_only,
+          operation_timeout_ms: operation_timeout_ms,
+          request_timeout_ms: request_timeout_ms,
+          **braceless_topic_config
+        )
       end
 
       # @param topic_name [String] topic name
@@ -133,9 +156,24 @@ module Karafka
 
       # @param topic_name [String] topic name
       # @param partition_count [Integer] total number of partitions we expect to end up with
+      # @param validate_only [Boolean] should the broker only validate the request
+      # @param operation_timeout_ms [Integer, nil] broker operation timeout
+      # @param request_timeout_ms [Integer, nil] request timeout
       # @see Topics.create_partitions
-      def create_partitions(topic_name, partition_count)
-        new.create_partitions(topic_name, partition_count)
+      def create_partitions(
+        topic_name,
+        partition_count,
+        validate_only: false,
+        operation_timeout_ms: nil,
+        request_timeout_ms: nil
+      )
+        new.create_partitions(
+          topic_name,
+          partition_count,
+          validate_only: validate_only,
+          operation_timeout_ms: operation_timeout_ms,
+          request_timeout_ms: request_timeout_ms
+        )
       end
 
       # @param name_or_hash [String, Symbol, Hash] topic name or hash with topics and partitions
@@ -359,9 +397,32 @@ module Karafka
     # @param partition_count [Integer] number of partitions for this topic
     # @param replication_factor [Integer] number of replicas
     # @param topic_config [Hash] topic config details
+    # @param validate_only [Boolean] should the broker only validate the request
+    # @param operation_timeout_ms [Integer, nil] broker operation timeout
+    # @param request_timeout_ms [Integer, nil] request timeout
+    # @param braceless_topic_config [Hash] topic config details given without braces
+    # @option braceless_topic_config [String] any topic config name, e.g. `"cleanup.policy"`
     # @see Topics#create
-    def create_topic(topic_name, partition_count, replication_factor, topic_config = {})
-      topics_admin.create(topic_name, partition_count, replication_factor, topic_config)
+    def create_topic(
+      topic_name,
+      partition_count,
+      replication_factor,
+      topic_config = {},
+      validate_only: false,
+      operation_timeout_ms: nil,
+      request_timeout_ms: nil,
+      **braceless_topic_config
+    )
+      topics_admin.create(
+        topic_name,
+        partition_count,
+        replication_factor,
+        topic_config,
+        validate_only: validate_only,
+        operation_timeout_ms: operation_timeout_ms,
+        request_timeout_ms: request_timeout_ms,
+        **braceless_topic_config
+      )
     end
 
     # @param topic_name [String] topic name
@@ -372,9 +433,24 @@ module Karafka
 
     # @param topic_name [String] topic name
     # @param partition_count [Integer] total number of partitions we expect to end up with
+    # @param validate_only [Boolean] should the broker only validate the request
+    # @param operation_timeout_ms [Integer, nil] broker operation timeout
+    # @param request_timeout_ms [Integer, nil] request timeout
     # @see Topics#create_partitions
-    def create_partitions(topic_name, partition_count)
-      topics_admin.create_partitions(topic_name, partition_count)
+    def create_partitions(
+      topic_name,
+      partition_count,
+      validate_only: false,
+      operation_timeout_ms: nil,
+      request_timeout_ms: nil
+    )
+      topics_admin.create_partitions(
+        topic_name,
+        partition_count,
+        validate_only: validate_only,
+        operation_timeout_ms: operation_timeout_ms,
+        request_timeout_ms: request_timeout_ms
+      )
     end
 
     # @param name_or_hash [String, Symbol, Hash] topic name or hash with topics and partitions
