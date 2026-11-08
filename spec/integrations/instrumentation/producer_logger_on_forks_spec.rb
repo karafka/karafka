@@ -1,7 +1,5 @@
 # frozen_string_literal: true
 
-# JRuby: unsupported (fork)
-
 # After fork unused producer logger should work as expected
 #
 # Note: We check this because rdkafka had an issue where fork logger would not work at all.

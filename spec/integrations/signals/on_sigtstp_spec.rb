@@ -1,7 +1,5 @@
 # frozen_string_literal: true
 
-# JRuby: unsupported (SIGQUIT is the JVM thread dump)
-
 # When Karafka receives sigstp it should finish all the work and keep polling not to trigger
 # rebalances, however the shutdown hooks should happen and new work should not be picked up
 

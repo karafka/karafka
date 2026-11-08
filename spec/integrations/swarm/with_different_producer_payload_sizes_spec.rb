@@ -1,7 +1,5 @@
 # frozen_string_literal: true
 
-# JRuby: unsupported (fork)
-
 # When creating a producer in forks, forks should inherit all producer settings and not only the
 # once coming from th kafka scope
 # The id should NOT be inherited not to create confusion.

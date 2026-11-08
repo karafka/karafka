@@ -1,7 +1,5 @@
 # frozen_string_literal: true
 
-# JRuby: unsupported (fork)
-
 # When supervisor stops work but do not stop because of blocking `at_exit` in them, supervisor
 # should kill them
 

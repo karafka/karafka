@@ -1,7 +1,5 @@
 # frozen_string_literal: true
 
-# JRuby: unsupported (fork)
-
 # When all good, all should be ok in swarm
 
 require "net/http"

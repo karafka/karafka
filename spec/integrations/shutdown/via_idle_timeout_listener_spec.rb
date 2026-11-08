@@ -1,7 +1,5 @@
 # frozen_string_literal: true
 
-# JRuby: unsupported (SIGQUIT is the JVM thread dump)
-
 # We should be able to build a listener that will monitor how long karafka is running without
 # receiving any new messages and that it will stop after the expected time by sending the stop
 # signal

@@ -1,7 +1,5 @@
 # frozen_string_literal: true
 
-# JRuby: unsupported (fork)
-
 # When we expect to control nodes more often that it happens, it should be reflected
 
 require "net/http"

@@ -1,7 +1,5 @@
 # frozen_string_literal: true
 
-# JRuby: unsupported (fork)
-
 # We should be able to use the regular producer with the inherited config to operate and send
 # messages
 

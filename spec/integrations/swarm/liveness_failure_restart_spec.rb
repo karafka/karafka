@@ -1,7 +1,5 @@
 # frozen_string_literal: true
 
-# JRuby: unsupported (fork)
-
 # If we use liveness API to report issue, Karafka should restart the node
 
 setup_karafka do |config|

@@ -1,7 +1,5 @@
 # frozen_string_literal: true
 
-# JRuby: unsupported (fork)
-
 # After node dies (for any reason), it should be cleaned up and not left hanging as a zombie
 setup_karafka do |config|
   config.swarm.nodes = 1

@@ -1,7 +1,5 @@
 # frozen_string_literal: true
 
-# JRuby: unsupported (Puma worker mode needs fork)
-
 # Karafka should run from a Puma server easily
 
 Bundler.require(:default)

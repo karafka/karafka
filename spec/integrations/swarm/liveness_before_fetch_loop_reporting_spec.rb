@@ -1,7 +1,5 @@
 # frozen_string_literal: true
 
-# JRuby: unsupported (fork)
-
 # The liveness listener should report healthy on before_fetch_loop so the supervisor has an
 # initial healthy report before any consumption starts. This prevents the supervisor from killing
 # a node whose first consumption takes longer than the report timeout.

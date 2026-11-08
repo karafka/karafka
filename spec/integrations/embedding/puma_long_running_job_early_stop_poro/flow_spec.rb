@@ -1,7 +1,5 @@
 # frozen_string_literal: true
 
-# JRuby: unsupported (Puma worker mode needs fork)
-
 # This test demonstrates the "good" scenario: a long-running Karafka consumer embedded in Puma
 # checks Karafka::App.stopping? between processing chunks and breaks out early when Puma
 # triggers shutdown.

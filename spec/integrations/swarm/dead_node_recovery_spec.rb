@@ -1,7 +1,5 @@
 # frozen_string_literal: true
 
-# JRuby: unsupported (fork)
-
 # After node dies (for any reason), it should be restarted by the supervisor
 setup_karafka do |config|
   config.swarm.nodes = 1

@@ -1,7 +1,5 @@
 # frozen_string_literal: true
 
-# JRuby: unsupported (sqlite3 C extension)
-
 # Karafka should work with Rails and AJ + #enqueue_after_transaction_commit
 
 ENV["RAILS_ENV"] = "production"
