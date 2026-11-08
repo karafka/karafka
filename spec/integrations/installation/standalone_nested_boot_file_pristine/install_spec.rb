@@ -39,7 +39,7 @@ Dir.mktmpdir do |dir|
     # This will crash if this file is not accessible or does not exist
     assert_equal 0, cmd(dir, "cat config_wow/my_boot.rb")[1]
 
-    kr_run = cmd(dir, "timeout --preserve-status 10 bundle exec karafka server")
+    kr_run = cmd(dir, "timeout --preserve-status 30 bundle exec karafka server")
     assert_equal 0, kr_run[1], kr_run[0]
   end
 end

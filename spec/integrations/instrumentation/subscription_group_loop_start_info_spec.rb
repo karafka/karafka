@@ -43,7 +43,7 @@ $stderr = proper_stderr
 
 content = strio.string
 
-assert content.include?("[#{Karafka::Server.id}] Running in ruby")
+assert content.include?("[#{Karafka::Server.id}] Running in #{RUBY_DESCRIPTION}")
 assert content.include?("[#{Karafka::Server.id}] Running Karafka")
 assert content.include?("[#{Karafka::Server.id}] Stopping Karafka server")
 assert content.include?("[#{Karafka::Server.id}] Stopped Karafka server")
