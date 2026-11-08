@@ -7,12 +7,20 @@
 # Two subscription groups share one worker. The first consumes a message, then the second's
 # consumer hangs. On stop, the first group's shutdown job waits behind the hanging job, so its
 # listener keeps pinging its client. Each events poll of that listener defers thread termination
-# for 10 seconds, like a native call that `Thread#terminate` cannot interrupt. It defers it with
-# busy work, as JRuby delivers `Thread#terminate` into a blocking call such as `sleep` even inside
+# for 10 seconds with native `usleep` calls, like a native call that `Thread#terminate` cannot
+# interrupt. Not with `sleep`: JRuby delivers `Thread#terminate` into it even inside
 # `Thread.handle_interrupt(Object => :never)`.
 #
 # This spec is registered in `bin/integrations` as expecting exit code 2 (forceful shutdown).
 # A listener shut down while its thread was alive, or no report, exits with code 10 instead.
+
+module LibC
+  extend FFI::Library
+
+  ffi_lib FFI::Library::LIBC
+
+  attach_function :usleep, [:uint], :int, blocking: true
+end
 
 setup_karafka(allow_errors: true) do |config|
   config.concurrency = 1
@@ -30,7 +38,7 @@ Karafka::Connection::ConsumerGroups::Client.prepend(
             Thread.current.name.to_s.include?("karafka.listener")
           deadline = Process.clock_gettime(Process::CLOCK_MONOTONIC) + 10
 
-          Thread.pass while Process.clock_gettime(Process::CLOCK_MONOTONIC) < deadline
+          LibC.usleep(10_000) while Process.clock_gettime(Process::CLOCK_MONOTONIC) < deadline
         end
       end
     end
