@@ -332,8 +332,13 @@ module Karafka
       # @return [true]
       #
       # @raise [Karafka::Errors::ConsumerGroupSubscribedToTopicError] when the consumer group has
-      #   active members subscribed to any of the topics. Kafka rejects the whole deletion then,
-      #   so offsets of a running consumer are never lost.
+      #   active members subscribed to any of the topics. Kafka keeps the offsets of those topics,
+      #   so offsets of a running consumer are never lost. Its message names the consumer group and
+      #   the rejected partitions.
+      #
+      # @note Kafka handles each topic on its own. When some of the topics are rejected because
+      #   the consumer group is subscribed to them, offsets of the other topics from the same
+      #   request are already deleted when the error is raised.
       #
       # @note This operation is destructive and irreversible. When the consumer group starts
       #   consuming the topic again, it starts from the `initial_offset`.
@@ -365,7 +370,7 @@ module Karafka
         rescue Rdkafka::RdkafkaError => e
           raise unless CONSUMER_GROUP_SUBSCRIBED_ERRORS.include?(e.code)
 
-          raise(Errors::ConsumerGroupSubscribedToTopicError, group_id)
+          raise(Errors::ConsumerGroupSubscribedToTopicError, "#{group_id}: #{e.message}")
         end
       end
 

@@ -268,8 +268,17 @@ RSpec.describe Karafka::Admin::ConsumerGroups do
 
     context "when no topics are given" do
       let(:topics) { [] }
+      let(:instance) { described_class.new }
 
-      it { expect(deletion).to be(true) }
+      before do
+        allow(described_class).to receive(:new).and_return(instance)
+        allow(instance).to receive(:with_admin)
+      end
+
+      it "expect not to call Kafka" do
+        expect(deletion).to be(true)
+        expect(instance).not_to have_received(:with_admin)
+      end
     end
 
     context "when requested consumer group does not exist" do
@@ -283,12 +292,7 @@ RSpec.describe Karafka::Admin::ConsumerGroups do
       let(:instance) { described_class.new }
       let(:admin) { instance_double(Rdkafka::Admin) }
       let(:handle) { instance_double(Rdkafka::Admin::DeleteConsumerGroupOffsetsHandle) }
-      let(:code) { :group_subscribed_to_topic }
-      let(:error) do
-        Rdkafka::RdkafkaError.new(Rdkafka::Bindings::RD_KAFKA_RESP_ERR__STATE).tap do |rdkafka_error|
-          allow(rdkafka_error).to receive(:code).and_return(code)
-        end
-      end
+      let(:error) { Rdkafka::RdkafkaError.new(86, broker_message: "Failed for partition 0") }
 
       before do
         allow(described_class).to receive(:new).and_return(instance)
@@ -302,7 +306,7 @@ RSpec.describe Karafka::Admin::ConsumerGroups do
         it "expect to raise a consumer group subscribed to topic error" do
           expect { deletion }.to raise_error(
             Karafka::Errors::ConsumerGroupSubscribedToTopicError,
-            /#{cg_id}/
+            /#{cg_id}.*Failed for partition 0/m
           )
         end
       end
@@ -316,7 +320,7 @@ RSpec.describe Karafka::Admin::ConsumerGroups do
       end
 
       context "when the coordinator is not ready yet and then becomes ready" do
-        let(:code) { :not_coordinator }
+        let(:error) { Rdkafka::RdkafkaError.new(16) }
 
         before do
           allow(described_class).to receive(:retry_backoff).and_return(1)

@@ -1,7 +1,8 @@
 # frozen_string_literal: true
 
 # Deleting committed offsets of a running consumer group should work for a topic it no longer
-# consumes, and raise a clear error for a topic it is subscribed to, leaving those offsets in place
+# consumes, and raise a clear error for a topic it is subscribed to, leaving those offsets in place.
+# In a mixed request, offsets of the not subscribed topic are deleted before the error is raised.
 
 setup_karafka
 
@@ -25,10 +26,12 @@ produce_many(DT.topic, DT.uuids(10))
 start_karafka_and_wait_until do
   next false unless DT[:offsets].size >= 10
 
-  Karafka::Admin.delete_consumer_group_offsets(DT.group, [removed_topic])
+  Karafka::Admin.delete_consumer_group_offsets(DT.group, { removed_topic => [0] })
 
+  # Kafka handles each topic on its own: it deletes offsets of the topic the consumer group no
+  # longer consumes and rejects only the subscribed one
   begin
-    Karafka::Admin.delete_consumer_group_offsets(DT.group, [DT.topic])
+    Karafka::Admin.delete_consumer_group_offsets(DT.group, [DT.topic, removed_topic])
   rescue Karafka::Errors::ConsumerGroupSubscribedToTopicError => e
     DT[:error] = e
   end
@@ -38,6 +41,7 @@ end
 
 assert DT[:error].is_a?(Karafka::Errors::ConsumerGroupSubscribedToTopicError)
 assert DT[:error].message.include?(DT.group)
+assert DT[:error].message.include?(DT.topic)
 
 offsets = Karafka::Admin.read_lags_with_offsets({ DT.group => [DT.topic, removed_topic] })
 
