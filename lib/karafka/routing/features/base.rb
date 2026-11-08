@@ -16,8 +16,8 @@ module Karafka
           #
           # 1. **Mode-namespaced feature** (how every built-in Karafka/Karafka-Web feature is
           #    defined): the feature class lives under a mode namespace, e.g.
-          #    `Karafka::Routing::Features::ConsumerGroups::Deserializers` or
-          #    `...::ShareGroups::Deserializers`. Its mode is read straight off that namespace and
+          #    `Karafka::Routing::Features::ConsumerGroups::Deserializing` or
+          #    `...::ShareGroups::Deserializing`. Its mode is read straight off that namespace and
           #    it only needs to define kind-only `Group`/`Topic`/`Contracts` hooks.
           #
           # 2. **Custom feature** (the supported public extension point - see

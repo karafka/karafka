@@ -7,7 +7,7 @@ module Karafka
         # Share group topic (KIP-932 / Queues for Kafka) validation rules.
         #
         # Mirrors the consumer-group {Topic} contract for the attributes share topics share with
-        # consumer topics (including `deserializers`, since share groups also process message
+        # consumer topics (including `deserializing`, since share groups also process message
         # payloads, keys and headers), but omits consumer-group-only routing features that are not
         # prepended onto share topics. Reuses the `routing.topic` locale messages.
         class Topic < Karafka::Contracts::Base
@@ -17,7 +17,7 @@ module Karafka
             ).fetch("en").fetch("validations").fetch("routing").fetch("topic")
           end
 
-          required(:deserializers) { |val| !val.nil? }
+          required(:deserializing) { |val| !val.nil? }
           required(:id) { |val| val.is_a?(String) && Karafka::Contracts::TOPIC_REGEXP.match?(val) }
           required(:kafka) { |val| val.is_a?(Hash) && !val.empty? }
           required(:max_messages) { |val| val.is_a?(Integer) && val >= 1 }
