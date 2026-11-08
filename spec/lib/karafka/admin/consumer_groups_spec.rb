@@ -234,6 +234,108 @@ RSpec.describe Karafka::Admin::ConsumerGroups do
     # much easier to test with integrations on created consumer group
   end
 
+  describe "#delete_offsets" do
+    subject(:deletion) { described_class.delete_offsets(cg_id, topics) }
+
+    let(:cg_id) { SecureRandom.uuid }
+    let(:offsets) { described_class.read_lags_with_offsets({ cg_id => [name, name2] })[cg_id] }
+
+    before do
+      Karafka::Admin::Topics.create(name, 2, 1)
+      Karafka::Admin::Topics.create(name2, 1, 1)
+      described_class.seek(cg_id, { name => { 0 => 1, 1 => 2 }, name2 => { 0 => 3 } })
+    end
+
+    context "when deleting offsets of all the partitions of a topic" do
+      let(:topics) { [name] }
+
+      it "expect to delete them and keep offsets of other topics" do
+        expect(deletion).to be(true)
+        expect(offsets[name].transform_values { |details| details[:offset] }).to eq(0 => -1, 1 => -1)
+        expect(offsets[name2][0][:offset]).to eq(3)
+      end
+    end
+
+    context "when deleting offsets of selected partitions of a topic" do
+      let(:topics) { { name => [1] } }
+
+      it "expect to delete only them" do
+        expect(deletion).to be(true)
+        expect(offsets[name].transform_values { |details| details[:offset] }).to eq(0 => 1, 1 => -1)
+        expect(offsets[name2][0][:offset]).to eq(3)
+      end
+    end
+
+    context "when no topics are given" do
+      let(:topics) { [] }
+
+      it { expect(deletion).to be(true) }
+    end
+
+    context "when requested consumer group does not exist" do
+      subject(:deletion) { described_class.delete_offsets(SecureRandom.uuid, [name]) }
+
+      it { expect { deletion }.to raise_error(Rdkafka::RdkafkaError) }
+    end
+
+    context "when Kafka rejects the deletion" do
+      let(:topics) { { name => [0] } }
+      let(:instance) { described_class.new }
+      let(:admin) { instance_double(Rdkafka::Admin) }
+      let(:handle) { instance_double(Rdkafka::Admin::DeleteConsumerGroupOffsetsHandle) }
+      let(:code) { :group_subscribed_to_topic }
+      let(:error) do
+        Rdkafka::RdkafkaError.new(Rdkafka::Bindings::RD_KAFKA_RESP_ERR__STATE).tap do |rdkafka_error|
+          allow(rdkafka_error).to receive(:code).and_return(code)
+        end
+      end
+
+      before do
+        allow(described_class).to receive(:new).and_return(instance)
+        allow(instance).to receive(:with_admin).and_yield(admin)
+        allow(admin).to receive(:delete_consumer_group_offsets).and_return(handle)
+      end
+
+      context "when the consumer group is subscribed to the topic" do
+        before { allow(handle).to receive(:wait).and_raise(error) }
+
+        it "expect to raise a consumer group subscribed to topic error" do
+          expect { deletion }.to raise_error(
+            Karafka::Errors::ConsumerGroupSubscribedToTopicError,
+            /#{cg_id}/
+          )
+        end
+      end
+
+      context "when Kafka rejects it with another error" do
+        let(:error) { Rdkafka::RdkafkaError.new(Rdkafka::Bindings::RD_KAFKA_RESP_ERR__STATE) }
+
+        before { allow(handle).to receive(:wait).and_raise(error) }
+
+        it { expect { deletion }.to raise_error(error) }
+      end
+
+      context "when the coordinator is not ready yet and then becomes ready" do
+        let(:code) { :not_coordinator }
+
+        before do
+          allow(described_class).to receive(:retry_backoff).and_return(1)
+
+          calls = 0
+          allow(handle).to receive(:wait) do
+            calls += 1
+            raise(error) if calls == 1
+          end
+        end
+
+        it "expect to retry the deletion" do
+          expect(deletion).to be(true)
+          expect(handle).to have_received(:wait).twice
+        end
+      end
+    end
+  end
+
   describe "#read_lags_with_offsets" do
     subject(:results) { described_class.read_lags_with_offsets(cgs_t) }
 
