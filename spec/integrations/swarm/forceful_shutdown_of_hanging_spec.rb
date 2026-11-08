@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+# JRuby: unsupported (fork)
+
 # When supervisor stops work, hanging processes should be killed
 
 setup_karafka(allow_errors: true) do |config|

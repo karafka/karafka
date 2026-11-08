@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+# JRuby: unsupported (fork)
+
 # When nodes restart, the supervisor should close old reader pipes to prevent FD leaks.
 # Each node restart creates a new IO.pipe pair in Node#start. Without proper cleanup,
 # old reader pipe FDs accumulate in the supervisor process, eventually hitting OS limits.

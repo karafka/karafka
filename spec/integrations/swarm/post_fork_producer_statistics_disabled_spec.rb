@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+# JRuby: unsupported (fork)
+
 # When statistics.interval.ms is set to 0 on the producer and we fork in swarm mode,
 # the post-fork producer should inherit the statistics.interval.ms = 0 setting,
 # ensuring statistics remain disabled after the fork.

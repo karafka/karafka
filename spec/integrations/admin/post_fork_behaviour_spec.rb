@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+# JRuby: unsupported (fork)
+
 # When working with Admin API in post-forks we should have no issues.
 # @see https://github.com/ffi/ffi/issues/1114
 

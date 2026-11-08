@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+# JRuby: unsupported (fork)
+
 # A producer that was closed before forking should remain closed in the child process.
 # Attempting to use it should raise WaterDrop::Errors::ProducerClosedError.
 # This behavior is by design - closed producers do not "resurrect" after fork.

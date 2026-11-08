@@ -41,6 +41,10 @@ FAIL_ON_LEFTOVERS = ENV.key?('CI')
 # How may bytes do we want to keep from the stdout in the buffer for when we need to print it
 MAX_BUFFER_OUTPUT = 307_200
 
+# Scenarios that can never pass on JRuby (fork, signals the JVM owns, C extension gems) carry a
+# `# JRuby: unsupported (<reason>)` comment line. On JRuby they are skipped and reported as such.
+JRUBY_UNSUPPORTED = /^# JRuby: unsupported \((.+)\)$/
+
 # Abstraction around a single test scenario execution process
 class Scenario
   # How long a scenario can run before we kill it
@@ -118,6 +122,14 @@ class Scenario
     return :sequential if scenario_dir.include?('_sequential')
 
     :regular
+  end
+
+  # @return [String, nil] reason why this scenario cannot run on the current Ruby engine or nil
+  #   if it can run
+  def skip_reason
+    return nil unless RUBY_ENGINE == 'jruby'
+
+    File.read(@path)[JRUBY_UNSUPPORTED, 1]
   end
 
   # @return [Boolean] any spec that is not a regular one should not run in parallel with others
@@ -336,9 +348,14 @@ scenarios = specs
             .with_index { |integration, index| Scenario.new(integration, index % groups) }
             .delete_if { |scenario| scenario.index != group && group != -1 }
 
-raise ArgumentError, "No integration specs with filters: #{ARGV.join(', ')}" if scenarios.empty?
+skipped_scenarios, scenarios = scenarios.partition(&:skip_reason)
+
+if scenarios.empty? && skipped_scenarios.empty?
+  raise ArgumentError, "No integration specs with filters: #{ARGV.join(', ')}"
+end
 
 puts "Running #{scenarios.size} scenarios"
+puts "Skipping #{skipped_scenarios.size} scenarios" unless skipped_scenarios.empty?
 
 regulars = scenarios.reject(&:linear?)
 linears = scenarios - regulars
@@ -387,6 +404,15 @@ puts "\nLongest scenarios:\n\n"
 
 finished_scenarios.sort_by(&:time_taken).reverse.first(10).each do |long_scenario|
   puts "[#{'%6.2f' % long_scenario.time_taken}] #{long_scenario.name}"
+end
+
+unless skipped_scenarios.empty?
+  puts
+  puts "\nSkipped scenarios:\n\n"
+
+  skipped_scenarios.sort_by(&:name).each do |scenario|
+    puts "\e[#{33}m#{'[SKIPPED]'}\e[0m #{scenario.name} (#{scenario.skip_reason})"
+  end
 end
 
 failed_scenarios = finished_scenarios.reject(&:success?)

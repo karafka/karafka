@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+# JRuby: unsupported (Puma exits with 1 on SIGTERM)
+
 # Karafka should run from a Puma server easily
 
 Bundler.require(:default)

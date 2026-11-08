@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+# JRuby: unsupported (fork)
+
 # When the routing describes an active share group, swarm mode must fail fast in the supervisor
 # before any node is forked, with the share-groups-not-implemented error. Before the fix each
 # forked node would crash on the guard and the supervisor would restart it in an endless loop.

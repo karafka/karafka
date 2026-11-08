@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+# JRuby: unsupported (fork)
+
 # When fenced out by a new instance, kubernetes listener should report this as a 500
 
 INSTANCE_ID = SecureRandom.uuid

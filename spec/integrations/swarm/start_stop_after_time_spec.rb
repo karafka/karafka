@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+# JRuby: unsupported (fork)
+
 # We should be able to create a swarm where one of the processes gets assignment and consumes
 # messages. After this we should be able to stop everything.
 

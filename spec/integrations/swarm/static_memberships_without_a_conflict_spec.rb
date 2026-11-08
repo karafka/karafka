@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+# JRuby: unsupported (fork)
+
 # We should be able to create a swarm with static members that can go up and down and receive same
 # assignments.
 #

@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+# JRuby: unsupported (SIGQUIT is the JVM thread dump)
+
 # When Karafka receives sigquit, it should stop
 
 setup_karafka

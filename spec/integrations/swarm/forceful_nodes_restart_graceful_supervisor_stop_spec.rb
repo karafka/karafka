@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+# JRuby: unsupported (fork)
+
 # When supervisor restarts nodes that are hanging it should emit a status and when nodes are
 # no longer hanging it should gracefully stop
 

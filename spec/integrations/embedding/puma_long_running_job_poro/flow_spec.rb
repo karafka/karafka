@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+# JRuby: unsupported (Puma worker mode needs fork)
+
 # This test demonstrates the "ugly" scenario: a long-running Karafka consumer embedded in Puma
 # blocks the worker shutdown. Because processing takes longer than Puma's worker_shutdown_timeout,
 # Puma master sends SIGKILL to the worker.

@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+# JRuby: unsupported (fork)
+
 # When we fork a process and use an idempotent producer with reload settings,
 # the producer should properly reinitialize in the forked child and be able to
 # produce messages.
