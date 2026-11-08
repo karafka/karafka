@@ -1,7 +1,5 @@
 # frozen_string_literal: true
 
-# JRuby: unsupported (fork)
-
 # On a Ruby without Process.fork (e.g. JRuby), swarm mode must fail before any work with an error
 # that names the Ruby engine, both from the CLI and when the supervisor is run directly.
 
