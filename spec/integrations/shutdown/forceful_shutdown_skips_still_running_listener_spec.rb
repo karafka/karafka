@@ -9,7 +9,9 @@
 # listener keeps pinging its client. Each events poll of that listener defers thread termination
 # for 10 seconds with native `usleep` calls, like a native call that `Thread#terminate` cannot
 # interrupt. Not with `sleep`: JRuby delivers `Thread#terminate` into it even inside
-# `Thread.handle_interrupt(Object => :never)`.
+# `Thread.handle_interrupt(Object => :never)`. Many short calls, as MRI cuts one long call short.
+# Only the first group's listener defers: the second one also polls events once per
+# `tick_interval` while it waits on its job, and could then be skipped too.
 #
 # This spec is registered in `bin/integrations` as expecting exit code 2 (forceful shutdown).
 # A listener shut down while its thread was alive, or no report, exits with code 10 instead.
