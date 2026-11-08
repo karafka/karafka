@@ -227,12 +227,12 @@ module Karafka
       # Deletes committed offsets of a consumer group for given topics or topics partitions
       #
       # @param group_id [String] consumer group id
-      # @param topics [Array<String>, Hash{String => Array<Integer>}] topics or topics with
-      #   partitions for which we want to delete committed offsets
+      # @param topics_with_partitions [Array<String>, Hash{String => Array<Integer>}] topics or
+      #   topics with partitions for which we want to delete committed offsets
       # @return [true]
       # @see ConsumerGroups.delete_offsets
-      def delete_consumer_group_offsets(group_id, topics)
-        new.delete_consumer_group_offsets(group_id, topics)
+      def delete_consumer_group_offsets(group_id, topics_with_partitions)
+        new.delete_consumer_group_offsets(group_id, topics_with_partitions)
       end
 
       # Lists all consumer groups in the cluster with their current state
@@ -467,11 +467,11 @@ module Karafka
     end
 
     # @param group_id [String] consumer group id
-    # @param topics [Array<String>, Hash{String => Array<Integer>}] topics or topics with
-    #   partitions for which we want to delete committed offsets
+    # @param topics_with_partitions [Array<String>, Hash{String => Array<Integer>}] topics or
+    #   topics with partitions for which we want to delete committed offsets
     # @see ConsumerGroups#delete_offsets
-    def delete_consumer_group_offsets(group_id, topics)
-      consumer_groups_admin.delete_offsets(group_id, topics)
+    def delete_consumer_group_offsets(group_id, topics_with_partitions)
+      consumer_groups_admin.delete_offsets(group_id, topics_with_partitions)
     end
 
     # @return [Array<Hash>] array of `{ group_id:, state: }` entries

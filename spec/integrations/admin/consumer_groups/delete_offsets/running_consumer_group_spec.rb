@@ -29,8 +29,6 @@ start_karafka_and_wait_until do
 
   Karafka::Admin.delete_consumer_group_offsets(DT.group, { removed_topic => [0] })
 
-  # Kafka handles each topic on its own: it deletes offsets of the topic the consumer group no
-  # longer consumes and rejects only the subscribed one
   begin
     Karafka::Admin.delete_consumer_group_offsets(DT.group, [DT.topic, removed_topic])
   rescue Karafka::Errors::ConsumerGroupSubscribedToTopicError => e
@@ -41,7 +39,6 @@ start_karafka_and_wait_until do
 end
 
 assert DT[:error].is_a?(Karafka::Errors::ConsumerGroupSubscribedToTopicError)
-# Both subscribed partitions are rejected and named, the not subscribed topic is not
 assert_equal "#{DT.group}: #{DT.topic}#0, #{DT.topic}#1", DT[:error].message
 
 offsets = Karafka::Admin.read_lags_with_offsets({ DT.group => [DT.topic, removed_topic] })

@@ -100,11 +100,11 @@ module Karafka
         end
 
         # @param group_id [String] consumer group id
-        # @param topics [Array<String>, Hash{String => Array<Integer>}] topics or topics with
-        #   partitions for which we want to delete committed offsets
+        # @param topics_with_partitions [Array<String>, Hash{String => Array<Integer>}] topics or
+        #   topics with partitions for which we want to delete committed offsets
         # @see #delete_offsets
-        def delete_offsets(group_id, topics)
-          new.delete_offsets(group_id, topics)
+        def delete_offsets(group_id, topics_with_partitions)
+          new.delete_offsets(group_id, topics_with_partitions)
         end
 
         # @param group_id [String] group id to trigger rebalance for
@@ -325,9 +325,9 @@ module Karafka
       # leaving the consumer group and its other committed offsets in place
       #
       # @param group_id [String] consumer group id
-      # @param topics [Array<String>, Hash{String => Array<Integer>}] names of topics for which we
-      #   want to delete offsets on all the partitions or a hash with topics and partitions for
-      #   which we want to delete offsets
+      # @param topics_with_partitions [Array<String>, Hash{String => Array<Integer>}] names of
+      #   topics for which we want to delete offsets on all the partitions or a hash with topics
+      #   and partitions for which we want to delete offsets
       #
       # @return [true]
       #
@@ -348,13 +348,15 @@ module Karafka
       #
       # @example Delete offsets of partitions 0 and 1 of a topic
       #   Karafka::Admin::ConsumerGroups.delete_offsets('group-id', { 'topic' => [0, 1] })
-      def delete_offsets(group_id, topics)
+      def delete_offsets(group_id, topics_with_partitions)
         tpl = Rdkafka::Consumer::TopicPartitionList.new
 
-        if topics.is_a?(Hash)
-          topics.each { |topic, partitions| tpl.add_topic(topic, partitions) }
+        if topics_with_partitions.is_a?(Hash)
+          topics_with_partitions.each { |topic, partitions| tpl.add_topic(topic, partitions) }
         else
-          topics.each { |topic| tpl.add_topic(topic, topics_admin.info(topic)[:partition_count]) }
+          topics_with_partitions.each do |topic|
+            tpl.add_topic(topic, topics_admin.info(topic)[:partition_count])
+          end
         end
 
         return true if tpl.empty?
