@@ -321,6 +321,20 @@ RSpec.describe Karafka::Admin::ConsumerGroups do
         end
       end
 
+      context "when a partition is rejected with another error" do
+        let(:error) { Rdkafka::RdkafkaError.new(3) }
+        let(:partitions) { [{ topic: name, partition: 9, offset: -1, error: error }] }
+
+        before { allow(handle).to receive(:wait).with(max_wait_timeout_ms: anything).and_raise(error) }
+
+        it "expect to raise the rdkafka error, not the subscribed one" do
+          expect { deletion }.to raise_error do |raised|
+            expect(raised).to be(error)
+            expect(raised.code).to eq(:unknown_topic_or_part)
+          end
+        end
+      end
+
       context "when Kafka rejects it with another error" do
         let(:error) { Rdkafka::RdkafkaError.new(Rdkafka::Bindings::RD_KAFKA_RESP_ERR__STATE) }
 
