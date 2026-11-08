@@ -47,6 +47,7 @@
 - [Maintenance] [Pro] Stabilize the throttled virtual partitions integration spec by measuring throttling from the first consumption instead of from startup.
 - [Maintenance] Stabilize the producer monitor overwrite integration spec by creating its topic before producing.
 - [Maintenance] [Pro] Stabilize the `lost_assignment_with_offset_storage` transactions spec.
+- [Maintenance] [Pro] Stabilize the patterned virtual partitions integration spec, which failed with `unknown_topic_or_part` when its pattern matched no topic yet.
 - [Maintenance] Remove the `GC.compact` fallback from `Karafka::App.warmup`, as `Process.warmup` exists on every supported Ruby.
 - [Maintenance] Rename the internal `*_DEV_DEFAULTS` kafka defaults to `*_NON_PRODUCTION_DEFAULTS`, as they apply in every environment except `production`. Behavior is unchanged.
 - [Fix] [Pro] Do not let healthy KIP-848 (`group.protocol=consumer`) multiplexed listeners that never received an assignment block dynamic scaling. With more listeners than partitions they stay in the `init` join state with a rebalance age of 0, so the manager never saw them as stable and kept them alive instead of scaling them down.
