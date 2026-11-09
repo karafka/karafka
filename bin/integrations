@@ -76,8 +76,9 @@ class Scenario
     'setup/with_kip_848_protocol_incorrect_config_spec.rb' => [1].freeze
   }.freeze
 
-  # Specs that can never pass on JRuby (fork, signals the JVM owns, C extension gems) with the
-  # reason why. They are skipped there.
+  # Specs that cannot pass on JRuby (fork, signals the JVM owns, C extension gems, open JRuby
+  # bugs) with the reason why. They are skipped there. Drop a JRuby bug entry once CI runs a
+  # JRuby with the fix.
   JRUBY_UNSUPPORTED = {
     'admin/post_fork_behaviour_spec.rb' => 'fork',
     'instrumentation/producer_logger_on_forks_spec.rb' => 'fork',
@@ -110,7 +111,16 @@ class Scenario
     'signals/on_sigtstp_spec.rb' => 'SIGQUIT is the JVM thread dump',
     'rails/rails72_pristine/with-active-job-transactional/schedule_with_sqlite_spec.rb' => 'sqlite3 C extension',
     'rails/rails80_pristine/with-active-job-transactional/schedule_with_sqlite_spec.rb' => 'sqlite3 C extension',
-    'rails/rails81_pristine/with-active-job-transactional/schedule_with_sqlite_spec.rb' => 'sqlite3 C extension'
+    'rails/rails81_pristine/with-active-job-transactional/schedule_with_sqlite_spec.rb' => 'sqlite3 C extension',
+    'cli/console_with_irb_poro/console_with_irb_spec.rb' => 'JRuby autoload bug (jruby/jruby#9589)',
+    'rails/rails72_pristine/with_kubernetes_listener_in_the_console/console_with_rails_spec.rb' => 'JRuby autoload bug (jruby/jruby#9589)',
+    'rails/rails80_pristine/with_kubernetes_listener_in_the_console/console_with_rails_spec.rb' => 'JRuby autoload bug (jruby/jruby#9589)',
+    'rails/rails81_pristine/with_kubernetes_listener_in_the_console/console_with_rails_spec.rb' => 'JRuby autoload bug (jruby/jruby#9589)',
+    'rails/rails72_pristine/without-active_job_rspec/console_with_rails_spec.rb' => 'JRuby autoload bug (jruby/jruby#9589)',
+    'rails/rails80_pristine/without-active_job_rspec/console_with_rails_spec.rb' => 'JRuby autoload bug (jruby/jruby#9589)',
+    'rails/rails81_pristine/without-active_job_rspec/console_with_rails_spec.rb' => 'JRuby autoload bug (jruby/jruby#9589)',
+    'rails/rails80_pristine/with_setup_via_initializers/rails_console_spec.rb' => 'JRuby autoload bug (jruby/jruby#9589)',
+    'rails/rails81_pristine/with_setup_via_initializers/rails_console_spec.rb' => 'JRuby autoload bug (jruby/jruby#9589)'
   }.freeze
 
   private_constant :MAX_RUN_TIME, :KILL_AFTER, :EXIT_CODES, :JRUBY_UNSUPPORTED
