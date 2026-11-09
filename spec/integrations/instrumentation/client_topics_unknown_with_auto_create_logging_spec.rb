@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 # When a subscribed topic does not exist and `allow.auto.create.topics` is on, Karafka should
-# publish `client.unknown_topic`, log it at the info level, not report it as an error and keep
+# publish `client.topics.unknown`, log it at the info level, not report it as an error and keep
 # consuming from the existing topic
 
 strio = StringIO.new
@@ -20,7 +20,7 @@ end
 Karafka::Admin.create_topic(DT.topics[0], 1, 1)
 produce_many(DT.topics[0], DT.uuids(1))
 
-Karafka.monitor.subscribe("client.unknown_topic") do |event|
+Karafka.monitor.subscribe("client.topics.unknown") do |event|
   DT[:unknown] << event[:topic]
 end
 

@@ -208,7 +208,7 @@ RSpec.describe_current do
 
         it "expect to instrument the unknown topic event" do
           expect(Karafka.monitor).to have_received(:instrument).with(
-            "client.unknown_topic",
+            "client.topics.unknown",
             caller: client,
             subscription_group: subscription_group,
             topic: topic_name,
@@ -239,7 +239,7 @@ RSpec.describe_current do
 
       it "expect not to instrument the unknown topic event" do
         expect(Karafka.monitor)
-          .not_to have_received(:instrument).with("client.unknown_topic", any_args)
+          .not_to have_received(:instrument).with("client.topics.unknown", any_args)
       end
 
       it "expect to report it as an error" do
