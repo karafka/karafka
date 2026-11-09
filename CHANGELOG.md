@@ -47,6 +47,7 @@
 - [Maintenance] [Pro] Stabilize the throttled virtual partitions integration spec by measuring throttling from the first consumption instead of from startup.
 - [Maintenance] Stabilize the producer monitor overwrite integration spec by creating its topic before producing.
 - [Maintenance] [Pro] Stabilize the `lost_assignment_with_offset_storage` transactions spec.
+- [Maintenance] [Pro] Stabilize the patterned virtual partitions integration spec, which failed with `unknown_topic_or_part` when its pattern matched no topic yet.
 - [Maintenance] Remove the `GC.compact` fallback from `Karafka::App.warmup`, as `Process.warmup` exists on every supported Ruby.
 - [Maintenance] Rename the internal `*_DEV_DEFAULTS` kafka defaults to `*_NON_PRODUCTION_DEFAULTS`, as they apply in every environment except `production`. Behavior is unchanged.
 - [Maintenance] Skip integration specs that cannot run on JRuby (fork, Swarm, Puma workers, `SIGQUIT`, C extension gems) when `bin/integrations` runs on JRuby, and report them as skipped.
