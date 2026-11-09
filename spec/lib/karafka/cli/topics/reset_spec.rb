@@ -23,5 +23,20 @@ RSpec.describe_current do
       expect(Karafka::Cli::Topics::Create).to have_received(:new).once
       expect(topics_create).to have_received(:call).once
     end
+
+    context "when a topic has configuration unknown to the cluster" do
+      before do
+        allow(reset_topics)
+          .to receive(:unknown_configs)
+          .and_return(instance_double(Karafka::Declaratives::Topic, name: "topic") => { "x" => "1" })
+        allow(reset_topics).to receive(:puts)
+      end
+
+      it "raises and does not delete or create any topics" do
+        expect { reset_topics.call }.to raise_error(Karafka::Errors::CommandValidationError)
+        expect(Karafka::Cli::Topics::Delete).not_to have_received(:new)
+        expect(Karafka::Cli::Topics::Create).not_to have_received(:new)
+      end
+    end
   end
 end

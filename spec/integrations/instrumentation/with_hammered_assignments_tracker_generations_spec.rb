@@ -7,7 +7,7 @@ setup_karafka
 
 class Consumer < Karafka::BaseConsumer
   def consume
-    100.times do
+    1_000.times do
       gens = Karafka::Instrumentation::AssignmentsTracker.instance.generations
       gens.each_value { |partitions| partitions.each_value { |gen| raise if gen < 1 } }
 
@@ -20,7 +20,7 @@ class Consumer < Karafka::BaseConsumer
 end
 
 draw_routes do
-  DT.groups[0...100].each do |cg|
+  DT.groups[0...10].each do |cg|
     consumer_group cg do
       topic DT.topic do
         consumer Consumer
@@ -32,5 +32,5 @@ end
 produce(DT.topic, rand.to_s)
 
 start_karafka_and_wait_until do
-  DT[:done].size >= 100
+  DT[:done].size >= 10
 end
