@@ -3,7 +3,10 @@
 # AssignmentsTracker generations should remain stable and not crash when accessed concurrently
 # from multiple consumer groups during message processing
 
-setup_karafka
+setup_karafka do |config|
+  # Closing 100 consumer groups on a loaded CI runner can take longer than the default 30 seconds
+  config.shutdown_timeout = 120_000
+end
 
 class Consumer < Karafka::BaseConsumer
   def consume
