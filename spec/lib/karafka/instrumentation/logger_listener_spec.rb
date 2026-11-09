@@ -213,8 +213,8 @@ RSpec.describe_current do
     it { expect(Karafka.logger).to have_received(:info).with(message) }
   end
 
-  describe "#on_client_unknown_topic" do
-    subject(:trigger) { listener.on_client_unknown_topic(event) }
+  describe "#on_client_topics_unknown" do
+    subject(:trigger) { listener.on_client_topics_unknown(event) }
 
     let(:client) { instance_double(Karafka::Connection::ConsumerGroups::Client, id: SecureRandom.hex(6)) }
     let(:message) { "[#{client.id}] Topic Topic does not exist yet. Waiting for it to be created." }

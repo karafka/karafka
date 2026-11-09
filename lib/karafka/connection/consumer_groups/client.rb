@@ -721,7 +721,7 @@ module Karafka
           when :unknown_topic_or_part # 3
             if @subscription_group.kafka[:"allow.auto.create.topics"]
               Karafka.monitor.instrument(
-                "client.unknown_topic",
+                "client.topics.unknown",
                 caller: self,
                 subscription_group: @subscription_group,
                 topic: e.details[:topic],

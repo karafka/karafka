@@ -158,7 +158,7 @@ module Karafka
       # Prints info about a subscribed topic that does not exist yet
       #
       # @param event [Karafka::Core::Monitoring::Event] event details including payload
-      def on_client_unknown_topic(event)
+      def on_client_topics_unknown(event)
         topic = event[:topic] || "unknown"
         client = event[:caller]
 
