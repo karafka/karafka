@@ -43,20 +43,15 @@ module Karafka
 
           data.each do |group|
             group[:topics].each do |topic|
-              dec = topic[:declaratives]
-
-              # Share-group topics (KIP-932) do not support declarative management, so they and
-              # their DLQ topics (Pro) are not subject to the strict declarative check
-              next unless dec
-
               pat = topic[:patterns]
               # Ignore pattern topics because they won't exist and should not be declarative managed
               topics << topic[:name] if !pat || !pat[:active]
 
+              # Share-group topics have a DLQ only in Pro
               dlq = topic[:dead_letter_queue]
-              topics << dlq[:topic] if dlq[:active]
+              topics << dlq[:topic] if dlq && dlq[:active]
 
-              dec_topics << topic[:name] if dec[:active]
+              dec_topics << topic[:name] if topic[:declaratives][:active]
             end
           end
 

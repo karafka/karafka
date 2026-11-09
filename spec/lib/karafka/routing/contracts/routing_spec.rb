@@ -139,6 +139,58 @@ RSpec.describe_current do
     it { expect(check).to be_success }
   end
 
+  context "when there are share-group topics routes with declaratives" do
+    let(:routing) do
+      [
+        {
+          topics: [
+            {
+              name: "topic",
+              declaratives: { active: true }
+            }
+          ]
+        }
+      ]
+    end
+
+    it { expect(check).to be_success }
+  end
+
+  context "when there are share-group topics routes with inactive declaratives" do
+    let(:routing) do
+      [
+        {
+          topics: [
+            {
+              name: "topic",
+              declaratives: { active: false }
+            }
+          ]
+        }
+      ]
+    end
+
+    it { expect(check).not_to be_success }
+  end
+
+  context "when there are share-group topics routes with DLQ without declaratives" do
+    let(:routing) do
+      [
+        {
+          topics: [
+            {
+              name: "topic",
+              dead_letter_queue: { active: true, topic: "dlq" },
+              declaratives: { active: true }
+            }
+          ]
+        }
+      ]
+    end
+
+    it { expect(check).not_to be_success }
+  end
+
   context "when there are topics routes with inactive declaratives but not strict" do
     before { Karafka::App.config.strict_declarative_topics = false }
 
