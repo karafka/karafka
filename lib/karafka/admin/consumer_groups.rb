@@ -52,13 +52,20 @@ module Karafka
         unknown_member_id
       ].freeze
 
+      # Error with which Kafka rejects an offsets deletion for topics the consumer group is
+      # subscribed to
+      CONSUMER_GROUP_SUBSCRIBED_ERRORS = %i[
+        group_subscribed_to_topic
+      ].freeze
+
       private_constant(
         :LONG_TIME_AGO,
         :DAY_IN_SECONDS,
         :CONSUMER_GROUP_STATES,
         :COORDINATOR_NOT_READY_ERRORS,
         :OFFSETS_FETCH_RETRYABLE_ERRORS,
-        :CONSUMER_GROUP_NOT_EMPTY_ERRORS
+        :CONSUMER_GROUP_NOT_EMPTY_ERRORS,
+        :CONSUMER_GROUP_SUBSCRIBED_ERRORS
       )
 
       class << self
@@ -90,6 +97,14 @@ module Karafka
         # @see #delete
         def delete(group_id)
           new.delete(group_id)
+        end
+
+        # @param group_id [String] consumer group id
+        # @param topics_with_partitions [Array<String>, Hash{String => Array<Integer>}] topics or
+        #   topics with partitions for which we want to delete committed offsets
+        # @see #delete_offsets
+        def delete_offsets(group_id, topics_with_partitions)
+          new.delete_offsets(group_id, topics_with_partitions)
         end
 
         # @param group_id [String] group id to trigger rebalance for
@@ -303,6 +318,72 @@ module Karafka
         with_admin do |admin|
           handler = admin.delete_group(group_id)
           handler.wait(max_wait_timeout_ms: max_wait_time_ms)
+        end
+      end
+
+      # Deletes committed offsets of a consumer group for given topics or topics partitions,
+      # leaving the consumer group and its other committed offsets in place
+      #
+      # @param group_id [String] consumer group id
+      # @param topics_with_partitions [Array<String>, Hash{String => Array<Integer>}] names of
+      #   topics for which we want to delete offsets on all the partitions or a hash with topics
+      #   and partitions for which we want to delete offsets
+      #
+      # @return [true]
+      #
+      # @raise [Karafka::Errors::ConsumerGroupSubscribedToTopicError] when the consumer group has
+      #   active members subscribed to any of the topics. Kafka keeps the offsets of those topics,
+      #   so offsets of a running consumer are never lost. Its message names the consumer group and
+      #   all the rejected partitions (`topic#partition`).
+      #
+      # @note Kafka handles each topic on its own. When some of the topics are rejected because
+      #   the consumer group is subscribed to them, offsets of the other topics from the same
+      #   request are already deleted when the error is raised.
+      #
+      # @note This operation is destructive and irreversible. When the consumer group starts
+      #   consuming the topic again, it starts from the `initial_offset`.
+      #
+      # @example Delete offsets of all the partitions of a topic
+      #   Karafka::Admin::ConsumerGroups.delete_offsets('group-id', ['topic'])
+      #
+      # @example Delete offsets of partitions 0 and 1 of a topic
+      #   Karafka::Admin::ConsumerGroups.delete_offsets('group-id', { 'topic' => [0, 1] })
+      def delete_offsets(group_id, topics_with_partitions)
+        tpl = Rdkafka::Consumer::TopicPartitionList.new
+
+        if topics_with_partitions.is_a?(Hash)
+          topics_with_partitions.each { |topic, partitions| tpl.add_topic(topic, partitions) }
+        else
+          topics_with_partitions.each do |topic|
+            tpl.add_topic(topic, topics_admin.info(topic)[:partition_count])
+          end
+        end
+
+        return true if tpl.empty?
+
+        with_admin do |admin|
+          with_retries(COORDINATOR_NOT_READY_ERRORS) do
+            handle = admin.delete_consumer_group_offsets(group_id, tpl)
+            # We read the report first, as the error raised by the handle names only the first
+            # rejected partition
+            report = handle.wait(max_wait_timeout_ms: max_wait_time_ms, raise_response_error: false)
+
+            rejected = (report&.partitions || []).select do |partition|
+              CONSUMER_GROUP_SUBSCRIBED_ERRORS.include?(partition[:error]&.code)
+            end
+
+            unless rejected.empty?
+              raise(
+                Errors::ConsumerGroupSubscribedToTopicError,
+                "#{group_id}: #{rejected.map { |details| "#{details[:topic]}##{details[:partition]}" }.join(", ")}"
+              )
+            end
+
+            # Raises any other error of the deletion
+            handle.wait(max_wait_timeout_ms: max_wait_time_ms)
+          end
+
+          true
         end
       end
 
