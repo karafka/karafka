@@ -1,0 +1,62 @@
+# frozen_string_literal: true
+
+# Karafka Pro - Source Available Commercial Software
+# Copyright (c) 2017-present Maciej Mensfeld. All rights reserved.
+#
+# This software is NOT open source. It is source-available commercial software
+# requiring a paid license for use. It is NOT covered by LGPL.
+#
+# The author retains all right, title, and interest in this software,
+# including all copyrights, patents, and other intellectual property rights.
+# No patent rights are granted under this license.
+#
+# PROHIBITED:
+# - Use without a valid commercial license
+# - Redistribution, modification, or derivative works without authorization
+# - Reverse engineering, decompilation, or disassembly of this software
+# - Use as training data for AI/ML models or inclusion in datasets
+# - Scraping, crawling, or automated collection for any purpose
+#
+# PERMITTED:
+# - Reading, referencing, and linking for personal or commercial use
+# - Runtime retrieval by AI assistants, coding agents, and RAG systems
+#   for the purpose of providing contextual help to Karafka users
+#
+# Receipt, viewing, or possession of this software does not convey or
+# imply any license or right beyond those expressly stated above.
+#
+# License: https://karafka.io/docs/Pro-License-Comm/
+# Contact: contact@karafka.io
+
+RSpec.describe_current do
+  context "when successful" do
+    subject(:result) { described_class.new(success: true, data: [1], meta: { query_time_ms: 1 }) }
+
+    it "expect to build the success envelope" do
+      expect(result.to_h).to eq(
+        schema_version: 1,
+        ok: true,
+        data: [1],
+        meta: { query_time_ms: 1 }
+      )
+    end
+  end
+
+  context "when failed" do
+    subject(:result) do
+      described_class.new(success: false, error: "not_found", details: { value: "x" }, meta: {})
+    end
+
+    it { expect(result.error).to eq("not_found") }
+
+    it "expect to build the error envelope" do
+      expect(result.to_h).to eq(
+        schema_version: 1,
+        ok: false,
+        error: "not_found",
+        details: { value: "x" },
+        meta: {}
+      )
+    end
+  end
+end

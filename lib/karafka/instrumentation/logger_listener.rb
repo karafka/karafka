@@ -483,6 +483,9 @@ module Karafka
           error backtrace
         when "lag_compensation.refresher.error"
           warn "Lag compensation refresher error occurred: #{details}"
+        when "action.execute.error"
+          error "Action execution error occurred: #{details}"
+          error backtrace
         # This handles any custom errors coming from places like Web-UI, etc
         else
           error "#{type} error occurred: #{error.class} - #{details}"

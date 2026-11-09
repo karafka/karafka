@@ -109,6 +109,7 @@ module Karafka
         #   that need to have some special configuration stuff injected into config, etc
         def features
           [
+            Actions,
             Cleaner,
             Encryption,
             RecurringTasks,

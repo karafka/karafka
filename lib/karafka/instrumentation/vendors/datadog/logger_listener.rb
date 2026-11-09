@@ -147,6 +147,8 @@ module Karafka
               error "Virtual partitions partitioner error occurred: #{error}"
             when "lag_compensation.refresher.error"
               warn "Lag compensation refresher error occurred: #{error}"
+            when "action.execute.error"
+              error "Action execution error occurred: #{error}"
             else
               error "#{event[:type]} error occurred: #{error}"
             end

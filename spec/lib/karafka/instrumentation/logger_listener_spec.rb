@@ -809,6 +809,15 @@ RSpec.describe_current do
       it { expect(Karafka.logger).to have_received(:error).with(message) }
     end
 
+    context "when it is an action.execute.error" do
+      let(:type) { "action.execute.error" }
+      let(:message) { "Action execution error occurred: #{error}" }
+      let(:error) { StandardError.new.tap { |e| e.set_backtrace(%w[a.rb:1 b.rb:2]) } }
+
+      it { expect(Karafka.logger).to have_received(:error).with(message) }
+      it { expect(Karafka.logger).to have_received(:error).with("a.rb:1\nb.rb:2") }
+    end
+
     context "when it is a virtual_partitions.partitioner.error" do
       let(:type) { "virtual_partitions.partitioner.error" }
       let(:message) { "Virtual partitions partitioner error occurred: #{error}" }
