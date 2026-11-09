@@ -213,6 +213,28 @@ RSpec.describe_current do
     it { expect(Karafka.logger).to have_received(:info).with(message) }
   end
 
+  describe "#on_client_unknown_topic" do
+    subject(:trigger) { listener.on_client_unknown_topic(event) }
+
+    let(:client) { instance_double(Karafka::Connection::ConsumerGroups::Client, id: SecureRandom.hex(6)) }
+    let(:message) { "[#{client.id}] Topic Topic does not exist yet. Waiting for it to be created." }
+    let(:payload) do
+      {
+        caller: client,
+        topic: "Topic"
+      }
+    end
+
+    it { expect(Karafka.logger).to have_received(:info).with(message) }
+
+    context "when topic name is not known" do
+      let(:message) { "[#{client.id}] Topic unknown does not exist yet. Waiting for it to be created." }
+      let(:payload) { { caller: client, topic: nil } }
+
+      it { expect(Karafka.logger).to have_received(:info).with(message) }
+    end
+  end
+
   describe "#on_consumer_consuming_retry" do
     subject(:trigger) { listener.on_consumer_consuming_retry(event) }
 
