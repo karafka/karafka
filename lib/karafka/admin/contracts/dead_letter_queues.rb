@@ -20,7 +20,17 @@ module Karafka
           next true if val.nil?
           next false unless val.is_a?(Array) && !val.empty?
 
-          val.all? { |partition| partition.is_a?(Integer) && partition >= 0 }
+          val.all? { |partition| partition.is_a?(Integer) && partition >= 0 } &&
+            val.uniq.size == val.size
+        end
+
+        # Karafka.producer dispatches to the app cluster, not to the custom one
+        virtual do |data, errors|
+          next unless errors.empty?
+          next unless data.fetch(:custom_kafka)
+          next unless data.fetch(:producer).nil?
+
+          [[%w[producer], :required_with_custom_kafka]]
         end
       end
     end

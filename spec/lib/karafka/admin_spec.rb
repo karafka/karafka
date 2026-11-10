@@ -417,6 +417,34 @@ RSpec.describe_current do
 
       admin.plan_topic_replication(topic: name, replication_factor: 2)
     end
+
+    it "carries the external client over to dead letter queue operations" do
+      expect(Karafka::Admin::DeadLetterQueues)
+        .to receive(:new)
+        .with(kafka: {}, external_client: external_client)
+        .and_call_original
+
+      allow_any_instance_of(Karafka::Admin::DeadLetterQueues).to receive(:copy)
+
+      admin.copy_dead_letter_queue(name, target_topic_name: "target")
+    end
+  end
+
+  describe "custom kafka delegations" do
+    subject(:admin) { described_class.new(kafka: kafka) }
+
+    let(:kafka) { { "bootstrap.servers": "127.0.0.1:9092" } }
+
+    it "carries the custom kafka over to dead letter queue operations" do
+      expect(Karafka::Admin::DeadLetterQueues)
+        .to receive(:new)
+        .with(kafka: kafka, external_client: nil)
+        .and_call_original
+
+      allow_any_instance_of(Karafka::Admin::DeadLetterQueues).to receive(:copy)
+
+      admin.copy_dead_letter_queue(name, target_topic_name: "target", producer: Karafka.producer)
+    end
   end
 
   describe "#with_re_wait" do

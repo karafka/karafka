@@ -127,9 +127,10 @@ en:
         missing: needs to be present
         topic_name_format: needs to be a non-empty string
         target_topic_name_format: needs to be nil or a non-empty string
-        partitions_format: needs to be nil or a non-empty array of non-negative integers
+        partitions_format: needs to be nil or a non-empty array of unique non-negative integers
         start_offset_format: needs to be a non-negative integer or a time
         end_offset_format: needs to be nil or a non-negative integer
+        required_with_custom_kafka: producer needs to be provided with a custom kafka configuration
 
     routing:
       without_declarative_definition: lacks explicit declarative topics definition

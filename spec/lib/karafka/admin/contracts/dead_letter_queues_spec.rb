@@ -9,7 +9,9 @@ RSpec.describe_current do
       target_topic_name: nil,
       partitions: nil,
       start_offset: 0,
-      end_offset: nil
+      end_offset: nil,
+      producer: nil,
+      custom_kafka: false
     }
   end
 
@@ -63,6 +65,25 @@ RSpec.describe_current do
     before { config[:partitions] = [0, -1] }
 
     it { expect(contract.call(config)).not_to be_success }
+  end
+
+  context "when partitions contain duplicates" do
+    before { config[:partitions] = [0, 0] }
+
+    it { expect(contract.call(config)).not_to be_success }
+  end
+
+  context "when kafka is custom and there is no producer" do
+    before { config[:custom_kafka] = true }
+
+    it { expect(contract.call(config)).not_to be_success }
+    it { expect(contract.call(config).errors).to eq(producer: "producer needs to be provided with a custom kafka configuration") }
+  end
+
+  context "when kafka is custom and a producer is given" do
+    before { config.merge!(custom_kafka: true, producer: Karafka.producer) }
+
+    it { expect(contract.call(config)).to be_success }
   end
 
   context "when partitions is not an array" do

@@ -337,6 +337,8 @@ module Karafka
       # @param producer [WaterDrop::Producer, nil] producer to dispatch with. `Karafka.producer`
       #   when nil
       # @return [Integer] number of copied messages
+      # @note `Karafka.producer` dispatches to the app cluster, so an admin with a custom `kafka`
+      #   configuration requires `producer:`
       # @see DeadLetterQueues#copy
       def copy_dead_letter_queue(
         topic_name,
@@ -553,7 +555,8 @@ module Karafka
     # @param partitions [Array<Integer>, nil] partitions to copy from
     # @param start_offset [Integer, Time] offset (inclusive) or time from which to copy
     # @param end_offset [Integer, nil] offset (exclusive) until which to copy
-    # @param producer [WaterDrop::Producer, nil] producer to dispatch with
+    # @param producer [WaterDrop::Producer, nil] producer to dispatch with. Required with a
+    #   custom `kafka` configuration
     # @return [Integer] number of copied messages
     # @see DeadLetterQueues#copy
     def copy_dead_letter_queue(

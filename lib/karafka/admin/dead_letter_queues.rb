@@ -64,14 +64,16 @@ module Karafka
       # @param topic_name [String] dead letter queue topic name
       # @param target_topic_name [String, nil] topic to copy all the messages to. When nil, each
       #   message is copied to its Pro DLQ `source_topic` header
-      # @param partitions [Array<Integer>, nil] partitions to copy from. All when nil
+      # @param partitions [Array<Integer>, nil] unique partitions to copy from. All when nil
       # @param start_offset [Integer, Time] offset (inclusive) or time from which to copy in each
-      #   partition. Defaults to the first available message
+      #   partition. Defaults to the first available message. An offset below the low watermark
+      #   starts at the low watermark
       # @param end_offset [Integer, nil] offset (exclusive) until which to copy in each partition.
       #   When nil, copies until the high watermark offset at the time of the call, so messages
       #   that land in the dead letter queue during the copy are not copied
       # @param producer [WaterDrop::Producer, nil] producer to dispatch with. `Karafka.producer`
-      #   when nil
+      #   when nil. Required when the admin uses a custom `kafka` configuration, as
+      #   `Karafka.producer` dispatches to the app cluster
       #
       # @return [Integer] number of copied messages
       #
@@ -110,7 +112,9 @@ module Karafka
             target_topic_name: target_topic_name,
             partitions: partitions,
             start_offset: start_offset,
-            end_offset: end_offset
+            end_offset: end_offset,
+            producer: producer,
+            custom_kafka: !@custom_kafka.empty?
           }
         )
 
@@ -118,15 +122,20 @@ module Karafka
         producer ||= Karafka.producer
         partitions ||= topics.info(topic_name).fetch(:partitions).map { |p| p.fetch(:partition_id) }
 
+        watermarks = topics.read_watermark_offsets({ topic_name => partitions }).fetch(topic_name)
+        start_offsets = resolve_start_offsets(topics, topic_name, partitions, start_offset)
+
         partitions.sum do |partition|
+          low_offset, high_offset = watermarks.fetch(partition)
+
           copy_partition(
             topics,
             producer,
             topic_name,
             partition,
             target_topic_name,
-            start_offset,
-            end_offset
+            [start_offsets.fetch(partition) || high_offset, low_offset].max,
+            end_offset ? [end_offset, high_offset].min : high_offset
           )
         end
       end
@@ -134,12 +143,29 @@ module Karafka
       private
 
       # @param topics [Topics] topics admin to read with
+      # @param topic_name [String] dead letter queue topic name
+      # @param partitions [Array<Integer>] partitions to copy from
+      # @param start_offset [Integer, Time] offset or time from which to copy
+      # @return [Hash{Integer => Integer, nil}] start offset per partition, nil when no message
+      #   exists at or after the given time
+      def resolve_start_offsets(topics, topic_name, partitions, start_offset)
+        return partitions.to_h { |partition| [partition, start_offset] } if start_offset.is_a?(Integer)
+
+        timestamp = (start_offset.to_f * 1_000).to_i
+        specs = partitions.map { |partition| { partition: partition, offset: timestamp } }
+
+        topics
+          .read_partition_offsets({ topic_name => specs })
+          .to_h { |result| [result.fetch(:partition), result.fetch(:offset).negative? ? nil : result.fetch(:offset)] }
+      end
+
+      # @param topics [Topics] topics admin to read with
       # @param producer [WaterDrop::Producer] producer to dispatch with
       # @param topic_name [String] dead letter queue topic name
       # @param partition [Integer] partition to copy from
       # @param target_topic_name [String, nil] topic to copy to
-      # @param start_offset [Integer, Time] offset or time from which to copy
-      # @param end_offset [Integer, nil] offset (exclusive) until which to copy
+      # @param start_offset [Integer] offset (inclusive) from which to copy
+      # @param end_offset [Integer] offset (exclusive) until which to copy
       # @return [Integer] number of copied messages
       def copy_partition(
         topics,
@@ -150,18 +176,18 @@ module Karafka
         start_offset,
         end_offset
       )
-        high_offset = topics.read_watermark_offsets(topic_name, partition).last
-        end_offset = end_offset ? [end_offset, high_offset].min : high_offset
         offset = start_offset
         copied = 0
 
-        loop do
-          break if offset.is_a?(Integer) && offset >= end_offset
-
+        while offset < end_offset
           batch = topics.read(topic_name, partition, BATCH_SIZE, offset)
           batch.select! { |message| message.offset < end_offset }
 
-          break if batch.empty?
+          # A window can hold no messages (compaction, aborted transactions), so we move past it
+          if batch.empty?
+            offset += BATCH_SIZE
+            next
+          end
 
           producer.produce_many_sync(
             batch.map { |message| build_message(message, target_topic_name) }
