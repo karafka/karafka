@@ -28,7 +28,7 @@
 # License: https://karafka.io/docs/Pro-License-Comm/
 # Contact: contact@karafka.io
 
-# When a consumer goes into a non-cooperative-sticky rebalance and gets the partitions back,
+# When a consumer goes into a cooperative-sticky rebalance and gets the partitions back,
 # it should not have duplicated data.
 
 setup_karafka(allow_errors: true) do |config|
@@ -40,16 +40,8 @@ end
 DT[:all] = {}
 DT[:data] = {}
 
-# A rebalance can bump the generation while a transaction is open. Its offset commit then fails
-# with illegal_generation, the transaction aborts and the batch is consumed again.
 Karafka.monitor.subscribe("error.occurred") do |event|
-  error = event[:error]
-
-  next if error.is_a?(Rdkafka::RdkafkaError) && error.code == :illegal_generation
-
-  Karafka.logger.fatal error
-  sleep(0.5)
-  exit! 8
+  DT[:errors] << event[:error]
 end
 
 class Consumer < Karafka::BaseConsumer
@@ -144,6 +136,13 @@ end
 other.join(10) || raise
 
 consumer.close
+
+# A rebalance can bump the generation while a transaction is open. Its offset commit then fails
+# with illegal_generation, the transaction aborts and the batch is consumed again.
+DT[:errors].each do |error|
+  assert(error.is_a?(Rdkafka::RdkafkaError), error)
+  assert_equal(:illegal_generation, error.code, error)
+end
 
 # This ensures we do not skip over offsets
 # The +1 range is for the transactional marker
