@@ -75,3 +75,9 @@ expected_error = Karafka::Pro::Encryption::Errors::PrivateKeyNotFoundError
 assert DT[:consumed].empty?
 assert_equal "consumer.consume.error", DT[:errors].first[:type]
 assert DT[:errors].first[:error].is_a?(expected_error)
+
+# Records at rest are envelopes: the envelope version byte and more than the 512 bytes of a
+# direct RSA-4096 ciphertext
+raws = Karafka::Admin.read_topic(DT.topic, 0, 10).map(&:raw_payload)
+assert_equal 10, raws.size
+assert(raws.all? { |raw| raw.bytesize > 512 && raw.b[0] == "\x01".b })

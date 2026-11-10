@@ -76,3 +76,9 @@ end
 
 assert_equal elements, DT[:consumed]
 assert_equal %w[1], DT[:versions].uniq
+
+# Records at rest are envelopes: the envelope version byte and more than the 512 bytes of a
+# direct RSA-4096 ciphertext
+raws = Karafka::Admin.read_topic(DT.topic, 0, 10).map(&:raw_payload)
+assert_equal 10, raws.size
+assert(raws.all? { |raw| raw.bytesize > 512 && raw.b[0] == "\x01".b })

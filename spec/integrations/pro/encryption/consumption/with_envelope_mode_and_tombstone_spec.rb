@@ -79,3 +79,9 @@ assert_equal NORMAL, normal_result[:payload]
 assert !tombstone_result.nil?, "tombstone was not consumed"
 assert tombstone_result[:raw_nil], "tombstone payload should remain nil"
 assert_equal 2, DT[:results].size
+
+# Records at rest are envelopes: the envelope version byte and more than the 512 bytes of a
+# direct RSA-4096 ciphertext
+raws = Karafka::Admin.read_topic(DT.topic, 0, 2).map(&:raw_payload).compact
+assert_equal 1, raws.size
+assert(raws.all? { |raw| raw.bytesize > 512 && raw.b[0] == "\x01".b })

@@ -79,3 +79,9 @@ assert_equal "", empty_result[:payload]
 assert !empty_result[:tombstone], "empty payload should not be a tombstone"
 assert_equal "1", empty_result[:encryption]
 assert_equal 2, DT[:results].size
+
+# Records at rest are envelopes: the envelope version byte and more than the 512 bytes of a
+# direct RSA-4096 ciphertext
+raws = Karafka::Admin.read_topic(DT.topic, 0, 2).map(&:raw_payload)
+assert_equal 2, raws.size
+assert(raws.all? { |raw| raw.bytesize > 512 && raw.b[0] == "\x01".b })

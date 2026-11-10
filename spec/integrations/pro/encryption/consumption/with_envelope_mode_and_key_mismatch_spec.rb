@@ -74,3 +74,9 @@ end
 assert DT[:consumed].empty?
 assert(DT[:errors].all? { |event| event[:type] == "consumer.consume.error" })
 assert(DT[:errors].all? { |event| event[:error].is_a?(OpenSSL::PKey::PKeyError) })
+
+# Records at rest are envelopes: the envelope version byte and more than the 512 bytes of a
+# direct RSA-4096 ciphertext
+raws = Karafka::Admin.read_topic(DT.topic, 0, 10).map(&:raw_payload)
+assert_equal 10, raws.size
+assert(raws.all? { |raw| raw.bytesize > 512 && raw.b[0] == "\x01".b })
