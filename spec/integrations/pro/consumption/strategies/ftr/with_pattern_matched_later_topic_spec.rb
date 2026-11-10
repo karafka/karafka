@@ -58,6 +58,7 @@ elements = DT.uuids(20)
 start_karafka_and_wait_until do
   sleep(5)
 
+  Karafka::Admin.create_topic(DT.topic, 1, 1)
   produce_many(DT.topic, elements)
 
   # This needs to run for a while as on slow CIs things pick up slowly
