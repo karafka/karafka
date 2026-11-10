@@ -2,7 +2,10 @@
 
 # Karafka CLI info --extended should redact sensitive kafka config values, also in topic overrides
 
+output = StringIO.new
+
 setup_karafka do |config|
+  config.logger = Logger.new(output)
   config.kafka[:"sasl.password"] = "root-sasl-password"
   config.kafka[:"ssl.key.pem"] = "root-private-key-pem"
   config.kafka[:"ssl.certificate.pem"] = "root-certificate-pem"
@@ -17,9 +20,6 @@ end
 
 ARGV[0] = "info"
 ARGV[1] = "--extended"
-
-output = StringIO.new
-Karafka.instance_variable_set(:@logger, ::Logger.new(output).tap { |l| l.level = ::Logger::INFO })
 
 Karafka::Cli.start
 
