@@ -302,13 +302,15 @@ RSpec.describe_current do
         writer = Thread.new { tracker.on_rebalance_partitions_assigned(assign_event) }
         entered.pop
 
-        reader = Thread.new { tracker.generations }
-        sleep(0.01) until reader.status != "run"
+        begin
+          reader = Thread.new { tracker.generations }
+          sleep(0.01) until reader.status != "run"
 
-        expect(reader).to be_alive
-
-        release << true
-        writer.join
+          expect(reader).to be_alive
+        ensure
+          release << true
+          writer.join
+        end
 
         expect(reader.value[topic1]).to eq({ 0 => 1, 1 => 1, 2 => 1 })
       end
