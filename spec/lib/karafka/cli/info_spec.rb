@@ -152,6 +152,8 @@ RSpec.describe_current do
             "sasl.password": "s3cr3t",
             "ssl.key.password": "keypass",
             "sasl.oauthbearer.client.secret": "oauth_secret",
+            "ssl.key.pem": "private_key_pem",
+            "ssl.certificate.pem": "certificate_pem",
             "security.protocol": "sasl_ssl"
           )
         end
@@ -161,12 +163,14 @@ RSpec.describe_current do
           expect(Karafka.logger).to have_received(:info).with(/sasl\.password: \[REDACTED\]/)
           expect(Karafka.logger).to have_received(:info).with(/ssl\.key\.password: \[REDACTED\]/)
           expect(Karafka.logger).to have_received(:info).with(/sasl\.oauthbearer\.client\.secret: \[REDACTED\]/)
+          expect(Karafka.logger).to have_received(:info).with(/ssl\.key\.pem: \[REDACTED\]/)
         end
 
         it "expect not to redact non-sensitive values" do
           info_cli.call
           expect(Karafka.logger).to have_received(:info).with(/bootstrap\.servers: localhost:9092/)
           expect(Karafka.logger).to have_received(:info).with(/security\.protocol: sasl_ssl/)
+          expect(Karafka.logger).to have_received(:info).with(/ssl\.certificate\.pem: certificate_pem/)
         end
       end
     end
