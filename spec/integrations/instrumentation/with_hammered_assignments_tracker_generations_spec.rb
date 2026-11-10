@@ -9,7 +9,13 @@ class Consumer < Karafka::BaseConsumer
   def consume
     1_000.times do
       gens = Karafka::Instrumentation::AssignmentsTracker.instance.generations
-      gens.each_value { |partitions| partitions.each_value { |gen| raise if gen < 1 } }
+      raise unless gens.frozen?
+
+      gens.each_value do |partitions|
+        raise unless partitions.frozen?
+
+        partitions.each_value { |gen| raise if gen < 1 }
+      end
 
       gen = Karafka::Instrumentation::AssignmentsTracker.instance.generation(topic, partition)
       raise if gen < 1
