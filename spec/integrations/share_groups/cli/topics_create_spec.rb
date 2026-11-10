@@ -1,9 +1,9 @@
 # frozen_string_literal: true
 
 # `karafka topics create` should work when share groups (KIP-932) are routed. Share-group topics
-# do not carry routing declaratives, so they are created only when declared via the standalone
-# declaratives DSL, while consumer-group topics keep their routing-based declarations. A share
-# topic created this way should then be consumable by its share group.
+# carry routing declaratives like consumer-group topics, and a standalone declaration takes
+# precedence over the routing one. A share topic created this way should then be consumable by its
+# share group.
 
 setup_karafka
 
@@ -39,7 +39,7 @@ draw_routes(create_topics: false) do
       consumer ShareConsumer
     end
 
-    # Share topic without any declaration - should not be created by the CLI
+    # Share topic without an explicit declaration - created with the routing defaults
     topic DT.topics[2] do
       active(false)
       consumer ShareConsumer
@@ -59,7 +59,7 @@ created = cluster_topics.to_h { |topic| [topic.fetch(:topic_name), topic.fetch(:
 
 assert_equal 1, created.fetch(DT.topics[0])
 assert_equal 3, created.fetch(DT.topics[1])
-assert !created.key?(DT.topics[2])
+assert_equal 1, created.fetch(DT.topics[2])
 
 # setup_share_group would try to create the topic again, so we only configure the group offset
 # reset here so the already produced records are delivered

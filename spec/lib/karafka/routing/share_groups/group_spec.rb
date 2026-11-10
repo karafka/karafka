@@ -69,7 +69,6 @@ RSpec.describe Karafka::Routing::ShareGroups::Group do
       end
     end
 
-    # Declarative topics use the same routing bridge for both modes
     %i[declaratives config].each do |feature|
       it "expect both consumer and share topics to respond to :#{feature}" do
         expect(consumer_topic).to respond_to(feature)

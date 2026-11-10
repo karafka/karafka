@@ -5,7 +5,7 @@ module Karafka
     module Features
       module ConsumerGroups
         class Declaratives < Base
-          # Bridge module prepended onto the consumer-group topic.
+          # Bridge module prepended onto the consumer-group and share-group topics.
           # The config(...) method forwards to the Declaratives subsystem, creating or retrieving
           # a Karafka::Declaratives::Topic in the repository. This preserves backwards compatibility
           # while the actual declarative state lives in Karafka::Declaratives.
