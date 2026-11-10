@@ -160,3 +160,12 @@ en:
       headers_schedule_target_epoch_too_far_in_future: 'scheduling is too far in the future (schedule_target_epoch must be Unix time in seconds)'
       headers_format: are not correct
       not_a_scheduled_messages_topic: 'the envelope topic is not a scheduled messages topic'
+
+    admin_dead_letter_queues_copy:
+      missing: needs to be present
+      topic_name_format: needs to be a non-empty string
+      target_topic_name_format: needs to be nil or a non-empty string
+      partitions_format: needs to be nil or a non-empty array of unique non-negative integers
+      start_offset_format: needs to be a non-negative integer or a time
+      end_offset_format: needs to be nil or a non-negative integer
+      required_with_custom_kafka: producer needs to be provided with a custom kafka configuration

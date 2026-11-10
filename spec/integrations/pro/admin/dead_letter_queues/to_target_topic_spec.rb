@@ -28,17 +28,15 @@
 # License: https://karafka.io/docs/Pro-License-Comm/
 # Contact: contact@karafka.io
 
-# Karafka::Admin.copy_dead_letter_queue without a target topic should copy messages the Pro DLQ
-# dispatched back to their source topic and partition, with the original key and headers, without
-# the DLQ source headers and with the replay count header. A message that fails again carries the
-# replay count to the DLQ, so a second copy increments it.
+# Karafka::Pro::Admin::DeadLetterQueues.copy with a target topic should copy messages the Pro DLQ
+# dispatched to that topic instead of their source topic, keeping the original key and headers.
 
 setup_karafka(allow_errors: %w[consumer.consume.error])
 
 class Consumer < Karafka::BaseConsumer
   def consume
     messages.each do |message|
-      raise StandardError if message.raw_payload == DT[:failing]
+      raise StandardError if message.offset == 1
 
       mark_as_consumed message
     end
@@ -47,7 +45,6 @@ end
 
 draw_routes do
   topic DT.topics[0] do
-    config(partitions: 2)
     consumer Consumer
     dead_letter_queue(topic: DT.topics[1], max_retries: 0)
   end
@@ -57,46 +54,33 @@ draw_routes do
   end
 end
 
-elements = DT.uuids(5)
-DT[:failing] = elements[2]
+Karafka::Admin.create_topic(DT.topics[2], 1, 1)
 
-# This key alone would go to partition 0, so the copy must use the source partition
-produce_many(DT.topics[0], elements, partition: 1, key: "key1", headers: { "user" => "value" })
+elements = DT.uuids(3)
+produce_many(DT.topics[0], elements, key: "key", headers: { "user" => "value" })
 
-# The message is copied while the app runs, fails again and goes back to the DLQ with its replay
-# count
-start_karafka_and_wait_until(sleep: 0.5) do
-  dlq_high = Karafka::Admin.read_watermark_offsets(DT.topics[1], 0).last
-
-  if dlq_high >= 1 && !DT.key?(:copied)
-    DT[:copied] = Karafka::Admin.copy_dead_letter_queue(DT.topics[1])
-  end
-
-  dlq_high >= 2
+start_karafka_and_wait_until do
+  Karafka::Admin.read_watermark_offsets(DT.topics[1], 0).last >= 1
 end
-
-assert_equal 1, DT[:copied]
-
-replayed = Karafka::Admin.read_topic(DT.topics[0], 1, 1, 5).first
-
-assert_equal elements[2], replayed.raw_payload
-assert_equal "key1", replayed.raw_key
-assert_equal({ "user" => "value", "replay_count" => "1" }, replayed.raw_headers)
-assert_equal [0, 0], Karafka::Admin.read_watermark_offsets(DT.topics[0], 0)
-
-dlq_message = Karafka::Admin.read_topic(DT.topics[1], 0, 1, 1).first
-
-assert_equal "1", dlq_message.raw_headers["replay_count"]
-assert_equal "5", dlq_message.raw_headers["source_offset"]
 
 # Karafka closes its producer when it stops
 producer = WaterDrop::Producer.new do |config|
   config.kafka = Karafka::Setup::AttributesMap.producer(Karafka::App.config.kafka.dup)
 end
 
-copied = Karafka::Admin.copy_dead_letter_queue(DT.topics[1], start_offset: 1, producer: producer)
+copied = Karafka::Pro::Admin::DeadLetterQueues.copy(
+  DT.topics[1],
+  target_topic_name: DT.topics[2],
+  producer: producer
+)
 
 assert_equal 1, copied
-assert_equal "2", Karafka::Admin.read_topic(DT.topics[0], 1, 1, 6).first.raw_headers["replay_count"]
+
+replayed = Karafka::Admin.read_topic(DT.topics[2], 0, 10, 0)
+
+assert_equal [elements[1]], replayed.map(&:raw_payload)
+assert_equal "key", replayed.first.raw_key
+assert_equal({ "user" => "value", "replay_count" => "1" }, replayed.first.raw_headers)
+assert_equal 3, Karafka::Admin.read_watermark_offsets(DT.topics[0], 0).last
 
 producer.close

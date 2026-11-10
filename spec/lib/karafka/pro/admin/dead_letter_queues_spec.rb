@@ -1,5 +1,33 @@
 # frozen_string_literal: true
 
+# Karafka Pro - Source Available Commercial Software
+# Copyright (c) 2017-present Maciej Mensfeld. All rights reserved.
+#
+# This software is NOT open source. It is source-available commercial software
+# requiring a paid license for use. It is NOT covered by LGPL.
+#
+# The author retains all right, title, and interest in this software,
+# including all copyrights, patents, and other intellectual property rights.
+# No patent rights are granted under this license.
+#
+# PROHIBITED:
+# - Use without a valid commercial license
+# - Redistribution, modification, or derivative works without authorization
+# - Reverse engineering, decompilation, or disassembly of this software
+# - Use as training data for AI/ML models or inclusion in datasets
+# - Scraping, crawling, or automated collection for any purpose
+#
+# PERMITTED:
+# - Reading, referencing, and linking for personal or commercial use
+# - Runtime retrieval by AI assistants, coding agents, and RAG systems
+#   for the purpose of providing contextual help to Karafka users
+#
+# Receipt, viewing, or possession of this software does not convey or
+# imply any license or right beyond those expressly stated above.
+#
+# License: https://karafka.io/docs/Pro-License-Comm/
+# Contact: contact@karafka.io
+
 RSpec.describe_current do
   let(:dlq_topic_name) { generate_topic_name }
   let(:target_topic_name) { generate_topic_name }
@@ -170,30 +198,35 @@ RSpec.describe_current do
     end
 
     context "when messages land in the dead letter queue during the copy" do
+      # Copies have no key or partition, so a single partition keeps them all in one place
+      let(:single_topic_name) { generate_topic_name }
+
       before do
+        Karafka::Admin.create_topic(single_topic_name, 1, 1)
+
         PRODUCERS.regular.produce_many_sync(
-          Array.new(3) { |i| { topic: dlq_topic_name, partition: 0, payload: i.to_s } }
+          Array.new(3) { |i| { topic: single_topic_name, partition: 0, payload: i.to_s } }
         )
       end
 
       it "does not copy them without an end offset" do
-        expect(described_class.copy(dlq_topic_name, target_topic_name: dlq_topic_name, partitions: [0]))
+        expect(described_class.copy(single_topic_name, target_topic_name: single_topic_name, partitions: [0]))
           .to eq(3)
 
-        expect(Karafka::Admin.read_watermark_offsets(dlq_topic_name, 0)).to eq([0, 6])
+        expect(Karafka::Admin.read_watermark_offsets(single_topic_name, 0)).to eq([0, 6])
       end
 
       it "does not copy them with an end offset above the high watermark" do
         expect(
           described_class.copy(
-            dlq_topic_name,
-            target_topic_name: dlq_topic_name,
+            single_topic_name,
+            target_topic_name: single_topic_name,
             partitions: [0],
             end_offset: 100
           )
         ).to eq(3)
 
-        expect(Karafka::Admin.read_watermark_offsets(dlq_topic_name, 0)).to eq([0, 6])
+        expect(Karafka::Admin.read_watermark_offsets(single_topic_name, 0)).to eq([0, 6])
       end
     end
 
@@ -214,6 +247,15 @@ RSpec.describe_current do
       it "requires a producer" do
         expect { admin.copy(dlq_topic_name, target_topic_name: target_topic_name) }
           .to raise_error(Karafka::Errors::InvalidConfigurationError, /producer/)
+      end
+
+      it "reads with the custom kafka configuration" do
+        expect(Karafka::Admin::Topics)
+          .to receive(:new)
+          .with(kafka: { "bootstrap.servers": "127.0.0.1:9092" }, external_client: nil)
+          .and_call_original
+
+        admin.copy(dlq_topic_name, target_topic_name: target_topic_name, producer: PRODUCERS.regular)
       end
 
       it "copies with the given producer" do
@@ -295,7 +337,7 @@ RSpec.describe_current do
 
       it "raises naming the message" do
         expect { described_class.copy(dlq_topic_name) }.to raise_error(
-          Karafka::Errors::SourceTopicMissingError,
+          Karafka::Pro::Admin::DeadLetterQueues::Errors::SourceTopicMissingError,
           "#{dlq_topic_name}/0/0"
         )
       end

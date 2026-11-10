@@ -324,40 +324,6 @@ module Karafka
         )
       end
 
-      # Copies (replays) messages of a dead letter queue topic to their source topic or to a
-      # given target topic
-      #
-      # @param topic_name [String] dead letter queue topic name
-      # @param target_topic_name [String, nil] topic to copy all the messages to. When nil, each
-      #   message is copied to its Pro DLQ `source_topic` header
-      # @param partitions [Array<Integer>, nil] partitions to copy from. All when nil
-      # @param start_offset [Integer, Time] offset (inclusive) or time from which to copy
-      # @param end_offset [Integer, nil] offset (exclusive) until which to copy. When nil, the
-      #   high watermark offset at the time of the call
-      # @param producer [WaterDrop::Producer, nil] producer to dispatch with. `Karafka.producer`
-      #   when nil
-      # @return [Integer] number of copied messages
-      # @note `Karafka.producer` dispatches to the app cluster, so an admin with a custom `kafka`
-      #   configuration requires `producer:`
-      # @see DeadLetterQueues#copy
-      def copy_dead_letter_queue(
-        topic_name,
-        target_topic_name: nil,
-        partitions: nil,
-        start_offset: 0,
-        end_offset: nil,
-        producer: nil
-      )
-        new.copy_dead_letter_queue(
-          topic_name,
-          target_topic_name: target_topic_name,
-          partitions: partitions,
-          start_offset: start_offset,
-          end_offset: end_offset,
-          producer: producer
-        )
-      end
-
       # @return [Rdkafka::Metadata] cluster metadata info
       def cluster_info
         new.cluster_info
@@ -547,33 +513,6 @@ module Karafka
         topic: topic,
         to: replication_factor,
         brokers: brokers
-      )
-    end
-
-    # @param topic_name [String] dead letter queue topic name
-    # @param target_topic_name [String, nil] topic to copy all the messages to
-    # @param partitions [Array<Integer>, nil] partitions to copy from
-    # @param start_offset [Integer, Time] offset (inclusive) or time from which to copy
-    # @param end_offset [Integer, nil] offset (exclusive) until which to copy
-    # @param producer [WaterDrop::Producer, nil] producer to dispatch with. Required with a
-    #   custom `kafka` configuration
-    # @return [Integer] number of copied messages
-    # @see DeadLetterQueues#copy
-    def copy_dead_letter_queue(
-      topic_name,
-      target_topic_name: nil,
-      partitions: nil,
-      start_offset: 0,
-      end_offset: nil,
-      producer: nil
-    )
-      DeadLetterQueues.new(kafka: @custom_kafka, external_client: @external_client).copy(
-        topic_name,
-        target_topic_name: target_topic_name,
-        partitions: partitions,
-        start_offset: start_offset,
-        end_offset: end_offset,
-        producer: producer
       )
     end
 

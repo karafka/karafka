@@ -99,10 +99,6 @@ module Karafka
     # Kafka accepts such deletions only for topics no active member subscribes to.
     ConsumerGroupSubscribedToTopicError = Class.new(BaseError)
 
-    # Raised when copying a dead letter queue message without a target topic and the message
-    # has no `source_topic` header to copy it to
-    SourceTopicMissingError = Class.new(BaseError)
-
     # For internal usage only
     # Raised when we run operations that require certain result but despite successfully finishing
     # it is not yet available due to some synchronization mechanisms and caches
