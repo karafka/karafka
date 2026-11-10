@@ -475,6 +475,32 @@ RSpec.describe_current do
         expect(buffer_state).to eq([topic_name, 1] => { offsets: [0], eof: false })
       end
     end
+
+    context "when partitions were revoked and assigned back during the first poll" do
+      let(:drained) { [message(0, 1)] }
+
+      let(:assignment) do
+        {
+          subscription_group_id: subscription_group.id,
+          tpl: Rdkafka::Consumer::TopicPartitionList.new(
+            topic_name => [Rdkafka::Consumer::Partition.new(0, nil)]
+          )
+        }
+      end
+
+      before do
+        allow(kafka).to receive(:poll) do
+          client.rebalance_manager.on_rebalance_partitions_revoked(assignment)
+          client.rebalance_manager.on_rebalance_partitions_assigned(assignment)
+          first
+        end
+      end
+
+      it "expect to keep the message of the new assignment and not to drain" do
+        expect(buffer_state).to eq([topic_name, 0] => { offsets: [0], eof: false })
+        expect(kafka).not_to have_received(:poll_batch_nb)
+      end
+    end
   end
 
   describe "#reset" do

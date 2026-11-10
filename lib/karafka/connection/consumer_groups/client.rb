@@ -151,7 +151,9 @@ module Karafka
             else
               @buffer << response
 
-              eofed = drain(max_messages - @buffer.size)
+              # After a rebalance in this poll, the batch ends below without draining, so the drain
+              # clean-up never removes messages of partitions assigned back in that rebalance
+              eofed = drain(max_messages - @buffer.size) unless @rebalance_manager.changed?
             end
 
             # Upon polling rebalance manager might have been updated.
@@ -750,7 +752,9 @@ module Karafka
             end
           end
 
-          # Revocation callbacks run inside of the drain call, before its messages reach the buffer
+          # Revocation callbacks run inside of the drain call, before its messages reach the buffer.
+          # The drain runs only without an earlier rebalance in this batch, so all the revocations
+          # are from the drain itself
           @rebalance_manager.remove_revoked_and_duplicated_messages if @rebalance_manager.changed?
 
           eofed
