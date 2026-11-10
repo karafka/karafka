@@ -22,7 +22,7 @@ module Karafka
         #   and values are strings, as the cluster returns them.
         # @note Config names are read from an existing topic. When there is no topic we can
         #   describe, the cluster validates the creation of the topics instead. Nothing is
-        #   reported when we are not allowed to create them either.
+        #   reported for a topic we are not allowed to create either.
         def call
           topics = @declaratives_topics.reject { |topic| topic.declaratives.details.empty? }
 
@@ -56,23 +56,22 @@ module Karafka
         # @param topics [Array<Karafka::Declaratives::Topic>] declarative topics with configs,
         #   none of which exists, as otherwise we would describe it
         # @return [Hash{Karafka::Declaratives::Topic => Hash{String => String}}] declarative
-        #   topics with their configs that the cluster does not know. Empty when we are not
-        #   allowed to create topics.
+        #   topics with their configs that the cluster does not know. Topics we are not allowed
+        #   to create are skipped.
         def find_unknown_on_create(topics)
           Admin.with_admin do |admin|
             new_topics_configs = Cluster::NewTopicsConfigs.new(admin)
 
             topics.each_with_object({}) do |topic, unknown|
               configs = configs(topic)
-              names = new_topics_configs.unknown(topic.name, configs)
+              names = new_topics_configs.unknown(topic, configs)
 
               unknown[topic] = configs.slice(*names) unless names.empty?
+            # We may be allowed to create only some of the topics
+            rescue Rdkafka::RdkafkaError => e
+              raise unless e.code == :topic_authorization_failed
             end
           end
-        rescue Rdkafka::RdkafkaError => e
-          raise unless e.code == :topic_authorization_failed
-
-          {}
         end
 
         # @param topics [Array<Karafka::Declaratives::Topic>] declarative topics with configs

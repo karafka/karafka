@@ -97,6 +97,29 @@ RSpec.describe_current do
       it { expect(unknown_configs.call).to eq({}) }
     end
 
+    context "when we are not allowed to create only one of the topics" do
+      let(:denied_topic) { Karafka::Declaratives::Topic.new(generate_topic_name) }
+      let(:declaratives_topics) { [denied_topic, missing_topic] }
+
+      before do
+        denied_topic.details = { "retention.ms": 1 }
+
+        allow(Karafka::Admin).to receive(:with_admin).and_wrap_original do |original, &block|
+          original.call do |admin|
+            allow(admin).to receive(:create_topic).and_call_original
+            allow(admin)
+              .to receive(:create_topic)
+              .with(denied_topic.name, any_args)
+              .and_raise(error)
+
+            block.call(admin)
+          end
+        end
+      end
+
+      it { expect(unknown_configs.call).to eq(missing_topic => { "retention.msx" => "1" }) }
+    end
+
     context "when validating the creation of topics fails for a different reason" do
       let(:other_error) { Rdkafka::RdkafkaError.new(Rdkafka::Bindings::RD_KAFKA_RESP_ERR__FATAL) }
 
