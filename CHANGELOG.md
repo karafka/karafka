@@ -1,6 +1,6 @@
 # Karafka Framework Changelog
 
-## 2.6.2 (Unreleased)
+## 2.7.0 (Unreleased)
 - **[EOL]** Drop Ruby 3.2 support; require Ruby 3.3+.
 - **[EOL]** Drop Rails 7.0 and 7.1 compatibility; require Rails 7.2+.
 - **[Feature]** Add `Instrumentation::Vendors::NewRelic::MetricsListener` for publishing Karafka metrics to New Relic. Context is encoded in the metric name, as New Relic custom metrics do not support tags (svyatmuzyka).
@@ -19,6 +19,7 @@
 - [Enhancement] Log only the top two backtrace lines for `librdkafka.error` in the `LoggerListener`, so unreachable brokers no longer flood the logs.
 - [Enhancement] Include the topic, partition and offset from librdkafka error details (e.g. a message that failed to decompress) in `LoggerListener` error logs. Only librdkafka errors are used, and the consumer's own context takes precedence.
 - [Enhancement] Instrument `client.topics.unknown` and log it at the info level when a subscribed topic does not exist yet and `allow.auto.create.topics` is on, instead of ignoring it silently.
+- [Enhancement] Take the messages librdkafka has already fetched with one non-blocking `poll_batch_nb` call after each blocking poll, instead of one poll per message. This lowers the CPU time per consumed message. A partition EOF now ends the batch after the messages taken together with it, and a polling error among them is handled without the retry backoff.
 - [Change] Raise `UnsupportedOptionError` with the Ruby engine name (e.g. `jruby`) when Swarm runs on a Ruby without `Process.fork`, also when `Swarm::Supervisor#run` is called directly, before any work is done.
 - [Change] Require `karafka-rdkafka` `>=` `0.32.0`. A failed consumer close is now reported as a `librdkafka.error` on `error.occurred` instead of being dropped. A close fails in practice only after a fatal error, e.g. when the consumer was fenced by a static membership conflict. Such an error is usually reported first when polling, so it is reported twice: as `connection.client.poll.error` and again on close.
 - [Change] Fail `karafka topics align` and `migrate` (exit 1) when an existing declarative topic has config keys the cluster does not know (e.g. a typo), naming them, instead of skipping them silently. `plan` lists such keys as unknown and fails too.

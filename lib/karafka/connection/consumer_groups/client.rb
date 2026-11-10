@@ -124,6 +124,8 @@ module Karafka
           max_messages = @subscription_group.max_messages
 
           loop do
+            eofed = false
+
             time_poll.start
 
             # Don't fetch more messages if we do not have any time left
@@ -148,6 +150,8 @@ module Karafka
               nil
             else
               @buffer << response
+
+              eofed = drain(max_messages - @buffer.size)
             end
 
             # Upon polling rebalance manager might have been updated.
@@ -175,7 +179,7 @@ module Karafka
             # signaling to propagate it asap
             # Worth keeping in mind, that the rebalance manager might have been updated despite no
             # messages being returned during a poll
-            break if response.nil? || response.is_a?(Hash)
+            break if response.nil? || response.is_a?(Hash) || eofed
           end
 
           @buffer
@@ -701,9 +705,65 @@ module Karafka
           # tick interval time limitations and not because time run out without any data
           time_poll.exceeded? ? nil : :tick_time
         rescue Rdkafka::RdkafkaError => e
-          early_report = false
-
           retryable = time_poll.attempts <= MAX_POLL_RETRIES && time_poll.retryable?
+
+          case poll_error_action(e, retryable)
+          when :eof then return e.details
+          when :skip then return nil
+          when :raise then raise
+          end
+
+          # Most of the errors can be safely ignored as librdkafka will recover from them
+          # See https://github.com/edenhill/librdkafka/issues/1987#issuecomment-422008750
+          # See https://github.com/edenhill/librdkafka/wiki/Error-handling
+
+          time_poll.checkpoint
+          time_poll.backoff
+
+          # poll may not only return message but also can run callbacks and if they changed,
+          # despite the errors we need to delegate to the other app parts
+          @rebalance_manager.changed? ? nil : retry
+        end
+
+        # Takes, in one non-blocking call, the messages librdkafka has already fetched, so we do not
+        # cross into it once per message. Every item is handled in order, because the ones after
+        # an error are already dequeued.
+        #
+        # @param room [Integer] how many messages we can still take into the buffer
+        # @return [Boolean] true if any of the partitions reached eof
+        def drain(room)
+          return false unless room.positive?
+
+          eofed = false
+
+          kafka.poll_batch_nb(0, max_items: room).each do |item|
+            next @buffer << item unless item.is_a?(Rdkafka::RdkafkaError)
+
+            # The drain neither waits nor retries, so the time budget does not apply. A repeated
+            # error reaches the next blocking `#poll` that owns the retries and backoff
+            case poll_error_action(item, true)
+            when :eof
+              @buffer.eof(item.details[:topic], item.details[:partition])
+              eofed = true
+            when :raise
+              raise item
+            end
+          end
+
+          # Revocation callbacks run inside of the drain call, before its messages reach the buffer
+          @rebalance_manager.remove_revoked_and_duplicated_messages if @rebalance_manager.changed?
+
+          eofed
+        end
+
+        # Instruments a polling error and decides how it should be handled
+        #
+        # @param error [Rdkafka::RdkafkaError] error from polling
+        # @param retryable [Boolean] can we still retry given our time and attempts
+        # @return [Symbol] `:eof` when partition end was reached, `:skip` when the error should be
+        #   ignored, `:raise` when it should be raised and `:retry` when we can poll again
+        def poll_error_action(error, retryable)
+          early_report = false
 
           # There are retryable issues on which we want to report fast as they are source of
           # problems and can mean some bigger system instabilities
@@ -711,7 +771,7 @@ module Karafka
           # We want to report early on max poll interval exceeding because it may mean that the
           # underlying processing is taking too much time and it is not LRJ
 
-          case e.code
+          case error.code
           when *EARLY_REPORT_ERRORS
             early_report = true
           # See
@@ -724,11 +784,11 @@ module Karafka
                 "client.topics.unknown",
                 caller: self,
                 subscription_group: @subscription_group,
-                topic: e.details[:topic],
-                error: e
+                topic: error.details[:topic],
+                error: error
               )
 
-              return nil
+              return :skip
             end
 
             early_report = true
@@ -741,33 +801,22 @@ module Karafka
           # not expect a lof of lag and want to quickly move to processing.
           # We can also pass the eof notion to the consumers for improved decision making.
           when :partition_eof
-            return e.details
+            return :eof
           end
 
           # Any fatal error should always cause early report
-          early_report = true if e.fatal?
+          early_report = true if error.fatal?
 
           if early_report || !retryable
             Karafka.monitor.instrument(
               "error.occurred",
               caller: self,
-              error: e,
+              error: error,
               type: "connection.client.poll.error"
             )
           end
 
-          raise unless retryable
-
-          # Most of the errors can be safely ignored as librdkafka will recover from them
-          # See https://github.com/edenhill/librdkafka/issues/1987#issuecomment-422008750
-          # See https://github.com/edenhill/librdkafka/wiki/Error-handling
-
-          time_poll.checkpoint
-          time_poll.backoff
-
-          # poll may not only return message but also can run callbacks and if they changed,
-          # despite the errors we need to delegate to the other app parts
-          @rebalance_manager.changed? ? nil : retry
+          retryable ? :retry : :raise
         end
 
         # Builds a new rdkafka consumer instance based on the subscription group configuration

@@ -253,6 +253,229 @@ RSpec.describe_current do
     end
   end
 
+  describe "#batch_poll draining of prefetched messages" do
+    let(:kafka) { instance_double(Rdkafka::Consumer, events_poll: nil) }
+    let(:topic_name) { SecureRandom.hex(6) }
+    let(:max_messages) { 100 }
+    let(:first) { build(:kafka_fetched_message, topic: topic_name, partition: 0, offset: 0) }
+    let(:drained) { [] }
+
+    let(:buffer_state) do
+      state = {}
+      client.batch_poll.each do |topic, partition, messages, eof|
+        state[[topic, partition]] = { offsets: messages.map(&:offset), eof: eof }
+      end
+      state
+    end
+
+    def message(partition, offset)
+      build(:kafka_fetched_message, topic: topic_name, partition: partition, offset: offset)
+    end
+
+    def eof_error(partition, offset)
+      Rdkafka::RdkafkaError.new(
+        -191,
+        details: { topic: topic_name, partition: partition, offset: offset }
+      )
+    end
+
+    before do
+      allow(client).to receive(:kafka).and_return(kafka)
+      allow(subscription_group).to receive_messages(max_wait_time: 100, max_messages: max_messages)
+      allow(kafka).to receive(:poll).and_return(first, nil)
+      allow(kafka).to receive(:poll_batch_nb).and_return(drained)
+      allow(Karafka.monitor).to receive(:instrument).and_call_original
+    end
+
+    context "when only messages are ready" do
+      let(:drained) { [message(0, 1), message(0, 2)] }
+
+      it "expect to drain them into the buffer after the first message" do
+        expect(buffer_state).to eq([topic_name, 0] => { offsets: [0, 1, 2], eof: false })
+      end
+
+      it "expect to drain without waiting and only as much as there is room for" do
+        client.batch_poll
+        expect(kafka).to have_received(:poll_batch_nb).with(0, max_items: 99)
+      end
+    end
+
+    context "when the first message fills the buffer" do
+      let(:max_messages) { 1 }
+
+      it "expect not to drain" do
+        client.batch_poll
+        expect(kafka).not_to have_received(:poll_batch_nb)
+      end
+    end
+
+    context "when nothing was polled" do
+      before { allow(kafka).to receive(:poll).and_return(nil) }
+
+      it "expect not to drain" do
+        client.batch_poll
+        expect(kafka).not_to have_received(:poll_batch_nb)
+      end
+    end
+
+    context "when partition eof is in the middle of the drain" do
+      let(:drained) { [message(0, 1), eof_error(0, 2), message(1, 0)] }
+
+      it "expect to keep all the messages and mark the eof" do
+        expect(buffer_state).to eq(
+          [topic_name, 0] => { offsets: [0, 1], eof: true },
+          [topic_name, 1] => { offsets: [0], eof: false }
+        )
+      end
+
+      it "expect to finish the batch after the drain" do
+        client.batch_poll
+        expect(kafka).to have_received(:poll).once
+      end
+    end
+
+    context "when a message of the same partition comes after its eof" do
+      let(:drained) { [eof_error(0, 1), message(0, 1)] }
+
+      it "expect not to mark the partition as eof" do
+        expect(buffer_state).to eq([topic_name, 0] => { offsets: [0, 1], eof: false })
+      end
+    end
+
+    context "when many partitions reach eof in one drain" do
+      let(:drained) { [message(1, 0), eof_error(0, 1), eof_error(1, 1)] }
+
+      it "expect to mark all of them" do
+        expect(buffer_state).to eq(
+          [topic_name, 0] => { offsets: [0], eof: true },
+          [topic_name, 1] => { offsets: [0], eof: true }
+        )
+      end
+    end
+
+    context "when there is no eof in the drain" do
+      let(:drained) { [message(0, 1)] }
+
+      it "expect to continue polling" do
+        client.batch_poll
+        expect(kafka).to have_received(:poll).twice
+      end
+    end
+
+    context "when the drain has an unknown topic error and auto creation is on" do
+      let(:error) { Rdkafka::RdkafkaError.new(3, details: { topic: topic_name }) }
+      let(:drained) { [error, message(0, 1)] }
+
+      before do
+        allow(subscription_group).to receive(:kafka)
+          .and_return(subscription_group.kafka.merge("allow.auto.create.topics": true))
+      end
+
+      it "expect to keep the messages after it" do
+        expect(buffer_state).to eq([topic_name, 0] => { offsets: [0, 1], eof: false })
+      end
+
+      it "expect to instrument the unknown topic event" do
+        client.batch_poll
+
+        expect(Karafka.monitor).to have_received(:instrument).with(
+          "client.topics.unknown",
+          caller: client,
+          subscription_group: subscription_group,
+          topic: topic_name,
+          error: error
+        )
+      end
+
+      it "expect not to report it as an error" do
+        client.batch_poll
+        expect(Karafka.monitor).not_to have_received(:instrument).with("error.occurred", any_args)
+      end
+    end
+
+    context "when the drain has an early reported error" do
+      let(:error) { Rdkafka::RdkafkaError.new(-147) }
+      let(:drained) { [error, message(0, 1)] }
+
+      it "expect to keep the messages after it" do
+        expect(buffer_state).to eq([topic_name, 0] => { offsets: [0, 1], eof: false })
+      end
+
+      it "expect to report it as an error" do
+        client.batch_poll
+
+        expect(Karafka.monitor).to have_received(:instrument).with(
+          "error.occurred",
+          caller: client,
+          error: error,
+          type: "connection.client.poll.error"
+        )
+      end
+    end
+
+    context "when the drain has a retryable error that is not early reported" do
+      let(:drained) { [Rdkafka::RdkafkaError.new(-185), message(0, 1)] }
+
+      it "expect to keep the messages after it" do
+        expect(buffer_state).to eq([topic_name, 0] => { offsets: [0, 1], eof: false })
+      end
+
+      it "expect not to report it" do
+        client.batch_poll
+        expect(Karafka.monitor).not_to have_received(:instrument).with("error.occurred", any_args)
+      end
+    end
+
+    context "when the drain has an error that cannot be retried" do
+      let(:error) { Rdkafka::RdkafkaError.new(3, details: { topic: topic_name }) }
+      let(:drained) { [message(0, 1), error] }
+
+      before do
+        allow(subscription_group).to receive(:kafka)
+          .and_return(subscription_group.kafka.merge("allow.auto.create.topics": false))
+      end
+
+      it "expect to raise it" do
+        expect { client.batch_poll }.to raise_error(error)
+      end
+
+      it "expect to report it as an error" do
+        client.batch_poll
+      rescue Rdkafka::RdkafkaError
+        expect(Karafka.monitor).to have_received(:instrument).with(
+          "error.occurred",
+          caller: client,
+          error: error,
+          type: "connection.client.poll.error"
+        )
+      end
+    end
+
+    context "when partitions are revoked inside of the drain" do
+      let(:drained) { [message(0, 1), message(1, 0), message(1, 0)] }
+
+      let(:revocation) do
+        {
+          subscription_group_id: subscription_group.id,
+          tpl: Rdkafka::Consumer::TopicPartitionList.new(
+            topic_name => [Rdkafka::Consumer::Partition.new(0, nil)]
+          )
+        }
+      end
+
+      before do
+        allow(kafka).to receive(:poll_batch_nb) do
+          client.rebalance_manager.on_rebalance_partitions_revoked(revocation)
+          drained
+        end
+      end
+
+      it "expect to remove the drained messages of the revoked partitions and duplicates" do
+        expect(buffer_state).to eq([topic_name, 1] => { offsets: [0], eof: false })
+      end
+    end
+  end
+
   describe "#reset" do
     let(:kafka) { instance_double(Rdkafka::Consumer) }
     let(:sg_id) { subscription_group.id }
