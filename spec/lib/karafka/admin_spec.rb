@@ -112,6 +112,29 @@ RSpec.describe_current do
     end
   end
 
+  describe "#copy_dead_letter_queue" do
+    it "delegates to Admin::DeadLetterQueues#copy" do
+      expect_any_instance_of(Karafka::Admin::DeadLetterQueues)
+        .to receive(:copy)
+        .with(
+          name,
+          target_topic_name: "target",
+          partitions: [0],
+          start_offset: 5,
+          end_offset: 10,
+          producer: nil
+        )
+
+      described_class.copy_dead_letter_queue(
+        name,
+        target_topic_name: "target",
+        partitions: [0],
+        start_offset: 5,
+        end_offset: 10
+      )
+    end
+  end
+
   # More specs in the integrations
   describe "#seek_consumer_group" do
     let(:group_id) { SecureRandom.uuid }
