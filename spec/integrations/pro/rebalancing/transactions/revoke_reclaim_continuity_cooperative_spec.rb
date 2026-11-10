@@ -50,6 +50,7 @@ class Consumer < Karafka::BaseConsumer
   end
 
   def consume
+    cycled = !DT[:attempts].empty?
     offsets = []
     counters = []
 
@@ -65,7 +66,8 @@ class Consumer < Karafka::BaseConsumer
       mark_as_consumed(messages.last) unless DT.key?(:marked)
     end
 
-    DT[:marked] = true
+    # Keep marking through the first rebalance cycle, so rebalances meet open marking transactions
+    DT[:marked] = true if cycled
     @buffer.concat(offsets)
 
     # Only batches of committed transactions are recorded, so a lost retry of an aborted batch
