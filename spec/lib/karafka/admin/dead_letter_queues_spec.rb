@@ -66,6 +66,31 @@ RSpec.describe_current do
       end
     end
 
+    context "when the start offset is a time" do
+      let(:now_ms) { (Time.now.to_f * 1_000).to_i }
+
+      before do
+        PRODUCERS.regular.produce_many_sync(
+          [
+            { topic: dlq_topic_name, partition: 0, payload: "old", timestamp: now_ms - 600_000 },
+            { topic: dlq_topic_name, partition: 0, payload: "new", timestamp: now_ms }
+          ]
+        )
+      end
+
+      it "copies the messages from that time" do
+        expect(
+          described_class.copy(
+            dlq_topic_name,
+            target_topic_name: target_topic_name,
+            start_offset: Time.at((now_ms - 60_000) / 1_000.0)
+          )
+        ).to eq(1)
+
+        expect(target_messages.map(&:raw_payload)).to eq(%w[new])
+      end
+    end
+
     context "when the end offset is above the high watermark" do
       before do
         PRODUCERS.regular.produce_many_sync(
