@@ -63,8 +63,6 @@ DT[:failing] = elements[2]
 # This key alone would go to partition 0, so the copy must use the source partition
 produce_many(DT.topics[0], elements, partition: 1, key: "key1", headers: { "user" => "value" })
 
-# The message is copied while the app runs, fails again and goes back to the DLQ with its replay
-# count
 start_karafka_and_wait_until(sleep: 0.5) do
   dlq_high = Karafka::Admin.read_watermark_offsets(DT.topics[1], 0).last
 

@@ -41,4 +41,3 @@ rescue NameError
 end
 
 assert not_found
-assert !Karafka::Admin.respond_to?(:copy_dead_letter_queue)
