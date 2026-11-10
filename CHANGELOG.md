@@ -75,6 +75,7 @@
 - [Fix] Stop routing `defaults` from overwriting a topic's own `consumer`, `kafka`, `max_messages`, `max_wait_time`, `initial_offset` and `consumer_persistence`.
 - [Fix] Stop routing `kafka(inherit: true, ...)` from changing the given settings hash. A frozen hash raised `FrozenError` and a hash shared by many topics stopped inheriting the root `kafka` settings after the first topic.
 - [Fix] Fail `karafka topics` `plan`, `migrate`, `align`, `create`, `delete`, `repartition` and `reset` (exit 1) before changing anything when any declarative topic, also a missing or skipped one, has config keys the cluster does not know. They now need `DescribeConfigs` on declared topics with config.
+- [Fix] Redact `ssl.key.pem` (the client private key) in `karafka info --extended` output.
 
 ## 2.6.1 (2026-08-24)
 - **[Feature]** [Pro] Add an opt-in envelope encryption mode for Messages At Rest (`config.encryption.mode = :envelope`, requires openssl `>= 3.0`) without the RSA payload size limit. Upgrade all consuming processes before enabling.

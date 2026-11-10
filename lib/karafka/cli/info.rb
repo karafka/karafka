@@ -56,7 +56,7 @@ module Karafka
 
       # Kafka config keys whose values must be redacted in log output.
       # Matches librdkafka keys that carry passwords, tokens, or key material.
-      SENSITIVE_KAFKA_CONFIG_PATTERN = /password|secret|token|sasl\.oauthbearer\.client/i
+      SENSITIVE_KAFKA_CONFIG_PATTERN = /password|secret|token|sasl\.oauthbearer\.client|ssl\.key\.pem/i
 
       private_constant :SENSITIVE_KAFKA_CONFIG_PATTERN
 
