@@ -53,12 +53,11 @@
 - [Maintenance] Remove the `GC.compact` fallback from `Karafka::App.warmup`, as `Process.warmup` exists on every supported Ruby.
 - [Maintenance] Rename the internal `*_DEV_DEFAULTS` kafka defaults to `*_NON_PRODUCTION_DEFAULTS`, as they apply in every environment except `production`. Behavior is unchanged.
 - [Maintenance] Skip integration specs that cannot run on JRuby (fork, Swarm, Puma workers, `SIGQUIT`, C extension gems, consoles hit by a JRuby autoload bug) when `bin/integrations` runs on JRuby, and report them as skipped.
-- [Maintenance] Stabilize the hammered `AssignmentsTracker` generations integration spec by using 10 consumer groups instead of 100, so it no longer exceeds the shutdown timeout on a loaded CI runner.
+- [Maintenance] Stabilize the hammered `AssignmentsTracker` generations integration spec by using 10 consumer groups instead of 100, so it no longer exceeds the shutdown timeout on a loaded CI runner, and by reading generations from a background thread while the consumer groups get assignments.
 - [Maintenance] Stabilize the hammered `AssignmentsTracker` inspect integration spec by using 10 consumer groups instead of 101, so it no longer exceeds the shutdown timeout on a loaded CI runner, and by inspecting from a background thread while the groups get assignments.
 - [Maintenance] [Pro] Stabilize the cooperative-sticky transactional revoke and reclaim integration spec. A rebalance can bump the generation while a transaction is open, so its offset commit fails with `illegal_generation` and the batch is consumed again.
 - [Maintenance] [Pro] Stabilize the parallel segments LRJ revoke continuity integration spec. It could trigger the rebalance before segment 0 owned the partition, so nothing was revoked.
 - [Maintenance] [Pro] Stabilize the parallel segments throttling integration spec. It failed when the segment groups ran out of phase.
-- [Maintenance] Make the hammered `AssignmentsTracker` generations integration spec catch unsafe concurrent reads again by reading generations from a background thread while the groups get assignments.
 - [Fix] [Pro] Do not let healthy KIP-848 (`group.protocol=consumer`) multiplexed listeners that never received an assignment block dynamic scaling. With more listeners than partitions they stay in the `init` join state with a rebalance age of 0, so the manager never saw them as stable and kept them alive instead of scaling them down.
 - [Fix] Stop `CoordinatorsBuffer#@coordinators` from growing unbounded across rebalances by dropping a topic entry on revoke once it tracks no partitions (mirrors `PausesManager#delete`).
 - [Fix] Use `::JSON.parse` in the ActiveJob deserializer, so consuming ActiveJob messages works with the json gem `>= 3.0`.
