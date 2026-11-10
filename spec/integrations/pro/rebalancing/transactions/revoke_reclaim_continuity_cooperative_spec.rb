@@ -31,7 +31,7 @@
 # When a consumer goes into a non-cooperative-sticky rebalance and gets the partitions back,
 # it should not have duplicated data.
 
-setup_karafka do |config|
+setup_karafka(allow_errors: true) do |config|
   config.max_messages = 100
   config.kafka[:"transactional.id"] = SecureRandom.uuid
   config.kafka[:"partition.assignment.strategy"] = "cooperative-sticky"
@@ -40,6 +40,18 @@ end
 DT[:all] = {}
 DT[:data] = {}
 
+# A rebalance can bump the generation while a transaction is open. Its offset commit then fails
+# with illegal_generation, the transaction aborts and the batch is consumed again.
+Karafka.monitor.subscribe("error.occurred") do |event|
+  error = event[:error]
+
+  next if error.is_a?(Rdkafka::RdkafkaError) && error.code == :illegal_generation
+
+  Karafka.logger.fatal error
+  sleep(0.5)
+  exit! 8
+end
+
 class Consumer < Karafka::BaseConsumer
   def initialized
     @buffer = []
@@ -47,6 +59,7 @@ class Consumer < Karafka::BaseConsumer
 
   def consume
     DT[:running] = true
+    offsets = []
 
     transaction do
       messages.each do |message|
@@ -58,15 +71,15 @@ class Consumer < Karafka::BaseConsumer
 
         raise if @buffer.include?(message.offset)
 
-        @buffer << message.offset
+        offsets << message.offset
         produce_async(topic: DT.topics[1], payload: message.raw_payload)
       end
 
-      unless DT.key?(:marked)
-        mark_as_consumed(messages.last)
-        DT[:marked] = true
-      end
+      mark_as_consumed(messages.last) unless DT.key?(:marked)
     end
+
+    DT[:marked] = true
+    @buffer.concat(offsets)
   end
 end
 
