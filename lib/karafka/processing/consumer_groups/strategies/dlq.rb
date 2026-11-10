@@ -6,7 +6,7 @@ module Karafka
       module Strategies
         # When using dead letter queue, processing won't stop after defined number of retries
         # upon encountering non-critical errors but the messages that error will be moved to a
-        # separate topic with their payload and metadata, so they can be handled differently.
+        # separate topic with their payload, so they can be handled differently.
         module Dlq
           include Default
 
