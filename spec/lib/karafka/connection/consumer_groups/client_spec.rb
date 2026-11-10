@@ -431,6 +431,7 @@ RSpec.describe_current do
       let(:drained) { [message(0, 1), error] }
 
       before do
+        allow(Karafka::App).to receive(:running?).and_return(false)
         allow(subscription_group).to receive(:kafka)
           .and_return(subscription_group.kafka.merge("allow.auto.create.topics": false))
       end
