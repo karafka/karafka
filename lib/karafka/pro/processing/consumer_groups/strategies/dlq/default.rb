@@ -58,7 +58,9 @@ module Karafka
                 return super unless topic.dead_letter_queue.independent?
                 return false unless super
 
+                # The running attempt was already counted before consumption, so it becomes the first one
                 coordinator.pause_tracker.reset
+                coordinator.pause_tracker.increment
 
                 true
               ensure
@@ -76,7 +78,9 @@ module Karafka
                 return super unless topic.dead_letter_queue.independent?
                 return false unless super
 
+                # The running attempt was already counted before consumption, so it becomes the first one
                 coordinator.pause_tracker.reset
+                coordinator.pause_tracker.increment
 
                 true
               ensure
