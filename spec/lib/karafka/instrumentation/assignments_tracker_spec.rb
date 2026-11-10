@@ -277,6 +277,45 @@ RSpec.describe_current do
       expect(gens[topic1]).to be_frozen
     end
 
+    it "expect a returned snapshot not to change on later assignments" do
+      tracker.on_rebalance_partitions_assigned(assign_event)
+      gens = tracker.generations
+      tracker.on_rebalance_partitions_assigned(assign_event)
+
+      expect(gens[topic1]).to eq({ 0 => 1, 1 => 1, 2 => 1 })
+      expect(tracker.generations[topic1]).to eq({ 0 => 2, 1 => 2, 2 => 2 })
+    end
+
+    context "when an assignment is in progress" do
+      let(:entered) { Queue.new }
+      let(:release) { Queue.new }
+
+      before do
+        allow(subscription_group1.topics).to receive(:find).and_wrap_original do |original, *args|
+          entered << true
+          release.pop
+          original.call(*args)
+        end
+      end
+
+      it "expect to wait for it and return its result" do
+        writer = Thread.new { tracker.on_rebalance_partitions_assigned(assign_event) }
+        entered.pop
+
+        begin
+          reader = Thread.new { tracker.generations }
+          sleep(0.01) until reader.status != "run"
+
+          expect(reader).to be_alive
+        ensure
+          release << true
+          writer.join
+        end
+
+        expect(reader.value[topic1]).to eq({ 0 => 1, 1 => 1, 2 => 1 })
+      end
+    end
+
     context "when clear is called" do
       before do
         tracker.on_rebalance_partitions_assigned(assign_event)
