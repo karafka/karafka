@@ -9,6 +9,8 @@ RSpec.describe_current do
 
   describe "#copy" do
     before do
+      # Other specs can leave a custom producer as the app one
+      allow(Karafka).to receive(:producer).and_return(PRODUCERS.regular)
       Karafka::Admin.create_topic(dlq_topic_name, 2, 1)
       Karafka::Admin.create_topic(target_topic_name, 1, 1)
     end
