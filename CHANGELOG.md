@@ -58,6 +58,7 @@
 - [Maintenance] [Pro] Stabilize the cooperative-sticky transactional revoke and reclaim integration spec. A rebalance can bump the generation while a transaction is open, so its offset commit fails with `illegal_generation` and the batch is consumed again.
 - [Maintenance] [Pro] Stabilize the parallel segments LRJ revoke continuity integration spec. It could trigger the rebalance before segment 0 owned the partition, so nothing was revoked.
 - [Maintenance] [Pro] Stabilize the parallel segments throttling integration spec. It failed when the segment groups ran out of phase.
+- [Maintenance] Stabilize the setup config producer specs, which left `Karafka.producer` on a custom producer and made later produce specs time out.
 - [Fix] [Pro] Do not let healthy KIP-848 (`group.protocol=consumer`) multiplexed listeners that never received an assignment block dynamic scaling. With more listeners than partitions they stay in the `init` join state with a rebalance age of 0, so the manager never saw them as stable and kept them alive instead of scaling them down.
 - [Fix] Stop `CoordinatorsBuffer#@coordinators` from growing unbounded across rebalances by dropping a topic entry on revoke once it tracks no partitions (mirrors `PausesManager#delete`).
 - [Fix] Use `::JSON.parse` in the ActiveJob deserializer, so consuming ActiveJob messages works with the json gem `>= 3.0`.
