@@ -24,6 +24,18 @@ RSpec.describe_current do
     it { expect(check).not_to be_success }
   end
 
+  context "when enable.partition.eof is \"true\"" do
+    before { config[:kafka][:"enable.partition.eof"] = "true" }
+
+    it { expect(check).to be_success }
+  end
+
+  context "when enable.partition.eof is \"false\"" do
+    before { config[:kafka][:"enable.partition.eof"] = "false" }
+
+    it { expect(check).not_to be_success }
+  end
+
   context "when eofed is enabled without enable.partition.eof" do
     let(:config) do
       {

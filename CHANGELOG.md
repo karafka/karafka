@@ -23,6 +23,7 @@
 - [Change] Require `karafka-rdkafka` `>=` `0.32.0`. A failed consumer close is now reported as a `librdkafka.error` on `error.occurred` instead of being dropped. A close fails in practice only after a fatal error, e.g. when the consumer was fenced by a static membership conflict. Such an error is usually reported first when polling, so it is reported twice: as `connection.client.poll.error` and again on close.
 - [Change] Fail `karafka topics align` and `migrate` (exit 1) when an existing declarative topic has config keys the cluster does not know (e.g. a typo), naming them, instead of skipping them silently. `plan` lists such keys as unknown and fails too.
 - [Change] Raise `Karafka::Errors::ConsumerGroupNotEmptyError` when `Karafka::Admin` changes the offsets of a consumer group with active members, instead of silently leaving them unchanged. With an external consumer client, offsets are read and changed for the queried consumer group, not the client's own.
+- [Change] Require `karafka-core` `>=` `2.6.8`.
 - [Maintenance] Cover `karafka install --share_groups` with an integration spec: it generates `ApplicationShareConsumer` and the app boots with it.
 - [Maintenance] Cover the `:max_timestamp` and Integer-timestamp `Admin#read_partition_offsets` offset modes with integration specs.
 - [Maintenance] Cover the untested New Relic `MetricsListener` paths with integration specs: revoked and shutdown metrics, overridden listener methods, and an empty metrics list.
@@ -78,6 +79,7 @@
 - [Fix] Stop routing `kafka(inherit: true, ...)` from changing the given settings hash. A frozen hash raised `FrozenError` and a hash shared by many topics stopped inheriting the root `kafka` settings after the first topic.
 - [Fix] Fail `karafka topics` `plan`, `migrate`, `align`, `create`, `delete`, `repartition` and `reset` (exit 1) before changing anything when any declarative topic, also a missing or skipped one, has config keys the cluster does not know. They now need `DescribeConfigs` on declared topics with config.
 - [Fix] Treat `allow.auto.create.topics` as on only when it is `true` or `"true"`. Any other value (e.g. `"false"`) now reports a missing subscribed topic as an error instead of waiting with a "Waiting for it to be created" log.
+- [Fix] Treat `enable.partition.eof` as on only when it is `true` or `"true"` in the `eofed` routing check. Any other value (e.g. `"false"`) now fails routing validation when `eofed` is on.
 
 ## 2.6.1 (2026-08-24)
 - **[Feature]** [Pro] Add an opt-in envelope encryption mode for Messages At Rest (`config.encryption.mode = :envelope`, requires openssl `>= 3.0`) without the RSA payload size limit. Upgrade all consuming processes before enabling.

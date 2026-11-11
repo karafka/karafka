@@ -26,7 +26,7 @@ module Karafka
 
                 next unless eofed[:active]
 
-                next if data[:kafka][:"enable.partition.eof"]
+                next if Karafka::Core::Helpers::KafkaConfig.enabled?(data[:kafka][:"enable.partition.eof"])
 
                 [[%i[eofed kafka], :enable]]
               end
