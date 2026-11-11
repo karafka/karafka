@@ -35,11 +35,15 @@ module Karafka
     #   short-lived instance. Routing is capability based: rdkafka admin instances are used by
     #   admin-based operations (`with_admin` and everything built on top of it, e.g.
     #   `cluster_info`), any other external client is used by consumer-based operations
-    #   (`with_consumer` and everything built on top of it). The lifecycle of an external
-    #   client belongs fully to its owner: it is never configured, started or closed here and
-    #   all operations run within its identity, including its `group.id`. This is a low-level
-    #   internal API: the caller is responsible for providing a client capable of the invoked
-    #   operations and for invoking only operations that are safe to run on a live client.
+    #   (`with_consumer` and everything built on top of it: `#read_topic` and
+    #   `#trigger_rebalance`). Only those operations run within the identity of an external
+    #   consumer client, including its `group.id`. All other operations, including consumer
+    #   group offset and lag reads and offset changes, use their own short-lived admin instance
+    #   when the external client is not an rdkafka admin. The lifecycle of an external client
+    #   belongs fully to its owner: it is never configured, started or closed here. This is a
+    #   low-level internal API: the caller is responsible for providing a client capable of the
+    #   invoked operations and for invoking only operations that are safe to run on a live
+    #   client.
     #
     # @note Raw and proxied rdkafka instances are resolved once at construction, so the admin
     #   instance should not outlive them. `Karafka::Connection::ConsumerGroups::Client` instances
