@@ -58,7 +58,10 @@ module Karafka
                 return super unless topic.dead_letter_queue.independent?
                 return false unless super
 
+                # The running attempt was already counted before consumption, so it becomes the first one
                 coordinator.pause_tracker.reset
+                coordinator.pause_tracker.increment
+                coordinator.errors_tracker.clear
 
                 true
               ensure
@@ -76,7 +79,10 @@ module Karafka
                 return super unless topic.dead_letter_queue.independent?
                 return false unless super
 
+                # The running attempt was already counted before consumption, so it becomes the first one
                 coordinator.pause_tracker.reset
+                coordinator.pause_tracker.increment
+                coordinator.errors_tracker.clear
 
                 true
               ensure
@@ -240,8 +246,9 @@ module Karafka
                 # We consult `errors_tracker.last` (not the per-consumer consumption cause used
                 # by the OSS strategies, which have no tracker) because it is exactly what the
                 # DLQ strategy callable below receives - this guard judges the same evidence as
-                # the strategy it overrides. The tracker is cleared at attempt zero, so `last`
-                # is always the most recent failure of the current failure streak
+                # the strategy it overrides. The tracker is cleared at attempt zero and on the
+                # independent reset, so `last` is always the most recent failure of the current
+                # failure streak
                 if critical_error?(errors_tracker.last)
                   retry_after_pause
 
