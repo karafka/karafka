@@ -110,7 +110,7 @@ GEM
     prism (2.1.0-x86_64-linux-gnu)
     prism (2.1.0-x86_64-linux-musl)
     raabro (1.5.0)
-    rack (3.2.7)
+    rack (3.2.8)
     rake (13.4.2)
     roda (3.108.0)
       rack
@@ -221,7 +221,7 @@ CHECKSUMS
   prism (2.1.0-x86_64-linux-gnu) sha256=b2b647afce09551e650b8bb3e2fc91d7d73d392a09534ca307ec0d619c33bfd4
   prism (2.1.0-x86_64-linux-musl) sha256=249f45981726923e259b927902246219fa25ad10a76f43849c9aee1a3d3ec5b8
   raabro (1.5.0) sha256=3f998a7bc84f9c84df3ab580634d2e0a5bda4f0841168d56035f529c9877440a
-  rack (3.2.7) sha256=93e13e1c24f93556671d85d2d79fa228c3485815c50d7e2f265b5330c6528fb7
+  rack (3.2.8) sha256=1fecc85e463ebc7a2a945fff829ffcd549babeb1556384796fad946c28dc4ec7
   rake (13.4.2) sha256=cb825b2bd5f1f8e91ca37bddb4b9aaf345551b4731da62949be002fa89283701
   roda (3.108.0) sha256=a209acc5c885c7c9cfe703ad985b343026f79f67949932dd739b83e5a129ffbd
   rspec (3.13.2) sha256=206284a08ad798e61f86d7ca3e376718d52c0bc944626b2349266f239f820587
