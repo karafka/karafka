@@ -93,6 +93,43 @@ RSpec.describe_current do
     it { expect(topic).to respond_to(attribute) }
   end
 
+  describe "#kafka=" do
+    context "when inherit is set on a frozen hash" do
+      let(:settings) { { inherit: true, "client.id": "custom" }.freeze }
+
+      before { topic.kafka = settings }
+
+      it { expect(topic.kafka[:"client.id"]).to eq("custom") }
+      it { expect(topic.kafka[:"bootstrap.servers"]).to eq(Karafka::App.config.kafka[:"bootstrap.servers"]) }
+      it { expect(topic.kafka).not_to have_key(:inherit) }
+    end
+
+    context "when one settings hash is used by two topics" do
+      let(:settings) { { inherit: true, "fetch.wait.max.ms": 100 } }
+      let(:other_topic) { described_class.new("other", group) }
+
+      before do
+        topic.kafka = settings
+        other_topic.kafka = settings
+      end
+
+      it { expect(settings).to eq(inherit: true, "fetch.wait.max.ms": 100) }
+      it { expect(other_topic.kafka[:"bootstrap.servers"]).to eq(Karafka::App.config.kafka[:"bootstrap.servers"]) }
+      it { expect(other_topic.kafka[:"fetch.wait.max.ms"]).to eq(100) }
+    end
+
+    context "when settings without inherit are changed after assignment" do
+      let(:settings) { { "bootstrap.servers": "host:9092" } }
+
+      before do
+        topic.kafka = settings
+        settings[:"client.id"] = "changed"
+      end
+
+      it { expect(topic.kafka).to eq("bootstrap.servers": "host:9092") }
+    end
+  end
+
   describe "#active?" do
     context "when there are no topics in the topics" do
       it { expect(topic.active?).to be(true) }

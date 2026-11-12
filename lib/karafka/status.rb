@@ -56,13 +56,13 @@ module Karafka
           MUTEX.synchronize do
             # Do not allow reverse state transitions (we always go one way) or transition to the
             # same state as currently
-            return if @status && STATES.keys.index(:#{state}) <= STATES.keys.index(@status)
+            return false if @status && STATES.keys.index(:#{state}) <= STATES.keys.index(@status)
 
             @status = :#{state}
 
             # Skip on creation (initializing)
             # We skip as during this state we do not have yet a monitor
-            return if initializing?
+            return true if initializing?
 
             conductor.signal
 
@@ -71,6 +71,8 @@ module Karafka
               caller: self,
               server_id: Karafka::Server.id
             )
+
+            true
           end
         end
       RUBY

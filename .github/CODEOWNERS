@@ -1,3 +1,6 @@
+# Every change needs a review from a maintainer before it can merge.
+* @mensfeld
+
 /.github @mensfeld
 /.github/workflows/ @mensfeld
 /.github/actions/ @mensfeld

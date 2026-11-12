@@ -44,6 +44,8 @@ The Open Source version of the Software ("LGPL Version") is licensed under the t
 
 6. Support, Maintenance and Services. Subject to the terms and conditions of this Agreement, as set forth in your invoice, and as set forth on the Karafka Pro support page (https://karafka.io/docs/Pro-Support/), support and maintenance services may be included with the purchase of your license subscription.
 
+Support, consultations, and other services provided under this Agreement are not "work made for hire" and do not result in any assignment of intellectual property to you. All code, fixes, features, documentation, and other materials created by Maciej Mensfeld, including those created in response to your requests or reports, are owned exclusively by Maciej Mensfeld and, where incorporated into the Software, are licensed to you under this Agreement.
+
 7. Term of Agreement.
 
 7.1 Term. This Agreement is effective as of the Delivery of the Software and expires at such time as all license and service subscriptions hereunder have expired in accordance with their own terms (the "Term"). For clarification, the term of your license under this Agreement may be perpetual, limited to the Evaluation Period under Section 1.5, or designated as a fixed-term license in the Invoice, and shall be specified at your time of purchase or, for an evaluation license, at issuance. Either party may terminate this Agreement (including all related Invoices) if the other party: (a) fails to cure any material breach of this Agreement within thirty (30) days after written notice of such breach, provided that Maciej Mensfeld may terminate this Agreement immediately upon any breach of Section 3 (including, without limitation, any use of the Software for artificial intelligence or machine learning purposes as described in Section 3.3) or if you exceed any other restrictions contained in Section 1, unless otherwise specified in this agreement; (b) ceases operation without a successor; or (c) seeks protection under any bankruptcy, receivership, trust deed, creditors arrangement, composition or comparable proceeding, or if any such proceeding is instituted against such party (and not dismissed within sixty (60) days)). Termination is not an exclusive remedy and the exercise by either party of any remedy under this Agreement will be without prejudice to any other remedies it may have under this Agreement, by law, or otherwise.
@@ -61,6 +63,8 @@ To the maximum extent permitted by applicable law, Maciej Mensfeld disclaims all
 In no event will Maciej Mensfeld be liable for any direct, indirect, consequential, incidental, special, exemplary, or punitive damages or liabilities whatsoever arising from or relating to the Software, the Software content or this Agreement, whether based on contract, tort (including negligence), strict liability or other theory, even if Maciej Mensfeld has been advised of the possibility of such damages.
 
 In no event will Maciej Mensfeld' liability exceed the Software license price as indicated in the invoice. The existence of more than one claim will not enlarge or extend this limit.
+
+The limitations in this Section apply to all claims, including claims for indemnification, and regardless of any terms in your purchase orders or other documents.
 
 10. Remedies. Your exclusive remedy and Maciej Mensfeld' entire liability for breach of this Agreement shall be limited, at Maciej Mensfeld' sole and exclusive discretion, to (a) replacement of any defective software or documentation; or (b) refund of the license fee paid to Maciej Mensfeld, payable in accordance with Maciej Mensfeld' refund policy.
 
@@ -95,5 +99,7 @@ In no event will Maciej Mensfeld' liability exceed the Software license price as
 13.9 Waiver. Failure or neglect by either party to enforce at any time any of the provisions of this licence Agreement shall not be construed or deemed to be a waiver of that party's rights under this Agreement.
 
 13.10 Headings. The headings of sections and paragraphs of this Agreement are for convenience of reference only and are not intended to restrict, affect or be of any weight in the interpretation or construction of the provisions of such sections or paragraphs.
+
+13.11 Order of Precedence. This Agreement prevails over any purchase order, vendor onboarding terms, procurement portal terms, or other document issued by you, even if such document states otherwise or is acknowledged, accepted, or performed by Maciej Mensfeld. Any additional or conflicting terms in such documents are rejected and have no effect unless expressly agreed in a written addendum signed by Maciej Mensfeld that specifically refers to this Agreement ("Signed Addendum").
 
 14. Contact Information. If you have any questions about this EULA, or if you want to contact Maciej Mensfeld for any reason, please direct correspondence to contact@karafka.io.

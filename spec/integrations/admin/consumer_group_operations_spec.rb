@@ -124,7 +124,7 @@ rescue => e
     success: false,
     error_class: e.class.name,
     error_message: e.message,
-    expected_failure: e.message.include?("active") || e.message.include?("member")
+    expected_failure: e.is_a?(Karafka::Errors::ConsumerGroupNotEmptyError)
   }
 end
 
@@ -265,7 +265,8 @@ end
 
 # The key success criteria: handling operations with active consumers
 operations_count = DT[:admin_operations].size
-successful_operations = DT[:admin_operations].count { |op| op[:success] }
+# Seeking a consumer group with active members is rejected by Kafka
+handled_operations = DT[:admin_operations].count { |op| op[:success] || op[:expected_failure] }
 
 assert(
   operations_count >= 3,
@@ -273,6 +274,6 @@ assert(
 )
 
 assert(
-  successful_operations > 0,
-  "Should successfully handle some operations with active consumers"
+  handled_operations > 0,
+  "Should correctly handle some operations with active consumers"
 )

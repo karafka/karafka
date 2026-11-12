@@ -87,7 +87,7 @@ RSpec.describe_current do
         )
       end
 
-      it "does not add consumer kafka dev defaults" do
+      it "does not add consumer kafka non-production defaults" do
         expect(kafka_config).not_to include(
           "allow.auto.create.topics": "true",
           "topic.metadata.refresh.interval.ms": 5_000
@@ -101,7 +101,7 @@ RSpec.describe_current do
         injector.consumer(kafka_config)
       end
 
-      it "adds both consumer kafka defaults and dev defaults" do
+      it "adds both consumer kafka defaults and non-production defaults" do
         expect(kafka_config).to include(
           "statistics.interval.ms": 5_000,
           "client.software.name": "karafka",
@@ -167,7 +167,7 @@ RSpec.describe_current do
         injector.producer(kafka_config)
       end
 
-      it "adds producer kafka dev defaults" do
+      it "adds producer kafka non-production defaults" do
         expect(kafka_config).to include(
           "allow.auto.create.topics": "true",
           "topic.metadata.refresh.interval.ms": 5_000,

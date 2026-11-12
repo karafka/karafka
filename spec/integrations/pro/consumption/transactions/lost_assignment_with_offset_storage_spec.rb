@@ -48,7 +48,8 @@ class Consumer < Karafka::BaseConsumer
 
     begin
       transaction do
-        produce_async(topic: topic.name, payload: "1")
+        # Sync, so the aborted message always reaches the partition before the abort
+        produce_sync(topic: topic.name, payload: "1")
         mark_as_consumed(messages.last)
       end
     rescue Karafka::Errors::AssignmentLostError => e
@@ -59,7 +60,8 @@ end
 
 draw_routes(Consumer)
 
-produce_many(DT.topic, DT.uuids(1))
+elements = DT.uuids(1)
+produce_many(DT.topic, elements)
 
 start_karafka_and_wait_until do
   DT.key?(:done)
@@ -67,7 +69,7 @@ end
 
 assert DT.key?(:error)
 assert_equal [], Karafka::Admin.read_topic(DT.topic, 0, 1)
-# We will have one message but this is read uncommitted so it will not appear in the above, plus
-# the failed transaction control one
-assert_equal 2, Karafka::Admin.read_watermark_offsets(DT.topic, 0).last
+# Initial message with its commit marker, plus the aborted message with its abort marker
+assert_equal 4, Karafka::Admin.read_watermark_offsets(DT.topic, 0).last
+assert_equal elements, Karafka::Admin.read_topic(DT.topic, 0, 10, 0).map(&:raw_payload)
 assert_equal 0, fetch_next_offset

@@ -55,10 +55,15 @@ module Karafka
               h[k] = {
                 state: "",
                 join_state: "",
+                join_state_changed_at: monotonic_now,
+                unassigned: false,
                 state_age: 0,
                 changed_at: monotonic_now
               }
             end
+
+            # Ids of subscription groups that use the KIP-848 consumer group protocol
+            @consumer_protocol_ids = Set.new
           end
 
           # Registers listeners and starts the scaling procedures
@@ -71,7 +76,15 @@ module Karafka
             @listeners = listeners
 
             # Preload all the keys into the hash so we never add keys to changes but just change them
-            listeners.each { |listener| @changes[listener.subscription_group.id] }
+            listeners.each do |listener|
+              subscription_group = listener.subscription_group
+
+              @changes[subscription_group.id]
+
+              next unless consumer_protocol?(subscription_group)
+
+              @consumer_protocol_ids << subscription_group.id
+            end
 
             in_sg_families do |first_subscription_group, sg_listeners|
               multiplexing = first_subscription_group.multiplexing
@@ -94,21 +107,37 @@ module Karafka
           # @note Please note that while we collect here per subscription group, we use those
           #   metrics collectively on a whole consumer group. This reduces the friction.
           def notice(subscription_group_id, statistics)
+            cgrp = statistics["cgrp"]
+            change = @changes[subscription_group_id]
+            join_state = cgrp["join_state"]
+
+            # Track for how long the listener has been in its current join state
+            unless change[:join_state] == join_state
+              change[:join_state_changed_at] = monotonic_now
+            end
+
+            unassigned = unassigned?(subscription_group_id, cgrp)
+
             times = []
-            # stateage is in microseconds
+            # Broker stateage is in microseconds, so we convert it to milliseconds. The cgrp
+            # stateage and rebalance_age are already in milliseconds
             # We monitor broker changes to make sure we do not introduce extra friction
             times << (statistics["brokers"].values.map { |stats| stats["stateage"] }.min / 1_000)
-            times << statistics["cgrp"]["rebalance_age"]
-            times << statistics["cgrp"]["stateage"]
+            times << cgrp["stateage"]
 
-            # Keep the previous change age for changes that were triggered by us
-            previous_changed_at = @changes[subscription_group_id][:changed_at]
+            # A member that was never assigned anything reports rebalance age of 0 forever, so
+            # instead we use the time it has spent waiting without an assignment
+            times << if unassigned
+              monotonic_now - change[:join_state_changed_at]
+            else
+              cgrp["rebalance_age"]
+            end
 
-            @changes[subscription_group_id].merge!(
+            change.merge!(
               state_age: times.min,
-              changed_at: previous_changed_at,
-              join_state: statistics["cgrp"]["join_state"],
-              state: statistics["cgrp"]["state"]
+              join_state: join_state,
+              unassigned: unassigned,
+              state: cgrp["state"]
             )
           end
 
@@ -272,8 +301,29 @@ module Karafka
               state[:state_age] >= scale_delay &&
                 (monotonic_now - state[:changed_at]) >= scale_delay &&
                 state[:state] == "up" &&
-                state[:join_state] == "steady"
+                (state[:join_state] == "steady" || state[:unassigned])
             end
+          end
+
+          # @param subscription_group [Karafka::Routing::SubscriptionGroup]
+          # @return [Boolean] does this subscription group use the KIP-848 consumer group protocol
+          def consumer_protocol?(subscription_group)
+            subscription_group.kafka[:"group.protocol"].to_s.casecmp?("consumer")
+          end
+
+          # With the KIP-848 consumer group protocol, a healthy member that the broker never
+          # assigned any partitions to stays in the "init" join state and never reaches "steady".
+          # This happens when there are more members than partitions. Such a member is not in the
+          # middle of any rebalance, so it should not block scaling of its subscription group.
+          #
+          # @param subscription_group_id [String]
+          # @param cgrp [Hash] consumer group statistics
+          # @return [Boolean] is this a healthy, consumer protocol member without any assignment
+          def unassigned?(subscription_group_id, cgrp)
+            @consumer_protocol_ids.include?(subscription_group_id) &&
+              cgrp["state"] == "up" &&
+              cgrp["join_state"] == "init" &&
+              cgrp["assignment_size"].to_i.zero?
           end
 
           # Yields listeners in groups based on their subscription groups

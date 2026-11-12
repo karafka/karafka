@@ -5,7 +5,9 @@
 # (unlike a non-matching wildcard inclusion, which leaves nothing active). Wildcard exclusions
 # skip the "must match an existing route" contract check, so this must not raise.
 
-setup_karafka
+setup_karafka do |config|
+  config.kafka[:"allow.auto.create.topics"] = true
+end
 
 draw_routes(create_topics: false) do
   topic "orders-created" do
