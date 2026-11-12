@@ -5,9 +5,10 @@ module Karafka
     # Namespace for the Kafka-level group types (consumer groups and share groups).
     module Groups
       # Base class describing a single Kafka group (a consumer group or a share group) that is
-      # going to subscribe to given topics. It carries the mode-agnostic routing machinery; the
-      # subclasses only declare their {#group_type}, the activity-manager scope they filter under,
-      # the topic class they instantiate and the routing defaults applied to their topics.
+      # going to subscribe to given topics. It carries the mode-agnostic routing machinery and
+      # applies the routing defaults to each topic; the subclasses only declare their
+      # {#group_type}, the activity-manager scope they filter under and the topic class they
+      # instantiate, and may override `topic_defaults` to change which defaults apply.
       #
       # @note A single group represents one Kafka group, but it may not match 1:1 with subscription
       #   groups. There can be more subscription groups than groups.
