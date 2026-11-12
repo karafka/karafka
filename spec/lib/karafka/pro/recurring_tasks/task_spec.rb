@@ -52,7 +52,7 @@ RSpec.describe_current do
     end
 
     it "parses the cron expression correctly" do
-      expect(task.send(:instance_variable_get, :@cron)).to be_a(Fugit::Cron)
+      expect(task.cron).to be_a(Fugit::Cron)
     end
   end
 
@@ -76,9 +76,11 @@ RSpec.describe_current do
   end
 
   describe "#trigger" do
+    let(:enabled) { false }
+
     it "triggers the task execution" do
       task.trigger
-      expect(task.send(:instance_variable_get, :@trigger)).to be(true)
+      expect(task.call?).to be(true)
     end
   end
 
@@ -156,8 +158,7 @@ RSpec.describe_current do
       it "calls the block and updates previous_time" do
         task.call
 
-        expect(task.send(:instance_variable_get, :@previous_time))
-          .to be_within(1.second).of(Time.now)
+        expect(task.previous_time).to be_within(1.second).of(Time.now)
       end
 
       it "instruments the execution" do
@@ -177,10 +178,14 @@ RSpec.describe_current do
       end
     end
 
-    it "resets the trigger after execution" do
-      task.trigger
-      task.call
-      expect(task.send(:instance_variable_get, :@trigger)).to be(false)
+    context "when the task is disabled and triggered" do
+      let(:enabled) { false }
+
+      it "resets the trigger after execution" do
+        task.trigger
+        task.call
+        expect(task.call?).to be(false)
+      end
     end
   end
 

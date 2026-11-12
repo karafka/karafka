@@ -72,6 +72,29 @@ RSpec.describe_current do
     it { expect(contract.call(message)).not_to be_success }
   end
 
+  context "when headers do not include the target topic" do
+    before { message[:headers].delete("schedule_target_topic") }
+
+    it { expect(contract.call(message)).not_to be_success }
+  end
+
+  context "when headers do not include the target epoch" do
+    before { message[:headers].delete("schedule_target_epoch") }
+
+    it { expect(contract.call(message)).not_to be_success }
+  end
+
+  context "when it is a cancel message with only the cancel headers" do
+    before do
+      message[:headers] = {
+        "schedule_schema_version" => "1.0",
+        "schedule_source_type" => "cancel"
+      }
+    end
+
+    it { expect(contract.call(message)).to be_success }
+  end
+
   context "when headers is not a hash" do
     before { message[:headers] = "not a hash" }
 

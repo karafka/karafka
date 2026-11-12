@@ -159,7 +159,7 @@ RSpec.describe_current do
         allow(Karafka::App).to receive_messages(
           stopped?: false,
           terminated?: false,
-          stop!: nil
+          stop!: true
         )
         allow(described_class).to receive(:sleep)
         allow(Kernel).to receive(:exit!)
@@ -235,6 +235,130 @@ RSpec.describe_current do
         end
       end
 
+      context "when a terminated listener thread is still in a call on its client" do
+        let(:alive) { [true] }
+        let(:shutdown_while_alive) { [] }
+        let(:listener) do
+          instance_double(
+            Karafka::Connection::ConsumerGroups::Listener,
+            id: "listener-1",
+            subscription_group: build(:routing_subscription_group),
+            stopped?: false,
+            terminate: true,
+            active?: true
+          )
+        end
+
+        before do
+          batch = instance_double(
+            Karafka::Connection::ListenersBatch,
+            active: [listener],
+            all?: false,
+            select: [listener]
+          )
+          allow(batch).to receive(:each) { |&block| [listener].each(&block) }
+          allow(listener).to receive(:alive?) { alive.first }
+          allow(listener).to receive(:join) { alive[0] = false }
+          allow(listener).to receive(:shutdown) { shutdown_while_alive << alive.first }
+          described_class.listeners = batch
+          server_class.stop
+        end
+
+        it "expect to wait for its thread to end before shutting down its client" do
+          expect(listener).to have_received(:join).with(be_between(0, 2.5))
+          expect(shutdown_while_alive).to eq([false])
+        end
+      end
+
+      context "when a terminated listener thread does not end in time" do
+        let(:listener) do
+          instance_double(
+            Karafka::Connection::ConsumerGroups::Listener,
+            id: "listener-1",
+            subscription_group: build(:routing_subscription_group),
+            alive?: true,
+            join: nil,
+            stopped?: false,
+            terminate: true,
+            shutdown: true,
+            active?: true
+          )
+        end
+
+        before do
+          batch = instance_double(
+            Karafka::Connection::ListenersBatch,
+            active: [listener],
+            all?: false,
+            select: [listener]
+          )
+          allow(batch).to receive(:each) { |&block| [listener].each(&block) }
+          allow(Karafka.monitor).to receive(:instrument).and_call_original
+          described_class.listeners = batch
+          server_class.stop
+        end
+
+        it "expect not to shut down its client from another thread and to report it" do
+          expect(listener).not_to have_received(:shutdown)
+          expect(Karafka.monitor).to have_received(:instrument).with(
+            "connection.listener.shutdown.skipped",
+            caller: server_class,
+            listener: listener,
+            subscription_group: listener.subscription_group
+          )
+        end
+      end
+
+      context "when a subscriber of the skipped listener report fails" do
+        let(:alive_listener) do
+          instance_double(
+            Karafka::Connection::ConsumerGroups::Listener,
+            id: "listener-1",
+            subscription_group: build(:routing_subscription_group),
+            alive?: true,
+            join: nil,
+            stopped?: false,
+            terminate: true,
+            shutdown: true,
+            active?: true
+          )
+        end
+
+        let(:ended_listener) do
+          instance_double(
+            Karafka::Connection::ConsumerGroups::Listener,
+            alive?: false,
+            stopped?: false,
+            terminate: true,
+            shutdown: true,
+            active?: true
+          )
+        end
+
+        before do
+          listeners = [alive_listener, ended_listener]
+          batch = instance_double(
+            Karafka::Connection::ListenersBatch,
+            active: listeners,
+            all?: false,
+            select: listeners
+          )
+          allow(batch).to receive(:each) { |&block| listeners.each(&block) }
+          allow(Karafka.monitor).to receive(:instrument).and_call_original
+          allow(Karafka.monitor)
+            .to receive(:instrument)
+            .with("connection.listener.shutdown.skipped", any_args)
+            .and_raise(StandardError)
+          described_class.listeners = batch
+          server_class.stop
+        end
+
+        it "expect to still shut down the listener whose thread has ended" do
+          expect(alive_listener).not_to have_received(:shutdown)
+          expect(ended_listener).to have_received(:shutdown)
+        end
+      end
+
       context "when there are active processing workers (processing does not want to stop)" do
         let(:active_thread) do
           instance_double(
@@ -272,7 +396,7 @@ RSpec.describe_current do
         allow(Karafka::App).to receive_messages(
           stopped?: false,
           terminated?: false,
-          stop!: nil
+          stop!: true
         )
         allow(described_class).to receive(:sleep)
         allow(Kernel).to receive(:exit!)
@@ -307,6 +431,62 @@ RSpec.describe_current do
           expect(Karafka::App).to have_received(:stop!)
           expect(described_class).to have_received(:sleep).with(0.1).exactly(5).times
           expect(Kernel).to have_received(:exit!).with(2)
+        end
+      end
+    end
+
+    context "when another stop runs between the check and the transition of the first one" do
+      let(:timeout_ms) { 1_000 }
+      let(:nested_stops) { [] }
+
+      before do
+        # Earlier examples can leave the app terminated, which blocks `run!`
+        Karafka::App.config.internal.status.reset!
+        Karafka::App.config.internal.status.run!
+
+        allow(Karafka::App).to receive_messages(stopped?: false, terminated?: false)
+        allow(described_class).to receive(:sleep)
+
+        allow(Karafka::App).to receive(:stop!).and_wrap_original do |original|
+          if nested_stops.empty?
+            nested_stops << true
+            server_class.stop
+          end
+
+          original.call
+        end
+
+        server_class.stop
+      end
+
+      it "expect to run the stop sequence only once" do
+        expect(nested_stops).to eq([true])
+        expect(Karafka::App.producer).to have_received(:close).once
+      end
+    end
+
+    %w[app.stopping app.stopped].each do |event|
+      context "when stop is called from an #{event} subscriber" do
+        let(:timeout_ms) { 1_000 }
+        let(:nested_results) { [] }
+        let(:listener) { ->(_) { nested_results << server_class.stop } }
+
+        before do
+          # Earlier examples can leave the app terminated, which blocks `run!`
+          Karafka::App.config.internal.status.reset!
+          Karafka::App.config.internal.status.run!
+
+          allow(Karafka::App).to receive(:stopped?).and_call_original
+          allow(Karafka::App).to receive(:terminated?).and_call_original
+          allow(described_class).to receive(:sleep)
+
+          Karafka.monitor.subscribe(event, &listener)
+          server_class.stop
+        end
+
+        it "expect to return without running the stop sequence again" do
+          expect(nested_results).to eq([nil])
+          expect(Karafka::App.producer).to have_received(:close).once
         end
       end
     end

@@ -4,11 +4,13 @@
 # should be fenced
 #
 # If new consumer is not fenced, it will run forever and spec will timeout
+#
+# Closing the fenced consumer fails and that failure is reported as a librdkafka.error
 
 GROUP_INSTANCE_ID = SecureRandom.uuid
 
 setup_karafka(
-  allow_errors: %w[connection.client.poll.error],
+  allow_errors: %w[connection.client.poll.error librdkafka.error],
   consumer_group_protocol: true
 ) do |config|
   config.kafka[:"group.instance.id"] = GROUP_INSTANCE_ID

@@ -28,13 +28,13 @@ module Karafka
         "client.software.version": CLIENT_SOFTWARE_VERSION
       }.freeze
 
-      # Contains settings that should not be used in production but make life easier in dev
-      CONSUMER_GROUP_KAFKA_DEV_DEFAULTS = {
-        # Will create non-existing topics automatically.
-        # Note that the broker needs to be configured with `auto.create.topics.enable=true`
-        # While it is not recommended in prod, it simplifies work in dev
+      # Contains settings that should not be used in production but make life easier in every
+      # other environment
+      CONSUMER_GROUP_KAFKA_NON_PRODUCTION_DEFAULTS = {
+        # Lets the consumer subscribe to topics that do not exist yet and wait for them to be
+        # created. While it is not recommended in prod, it simplifies work in other environments
         "allow.auto.create.topics": "true",
-        # We refresh the cluster state often as newly created topics in dev may not be detected
+        # We refresh the cluster state often as newly created topics may not be detected
         # fast enough. Fast enough means within reasonable time to provide decent user experience
         # While it's only a one time thing for new topics, it can still be irritating to have to
         # restart the process.
@@ -52,16 +52,16 @@ module Karafka
         "client.software.version": CLIENT_SOFTWARE_VERSION
       }.freeze
 
-      # Dev-only share-group defaults. Same rationale as for the consumer-group ones.
-      SHARE_GROUP_KAFKA_DEV_DEFAULTS = {
+      # Non-production share-group defaults. Same rationale as for the consumer-group ones.
+      SHARE_GROUP_KAFKA_NON_PRODUCTION_DEFAULTS = {
         "allow.auto.create.topics": "true",
         "topic.metadata.refresh.interval.ms": 5_000
       }.freeze
 
-      # Contains settings that should not be used in production but make life easier in dev
-      # It is applied only to the default producer. If users setup their own producers, then
-      # they have to set this by themselves.
-      PRODUCER_KAFKA_DEV_DEFAULTS = {
+      # Contains settings that should not be used in production but make life easier in every
+      # other environment. It is applied only to the default producer. If users setup their own
+      # producers, then they have to set this by themselves.
+      PRODUCER_KAFKA_NON_PRODUCTION_DEFAULTS = {
         # For all of those same reasoning as for the consumer
         "allow.auto.create.topics": "true",
         "topic.metadata.refresh.interval.ms": 5_000,
@@ -70,47 +70,47 @@ module Karafka
 
       private_constant(
         :CLIENT_SOFTWARE_VERSION,
-        :CONSUMER_GROUP_KAFKA_DEFAULTS, :CONSUMER_GROUP_KAFKA_DEV_DEFAULTS,
-        :SHARE_GROUP_KAFKA_DEFAULTS, :SHARE_GROUP_KAFKA_DEV_DEFAULTS,
-        :PRODUCER_KAFKA_DEV_DEFAULTS
+        :CONSUMER_GROUP_KAFKA_DEFAULTS, :CONSUMER_GROUP_KAFKA_NON_PRODUCTION_DEFAULTS,
+        :SHARE_GROUP_KAFKA_DEFAULTS, :SHARE_GROUP_KAFKA_NON_PRODUCTION_DEFAULTS,
+        :PRODUCER_KAFKA_NON_PRODUCTION_DEFAULTS
       )
 
-      # Injects the consumer-group kafka defaults into a kafka config hash, adding the dev-only
-      # ones outside of production. Extensions (e.g. Pro) layer extra defaults by prepending onto
-      # the module singleton class and calling `super`.
+      # Injects the consumer-group kafka defaults into a kafka config hash, adding the
+      # non-production ones outside of production. Extensions (e.g. Pro) layer extra defaults by
+      # prepending onto the module singleton class and calling `super`.
       class ConsumerGroup < Karafka::Core::Configurable::Injector
         class << self
           # @return [Hash] consumer-group kafka defaults for the current environment
           def defaults
             return CONSUMER_GROUP_KAFKA_DEFAULTS if Karafka::App.env.production?
 
-            CONSUMER_GROUP_KAFKA_DEFAULTS.merge(CONSUMER_GROUP_KAFKA_DEV_DEFAULTS)
+            CONSUMER_GROUP_KAFKA_DEFAULTS.merge(CONSUMER_GROUP_KAFKA_NON_PRODUCTION_DEFAULTS)
           end
         end
       end
 
       # Injects the share-group (KIP-932) kafka defaults into a kafka config hash, adding the
-      # dev-only ones outside of production.
+      # non-production ones outside of production.
       class ShareGroup < Karafka::Core::Configurable::Injector
         class << self
           # @return [Hash] share-group kafka defaults for the current environment
           def defaults
             return SHARE_GROUP_KAFKA_DEFAULTS if Karafka::App.env.production?
 
-            SHARE_GROUP_KAFKA_DEFAULTS.merge(SHARE_GROUP_KAFKA_DEV_DEFAULTS)
+            SHARE_GROUP_KAFKA_DEFAULTS.merge(SHARE_GROUP_KAFKA_NON_PRODUCTION_DEFAULTS)
           end
         end
       end
 
-      # Injects the producer kafka defaults into a kafka config hash. They are dev-only, so nothing
-      # is injected in production.
+      # Injects the producer kafka defaults into a kafka config hash. They are non-production ones,
+      # so nothing is injected in production.
       class Producer < Karafka::Core::Configurable::Injector
         class << self
           # @return [Hash] producer kafka defaults for the current environment
           def defaults
             return super if Karafka::App.env.production?
 
-            PRODUCER_KAFKA_DEV_DEFAULTS
+            PRODUCER_KAFKA_NON_PRODUCTION_DEFAULTS
           end
         end
       end

@@ -1,0 +1,56 @@
+# Decides whether a pull request touches anything but docs. Called as the `changes` job by each
+# CI workflow that runs on pull requests: docs-only pull requests skip the heavy jobs, while the
+# Success job of each workflow still runs and reports success, so the required checks do not
+# stay pending. Scheduled and any other runs always test everything
+
+name: CI Changes
+
+on:
+  workflow_call:
+    outputs:
+      code:
+        description: "'false' when the heavy jobs can be skipped, 'true' otherwise"
+        value: ${{ jobs.detect.outputs.code }}
+
+permissions:
+  contents: read
+
+jobs:
+  detect:
+    timeout-minutes: 5
+    runs-on: ubuntu-latest
+    outputs:
+      code: ${{ steps.filter.outputs.code }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 2
+
+      - name: Detect code changes
+        id: filter
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+        run: |
+          # Only pull requests can skip; scheduled and any other runs always test everything
+          if [ "$EVENT_NAME" != "pull_request" ]; then
+            echo "code=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          # HEAD is the PR merge commit, so HEAD^1..HEAD is what the PR changes in master
+          changed="$(git diff --name-only --no-renames HEAD^1 HEAD)"
+
+          # Anything not on the docs list counts as code (an empty diff too)
+          code=false
+          while IFS= read -r file; do
+            case "$file" in
+              lib/*|spec/*|test/*|ext/*|bin/*) code=true ;;
+              *.md|LICENSE*|MIT-LICENSE|.github/ISSUE_TEMPLATE/*|.github/FUNDING.yml) ;;
+              *.png|*.jpg|*.jpeg|*.svg|*.gif) ;;
+              *) code=true ;;
+            esac
+          done <<< "$changed"
+
+          echo "Changed files:"
+          echo "$changed"
+          echo "code=$code" >> "$GITHUB_OUTPUT"

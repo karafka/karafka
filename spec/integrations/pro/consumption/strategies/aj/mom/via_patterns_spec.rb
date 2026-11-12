@@ -32,6 +32,7 @@
 # be picked up and operable even when topics are created after the subscription starts
 
 setup_karafka do |config|
+  config.kafka[:"allow.auto.create.topics"] = true
   config.kafka[:"topic.metadata.refresh.interval.ms"] = 2_000
 end
 
@@ -61,6 +62,8 @@ start_karafka_and_wait_until do
   sleep(2)
 
   unless @sent
+    Karafka::Admin.create_topic(DT.topics[0], 1, 1)
+    Karafka::Admin.create_topic(DT.topics[1], 1, 1)
     Job1.perform_later
     Job2.perform_later
     @sent = true

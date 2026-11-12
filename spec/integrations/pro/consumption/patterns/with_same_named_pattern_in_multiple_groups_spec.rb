@@ -31,6 +31,7 @@
 # Karafka should work as expected when having same matching used in multiple CGs.
 
 setup_karafka do |config|
+  config.kafka[:"allow.auto.create.topics"] = true
   config.kafka[:"topic.metadata.refresh.interval.ms"] = 2_000
 end
 
@@ -61,6 +62,7 @@ end
 start_karafka_and_wait_until do
   unless @created
     sleep(5)
+    Karafka::Admin.create_topic(DT.topic, 1, 1)
     produce_many(DT.topic, DT.uuids(1))
     @created = true
   end

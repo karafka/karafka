@@ -102,6 +102,16 @@ RSpec.describe_current do
     end
   end
 
+  describe "#delete_records" do
+    let(:specs) { { name => [{ partition: 0, offset: 10 }] } }
+
+    it "delegates to Admin::Topics#delete_records" do
+      expect_any_instance_of(Karafka::Admin::Topics)
+        .to receive(:delete_records).with(specs)
+      described_class.delete_records(specs)
+    end
+  end
+
   # More specs in the integrations
   describe "#seek_consumer_group" do
     let(:group_id) { SecureRandom.uuid }
@@ -162,6 +172,17 @@ RSpec.describe_current do
       expect_any_instance_of(Karafka::Admin::ConsumerGroups)
         .to receive(:delete).with(group_id)
       described_class.delete_consumer_group(group_id)
+    end
+  end
+
+  describe "#delete_consumer_group_offsets" do
+    let(:group_id) { SecureRandom.uuid }
+    let(:topics) { { "topic" => [0] } }
+
+    it "delegates to ConsumerGroups#delete_offsets" do
+      expect_any_instance_of(Karafka::Admin::ConsumerGroups)
+        .to receive(:delete_offsets).with(group_id, topics)
+      described_class.delete_consumer_group_offsets(group_id, topics)
     end
   end
 

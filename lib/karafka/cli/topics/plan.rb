@@ -8,9 +8,14 @@ module Karafka
       class Plan < Base
         # Figures out scope of changes that need to happen
         # @return [Boolean] true if running migrate would change anything, false otherwise
+        # @raise [Karafka::Errors::CommandValidationError] when any topic has configuration
+        #   unknown to the cluster, as migrate would fail on it
         def call
           # If no changes at all, just print and stop
-          if topics_to_create.empty? && topics_to_repartition.empty? && topics_to_alter.empty?
+          if topics_to_create.empty? &&
+              topics_to_repartition.empty? &&
+              topics_to_alter.empty? &&
+              unknown_configs.empty?
             puts "Karafka will #{yellow("not")} perform any actions. No changes needed."
 
             return false
@@ -27,7 +32,12 @@ module Karafka
               puts "  #{green("+")} #{topic.name}:"
               puts "    #{green("+")} partitions: \"#{topic.declaratives.partitions}\""
 
+              unknown = unknown_configs.fetch(topic, {})
+
               topic.declaratives.details.each do |name, value|
+                # Unknown configs are never applied, so they are reported separately
+                next if unknown.key?(name.to_s)
+
                 puts "    #{green("+")} #{name}: \"#{value}\""
               end
 
@@ -93,13 +103,28 @@ module Karafka
               configs.each do |name, changes|
                 from = changes.fetch(:from)
                 to = changes.fetch(:to)
-                action = changes.fetch(:action)
-                type = (action == :change) ? yellow("~") : green("+")
-                puts "    #{type} #{name}: \"#{red(from)}\" #{grey("=>")} \"#{green(to)}\""
+                puts "    #{yellow("~")} #{name}: \"#{red(from)}\" #{grey("=>")} \"#{green(to)}\""
               end
 
               puts
             end
+          end
+
+          unless unknown_configs.empty?
+            puts "Following topics configuration is unknown to the cluster and cannot be applied:"
+            puts
+
+            unknown_configs.each do |topic, configs|
+              puts "  #{red("!")} #{topic.name}:"
+
+              configs.each do |name, value|
+                puts "    #{red("!")} #{name}: \"#{value}\""
+              end
+
+              puts
+            end
+
+            raise Errors::CommandValidationError
           end
 
           changes
@@ -169,14 +194,16 @@ module Karafka
             declarative_config.transform_keys!(&:to_s)
             declarative_config.transform_values!(&:to_s)
 
-            # We only apply additive/in-place changes so we start from our config
+            # We only apply in-place changes so we start from our config
             declarative_config.each do |declarative_name, declarative_value|
+              # Unknown configs are never applied, so they are reported separately
+              next if unknown_configs.fetch(declarative, {}).key?(declarative_name)
+
               @topics_to_alter[declarative] ||= {}
 
               @topics_to_alter[declarative][declarative_name] ||= {
                 from: "",
-                to: declarative_value,
-                action: :add
+                to: declarative_value
               }
 
               scoped = @topics_to_alter[declarative][declarative_name]
@@ -191,7 +218,6 @@ module Karafka
 
                 # Always use a non-synonym name if differs
                 final_name = config.name
-                scoped[:action] = :change
                 scoped[:from] = config.value
               end
 

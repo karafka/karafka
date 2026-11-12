@@ -49,7 +49,7 @@ module Karafka
           #   happen that often, process should be considered dead.
           # @param stability_ttl [Integer, nil] max time in ms a subscription group can remain in
           #   the same tracked non-"steady" librdkafka `cgrp.join_state` (e.g. `wait-join`,
-          #   `wait-assn`, `wait-sync`) before the process is considered unhealthy. When nil
+          #   `wait-assign-call`, `wait-sync`) before the process is considered unhealthy. When nil
           #   (default), it is derived lazily on first health evaluation as the maximum
           #   `max.poll.interval.ms` across all active subscription groups, multiplied by 2,
           #   which keeps the threshold safe relative to the user's actual poll intervals rather
@@ -66,7 +66,7 @@ module Karafka
           #   The timer resets on every join_state transition between tracked states because any
           #   change indicates the join protocol is still progressing; only a consumer frozen in
           #   the same non-steady state continuously triggers the alarm. A consumer cycling
-          #   rapidly between non-steady states (e.g. wait-join -> wait-assn -> wait-join) will
+          #   rapidly between non-steady states (e.g. wait-join -> wait-sync -> wait-join) will
           #   not trip this check - it only catches consumers frozen in a single join state.
           #   Requires `statistics.interval.ms` to be configured in the Kafka client settings;
           #   without it `statistics.emitted` never fires, tracking hashes remain empty, and this
@@ -121,7 +121,7 @@ module Karafka
           end
 
           # Track when each subscription group's consumer enters or leaves a non-steady join state.
-          # A prolonged non-steady state (e.g., wait-join, wait-assn caused by a broker stuck in
+          # A prolonged non-steady state (e.g., wait-join, or wait-sync caused by a broker stuck in
           # CompletingRebalance) is reported as unhealthy.
           #
           # `steady`, `init`, and `wait-metadata` all clear any stale tracking for the subscription
@@ -135,7 +135,7 @@ module Karafka
           # The stuck timer resets on every transition between tracked states because any change
           # indicates the join protocol is still progressing. Only a consumer frozen in the same
           # non-steady state continuously for stability_ttl is flagged. A consumer cycling
-          # rapidly between non-steady states (e.g. wait-join -> wait-assn -> wait-join) will not
+          # rapidly between non-steady states (e.g. wait-join -> wait-sync -> wait-join) will not
           # trip this alarm - only a frozen-in-one-state consumer is caught.
           # @param event [Karafka::Core::Monitoring::Event]
           def on_statistics_emitted(event)

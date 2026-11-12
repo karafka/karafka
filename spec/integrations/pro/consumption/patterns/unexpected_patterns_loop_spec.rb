@@ -34,6 +34,7 @@
 TOPIC_NAME = "it-not-funny-at-all-#{SecureRandom.uuid}".freeze
 
 setup_karafka(allow_errors: %w[consumer.consume.error]) do |config|
+  config.kafka[:"allow.auto.create.topics"] = true
   config.kafka[:"topic.metadata.refresh.interval.ms"] = 2_000
 end
 
@@ -61,6 +62,8 @@ end
 start_karafka_and_wait_until do
   unless @created
     sleep(5)
+    Karafka::Admin.create_topic(TOPIC_NAME, 1, 1)
+    Karafka::Admin.create_topic("#{TOPIC_NAME}.dlq", 1, 1)
     produce_many(TOPIC_NAME, DT.uuids(1))
     @created = true
   end

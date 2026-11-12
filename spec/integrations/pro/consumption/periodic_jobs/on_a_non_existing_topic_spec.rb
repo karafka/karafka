@@ -30,7 +30,9 @@
 
 # If we try to tick on a non-existing topic, we should not.
 
-setup_karafka
+setup_karafka do |config|
+  config.kafka[:"allow.auto.create.topics"] = true
+end
 
 class Consumer < Karafka::BaseConsumer
   def consume

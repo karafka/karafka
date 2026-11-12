@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 # On a Ruby without Process.fork (e.g. JRuby), swarm mode must fail before any work with an error
-# that names what is missing, both from the CLI and when the supervisor is run directly.
+# that names the Ruby engine, both from the CLI and when the supervisor is run directly.
 
 setup_karafka
 
@@ -38,6 +38,6 @@ rescue Karafka::Errors::UnsupportedOptionError => e
 end
 
 assert_equal 2, errors.size
-errors.each { |error| assert error.message.include?("JRuby"), error.message }
+errors.each { |error| assert_equal RUBY_ENGINE, error.message }
 assert !Karafka.producer.status.closed?
 assert Karafka::App.config.internal.swarm.manager.nodes.empty?

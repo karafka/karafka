@@ -31,7 +31,9 @@
 # When we define a pattern that gets assigned a matcher topic and this matcher topic is not part of
 # the exclusion, it should work
 
-setup_karafka
+setup_karafka do |config|
+  config.kafka[:"allow.auto.create.topics"] = true
+end
 
 draw_routes(create_topics: false) do
   pattern(/#{DT.topic}/) do

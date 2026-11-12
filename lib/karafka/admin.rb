@@ -35,11 +35,15 @@ module Karafka
     #   short-lived instance. Routing is capability based: rdkafka admin instances are used by
     #   admin-based operations (`with_admin` and everything built on top of it, e.g.
     #   `cluster_info`), any other external client is used by consumer-based operations
-    #   (`with_consumer` and everything built on top of it). The lifecycle of an external
-    #   client belongs fully to its owner: it is never configured, started or closed here and
-    #   all operations run within its identity, including its `group.id`. This is a low-level
-    #   internal API: the caller is responsible for providing a client capable of the invoked
-    #   operations and for invoking only operations that are safe to run on a live client.
+    #   (`with_consumer` and everything built on top of it: `#read_topic` and
+    #   `#trigger_rebalance`). Only those operations run within the identity of an external
+    #   consumer client, including its `group.id`. All other operations, including consumer
+    #   group offset and lag reads and offset changes, use their own short-lived admin instance
+    #   when the external client is not an rdkafka admin. The lifecycle of an external client
+    #   belongs fully to its owner: it is never configured, started or closed here. This is a
+    #   low-level internal API: the caller is responsible for providing a client capable of the
+    #   invoked operations and for invoking only operations that are safe to run on a live
+    #   client.
     #
     # @note Raw and proxied rdkafka instances are resolved once at construction, so the admin
     #   instance should not outlive them. `Karafka::Connection::ConsumerGroups::Client` instances
@@ -51,8 +55,8 @@ module Karafka
     #   admin = Karafka::Admin.new(kafka: { 'bootstrap.servers': 'other-cluster:9092' })
     #   admin.cluster_info
     #
-    # @example Read lags of a running consumer via its own client connection
-    #   admin = Karafka::Admin.new(external_client: client)
+    # @example Read consumer group lags via an existing rdkafka admin instance
+    #   admin = Karafka::Admin.new(external_client: rdkafka_admin)
     #   admin.read_lags_with_offsets({ 'my-group' => ['events'] })
     def initialize(kafka: {}, external_client: nil)
       @custom_kafka = kafka
@@ -152,6 +156,14 @@ module Karafka
         new.read_partition_offsets(topic_partition_offsets, isolation_level: isolation_level)
       end
 
+      # @param topic_partition_offsets [Hash{String => Array<Hash>}] topics with partition specs
+      # @return [Array<Hash>] new low watermark offsets of the partitions
+      # @note This operation is destructive and irreversible.
+      # @see Topics.delete_records
+      def delete_records(topic_partition_offsets)
+        new.delete_records(topic_partition_offsets)
+      end
+
       # @param topic_name [String] name of the topic we're interested in
       # @see Topics.info
       def topic_info(topic_name)
@@ -214,6 +226,17 @@ module Karafka
       # @see ConsumerGroups.delete
       def delete_consumer_group(group_id)
         new.delete_consumer_group(group_id)
+      end
+
+      # Deletes committed offsets of a consumer group for given topics or topics partitions
+      #
+      # @param group_id [String] consumer group id
+      # @param topics_with_partitions [Array<String>, Hash{String => Array<Integer>}] topics or
+      #   topics with partitions for which we want to delete committed offsets
+      # @return [true]
+      # @see ConsumerGroups.delete_offsets
+      def delete_consumer_group_offsets(group_id, topics_with_partitions)
+        new.delete_consumer_group_offsets(group_id, topics_with_partitions)
       end
 
       # Lists all consumer groups in the cluster with their current state
@@ -383,6 +406,14 @@ module Karafka
       topics_admin.read_partition_offsets(topic_partition_offsets, isolation_level: isolation_level)
     end
 
+    # @param topic_partition_offsets [Hash{String => Array<Hash>}] topics with partition specs
+    # @return [Array<Hash>] new low watermark offsets of the partitions
+    # @note This operation is destructive and irreversible.
+    # @see Topics#delete_records
+    def delete_records(topic_partition_offsets)
+      topics_admin.delete_records(topic_partition_offsets)
+    end
+
     # @param topic_name [String] name of the topic we're interested in
     # @see Topics#info
     def topic_info(topic_name)
@@ -437,6 +468,14 @@ module Karafka
     # @see ConsumerGroups#delete
     def delete_consumer_group(group_id)
       consumer_groups_admin.delete(group_id)
+    end
+
+    # @param group_id [String] consumer group id
+    # @param topics_with_partitions [Array<String>, Hash{String => Array<Integer>}] topics or
+    #   topics with partitions for which we want to delete committed offsets
+    # @see ConsumerGroups#delete_offsets
+    def delete_consumer_group_offsets(group_id, topics_with_partitions)
+      consumer_groups_admin.delete_offsets(group_id, topics_with_partitions)
     end
 
     # @return [Array<Hash>] array of `{ group_id:, state: }` entries
