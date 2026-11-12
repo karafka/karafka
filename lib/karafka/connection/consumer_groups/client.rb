@@ -62,7 +62,11 @@ module Karafka
           :unreleased_instance_id # 111
         ].freeze
 
-        private_constant :MAX_POLL_RETRIES, :COOP_UNSUBSCRIBE_FACTOR, :EARLY_REPORT_ERRORS
+        # Default for partitions lookups without allocations
+        EMPTY_ARRAY = [].freeze
+
+        private_constant :MAX_POLL_RETRIES, :COOP_UNSUBSCRIBE_FACTOR, :EARLY_REPORT_ERRORS,
+          :EMPTY_ARRAY
 
         # Creates a new consumer instance.
         #
@@ -747,8 +751,9 @@ module Karafka
             next @buffer << item unless item.is_a?(Rdkafka::RdkafkaError)
 
             # The drain neither waits nor retries, so the time budget does not apply. A repeated
-            # error reaches the next blocking `#poll` that owns the retries and backoff
-            action = poll_error_action(item, true)
+            # error reaches the next blocking `#poll` that owns the retries and backoff. The item
+            # itself is gone (e.g. a message that failed to build), so it is always reported
+            action = poll_error_action(item, true, report: true)
 
             case action
             when :eof
@@ -766,18 +771,39 @@ module Karafka
           # Revocation callbacks run inside of the drain call, before its messages reach the buffer.
           # The drain runs only without an earlier rebalance in this batch, so all the revocations
           # are from the drain itself
-          @rebalance_manager.remove_revoked_and_duplicated_messages if @rebalance_manager.changed?
+          clean_up_after_drain if @rebalance_manager.changed?
 
           eofed
+        end
+
+        # Removes drained messages of revoked partitions. A partition can also be assigned back
+        # within the same drain and librdkafka is then already past its drained messages, so we
+        # seek it back to the first of them, not to lose them
+        def clean_up_after_drain
+          assigned = @rebalance_manager.assigned_partitions
+          revoked = @rebalance_manager.revoked_partitions
+          rewinds = []
+
+          @buffer.each do |topic_name, partition, messages|
+            next unless revoked.fetch(topic_name, EMPTY_ARRAY).include?(partition)
+            next unless assigned.fetch(topic_name, EMPTY_ARRAY).include?(partition)
+
+            rewinds << Messages::Seek.new(topic_name, partition, messages.first.offset)
+          end
+
+          @rebalance_manager.remove_revoked_and_duplicated_messages
+
+          rewinds.each { |rewind| internal_seek(rewind) }
         end
 
         # Instruments a polling error and decides how it should be handled
         #
         # @param error [Rdkafka::RdkafkaError] error from polling
         # @param retryable [Boolean] can we still retry given our time and attempts
+        # @param report [Boolean] should the error be reported even when retryable
         # @return [Symbol] `:eof` when partition end was reached, `:skip` when the error should be
         #   ignored, `:raise` when it should be raised and `:retry` when we can poll again
-        def poll_error_action(error, retryable)
+        def poll_error_action(error, retryable, report: false)
           early_report = false
 
           # There are retryable issues on which we want to report fast as they are source of
@@ -822,7 +848,7 @@ module Karafka
           # Any fatal error should always cause early report
           early_report = true if error.fatal?
 
-          if early_report || !retryable
+          if early_report || !retryable || report
             Karafka.monitor.instrument(
               "error.occurred",
               caller: self,

@@ -422,15 +422,81 @@ RSpec.describe_current do
     end
 
     context "when the drain has a retryable error that is not early reported" do
-      let(:drained) { [Rdkafka::RdkafkaError.new(-185), message(0, 1)] }
+      let(:error) { Rdkafka::RdkafkaError.new(-185) }
+      let(:drained) { [error, message(0, 1)] }
 
       it "expect to keep the messages after it" do
         expect(buffer_state).to eq([topic_name, 0] => { offsets: [0, 1], eof: false })
       end
 
-      it "expect not to report it" do
+      it "expect to report it once as it is not retried" do
         client.batch_poll
-        expect(Karafka.monitor).not_to have_received(:instrument).with("error.occurred", any_args)
+
+        expect(Karafka.monitor).to have_received(:instrument).with(
+          "error.occurred",
+          caller: client,
+          error: error,
+          type: "connection.client.poll.error"
+        ).once
+      end
+    end
+
+    context "when the drain has a message that failed to build" do
+      let(:error) { Rdkafka::RdkafkaError.new(-1, "Error reading message headers") }
+      let(:drained) { [message(0, 1), error, message(0, 3)] }
+
+      it "expect to keep the messages around it" do
+        expect(buffer_state).to eq([topic_name, 0] => { offsets: [0, 1, 3], eof: false })
+      end
+
+      it "expect to report it" do
+        client.batch_poll
+
+        expect(Karafka.monitor).to have_received(:instrument).with(
+          "error.occurred",
+          caller: client,
+          error: error,
+          type: "connection.client.poll.error"
+        )
+      end
+    end
+
+    context "when a partition is revoked and assigned back inside of the drain" do
+      let(:drained) { [message(0, 1), message(0, 2), message(1, 0)] }
+
+      let(:tpl) do
+        {
+          subscription_group_id: subscription_group.id,
+          tpl: Rdkafka::Consumer::TopicPartitionList.new(
+            topic_name => [Rdkafka::Consumer::Partition.new(0, nil)]
+          )
+        }
+      end
+
+      before do
+        allow(kafka).to receive(:seek)
+        allow(kafka).to receive(:position).and_return(
+          Rdkafka::Consumer::TopicPartitionList.new(
+            topic_name => [Rdkafka::Consumer::Partition.new(0, 3)]
+          )
+        )
+        allow(kafka).to receive(:poll_batch_nb) do
+          client.rebalance_manager.on_rebalance_partitions_revoked(tpl)
+          client.rebalance_manager.on_rebalance_partitions_assigned(tpl)
+          drained
+        end
+      end
+
+      it "expect to remove its drained messages" do
+        expect(buffer_state).to eq([topic_name, 1] => { offsets: [0], eof: false })
+      end
+
+      it "expect to seek it back to the first of them" do
+        client.batch_poll
+
+        expect(kafka).to have_received(:seek) do |seek|
+          expect([seek.topic, seek.partition, seek.offset]).to eq([topic_name, 0, 1])
+        end
       end
     end
 
