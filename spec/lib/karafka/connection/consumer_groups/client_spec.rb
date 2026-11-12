@@ -473,13 +473,15 @@ RSpec.describe_current do
         }
       end
 
+      let(:position) { 3 }
+
       before do
         allow(kafka).to receive(:seek)
-        allow(kafka).to receive(:position).and_return(
+        allow(kafka).to receive(:position) do
           Rdkafka::Consumer::TopicPartitionList.new(
-            topic_name => [Rdkafka::Consumer::Partition.new(0, 3)]
+            topic_name => [Rdkafka::Consumer::Partition.new(0, position)]
           )
-        )
+        end
         allow(kafka).to receive(:poll_batch_nb) do
           client.rebalance_manager.on_rebalance_partitions_revoked(tpl)
           client.rebalance_manager.on_rebalance_partitions_assigned(tpl)
@@ -496,6 +498,30 @@ RSpec.describe_current do
 
         expect(kafka).to have_received(:seek) do |seek|
           expect([seek.topic, seek.partition, seek.offset]).to eq([topic_name, 0, 1])
+        end
+      end
+
+      context "when only a message from before the revocation was drained" do
+        let(:first) { message(0, 5) }
+        let(:drained) { [message(0, 6)] }
+        let(:position) { 5 }
+
+        it "expect not to seek forward past the restart point" do
+          client.batch_poll
+          expect(kafka).not_to have_received(:seek)
+        end
+      end
+
+      context "when a message from before the revocation precedes lower ones" do
+        let(:drained) { [message(0, 6), message(0, 5), message(0, 6)] }
+        let(:position) { 7 }
+
+        it "expect to seek back to the lowest drained offset" do
+          client.batch_poll
+
+          expect(kafka).to have_received(:seek) do |seek|
+            expect([seek.topic, seek.partition, seek.offset]).to eq([topic_name, 0, 5])
+          end
         end
       end
     end

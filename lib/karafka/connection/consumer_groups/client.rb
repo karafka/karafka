@@ -777,8 +777,9 @@ module Karafka
         end
 
         # Removes drained messages of revoked partitions. A partition can also be assigned back
-        # within the same drain and librdkafka is then already past its drained messages, so we
-        # seek it back to the first of them, not to lose them
+        # within the same drain and librdkafka may then already be past some of its drained
+        # messages, so we seek it back to the lowest of them, not to lose them. A drained message
+        # from before the revocation can precede them, so we never seek forward
         def clean_up_after_drain
           assigned = @rebalance_manager.assigned_partitions
           revoked = @rebalance_manager.revoked_partitions
@@ -788,12 +789,16 @@ module Karafka
             next unless revoked.fetch(topic_name, EMPTY_ARRAY).include?(partition)
             next unless assigned.fetch(topic_name, EMPTY_ARRAY).include?(partition)
 
-            rewinds << Messages::Seek.new(topic_name, partition, messages.first.offset)
+            rewinds << Messages::Seek.new(topic_name, partition, messages.map(&:offset).min)
           end
 
           @rebalance_manager.remove_revoked_and_duplicated_messages
 
-          rewinds.each { |rewind| internal_seek(rewind) }
+          rewinds.each do |rewind|
+            position = topic_partition_position(rewind.topic, rewind.partition)
+
+            internal_seek(rewind) if position > rewind.offset
+          end
         end
 
         # Instruments a polling error and decides how it should be handled
