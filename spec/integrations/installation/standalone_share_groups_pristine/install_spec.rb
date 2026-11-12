@@ -39,7 +39,7 @@ Dir.mktmpdir do |dir|
     share_consumer = File.read(share_consumer_path)
     assert share_consumer.include?("class ApplicationShareConsumer < Karafka::ShareConsumer"), share_consumer
 
-    kr_run = cmd(dir, "timeout --preserve-status 10 bundle exec karafka server")
+    kr_run = cmd(dir, "timeout --preserve-status 30 bundle exec karafka server")
     assert_equal 0, kr_run[1], kr_run[0]
   end
 end

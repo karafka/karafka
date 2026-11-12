@@ -213,6 +213,28 @@ RSpec.describe_current do
     it { expect(Karafka.logger).to have_received(:info).with(message) }
   end
 
+  describe "#on_client_topics_unknown" do
+    subject(:trigger) { listener.on_client_topics_unknown(event) }
+
+    let(:client) { instance_double(Karafka::Connection::ConsumerGroups::Client, id: SecureRandom.hex(6)) }
+    let(:message) { "[#{client.id}] Topic Topic does not exist yet. Waiting for it to be created." }
+    let(:payload) do
+      {
+        caller: client,
+        topic: "Topic"
+      }
+    end
+
+    it { expect(Karafka.logger).to have_received(:info).with(message) }
+
+    context "when topic name is not known" do
+      let(:message) { "[#{client.id}] Topic unknown does not exist yet. Waiting for it to be created." }
+      let(:payload) { { caller: client, topic: nil } }
+
+      it { expect(Karafka.logger).to have_received(:info).with(message) }
+    end
+  end
+
   describe "#on_consumer_consuming_retry" do
     subject(:trigger) { listener.on_consumer_consuming_retry(event) }
 
@@ -524,6 +546,23 @@ RSpec.describe_current do
         expect(details).to include(consumer.topic.subscription_group.id)
         expect(details).to include(consumer.topic.subscription_group.group.id)
       end
+
+      context "when the librdkafka error details overlap with the consumer context" do
+        let(:error) do
+          Rdkafka::RdkafkaError.new(-170, details: { topic: "other", partition: 99 })
+        end
+
+        it "expects to log the consumer topic and partition" do
+          expect(Karafka.logger).to have_received(:error).with(
+            a_string_including("topic: #{consumer.topic.name}, partition: #{consumer.partition}")
+          )
+        end
+
+        it "expects not to log the librdkafka error topic and partition" do
+          expect(Karafka.logger).not_to have_received(:error).with(a_string_including("topic: other"))
+          expect(Karafka.logger).not_to have_received(:error).with(a_string_including("partition: 99"))
+        end
+      end
     end
 
     context "when it is a consumer.revoked.error" do
@@ -663,6 +702,90 @@ RSpec.describe_current do
         expect(details).to include(message)
         expect(details).to include(con_client.subscription_group.id)
         expect(details).to include(con_client.subscription_group.group.id)
+      end
+
+      context "when the error carries the message topic, partition and offset" do
+        let(:error) do
+          Rdkafka::RdkafkaError.new(
+            -170,
+            broker_message: "Decompression (codec 0x4) of message at 7 of 77 bytes failed",
+            details: { topic: "orders", partition: 3, offset: 7 }
+          )
+        end
+
+        it "expects to log them after our own context" do
+          expect(Karafka.logger).to have_received(:error).with(
+            a_string_ending_with(
+              "[consumer_group: #{con_client.subscription_group.group.id}, " \
+              "subscription_group: #{con_client.subscription_group.id}, " \
+              "topic: orders, partition: 3, offset: 7]"
+            )
+          )
+        end
+      end
+
+      context "when a non-librdkafka error defines details" do
+        let(:error) do
+          error = StandardError.new
+          error.define_singleton_method(:details) do
+            { topic: "secret", partition: 9, offset: 99, token: "x" }
+          end
+          error
+        end
+
+        it "expects not to log any of them" do
+          expect(Karafka.logger).to have_received(:error).with(
+            "Data polling error occurred: #{error} " \
+            "[consumer_group: #{con_client.subscription_group.group.id}, " \
+            "subscription_group: #{con_client.subscription_group.id}]"
+          )
+        end
+      end
+
+      context "when the librdkafka error details have extra keys" do
+        let(:error) do
+          Rdkafka::RdkafkaError.new(
+            -170,
+            details: { topic: "orders", partition: 3, offset: 7, foo: "bar" }
+          )
+        end
+
+        it "expects to log only the topic, partition and offset" do
+          expect(Karafka.logger).to have_received(:error).with(
+            a_string_including("topic: orders, partition: 3, offset: 7")
+          )
+        end
+
+        it "expects not to log the extra keys" do
+          expect(Karafka.logger).not_to have_received(:error).with(a_string_including("foo"))
+        end
+      end
+
+      context "when the librdkafka error details have placeholder values" do
+        let(:error) do
+          Rdkafka::RdkafkaError.new(
+            -170,
+            details: { topic: "orders", partition: -1, offset: -1001 }
+          )
+        end
+
+        it "expects to log them as they are" do
+          expect(Karafka.logger).to have_received(:error).with(
+            a_string_including("topic: orders, partition: -1, offset: -1001")
+          )
+        end
+      end
+
+      context "when the librdkafka error details are empty" do
+        let(:error) { Rdkafka::RdkafkaError.new(-170) }
+
+        it "expects to log the same details as for other errors" do
+          expect(Karafka.logger).to have_received(:error).with(
+            "Data polling error occurred: #{error} " \
+            "[consumer_group: #{con_client.subscription_group.group.id}, " \
+            "subscription_group: #{con_client.subscription_group.id}]"
+          )
+        end
       end
     end
 

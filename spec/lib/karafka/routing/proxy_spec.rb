@@ -12,6 +12,34 @@ RSpec.describe_current do
     end
   end
 
+  describe "defaults" do
+    let(:target) { Struct.new(:max_messages, :max_wait_time).new }
+    let(:defaults) do
+      lambda do |_|
+        max_messages 50
+        max_wait_time 500
+      end
+    end
+
+    it "expect to apply defaults that were not assigned in the block" do
+      described_class.new(target, defaults) { max_messages 7 }
+      expect(target.max_messages).to eq(7)
+      expect(target.max_wait_time).to eq(500)
+    end
+
+    it "expect to apply all defaults when there is no block" do
+      described_class.new(target, defaults)
+      expect(target.max_messages).to eq(50)
+      expect(target.max_wait_time).to eq(500)
+    end
+
+    it "expect to apply only the block when defaults are nil" do
+      described_class.new(target, nil) { max_messages 7 }
+      expect(target.max_messages).to eq(7)
+      expect(target.max_wait_time).to be_nil
+    end
+  end
+
   describe "ignored method proxy" do
     context "when it is a boolean like named method" do
       it "expect not to pass it further and raise error" do

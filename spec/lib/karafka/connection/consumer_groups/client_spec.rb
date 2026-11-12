@@ -185,6 +185,74 @@ RSpec.describe_current do
     end
   end
 
+  describe "#batch_poll" do
+    let(:kafka) { instance_double(Rdkafka::Consumer, events_poll: nil) }
+    let(:topic_name) { SecureRandom.hex(6) }
+    let(:error) { Rdkafka::RdkafkaError.new(3, details: { topic: topic_name }) }
+
+    before do
+      allow(client).to receive(:kafka).and_return(kafka)
+      allow(subscription_group).to receive(:max_wait_time).and_return(100)
+      allow(kafka).to receive(:poll).and_raise(error)
+      allow(Karafka.monitor).to receive(:instrument).and_call_original
+    end
+
+    [true, "true"].each do |auto_create|
+      context "when subscribed topic does not exist and auto creation is #{auto_create.inspect}" do
+        before do
+          allow(subscription_group).to receive(:kafka)
+            .and_return(subscription_group.kafka.merge("allow.auto.create.topics": auto_create))
+
+          client.batch_poll
+        end
+
+        it "expect to instrument the unknown topic event" do
+          expect(Karafka.monitor).to have_received(:instrument).with(
+            "client.topics.unknown",
+            caller: client,
+            subscription_group: subscription_group,
+            topic: topic_name,
+            error: error
+          ).at_least(:once)
+        end
+
+        it "expect not to report it as an error" do
+          expect(Karafka.monitor).not_to have_received(:instrument).with("error.occurred", any_args)
+        end
+      end
+    end
+
+    context "when subscribed topic does not exist and auto creation is false" do
+      before do
+        allow(subscription_group).to receive(:kafka)
+          .and_return(subscription_group.kafka.merge("allow.auto.create.topics": false))
+
+        # Not running, so the error is not retried
+        client.batch_poll
+      rescue Rdkafka::RdkafkaError
+        nil
+      end
+
+      it "expect to raise the error" do
+        expect { client.batch_poll }.to raise_error(error)
+      end
+
+      it "expect not to instrument the unknown topic event" do
+        expect(Karafka.monitor)
+          .not_to have_received(:instrument).with("client.topics.unknown", any_args)
+      end
+
+      it "expect to report it as an error" do
+        expect(Karafka.monitor).to have_received(:instrument).with(
+          "error.occurred",
+          caller: client,
+          error: error,
+          type: "connection.client.poll.error"
+        ).at_least(:once)
+      end
+    end
+  end
+
   describe "#reset" do
     let(:kafka) { instance_double(Rdkafka::Consumer) }
     let(:sg_id) { subscription_group.id }
