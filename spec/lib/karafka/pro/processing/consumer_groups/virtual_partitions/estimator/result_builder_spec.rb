@@ -44,6 +44,7 @@ RSpec.describe_current do
       unique_keys: active_vps,
       null_keys: 0,
       active_vps: active_vps,
+      group_sizes: Array.new(active_vps) { messages / active_vps },
       utilization: utilization,
       load_imbalance: load_imbalance,
       parallelization: parallelization,
@@ -118,6 +119,14 @@ RSpec.describe_current do
 
     it { expect(result[:partitions][0][:batches_details]).to eq(partitions_batches[0]) }
     it { expect(result[:summary]).not_to have_key(:batches_details) }
+
+    it "deeply freezes the batches details" do
+      batch_details = result[:partitions][0][:batches_details]
+
+      expect(batch_details).to be_frozen
+      expect(batch_details.first).to be_frozen
+      expect(batch_details.first[:group_sizes]).to be_frozen
+    end
   end
 
   context "when scoring" do

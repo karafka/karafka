@@ -82,6 +82,12 @@ RSpec.describe_current do
       )
     end
 
+    context "with the balanced distribution" do
+      let(:settings) { { distribution: :balanced } }
+
+      it { expect(result[:settings][:distribution]).to eq(:balanced) }
+    end
+
     it { expect(result.keys.first).to eq(:format_version) }
     it { expect(result[:format_version]).to eq(described_class::FORMAT_VERSION) }
     it { expect(result[:topic_name]).to eq("orders") }
