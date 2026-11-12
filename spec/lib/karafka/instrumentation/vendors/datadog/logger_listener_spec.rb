@@ -405,7 +405,24 @@ RSpec.describe_current do
       end
     end
 
-    context "when processing fails and worker.processed is not published" do
+    context "when wrap fails and worker.processed is not published" do
+      before do
+        instrument("worker.process")
+        instrument("error.occurred", { error: error, type: "consumer.wrap.error" })
+        instrument("worker.completed")
+      end
+
+      it "finishes its own span on worker.completed" do
+        expect(own_span.finishes).to eq(1)
+      end
+
+      it "sets the error on its own span" do
+        expect(own_span.errors).to eq([error])
+        expect(foreign_span.errors).to be_empty
+      end
+    end
+
+    context "when worker fails and worker.processed is not published" do
       before do
         instrument("worker.process")
         instrument("error.occurred", details.merge(error: error, type: "worker.process.error"))

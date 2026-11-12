@@ -88,7 +88,8 @@ module Karafka
             pop_tags
           end
 
-          # Finishes the job span when `worker.processed` was not published (worker error)
+          # Finishes the job span also when `worker.processed` was not published, e.g. after an error
+          # rescued as `consumer.wrap.error` or `worker.process.error`
           #
           # @param _event [Karafka::Core::Monitoring::Event] event details including payload
           def on_worker_completed(_event)
@@ -215,7 +216,7 @@ module Karafka
               @dd_patch_checked = true
 
               return unless defined?(::Datadog::Tracing::Contrib::Karafka::Patcher)
-              # `patched?` is also true when the patch failed (e.g. Karafka loaded after dd-trace)
+              # `patched?` is also true when the patch raised
               return unless ::Datadog::Tracing::Contrib::Karafka::Patcher.patch_successful
 
               warn(

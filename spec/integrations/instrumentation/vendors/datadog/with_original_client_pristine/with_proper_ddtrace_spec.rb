@@ -48,6 +48,7 @@ start_karafka_and_wait_until do
   DT.key?(0)
 end
 
-# datadog is required before karafka here, so its Karafka patch fails and nothing is duplicated
+# datadog is required before karafka here, so its Karafka patch is never applied and nothing is
+# duplicated
 assert !Datadog::Tracing::Contrib::Karafka::Patcher.patch_successful
 assert !strio.string.include?("dd-trace-rb Karafka integration is active")
