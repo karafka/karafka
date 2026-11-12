@@ -72,7 +72,7 @@ module Karafka
           topic = topic_class.new(topic_name, self)
           @topics << Proxy.new(
             topic,
-            builder.defaults,
+            topic_defaults,
             &
           ).target
           built_topic = @topics.last
@@ -130,6 +130,12 @@ module Karafka
         # @raise [NotImplementedError] when not overridden
         def activity_scope
           raise NotImplementedError, "Implement in a subclass"
+        end
+
+        # @return [Proc, nil] routing defaults evaluated against each topic of this group or nil
+        #   when none apply
+        def topic_defaults
+          builder.defaults
         end
 
         # @return [Class] routing topic class this group instantiates for its topics. Overridden

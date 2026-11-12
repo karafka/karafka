@@ -29,6 +29,12 @@ module Karafka
           :share_groups
         end
 
+        # @return [nil] the routing `defaults` block applies to consumer-group topics only, so share
+        #   topics get none
+        def topic_defaults
+          nil
+        end
+
         # @return [Class] topic class used for share-group topics. It deliberately does not inherit
         #   consumer-group routing features so that share-group feature flow stays independent.
         def topic_class
