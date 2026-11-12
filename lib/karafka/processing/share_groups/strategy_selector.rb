@@ -9,9 +9,7 @@ module Karafka
         attr_reader :strategies
 
         # Features we support in the OSS offering.
-        SUPPORTED_FEATURES = %i[
-          dead_letter_queue
-        ].freeze
+        SUPPORTED_FEATURES = %i[].freeze
 
         # Initializes the strategy selector and preloads all strategies
         def initialize
