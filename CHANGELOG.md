@@ -52,10 +52,10 @@
 - [Maintenance] [Pro] Stabilize the patterned virtual partitions integration spec, which failed with `unknown_topic_or_part` when its pattern matched no topic yet.
 - [Maintenance] Remove the `GC.compact` fallback from `Karafka::App.warmup`, as `Process.warmup` exists on every supported Ruby.
 - [Maintenance] Rename the internal `*_DEV_DEFAULTS` kafka defaults to `*_NON_PRODUCTION_DEFAULTS`, as they apply in every environment except `production`. Behavior is unchanged.
-- [Maintenance] Skip integration specs that cannot run on JRuby (fork, Swarm, Puma workers, `SIGQUIT`, C extension gems, consoles hit by a JRuby autoload bug) when `bin/integrations` runs on JRuby, and report them as skipped.
-- [Maintenance] Stabilize the hammered `AssignmentsTracker` generations integration spec by using 10 consumer groups instead of 100, so it no longer exceeds the shutdown timeout on a loaded CI runner, and by reading generations from a background thread while the consumer groups get assignments.
-- [Maintenance] Stabilize the hammered `AssignmentsTracker` inspect integration spec by using 10 consumer groups instead of 101, so it no longer exceeds the shutdown timeout on a loaded CI runner, and by inspecting from a background thread while the groups get assignments.
-- [Maintenance] [Pro] Stabilize the cooperative-sticky transactional revoke and reclaim integration spec. A rebalance can bump the generation while a transaction is open, so its offset commit fails with `illegal_generation` and the batch is consumed again.
+- [Maintenance] Skip integration specs that cannot run on JRuby (e.g. fork, Swarm, C extension gems) when `bin/integrations` runs on JRuby, and report them as skipped.
+- [Maintenance] Stabilize the hammered `AssignmentsTracker` generations integration spec, which could exceed the shutdown timeout on a loaded CI runner.
+- [Maintenance] Stabilize the hammered `AssignmentsTracker` inspect integration spec, which could exceed the shutdown timeout on a loaded CI runner.
+- [Maintenance] [Pro] Stabilize the cooperative-sticky transactional revoke and reclaim integration spec, which failed when a rebalance happened during an open transaction.
 - [Maintenance] [Pro] Stabilize the parallel segments LRJ revoke continuity integration spec. It could trigger the rebalance before segment 0 owned the partition, so nothing was revoked.
 - [Maintenance] [Pro] Stabilize the parallel segments throttling integration spec. It failed when the segment groups ran out of phase.
 - [Maintenance] Stabilize the setup config producer specs, which left `Karafka.producer` on a custom producer and made later produce specs time out.
