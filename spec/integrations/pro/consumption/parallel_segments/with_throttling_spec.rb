@@ -38,8 +38,7 @@ class Consumer < Karafka::BaseConsumer
   def consume
     segment_id = topic.group.segment_id
 
-    # Track processing time for throttling analysis
-    DT[:times] << [segment_id, Time.now.to_f]
+    DT[:times] << [segment_id, Time.now.to_f, messages.size]
 
     messages.each do |message|
       DT[segment_id] << message.raw_payload
@@ -125,29 +124,27 @@ assert(
   "Processing completed too quickly (#{elapsed_time.round(2)}s)"
 )
 
-segments_times = DT[:times].group_by(&:first)
-segment0_times = segments_times[0]&.map(&:last) || []
-segment1_times = segments_times[1]&.map(&:last) || []
-
-# Instead of trying to find windows where both segments processed > 5 messages,
-# we should check if both segments processed messages in parallel
-# and were throttled at similar times
-
-# Check if there was parallel processing (both segments active within a short time-frame)
-time_diffs = []
-segment0_times.each do |t0|
-  # Find the closest processing time in segment 1
-  closest_t1 = segment1_times.min_by { |t1| (t1 - t0).abs }
-  time_diffs << (closest_t1 - t0).abs if closest_t1
-end
-
-# If we have at least one pair of close timestamps (within 1 second)
-has_parallel_processing = time_diffs.any? { |diff| diff < 1.0 }
+# A global throttler would let through at most 5 messages in any window shorter than the 5 s
+# interval. With per segment throttling each segment processes up to 5 messages per throttling
+# cycle (about 6 s), so while both segments are active, a 4 s window always holds a batch of each.
+# This does not depend on when each segment group joined and got its assignment.
+window = 4.0
+max_in_window = DT[:times].map do |_, started_at, _|
+  DT[:times]
+    .select { |_, time, _| time >= started_at && time < started_at + window }
+    .sum(&:last)
+end.max || 0
 
 assert(
-  has_parallel_processing,
-  "No evidence of parallel processing between segments, suggesting global throttling"
+  max_in_window > 5,
+  <<~MSG
+    No evidence of parallel processing between segments, suggesting global throttling
+    max messages in #{window}s: #{max_in_window}
+    consumed: #{DT[:times].map { |segment, time, size| [segment, time.round(3), size] }}
+  MSG
 )
 
-assert segment0_times.size >= 5, "Segment 0 didn't process enough messages: #{segment0_times.size}"
-assert segment1_times.size >= 5, "Segment 1 didn't process enough messages: #{segment1_times.size}"
+batches = DT[:times].map(&:first).tally
+
+assert batches.fetch(0, 0) >= 5, "Segment 0 didn't process enough batches: #{batches.fetch(0, 0)}"
+assert batches.fetch(1, 0) >= 5, "Segment 1 didn't process enough batches: #{batches.fetch(1, 0)}"

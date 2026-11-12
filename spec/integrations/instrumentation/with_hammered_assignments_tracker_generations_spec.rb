@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 # AssignmentsTracker generations should remain stable and not crash when accessed concurrently
-# from multiple consumer groups during message processing
+# from multiple consumer groups during message processing and while those groups get assignments
 
 setup_karafka
 
@@ -36,6 +36,14 @@ draw_routes do
 end
 
 produce(DT.topic, rand.to_s)
+
+# Reads while the rebalances of all the groups write their generations
+Thread.new do
+  until DT[:done].size >= 10
+    Karafka::Instrumentation::AssignmentsTracker.instance.generations
+    Thread.pass
+  end
+end
 
 start_karafka_and_wait_until do
   DT[:done].size >= 10

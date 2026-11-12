@@ -124,8 +124,9 @@ module Karafka
         end
       end
 
-      # @param block [Proc] block with per-topic evaluated defaults
-      # @return [Proc] defaults that should be evaluated per topic
+      # @param block [Proc] block with defaults evaluated per consumer-group topic
+      # @return [Proc] defaults that should be evaluated per consumer-group topic
+      # @note Defaults apply to consumer-group topics only. Share-group topics do not get them.
       def defaults(&block)
         return @defaults unless block
 
