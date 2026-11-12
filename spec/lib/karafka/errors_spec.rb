@@ -66,4 +66,16 @@ RSpec.describe_current do
 
     specify { expect(error).to be < described_class::BaseError }
   end
+
+  describe "ConsumerGroupNotEmptyError" do
+    subject(:error) { described_class::ConsumerGroupNotEmptyError }
+
+    specify { expect(error).to be < described_class::BaseError }
+  end
+
+  describe "ConsumerGroupSubscribedToTopicError" do
+    subject(:error) { described_class::ConsumerGroupSubscribedToTopicError }
+
+    specify { expect(error).to be < described_class::BaseError }
+  end
 end

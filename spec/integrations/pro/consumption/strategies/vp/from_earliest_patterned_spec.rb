@@ -35,6 +35,7 @@
 # This should also work as expected for pattern based topics.
 
 setup_karafka do |config|
+  config.kafka[:"allow.auto.create.topics"] = true
   config.concurrency = 10
   config.kafka[:"topic.metadata.refresh.interval.ms"] = 2_000
 end

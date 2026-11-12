@@ -8,8 +8,8 @@ module Karafka
       class Plan < Base
         # Figures out scope of changes that need to happen
         # @return [Boolean] true if running migrate would change anything, false otherwise
-        # @raise [Karafka::Errors::CommandValidationError] when any existing topic has
-        #   configuration unknown to the cluster, as migrate would fail on it
+        # @raise [Karafka::Errors::CommandValidationError] when any topic has configuration
+        #   unknown to the cluster, as migrate would fail on it
         def call
           # If no changes at all, just print and stop
           if topics_to_create.empty? &&
@@ -32,7 +32,12 @@ module Karafka
               puts "  #{green("+")} #{topic.name}:"
               puts "    #{green("+")} partitions: \"#{topic.declaratives.partitions}\""
 
+              unknown = unknown_configs.fetch(topic, {})
+
               topic.declaratives.details.each do |name, value|
+                # Unknown configs are never applied, so they are reported separately
+                next if unknown.key?(name.to_s)
+
                 puts "    #{green("+")} #{name}: \"#{value}\""
               end
 

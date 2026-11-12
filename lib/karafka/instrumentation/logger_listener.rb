@@ -155,6 +155,16 @@ module Karafka
         MSG
       end
 
+      # Prints info about a subscribed topic that does not exist yet
+      #
+      # @param event [Karafka::Core::Monitoring::Event] event details including payload
+      def on_client_topics_unknown(event)
+        topic = event[:topic] || "unknown"
+        client = event[:caller]
+
+        info "[#{client.id}] Topic #{topic} does not exist yet. Waiting for it to be created."
+      end
+
       # Prints info about retry of processing after an error
       #
       # @param event [Karafka::Core::Monitoring::Event] event details including payload
@@ -522,6 +532,9 @@ module Karafka
           {}
         end
 
+        # Our own context (consumer, client, listener) stays first and wins on overlapping keys
+        details = details.merge(extract_rdkafka_error_details(event[:error])) { |_, own, _| own }
+
         return nil if details.empty?
 
         "[#{details.map { |label, value| "#{label}: #{value}" }.join(", ")}]"
@@ -556,6 +569,21 @@ module Karafka
           consumer_group: listener.subscription_group.group.id,
           subscription_group: listener.subscription_group.id
         }
+      end
+
+      # Topic, partition and offset of the message a librdkafka error is about (e.g. a
+      # decompression failure). Only librdkafka errors are used: other errors, including those
+      # raised in user code, can define `#details` with any content, and it must not reach the
+      # logs or replace our own context.
+      #
+      # @param error [Object] error from the event payload
+      # @return [Hash] message location details or an empty hash
+      def extract_rdkafka_error_details(error)
+        return {} unless error.is_a?(Rdkafka::RdkafkaError)
+
+        # Negative values (e.g. -1001 for no position) are kept: they carry information and match
+        # how we log offsets elsewhere
+        error.details.slice(:topic, :partition, :offset)
       end
     end
   end

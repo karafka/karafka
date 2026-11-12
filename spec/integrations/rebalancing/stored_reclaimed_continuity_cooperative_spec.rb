@@ -77,9 +77,12 @@ other = Thread.new do
 
       begin
         consumer.commit
-      # Karafka joining may bump the generation, which is an ownership loss like in Karafka
+      # Karafka joining may bump the generation, which is an ownership loss like in Karafka.
+      # Auto-commit or revocation may also leave nothing stored to commit (no_offset)
       rescue Rdkafka::RdkafkaError => e
-        raise unless %i[illegal_generation unknown_member_id assignment_lost].include?(e.code)
+        raise unless %i[
+          illegal_generation unknown_member_id assignment_lost no_offset
+        ].include?(e.code)
       end
 
       break

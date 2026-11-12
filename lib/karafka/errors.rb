@@ -91,6 +91,14 @@ module Karafka
     # This should never happen. Please open an issue if it does.
     InvalidTimeBasedOffsetError = Class.new(BaseError)
 
+    # Raised when we try to change offsets of a consumer group that has active members. Kafka
+    # accepts such changes only for consumer groups without members.
+    ConsumerGroupNotEmptyError = Class.new(BaseError)
+
+    # Raised when we try to delete offsets of a consumer group for topics it is subscribed to.
+    # Kafka accepts such deletions only for topics no active member subscribes to.
+    ConsumerGroupSubscribedToTopicError = Class.new(BaseError)
+
     # For internal usage only
     # Raised when we run operations that require certain result but despite successfully finishing
     # it is not yet available due to some synchronization mechanisms and caches

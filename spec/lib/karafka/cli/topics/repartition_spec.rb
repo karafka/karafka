@@ -60,5 +60,18 @@ RSpec.describe Karafka::Cli::Topics::Repartition do
         expect(Karafka::Admin).not_to have_received(:create_partitions)
       end
     end
+
+    context "when a topic has configuration unknown to the cluster" do
+      before do
+        allow(repartition_topics)
+          .to receive(:unknown_configs)
+          .and_return(declaratives_routing_topics[2] => { "retention.msx" => "1" })
+      end
+
+      it "raises and does not repartition any topic" do
+        expect { repartition_topics.call }.to raise_error(Karafka::Errors::CommandValidationError)
+        expect(Karafka::Admin).not_to have_received(:create_partitions)
+      end
+    end
   end
 end

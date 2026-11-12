@@ -7,7 +7,11 @@ module Karafka
       # Will **not** create topics if missing.
       class Repartition < Base
         # @return [Boolean] true if anything was repartitioned, otherwise false
+        # @raise [Karafka::Errors::CommandValidationError] when any topic has configuration
+        #   unknown to the cluster. Nothing is applied then.
         def call
+          ensure_configs_exist_in_cluster!
+
           any_repartitioned = false
 
           existing_partitions = existing_topics.to_h do |topic|

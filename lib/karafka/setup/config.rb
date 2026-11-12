@@ -474,7 +474,7 @@ module Karafka
             # In some cases WaterDrop updates the config and we don't want our consumer config to
             # be polluted by those updates, that's why we copy
             producer_kafka = AttributesMap.producer(config.kafka.dup)
-            # We inject some defaults (mostly for dev) unless user defined them
+            # We inject some defaults (mostly for non-production) unless user defined them
             Setup::DefaultsInjector.producer(producer_kafka)
             producer_config.kafka = producer_kafka
             # We also propagate same listener to the default producer to make sure, that the

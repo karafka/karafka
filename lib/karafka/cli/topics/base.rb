@@ -23,10 +23,20 @@ module Karafka
 
           yield
         rescue Rdkafka::RdkafkaError => e
-          puts "#{operation_message} #{red("failed")}:"
-          puts e
+          raise_failed(operation_message, e)
+        end
 
-          raise Errors::CommandValidationError, cause: e
+        # Prints a failed operation with its error and raises the mapped error for proper exit
+        # code status handling
+        #
+        # @param operation_message [String] message of the operation that failed
+        # @param error [Rdkafka::RdkafkaError] error that failed it
+        # @raise [Karafka::Errors::CommandValidationError] always
+        def raise_failed(operation_message, error)
+          puts "#{operation_message} #{red("failed")}:"
+          puts error
+
+          raise Errors::CommandValidationError, cause: error
         end
 
         # @return [Array<Karafka::Declaratives::Topic>] all available topics that can be managed
@@ -45,8 +55,8 @@ module Karafka
           end
         end
 
-        # Fails when any existing declarative topic has configuration that the cluster does not
-        # know. Such configuration would never be applied, so we stop before changing anything.
+        # Fails when any declarative topic has configuration that the cluster does not know. Such
+        # configuration would never be applied, so we stop before changing anything.
         #
         # @raise [Karafka::Errors::CommandValidationError] when unknown configuration is present
         def ensure_configs_exist_in_cluster!
@@ -60,14 +70,22 @@ module Karafka
           raise Errors::CommandValidationError
         end
 
-        # @return [Hash{Karafka::Declaratives::Topic => Hash{String => String}}] existing
-        #   declarative topics with their configs (names with values) that the cluster does not
-        #   know and so could never be applied
+        # @return [Hash{Karafka::Declaratives::Topic => Hash{String => String}}] declarative
+        #   topics with their configs (names with values) that the cluster does not know and so
+        #   could never be applied
         def unknown_configs
-          @unknown_configs ||= UnknownConfigs.new(
-            declaratives_routing_topics,
-            existing_topics_names
-          ).call
+          @unknown_configs ||= find_unknown_configs
+        end
+
+        # @param as_new [Boolean] checks every topic as one to be created
+        # @return [Hash{Karafka::Declaratives::Topic => Hash{String => String}}] declarative
+        #   topics with their configs that the cluster does not know
+        # @raise [Karafka::Errors::CommandValidationError] when we could not read the topics
+        #   configuration from the cluster (e.g. not allowed to describe a declared topic)
+        def find_unknown_configs(as_new: false)
+          UnknownConfigs.new(declaratives_routing_topics, existing_topics_names, as_new: as_new).call
+        rescue Rdkafka::RdkafkaError => e
+          raise_failed("Checking topics configuration", e)
         end
 
         # @return [Array<Hash>] existing topics details

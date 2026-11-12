@@ -76,7 +76,54 @@ class Scenario
     'setup/with_kip_848_protocol_incorrect_config_spec.rb' => [1].freeze
   }.freeze
 
-  private_constant :MAX_RUN_TIME, :KILL_AFTER, :EXIT_CODES
+  # Specs that cannot pass on JRuby (fork, signals the JVM owns, C extension gems, open JRuby
+  # bugs) with the reason why. They are skipped there. Drop a JRuby bug entry once CI runs a
+  # JRuby with the fix.
+  JRUBY_UNSUPPORTED = {
+    'admin/post_fork_behaviour_spec.rb' => 'fork',
+    'instrumentation/producer_logger_on_forks_spec.rb' => 'fork',
+    'instrumentation/vendors/kubernetes/fenced_out_criticality_spec.rb' => 'fork',
+    'instrumentation/vendors/kubernetes/swarm_liveness_all_good_spec.rb' => 'fork',
+    'instrumentation/vendors/kubernetes/swarm_liveness_not_controlling_often_spec.rb' => 'fork',
+    'production/closed_producer_not_usable_post_fork_spec.rb' => 'fork',
+    'swarm/cli_validations_for_inclusions_spec.rb' => 'fork',
+    'swarm/dead_node_cleanup_spec.rb' => 'fork',
+    'swarm/dead_node_recovery_spec.rb' => 'fork',
+    'swarm/forceful_nodes_restart_graceful_supervisor_stop_spec.rb' => 'fork',
+    'swarm/forceful_shutdown_of_hanging_spec.rb' => 'fork',
+    'swarm/liveness_before_fetch_loop_reporting_spec.rb' => 'fork',
+    'swarm/liveness_failure_restart_spec.rb' => 'fork',
+    'swarm/node_pipe_fd_leak_on_restart_spec.rb' => 'fork',
+    'swarm/post_fork_idempotent_producer_reinitialization_spec.rb' => 'fork',
+    'swarm/post_fork_producer_statistics_disabled_spec.rb' => 'fork',
+    'swarm/regular_flow_with_post_fork_producer_spec.rb' => 'fork',
+    'swarm/share_groups_fail_fast_before_fork_spec.rb' => 'fork',
+    'swarm/start_stop_after_time_spec.rb' => 'fork',
+    'swarm/static_memberships_without_a_conflict_spec.rb' => 'fork',
+    'swarm/with_blocking_at_exit_spec.rb' => 'fork',
+    'swarm/with_different_producer_payload_sizes_spec.rb' => 'fork',
+    'embedding/puma_long_running_job_early_stop_poro/flow_spec.rb' => 'Puma worker mode needs fork',
+    'embedding/puma_long_running_job_poro/flow_spec.rb' => 'Puma worker mode needs fork',
+    'embedding/puma_with_worker_poro/flow_spec.rb' => 'Puma worker mode needs fork',
+    'embedding/puma_single_poro/flow_spec.rb' => 'Puma exits with 1 on SIGTERM',
+    'shutdown/via_idle_timeout_listener_spec.rb' => 'SIGQUIT is the JVM thread dump',
+    'signals/on_sigquit_spec.rb' => 'SIGQUIT is the JVM thread dump',
+    'signals/on_sigtstp_spec.rb' => 'SIGQUIT is the JVM thread dump',
+    'rails/rails72_pristine/with-active-job-transactional/schedule_with_sqlite_spec.rb' => 'sqlite3 C extension',
+    'rails/rails80_pristine/with-active-job-transactional/schedule_with_sqlite_spec.rb' => 'sqlite3 C extension',
+    'rails/rails81_pristine/with-active-job-transactional/schedule_with_sqlite_spec.rb' => 'sqlite3 C extension',
+    'cli/console_with_irb_poro/console_with_irb_spec.rb' => 'JRuby autoload bug (jruby/jruby#9589)',
+    'rails/rails72_pristine/with_kubernetes_listener_in_the_console/console_with_rails_spec.rb' => 'JRuby autoload bug (jruby/jruby#9589)',
+    'rails/rails80_pristine/with_kubernetes_listener_in_the_console/console_with_rails_spec.rb' => 'JRuby autoload bug (jruby/jruby#9589)',
+    'rails/rails81_pristine/with_kubernetes_listener_in_the_console/console_with_rails_spec.rb' => 'JRuby autoload bug (jruby/jruby#9589)',
+    'rails/rails72_pristine/without-active_job_rspec/console_with_rails_spec.rb' => 'JRuby autoload bug (jruby/jruby#9589)',
+    'rails/rails80_pristine/without-active_job_rspec/console_with_rails_spec.rb' => 'JRuby autoload bug (jruby/jruby#9589)',
+    'rails/rails81_pristine/without-active_job_rspec/console_with_rails_spec.rb' => 'JRuby autoload bug (jruby/jruby#9589)',
+    'rails/rails80_pristine/with_setup_via_initializers/rails_console_spec.rb' => 'JRuby autoload bug (jruby/jruby#9589)',
+    'rails/rails81_pristine/with_setup_via_initializers/rails_console_spec.rb' => 'JRuby autoload bug (jruby/jruby#9589)'
+  }.freeze
+
+  private_constant :MAX_RUN_TIME, :KILL_AFTER, :EXIT_CODES, :JRUBY_UNSUPPORTED
 
   attr_reader :index
 
@@ -118,6 +165,14 @@ class Scenario
     return :sequential if scenario_dir.include?('_sequential')
 
     :regular
+  end
+
+  # @return [String, nil] reason why this scenario cannot run on the current Ruby engine or nil
+  #   if it can run
+  def skip_reason
+    return nil unless RUBY_ENGINE == 'jruby'
+
+    JRUBY_UNSUPPORTED[name]
   end
 
   # @return [Boolean] any spec that is not a regular one should not run in parallel with others
@@ -336,9 +391,14 @@ scenarios = specs
             .with_index { |integration, index| Scenario.new(integration, index % groups) }
             .delete_if { |scenario| scenario.index != group && group != -1 }
 
-raise ArgumentError, "No integration specs with filters: #{ARGV.join(', ')}" if scenarios.empty?
+skipped_scenarios, scenarios = scenarios.partition(&:skip_reason)
+
+if scenarios.empty? && skipped_scenarios.empty?
+  raise ArgumentError, "No integration specs with filters: #{ARGV.join(', ')}"
+end
 
 puts "Running #{scenarios.size} scenarios"
+puts "Skipping #{skipped_scenarios.size} scenarios" unless skipped_scenarios.empty?
 
 regulars = scenarios.reject(&:linear?)
 linears = scenarios - regulars
@@ -387,6 +447,15 @@ puts "\nLongest scenarios:\n\n"
 
 finished_scenarios.sort_by(&:time_taken).reverse.first(10).each do |long_scenario|
   puts "[#{'%6.2f' % long_scenario.time_taken}] #{long_scenario.name}"
+end
+
+unless skipped_scenarios.empty?
+  puts
+  puts "\nSkipped scenarios:\n\n"
+
+  skipped_scenarios.sort_by(&:name).each do |scenario|
+    puts "\e[#{33}m#{'[SKIPPED]'}\e[0m #{scenario.name} (#{scenario.skip_reason})"
+  end
 end
 
 failed_scenarios = finished_scenarios.reject(&:success?)

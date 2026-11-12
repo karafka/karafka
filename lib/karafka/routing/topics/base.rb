@@ -85,9 +85,9 @@ module Karafka
         #
         # @note It is set to `false` by default to preserve backwards compatibility
         def kafka=(settings = {})
-          inherit = settings.delete(:inherit)
+          kafka = settings.except(:inherit)
 
-          @kafka = inherit ? Karafka::App.config.kafka.merge(settings) : settings
+          @kafka = settings[:inherit] ? Karafka::App.config.kafka.merge(kafka) : kafka
         end
 
         # @return [String] name of subscription that will go to librdkafka

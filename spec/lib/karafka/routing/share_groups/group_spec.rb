@@ -112,6 +112,49 @@ RSpec.describe Karafka::Routing::ShareGroups::Group do
     end
   end
 
+  context "when routing defaults use consumer-group-only calls" do
+    # Groups read the defaults from the global routing builder, so this context draws on it
+    subject(:builder) { Karafka::App.routes }
+
+    let(:consumer_topic) { builder.find(&:consumer_group?).topics.first }
+    let(:share_topic) { builder.find(&:share_group?).topics.first }
+    let(:payload_deserializer) { ->(message) { message.raw_payload } }
+
+    before do
+      cclass = cg_consumer_class
+      sclass = consumer_class
+      deserializer = payload_deserializer
+
+      builder.draw do
+        defaults do
+          config(partitions: 2)
+          dead_letter_queue(topic: "dlq", independent: true)
+          deserializers(payload: deserializer)
+        end
+
+        consumer_group "cg" do
+          topic(:a) { consumer cclass }
+        end
+
+        share_group "sg" do
+          topic(:b) { consumer sclass }
+        end
+      end
+    end
+
+    it "expect consumer topics to get the defaults" do
+      expect(consumer_topic.declaratives.partitions).to eq(2)
+      expect(consumer_topic.dead_letter_queue.topic).to eq("dlq")
+      expect(consumer_topic.dead_letter_queue.independent).to be(true)
+      expect(consumer_topic.deserializers.payload).to eq(payload_deserializer)
+    end
+
+    it "expect share topics not to get any of the defaults" do
+      expect(share_topic.to_h).not_to include(:declaratives, :dead_letter_queue)
+      expect(share_topic.deserializers.payload).to be_a(Karafka::Deserializers::Payload)
+    end
+  end
+
   context "when the global pause settings are customized" do
     let(:share_topic) { builder.find(&:share_group?).topics.first }
     let(:original_timeout) { Karafka::App.config.pause.timeout }

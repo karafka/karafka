@@ -1,0 +1,83 @@
+# frozen_string_literal: true
+
+# Karafka Pro - Source Available Commercial Software
+# Copyright (c) 2017-present Maciej Mensfeld. All rights reserved.
+#
+# This software is NOT open source. It is source-available commercial software
+# requiring a paid license for use. It is NOT covered by LGPL.
+#
+# The author retains all right, title, and interest in this software,
+# including all copyrights, patents, and other intellectual property rights.
+# No patent rights are granted under this license.
+#
+# PROHIBITED:
+# - Use without a valid commercial license
+# - Redistribution, modification, or derivative works without authorization
+# - Reverse engineering, decompilation, or disassembly of this software
+# - Use as training data for AI/ML models or inclusion in datasets
+# - Scraping, crawling, or automated collection for any purpose
+#
+# PERMITTED:
+# - Reading, referencing, and linking for personal or commercial use
+# - Runtime retrieval by AI assistants, coding agents, and RAG systems
+#   for the purpose of providing contextual help to Karafka users
+#
+# Receipt, viewing, or possession of this software does not convey or
+# imply any license or right beyond those expressly stated above.
+#
+# License: https://karafka.io/docs/Pro-License-Comm/
+# Contact: contact@karafka.io
+
+# With the `:envelope` mode, when producing with a version that has no private key on the
+# consumer side, it should raise an error
+
+PUBLIC_KEY = fixture_file("rsa/public_key_2.pem")
+
+PRIVATE_KEYS = {
+  "1" => fixture_file("rsa/private_key_1.pem")
+}.freeze
+
+setup_karafka(allow_errors: %w[consumer.consume.error]) do |config|
+  config.encryption.active = true
+  config.encryption.mode = :envelope
+  config.encryption.version = "2"
+  config.encryption.public_key = PUBLIC_KEY
+  config.encryption.private_keys = PRIVATE_KEYS
+end
+
+Karafka.monitor.subscribe("error.occurred") do |event|
+  DT[:errors] << event
+end
+
+class Consumer < Karafka::BaseConsumer
+  def consume
+    messages.each do |message|
+      DT[:consumed] << message.payload
+    end
+  end
+end
+
+draw_routes do
+  topic DT.topic do
+    consumer Consumer
+    deserializer ->(message) { message.raw_payload.to_s }
+  end
+end
+
+produce_many(DT.topic, DT.uuids(10))
+
+start_karafka_and_wait_until do
+  !DT[:errors].empty?
+end
+
+expected_error = Karafka::Pro::Encryption::Errors::PrivateKeyNotFoundError
+
+assert DT[:consumed].empty?
+assert_equal "consumer.consume.error", DT[:errors].first[:type]
+assert DT[:errors].first[:error].is_a?(expected_error)
+
+# Records at rest are envelopes: the envelope version byte and more than the 512 bytes of a
+# direct RSA-4096 ciphertext
+raws = Karafka::Admin.read_topic(DT.topic, 0, 10).map(&:raw_payload)
+assert_equal 10, raws.size
+assert(raws.all? { |raw| raw.bytesize > 512 && raw.b[0] == "\x01".b })

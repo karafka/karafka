@@ -9,6 +9,11 @@ RSpec.describe_current do
 
   describe "#names" do
     it { expect(topics_configs.names).to include("retention.ms", "cleanup.policy") }
-    it { expect(topics_configs.names).to include("log.retention.bytes") }
+    it { expect(topics_configs.names).not_to include("log.retention.bytes") }
+  end
+
+  describe "#names_with_synonyms" do
+    it { expect(topics_configs.names_with_synonyms).to include("retention.ms", "cleanup.policy") }
+    it { expect(topics_configs.names_with_synonyms).to include("log.retention.bytes") }
   end
 end

@@ -6,7 +6,11 @@ module Karafka
       # Creates topics based on the routing setup and configuration
       class Create < Base
         # @return [Boolean] true if any topic was created, otherwise false
+        # @raise [Karafka::Errors::CommandValidationError] when any topic has configuration
+        #   unknown to the cluster. Nothing is applied then.
         def call
+          ensure_configs_exist_in_cluster!
+
           any_created = false
 
           declaratives_routing_topics.each do |topic|

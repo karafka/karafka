@@ -17,7 +17,7 @@ RSpec.describe_current do
         )
 
       declaratives_routing_topics.each_with_index do |topic, index|
-        declaratives = instance_double(Karafka::Declaratives::Topic)
+        declaratives = instance_double(Karafka::Declaratives::Topic, details: {})
 
         allow(topic).to receive_messages(
           name: "topic_#{index}",
@@ -55,6 +55,21 @@ RSpec.describe_current do
       it "does not delete any topics and returns false" do
         expect(delete_topics.call).to be_falsey
 
+        expect(Karafka::Admin).not_to have_received(:delete_topic)
+      end
+    end
+
+    context "when a topic has configuration unknown to the cluster" do
+      let(:existing_topics_names) { %w[topic_0 topic_1] }
+
+      before do
+        allow(delete_topics)
+          .to receive(:unknown_configs)
+          .and_return(declaratives_routing_topics[1] => { "retention.msx" => "1" })
+      end
+
+      it "raises and does not delete any topics" do
+        expect { delete_topics.call }.to raise_error(Karafka::Errors::CommandValidationError)
         expect(Karafka::Admin).not_to have_received(:delete_topic)
       end
     end

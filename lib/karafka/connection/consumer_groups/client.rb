@@ -716,10 +716,20 @@ module Karafka
             early_report = true
           # See
           # https://github.com/confluentinc/confluent-kafka-dotnet/issues/1366#issuecomment-821842990
-          # This will be raised each time poll detects a non-existing topic. When auto creation is
-          # on, we can safely ignore it
+          # librdkafka reports subscribed topics that do not exist. With auto creation allowed they
+          # may still be created, so we only report it and wait
           when :unknown_topic_or_part # 3
-            return nil if @subscription_group.kafka[:"allow.auto.create.topics"]
+            if @subscription_group.kafka[:"allow.auto.create.topics"]
+              Karafka.monitor.instrument(
+                "client.topics.unknown",
+                caller: self,
+                subscription_group: @subscription_group,
+                topic: e.details[:topic],
+                error: e
+              )
+
+              return nil
+            end
 
             early_report = true
 

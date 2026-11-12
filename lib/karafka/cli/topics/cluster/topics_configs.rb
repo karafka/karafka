@@ -15,14 +15,28 @@ module Karafka
             @topic_name = topic_name
           end
 
-          # @return [Array<String>] names of all topic configs with their synonyms
+          # @return [Array<String>] names of all topic configs, without their synonyms
+          # @note Only those names are accepted when creating a topic
           def names
-            @names ||= begin
+            @names ||= configs.map(&:name)
+          end
+
+          # @return [Array<String>] names of all topic configs with their synonyms
+          # @note Synonyms are accepted only when altering an existing topic
+          def names_with_synonyms
+            @names_with_synonyms ||= configs.flat_map do |config|
+              config.synonyms.map(&:name) << config.name
+            end
+          end
+
+          private
+
+          # @return [Array<Karafka::Admin::Configs::Config>] configs of the described topic
+          def configs
+            @configs ||= begin
               resource = Admin::Configs::Resource.new(type: :topic, name: @topic_name)
 
-              Admin::Configs.describe(resource).first.configs.flat_map do |config|
-                config.synonyms.map(&:name) << config.name
-              end
+              Admin::Configs.describe(resource).first.configs
             end
           end
         end

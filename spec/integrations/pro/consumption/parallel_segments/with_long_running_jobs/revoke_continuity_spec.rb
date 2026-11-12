@@ -60,8 +60,12 @@ class Consumer < Karafka::BaseConsumer
     # Store message for verification
     DT[segment_id] << messages.first.raw_payload
 
-    # Trigger rebalance after certain number of messages
-    if DT[:processed].size >= 6 && DT[:rebalanced].empty? && DT[:trigger_rebalance].empty?
+    # Trigger rebalance after certain number of messages, but only once segment 0 owns the
+    # partition, as the extra consumer joins only the segment 0 consumer group
+    if DT[:processed].size >= 6 &&
+        !DT[0].empty? &&
+        DT[:rebalanced].empty? &&
+        DT[:trigger_rebalance].empty?
       DT[:trigger_rebalance] << true
     end
   end
@@ -166,10 +170,9 @@ end
 
 # Start Karafka and wait for everything to complete
 start_karafka_and_wait_until do
-  # Wait until producer is done and we've processed enough messages
-  # OR we've detected revocation
+  # Wait until producer is done and we've detected revocation
   !DT[:producer_done].empty? &&
-    (DT[:processed].size >= 12 || !DT[:revoked_events].empty? || !DT[:revoked_called].empty?)
+    (!DT[:revoked_events].empty? || !DT[:revoked_called].empty?)
 end
 
 # Ensure producer thread is cleaned up
