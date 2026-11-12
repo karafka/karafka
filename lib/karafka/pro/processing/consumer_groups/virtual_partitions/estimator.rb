@@ -62,20 +62,6 @@ module Karafka
             # meaning changed).
             FORMAT_VERSION = 1
 
-            # Minimum score for the `:recommended` verdict
-            RECOMMENDED_SCORE = 70
-
-            # Minimum score for the `:maybe` verdict
-            MAYBE_SCORE = 40
-
-            # Weights of the score components. They sum up to 100.
-            SCORE_WEIGHTS = {
-              utilization: 40,
-              parallelization: 30,
-              balance: 20,
-              stability: 10
-            }.freeze
-
             # Settings used by the real distributors
             DistributorConfig = Struct.new(:partitioner, :reducer, :max_partitions)
 
@@ -121,15 +107,22 @@ module Karafka
               )
 
               @concurrency = concurrency
-              @custom_partitioner = !partitioner.nil?
-              @custom_reducer = !reducer.nil?
               @partitioner = partitioner || ->(message) { message.raw_key }
               @reducer = reducer || ->(key) { key.to_s.sum % concurrency }
-              @distribution = distribution
               @batch_size = batch_size
               @sample_size = sample_size
-              @details = details
               @distributor_class = DISTRIBUTORS.fetch(distribution)
+              @result_builder = ResultBuilder.new(
+                settings: {
+                  concurrency: concurrency,
+                  distribution: distribution,
+                  batch_size: batch_size,
+                  sample_size: sample_size,
+                  custom_partitioner: !partitioner.nil?,
+                  custom_reducer: !reducer.nil?
+                },
+                details: details
+              )
             end
 
             # Reads the most recent messages of the topic partitions and estimates them
@@ -176,33 +169,14 @@ module Karafka
             # @param partitions_messages [Hash{Integer => Array<Karafka::Messages::Message>}]
             # @return [Hash]
             def build_result(topic_name, partitions_messages)
-              all_batches = []
-
-              partitions = partitions_messages.sort.to_h do |partition, messages|
-                batches = messages
+              partitions_batches = partitions_messages.transform_values do |messages|
+                messages
                   .sort_by(&:offset)
                   .each_slice(@batch_size)
                   .map { |batch| analyze_batch(batch) }
-
-                all_batches.concat(batches)
-
-                [partition, aggregate(batches)]
               end
 
-              deep_freeze(
-                format_version: FORMAT_VERSION,
-                topic_name: topic_name.dup,
-                settings: {
-                  concurrency: @concurrency,
-                  distribution: @distribution,
-                  batch_size: @batch_size,
-                  sample_size: @sample_size,
-                  custom_partitioner: @custom_partitioner,
-                  custom_reducer: @custom_reducer
-                },
-                partitions: partitions,
-                summary: aggregate(all_batches, details: false)
-              )
+              @result_builder.call(topic_name, partitions_batches)
             end
 
             # @param result [Hash] estimation result
@@ -259,78 +233,6 @@ module Karafka
               }
             end
 
-            # @param batches [Array<Hash>] batches stats
-            # @param details [Boolean] should we include batches details
-            # @return [Hash] aggregated stats
-            def aggregate(batches, details: @details)
-              count = batches.size
-
-              result = {
-                messages: batches.sum { |batch| batch[:messages] },
-                batches: count,
-                collapsed_batches: batches.count { |batch| batch[:collapsed] }
-              }
-
-              if count.zero?
-                result[:score] = nil
-                result[:verdict] = nil
-                result[:batches_details] = [] if details
-
-                return result
-              end
-
-              active_vps = batches.map { |batch| batch[:active_vps] }.sort!
-
-              result.merge!(
-                avg_unique_keys: average(batches, :unique_keys),
-                avg_null_keys: average(batches, :null_keys),
-                avg_active_vps: average(batches, :active_vps),
-                avg_utilization: average(batches, :utilization),
-                avg_load_imbalance: average(batches, :load_imbalance),
-                avg_parallelization: average(batches, :parallelization),
-                avg_speedup: average(batches, :speedup),
-                active_vps: {
-                  min: active_vps.first,
-                  median: active_vps[active_vps.size / 2],
-                  max: active_vps.last
-                },
-                poor_batches: batches.count { |batch| batch[:active_vps] < @concurrency / 2.0 },
-                single_vp_batches: batches.count { |batch| batch[:active_vps] == 1 }
-              )
-
-              result[:score] = score(result)
-              result[:verdict] = verdict(result[:score])
-              result[:batches_details] = batches if details
-
-              result
-            end
-
-            # @param stats [Hash] aggregated stats
-            # @return [Integer] score from 0 to 100
-            def score(stats)
-              balance = [100.0 - stats[:avg_load_imbalance], 0.0].max
-              stability = 100.0 - (stats[:poor_batches] * 100.0 / stats[:batches])
-
-              (
-                stats[:avg_utilization] * SCORE_WEIGHTS[:utilization] +
-                stats[:avg_parallelization] * SCORE_WEIGHTS[:parallelization] +
-                balance * SCORE_WEIGHTS[:balance] +
-                stability * SCORE_WEIGHTS[:stability]
-              ).fdiv(100).round
-            end
-
-            # @param score [Integer]
-            # @return [Symbol]
-            def verdict(score)
-              if score >= RECOMMENDED_SCORE
-                :recommended
-              elsif score >= MAYBE_SCORE
-                :maybe
-              else
-                :not_recommended
-              end
-            end
-
             # @param sizes [Array<Integer>] group sizes
             # @return [Float] coefficient of variation of the sizes in %
             def coefficient_of_variation(sizes)
@@ -338,24 +240,6 @@ module Karafka
               variance = sizes.sum { |size| (size - mean)**2 } / sizes.size
 
               Math.sqrt(variance) * 100 / mean
-            end
-
-            # @param batches [Array<Hash>]
-            # @param key [Symbol]
-            # @return [Float] average of the key values rounded to one decimal place
-            def average(batches, key)
-              (batches.sum { |batch| batch[key] }.to_f / batches.size).round(1)
-            end
-
-            # @param object [Object]
-            # @return [Object] deeply frozen object
-            def deep_freeze(object)
-              case object
-              when Hash then object.each_value { |value| deep_freeze(value) }
-              when Array then object.each { |value| deep_freeze(value) }
-              end
-
-              object.freeze
             end
           end
         end
