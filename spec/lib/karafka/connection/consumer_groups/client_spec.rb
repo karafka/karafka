@@ -251,6 +251,14 @@ RSpec.describe_current do
         ).at_least(:once)
       end
     end
+
+    context "when the poll error action is not supported" do
+      before { allow(client).to receive(:poll_error_action).and_return(:unsupported) }
+
+      it "expect to raise the unsupported case error" do
+        expect { client.batch_poll }.to raise_error(Karafka::Errors::UnsupportedCaseError)
+      end
+    end
   end
 
   describe "#batch_poll draining of prefetched messages" do
@@ -449,6 +457,16 @@ RSpec.describe_current do
           error: error,
           type: "connection.client.poll.error"
         )
+      end
+    end
+
+    context "when the drain error action is not supported" do
+      let(:drained) { [message(0, 1), Rdkafka::RdkafkaError.new(-185)] }
+
+      before { allow(client).to receive(:poll_error_action).and_return(:unsupported) }
+
+      it "expect to raise the unsupported case error" do
+        expect { client.batch_poll }.to raise_error(Karafka::Errors::UnsupportedCaseError)
       end
     end
 

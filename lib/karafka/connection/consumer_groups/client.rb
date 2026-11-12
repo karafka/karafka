@@ -709,10 +709,15 @@ module Karafka
         rescue Rdkafka::RdkafkaError => e
           retryable = time_poll.attempts <= MAX_POLL_RETRIES && time_poll.retryable?
 
-          case poll_error_action(e, retryable)
+          action = poll_error_action(e, retryable)
+
+          case action
           when :eof then return e.details
           when :skip then return nil
           when :raise then raise
+          when :retry then nil
+          else
+            raise Karafka::Errors::UnsupportedCaseError, action
           end
 
           # Most of the errors can be safely ignored as librdkafka will recover from them
@@ -743,12 +748,18 @@ module Karafka
 
             # The drain neither waits nor retries, so the time budget does not apply. A repeated
             # error reaches the next blocking `#poll` that owns the retries and backoff
-            case poll_error_action(item, true)
+            action = poll_error_action(item, true)
+
+            case action
             when :eof
               @buffer.eof(item.details[:topic], item.details[:partition])
               eofed = true
             when :raise
               raise item
+            when :skip, :retry
+              nil
+            else
+              raise Karafka::Errors::UnsupportedCaseError, action
             end
           end
 
