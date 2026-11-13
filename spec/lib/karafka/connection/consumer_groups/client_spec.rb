@@ -252,24 +252,27 @@ RSpec.describe_current do
       end
     end
 
-    context "when a message fails to build" do
-      let(:error) { Rdkafka::RdkafkaError.new(-199, "Error reading message headers") }
+    # Header parsing fails with bad_msg or underflow
+    [-199, -155].each do |code|
+      context "when a message fails to build with #{code}" do
+        let(:error) { Rdkafka::RdkafkaError.new(code, "Error reading message headers") }
 
-      before do
-        # Enough time to retry, so it is reported even when it is not raised
-        allow(subscription_group).to receive(:max_wait_time).and_return(1_000)
-        allow(kafka).to receive(:poll).and_invoke(->(_) { raise error }, ->(_) {})
+        before do
+          # Enough time to retry, so it is reported even when it is not raised
+          allow(subscription_group).to receive(:max_wait_time).and_return(1_000)
+          allow(kafka).to receive(:poll).and_invoke(->(_) { raise error }, ->(_) {})
 
-        client.batch_poll
-      end
+          client.batch_poll
+        end
 
-      it "expect to report it as an error" do
-        expect(Karafka.monitor).to have_received(:instrument).with(
-          "error.occurred",
-          caller: client,
-          error: error,
-          type: "connection.client.poll.error"
-        )
+        it "expect to report it as an error" do
+          expect(Karafka.monitor).to have_received(:instrument).with(
+            "error.occurred",
+            caller: client,
+            error: error,
+            type: "connection.client.poll.error"
+          )
+        end
       end
     end
 
@@ -373,6 +376,27 @@ RSpec.describe_current do
       it "expect to continue polling" do
         client.batch_poll
         expect(kafka).to have_received(:poll).twice
+      end
+    end
+
+    context "when a later partition stays at eof after the first one is cleared" do
+      let(:drained) { [eof_error(0, 1), eof_error(1, 1), message(0, 1)] }
+
+      it "expect to finish the batch after the drain" do
+        client.batch_poll
+        expect(kafka).to have_received(:poll).once
+      end
+    end
+
+    context "when messages are already in the buffer before the eof poll" do
+      before do
+        allow(kafka).to receive(:poll).and_invoke(->(_) { first }, ->(_) { raise eof_error(0, 1) })
+        allow(kafka).to receive(:poll_batch_nb).and_return([], [eof_error(1, 0)])
+      end
+
+      it "expect to drain only as much as there is room for after the eof" do
+        client.batch_poll
+        expect(kafka).to have_received(:poll_batch_nb).with(0, max_items: 99).twice
       end
     end
 
@@ -504,23 +528,25 @@ RSpec.describe_current do
       end
     end
 
-    context "when the drain has a message that failed to build" do
-      let(:error) { Rdkafka::RdkafkaError.new(-199, "Error reading message headers") }
-      let(:drained) { [message(0, 1), error, message(0, 3)] }
+    [-199, -155].each do |code|
+      context "when the drain has a message that failed to build with #{code}" do
+        let(:error) { Rdkafka::RdkafkaError.new(code, "Error reading message headers") }
+        let(:drained) { [message(0, 1), error, message(0, 3)] }
 
-      it "expect to keep the messages around it" do
-        expect(buffer_state).to eq([topic_name, 0] => { offsets: [0, 1, 3], eof: false })
-      end
+        it "expect to keep the messages around it" do
+          expect(buffer_state).to eq([topic_name, 0] => { offsets: [0, 1, 3], eof: false })
+        end
 
-      it "expect to report it" do
-        client.batch_poll
+        it "expect to report it" do
+          client.batch_poll
 
-        expect(Karafka.monitor).to have_received(:instrument).with(
-          "error.occurred",
-          caller: client,
-          error: error,
-          type: "connection.client.poll.error"
-        )
+          expect(Karafka.monitor).to have_received(:instrument).with(
+            "error.occurred",
+            caller: client,
+            error: error,
+            type: "connection.client.poll.error"
+          )
+        end
       end
     end
 

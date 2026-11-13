@@ -216,6 +216,16 @@ RSpec.describe_current do
 
       it { expect(buffer.eof?).to be(false) }
     end
+
+    context "when a later partition stays at eof after the first one is cleared" do
+      before do
+        buffer.eof(message.topic, message.partition)
+        buffer.eof(message.topic, message.partition + 1)
+        buffer << message
+      end
+
+      it { expect(buffer.eof?).to be(true) }
+    end
   end
 
   describe "#clear" do

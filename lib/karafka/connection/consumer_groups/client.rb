@@ -60,8 +60,10 @@ module Karafka
           :auto_offset_reset, # -140
           # This can happen with new rebalance protocol and same group.instance.id in use
           :unreleased_instance_id, # 111
-          # A message that could not be read (e.g. its headers). It is already consumed and lost
-          :bad_msg # -199
+          # A message that could not be read (e.g. its headers). It is already consumed and lost.
+          # Header parsing fails with one of these two
+          :bad_msg, # -199
+          :underflow # -155
         ].freeze
 
         # Default for partitions lookups without allocations
