@@ -47,6 +47,7 @@
 - [Fix] Stop routing `kafka(inherit: true, ...)` from changing the given settings hash. A frozen hash raised `FrozenError` and a hash shared by many topics stopped inheriting the root `kafka` settings after the first topic.
 - [Fix] Fail `karafka topics` `plan`, `migrate`, `align`, `create`, `delete`, `repartition` and `reset` (exit 1) before changing anything when any declarative topic, also a missing or skipped one, has config keys the cluster does not know. They now need `DescribeConfigs` on declared topics with config. With no topic to describe, new topics are checked only when `Create` is allowed on them.
 - [Fix] In independent DLQ, a message that failed after a recovered one in the same batch saw `#attempt` `0` and got one retry more than `max_retries`. In Pro, a custom DLQ `strategy:` also saw the errors of the recovered message.
+- [Fix] State the real minimum (10) in the routing `max_wait_time` validation error. It said "bigger than 0" for values from 1 to 9 that the rule rejects.
 
 ## 2.6.1 (2026-08-24)
 - **[Feature]** [Pro] Add an opt-in envelope encryption mode for Messages At Rest (`config.encryption.mode = :envelope`, requires openssl `>= 3.0`) without the RSA payload size limit. Upgrade all consuming processes before enabling.
