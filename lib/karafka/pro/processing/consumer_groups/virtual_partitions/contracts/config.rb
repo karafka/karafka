@@ -47,7 +47,9 @@ module Karafka
                   nested(:estimator) do
                     required(:sample_size) { |val| val.is_a?(Integer) && val >= 1 }
                     required(:distribution) { |val| %i[consistent balanced].include?(val) }
-                    required(:report_file) { |val| val.is_a?(String) && !val.empty? }
+                    required(:report_file) do |val|
+                      val.is_a?(Pathname) || (val.is_a?(String) && !val.empty?)
+                    end
                     required(:recommended_score) { |val| val.is_a?(Integer) && val.between?(0, 100) }
                     required(:maybe_score) { |val| val.is_a?(Integer) && val.between?(0, 100) }
 

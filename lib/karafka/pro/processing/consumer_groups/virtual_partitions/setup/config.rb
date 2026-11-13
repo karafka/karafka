@@ -47,7 +47,8 @@ module Karafka
                 # Distribution to estimate for (`:consistent` or `:balanced`)
                 setting(:distribution, default: :consistent)
 
-                # Report file `karafka vps estimate-report` reads when no path is given
+                # Report file (String or Pathname) `karafka vps estimate-report` reads when no path is
+                # given
                 setting(:report_file, default: "report.json")
 
                 # Minimum score for the `:recommended` verdict

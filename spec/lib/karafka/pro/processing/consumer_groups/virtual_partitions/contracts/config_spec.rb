@@ -59,6 +59,12 @@ RSpec.describe_current do
     it { expect(contract.call(config)).to be_success }
   end
 
+  context "when report_file is a Pathname" do
+    before { estimator[:report_file] = Pathname.new("tmp/report.json") }
+
+    it { expect(contract.call(config)).to be_success }
+  end
+
   context "when distribution is balanced" do
     before { estimator[:distribution] = :balanced }
 

@@ -165,29 +165,43 @@ RSpec.describe_current do
     context "with configured thresholds and weights" do
       let(:estimator_config) { Karafka::App.config.consumer_groups.virtual_partitions.estimator }
       let(:original_config) { estimator_config.to_h }
-      let(:stats) { { utilization: 25.0, parallelization: 0.0 } }
+      let(:recommended_score) { 68 }
+      let(:maybe_score) { 20 }
+      let(:stats) { { utilization: 50.0, parallelization: 80.0, load_imbalance: 10.0 } }
+
+      # One poor batch out of two gives 50% stability
+      let(:partitions_batches) do
+        { 0 => [batch(active_vps: 4, **stats), batch(active_vps: 1, **stats)] }
+      end
 
       before do
         original_config
-        estimator_config.recommended_score = 50
-        estimator_config.maybe_score = 20
-        estimator_config.score_weights.utilization = 20
-        estimator_config.score_weights.parallelization = 50
+        estimator_config.recommended_score = recommended_score
+        estimator_config.maybe_score = maybe_score
+        estimator_config.score_weights.utilization = 10
+        estimator_config.score_weights.parallelization = 20
+        estimator_config.score_weights.balance = 30
+        estimator_config.score_weights.stability = 40
       end
 
       after do
         estimator_config.recommended_score = original_config[:recommended_score]
         estimator_config.maybe_score = original_config[:maybe_score]
-        estimator_config.score_weights.utilization = original_config[:score_weights][:utilization]
-        estimator_config.score_weights.parallelization = original_config[:score_weights][:parallelization]
+
+        original_config[:score_weights].each do |name, weight|
+          estimator_config.score_weights.public_send(:"#{name}=", weight)
+        end
       end
 
-      it { expect(result[:summary]).to include(score: 35, verdict: :maybe) }
+      it "uses all the configured weights" do
+        expect(result[:summary]).to include(score: 68, verdict: :recommended)
+      end
 
-      context "when the score reaches the configured recommended score" do
-        let(:stats) { { utilization: 100.0, parallelization: 0.0 } }
+      context "when the score is below the configured maybe score" do
+        let(:recommended_score) { 70 }
+        let(:maybe_score) { 69 }
 
-        it { expect(result[:summary]).to include(score: 50, verdict: :recommended) }
+        it { expect(result[:summary]).to include(score: 68, verdict: :not_recommended) }
       end
     end
   end

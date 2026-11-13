@@ -128,7 +128,7 @@ en:
 
         consumer_groups.virtual_partitions.estimator.sample_size_format: needs to be an integer bigger than 0
         consumer_groups.virtual_partitions.estimator.distribution_format: needs to be either :consistent or :balanced
-        consumer_groups.virtual_partitions.estimator.report_file_format: needs to be a non-empty string
+        consumer_groups.virtual_partitions.estimator.report_file_format: needs to be a non-empty string or a Pathname
         consumer_groups.virtual_partitions.estimator.recommended_score_format: needs to be an integer between 0 and 100
         consumer_groups.virtual_partitions.estimator.maybe_score_format: needs to be an integer between 0 and 100
         consumer_groups.virtual_partitions.estimator.maybe_score_above_recommended: needs to be equal or lower than recommended_score
