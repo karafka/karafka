@@ -210,6 +210,15 @@ RSpec.describe_current do
 
       it { expect(result[:summary][:collapsed_batches]).to eq(1) }
       it { expect(result[:summary][:active_vps]).to eq(min: 1, median: 3.0, max: 5) }
+
+      it "has no load imbalance in the collapsed batch details" do
+        details = described_class.new(concurrency: 5, details: true, **settings)
+          .analyze(messages)[:partitions][0][:batches_details]
+
+        expect(details.map { |batch| batch[:collapsed] }).to eq([false, true])
+        expect(details[1][:load_imbalance]).to be_nil
+        expect(details[0][:load_imbalance]).not_to be_nil
+      end
     end
 
     context "when partitioner raises for one of uneven batches" do
