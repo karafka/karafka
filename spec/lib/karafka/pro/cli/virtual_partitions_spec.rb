@@ -98,8 +98,6 @@ RSpec.describe_current do
         expect { command.call("help") }
           .to output(/estimate-report \[path\].*\n.*help/).to_stdout
       end
-
-      it { expect { command.call("help") }.not_to raise_error }
     end
 
     context "when action is invalid" do
