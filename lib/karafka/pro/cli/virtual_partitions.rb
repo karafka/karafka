@@ -47,8 +47,13 @@ module Karafka
           case action
           when "estimate-report"
             EstimateReport.new(report_path).call
+          when "help"
+            Help.new.call
           else
-            raise ArgumentError, "Invalid virtual partitions action: #{action}"
+            raise(
+              Karafka::Errors::UnrecognizedCommandError,
+              "Unrecognized virtual partitions action: #{action}"
+            )
           end
         rescue Karafka::Errors::CommandValidationError => e
           puts e.message

@@ -70,13 +70,19 @@ module Karafka
                   ]
                 }.freeze
 
+                # Suggestion when there is no score, because a concurrency below 2 parallelizes
+                # nothing
+                UNSCORED_SUGGESTIONS = [
+                  "A concurrency below 2 runs each batch as one group, so nothing is parallelized."
+                ].freeze
+
                 # Limitations the estimate does not model
                 CAVEATS = [
                   "The estimate assumes the same processing cost for each message.",
                   "The worker pool is shared with other partitions and topics."
                 ].freeze
 
-                private_constant :COLUMNS, :SUGGESTIONS, :CAVEATS
+                private_constant :COLUMNS, :SUGGESTIONS, :UNSCORED_SUGGESTIONS, :CAVEATS
 
                 # @param report [Hash] report parsed from JSON, so with String keys
                 def initialize(report)
@@ -145,8 +151,16 @@ module Karafka
                     "  avg speedup: #{value["avg_speedup"]}x",
                     "  score: #{value["score"]}/100",
                     "  verdict: #{value["verdict"]}",
-                    *SUGGESTIONS.fetch(stats["verdict"], []).map { |line| "  #{line}" }
+                    *suggestions(stats).map { |line| "  #{line}" }
                   ]
+                end
+
+                # @param stats [Hash] summary stats
+                # @return [Array<String>] suggestions for the verdict
+                def suggestions(stats)
+                  return UNSCORED_SUGGESTIONS if stats["score"].nil?
+
+                  SUGGESTIONS.fetch(stats["verdict"], [])
                 end
 
                 # @param value [Object]

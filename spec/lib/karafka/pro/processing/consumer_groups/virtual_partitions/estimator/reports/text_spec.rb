@@ -106,6 +106,15 @@ RSpec.describe_current do
       it { expect(text).not_to include("Virtual Partitions should") }
     end
 
+    context "when concurrency is 1" do
+      let(:estimator) { estimator_class.new(concurrency: 1) }
+
+      it { expect(text).to include("score: -/100") }
+      it { expect(text).to include("verdict: not_recommended") }
+      it { expect(text).to include("A concurrency below 2 runs each batch as one group") }
+      it { expect(text).not_to include("Most batches use only a few keys") }
+    end
+
     context "with unknown top level keys" do
       let(:report) do
         JSON.parse(estimator.analyze(messages).to_json).merge("future" => { "a" => 1 })

@@ -191,6 +191,7 @@ RSpec.describe_current do
 
       it { expect(result[:summary][:active_vps]).to eq(min: 1, median: 1, max: 1) }
       it { expect(result[:summary][:collapsed_batches]).to eq(0) }
+      it { expect(result[:summary]).to include(score: nil, verdict: :not_recommended) }
     end
 
     context "when partitioner raises" do
@@ -208,7 +209,23 @@ RSpec.describe_current do
       end
 
       it { expect(result[:summary][:collapsed_batches]).to eq(1) }
-      it { expect(result[:summary][:active_vps]).to eq(min: 1, median: 5, max: 5) }
+      it { expect(result[:summary][:active_vps]).to eq(min: 1, median: 3.0, max: 5) }
+    end
+
+    context "when partitioner raises for one of uneven batches" do
+      let(:settings) do
+        {
+          partitioner: lambda do |message|
+            raise(StandardError) if message.offset == 150
+
+            (message.offset % 10 < 6) ? 0 : 1
+          end
+        }
+      end
+
+      it "leaves the collapsed batch out of the load imbalance" do
+        expect(result[:summary]).to include(collapsed_batches: 1, avg_load_imbalance: 20.0)
+      end
     end
 
     context "when partitioner raises with concurrency of 1" do
@@ -464,6 +481,41 @@ RSpec.describe_current do
 
         expect(result).to be_frozen
         expect(JSON.parse(File.read(target_file))).to eq(JSON.parse(result.to_json))
+      end
+    end
+
+    context "when partitions are interleaved" do
+      let(:settings) { { sample_size: 50, batch_size: 10 } }
+      let(:messages) do
+        build_messages(Array.new(25) { |i| "a-#{i % 7}" }, partition: 0)
+          .zip(build_messages(Array.new(25) { |i| "b-#{i % 3}" }, partition: 1))
+          .flatten
+      end
+
+      it "estimates each partition as #analyze does" do
+        expect(estimator.call(topic_name)[:partitions])
+          .to eq(estimator.analyze(messages)[:partitions])
+      end
+    end
+
+    context "when iterating" do
+      let(:calls) { [] }
+      let(:settings) { { sample_size: 50, batch_size: 10, partitioner: ->(_) { calls << 1 } } }
+      let(:calls_seen) { [] }
+
+      before do
+        allow(iterator).to receive(:each) do |&block|
+          messages.each do |message|
+            calls_seen << calls.size
+            block.call(message)
+          end
+        end
+      end
+
+      it "estimates each full batch without waiting for the rest" do
+        estimator.call(topic_name)
+
+        expect(calls_seen.values_at(9, 10, 20)).to eq([0, 10, 20])
       end
     end
 

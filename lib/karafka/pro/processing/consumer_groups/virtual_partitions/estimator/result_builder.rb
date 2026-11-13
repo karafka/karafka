@@ -94,26 +94,34 @@ module Karafka
                 end
 
                 active_vps = batches.map { |batch| batch[:active_vps] }.sort!
+                balanced_batches = batches.reject { |batch| batch[:collapsed] }
 
                 result.merge!(
                   avg_unique_keys: average(batches, :unique_keys),
                   avg_null_keys: average(batches, :null_keys),
                   avg_active_vps: average(batches, :active_vps),
                   avg_utilization: average(batches, :utilization),
-                  avg_load_imbalance: average(batches, :load_imbalance),
+                  avg_load_imbalance: balanced_batches.empty? ? nil : average(balanced_batches, :load_imbalance),
                   avg_parallelization: average(batches, :parallelization),
                   avg_speedup: average(batches, :speedup),
                   active_vps: {
                     min: active_vps.first,
-                    median: active_vps[active_vps.size / 2],
+                    median: median(active_vps),
                     max: active_vps.last
                   },
                   poor_batches: batches.count { |batch| batch[:active_vps] < @concurrency / 2.0 },
                   single_vp_batches: batches.count { |batch| batch[:active_vps] == 1 }
                 )
 
-                result[:score] = score(result)
-                result[:verdict] = verdict(result[:score])
+                # Nothing is parallelized below a concurrency of 2, so there is nothing to score
+                if @concurrency < 2
+                  result[:score] = nil
+                  result[:verdict] = :not_recommended
+                else
+                  result[:score] = score(result)
+                  result[:verdict] = verdict(result[:score])
+                end
+
                 result[:batches_details] = batches if details
 
                 result
@@ -123,7 +131,8 @@ module Karafka
               # @return [Integer] score from 0 to 100
               def score(stats)
                 weights = @config.score_weights
-                balance = [100.0 - stats[:avg_load_imbalance], 0.0].max
+                # Without any batch to measure the balance on, it is the worst case
+                balance = [100.0 - (stats[:avg_load_imbalance] || 100.0), 0.0].max
                 stability = 100.0 - (stats[:poor_batches] * 100.0 / stats[:batches])
 
                 (
@@ -144,6 +153,14 @@ module Karafka
                 else
                   :not_recommended
                 end
+              end
+
+              # @param values [Array<Integer>] sorted values
+              # @return [Float] median of the values
+              def median(values)
+                middle = values.size / 2
+
+                values.size.odd? ? values[middle].to_f : (values[middle - 1] + values[middle]) / 2.0
               end
 
               # @param batches [Array<Hash>]

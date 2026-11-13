@@ -74,7 +74,8 @@ module Karafka
             private_constant :DistributorConfig, :DISTRIBUTORS
 
             # @param concurrency [Integer] number of virtual partitions (max partitions) to
-            #   estimate for. Defaults to `Karafka::App.config.concurrency`.
+            #   estimate for. Defaults to `Karafka::App.config.concurrency`. Below 2 nothing is
+            #   parallelized, so non-empty results have no score and the `:not_recommended` verdict.
             # @param partitioner [#call, nil] virtual partitioner that receives a message. When
             #   `nil`, messages are grouped by `message.raw_key`.
             # @param reducer [#call, nil] reducer used by the `:consistent` distribution. When
@@ -135,19 +136,33 @@ module Karafka
             #   is written when nil.
             # @return [Hash] frozen estimation result
             def call(topic_name, partitions: nil, target_file: nil)
-              partitions ||= Array.new(
-                Karafka::Admin.topic_info(topic_name).fetch(:partition_count)
-              ) { |partition| partition }
+              partitions ||= (0...Karafka::Admin.topic_info(topic_name).fetch(:partition_count)).to_a
 
-              messages = partitions.to_h { |partition| [partition, []] }
+              buffers = partitions.to_h { |partition| [partition, []] }
+              partitions_batches = partitions.to_h { |partition| [partition, []] }
 
               iterator = Karafka::Pro::Iterator.new(
                 { topic_name => partitions.to_h { |partition| [partition, -@sample_size] } }
               )
 
-              iterator.each { |message| messages[message.partition] << message }
+              # The iterator yields each partition in offset order, so batches are built while
+              # iterating and only their stats are kept
+              iterator.each do |message|
+                partition = message.partition
+                buffer = buffers[partition]
+                buffer << message
 
-              save(build_result(topic_name, messages), target_file)
+                next if buffer.size < @batch_size
+
+                partitions_batches[partition] << analyze_batch(buffer)
+                buffers[partition] = []
+              end
+
+              buffers.each do |partition, buffer|
+                partitions_batches[partition] << analyze_batch(buffer) unless buffer.empty?
+              end
+
+              save(@result_builder.call(topic_name, partitions_batches), target_file)
             end
 
             # Estimates given messages without connecting to Kafka
@@ -157,29 +172,17 @@ module Karafka
             #   is written when nil.
             # @return [Hash] frozen estimation result
             def analyze(messages, target_file: nil)
-              result = build_result(
-                messages.first&.topic,
-                messages.group_by(&:partition)
-              )
-
-              save(result, target_file)
-            end
-
-            private
-
-            # @param topic_name [String, nil]
-            # @param partitions_messages [Hash{Integer => Array<Karafka::Messages::Message>}]
-            # @return [Hash]
-            def build_result(topic_name, partitions_messages)
-              partitions_batches = partitions_messages.transform_values do |messages|
-                messages
+              partitions_batches = messages.group_by(&:partition).transform_values do |partition_messages|
+                partition_messages
                   .sort_by(&:offset)
                   .each_slice(@batch_size)
                   .map { |batch| analyze_batch(batch) }
               end
 
-              @result_builder.call(topic_name, partitions_batches)
+              save(@result_builder.call(messages.first&.topic, partitions_batches), target_file)
             end
+
+            private
 
             # @param result [Hash] estimation result
             # @param target_file [String, Pathname, nil]
@@ -229,7 +232,8 @@ module Karafka
                 active_vps: active_vps,
                 group_sizes: sizes,
                 utilization: [active_vps * 100.0 / @concurrency, 100.0].min,
-                load_imbalance: coefficient_of_variation(sizes),
+                # A collapsed batch is one group, which is not a measure of how evenly keys spread
+                load_imbalance: collapsed ? nil : coefficient_of_variation(sizes),
                 parallelization: [size * 100.0 / @concurrency / largest, 100.0].min,
                 speedup: size.to_f / largest
               }

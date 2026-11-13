@@ -37,10 +37,17 @@ RSpec.describe_current do
   let(:partitions_batches) { { 0 => [batch(active_vps: 4)] } }
   let(:result) { builder.call(topic_name, partitions_batches) }
 
-  def batch(active_vps:, messages: 8, utilization: 100.0, load_imbalance: 0.0, parallelization: 100.0)
+  def batch(
+    active_vps:,
+    messages: 8,
+    utilization: 100.0,
+    load_imbalance: 0.0,
+    parallelization: 100.0,
+    collapsed: false
+  )
     {
       messages: messages,
-      collapsed: false,
+      collapsed: collapsed,
       unique_keys: active_vps,
       null_keys: 0,
       active_vps: active_vps,
@@ -99,6 +106,65 @@ RSpec.describe_current do
         single_vp_batches: 1
       )
     end
+  end
+
+  context "with an even number of batches" do
+    let(:partitions_batches) do
+      { 0 => [batch(active_vps: 1), batch(active_vps: 4)], 1 => [batch(active_vps: 2), batch(active_vps: 2)] }
+    end
+
+    it { expect(result[:partitions][0][:active_vps]).to eq(min: 1, median: 2.5, max: 4) }
+    it { expect(result[:summary][:active_vps]).to eq(min: 1, median: 2.0, max: 4) }
+  end
+
+  context "with an odd number of batches" do
+    let(:partitions_batches) { { 0 => [batch(active_vps: 4), batch(active_vps: 1), batch(active_vps: 3)] } }
+
+    it { expect(result[:summary][:active_vps]).to eq(min: 1, median: 3.0, max: 4) }
+  end
+
+  context "with collapsed batches" do
+    let(:partitions_batches) do
+      {
+        0 => [
+          batch(active_vps: 4, load_imbalance: 20.0),
+          batch(active_vps: 1, load_imbalance: nil, collapsed: true)
+        ]
+      }
+    end
+
+    it "leaves them out of the load imbalance" do
+      expect(result[:summary]).to include(collapsed_batches: 1, avg_load_imbalance: 20.0)
+    end
+  end
+
+  context "when all batches are collapsed" do
+    let(:partitions_batches) do
+      {
+        0 => [
+          batch(
+            active_vps: 1,
+            utilization: 25.0,
+            parallelization: 25.0,
+            load_imbalance: nil,
+            collapsed: true
+          )
+        ]
+      }
+    end
+
+    it "scores the balance as the worst case" do
+      expect(result[:summary]).to include(avg_load_imbalance: nil, score: 18, verdict: :not_recommended)
+    end
+  end
+
+  context "when concurrency is below 2" do
+    let(:settings) { { concurrency: 1, distribution: :consistent } }
+    let(:partitions_batches) { { 0 => [batch(active_vps: 1, utilization: 100.0)], 1 => [] } }
+
+    it { expect(result[:partitions][0]).to include(score: nil, verdict: :not_recommended) }
+    it { expect(result[:summary]).to include(score: nil, verdict: :not_recommended) }
+    it { expect(result[:partitions][1]).to include(score: nil, verdict: nil) }
   end
 
   context "when a partition has no batches" do

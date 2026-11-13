@@ -93,11 +93,20 @@ RSpec.describe_current do
       end
     end
 
+    context 'when action is "help"' do
+      it "prints the available actions" do
+        expect { command.call("help") }
+          .to output(/estimate-report \[path\].*\n.*help/).to_stdout
+      end
+
+      it { expect { command.call("help") }.not_to raise_error }
+    end
+
     context "when action is invalid" do
-      it "raises ArgumentError with appropriate message" do
+      it "raises UnrecognizedCommandError with appropriate message" do
         expect { command.call("invalid_action") }.to raise_error(
-          ArgumentError,
-          "Invalid virtual partitions action: invalid_action"
+          Karafka::Errors::UnrecognizedCommandError,
+          "Unrecognized virtual partitions action: invalid_action"
         )
       end
     end

@@ -63,7 +63,7 @@ module Karafka
                 end
               end
 
-              # The maybe verdict needs to be below the recommended one
+              # The maybe verdict needs to be not above the recommended one
               virtual do |data, errors|
                 next unless errors.empty?
 
