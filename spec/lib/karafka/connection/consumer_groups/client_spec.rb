@@ -222,33 +222,35 @@ RSpec.describe_current do
       end
     end
 
-    context "when subscribed topic does not exist and auto creation is false" do
-      before do
-        allow(subscription_group).to receive(:kafka)
-          .and_return(subscription_group.kafka.merge("allow.auto.create.topics": false))
+    [false, "false"].each do |auto_create|
+      context "when subscribed topic does not exist and auto creation is #{auto_create.inspect}" do
+        before do
+          allow(subscription_group).to receive(:kafka)
+            .and_return(subscription_group.kafka.merge("allow.auto.create.topics": auto_create))
 
-        # Not running, so the error is not retried
-        client.batch_poll
-      rescue Rdkafka::RdkafkaError
-        nil
-      end
+          # Not running, so the error is not retried
+          client.batch_poll
+        rescue Rdkafka::RdkafkaError
+          nil
+        end
 
-      it "expect to raise the error" do
-        expect { client.batch_poll }.to raise_error(error)
-      end
+        it "expect to raise the error" do
+          expect { client.batch_poll }.to raise_error(error)
+        end
 
-      it "expect not to instrument the unknown topic event" do
-        expect(Karafka.monitor)
-          .not_to have_received(:instrument).with("client.topics.unknown", any_args)
-      end
+        it "expect not to instrument the unknown topic event" do
+          expect(Karafka.monitor)
+            .not_to have_received(:instrument).with("client.topics.unknown", any_args)
+        end
 
-      it "expect to report it as an error" do
-        expect(Karafka.monitor).to have_received(:instrument).with(
-          "error.occurred",
-          caller: client,
-          error: error,
-          type: "connection.client.poll.error"
-        ).at_least(:once)
+        it "expect to report it as an error" do
+          expect(Karafka.monitor).to have_received(:instrument).with(
+            "error.occurred",
+            caller: client,
+            error: error,
+            type: "connection.client.poll.error"
+          ).at_least(:once)
+        end
       end
     end
   end

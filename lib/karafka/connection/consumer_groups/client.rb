@@ -719,7 +719,7 @@ module Karafka
           # librdkafka reports subscribed topics that do not exist. With auto creation allowed they
           # may still be created, so we only report it and wait
           when :unknown_topic_or_part # 3
-            if @subscription_group.kafka[:"allow.auto.create.topics"]
+            if Karafka::Core::Helpers::Kafka::Config.enabled?(@subscription_group.kafka[:"allow.auto.create.topics"])
               Karafka.monitor.instrument(
                 "client.topics.unknown",
                 caller: self,
