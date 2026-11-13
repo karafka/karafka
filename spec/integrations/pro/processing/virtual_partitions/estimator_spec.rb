@@ -29,7 +29,8 @@
 # Contact: contact@karafka.io
 
 # The Virtual Partitions estimator should sample all partitions of a topic and estimate them
-# without printing anything, and save the result as a JSON report when asked
+# while iterating, as #analyze does for the same messages, without printing anything, and save
+# the result as a JSON report when asked
 
 setup_karafka
 
@@ -70,6 +71,10 @@ assert_equal 10.0, result[:partitions][1][:avg_unique_keys]
 assert_equal 50, result[:summary][:messages]
 assert_equal 5, result[:summary][:batches]
 assert result.frozen?
+
+read = [0, 1].flat_map { |partition| Karafka::Admin.read_topic(DT.topics[0], partition, 100) }
+
+assert_equal estimator.analyze(read)[:partitions], result[:partitions]
 
 report = JSON.parse(File.read(target_file))
 

@@ -29,7 +29,8 @@
 # Contact: contact@karafka.io
 
 # karafka vps estimate-report should display a report saved by the Virtual Partitions estimator
-# and fail with one line and a non-zero exit code when the report file is missing or malformed
+# and fail with one line and a non-zero exit code when the report file is missing or malformed.
+# karafka vps help should list the available actions
 
 setup_karafka
 
@@ -102,3 +103,8 @@ report, status = run_cli("vps", "estimate-report", malformed)
 
 assert_equal 1, status
 assert_equal "Estimate report is not valid: #{malformed}\n", report
+
+help, status = run_cli("vps", "help")
+
+assert_equal 0, status
+assert help.include?("estimate-report [path]")
