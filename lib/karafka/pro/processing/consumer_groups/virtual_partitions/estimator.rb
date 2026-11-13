@@ -79,19 +79,21 @@ module Karafka
             #   `nil`, messages are grouped by `message.raw_key`.
             # @param reducer [#call, nil] reducer used by the `:consistent` distribution. When
             #   `nil`, the routing default (`key.to_s.sum % concurrency`) is used.
-            # @param distribution [Symbol] `:consistent` or `:balanced`
+            # @param distribution [Symbol] `:consistent` or `:balanced`. Defaults to
+            #   `consumer_groups.virtual_partitions.estimator.distribution`.
             # @param batch_size [Integer] number of messages in a batch. Defaults to
             #   `Karafka::App.config.max_messages`.
-            # @param sample_size [Integer] number of most recent messages to sample per partition
+            # @param sample_size [Integer] number of most recent messages to sample per partition.
+            #   Defaults to `consumer_groups.virtual_partitions.estimator.sample_size`.
             # @param details [Boolean] should the result also include per-batch details
             # @raise [Karafka::Errors::InvalidConfigurationError] when settings are invalid
             def initialize(
               concurrency: Karafka::App.config.concurrency,
               partitioner: nil,
               reducer: nil,
-              distribution: :consistent,
+              distribution: Karafka::App.config.consumer_groups.virtual_partitions.estimator.distribution,
               batch_size: Karafka::App.config.max_messages,
-              sample_size: 10_000,
+              sample_size: Karafka::App.config.consumer_groups.virtual_partitions.estimator.sample_size,
               details: false
             )
               Contracts::Estimator.new.validate!(

@@ -161,5 +161,34 @@ RSpec.describe_current do
 
       it { expect(result[:summary]).to include(score: 10, verdict: :not_recommended) }
     end
+
+    context "with configured thresholds and weights" do
+      let(:estimator_config) { Karafka::App.config.consumer_groups.virtual_partitions.estimator }
+      let(:original_config) { estimator_config.to_h }
+      let(:stats) { { utilization: 25.0, parallelization: 0.0 } }
+
+      before do
+        original_config
+        estimator_config.recommended_score = 50
+        estimator_config.maybe_score = 20
+        estimator_config.score_weights.utilization = 20
+        estimator_config.score_weights.parallelization = 50
+      end
+
+      after do
+        estimator_config.recommended_score = original_config[:recommended_score]
+        estimator_config.maybe_score = original_config[:maybe_score]
+        estimator_config.score_weights.utilization = original_config[:score_weights][:utilization]
+        estimator_config.score_weights.parallelization = original_config[:score_weights][:parallelization]
+      end
+
+      it { expect(result[:summary]).to include(score: 35, verdict: :maybe) }
+
+      context "when the score reaches the configured recommended score" do
+        let(:stats) { { utilization: 100.0, parallelization: 0.0 } }
+
+        it { expect(result[:summary]).to include(score: 50, verdict: :recommended) }
+      end
+    end
   end
 end

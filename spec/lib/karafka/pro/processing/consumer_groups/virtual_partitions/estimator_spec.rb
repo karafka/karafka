@@ -88,6 +88,29 @@ RSpec.describe_current do
       it { expect(result[:settings][:distribution]).to eq(:balanced) }
     end
 
+    context "when the estimator defaults are configured" do
+      let(:estimator_config) { Karafka::App.config.consumer_groups.virtual_partitions.estimator }
+      let(:original_config) { estimator_config.to_h }
+
+      before do
+        original_config
+        estimator_config.distribution = :balanced
+        estimator_config.sample_size = 20
+      end
+
+      after do
+        estimator_config.distribution = original_config[:distribution]
+        estimator_config.sample_size = original_config[:sample_size]
+      end
+
+      it "uses them" do
+        expect(described_class.new.analyze(messages)[:settings]).to include(
+          distribution: :balanced,
+          sample_size: 20
+        )
+      end
+    end
+
     it { expect(result.keys.first).to eq(:format_version) }
     it { expect(result[:format_version]).to eq(described_class::FORMAT_VERSION) }
     it { expect(result[:topic_name]).to eq("orders") }

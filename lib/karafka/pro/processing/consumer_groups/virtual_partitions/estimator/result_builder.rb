@@ -36,22 +36,9 @@ module Karafka
           class Estimator
             # Builds the estimation result out of the per-batch stats of each partition. It
             # aggregates the stats per partition and for all of them together, scores them and
-            # returns a deeply frozen Hash.
+            # returns a deeply frozen Hash. Score thresholds and weights come from the
+            # `consumer_groups.virtual_partitions.estimator` config.
             class ResultBuilder
-              # Minimum score for the `:recommended` verdict
-              RECOMMENDED_SCORE = 70
-
-              # Minimum score for the `:maybe` verdict
-              MAYBE_SCORE = 40
-
-              # Weights of the score components. They sum up to 100.
-              SCORE_WEIGHTS = {
-                utilization: 40,
-                parallelization: 30,
-                balance: 20,
-                stability: 10
-              }.freeze
-
               # @param settings [Hash] estimator settings to include in the result. Its
               #   `:concurrency` is used to count the poor batches.
               # @param details [Boolean] should the partitions stats also include per-batch details
@@ -59,6 +46,7 @@ module Karafka
                 @settings = settings
                 @concurrency = settings.fetch(:concurrency)
                 @details = details
+                @config = Karafka::App.config.consumer_groups.virtual_partitions.estimator
               end
 
               # @param topic_name [String, nil] name of the topic. It is copied, so the given
@@ -134,23 +122,24 @@ module Karafka
               # @param stats [Hash] aggregated stats
               # @return [Integer] score from 0 to 100
               def score(stats)
+                weights = @config.score_weights
                 balance = [100.0 - stats[:avg_load_imbalance], 0.0].max
                 stability = 100.0 - (stats[:poor_batches] * 100.0 / stats[:batches])
 
                 (
-                  stats[:avg_utilization] * SCORE_WEIGHTS[:utilization] +
-                  stats[:avg_parallelization] * SCORE_WEIGHTS[:parallelization] +
-                  balance * SCORE_WEIGHTS[:balance] +
-                  stability * SCORE_WEIGHTS[:stability]
+                  stats[:avg_utilization] * weights.utilization +
+                  stats[:avg_parallelization] * weights.parallelization +
+                  balance * weights.balance +
+                  stability * weights.stability
                 ).fdiv(100).round
               end
 
               # @param score [Integer]
               # @return [Symbol]
               def verdict(score)
-                if score >= RECOMMENDED_SCORE
+                if score >= @config.recommended_score
                   :recommended
-                elsif score >= MAYBE_SCORE
+                elsif score >= @config.maybe_score
                   :maybe
                 else
                   :not_recommended
