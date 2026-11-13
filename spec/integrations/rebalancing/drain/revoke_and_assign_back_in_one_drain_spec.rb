@@ -22,6 +22,8 @@ end
 
 module DrainWindow
   def drain(room)
+    DT[:drained] = true
+
     # Widens the window between the blocking poll and the drain
     sleep(1) if DT.key?(:slow) && !DT.key?(:widened)
     DT[:widened] = true if DT.key?(:slow)
@@ -115,7 +117,7 @@ end
 other.join
 
 # Without the drain hook running, this spec would not test anything
-assert DT.key?(:widened)
+assert DT.key?(:drained)
 
 PARTITIONS.times do |partition|
   assert_equal(
