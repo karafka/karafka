@@ -49,6 +49,7 @@
 - [Fix] In independent DLQ, a message that failed after a recovered one in the same batch saw `#attempt` `0` and got one retry more than `max_retries`. In Pro, a custom DLQ `strategy:` also saw the errors of the recovered message.
 - [Fix] Make the Datadog `LoggerListener` finish its own job span, not the active one, also on job errors. With dd-trace-rb's Karafka integration active too (e.g. `datadog/auto_instrument`), jobs nested into one never-ending trace and memory grew without limit. It now warns once when both are active.
 - [Fix] Log `lag_compensation.refresher.error` in the Datadog `LoggerListener` through `Karafka.logger` at `warn` level, not to stderr via `Kernel#warn`.
+- [Fix] State the real minimum (10) in the routing `max_wait_time` validation error. It said "bigger than 0" for values from 1 to 9 that the rule rejects.
 
 ## 2.6.1 (2026-08-24)
 - **[Feature]** [Pro] Add an opt-in envelope encryption mode for Messages At Rest (`config.encryption.mode = :envelope`, requires openssl `>= 3.0`) without the RSA payload size limit. Upgrade all consuming processes before enabling.
