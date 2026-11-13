@@ -220,9 +220,9 @@ module Karafka
         )
       end
 
-      # Removes given group (if exists)
+      # Removes given consumer group
       #
-      # @param group_id [String] group name
+      # @param group_id [String] consumer group name
       # @see ConsumerGroups.delete
       def delete_consumer_group(group_id)
         new.delete_consumer_group(group_id)
