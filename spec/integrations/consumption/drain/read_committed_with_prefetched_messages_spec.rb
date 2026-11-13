@@ -33,7 +33,17 @@ class Consumer < Karafka::BaseConsumer
   def eofed
     return unless DT[:offsets].size >= PER_TRANSACTION * 2
 
-    DT[:position] = client.send(:topic_partition_position, topic.name, partition)
+    DT[:position] = current_position
+  end
+
+  private
+
+  def current_position
+    tpl = Rdkafka::Consumer::TopicPartitionList.new(
+      topic.name => [Rdkafka::Consumer::Partition.new(partition, nil, 0)]
+    )
+
+    client.wrapped_kafka.wrapped.position(tpl).to_h.fetch(topic.name).first.offset || -1
   end
 end
 

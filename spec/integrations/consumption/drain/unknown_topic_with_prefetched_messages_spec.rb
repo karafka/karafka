@@ -1,8 +1,8 @@
 # frozen_string_literal: true
 
 # When a subscribed topic is deleted while messages of another topic are prefetched and drained,
-# the unknown topic error should be reported as on master, the client should not be reset and all
-# the messages of the other topic should be consumed with no gap.
+# the unknown topic error should be reported via `error.occurred`, the client should not be reset
+# and all the messages of the other topic should be consumed with no gap.
 #
 # The deletion happens while the messages produced before it are prefetched and more come after.
 # librdkafka hands the error out ahead of the queued messages, so it reaches the blocking poll and
