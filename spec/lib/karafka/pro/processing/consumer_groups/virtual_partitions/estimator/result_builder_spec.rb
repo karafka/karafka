@@ -121,7 +121,7 @@ RSpec.describe_current do
     let(:partitions_batches) { { 0 => [batch(active_vps: 4), batch(active_vps: 1), batch(active_vps: 3)] } }
 
     it { expect(result[:summary][:active_vps]).to eq(min: 1, median: 3.0, max: 4) }
-    it { expect(result[:summary][:active_vps][:median]).to eql(3.0) }
+    it { expect(result[:summary][:active_vps][:median]).to be_a(Float) }
   end
 
   context "with collapsed batches" do
