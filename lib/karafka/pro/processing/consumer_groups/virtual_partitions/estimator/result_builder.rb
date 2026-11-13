@@ -94,14 +94,14 @@ module Karafka
                 end
 
                 active_vps = batches.map { |batch| batch[:active_vps] }.sort!
-                balanced_batches = batches.reject { |batch| batch[:collapsed] }
+                uncollapsed_batches = batches.reject { |batch| batch[:collapsed] }
 
                 result.merge!(
                   avg_unique_keys: average(batches, :unique_keys),
                   avg_null_keys: average(batches, :null_keys),
                   avg_active_vps: average(batches, :active_vps),
                   avg_utilization: average(batches, :utilization),
-                  avg_load_imbalance: balanced_batches.empty? ? nil : average(balanced_batches, :load_imbalance),
+                  avg_load_imbalance: uncollapsed_batches.empty? ? nil : average(uncollapsed_batches, :load_imbalance),
                   avg_parallelization: average(batches, :parallelization),
                   avg_speedup: average(batches, :speedup),
                   active_vps: {
