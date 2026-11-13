@@ -7,9 +7,9 @@ setup_karafka
 
 class Consumer < Karafka::BaseConsumer
   def consume
-    messages.each { |message| DT[:offsets] << message.offset }
-
     mark_as_consumed!(messages.last)
+
+    messages.each { |message| DT[:offsets] << message.offset }
   end
 end
 

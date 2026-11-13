@@ -248,9 +248,6 @@ module Karafka
       # @raise [Karafka::Errors::ConsumerGroupNotEmptyError] when the new consumer group has
       #   active members. Kafka accepts offset changes only for consumer groups without members,
       #   so this method should **not** be executed on a running consumer group.
-      # @raise [Rdkafka::RdkafkaError] (`non_empty_group`) when `delete_previous` is `true` and
-      #   the previous consumer group has active members. The offsets are then already copied to
-      #   the new consumer group and the previous consumer group keeps its offsets.
       #
       # @note If new group exists, old offsets will be added to it.
       def copy(previous_name, new_name, topics)
