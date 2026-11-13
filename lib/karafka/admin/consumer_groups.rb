@@ -248,6 +248,9 @@ module Karafka
       # @raise [Karafka::Errors::ConsumerGroupNotEmptyError] when the new consumer group has
       #   active members. Kafka accepts offset changes only for consumer groups without members,
       #   so this method should **not** be executed on a running consumer group.
+      # @raise [Rdkafka::RdkafkaError] (`non_empty_group`) when `delete_previous` is `true` and
+      #   the previous consumer group has active members. The offsets are then already copied to
+      #   the new consumer group and the previous consumer group keeps its offsets.
       #
       # @note If new group exists, old offsets will be added to it.
       def copy(previous_name, new_name, topics)
@@ -290,6 +293,9 @@ module Karafka
       # @raise [Karafka::Errors::ConsumerGroupNotEmptyError] when the new consumer group has
       #   active members. Kafka accepts offset changes only for consumer groups without members,
       #   so this method should **not** be executed on a running consumer group.
+      # @raise [Rdkafka::RdkafkaError] (`non_empty_group`) when `delete_previous` is `true` and
+      #   the previous consumer group has active members. The offsets are then already copied to
+      #   the new consumer group and the previous consumer group keeps its offsets.
       #
       # @note After migration unless `delete_previous` is set to `false`, old group will be
       #   removed.
@@ -306,14 +312,17 @@ module Karafka
         true
       end
 
-      # Removes given group (if exists)
+      # Removes given consumer group
       #
-      # @param group_id [String] group name
+      # @param group_id [String] consumer group name
       #
       # @return [void]
       #
-      # @note This method should not be used on a running group as it will not yield any
-      #   results.
+      # @raise [Rdkafka::RdkafkaError] (`non_empty_group`) when the consumer group has active
+      #   members. Kafka removes only consumer groups without members, so this method should
+      #   **not** be executed on a running consumer group.
+      # @raise [Rdkafka::RdkafkaError] (`group_id_not_found`) when the consumer group does not
+      #   exist.
       def delete(group_id)
         with_admin do |admin|
           handler = admin.delete_group(group_id)
