@@ -2,7 +2,7 @@ PATH
   remote: .
   specs:
     karafka (2.6.1)
-      karafka-core (>= 2.6.3, < 2.7.0)
+      karafka-core (>= 2.6.8, < 2.7.0)
       karafka-rdkafka (>= 0.32.0)
       waterdrop (>= 2.10.2, < 3.0.0)
       zeitwerk (~> 2.3)
@@ -56,7 +56,7 @@ GEM
     i18n (1.15.2)
       concurrent-ruby (~> 1.0)
     json (3.1.0)
-    karafka-core (2.6.6)
+    karafka-core (2.6.8)
       karafka-rdkafka (>= 0.20.0)
       logger (>= 1.6.0)
     karafka-rdkafka (0.32.0)
@@ -198,7 +198,7 @@ CHECKSUMS
   i18n (1.15.2) sha256=00f9eb62412fe593b2a65a97daa75300d37abb8f7202ec748e94b6d46a9dd1b5
   json (3.1.0) sha256=3ce7ccf8fde58960177a3a756c31f292a4c1e1dedee884547096a5b0604e3bd8
   karafka (2.6.1)
-  karafka-core (2.6.6) sha256=be14a9898c2133eecf1e2edefbdc127d105d902360d93c4ce63328ad8e74a440
+  karafka-core (2.6.8) sha256=6a1fdacedc89148068db8f89550925d7ee5f1781fbed12374e92530a7db424ce
   karafka-rdkafka (0.32.0) sha256=07983e15df25e69c958b991fe50ea85f2b6170821816eb05248f77a9de7ffa2b
   karafka-rdkafka (0.32.0-aarch64-linux-gnu) sha256=f5083c785375b02b6acf802be8187de56b830817e4a44ccc3f8ab60f030f1b3e
   karafka-rdkafka (0.32.0-aarch64-linux-musl) sha256=105e368525ff0e9e2e7d72925d32a6da31793b4d88d6a026fefb0c25de39d54f
