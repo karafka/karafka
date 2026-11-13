@@ -24,6 +24,7 @@ module Karafka
           # Log levels that we use in this particular listener
           USED_LOG_LEVELS = %i[
             info
+            warn
             error
             fatal
           ].freeze
@@ -36,6 +37,9 @@ module Karafka
             setup(&block) if block
             @job_types_cache = {}.freeze
             @job_types_mutex = Mutex.new
+            @span_key = :"karafka_datadog_logger_listener_span_#{object_id}"
+            @dd_patch_checked = false
+            @dd_patch_mutex = Mutex.new
           end
 
           # @note We define this alias to be consistent with `WaterDrop#setup`
@@ -47,7 +51,11 @@ module Karafka
           #
           # @param event [Karafka::Core::Monitoring::Event] event details including payload
           def on_worker_process(event)
+            check_dd_patch unless @dd_patch_checked
+
             current_span = client.trace("karafka.consumer", service: service_name)
+            # Worker runs one job at a time, so this span is the one to finish for this job
+            Thread.current[@span_key] = current_span
             push_tags
 
             job = event[:job]
@@ -75,9 +83,17 @@ module Karafka
 
             info "[#{job.id}] #{job_type} job for #{consumer} on #{topic} finished in #{time}ms"
 
-            client.active_span&.finish
+            finish_span
 
             pop_tags
+          end
+
+          # Finishes the job span also when `worker.processed` was not published, e.g. after an
+          # error rescued as `consumer.wrap.error` or `worker.process.error`
+          #
+          # @param _event [Karafka::Core::Monitoring::Event] event details including payload
+          def on_worker_completed(_event)
+            finish_span
           end
 
           # There are many types of errors that can occur in many places, but we provide a single
@@ -87,7 +103,7 @@ module Karafka
             push_tags
 
             error = event[:error]
-            client.active_span&.set_error(error)
+            (Thread.current[@span_key] || client.active_span)&.set_error(error)
 
             case event[:type]
             when "consumer.initialized.error"
@@ -179,6 +195,37 @@ module Karafka
           end
 
           private
+
+          # Finishes the span opened for the current job of this worker thread, not the active one,
+          # which may belong to another integration (dd-trace-rb Karafka patch)
+          def finish_span
+            span = Thread.current[@span_key]
+
+            return unless span
+
+            Thread.current[@span_key] = nil
+            span.finish
+          end
+
+          # Warns once when the dd-trace-rb Karafka integration is active as well. It is checked on
+          # the first job because dd-trace-rb may patch Karafka late (e.g. from a Rails railtie).
+          def check_dd_patch
+            @dd_patch_mutex.synchronize do
+              return if @dd_patch_checked
+
+              @dd_patch_checked = true
+
+              return unless defined?(::Datadog::Tracing::Contrib::Karafka::Patcher)
+              # `patched?` is also true when the patch raised
+              return unless ::Datadog::Tracing::Contrib::Karafka::Patcher.patch_successful
+
+              warn(
+                "dd-trace-rb Karafka integration is active together with the Karafka Datadog " \
+                "LoggerListener. Both trace consumer jobs, which duplicates spans. " \
+                "Use only one of them."
+              )
+            end
+          end
 
           # Takes the job class and extracts the job type.
           # @param job_class [Class] job class
