@@ -5,7 +5,7 @@
 
 setup_karafka
 
-error = nil
+message = nil
 
 begin
   draw_routes(create_topics: false) do
@@ -15,16 +15,15 @@ begin
     end
   end
 rescue Karafka::Errors::InvalidConfigurationError => e
-  error = e
+  message = e.message
 end
 
-assert error
-assert error.message.include?("needs to be an integer bigger or equal to 10"), error.message
+assert message.to_s.include?("needs to be an integer bigger or equal to 10"), message
 
 clear_app_draws
 
 Karafka::App.config.max_wait_time = 5
-error = nil
+message = nil
 
 begin
   draw_routes(create_topics: false) do
@@ -33,11 +32,10 @@ begin
     end
   end
 rescue Karafka::Errors::InvalidConfigurationError => e
-  error = e
+  message = e.message
 end
 
-assert error
-assert error.message.include?("needs to be an integer bigger or equal to 10"), error.message
+assert message.to_s.include?("needs to be an integer bigger or equal to 10"), message
 
 clear_app_draws
 
