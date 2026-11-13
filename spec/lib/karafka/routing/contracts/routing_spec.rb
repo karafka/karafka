@@ -139,6 +139,36 @@ RSpec.describe_current do
     it { expect(check).to be_success }
   end
 
+  context "when there are share-group topics without a declaration" do
+    let(:routing) { [{ topics: [{ name: "share-topic" }] }] }
+
+    it { expect(check).not_to be_success }
+  end
+
+  context "when there are share-group topics with an inactive declaration" do
+    let(:routing) { [{ topics: [{ name: "share-topic" }] }] }
+
+    before { Karafka::App.declaratives.repository.find_or_create("share-topic").active(false) }
+
+    it { expect(check).not_to be_success }
+  end
+
+  context "when there are share-group topics with an active declaration" do
+    let(:routing) { [{ topics: [{ name: "share-topic" }] }] }
+
+    before { Karafka::App.declaratives.repository.find_or_create("share-topic") }
+
+    it { expect(check).to be_success }
+  end
+
+  context "when there are share-group topics without a declaration but not strict" do
+    before { Karafka::App.config.strict_declarative_topics = false }
+
+    let(:routing) { [{ topics: [{ name: "share-topic" }] }] }
+
+    it { expect(check).to be_success }
+  end
+
   context "when there are topics routes with inactive declaratives but not strict" do
     before { Karafka::App.config.strict_declarative_topics = false }
 

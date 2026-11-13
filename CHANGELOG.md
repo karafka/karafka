@@ -25,6 +25,7 @@
 - [Change] Raise `Karafka::Errors::ConsumerGroupNotEmptyError` when `Karafka::Admin` changes the offsets of a consumer group with active members, instead of silently leaving them unchanged. With an external consumer client, offsets are read and changed for the queried consumer group, not the client's own.
 - [Change] Apply the routing `defaults` block to consumer-group topics only. Share-group topics get no defaults, so consumer-group-only calls in it (e.g. `config(...)`, `dead_letter_queue`) no longer raise `NoMethodError` when a share group is drawn.
 - [Change] Require `karafka-core` `>=` `2.6.8`.
+- [Change] Apply `strict_declarative_topics` to share-group topics too: each one needs an active declaration in `declaratives.draw`, made before `routes.draw`.
 - [Maintenance] Foundational work for Kafka share groups (KIP-932) is in progress (routing layer, consumer class hierarchy, config seams). Not usable yet - share groups can be described in routing but cannot run.
 - [Fix] [Pro] Do not let healthy KIP-848 (`group.protocol=consumer`) multiplexed listeners that never received an assignment block dynamic scaling. With more listeners than partitions they stay in the `init` join state with a rebalance age of 0, so the manager never saw them as stable and kept them alive instead of scaling them down.
 - [Fix] Stop `CoordinatorsBuffer#@coordinators` from growing unbounded across rebalances by dropping a topic entry on revoke once it tracks no partitions (mirrors `PausesManager#delete`).
