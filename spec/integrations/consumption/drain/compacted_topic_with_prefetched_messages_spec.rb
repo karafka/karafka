@@ -31,17 +31,7 @@ class Consumer < Karafka::BaseConsumer
   def eofed
     return unless DT[:offsets].last == DT[:existing].last
 
-    DT[:position] = current_position
-  end
-
-  private
-
-  def current_position
-    tpl = Rdkafka::Consumer::TopicPartitionList.new(
-      topic.name => [Rdkafka::Consumer::Partition.new(partition, nil, 0)]
-    )
-
-    client.wrapped_kafka.wrapped.position(tpl).to_h.fetch(topic.name).first.offset || -1
+    DT[:position] = fetch_position(client, topic.name, partition)
   end
 end
 

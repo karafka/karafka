@@ -32,17 +32,7 @@ class Consumer < Karafka::BaseConsumer
     return unless DT[partition].size >= PER_PARTITION
     return if DT[:positions].key?(partition)
 
-    DT[:positions][partition] = current_position
-  end
-
-  private
-
-  def current_position
-    tpl = Rdkafka::Consumer::TopicPartitionList.new(
-      topic.name => [Rdkafka::Consumer::Partition.new(partition, nil, 0)]
-    )
-
-    client.wrapped_kafka.wrapped.position(tpl).to_h.fetch(topic.name).first.offset || -1
+    DT[:positions][partition] = fetch_position(client, topic.name, partition)
   end
 end
 

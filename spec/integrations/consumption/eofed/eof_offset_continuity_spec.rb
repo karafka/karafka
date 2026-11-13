@@ -37,20 +37,10 @@ class Consumer < Karafka::BaseConsumer
     # Only capture position and produce after all initial messages are consumed
     # This ensures the test works correctly even if messages arrive in multiple batches
     if DT[:consumed].size >= 5 && !DT.key?(:position_after_eof)
-      DT[:position_after_eof] = current_position
+      DT[:position_after_eof] = fetch_position(client, topic.name, partition)
 
       produce_many(topic.name, ["after_eof"])
     end
-  end
-
-  private
-
-  def current_position
-    tpl = Rdkafka::Consumer::TopicPartitionList.new(
-      topic.name => [Rdkafka::Consumer::Partition.new(partition, nil, 0)]
-    )
-
-    client.wrapped_kafka.wrapped.position(tpl).to_h.fetch(topic.name).first.offset || -1
   end
 end
 
