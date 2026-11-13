@@ -114,6 +114,9 @@ end
 
 other.join
 
+# Without the drain hook running, this spec would not test anything
+assert DT.key?(:widened)
+
 PARTITIONS.times do |partition|
   assert_equal(
     (0...PER_PARTITION).to_a,

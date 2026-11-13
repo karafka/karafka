@@ -252,6 +252,27 @@ RSpec.describe_current do
       end
     end
 
+    context "when a message fails to build" do
+      let(:error) { Rdkafka::RdkafkaError.new(-199, "Error reading message headers") }
+
+      before do
+        # Enough time to retry, so it is reported even when it is not raised
+        allow(subscription_group).to receive(:max_wait_time).and_return(1_000)
+        allow(kafka).to receive(:poll).and_invoke(->(_) { raise error }, ->(_) {})
+
+        client.batch_poll
+      end
+
+      it "expect to report it as an error" do
+        expect(Karafka.monitor).to have_received(:instrument).with(
+          "error.occurred",
+          caller: client,
+          error: error,
+          type: "connection.client.poll.error"
+        )
+      end
+    end
+
     context "when the poll error action is not supported" do
       before { allow(client).to receive(:poll_error_action).and_return(:unsupported) }
 
@@ -348,6 +369,54 @@ RSpec.describe_current do
       it "expect not to mark the partition as eof" do
         expect(buffer_state).to eq([topic_name, 0] => { offsets: [0, 1], eof: false })
       end
+
+      it "expect to continue polling" do
+        client.batch_poll
+        expect(kafka).to have_received(:poll).twice
+      end
+    end
+
+    context "when the blocking poll returns an eof" do
+      let(:drained) { [eof_error(1, 0), message(2, 0), eof_error(2, 1)] }
+
+      before { allow(kafka).to receive(:poll).and_raise(eof_error(0, 0)) }
+
+      it "expect to drain the eof events of other partitions into the same batch" do
+        expect(buffer_state).to eq(
+          [topic_name, 0] => { offsets: [], eof: true },
+          [topic_name, 1] => { offsets: [], eof: true },
+          [topic_name, 2] => { offsets: [0], eof: true }
+        )
+      end
+
+      it "expect to drain without waiting and to finish the batch after the drain" do
+        client.batch_poll
+        expect(kafka).to have_received(:poll_batch_nb).with(0, max_items: 100)
+        expect(kafka).to have_received(:poll).once
+      end
+
+      context "when the assignment changed during that poll" do
+        let(:assignment) do
+          {
+            subscription_group_id: subscription_group.id,
+            tpl: Rdkafka::Consumer::TopicPartitionList.new(
+              topic_name => [Rdkafka::Consumer::Partition.new(0, nil)]
+            )
+          }
+        end
+
+        before do
+          allow(kafka).to receive(:poll) do
+            client.rebalance_manager.on_rebalance_partitions_assigned(assignment)
+            raise eof_error(0, 0)
+          end
+        end
+
+        it "expect not to drain" do
+          client.batch_poll
+          expect(kafka).not_to have_received(:poll_batch_nb)
+        end
+      end
     end
 
     context "when many partitions reach eof in one drain" do
@@ -429,20 +498,14 @@ RSpec.describe_current do
         expect(buffer_state).to eq([topic_name, 0] => { offsets: [0, 1], eof: false })
       end
 
-      it "expect to report it once as it is not retried" do
+      it "expect not to report it as on the first attempt of a blocking poll" do
         client.batch_poll
-
-        expect(Karafka.monitor).to have_received(:instrument).with(
-          "error.occurred",
-          caller: client,
-          error: error,
-          type: "connection.client.poll.error"
-        ).once
+        expect(Karafka.monitor).not_to have_received(:instrument).with("error.occurred", any_args)
       end
     end
 
     context "when the drain has a message that failed to build" do
-      let(:error) { Rdkafka::RdkafkaError.new(-1, "Error reading message headers") }
+      let(:error) { Rdkafka::RdkafkaError.new(-199, "Error reading message headers") }
       let(:drained) { [message(0, 1), error, message(0, 3)] }
 
       it "expect to keep the messages around it" do
@@ -541,8 +604,8 @@ RSpec.describe_current do
       end
 
       it "expect to report it as an error" do
-        client.batch_poll
-      rescue Rdkafka::RdkafkaError
+        expect { client.batch_poll }.to raise_error(error)
+
         expect(Karafka.monitor).to have_received(:instrument).with(
           "error.occurred",
           caller: client,

@@ -70,6 +70,13 @@ module Karafka
         @groups[topic_name][partition][:eof] = true
       end
 
+      # @return [Boolean] true if any of the partitions is marked as eof
+      def eof?
+        @groups.each_value.any? do |partitions|
+          partitions.each_value.any? { |details| details[:eof] }
+        end
+      end
+
       # Marks the last polling time that can be accessed via `#last_polled_at`
       def polled
         @last_polled_at = monotonic_now

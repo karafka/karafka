@@ -23,6 +23,7 @@ end
 
 module DrainDelay
   def drain(room)
+    DT[:delayed] = true
     sleep(5)
 
     super
@@ -58,6 +59,8 @@ start_karafka_and_wait_until do
   DT[:offsets].size >= MESSAGES
 end
 
+# Without the drain hook running, this spec would not test anything
+assert DT.key?(:delayed)
 assert_equal (0...MESSAGES).to_a, DT[:offsets]
 assert DT[:sizes].all? { |size| size <= MAX_MESSAGES }
 assert DT[:revoked].empty?

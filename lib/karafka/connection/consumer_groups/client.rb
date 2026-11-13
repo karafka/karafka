@@ -59,7 +59,9 @@ module Karafka
           # this will not recover as fencing is permanent
           :auto_offset_reset, # -140
           # This can happen with new rebalance protocol and same group.instance.id in use
-          :unreleased_instance_id # 111
+          :unreleased_instance_id, # 111
+          # A message that could not be read (e.g. its headers). It is already consumed and lost
+          :bad_msg # -199
         ].freeze
 
         # Default for partitions lookups without allocations
@@ -150,6 +152,9 @@ module Karafka
             # We get a hash only in case of eof error
             when Hash
               @buffer.eof(response[:topic], response[:partition])
+
+              # Eof events of other partitions are often ready as well, so they land in this batch
+              drain(max_messages - @buffer.size) unless @rebalance_manager.changed?
             when nil
               nil
             else
@@ -741,7 +746,7 @@ module Karafka
         # an error are already dequeued.
         #
         # @param room [Integer] how many messages we can still take into the buffer
-        # @return [Boolean] true if any of the partitions reached eof
+        # @return [Boolean] true if any of the partitions is still at eof after the drain
         def drain(room)
           return false unless room.positive?
 
@@ -750,10 +755,9 @@ module Karafka
           kafka.poll_batch_nb(0, max_items: room).each do |item|
             next @buffer << item unless item.is_a?(Rdkafka::RdkafkaError)
 
-            # The drain neither waits nor retries, so the time budget does not apply. A repeated
-            # error reaches the next blocking `#poll` that owns the retries and backoff. The item
-            # itself is gone (e.g. a message that failed to build), so it is always reported
-            action = poll_error_action(item, true, report: true)
+            # Handled as on the first attempt of a blocking `#poll`, as the drain neither waits nor
+            # retries. A repeated error reaches the next blocking `#poll` that owns the retries
+            action = poll_error_action(item, true)
 
             case action
             when :eof
@@ -773,7 +777,8 @@ module Karafka
           # are from the drain itself
           clean_up_after_drain if @rebalance_manager.changed?
 
-          eofed
+          # A message after an eof of the same partition clears its eof
+          eofed && @buffer.eof?
         end
 
         # Removes drained messages of revoked partitions. A partition can also be assigned back
@@ -805,10 +810,9 @@ module Karafka
         #
         # @param error [Rdkafka::RdkafkaError] error from polling
         # @param retryable [Boolean] can we still retry given our time and attempts
-        # @param report [Boolean] should the error be reported even when retryable
         # @return [Symbol] `:eof` when partition end was reached, `:skip` when the error should be
         #   ignored, `:raise` when it should be raised and `:retry` when we can poll again
-        def poll_error_action(error, retryable, report: false)
+        def poll_error_action(error, retryable)
           early_report = false
 
           # There are retryable issues on which we want to report fast as they are source of
@@ -853,7 +857,7 @@ module Karafka
           # Any fatal error should always cause early report
           early_report = true if error.fatal?
 
-          if early_report || !retryable || report
+          if early_report || !retryable
             Karafka.monitor.instrument(
               "error.occurred",
               caller: self,
