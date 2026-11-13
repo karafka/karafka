@@ -100,12 +100,13 @@ module Karafka
           remove_revoked_and_duplicated_messages
         end
 
-        private
-
         # We may have a case where in the middle of data polling, we've lost a partition.
         # In a case like this we should remove all the pre-buffered messages from list partitions
         # as we are no longer responsible in a given process for processing those messages and
         # they should have been picked up by a different process.
+        #
+        # @note It runs on revocation and again after messages that were polled together with the
+        #   revocation reach the buffer
         def remove_revoked_and_duplicated_messages
           @revoked_partitions.each do |topic, partitions|
             partitions.each do |partition|

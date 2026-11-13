@@ -194,6 +194,40 @@ RSpec.describe_current do
     end
   end
 
+  describe "#eof?" do
+    let(:message) { build(:messages_message) }
+
+    it { expect(buffer.eof?).to be(false) }
+
+    context "when a partition is marked as eof" do
+      before do
+        buffer << build(:messages_message)
+        buffer.eof(message.topic, message.partition)
+      end
+
+      it { expect(buffer.eof?).to be(true) }
+    end
+
+    context "when a message of the eof partition comes after its eof" do
+      before do
+        buffer.eof(message.topic, message.partition)
+        buffer << message
+      end
+
+      it { expect(buffer.eof?).to be(false) }
+    end
+
+    context "when a later partition stays at eof after the first one is cleared" do
+      before do
+        buffer.eof(message.topic, message.partition)
+        buffer.eof(message.topic, message.partition + 1)
+        buffer << message
+      end
+
+      it { expect(buffer.eof?).to be(true) }
+    end
+  end
+
   describe "#clear" do
     before { buffer << build(:messages_message) }
 
