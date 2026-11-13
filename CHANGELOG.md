@@ -24,6 +24,7 @@
 - [Change] Fail `karafka topics align` and `migrate` (exit 1) when an existing declarative topic has config keys the cluster does not know (e.g. a typo), naming them, instead of skipping them silently. `plan` lists such keys as unknown and fails too.
 - [Change] Raise `Karafka::Errors::ConsumerGroupNotEmptyError` when `Karafka::Admin` changes the offsets of a consumer group with active members, instead of silently leaving them unchanged. With an external consumer client, offsets are read and changed for the queried consumer group, not the client's own.
 - [Change] Apply the routing `defaults` block to consumer-group topics only. Share-group topics get no defaults, so consumer-group-only calls in it (e.g. `config(...)`, `dead_letter_queue`) no longer raise `NoMethodError` when a share group is drawn.
+- [Change] Require `karafka-core` `>=` `2.6.8`.
 - [Maintenance] Foundational work for Kafka share groups (KIP-932) is in progress (routing layer, consumer class hierarchy, config seams). Not usable yet - share groups can be described in routing but cannot run.
 - [Fix] [Pro] Do not let healthy KIP-848 (`group.protocol=consumer`) multiplexed listeners that never received an assignment block dynamic scaling. With more listeners than partitions they stay in the `init` join state with a rebalance age of 0, so the manager never saw them as stable and kept them alive instead of scaling them down.
 - [Fix] Stop `CoordinatorsBuffer#@coordinators` from growing unbounded across rebalances by dropping a topic entry on revoke once it tracks no partitions (mirrors `PausesManager#delete`).
@@ -47,6 +48,7 @@
 - [Fix] Stop routing `kafka(inherit: true, ...)` from changing the given settings hash. A frozen hash raised `FrozenError` and a hash shared by many topics stopped inheriting the root `kafka` settings after the first topic.
 - [Fix] Fail `karafka topics` `plan`, `migrate`, `align`, `create`, `delete`, `repartition` and `reset` (exit 1) before changing anything when any declarative topic, also a missing or skipped one, has config keys the cluster does not know. They now need `DescribeConfigs` on declared topics with config. With no topic to describe, new topics are checked only when `Create` is allowed on them.
 - [Fix] In independent DLQ, a message that failed after a recovered one in the same batch saw `#attempt` `0` and got one retry more than `max_retries`. In Pro, a custom DLQ `strategy:` also saw the errors of the recovered message.
+- [Fix] Treat `allow.auto.create.topics` as on only when it is `true` or `"true"`. Any other value (e.g. `"false"`) now reports a missing subscribed topic as an error instead of waiting with a "Waiting for it to be created" log.
 - [Fix] State the real minimum (10) in the routing `max_wait_time` validation error. It said "bigger than 0" for values from 1 to 9 that the rule rejects.
 
 ## 2.6.1 (2026-08-24)
