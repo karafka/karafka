@@ -70,13 +70,13 @@ RSpec.describe_current do
         stub_const("ARGV", %w[vps estimate-report])
         allow(report_instance)
           .to receive(:call)
-          .and_raise(Karafka::Errors::CommandValidationError, "Estimate report file not found: x")
+          .and_raise(Karafka::Errors::CommandValidationError, "Estimate report is not valid: x")
       end
 
       it "prints the error and exits with an error" do
         expect { command.call("estimate-report") }
           .to raise_error(SystemExit) { |error| expect(error.status).to eq(1) }
-          .and output("Estimate report file not found: x\n").to_stdout
+          .and output("Estimate report is not valid: x\n").to_stdout
       end
     end
 
@@ -86,10 +86,8 @@ RSpec.describe_current do
         stub_const("ARGV", %w[vps estimate-report /nonexistent/report.json])
       end
 
-      it "prints one line and exits with an error" do
-        expect { command.call("estimate-report") }
-          .to raise_error(SystemExit) { |error| expect(error.status).to eq(1) }
-          .and output("Estimate report file not found: /nonexistent/report.json\n").to_stdout
+      it "raises the system error" do
+        expect { command.call("estimate-report") }.to raise_error(Errno::ENOENT)
       end
     end
 

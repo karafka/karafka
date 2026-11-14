@@ -108,10 +108,7 @@ RSpec.describe_current do
 
     context "when the file does not exist" do
       it do
-        expect { action.call }.to raise_error(
-          Karafka::Errors::CommandValidationError,
-          "Estimate report file not found: #{path}"
-        )
+        expect { action.call }.to raise_error(Errno::ENOENT)
       end
     end
 
@@ -119,10 +116,7 @@ RSpec.describe_current do
       before { File.write(path, "{not json") }
 
       it do
-        expect { action.call }.to raise_error(
-          Karafka::Errors::CommandValidationError,
-          "Estimate report is not valid JSON: #{path}"
-        )
+        expect { action.call }.to raise_error(JSON::ParserError)
       end
     end
 

@@ -42,8 +42,10 @@ module Karafka
 
           # Reads, validates and prints the report
           #
-          # @raise [Karafka::Errors::CommandValidationError] when the file is missing, is not
-          #   valid JSON, has an unsupported `format_version` or an invalid structure
+          # @raise [SystemCallError] when the file cannot be read
+          # @raise [JSON::ParserError] when the file is not valid JSON
+          # @raise [Karafka::Errors::CommandValidationError] when the report has an unsupported
+          #   `format_version` or an invalid structure
           def call
             report = load_report
 
@@ -54,22 +56,13 @@ module Karafka
 
           # @return [Hash] parsed and validated report
           def load_report
-            content = begin
-              File.read(@path)
-            rescue SystemCallError
-              fail!("Estimate report file not found: #{@path}")
-            end
+            report = JSON.parse(File.read(@path))
 
-            report = begin
-              JSON.parse(content)
-            rescue JSON::ParserError
-              fail!("Estimate report is not valid JSON: #{@path}")
-            end
-
-            expected = Processing::ConsumerGroups::VirtualPartitions::Estimator::FORMAT_VERSION
+            estimator = Processing::ConsumerGroups::VirtualPartitions::Estimator
+            expected = estimator::FORMAT_VERSION
             found = report.is_a?(Hash) ? report.fetch("format_version", nil) : nil
 
-            unless found.is_a?(Integer) && found == expected
+            unless estimator::FormatComparator.new.call(found) == :current
               found = found.nil? ? "missing" : found.inspect
 
               fail!(
