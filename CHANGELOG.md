@@ -53,6 +53,7 @@
 - [Fix] Log `lag_compensation.refresher.error` in the Datadog `LoggerListener` through `Karafka.logger` at `warn` level, not to stderr via `Kernel#warn`.
 - [Fix] Treat `allow.auto.create.topics` as on only when it is `true` or `"true"`. Any other value (e.g. `"false"`) now reports a missing subscribed topic as an error instead of waiting with a "Waiting for it to be created" log. Values librdkafka also reads as true (e.g. `1`, `"1"`, `"t"`, `"TRUE"`) are now treated as off by Karafka; use `true` or `"true"`.
 - [Fix] State the real minimum (10) in the routing `max_wait_time` validation error. It said "bigger than 0" for values from 1 to 9 that the rule rejects.
+- [Fix] Make routing validation stricter: reject topic and group names spanning many lines, the `.` and `..` topic names and topic names longer than 249 characters, and topic consumers that are not a class or a class name (e.g. a consumer instance), at boot instead of later at subscription or on the first message.
 
 ## 2.6.1 (2026-08-24)
 - **[Feature]** [Pro] Add an opt-in envelope encryption mode for Messages At Rest (`config.encryption.mode = :envelope`, requires openssl `>= 3.0`) without the RSA payload size limit. Upgrade all consuming processes before enabling.
