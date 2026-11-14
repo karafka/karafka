@@ -48,7 +48,7 @@ module Karafka
         # dispatch, so we do not repeat validations here
         optional(:scheduled_messages_topic) do |val|
           (val.is_a?(String) || val.is_a?(Symbol)) &&
-            ::Karafka::Contracts::TOPIC_REGEXP.match?(val.to_s)
+            ::Karafka::Contracts::TOPIC_NAME_REGEXP.match?(val.to_s)
         end
 
         optional(:dispatch_method) do |val|

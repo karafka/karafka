@@ -46,6 +46,24 @@ RSpec.describe_current do
     it { expect(check).not_to be_success }
   end
 
+  context "when topic has an invalid second line" do
+    before { config[:dead_letter_queue][:topic] = "ok\nbad topic!" }
+
+    it { expect(check).not_to be_success }
+  end
+
+  context "when topic is a dot" do
+    before { config[:dead_letter_queue][:topic] = "." }
+
+    it { expect(check).not_to be_success }
+  end
+
+  context "when topic is longer than 249 characters" do
+    before { config[:dead_letter_queue][:topic] = "a" * 250 }
+
+    it { expect(check).not_to be_success }
+  end
+
   context "when topic is not a string" do
     before { config[:dead_letter_queue][:topic] = 0 }
 

@@ -139,6 +139,7 @@ en:
         consumer_group_consumer_required: needs to be a consumer group consumer inheriting from Karafka::BaseConsumer
         deserializers_format: needs to be present
         consumer_format: needs to be present
+        consumer_class_required: needs to be a consumer class or its name as a String or Symbol
         id_format: 'needs to be a string with a Kafka accepted format'
         initial_offset_format: needs to be either earliest or latest
         subscription_group_details.name_format: must be a non-empty string
