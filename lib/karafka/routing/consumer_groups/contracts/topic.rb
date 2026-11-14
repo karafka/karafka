@@ -47,9 +47,8 @@ module Karafka
             consumer = data.fetch(:consumer)
 
             # Only actual consumer classes carry mode information, so the mode is enforced on
-            # classes only. nil (inactive/admin-only topics may have no consumer, already handled
-            # by the missing-check above) and String/Symbol by-name references are left untouched.
-            # Any other value (an instance, an Integer) can never consume and is rejected.
+            # classes only. nil is skipped: inactive/admin-only topics may have no consumer, already
+            # handled by the missing-check above.
             next if consumer.nil? || consumer.is_a?(String) || consumer.is_a?(Symbol)
             next [[%w[consumer], :class_required]] unless consumer.is_a?(Class)
             next if consumer <= Karafka::Consumers::ConsumerGroup

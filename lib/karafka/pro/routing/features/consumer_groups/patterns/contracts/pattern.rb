@@ -49,7 +49,7 @@ module Karafka
                   end
 
                   required(:name) do |val|
-                    val.is_a?(String) && Karafka::Contracts::TOPIC_REGEXP.match?(val)
+                    val.is_a?(String) && Karafka::Contracts::TOPIC_NAME_REGEXP.match?(val)
                   end
                 end
               end
