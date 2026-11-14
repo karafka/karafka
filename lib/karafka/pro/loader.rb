@@ -112,7 +112,8 @@ module Karafka
             Cleaner,
             Encryption,
             RecurringTasks,
-            ScheduledMessages
+            ScheduledMessages,
+            Processing::ConsumerGroups::VirtualPartitions
           ]
         end
 

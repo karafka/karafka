@@ -126,6 +126,18 @@ en:
         encryption.fingerprinter_missing: 'needs to be false or respond to #hexdigest method'
         encryption.fingerprinter_format: 'needs to be false or respond to #hexdigest method'
 
+        consumer_groups.virtual_partitions.estimator.sample_size_format: needs to be an integer bigger than 0
+        consumer_groups.virtual_partitions.estimator.distribution_format: needs to be either :consistent or :balanced
+        consumer_groups.virtual_partitions.estimator.report_file_format: needs to be a non-empty string or a Pathname
+        consumer_groups.virtual_partitions.estimator.recommended_score_format: needs to be an integer between 0 and 100
+        consumer_groups.virtual_partitions.estimator.maybe_score_format: needs to be an integer between 0 and 100
+        consumer_groups.virtual_partitions.estimator.maybe_score_above_recommended: needs to be equal or lower than recommended_score
+        consumer_groups.virtual_partitions.estimator.score_weights.utilization_format: needs to be an integer equal or bigger than 0
+        consumer_groups.virtual_partitions.estimator.score_weights.parallelization_format: needs to be an integer equal or bigger than 0
+        consumer_groups.virtual_partitions.estimator.score_weights.balance_format: needs to be an integer equal or bigger than 0
+        consumer_groups.virtual_partitions.estimator.score_weights.stability_format: needs to be an integer equal or bigger than 0
+        consumer_groups.virtual_partitions.estimator.score_weights_sum: needs to sum up to 100
+
         patterns.ttl_format: needs to be an integer bigger than 0
         patterns.ttl_missing: needs to be present
 
@@ -160,3 +172,12 @@ en:
       headers_schedule_target_epoch_too_far_in_future: 'scheduling is too far in the future (schedule_target_epoch must be Unix time in seconds)'
       headers_format: are not correct
       not_a_scheduled_messages_topic: 'the envelope topic is not a scheduled messages topic'
+
+    virtual_partitions_estimator:
+      concurrency_format: needs to be an integer bigger than 0
+      batch_size_format: needs to be an integer bigger than 0
+      sample_size_format: needs to be an integer bigger than 0
+      distribution_format: needs to be either :consistent or :balanced
+      partitioner_format: 'needs to respond to #call when given'
+      reducer_format: 'needs to respond to #call when given'
+      details_format: needs to be a boolean
