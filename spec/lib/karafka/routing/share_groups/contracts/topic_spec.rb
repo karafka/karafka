@@ -44,6 +44,17 @@ RSpec.describe_current do
   end
 
   context "when we validate consumer" do
+    context "when topic is not active" do
+      before do
+        config[:consumer] = nil
+        config[:active] = false
+      end
+
+      it "expect not to require consumer" do
+        expect(check).to be_success
+      end
+    end
+
     context "when it is a by-name String reference" do
       before { config[:consumer] = "SomeConsumerByName" }
 
