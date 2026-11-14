@@ -86,15 +86,15 @@ assert_equal 0, status
 assert report.include?("Virtual Partitions estimate for topic: #{DT.topic}")
 
 missing = File.join(dir, "missing.json")
-missing_error = nil
+not_found = false
 
 begin
   run_cli("vps", "estimate-report", missing)
-rescue Errno::ENOENT => e
-  missing_error = e
+rescue Errno::ENOENT
+  not_found = true
 end
 
-assert missing_error
+assert not_found
 
 malformed = File.join(dir, "malformed.json")
 File.write(
