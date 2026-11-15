@@ -95,10 +95,21 @@ RSpec.describe_current do
         end
       end
 
-      let(:parameters) { described_class.instance_method(:subscription_group).parameters }
+      it { expect { draw }.to raise_error(ArgumentError, "no keywords accepted") }
+    end
 
-      it { expect { draw }.to raise_error(ArgumentError) }
-      it { expect(parameters.map(&:first)).not_to include(:keyrest) }
+    context "when we use simple topic style with a nameless subscription group with keyword arguments" do
+      let(:draw) do
+        builder.draw do
+          subscription_group kafka: { "bootstrap.servers": "localhost:9092" } do
+            topic :topic_name1 do
+              consumer Class.new(Karafka::BaseConsumer)
+            end
+          end
+        end
+      end
+
+      it { expect { draw }.to raise_error(ArgumentError, "no keywords accepted") }
     end
 
     context "when we use simple topic style with one subscription group and two topics" do
