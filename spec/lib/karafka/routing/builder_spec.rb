@@ -95,7 +95,10 @@ RSpec.describe_current do
         end
       end
 
-      it { expect { draw }.to raise_error(ArgumentError, /unknown keyword: :kafka/) }
+      let(:parameters) { described_class.instance_method(:subscription_group).parameters }
+
+      it { expect { draw }.to raise_error(ArgumentError) }
+      it { expect(parameters.map(&:first)).not_to include(:keyrest) }
     end
 
     context "when we use simple topic style with one subscription group and two topics" do

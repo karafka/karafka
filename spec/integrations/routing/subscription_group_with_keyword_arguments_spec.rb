@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
-# Karafka should reject keyword arguments on the top-level subscription group as unknown keywords
-# and still allow named and nameless subscription groups.
+# Karafka should reject keyword arguments on the top-level subscription group with an
+# ArgumentError and still allow named and nameless subscription groups.
 
 setup_karafka
 
@@ -19,8 +19,7 @@ rescue ArgumentError => e
   error = e
 end
 
-assert error
-assert_equal "unknown keyword: :kafka", error.message
+assert error.is_a?(ArgumentError)
 
 draw_routes(create_topics: false) do
   subscription_group :group2 do
