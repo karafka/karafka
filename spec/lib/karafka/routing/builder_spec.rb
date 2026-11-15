@@ -67,6 +67,37 @@ RSpec.describe_current do
       it { expect(topic.subscription_group_details).to eq(name: "test") }
     end
 
+    context "when we use simple topic style with one nameless subscription group" do
+      let(:topic) { builder.first.topics.first }
+
+      before do
+        builder.draw do
+          subscription_group do
+            topic :topic_name1 do
+              consumer Class.new(Karafka::BaseConsumer)
+            end
+          end
+        end
+      end
+
+      it { expect(topic.subscription_group_details[:name]).to be_a(String) }
+      it { expect(topic.subscription_group_details[:name]).not_to be_empty }
+    end
+
+    context "when we use simple topic style with a subscription group with keyword arguments" do
+      let(:draw) do
+        builder.draw do
+          subscription_group :test, kafka: { "bootstrap.servers": "localhost:9092" } do
+            topic :topic_name1 do
+              consumer Class.new(Karafka::BaseConsumer)
+            end
+          end
+        end
+      end
+
+      it { expect { draw }.to raise_error(ArgumentError, /unknown keyword: :kafka/) }
+    end
+
     context "when we use simple topic style with one subscription group and two topics" do
       let(:topic1) { builder.first.topics.first }
       let(:topic2) { builder.first.topics.last }
