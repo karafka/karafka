@@ -13,7 +13,7 @@ module Karafka
             ).fetch("en").fetch("validations").fetch("routing").fetch("consumer_group")
           end
 
-          required(:id) { |val| val.is_a?(String) && Karafka::Contracts::TOPIC_REGEXP.match?(val) }
+          required(:id) { |val| val.is_a?(String) && Karafka::Contracts::NAME_REGEXP.match?(val) }
           required(:topics) { |val| val.is_a?(Array) && !val.empty? }
 
           virtual do |data, errors|

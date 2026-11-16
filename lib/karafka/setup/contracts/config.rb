@@ -17,10 +17,10 @@ module Karafka
           ).fetch("en").fetch("validations").fetch("setup").fetch("config")
         end
 
-        # Topics regexp constant reference for easier usage
-        TOPIC_REGEXP = Karafka::Contracts::TOPIC_REGEXP
+        # Names regexp constant reference for easier usage
+        NAME_REGEXP = Karafka::Contracts::NAME_REGEXP
 
-        private_constant :TOPIC_REGEXP
+        private_constant :NAME_REGEXP
 
         # License validity happens in the licenser. Here we do only the simple consistency checks
         nested(:license) do
@@ -28,7 +28,7 @@ module Karafka
           required(:entity) { |val| val.is_a?(String) }
         end
 
-        required(:client_id) { |val| val.is_a?(String) && TOPIC_REGEXP.match?(val) }
+        required(:client_id) { |val| val.is_a?(String) && NAME_REGEXP.match?(val) }
         required(:concurrency) { |val| val.is_a?(Integer) && val.positive? }
         required(:consumer_persistence) { |val| [true, false].include?(val) }
 
@@ -41,7 +41,7 @@ module Karafka
         required(:strict_topics_namespacing) { |val| [true, false].include?(val) }
         required(:shutdown_timeout) { |val| val.is_a?(Integer) && val.positive? }
         required(:max_wait_time) { |val| val.is_a?(Integer) && val.positive? }
-        required(:group_id) { |val| val.is_a?(String) && TOPIC_REGEXP.match?(val) }
+        required(:group_id) { |val| val.is_a?(String) && NAME_REGEXP.match?(val) }
         required(:kafka) { |val| val.is_a?(Hash) && !val.empty? }
         required(:strict_declarative_topics) { |val| [true, false].include?(val) }
         required(:worker_thread_priority) { |val| (-3..3).to_a.include?(val) }
@@ -60,7 +60,7 @@ module Karafka
         nested(:admin) do
           # Can be empty because inherits values from the root kafka
           required(:kafka) { |val| val.is_a?(Hash) }
-          required(:group_id) { |val| val.is_a?(String) && TOPIC_REGEXP.match?(val) }
+          required(:group_id) { |val| val.is_a?(String) && NAME_REGEXP.match?(val) }
           required(:max_wait_time) { |val| val.is_a?(Integer) && val.positive? }
           required(:retry_backoff) { |val| val.is_a?(Integer) && val >= 100 }
           required(:max_retries_duration) { |val| val.is_a?(Integer) && val >= 1_000 }

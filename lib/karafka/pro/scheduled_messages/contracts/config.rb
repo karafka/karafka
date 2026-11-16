@@ -52,11 +52,11 @@ module Karafka
             required(:dispatcher_class) { |val| !val.nil? }
 
             required(:group_id) do |val|
-              val.is_a?(String) && Karafka::Contracts::TOPIC_REGEXP.match?(val)
+              val.is_a?(String) && Karafka::Contracts::NAME_REGEXP.match?(val)
             end
 
             required(:states_postfix) do |val|
-              val.is_a?(String) && Karafka::Contracts::TOPIC_REGEXP.match?(val)
+              val.is_a?(String) && Karafka::Contracts::NAME_REGEXP.match?(val)
             end
 
             nested(:deserializers) do
