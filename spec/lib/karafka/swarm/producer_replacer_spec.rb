@@ -20,7 +20,7 @@ RSpec.describe_current do
   end
 
   describe "#call" do
-    let(:new_producer) { replacer.call(old_producer, kafka, logger) }
+    let(:new_producer) { replacer.call(old_producer, kafka, logger, 1) }
 
     after do
       new_producer.close
@@ -125,6 +125,47 @@ RSpec.describe_current do
       it "expect app-level value to take precedence" do
         bootstrap = new_producer.config.kafka[:"bootstrap.servers"]
         expect(bootstrap).to eq(kafka[:"bootstrap.servers"])
+      end
+    end
+
+    context "when old producer has a transactional.id" do
+      let(:old_producer) do
+        WaterDrop::Producer.new do |p_config|
+          p_config.kafka = Karafka::Setup::AttributesMap.producer(kafka.dup)
+          p_config.kafka[:"transactional.id"] = "app-tx"
+          p_config.logger = logger
+        end
+      end
+
+      before { allow(replacer).to receive(:nodes).and_return(nodes) }
+
+      context "when there are many nodes" do
+        let(:nodes) { 3 }
+
+        it "expect to suffix it with the node id" do
+          expect(new_producer.config.kafka[:"transactional.id"]).to eq("app-tx_1")
+        end
+
+        it "expect to keep the old producer transactional.id unchanged" do
+          new_producer
+          expect(old_producer.config.kafka[:"transactional.id"]).to eq("app-tx")
+        end
+      end
+
+      context "when there is one node" do
+        let(:nodes) { 1 }
+
+        it "expect to keep it unchanged" do
+          expect(new_producer.config.kafka[:"transactional.id"]).to eq("app-tx")
+        end
+      end
+    end
+
+    context "when old producer has no transactional.id" do
+      before { allow(replacer).to receive(:nodes).and_return(3) }
+
+      it "expect not to set it" do
+        expect(new_producer.config.kafka.key?(:"transactional.id")).to be(false)
       end
     end
 

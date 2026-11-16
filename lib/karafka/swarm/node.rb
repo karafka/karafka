@@ -66,7 +66,8 @@ module Karafka
           config.producer.close
 
           old_producer = config.producer
-          config.producer = ProducerReplacer.new.call(old_producer, kafka, config.logger)
+          node_producer = ProducerReplacer.new.call(old_producer, kafka, config.logger, @id)
+          config.producer = node_producer
 
           @pid = ::Process.pid
           @reader.close
@@ -80,6 +81,12 @@ module Karafka
           swarm.node = self
           monitor.subscribe(liveness_listener)
           monitor.instrument("swarm.node.after_fork", caller: self)
+
+          # The after fork hook may replace the node producer. Pro features still using it need
+          # to use the replacement instead
+          if Karafka.pro? && config.producer != node_producer
+            Pro::Loader.post_fork(config, node_producer)
+          end
 
           Karafka::Process.tags.add(:execution_mode, "mode:swarm")
           Karafka::Process.tags.add(:swarm_nodeid, "node:#{@id}")
