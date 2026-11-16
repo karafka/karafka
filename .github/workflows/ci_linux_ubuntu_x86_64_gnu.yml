@@ -114,16 +114,21 @@ jobs:
     if: needs.changes.outputs.code == 'true'
     timeout-minutes: 15
     runs-on: ubuntu-latest
+    # Ruby previews are non-blocking: a failing preview job shows red but does not fail the workflow
+    continue-on-error: ${{ matrix.continue-on-error || false }}
     strategy:
       fail-fast: false
       matrix:
         ruby:
+          - '4.1.0-preview1'
           - '4.0'
           - '3.4'
           - '3.3'
         include:
           - ruby: '4.0'
             coverage: 'true'
+          - ruby: '4.1.0-preview1'
+            continue-on-error: true
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - name: Install package dependencies
@@ -170,16 +175,22 @@ jobs:
     if: needs.changes.outputs.code == 'true'
     timeout-minutes: 30
     runs-on: ubuntu-latest
+    # Ruby previews are non-blocking: a failing preview job shows red but does not fail the workflow
+    continue-on-error: ${{ matrix.continue-on-error || false }}
     strategy:
       fail-fast: false
       matrix:
         ruby:
+          - '4.1.0-preview1'
           - '4.0'
           - '3.4'
           - '3.3'
         parallel_group:
           - '0'
           - '1'
+        include:
+          - ruby: '4.1.0-preview1'
+            continue-on-error: true
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - name: Install package dependencies
@@ -248,16 +259,22 @@ jobs:
     if: needs.changes.outputs.code == 'true'
     timeout-minutes: 45
     runs-on: ubuntu-latest
+    # Ruby previews are non-blocking: a failing preview job shows red but does not fail the workflow
+    continue-on-error: ${{ matrix.continue-on-error || false }}
     strategy:
       fail-fast: false
       matrix:
         ruby:
+          - '4.1.0-preview1'
           - '4.0'
           - '3.4'
           - '3.3'
         parallel_group:
           - '0'
           - '1'
+        include:
+          - ruby: '4.1.0-preview1'
+            continue-on-error: true
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - name: Install package dependencies
