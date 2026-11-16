@@ -5,6 +5,7 @@ RSpec.describe_current do
 
   let(:kafka) { Karafka::App.config.kafka.dup }
   let(:logger) { Karafka::App.config.logger }
+  let(:original_nodes) { Karafka::App.config.swarm.nodes }
 
   let(:old_producer) do
     WaterDrop::Producer.new do |p_config|
@@ -137,7 +138,12 @@ RSpec.describe_current do
         end
       end
 
-      before { allow(replacer).to receive(:nodes).and_return(nodes) }
+      before do
+        original_nodes
+        Karafka::App.config.swarm.nodes = nodes
+      end
+
+      after { Karafka::App.config.swarm.nodes = original_nodes }
 
       context "when there are many nodes" do
         let(:nodes) { 3 }
@@ -162,7 +168,12 @@ RSpec.describe_current do
     end
 
     context "when old producer has no transactional.id" do
-      before { allow(replacer).to receive(:nodes).and_return(3) }
+      before do
+        original_nodes
+        Karafka::App.config.swarm.nodes = 3
+      end
+
+      after { Karafka::App.config.swarm.nodes = original_nodes }
 
       it "expect not to set it" do
         expect(new_producer.config.kafka.key?(:"transactional.id")).to be(false)
