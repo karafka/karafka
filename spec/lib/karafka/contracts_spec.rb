@@ -27,10 +27,26 @@ RSpec.describe_current do
 
       it { is_expected.to be(false) }
     end
+
+    context "when it is a dot" do
+      let(:input) { "." }
+
+      it { is_expected.to be(true) }
+    end
+
+    context "when it is longer than 249 characters" do
+      let(:input) { "a" * 250 }
+
+      it { is_expected.to be(true) }
+    end
   end
 
   describe "#TOPIC_REGEXP" do
-    subject(:match) { input.match? described_class::TOPIC_REGEXP }
+    it { expect(described_class::TOPIC_REGEXP).to eq(described_class::NAME_REGEXP) }
+  end
+
+  describe "#TOPIC_NAME_REGEXP" do
+    subject(:match) { input.match? described_class::TOPIC_NAME_REGEXP }
 
     context "when topic name is valid" do
       let(:input) { "my-topic_1.events" }

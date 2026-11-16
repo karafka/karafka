@@ -36,7 +36,7 @@ module Karafka
           required(:kafka) { |val| val.is_a?(Hash) && !val.empty? }
           required(:max_messages) { |val| val.is_a?(Integer) && val >= 1 }
           required(:max_wait_time) { |val| val.is_a?(Integer) && val >= 10 }
-          required(:name) { |val| val.is_a?(String) && Karafka::Contracts::TOPIC_REGEXP.match?(val) }
+          required(:name) { |val| val.is_a?(String) && Karafka::Contracts::TOPIC_NAME_REGEXP.match?(val) }
           required(:active) { |val| [true, false].include?(val) }
           nested(:subscription_group_details) do
             required(:name) { |val| val.is_a?(String) && !val.empty? }
