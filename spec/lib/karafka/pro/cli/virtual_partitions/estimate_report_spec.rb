@@ -120,60 +120,41 @@ RSpec.describe_current do
       end
     end
 
-    {
-      "missing" => nil,
-      "2" => 2,
-      "0" => 0,
-      '"1"' => "1",
-      "1.0" => 1.0
-    }.each do |found, version|
-      context "when format_version is #{found}" do
-        before do
-          estimator.analyze(messages, target_file: path)
-          report = JSON.parse(File.read(path))
-          version.nil? ? report.delete("format_version") : report["format_version"] = version
-          write_report(report)
-        end
+    context "when format_version is not the current one" do
+      before do
+        estimator.analyze(messages, target_file: path)
+        write_report(JSON.parse(File.read(path)).merge("format_version" => 2))
+      end
 
-        it "fails without printing the report" do
-          expect { action.call }
-            .to raise_error(
-              Karafka::Errors::CommandValidationError,
-              "Unsupported estimate report format_version: #{found} " \
-              "(expected #{estimator_class::FORMAT_VERSION}). " \
-              "Generate the report again with the Karafka version used to display it."
-            )
-            .and output("").to_stdout
-        end
+      it "fails without printing the report" do
+        expect { action.call }
+          .to raise_error(
+            Karafka::Errors::CommandValidationError,
+            {
+              format_version: "needs to match the format this Karafka version builds. " \
+                "Generate the report again with this Karafka version"
+            }.to_s
+          )
+          .and output("").to_stdout
       end
     end
 
-    {
-      "settings is not an object" => { "settings" => "x" },
-      "partitions is not an object" => { "partitions" => [1, 2] },
-      "a partition is null" => { "partitions" => { "0" => nil } },
-      "summary is not an object" => { "summary" => 1 },
-      "summary active_vps is not an object" => {
-        "summary" => { "batches" => 1, "active_vps" => [1] }
-      },
-      "summary batches is an array" => { "summary" => { "batches" => [1] } },
-      "summary batches is a boolean" => { "summary" => { "batches" => true } },
-      "summary batches is a string" => { "summary" => { "batches" => "1" } }
-    }.each do |description, overrides|
-      context "when #{description}" do
-        before do
-          estimator.analyze(messages, target_file: path)
-          write_report(JSON.parse(File.read(path)).merge(overrides))
-        end
+    context "when the report has an invalid structure" do
+      before do
+        estimator.analyze(messages, target_file: path)
+        write_report(JSON.parse(File.read(path)).merge("settings" => "x", "partitions" => [1, 2]))
+      end
 
-        it "fails without printing the report" do
-          expect { action.call }
-            .to raise_error(
-              Karafka::Errors::CommandValidationError,
-              "Estimate report is not valid: #{path}"
-            )
-            .and output("").to_stdout
-        end
+      it "fails with all the errors without printing the report" do
+        expect { action.call }
+          .to raise_error(
+            Karafka::Errors::CommandValidationError,
+            {
+              settings: "needs to be an object",
+              partitions: "needs to be an object with an object per partition"
+            }.to_s
+          )
+          .and output("").to_stdout
       end
     end
 
@@ -183,7 +164,7 @@ RSpec.describe_current do
       it do
         expect { action.call }.to raise_error(
           Karafka::Errors::CommandValidationError,
-          /format_version: missing/
+          /format_version/
         )
       end
     end

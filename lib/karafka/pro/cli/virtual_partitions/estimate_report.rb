@@ -44,8 +44,8 @@ module Karafka
           #
           # @raise [SystemCallError] when the file cannot be read
           # @raise [JSON::ParserError] when the file is not valid JSON
-          # @raise [Karafka::Errors::CommandValidationError] when the report has an unsupported
-          #   `format_version` or an invalid structure
+          # @raise [Karafka::Errors::CommandValidationError] when the report does not pass the
+          #   `Contracts::EstimatorReport` contract
           def call
             report = load_report
 
@@ -58,55 +58,13 @@ module Karafka
           def load_report
             report = JSON.parse(File.read(@path))
 
-            estimator = Processing::ConsumerGroups::VirtualPartitions::Estimator
-            expected = estimator::FORMAT_VERSION
-            found = report.is_a?(Hash) ? report.fetch("format_version", nil) : nil
+            result = Processing::ConsumerGroups::VirtualPartitions::Contracts::EstimatorReport
+              .new
+              .call(report)
 
-            unless estimator::FormatComparator.new.call(found) == :current
-              found = found.nil? ? "missing" : found.inspect
+            return report if result.success?
 
-              fail!(
-                "Unsupported estimate report format_version: #{found} (expected #{expected}). " \
-                "Generate the report again with the Karafka version used to display it."
-              )
-            end
-
-            fail!("Estimate report is not valid: #{@path}") unless valid_structure?(report)
-
-            report
-          end
-
-          # @param report [Hash] parsed report
-          # @return [Boolean] are all the sections the renderer reads Hashes and the summary batches
-          #   count an Integer when present
-          def valid_structure?(report)
-            partitions = report["partitions"]
-            summary = report["summary"]
-
-            optional_hash?(report["settings"]) &&
-              optional_hash?(partitions) &&
-              (partitions || {}).each_value.all? { |stats| stats.is_a?(Hash) } &&
-              optional_hash?(summary) &&
-              optional_hash?((summary || {})["active_vps"]) &&
-              optional_integer?((summary || {})["batches"])
-          end
-
-          # @param value [Object]
-          # @return [Boolean] is the value an Integer or nil
-          def optional_integer?(value)
-            value.nil? || value.is_a?(Integer)
-          end
-
-          # @param value [Object]
-          # @return [Boolean] is the value a Hash or nil
-          def optional_hash?(value)
-            value.nil? || value.is_a?(Hash)
-          end
-
-          # @param message [String]
-          # @raise [Karafka::Errors::CommandValidationError]
-          def fail!(message)
-            raise Karafka::Errors::CommandValidationError, message
+            raise Karafka::Errors::CommandValidationError, result.errors
           end
         end
       end

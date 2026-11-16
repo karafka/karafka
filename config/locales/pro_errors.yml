@@ -181,3 +181,12 @@ en:
       partitioner_format: 'needs to respond to #call when given'
       reducer_format: 'needs to respond to #call when given'
       details_format: needs to be a boolean
+
+    virtual_partitions_estimator_report:
+      format_version_missing: needs to be present. Generate the report again with this Karafka version
+      format_version_format: needs to match the format this Karafka version builds. Generate the report again with this Karafka version
+      settings_format: needs to be an object
+      partitions_format: needs to be an object with an object per partition
+      summary_format: needs to be an object
+      summary.active_vps_format: needs to be an object
+      summary.batches_format: needs to be an integer
