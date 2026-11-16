@@ -108,9 +108,12 @@ File.write(
 report, status = run_cli("vps", "estimate-report", malformed)
 
 assert_equal 1, status
-assert_equal 1, report.lines.size
-assert report.include?('settings: "needs to be an object"')
-assert report.include?('partitions: "needs to be an object with an object per partition"')
+errors = {
+  settings: "needs to be an object",
+  partitions: "needs to be an object with an object per partition"
+}
+
+assert_equal "#{errors}\n", report
 
 help, status = run_cli("vps", "help")
 
