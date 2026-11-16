@@ -13,7 +13,6 @@
 - **[Feature]** Add `Karafka::Admin.delete_records` to delete the messages of given partitions below a given offset (or all of them with `:end`) by moving their low watermark. It is destructive and irreversible.
 - **[Feature]** Add `Karafka::Admin.delete_consumer_group_offsets` to delete a consumer group's committed offsets for given topics or partitions, keeping the consumer group and its other offsets. Raises `Karafka::Errors::ConsumerGroupSubscribedToTopicError` for topics the consumer group is subscribed to.
 - [Enhancement] Defer default log file creation until the first write and keep logging working (to stdout) when the log file cannot be created or written, e.g. on read-only filesystems (ydah).
-- [Enhancement] Build `Setup::DefaultsInjector` (and its Pro extension) on `Karafka::Core::Configurable::Injector`. Behavior is unchanged. Requires karafka-core `>= 2.6.3`.
 - [Enhancement] Stop allocating 6 objects per consumed message: build the default topic deserializers only once and read `max_messages` once per poll batch.
 - [Enhancement] Stop allocating a keyword `Hash` per consumed message when building its metadata.
 - [Enhancement] Log only the top two backtrace lines for `librdkafka.error` in the `LoggerListener`, so unreachable brokers no longer flood the logs.
@@ -53,6 +52,7 @@
 - [Fix] Log `lag_compensation.refresher.error` in the Datadog `LoggerListener` through `Karafka.logger` at `warn` level, not to stderr via `Kernel#warn`.
 - [Fix] Treat `allow.auto.create.topics` as on only when it is `true` or `"true"`. Any other value (e.g. `"false"`) now reports a missing subscribed topic as an error instead of waiting with a "Waiting for it to be created" log. Values librdkafka also reads as true (e.g. `1`, `"1"`, `"t"`, `"TRUE"`) are now treated as off by Karafka; use `true` or `"true"`.
 - [Fix] State the real minimum (10) in the routing `max_wait_time` validation error. It said "bigger than 0" for values from 1 to 9 that the rule rejects.
+- [Fix] Remove the `**args` parameter and its documented `kafka:` option from the top-level routing `subscription_group`. They never worked: any keyword argument raised a generic `ArgumentError`. Keyword arguments now raise `ArgumentError: no keywords accepted`.
 - [Fix] Make routing and config validation stricter: reject topic, group and client id names spanning many lines, the `.` and `..` topic names and topic names longer than 249 characters, and topic consumers that are not a class or a class name (e.g. a consumer instance), at boot instead of later at subscription or on the first message.
 
 ## 2.6.1 (2026-08-24)
