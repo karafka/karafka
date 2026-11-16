@@ -25,6 +25,7 @@
 - [Change] Apply the routing `defaults` block to consumer-group topics only. Share-group topics get no defaults, so consumer-group-only calls in it (e.g. `config(...)`, `dead_letter_queue`) no longer raise `NoMethodError` when a share group is drawn.
 - [Change] Require `karafka-core` `>=` `2.6.8`.
 - [Change] Apply `strict_declarative_topics` to share-group topics too: each one needs an active declaration in `declaratives.draw`, made before `routes.draw`.
+- [Change] Deprecate `Karafka::Contracts::TOPIC_REGEXP`; use `TOPIC_NAME_REGEXP` for topic names or `NAME_REGEXP` for group and client ids. It still works and will be removed in Karafka 2.7.
 - [Maintenance] Foundational work for Kafka share groups (KIP-932) is in progress (routing layer, consumer class hierarchy, config seams). Not usable yet - share groups can be described in routing but cannot run.
 - [Fix] [Pro] Do not let healthy KIP-848 (`group.protocol=consumer`) multiplexed listeners that never received an assignment block dynamic scaling. With more listeners than partitions they stay in the `init` join state with a rebalance age of 0, so the manager never saw them as stable and kept them alive instead of scaling them down.
 - [Fix] Stop `CoordinatorsBuffer#@coordinators` from growing unbounded across rebalances by dropping a topic entry on revoke once it tracks no partitions (mirrors `PausesManager#delete`).
@@ -53,7 +54,7 @@
 - [Fix] Treat `allow.auto.create.topics` as on only when it is `true` or `"true"`. Any other value (e.g. `"false"`) now reports a missing subscribed topic as an error instead of waiting with a "Waiting for it to be created" log. Values librdkafka also reads as true (e.g. `1`, `"1"`, `"t"`, `"TRUE"`) are now treated as off by Karafka; use `true` or `"true"`.
 - [Fix] State the real minimum (10) in the routing `max_wait_time` validation error. It said "bigger than 0" for values from 1 to 9 that the rule rejects.
 - [Fix] Remove the `**args` parameter and its documented `kafka:` option from the top-level routing `subscription_group`. They never worked: any keyword argument raised a generic `ArgumentError`. Keyword arguments now raise `ArgumentError: no keywords accepted`.
-- [Fix] Make routing and config validation stricter: reject topic, group and client id names spanning many lines, the `.` and `..` topic names and topic names longer than 249 characters, and topic consumers that are not a class or a class name (e.g. a consumer instance), at boot instead of later at subscription or on the first message.
+- [Fix] Make routing and config validation stricter: reject topic, group and client id names spanning many lines, the `.` and `..` topic names, topic names over 249 characters, and topic consumers that are not a class or class name (e.g. an instance), at boot instead of later.
 
 ## 2.6.1 (2026-08-24)
 - **[Feature]** [Pro] Add an opt-in envelope encryption mode for Messages At Rest (`config.encryption.mode = :envelope`, requires openssl `>= 3.0`) without the RSA payload size limit. Upgrade all consuming processes before enabling.

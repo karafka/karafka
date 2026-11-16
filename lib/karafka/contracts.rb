@@ -11,8 +11,8 @@ module Karafka
     # longer than 249 characters and the `.` and `..` names
     TOPIC_NAME_REGEXP = /\A(?!\.\.?\z)[A-Za-z0-9\-_.]{1,249}\z/
 
-    # @deprecated Use `NAME_REGEXP` or `TOPIC_NAME_REGEXP`. Kept as the group id rule for
-    #   external callers (karafka-web validates its `group_id` with it)
+    # @deprecated Use `NAME_REGEXP` or `TOPIC_NAME_REGEXP`. Will be removed in Karafka 2.7. Kept as
+    #   the group id rule for external callers (karafka-web validates its `group_id` with it)
     TOPIC_REGEXP = NAME_REGEXP
   end
 end
