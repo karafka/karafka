@@ -197,6 +197,31 @@ RSpec.describe_current do
       end
     end
 
+    context "when the end offset is on a transaction marker and later messages exist" do
+      before do
+        2.times do |round|
+          PRODUCERS.transactional.transaction do
+            PRODUCERS.transactional.produce_many_sync(
+              Array.new(3) { |i| { topic: dlq_topic_name, partition: 0, payload: "#{round}-#{i}" } }
+            )
+          end
+        end
+      end
+
+      it "stops at the end offset" do
+        expect(
+          described_class.copy(
+            dlq_topic_name,
+            target_topic_name: target_topic_name,
+            partitions: [0],
+            end_offset: 4
+          )
+        ).to eq(3)
+
+        expect(target_messages.map(&:raw_payload)).to eq(%w[0-0 0-1 0-2])
+      end
+    end
+
     context "when messages land in the dead letter queue during the copy" do
       # Copies have no key or partition, so a single partition keeps them all in one place
       let(:single_topic_name) { generate_topic_name }
