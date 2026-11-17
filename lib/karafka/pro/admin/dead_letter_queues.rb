@@ -35,7 +35,7 @@ module Karafka
       # Provides methods to copy (replay) messages from a dead letter queue topic back to the topic
       # they came from or to any other topic
       class DeadLetterQueues < Karafka::Admin
-        # How many messages we read from a partition in one go before dispatching them
+        # How many messages we dispatch in one go
         BATCH_SIZE = 1_000
 
         # Headers the Pro DLQ adds to each dispatched message to describe its origin. They are
@@ -116,6 +116,9 @@ module Karafka
         #
         # @note The copy is not atomic. A failure in the middle leaves earlier batches dispatched.
         #
+        # @note Messages are streamed with `Karafka::Pro::Iterator` using the admin `kafka`
+        #   configuration, also when the admin has an `external_client`.
+        #
         # @example Copy all messages of a Pro DLQ topic back to their source topics
         #   Karafka::Pro::Admin::DeadLetterQueues.copy('events_dlq')
         #
@@ -153,20 +156,19 @@ module Karafka
 
           watermarks = topics.read_watermark_offsets({ topic_name => partitions }).fetch(topic_name)
           start_offsets = resolve_start_offsets(topics, topic_name, partitions, start_offset)
+          ranges = {}
 
-          partitions.sum do |partition|
+          partitions.each do |partition|
             low_offset, high_offset = watermarks.fetch(partition)
+            first_offset = [start_offsets.fetch(partition) || high_offset, low_offset].max
+            last_offset = end_offset ? [end_offset, high_offset].min : high_offset
 
-            copy_partition(
-              topics,
-              producer,
-              topic_name,
-              partition,
-              target_topic_name,
-              [start_offsets.fetch(partition) || high_offset, low_offset].max,
-              end_offset ? [end_offset, high_offset].min : high_offset
-            )
+            ranges[partition] = [first_offset, last_offset] if first_offset < last_offset
           end
+
+          return 0 if ranges.empty?
+
+          stream(topic_name, ranges, target_topic_name, producer)
         end
 
         private
@@ -188,45 +190,45 @@ module Karafka
             .to_h { |result| [result.fetch(:partition), result.fetch(:offset).negative? ? nil : result.fetch(:offset)] }
         end
 
-        # @param topics [Karafka::Admin::Topics] topics admin to read with
-        # @param producer [WaterDrop::Producer] producer to dispatch with
+        # Streams the given offset ranges with one iterator and dispatches them in batches
+        #
         # @param topic_name [String] dead letter queue topic name
-        # @param partition [Integer] partition to copy from
+        # @param ranges [Hash{Integer => Array<Integer>}] start offset (inclusive) and end offset
+        #   (exclusive) per partition
         # @param target_topic_name [String, nil] topic to copy to
-        # @param start_offset [Integer] offset (inclusive) from which to copy
-        # @param end_offset [Integer] offset (exclusive) until which to copy
+        # @param producer [WaterDrop::Producer] producer to dispatch with
         # @return [Integer] number of copied messages
-        def copy_partition(
-          topics,
-          producer,
-          topic_name,
-          partition,
-          target_topic_name,
-          start_offset,
-          end_offset
-        )
-          offset = start_offset
+        def stream(topic_name, ranges, target_topic_name, producer)
+          iterator = Karafka::Pro::Iterator.new(
+            { topic_name => ranges.transform_values(&:first) },
+            settings: { "auto.offset.reset": "beginning" }.merge(@custom_kafka)
+          )
+
+          batch = []
           copied = 0
 
-          while offset < end_offset
-            batch = topics.read(topic_name, partition, BATCH_SIZE, offset)
-            batch.select! { |message| message.offset < end_offset }
+          iterator.each do |message|
+            end_offset = ranges.fetch(message.partition).last
 
-            # A window can hold no messages (compaction, aborted transactions), so we move past it
-            if batch.empty?
-              offset += BATCH_SIZE
+            # A gap (compaction, aborted transactions) can take us past the end offset
+            if message.offset >= end_offset
+              iterator.stop_current_partition
               next
             end
 
-            producer.produce_many_sync(
-              batch.map { |message| build_message(message, target_topic_name) }
-            )
+            batch << build_message(message, target_topic_name)
+            iterator.stop_current_partition if message.offset == end_offset - 1
 
+            next if batch.size < BATCH_SIZE
+
+            producer.produce_many_sync(batch)
             copied += batch.size
-            offset = batch.last.offset + 1
+            batch = []
           end
 
-          copied
+          producer.produce_many_sync(batch) unless batch.empty?
+
+          copied + batch.size
         end
 
         # @param message [Karafka::Messages::Message] dead letter queue message

@@ -258,6 +258,18 @@ RSpec.describe_current do
         admin.copy(dlq_topic_name, target_topic_name: target_topic_name, producer: PRODUCERS.regular)
       end
 
+      it "streams with the custom kafka configuration" do
+        expect(Karafka::Pro::Iterator)
+          .to receive(:new)
+          .with(
+            { dlq_topic_name => { 0 => 0 } },
+            settings: { "auto.offset.reset": "beginning", "bootstrap.servers": "127.0.0.1:9092" }
+          )
+          .and_call_original
+
+        admin.copy(dlq_topic_name, target_topic_name: target_topic_name, producer: PRODUCERS.regular)
+      end
+
       it "copies with the given producer" do
         expect(
           admin.copy(dlq_topic_name, target_topic_name: target_topic_name, producer: PRODUCERS.regular)
