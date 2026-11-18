@@ -5,7 +5,27 @@ module Karafka
     class Configs
       # Represents a single config entry that is related to a resource
       class Config
+        # Maps the numeric librdkafka config source codes to cooked Ruby symbols. Anything we do
+        # not recognize normalizes to `:unknown_config`.
+        SOURCES = {
+          Rdkafka::Bindings::RD_KAFKA_CONFIG_SOURCE_UNKNOWN_CONFIG => :unknown_config,
+          Rdkafka::Bindings::RD_KAFKA_CONFIG_SOURCE_DYNAMIC_TOPIC_CONFIG => :dynamic_topic_config,
+          Rdkafka::Bindings::RD_KAFKA_CONFIG_SOURCE_DYNAMIC_BROKER_CONFIG => :dynamic_broker_config,
+          Rdkafka::Bindings::RD_KAFKA_CONFIG_SOURCE_DYNAMIC_DEFAULT_BROKER_CONFIG =>
+            :dynamic_default_broker_config,
+          Rdkafka::Bindings::RD_KAFKA_CONFIG_SOURCE_STATIC_BROKER_CONFIG => :static_broker_config,
+          Rdkafka::Bindings::RD_KAFKA_CONFIG_SOURCE_DEFAULT_CONFIG => :default_config,
+          Rdkafka::Bindings::RD_KAFKA_CONFIG_SOURCE_GROUP_CONFIG => :group_config
+        }.freeze
+
+        private_constant :SOURCES
+
         attr_reader :name, :value, :synonyms
+
+        # @return [Symbol] where the value comes from: `:dynamic_topic_config` (set on the topic),
+        #   `:dynamic_broker_config`, `:dynamic_default_broker_config`, `:static_broker_config`,
+        #   `:default_config` (built-in default), `:group_config` or `:unknown_config`
+        attr_reader :source
 
         class << self
           # Creates a single config entry from the Rdkafka config result entry
@@ -20,6 +40,7 @@ module Karafka
               default: rd_kafka_config.default,
               sensitive: rd_kafka_config.sensitive,
               synonym: rd_kafka_config.synonym,
+              source: SOURCES.fetch(rd_kafka_config.source, :unknown_config),
               synonyms: rd_kafka_config.synonyms.map do |rd_kafka_synonym|
                 from_rd_kafka(rd_kafka_synonym)
               end
@@ -35,6 +56,7 @@ module Karafka
         # @param read_only [Integer] 1 if read only
         # @param sensitive [Integer] 1 if sensitive
         # @param synonym [Integer] 1 if synonym
+        # @param source [Symbol] where the value comes from
         # @param synonyms [Array] given config synonyms (if any)
         #
         # @note For alter operations only `name` and `value` are needed
@@ -45,6 +67,7 @@ module Karafka
           read_only: -1,
           sensitive: -1,
           synonym: -1,
+          source: :unknown_config,
           synonyms: []
         )
           @name = name
@@ -54,6 +77,7 @@ module Karafka
           @read_only = read_only
           @sensitive = sensitive
           @synonym = synonym
+          @source = source
           @synonyms = synonyms
         end
 

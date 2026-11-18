@@ -8,6 +8,7 @@ RSpec.describe_current do
   let(:sensitive) { -1 }
   let(:synonym) { -1 }
   let(:synonyms) { [] }
+  let(:source) { :unknown_config }
   let(:config) do
     described_class.new(
       name: name,
@@ -16,6 +17,7 @@ RSpec.describe_current do
       read_only: read_only,
       sensitive: sensitive,
       synonym: synonym,
+      source: source,
       synonyms: synonyms
     )
   end
@@ -63,6 +65,22 @@ RSpec.describe_current do
       let(:default) { 0 }
 
       it { is_expected.to be false }
+    end
+  end
+
+  describe "#source" do
+    subject(:config_source) { config.source }
+
+    context "when source is not provided" do
+      let(:config) { described_class.new(name: name, value: value) }
+
+      it { is_expected.to eq(:unknown_config) }
+    end
+
+    context "when source is provided" do
+      let(:source) { :dynamic_topic_config }
+
+      it { is_expected.to eq(:dynamic_topic_config) }
     end
   end
 
@@ -124,6 +142,7 @@ RSpec.describe_current do
         default: 1,
         sensitive: 1,
         synonym: 1,
+        source: Rdkafka::Bindings::RD_KAFKA_CONFIG_SOURCE_DEFAULT_CONFIG,
         synonyms: []
       )
     end
@@ -137,6 +156,7 @@ RSpec.describe_current do
         default: 1,
         sensitive: 1,
         synonym: 1,
+        source: Rdkafka::Bindings::RD_KAFKA_CONFIG_SOURCE_DYNAMIC_TOPIC_CONFIG,
         synonyms: [synonym_config]
       )
     end
@@ -148,6 +168,29 @@ RSpec.describe_current do
       expect(config_from_rd_kafka.value).to eq(value)
       expect(config_from_rd_kafka.synonyms.first.name).to eq("test_synonym")
       expect(config_from_rd_kafka.synonyms.first.value).to eq("synonym_value")
+    end
+
+    it "maps the source codes to symbols" do
+      expect(config_from_rd_kafka.source).to eq(:dynamic_topic_config)
+      expect(config_from_rd_kafka.synonyms.first.source).to eq(:default_config)
+    end
+
+    context "when the source code is not known" do
+      let(:rd_kafka_config) do
+        instance_double(
+          Rdkafka::Admin::ConfigBindingResult,
+          name: name,
+          value: value,
+          read_only: 0,
+          default: 0,
+          sensitive: 0,
+          synonym: 0,
+          source: 999,
+          synonyms: []
+        )
+      end
+
+      it { expect(config_from_rd_kafka.source).to eq(:unknown_config) }
     end
   end
 
