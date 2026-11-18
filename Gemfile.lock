@@ -137,7 +137,7 @@ GEM
     warning (1.6.0)
     waterdrop (2.10.10)
       karafka-core (>= 2.5.12, < 3.0.0)
-      karafka-rdkafka (>= 0.32.1)
+      karafka-rdkafka (>= 0.32.0)
       zeitwerk (~> 2.3)
     zeitwerk (2.8.3)
 
