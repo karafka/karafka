@@ -5,7 +5,7 @@ module Karafka
     class Configs
       # Represents a single config entry that is related to a resource
       class Config
-        # Maps the numeric librdkafka config source codes to cooked Ruby symbols. Anything we do
+        # Maps the numeric librdkafka config source codes to Ruby symbols. Anything we do
         # not recognize normalizes to `:unknown_config`.
         SOURCES = {
           Rdkafka::Bindings::RD_KAFKA_CONFIG_SOURCE_UNKNOWN_CONFIG => :unknown_config,
