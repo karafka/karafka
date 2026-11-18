@@ -443,7 +443,7 @@ RSpec.describe Karafka::Admin::ConsumerGroups do
         expect(handle).to have_received(:wait).twice
         expect(admin)
           .to have_received(:list_consumer_group_offsets)
-          .with("group", anything, require_stable_offsets: true)
+          .with("group", topic_partition_list: anything, require_stable_offsets: true)
           .twice
       end
     end
