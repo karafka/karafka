@@ -182,7 +182,7 @@ RSpec.describe_current do
       RD_KAFKA_CONFIG_SOURCE_DYNAMIC_DEFAULT_BROKER_CONFIG: :dynamic_default_broker_config,
       RD_KAFKA_CONFIG_SOURCE_STATIC_BROKER_CONFIG: :static_broker_config,
       RD_KAFKA_CONFIG_SOURCE_DEFAULT_CONFIG: :default_config,
-      RD_KAFKA_CONFIG_SOURCE_GROUP_CONFIG: :group_config
+      RD_KAFKA_CONFIG_SOURCE_GROUP_CONFIG: :consumer_group_config
     }.each do |constant, expected_source|
       context "when the source code is #{constant}" do
         let(:rd_kafka_config) do

@@ -15,7 +15,7 @@ module Karafka
             :dynamic_default_broker_config,
           Rdkafka::Bindings::RD_KAFKA_CONFIG_SOURCE_STATIC_BROKER_CONFIG => :static_broker_config,
           Rdkafka::Bindings::RD_KAFKA_CONFIG_SOURCE_DEFAULT_CONFIG => :default_config,
-          Rdkafka::Bindings::RD_KAFKA_CONFIG_SOURCE_GROUP_CONFIG => :group_config
+          Rdkafka::Bindings::RD_KAFKA_CONFIG_SOURCE_GROUP_CONFIG => :consumer_group_config
         }.freeze
 
         private_constant :SOURCES
@@ -24,7 +24,7 @@ module Karafka
 
         # @return [Symbol] where the value comes from: `:dynamic_topic_config` (set on the topic),
         #   `:dynamic_broker_config`, `:dynamic_default_broker_config`, `:static_broker_config`,
-        #   `:default_config` (built-in default), `:group_config` or `:unknown_config`
+        #   `:default_config` (built-in default), `:consumer_group_config` or `:unknown_config`
         attr_reader :source
 
         class << self
