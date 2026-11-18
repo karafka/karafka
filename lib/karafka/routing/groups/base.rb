@@ -87,15 +87,18 @@ module Karafka
         # topic definition
         # @param name [String, Symbol] name of the current subscription group
         def subscription_group=(name = SubscriptionGroup.id, &)
+          previous_subscription_group_details = @current_subscription_group_details
+
           # We cast it here, so the routing supports symbol based but that's anyhow later on
           # validated as a string
           @current_subscription_group_details = { name: name.to_s }
 
           Proxy.new(self, &)
 
-          # We need to reset the current subscription group after it is used, so it won't leak
-          # outside to other topics that would be defined without a defined subscription group
-          @current_subscription_group_details = { name: SubscriptionGroup.id }
+          # We need to restore the previous subscription group after it is used, so it won't leak
+          # outside to other topics that would be defined without a defined subscription group and
+          # so those topics keep sharing the same default subscription group
+          @current_subscription_group_details = previous_subscription_group_details
         end
 
         # @return [Array<Routing::SubscriptionGroup>] all the subscription groups build based on

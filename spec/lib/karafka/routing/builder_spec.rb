@@ -189,6 +189,98 @@ RSpec.describe_current do
       it { expect(topic2.subscription_group_details).not_to be_nil }
     end
 
+    context "when topics without a subscription group surround subscription group blocks" do
+      let(:consumer_class) { Class.new(Karafka::BaseConsumer) }
+      let(:groups) do
+        builder.first.subscription_groups.map { |sg| sg.topics.map(&:name) }
+      end
+
+      context "when there is one subscription group block in between" do
+        before do
+          consumer = consumer_class
+
+          builder.draw do
+            topic(:a) { consumer consumer }
+            subscription_group(:s) { topic(:b) { consumer consumer } }
+            topic(:c) { consumer consumer }
+          end
+        end
+
+        it { expect(groups).to eq([%w[a c], %w[b]]) }
+      end
+
+      context "when there are multiple subscription group blocks in between" do
+        before do
+          consumer = consumer_class
+
+          builder.draw do
+            topic(:a) { consumer consumer }
+            subscription_group(:s1) { topic(:b) { consumer consumer } }
+            topic(:c) { consumer consumer }
+            subscription_group { topic(:d) { consumer consumer } }
+            topic(:e) { consumer consumer }
+          end
+        end
+
+        it { expect(groups).to eq([%w[a c e], %w[b], %w[d]]) }
+      end
+
+      context "when subscription group blocks are nested" do
+        before do
+          consumer = consumer_class
+
+          builder.draw do
+            topic(:a) { consumer consumer }
+
+            subscription_group(:outer) do
+              topic(:b) { consumer consumer }
+              subscription_group(:inner) { topic(:c) { consumer consumer } }
+              topic(:d) { consumer consumer }
+            end
+
+            topic(:e) { consumer consumer }
+          end
+        end
+
+        it { expect(groups).to eq([%w[a e], %w[b d], %w[c]]) }
+      end
+
+      context "when a subscription group block is named like the default subscription group" do
+        before do
+          consumer = consumer_class
+
+          builder.draw do
+            topic(:a) { consumer consumer }
+          end
+
+          default_name = builder.first.topics.first.subscription_group_details[:name]
+
+          builder.draw do
+            subscription_group(default_name) { topic(:b) { consumer consumer } }
+            topic(:c) { consumer consumer }
+          end
+        end
+
+        it { expect(groups).to eq([%w[a b c]]) }
+      end
+
+      context "when this happens inside of an explicit consumer group" do
+        before do
+          consumer = consumer_class
+
+          builder.draw do
+            consumer_group(:cg) do
+              topic(:a) { consumer consumer }
+              subscription_group(:s) { topic(:b) { consumer consumer } }
+              topic(:c) { consumer consumer }
+            end
+          end
+        end
+
+        it { expect(groups).to eq([%w[a c], %w[b]]) }
+      end
+    end
+
     context "when we use 0.6 simple topic style single topic groups" do
       let(:topic1) { builder.first.topics.first }
       let(:topic2) { builder.last.topics.first }
