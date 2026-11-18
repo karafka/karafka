@@ -71,6 +71,22 @@ RSpec.describe_current do
       end
     end
 
+    context "when we want to describe a consumer group" do
+      let(:group_id) { SecureRandom.uuid }
+      let(:resources) { [described_class::Resource.new(type: :group, name: group_id)] }
+      let(:session_timeout) do
+        result.first.configs.find { |config| config.name == "consumer.session.timeout.ms" }
+      end
+
+      it do
+        expect(result.size).to eq(1)
+        expect(result.first.type).to eq(:group)
+        expect(result.first.name).to eq(group_id)
+        expect(session_timeout.value).to eq("45000")
+        expect(session_timeout.default?).to be(true)
+      end
+    end
+
     context "when trying to query multiple brokers at the same time" do
       let(:resources) do
         [
@@ -102,6 +118,14 @@ RSpec.describe_current do
     end
 
     let(:described_broker_config) do
+      lambda do
+        Karafka::Admin::Configs.describe(resources).first.configs.find do |config|
+          config.name == name
+        end.value
+      end
+    end
+
+    let(:described_group_config) do
       lambda do
         Karafka::Admin::Configs.describe(resources).first.configs.find do |config|
           config.name == name
@@ -242,6 +266,23 @@ RSpec.describe_current do
           .to change(described_topic_config, :call)
           .from("delete,compact").to("delete")
       end
+    end
+
+    context "when we want to set a valid value on a consumer group" do
+      let(:name) { "consumer.heartbeat.interval.ms" }
+      let(:resources) { [described_class::Resource.new(type: :group, name: SecureRandom.uuid)] }
+
+      before { resources.first.set(name, 6_000) }
+
+      it { expect { result }.to change(described_group_config, :call).from("5000").to("6000") }
+    end
+
+    context "when we want to set an invalid value on a consumer group" do
+      let(:resources) { [described_class::Resource.new(type: :group, name: SecureRandom.uuid)] }
+
+      before { resources.first.set("consumer.session.timeout.ms", 1) }
+
+      it { expect { result }.to raise_error(Rdkafka::RdkafkaError, /invalid_config/) }
     end
 
     context "when we want to set a valid value on a broker" do

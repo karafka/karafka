@@ -14,6 +14,20 @@ RSpec.describe Karafka::Admin::Configs::Resource do
       end
     end
 
+    context "with a group type" do
+      let(:type) { :group }
+      let(:name) { "test_group" }
+
+      it { expect(resource.type).to eq(:group) }
+      it { expect(resource.to_native_hash[:resource_type]).to eq(3) }
+    end
+
+    context "with a group type as an integer" do
+      let(:type) { Rdkafka::Bindings::RD_KAFKA_RESOURCE_GROUP }
+
+      it { expect(resource.type).to eq(:group) }
+    end
+
     context "with an unknown type" do
       let(:type) { :unknown }
 
