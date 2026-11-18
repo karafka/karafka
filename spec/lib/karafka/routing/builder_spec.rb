@@ -279,6 +279,26 @@ RSpec.describe_current do
 
         it { expect(groups).to eq([%w[a c], %w[b]]) }
       end
+
+      context "when this happens inside of a share group" do
+        let(:groups) do
+          builder.share_groups.first.subscription_groups.map { |sg| sg.topics.map(&:name) }
+        end
+
+        before do
+          consumer = Class.new(Karafka::ShareConsumer)
+
+          builder.draw do
+            share_group(:sh) do
+              topic(:a) { consumer consumer }
+              subscription_group(:s) { topic(:b) { consumer consumer } }
+              topic(:c) { consumer consumer }
+            end
+          end
+        end
+
+        it { expect(groups).to eq([%w[a c], %w[b]]) }
+      end
     end
 
     context "when we use 0.6 simple topic style single topic groups" do
