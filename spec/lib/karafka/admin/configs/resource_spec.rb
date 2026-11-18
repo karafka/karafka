@@ -14,18 +14,22 @@ RSpec.describe Karafka::Admin::Configs::Resource do
       end
     end
 
-    context "with a group type" do
-      let(:type) { :group }
+    context "with a consumer group type" do
+      let(:type) { :consumer_group }
       let(:name) { "test_group" }
 
-      it { expect(resource.type).to eq(:group) }
-      it { expect(resource.to_native_hash[:resource_type]).to eq(3) }
+      it { expect(resource.type).to eq(:consumer_group) }
+
+      it "maps to the librdkafka group resource type" do
+        expect(resource.to_native_hash[:resource_type])
+          .to eq(Rdkafka::Bindings::RD_KAFKA_RESOURCE_GROUP)
+      end
     end
 
-    context "with a group type as an integer" do
+    context "with a consumer group type as an integer" do
       let(:type) { Rdkafka::Bindings::RD_KAFKA_RESOURCE_GROUP }
 
-      it { expect(resource.type).to eq(:group) }
+      it { expect(resource.type).to eq(:consumer_group) }
     end
 
     context "with an unknown type" do
