@@ -54,6 +54,8 @@
 - [Fix] Treat `allow.auto.create.topics` as on only when it is `true` or `"true"`. Any other value (e.g. `"false"`) now reports a missing subscribed topic as an error instead of waiting with a "Waiting for it to be created" log. Values librdkafka also reads as true (e.g. `1`, `"1"`, `"t"`, `"TRUE"`) are now treated as off by Karafka; use `true` or `"true"`.
 - [Fix] State the real minimum (10) in the routing `max_wait_time` validation error. It said "bigger than 0" for values from 1 to 9 that the rule rejects.
 - [Fix] Remove the `**args` parameter and its documented `kafka:` option from the top-level routing `subscription_group`. They never worked: any keyword argument raised a generic `ArgumentError`. Keyword arguments now raise `ArgumentError: no keywords accepted`.
+- [Fix] Give each swarm node its own stable `transactional.id` (`<transactional.id>_<node id>`, as with `group.instance.id`), so nodes of a swarm with a transactional default producer no longer fence each other. A swarm with one node keeps the configured id.
+- [Fix] [Pro] Use the producer set in `swarm.node.after_fork` for scheduled messages and recurring tasks when they use the default producer, instead of the node producer it replaced.
 - [Fix] Keep topics drawn without an explicit `subscription_group` in one default subscription group of their consumer group, also when a `subscription_group` block is drawn between them. Before, each block started a new default subscription group, so routes with this layout now get fewer subscription groups and Kafka connections. With Pro, those topics also keep the consumer-group-level `multiplexing` settings.
 
 ## 2.6.1 (2026-08-24)
