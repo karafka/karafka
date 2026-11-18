@@ -175,6 +175,34 @@ RSpec.describe_current do
       expect(config_from_rd_kafka.synonyms.first.source).to eq(:default_config)
     end
 
+    {
+      RD_KAFKA_CONFIG_SOURCE_UNKNOWN_CONFIG: :unknown_config,
+      RD_KAFKA_CONFIG_SOURCE_DYNAMIC_TOPIC_CONFIG: :dynamic_topic_config,
+      RD_KAFKA_CONFIG_SOURCE_DYNAMIC_BROKER_CONFIG: :dynamic_broker_config,
+      RD_KAFKA_CONFIG_SOURCE_DYNAMIC_DEFAULT_BROKER_CONFIG: :dynamic_default_broker_config,
+      RD_KAFKA_CONFIG_SOURCE_STATIC_BROKER_CONFIG: :static_broker_config,
+      RD_KAFKA_CONFIG_SOURCE_DEFAULT_CONFIG: :default_config,
+      RD_KAFKA_CONFIG_SOURCE_GROUP_CONFIG: :group_config
+    }.each do |constant, expected_source|
+      context "when the source code is #{constant}" do
+        let(:rd_kafka_config) do
+          instance_double(
+            Rdkafka::Admin::ConfigBindingResult,
+            name: name,
+            value: value,
+            read_only: 0,
+            default: 0,
+            sensitive: 0,
+            synonym: 0,
+            source: Rdkafka::Bindings.const_get(constant),
+            synonyms: []
+          )
+        end
+
+        it { expect(config_from_rd_kafka.source).to eq(expected_source) }
+      end
+    end
+
     context "when the source code is not known" do
       let(:rd_kafka_config) do
         instance_double(
