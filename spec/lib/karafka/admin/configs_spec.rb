@@ -282,7 +282,10 @@ RSpec.describe_current do
 
       before { resources.first.set("consumer.session.timeout.ms", 1) }
 
-      it { expect { result }.to raise_error(Rdkafka::RdkafkaError, /invalid_config/) }
+      it "expect to reject the value" do
+        expect { result }
+          .to raise_error(Rdkafka::RdkafkaError, /group\.consumer\.min\.session\.timeout\.ms/)
+      end
     end
 
     context "when we want to set a valid value on a broker" do
