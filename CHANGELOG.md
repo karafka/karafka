@@ -13,12 +13,12 @@
 - **[Feature]** Add `Karafka::Admin.delete_records` to delete the messages of given partitions below a given offset (or all of them with `:end`) by moving their low watermark. It is destructive and irreversible.
 - **[Feature]** Add `Karafka::Admin.delete_consumer_group_offsets` to delete a consumer group's committed offsets for given topics or partitions, keeping the consumer group and its other offsets. Raises `Karafka::Errors::ConsumerGroupSubscribedToTopicError` for topics the consumer group is subscribed to.
 - [Enhancement] Defer default log file creation until the first write and keep logging working (to stdout) when the log file cannot be created or written, e.g. on read-only filesystems (ydah).
-- [Enhancement] Build `Setup::DefaultsInjector` (and its Pro extension) on `Karafka::Core::Configurable::Injector`. Behavior is unchanged. Requires karafka-core `>= 2.6.3`.
 - [Enhancement] Stop allocating 6 objects per consumed message: build the default topic deserializers only once and read `max_messages` once per poll batch.
 - [Enhancement] Stop allocating a keyword `Hash` per consumed message when building its metadata.
 - [Enhancement] Log only the top two backtrace lines for `librdkafka.error` in the `LoggerListener`, so unreachable brokers no longer flood the logs.
 - [Enhancement] Include the topic, partition and offset from librdkafka error details (e.g. a message that failed to decompress) in `LoggerListener` error logs. Only librdkafka errors are used, and the consumer's own context takes precedence.
 - [Enhancement] Instrument `client.topics.unknown` and log it at the info level when a subscribed topic does not exist yet and `allow.auto.create.topics` is on, instead of ignoring it silently.
+- [Enhancement] Support the `:consumer_group` resource type in `Karafka::Admin::Configs`, so consumer group configs can be described and altered, e.g. `consumer.session.timeout.ms` and `consumer.heartbeat.interval.ms`, which `group.protocol: "consumer"` (KIP-848) does not take from the client config.
 - [Change] Raise `UnsupportedOptionError` with the Ruby engine name (e.g. `jruby`) when Swarm runs on a Ruby without `Process.fork`, also when `Swarm::Supervisor#run` is called directly, before any work is done.
 - [Change] Require `karafka-rdkafka` `>=` `0.32.0`. A failed consumer close is now reported as a `librdkafka.error` on `error.occurred` instead of being dropped. A close fails in practice only after a fatal error, e.g. when the consumer was fenced by a static membership conflict. Such an error is usually reported first when polling, so it is reported twice: as `connection.client.poll.error` and again on close.
 - [Change] Fail `karafka topics align` and `migrate` (exit 1) when an existing declarative topic has config keys the cluster does not know (e.g. a typo), naming them, instead of skipping them silently. `plan` lists such keys as unknown and fails too.
@@ -56,6 +56,7 @@
 - [Fix] Remove the `**args` parameter and its documented `kafka:` option from the top-level routing `subscription_group`. They never worked: any keyword argument raised a generic `ArgumentError`. Keyword arguments now raise `ArgumentError: no keywords accepted`.
 - [Fix] Give each swarm node its own stable `transactional.id` (`<transactional.id>_<node id>`, as with `group.instance.id`), so nodes of a swarm with a transactional default producer no longer fence each other. A swarm with one node keeps the configured id.
 - [Fix] [Pro] Use the producer set in `swarm.node.after_fork` for scheduled messages and recurring tasks when they use the default producer, instead of the node producer it replaced.
+- [Fix] Keep topics drawn without an explicit `subscription_group` in one default subscription group of their consumer group, also when a `subscription_group` block is drawn between them. Before, each block started a new default subscription group, so routes with this layout now get fewer subscription groups and Kafka connections. With Pro, those topics also keep the consumer-group-level `multiplexing` settings.
 
 ## 2.6.1 (2026-08-24)
 - **[Feature]** [Pro] Add an opt-in envelope encryption mode for Messages At Rest (`config.encryption.mode = :envelope`, requires openssl `>= 3.0`) without the RSA payload size limit. Upgrade all consuming processes before enabling.
