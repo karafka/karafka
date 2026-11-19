@@ -17,7 +17,7 @@ module Karafka
           ).fetch("en").fetch("validations").fetch("setup").fetch("config")
         end
 
-        # Names regexp constant reference for easier usage
+        # Format of the `client_id`, `group_id` and `admin.group_id` settings
         NAME_REGEXP = Karafka::Contracts::NAME_REGEXP
 
         private_constant :NAME_REGEXP

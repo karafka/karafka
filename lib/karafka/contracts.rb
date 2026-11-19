@@ -3,7 +3,9 @@
 module Karafka
   # Namespace for all the validation contracts that we use to check input
   module Contracts
-    # Regexp for validating format of group ids, client ids and topic name parts
+    # Regexp for validating ids that are not full topic names: consumer and share group ids,
+    # routing topic ids, the `client_id`, `group_id` and `admin.group_id` settings, and the Pro
+    # recurring tasks `group_id` and scheduled messages `group_id` and `states_postfix`
     # @note It is not nested inside of the contracts, as it is used by couple of them
     NAME_REGEXP = /\A[A-Za-z0-9\-_.]+\z/
 
