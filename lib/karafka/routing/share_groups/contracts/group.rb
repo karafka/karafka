@@ -61,11 +61,11 @@ module Karafka
               if n.chars.include?(".")
                 # Check underscore styled topic
                 underscored_topic = n.tr(".", "_")
-                error_occured = names_hash[underscored_topic] ? true : false
+                error_occured = true if names_hash[underscored_topic]
               else
                 # Check dot styled topic
                 dot_topic = n.tr("_", ".")
-                error_occured = names_hash[dot_topic] ? true : false
+                error_occured = true if names_hash[dot_topic]
               end
             end
 

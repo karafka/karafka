@@ -50,4 +50,27 @@ RSpec.describe_current do
     it { expect(topic.subscription_group_details[:multiplexing_max]).to eq(3) }
     it { expect(topic.subscription_group_details[:name]).to eq("test") }
   end
+
+  context "when consumer group level multiplexing surrounds a subscription group block" do
+    let(:consumer_group) { builder.first }
+    let(:details) { consumer_group.topics.to_h { |topic| [topic.name, topic.subscription_group_details] } }
+    let(:groups) { consumer_group.subscription_groups.map { |sg| sg.topics.map(&:name) } }
+
+    before do
+      builder.draw do
+        consumer_group(:a) do
+          multiplexing(max: 2)
+
+          topic(:a) { active(false) }
+          subscription_group(:s) { topic(:b) { active(false) } }
+          topic(:c) { active(false) }
+        end
+      end
+    end
+
+    it { expect(details["c"]).to eq(details["a"]) }
+    it { expect(details["c"][:multiplexing_max]).to eq(2) }
+    it { expect(details["b"]).to eq(name: "s") }
+    it { expect(groups).to eq([%w[a c], %w[a c], %w[b]]) }
+  end
 end

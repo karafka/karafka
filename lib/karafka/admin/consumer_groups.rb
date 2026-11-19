@@ -799,7 +799,9 @@ module Karafka
 
             report = with_retries(OFFSETS_FETCH_RETRYABLE_ERRORS) do
               admin
-                .list_consumer_group_offsets(group, tpl, require_stable_offsets: require_stable)
+                .list_consumer_group_offsets(
+                  group, topic_partition_list: tpl, require_stable_offsets: require_stable
+                )
                 .wait(max_wait_timeout_ms: max_wait_time_ms)
             end
 
