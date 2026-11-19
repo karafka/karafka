@@ -5,6 +5,12 @@ module Karafka
     # Proxy is used as a translation layer in between the DSL and raw topic and consumer group
     # objects.
     class Proxy
+      # Non-writer DSL methods that set a target setting when called with arguments. Like writers,
+      # a call in the block is not overwritten by the same call in the defaults.
+      SETTING_METHODS = %i[pause].freeze
+
+      private_constant :SETTING_METHODS
+
       attr_reader :target
 
       # @param target [Object] target object to which we proxy any DSL call
@@ -24,19 +30,26 @@ module Karafka
 
       # Translates the no "=" DSL of routing into elements assignments on target
       # @param method_name [Symbol] name of the missing method
-      def method_missing(method_name, ...)
+      # @param args [Array<Object>] positional arguments of the DSL call
+      # @param kwargs [Hash] keyword arguments of the DSL call
+      # @option kwargs [Object] :name any keyword argument the target method accepts
+      def method_missing(method_name, *args, **kwargs, &)
         return super unless respond_to_missing?(method_name)
 
-        if @target.respond_to?(:"#{method_name}=")
+        writer = @target.respond_to?(:"#{method_name}=")
+
+        if writer || (SETTING_METHODS.include?(method_name) && !(args.empty? && kwargs.empty?))
           if @applying_defaults
             return if @assigned.include?(method_name)
           else
             @assigned << method_name
           end
+        end
 
-          @target.public_send(:"#{method_name}=", ...)
+        if writer
+          @target.public_send(:"#{method_name}=", *args, **kwargs, &)
         else
-          @target.public_send(method_name, ...)
+          @target.public_send(method_name, *args, **kwargs, &)
         end
       end
 

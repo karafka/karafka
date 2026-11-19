@@ -60,6 +60,7 @@
 - [Fix] Keep topics drawn without an explicit `subscription_group` in one default subscription group of their consumer group, also when a `subscription_group` block is drawn between them. Before, each block started a new default subscription group, so routes with this layout now get fewer subscription groups and Kafka connections. With Pro, those topics also keep the consumer-group-level `multiplexing` settings.
 - [Fix] Reject topics whose names differ only by namespacing style (e.g. `a.b` and `a_b`) in one consumer group or share group also when other namespaced topics follow them. With `strict_topics_namespacing` on, a later namespaced topic without such a collision hid the error.
 - [Fix] Keep topics drawn without an explicit `subscription_group` in one default subscription group of their consumer group, also when a `subscription_group` block is drawn between them, so such routes now get fewer subscription groups and Kafka connections. With Pro, those topics also keep the consumer-group-level `multiplexing` settings.
+- [Fix] [Pro] Keep a topic's own `pause(...)` over a routing `defaults` `pause(...)`. Before, the defaults replaced it, also on the Web UI reports topic, the Recurring Tasks schedules topic and Parallel Segments topic copies.
 
 ## 2.6.1 (2026-08-24)
 - **[Feature]** [Pro] Add an opt-in envelope encryption mode for Messages At Rest (`config.encryption.mode = :envelope`, requires openssl `>= 3.0`) without the RSA payload size limit. Upgrade all consuming processes before enabling.
