@@ -5,10 +5,13 @@ module Karafka
     class Configs
       # Represents a single config entry that is related to a resource
       class Config
+        # Source of a config entry whose origin librdkafka does not report or we do not recognize
+        UNKNOWN_SOURCE = :unknown_config
+
         # Maps the numeric librdkafka config source codes to Ruby symbols. Anything we do
         # not recognize normalizes to `:unknown_config`.
         SOURCES = {
-          Rdkafka::Bindings::RD_KAFKA_CONFIG_SOURCE_UNKNOWN_CONFIG => :unknown_config,
+          Rdkafka::Bindings::RD_KAFKA_CONFIG_SOURCE_UNKNOWN_CONFIG => UNKNOWN_SOURCE,
           Rdkafka::Bindings::RD_KAFKA_CONFIG_SOURCE_DYNAMIC_TOPIC_CONFIG => :dynamic_topic_config,
           Rdkafka::Bindings::RD_KAFKA_CONFIG_SOURCE_DYNAMIC_BROKER_CONFIG => :dynamic_broker_config,
           Rdkafka::Bindings::RD_KAFKA_CONFIG_SOURCE_DYNAMIC_DEFAULT_BROKER_CONFIG =>
@@ -18,7 +21,7 @@ module Karafka
           Rdkafka::Bindings::RD_KAFKA_CONFIG_SOURCE_GROUP_CONFIG => :consumer_group_config
         }.freeze
 
-        private_constant :SOURCES
+        private_constant :UNKNOWN_SOURCE, :SOURCES
 
         attr_reader :name, :value, :synonyms
 
@@ -40,7 +43,7 @@ module Karafka
               default: rd_kafka_config.default,
               sensitive: rd_kafka_config.sensitive,
               synonym: rd_kafka_config.synonym,
-              source: SOURCES.fetch(rd_kafka_config.source, :unknown_config),
+              source: SOURCES.fetch(rd_kafka_config.source, UNKNOWN_SOURCE),
               synonyms: rd_kafka_config.synonyms.map do |rd_kafka_synonym|
                 from_rd_kafka(rd_kafka_synonym)
               end
@@ -67,7 +70,7 @@ module Karafka
           read_only: -1,
           sensitive: -1,
           synonym: -1,
-          source: :unknown_config,
+          source: UNKNOWN_SOURCE,
           synonyms: []
         )
           @name = name
