@@ -168,8 +168,8 @@ module Karafka
       def inspect
         parts = [
           "id=#{@id}",
-          "topic=#{topic&.name.inspect}",
-          "partition=#{partition}",
+          "topic=#{coordinator&.topic&.name.inspect}",
+          "partition=#{coordinator&.partition}",
           "used=#{@used}",
           "messages_count=#{@messages&.count}",
           "revoked=#{coordinator&.revoked?}"

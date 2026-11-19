@@ -703,14 +703,12 @@ RSpec.describe_current do
   end
 
   describe "#inspect" do
-    let(:consumer_id) { "abc123" }
     let(:topic_name) { "test-topic" }
     let(:partition_number) { 5 }
     let(:messages_count) { 10 }
 
     before do
-      allow(consumer).to receive_messages(
-        id: consumer_id,
+      allow(coordinator).to receive_messages(
         topic: instance_double(Karafka::Routing::Topic, name: topic_name),
         partition: partition_number
       )
@@ -723,6 +721,11 @@ RSpec.describe_current do
 
     it "expect to return formatted string with consumer details" do
       result = consumer.inspect
+
+      expect(result).to eq(
+        "#<#{working_class.name}:#{format("%#x", consumer.object_id)} id=#{consumer.id} " \
+        'topic="test-topic" partition=5 used=false messages_count=10 revoked=false>'
+      )
 
       expect(result).to include('topic="test-topic"')
       expect(result).to include("partition=5")
@@ -739,7 +742,7 @@ RSpec.describe_current do
     end
 
     context "when topic is nil" do
-      before { allow(consumer).to receive(:topic).and_return(nil) }
+      before { allow(coordinator).to receive(:topic).and_return(nil) }
 
       it "expect to handle nil topic gracefully" do
         result = consumer.inspect
@@ -766,9 +769,19 @@ RSpec.describe_current do
       it "expect to handle nil coordinator gracefully" do
         result = consumer.inspect
 
+        expect(result).to include("topic=nil")
+        expect(result).to include("partition= ")
         expect(result).to include("revoked=")
         expect { consumer.inspect }.not_to raise_error
       end
+    end
+
+    context "when consumer was never attached to a coordinator" do
+      subject(:consumer) { working_class.new }
+
+      it { expect(consumer.inspect).to be_a(String) }
+      it { expect(consumer.inspect).to include("topic=nil partition= used=false") }
+      it { expect(consumer.inspect).to end_with(" revoked=>") }
     end
 
     context "when consumer is not used" do
