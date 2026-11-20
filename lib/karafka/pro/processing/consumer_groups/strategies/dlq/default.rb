@@ -45,13 +45,21 @@ module Karafka
               ].freeze
 
               # Headers added to each dispatched DLQ message to describe its origin
-              SOURCE_HEADERS = %w[
-                source_topic
-                source_partition
-                source_offset
-                source_consumer_group
-                source_attempts
-                source_trace_id
+              SOURCE_TOPIC_HEADER = "source_topic"
+              SOURCE_PARTITION_HEADER = "source_partition"
+              SOURCE_OFFSET_HEADER = "source_offset"
+              SOURCE_CONSUMER_GROUP_HEADER = "source_consumer_group"
+              SOURCE_ATTEMPTS_HEADER = "source_attempts"
+              SOURCE_TRACE_ID_HEADER = "source_trace_id"
+
+              # All the origin headers
+              SOURCE_HEADERS = [
+                SOURCE_TOPIC_HEADER,
+                SOURCE_PARTITION_HEADER,
+                SOURCE_OFFSET_HEADER,
+                SOURCE_CONSUMER_GROUP_HEADER,
+                SOURCE_ATTEMPTS_HEADER,
+                SOURCE_TRACE_ID_HEADER
               ].freeze
 
               # Override of the standard `#mark_as_consumed` in order to handle the pause tracker
@@ -191,16 +199,12 @@ module Karafka
                   partition_key: source_partition,
                   payload: skippable_message.raw_payload,
                   headers: skippable_message.raw_headers.merge(
-                    SOURCE_HEADERS.zip(
-                      [
-                        topic.name,
-                        source_partition,
-                        skippable_message.offset.to_s,
-                        topic.group.id,
-                        attempt.to_s,
-                        errors_tracker.trace_id
-                      ]
-                    ).to_h
+                    SOURCE_TOPIC_HEADER => topic.name,
+                    SOURCE_PARTITION_HEADER => source_partition,
+                    SOURCE_OFFSET_HEADER => skippable_message.offset.to_s,
+                    SOURCE_CONSUMER_GROUP_HEADER => topic.group.id,
+                    SOURCE_ATTEMPTS_HEADER => attempt.to_s,
+                    SOURCE_TRACE_ID_HEADER => errors_tracker.trace_id
                   )
                 }
 
