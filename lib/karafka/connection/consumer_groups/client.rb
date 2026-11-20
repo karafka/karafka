@@ -757,13 +757,21 @@ module Karafka
 
           eofed = false
           rewound = nil
+          previous = nil
 
           kafka.poll_batch_nb(0, max_items: room).each do |item|
             unless item.is_a?(Rdkafka::RdkafkaError)
-              offsets = @last_offsets[item.topic]
-              last_offset = offsets[item.partition]
-              (rewound ||= []) << item if last_offset && item.offset < last_offset
-              offsets[item.partition] = item.offset
+              # Drained messages come in runs of one partition, so we look up the last offset
+              # handed over only when the partition changes
+              if previous && previous.partition == item.partition && previous.topic == item.topic
+                (rewound ||= []) << item if item.offset < previous.offset
+              else
+                @last_offsets[previous.topic][previous.partition] = previous.offset if previous
+                last_offset = @last_offsets[item.topic][item.partition]
+                (rewound ||= []) << item if last_offset && item.offset < last_offset
+              end
+
+              previous = item
 
               next @buffer << item
             end
@@ -784,6 +792,8 @@ module Karafka
               raise Karafka::Errors::UnsupportedCaseError, action
             end
           end
+
+          @last_offsets[previous.topic][previous.partition] = previous.offset if previous
 
           # Revocation callbacks run inside of the drain call, before its messages reach the buffer.
           # The drain runs only without an earlier rebalance in this batch, so all the revocations

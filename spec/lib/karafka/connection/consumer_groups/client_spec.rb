@@ -662,6 +662,32 @@ RSpec.describe_current do
           end
         end
 
+        context "when the drain goes back within a run of one partition" do
+          let(:first) { message(1, 0) }
+          let(:drained) { [message(0, 5), message(0, 0)] }
+
+          it "expect to seek the stale position" do
+            client.batch_poll
+
+            expect(kafka).to have_received(:seek) do |seek|
+              expect([seek.topic, seek.partition, seek.offset]).to eq([topic_name, 0, 1])
+            end
+          end
+        end
+
+        context "when the drain goes back after a run of another partition" do
+          let(:first) { message(1, 0) }
+          let(:drained) { [message(0, 5), message(1, 1), message(0, 0)] }
+
+          it "expect to seek the stale position" do
+            client.batch_poll
+
+            expect(kafka).to have_received(:seek) do |seek|
+              expect([seek.topic, seek.partition, seek.offset]).to eq([topic_name, 0, 1])
+            end
+          end
+        end
+
         context "when the drain goes forward" do
           let(:first) { message(0, 0) }
 
