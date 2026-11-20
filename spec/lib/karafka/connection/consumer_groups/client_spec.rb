@@ -300,8 +300,8 @@ RSpec.describe_current do
         state
       end
 
-      def message(partition, offset)
-        build(:kafka_fetched_message, topic: topic_name, partition: partition, offset: offset)
+      def message(partition, offset, topic = topic_name)
+        build(:kafka_fetched_message, topic: topic, partition: partition, offset: offset)
       end
 
       def eof_error(partition, offset)
@@ -687,6 +687,67 @@ RSpec.describe_current do
             expect(kafka).to have_received(:seek) do |seek|
               expect([seek.topic, seek.partition, seek.offset]).to eq([topic_name, 0, 1])
             end
+          end
+        end
+
+        context "when the previous message of the partition came last in an earlier drain" do
+          let(:first) { message(1, 0) }
+
+          before do
+            allow(kafka).to receive(:poll).and_return(first, nil, message(1, 1), nil)
+            allow(kafka).to receive(:poll_batch_nb).and_return([message(0, 300)], [message(0, 0)])
+          end
+
+          it "expect to seek the stale position" do
+            client.batch_poll
+            client.batch_poll
+
+            expect(kafka).to have_received(:seek) do |seek|
+              expect([seek.topic, seek.partition, seek.offset]).to eq([topic_name, 0, 1])
+            end
+          end
+        end
+
+        context "when the same partition of another topic came in between" do
+          let(:other_topic) { SecureRandom.hex(6) }
+          let(:first) { message(1, 0) }
+
+          let(:drained) do
+            [message(0, 300), message(0, 0, other_topic), message(0, 1, other_topic), message(0, 0)]
+          end
+
+          it "expect to seek the stale position of the first topic only" do
+            client.batch_poll
+
+            expect(kafka).to have_received(:seek).once do |seek|
+              expect([seek.topic, seek.partition, seek.offset]).to eq([topic_name, 0, 1])
+            end
+          end
+        end
+
+        context "when the rewound partition is revoked inside of the drain" do
+          let(:first) { message(0, 300) }
+          let(:drained) { [message(0, 0)] }
+
+          let(:revocation) do
+            {
+              subscription_group_id: subscription_group.id,
+              tpl: Rdkafka::Consumer::TopicPartitionList.new(
+                topic_name => [Rdkafka::Consumer::Partition.new(0, nil)]
+              )
+            }
+          end
+
+          before do
+            allow(kafka).to receive(:poll_batch_nb) do
+              client.rebalance_manager.on_rebalance_partitions_revoked(revocation)
+              drained
+            end
+          end
+
+          it "expect not to seek it" do
+            client.batch_poll
+            expect(kafka).not_to have_received(:seek)
           end
         end
 
