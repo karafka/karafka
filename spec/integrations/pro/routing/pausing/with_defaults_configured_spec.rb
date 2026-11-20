@@ -28,8 +28,8 @@
 # License: https://karafka.io/docs/Pro-License-Comm/
 # Contact: contact@karafka.io
 
-# A topic's own pause should win over a routing defaults pause, while topics without one, including
-# the recurring tasks schedules topic, keep using their own or the defaults one
+# A topic's own pause, including the one the recurring tasks schedules topic sets, should win over
+# a routing defaults pause, while a topic without its own pause should use the defaults one
 
 setup_karafka
 

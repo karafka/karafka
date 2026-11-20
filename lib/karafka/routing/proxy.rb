@@ -61,12 +61,10 @@ module Karafka
 
       private
 
-      # @param args [Array<Object>] positional arguments of the DSL call
-      # @param kwargs [Hash] keyword arguments of the DSL call
-      # @option kwargs [Object] :name any keyword argument the target method accepts
+      # @param args [Array<Object>] arguments of the DSL call, with keyword ones as a trailing Hash
       # @return [Boolean] true when the call has any non-nil argument, so it sets a value
-      def setting_call?(*args, **kwargs)
-        args.any? { |arg| !arg.nil? } || kwargs.any? { |_, value| !value.nil? }
+      def setting_call?(*args)
+        args.any? { |arg| arg.is_a?(Hash) ? !arg.compact.empty? : !arg.nil? }
       end
     end
   end
