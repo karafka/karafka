@@ -613,6 +613,65 @@ RSpec.describe_current do
         end
       end
 
+      context "when the drain goes back in offsets without a seek" do
+        let(:first) { message(0, 300) }
+        let(:drained) { [message(0, 0), message(0, 1)] }
+        let(:position) { 301 }
+
+        before do
+          allow(kafka).to receive(:seek)
+          allow(kafka).to receive(:position) do
+            Rdkafka::Consumer::TopicPartitionList.new(
+              topic_name => [Rdkafka::Consumer::Partition.new(0, position)]
+            )
+          end
+        end
+
+        it "expect to seek the stale position to right after the last drained message" do
+          client.batch_poll
+
+          expect(kafka).to have_received(:seek) do |seek|
+            expect([seek.topic, seek.partition, seek.offset]).to eq([topic_name, 0, 2])
+          end
+        end
+
+        context "when the position is already right after the last drained message" do
+          let(:position) { 2 }
+
+          it "expect not to seek" do
+            client.batch_poll
+            expect(kafka).not_to have_received(:seek)
+          end
+        end
+
+        context "when the previous message of the partition came in an earlier batch" do
+          let(:first) { message(1, 0) }
+
+          before do
+            allow(kafka).to receive(:poll).and_return(message(0, 300), nil, first, nil)
+            allow(kafka).to receive(:poll_batch_nb).and_return([], drained)
+          end
+
+          it "expect to seek the stale position as well" do
+            client.batch_poll
+            client.batch_poll
+
+            expect(kafka).to have_received(:seek) do |seek|
+              expect([seek.topic, seek.partition, seek.offset]).to eq([topic_name, 0, 2])
+            end
+          end
+        end
+
+        context "when the drain goes forward" do
+          let(:first) { message(0, 0) }
+
+          it "expect not to check the position" do
+            client.batch_poll
+            expect(kafka).not_to have_received(:position)
+          end
+        end
+      end
+
       context "when the drain has an error that cannot be retried" do
         let(:error) { Rdkafka::RdkafkaError.new(3, details: { topic: topic_name }) }
         let(:drained) { [message(0, 1), error] }

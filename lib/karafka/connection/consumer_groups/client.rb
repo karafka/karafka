@@ -87,6 +87,8 @@ module Karafka
           @closed = false
           @subscription_group = subscription_group
           @buffer = RawMessagesBuffer.new
+          # Last offset handed over per partition, to detect drains that went back in offsets
+          @last_offsets = Hash.new { |hash, topic_name| hash[topic_name] = {} }
           @rebalance_manager = RebalanceManager.new(@subscription_group.id, @buffer)
           @rebalance_callback = Instrumentation::Callbacks::ConsumerGroups::Rebalance.new(
             @subscription_group,
@@ -161,6 +163,7 @@ module Karafka
               nil
             else
               @buffer << response
+              @last_offsets[response.topic][response.partition] = response.offset
 
               # After a rebalance in this poll, the batch ends below without draining, so the drain
               # clean-up never removes messages of partitions assigned back in that rebalance
@@ -753,9 +756,17 @@ module Karafka
           return false unless room.positive?
 
           eofed = false
+          rewound = nil
 
           kafka.poll_batch_nb(0, max_items: room).each do |item|
-            next @buffer << item unless item.is_a?(Rdkafka::RdkafkaError)
+            unless item.is_a?(Rdkafka::RdkafkaError)
+              offsets = @last_offsets[item.topic]
+              last_offset = offsets[item.partition]
+              (rewound ||= []) << item if last_offset && item.offset < last_offset
+              offsets[item.partition] = item.offset
+
+              next @buffer << item
+            end
 
             # Handled as on the first attempt of a blocking `#poll`, as the drain neither waits nor
             # retries. A repeated error reaches the next blocking `#poll` that owns the retries
@@ -778,6 +789,7 @@ module Karafka
           # The drain runs only without an earlier rebalance in this batch, so all the revocations
           # are from the drain itself
           clean_up_after_drain if @rebalance_manager.changed?
+          align_positions_after_drain(rewound) if rewound
 
           # A message after an eof of the same partition clears its eof
           eofed && @buffer.eof?
@@ -805,6 +817,25 @@ module Karafka
             position = topic_partition_position(rewind.topic, rewind.partition)
 
             internal_seek(rewind) if position > rewind.offset
+          end
+        end
+
+        # A blocking poll always moves the position of a partition to its message, but the drain
+        # moves it only forward. When the offsets went back without a seek, e.g. on an offset reset
+        # after the topic was recreated, the position stays ahead of the drained messages and a
+        # pause without an offset would resume from it. We seek such partitions to right after
+        # their last drained message. The seek does not happen when the position is already there
+        #
+        # @param rewound [Array<Rdkafka::Consumer::Message>] drained messages behind the previous
+        #   message of their partition
+        def align_positions_after_drain(rewound)
+          rewound.map! { |message| [message.topic, message.partition] }.uniq!
+
+          @buffer.each do |topic_name, partition, messages|
+            next if messages.empty?
+            next unless rewound.include?([topic_name, partition])
+
+            internal_seek(Messages::Seek.new(topic_name, partition, messages.last.offset + 1))
           end
         end
 
