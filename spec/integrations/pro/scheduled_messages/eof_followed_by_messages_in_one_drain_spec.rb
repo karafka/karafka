@@ -67,6 +67,10 @@ past = Array.new(PAST) do |i|
   proxy
 end
 
+# A backlog keeps the consumer busy while its end and new schedules after it queue up
+Karafka.producer.produce_many_sync(
+  Array.new(20_000) { schedule(SecureRandom.uuid, Time.now.to_i + 100_000) }
+)
 Karafka.producer.produce_many_sync(past)
 
 Thread.new do
@@ -75,7 +79,7 @@ Thread.new do
       Array.new(5) { schedule(SecureRandom.uuid, Time.now.to_i + 100_000) }
     )
 
-    sleep(0.05)
+    sleep(0.01)
   end
 rescue WaterDrop::Errors::ProducerClosedError
   nil
