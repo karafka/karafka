@@ -1,8 +1,8 @@
 # frozen_string_literal: true
 
-# When a topic is recreated, librdkafka resets its partitions to the latest offset. When the first
-# messages after that reset are drained, a `pause(:consecutive)` must still resume each partition
-# right after its last consumed message: nothing produced after the reset may be skipped and the
+# When a topic is recreated, librdkafka resets its partitions back to the earliest offset. When
+# the first messages after that reset are drained, a `pause(:consecutive)` must still resume each
+# partition right after its last consumed message: no message may be consumed twice and the
 # position of a paused partition must not stay ahead of the last consumed offset.
 #
 # Small partition fetches keep messages of many partitions queued, so later batches are drained.
@@ -13,7 +13,6 @@ AFTER = 20
 
 setup_karafka do |config|
   config.kafka[:"max.partition.fetch.bytes"] = 1_024
-  config.kafka[:"auto.offset.reset"] = "latest"
   config.max_messages = 50
   config.concurrency = 4
 end
@@ -40,33 +39,23 @@ end
 draw_routes(create_topics: false) do
   topic DT.topic do
     consumer Consumer
-    initial_offset "latest"
   end
 end
 
+PARTITIONS.times do |partition|
+  produce_many(DT.topic, DT.uuids(BEFORE), partition: partition)
+end
+
 Thread.new do
-  sleep(0.1) until Karafka::App.running? && DT.key?(:assigned)
-
-  PARTITIONS.times do |partition|
-    produce_many(DT.topic, DT.uuids(BEFORE), partition: partition)
-  end
-
   sleep(0.1) until PARTITIONS.times.all? { |partition| DT[[:before, partition]].size >= BEFORE }
 
   Karafka::Admin.delete_topic(DT.topic)
   Karafka::Admin.create_topic(DT.topic, PARTITIONS, 1)
   DT[:recreated] = true
 
-  # Give librdkafka time to reset the partitions to the latest offset of the new topic
-  sleep(5)
-
   PARTITIONS.times do |partition|
     produce_many(DT.topic, DT.uuids(AFTER), partition: partition)
   end
-end
-
-Karafka::App.monitor.subscribe("rebalance.partitions_assigned") do
-  DT[:assigned] = true
 end
 
 start_karafka_and_wait_until do
