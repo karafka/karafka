@@ -44,15 +44,20 @@ module Karafka
                 dead_letter_queue
               ].freeze
 
-              # Headers added to each dispatched DLQ message to describe its origin
+              # Header with the topic of the message dispatched to the DLQ
               SOURCE_TOPIC_HEADER = "source_topic"
+              # Header with the partition of the message dispatched to the DLQ
               SOURCE_PARTITION_HEADER = "source_partition"
+              # Header with the offset of the message dispatched to the DLQ
               SOURCE_OFFSET_HEADER = "source_offset"
+              # Header with the consumer group that dispatched the message to the DLQ
               SOURCE_CONSUMER_GROUP_HEADER = "source_consumer_group"
+              # Header with the number of processing attempts before the DLQ dispatch
               SOURCE_ATTEMPTS_HEADER = "source_attempts"
+              # Header with the trace id of the error that caused the DLQ dispatch
               SOURCE_TRACE_ID_HEADER = "source_trace_id"
 
-              # All the origin headers
+              # Headers added to each dispatched DLQ message to describe its origin
               SOURCE_HEADERS = [
                 SOURCE_TOPIC_HEADER,
                 SOURCE_PARTITION_HEADER,
