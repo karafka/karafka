@@ -12,6 +12,8 @@
 - **[Feature]** Add `Karafka::Admin.describe_cluster` and `.describe_topics` to read the cluster id, controller, brokers with racks, topic ids, partition leaders and replicas, and optionally the authorized operations. Requires karafka-rdkafka `>= 0.31.0`.
 - **[Feature]** Add `Karafka::Admin.delete_records` to delete the messages of given partitions below a given offset (or all of them with `:end`) by moving their low watermark. It is destructive and irreversible.
 - **[Feature]** Add `Karafka::Admin.delete_consumer_group_offsets` to delete a consumer group's committed offsets for given topics or partitions, keeping the consumer group and its other offsets. Raises `Karafka::Errors::ConsumerGroupSubscribedToTopicError` for topics the consumer group is subscribed to.
+- **[Feature]** [Pro] Add Virtual Partitions Estimator, a console API that samples a topic and estimates how well Virtual Partitions would parallelize it. Results can be saved as a versioned JSON report (`target_file:`) and displayed with `karafka vps estimate-report`.
+- **[Feature]** Add `Admin::Configs::Config#source` (e.g. `:dynamic_topic_config`, `:dynamic_broker_config`, `:default_config`), also on synonyms, telling a value set on the topic from one inherited from the broker or a built-in default. Requires karafka-rdkafka `>= 0.32.1`.
 - [Enhancement] Defer default log file creation until the first write and keep logging working (to stdout) when the log file cannot be created or written, e.g. on read-only filesystems (ydah).
 - [Enhancement] Stop allocating 6 objects per consumed message: build the default topic deserializers only once and read `max_messages` once per poll batch.
 - [Enhancement] Stop allocating a keyword `Hash` per consumed message when building its metadata.
@@ -61,6 +63,9 @@
 - [Fix] Reject topics whose names differ only by namespacing style (e.g. `a.b` and `a_b`) in one consumer group or share group also when other namespaced topics follow them. With `strict_topics_namespacing` on, a later namespaced topic without such a collision hid the error.
 - [Fix] Keep topics drawn without an explicit `subscription_group` in one default subscription group of their consumer group, also when a `subscription_group` block is drawn between them, so such routes now get fewer subscription groups and Kafka connections. With Pro, those topics also keep the consumer-group-level `multiplexing` settings.
 - [Fix] Make routing and config validation stricter: reject topic, group and client id names spanning many lines, the `.` and `..` topic names, topic names over 249 characters, and topic consumers that are not a class or class name (e.g. an instance), at boot instead of later.
+- [Maintenance] 2.6.2.alpha1 was published without a Sigstore attestation: signing failed in the release workflow (the signer does not work with json 3.x, the default of Ruby 4.0) and the attestation patch then pushed the gem unsigned.
+- [Maintenance] Sign the gem with `sigstore-cli` and push it with `gem push --attestation` (the `gem-push` action of `karafka/misc`), so a failed signing stops the release instead of publishing the gem without an attestation.
+- [Maintenance] Add the `Sigstore Check` workflow: nightly, and on pull requests that change the push workflow, it builds the gem, signs it like a release and verifies the attestation, without pushing.
 
 ## 2.6.1 (2026-08-24)
 - **[Feature]** [Pro] Add an opt-in envelope encryption mode for Messages At Rest (`config.encryption.mode = :envelope`, requires openssl `>= 3.0`) without the RSA payload size limit. Upgrade all consuming processes before enabling.

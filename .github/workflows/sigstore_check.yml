@@ -1,0 +1,49 @@
+name: Sigstore Check
+
+# Builds the gem, signs it the way the push workflows do and verifies the attestation, without
+# pushing anything, so a broken signer shows up before a release
+
+on:
+  schedule:
+    - cron: '0 3 * * *'
+  pull_request:
+    branches: [ master ]
+    paths:
+      - '.github/workflows/sigstore_check.yml'
+      - '.github/workflows/push*.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  sign:
+    # Signing needs the OIDC token, which forks do not get
+    if: >-
+      github.repository_owner == 'karafka' &&
+      (github.event_name != 'pull_request' ||
+       github.event.pull_request.head.repo.full_name == github.repository)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    permissions:
+      contents: read
+      id-token: write
+
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@f9c4492e86def3e644ab32a0ef185eda5b0c20d0 # v1.342.0
+        with:
+          bundler-cache: false
+
+      - name: Build the gem
+        run: gem build *.gemspec
+
+      - name: Sign and verify the gem
+        uses: karafka/misc/.github/actions/sigstore-check@0fae3bd661f8f240f5b12039eb844ad52940a4fb # master
