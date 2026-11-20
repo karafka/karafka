@@ -130,4 +130,10 @@ RSpec.describe_current do
 
     it { expect(contract.call(config)).not_to be_success }
   end
+
+  context "when scheduled_messages_topic is a dot" do
+    before { config[:scheduled_messages_topic] = "." }
+
+    it { expect(contract.call(config)).not_to be_success }
+  end
 end

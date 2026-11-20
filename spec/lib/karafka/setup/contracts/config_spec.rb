@@ -440,6 +440,12 @@ RSpec.describe_current do
 
       it { expect(contract.call(config)).not_to be_success }
     end
+
+    context "when client_id is a dot" do
+      before { config[:client_id] = "." }
+
+      it { expect(contract.call(config)).to be_success }
+    end
   end
 
   context "when we validate group_id" do

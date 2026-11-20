@@ -154,6 +154,12 @@ RSpec.describe_current do
 
       it { expect(check).not_to be_success }
     end
+
+    context "when id is longer than 249 characters" do
+      before { config[:id] = "a" * 250 }
+
+      it { expect(check).to be_success }
+    end
   end
 
   describe "#topic_unique_key" do
