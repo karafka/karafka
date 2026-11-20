@@ -9,8 +9,7 @@ module Karafka
       #
       # Block-set values are kept over defaults for methods with a `name=` writer. Pro `pause` has
       # none and merges into the existing config, so without listing it here the defaults (evaluated
-      # after the block) would replace a topic's own `pause(...)`. Like writers, a call in the block
-      # is not overwritten by the same call in the defaults.
+      # after the block) would replace a topic's own `pause(...)`.
       SETTING_METHODS = %i[pause].freeze
 
       private_constant :SETTING_METHODS
