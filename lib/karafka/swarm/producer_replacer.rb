@@ -8,6 +8,10 @@ module Karafka
     # This class encapsulates the logic for building that new producer, inheriting all relevant
     # settings from the old one while generating fresh connection-level configuration.
     class ProducerReplacer
+      include Helpers::ConfigImporter.new(
+        nodes: %i[swarm nodes]
+      )
+
       # Attributes that should not be directly copied from the old producer config because they
       # are either regenerated fresh (kafka, logger, id) or handled via their own namespaced
       # migration (oauth, polling, polling.fd).
@@ -27,14 +31,16 @@ module Karafka
       # @param old_producer [WaterDrop::Producer] the old producer to inherit settings from
       # @param kafka [Hash] app-level kafka configuration
       # @param logger [Object] logger instance for the new producer
+      # @param node_id [Integer] id of the swarm node the producer is built for
       # @return [WaterDrop::Producer] new producer with inherited configuration
-      def call(old_producer, kafka, logger)
+      def call(old_producer, kafka, logger, node_id)
         old_producer_config = old_producer.config
 
         WaterDrop::Producer.new do |p_config|
           p_config.logger = logger
 
           migrate_kafka(p_config, old_producer_config, kafka)
+          inject_transactional_id(p_config, node_id)
           migrate_root(p_config, old_producer_config)
           migrate_oauth(p_config, old_producer_config)
           migrate_polling(p_config, old_producer_config)
@@ -72,6 +78,21 @@ module Karafka
 
           p_config.kafka[key] = value
         end
+      end
+
+      # Makes the `transactional.id` unique per node, so nodes do not fence each other, and stable
+      # across node restarts, so Kafka can finish the transactions of the previous node instance.
+      # A single node keeps the configured id unchanged.
+      #
+      # @param p_config [WaterDrop::Config] new producer config being built
+      # @param node_id [Integer] id of the swarm node the producer is built for
+      def inject_transactional_id(p_config, node_id)
+        transactional_id = p_config.kafka[:"transactional.id"]
+
+        return unless transactional_id
+        return if nodes == 1
+
+        p_config.kafka[:"transactional.id"] = "#{transactional_id}_#{node_id}"
       end
 
       # Migrates oauth configuration from the old producer

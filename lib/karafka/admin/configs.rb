@@ -4,7 +4,8 @@ module Karafka
   class Admin
     # Namespace for admin operations related to configuration management
     #
-    # At the moment Karafka supports configuration management for brokers and topics
+    # At the moment Karafka supports configuration management for brokers, topics and consumer
+    # groups
     #
     # You can describe configuration as well as alter it.
     #

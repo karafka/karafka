@@ -17,6 +17,20 @@ module Karafka
             ).fetch("en").fetch("validations").fetch("routing").fetch("topic")
           end
 
+          # Share consumers (KIP-932) do not support pattern subscriptions, so regexp-style topic
+          # definitions must be rejected with a clear error instead of only the generic name-format
+          # one. A `Regexp` given to `topic()` is stringified by the routing into a `"(?..."`
+          # prefixed literal and a librdkafka pattern subscription string starts with `"^"` - both
+          # shapes indicate the user expected regexp subscriptions to work. It is defined before
+          # the `name` format rule because only the first error of a path is kept.
+          virtual do |data, _errors|
+            name = data[:name].to_s
+
+            next unless name.start_with?("^", "(?")
+
+            [[%w[name], :regexp_subscription_not_supported]]
+          end
+
           required(:deserializers) { |val| !val.nil? }
           required(:id) { |val| val.is_a?(String) && Karafka::Contracts::TOPIC_REGEXP.match?(val) }
           required(:kafka) { |val| val.is_a?(Hash) && !val.empty? }
@@ -26,20 +40,6 @@ module Karafka
           required(:active) { |val| [true, false].include?(val) }
           nested(:subscription_group_details) do
             required(:name) { |val| val.is_a?(String) && !val.empty? }
-          end
-
-          # Share consumers (KIP-932) do not support pattern subscriptions, so regexp-style topic
-          # definitions must be rejected with a clear error instead of only the generic name-format
-          # one. A `Regexp` given to `topic()` is stringified by the routing into a `"(?..."`
-          # prefixed literal and a librdkafka pattern subscription string starts with `"^"` - both
-          # shapes indicate the user expected regexp subscriptions to work. This virtual runs
-          # independently of other errors so its message always accompanies the generic one.
-          virtual do |data, _errors|
-            name = data[:name].to_s
-
-            next unless name.start_with?("^", "(?")
-
-            [[%w[name], :regexp_subscription_not_supported]]
           end
 
           # Consumer needs to be present only if topic is active

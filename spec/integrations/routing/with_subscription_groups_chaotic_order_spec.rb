@@ -28,6 +28,9 @@ draw_routes(create_topics: false) do
 end
 
 subscription_groups = Karafka::App.subscription_groups
+default_group = subscription_groups.values.first
 
-assert_equal 3, subscription_groups.values.first.size
+assert_equal 2, default_group.size
+assert_equal %w[topic0 topic2], default_group.first.topics.map(&:name)
+assert_equal %w[topic1], default_group.last.topics.map(&:name)
 assert_equal 1, subscription_groups.values.last.size
