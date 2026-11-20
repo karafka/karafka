@@ -1,8 +1,8 @@
 # frozen_string_literal: true
 
 RSpec.describe_current do
-  describe "#NAME_REGEXP" do
-    subject(:match) { input.match? described_class::NAME_REGEXP }
+  describe "#KAFKA_IDS_REGEXP" do
+    subject(:match) { input.match? described_class::KAFKA_IDS_REGEXP }
 
     context "when name is valid" do
       let(:input) { "name" }
@@ -39,10 +39,6 @@ RSpec.describe_current do
 
       it { is_expected.to be(true) }
     end
-  end
-
-  describe "#TOPIC_REGEXP" do
-    it { expect(described_class::TOPIC_REGEXP).to eq(described_class::NAME_REGEXP) }
   end
 
   describe "#TOPIC_NAME_REGEXP" do

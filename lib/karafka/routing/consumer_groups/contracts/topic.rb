@@ -13,7 +13,7 @@ module Karafka
           end
 
           required(:deserializers) { |val| !val.nil? }
-          required(:id) { |val| val.is_a?(String) && Karafka::Contracts::NAME_REGEXP.match?(val) }
+          required(:id) { |val| val.is_a?(String) && Karafka::Contracts::KAFKA_IDS_REGEXP.match?(val) }
           required(:kafka) { |val| val.is_a?(Hash) && !val.empty? }
           required(:max_messages) { |val| val.is_a?(Integer) && val >= 1 }
           required(:initial_offset) { |val| %w[earliest latest].include?(val) }

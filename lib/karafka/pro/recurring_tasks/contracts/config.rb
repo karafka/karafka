@@ -47,7 +47,7 @@ module Karafka
             # Do not allow to run more often than every 5 seconds
             required(:interval) { |val| val.is_a?(Integer) && val >= 1_000 }
             required(:group_id) do |val|
-              val.is_a?(String) && Karafka::Contracts::NAME_REGEXP.match?(val)
+              val.is_a?(String) && Karafka::Contracts::KAFKA_IDS_REGEXP.match?(val)
             end
 
             nested(:topics) do
