@@ -32,6 +32,12 @@ RSpec.describe_current do
       expect(target.max_messages).to eq(50)
       expect(target.max_wait_time).to eq(500)
     end
+
+    it "expect to apply only the block when defaults are nil" do
+      described_class.new(target, nil) { max_messages 7 }
+      expect(target.max_messages).to eq(7)
+      expect(target.max_wait_time).to be_nil
+    end
   end
 
   describe "ignored method proxy" do

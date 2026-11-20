@@ -23,6 +23,7 @@ RSpec.describe_current do
     end
 
     allow(active_span).to receive(:set_error)
+    allow(Karafka.logger).to receive(:warn)
     allow(Karafka.logger).to receive(:error)
     allow(Karafka.logger).to receive(:fatal)
     allow(Karafka.logger).to receive(:respond_to?).with(:push_tags).and_return(false)
@@ -223,6 +224,13 @@ RSpec.describe_current do
       it { expect(Karafka.logger).to have_received(:error).with(message) }
     end
 
+    context "when it is a lag_compensation.refresher.error" do
+      let(:type) { "lag_compensation.refresher.error" }
+      let(:message) { "Lag compensation refresher error occurred: #{error}" }
+
+      it { expect(Karafka.logger).to have_received(:warn).with(message) }
+    end
+
     context "when it is an unrecognized error type" do
       let(:type) { "custom.unknown.error" }
       let(:message) { "custom.unknown.error error occurred: #{error}" }
@@ -315,6 +323,214 @@ RSpec.describe_current do
       expect(builds.size).to eq(1)
       expect(Array.new(listener.logs.size) { listener.logs.pop }.uniq)
         .to eq(["[id] DatadogSpecJob job for Consumer on topic started"])
+    end
+  end
+
+  describe "span lifecycle" do
+    subject(:trigger) { nil }
+
+    let(:span_class) do
+      Class.new do
+        attr_accessor :resource
+        attr_reader :finishes, :errors
+
+        def initialize
+          @finishes = 0
+          @errors = []
+        end
+
+        def finish
+          @finishes += 1
+        end
+
+        def set_error(error)
+          @errors << error
+        end
+      end
+    end
+    # Stands for a span opened by another integration (dd-trace-rb Karafka patch)
+    let(:foreign_span) { span_class.new }
+    let(:client) do
+      span_class = self.span_class
+      foreign_span = self.foreign_span
+
+      Class.new do
+        attr_reader :spans
+
+        define_method(:initialize) { @spans = [] }
+        define_method(:trace) { |*, **| span_class.new.tap { |span| @spans << span } }
+        define_method(:active_span) { foreign_span }
+        define_method(:log_correlation) { "" }
+      end.new
+    end
+    let(:span_listener) { described_class.new { |config| config.client = client } }
+    let(:executor) { Struct.new(:topic).new(Struct.new(:consumer, :name).new("Consumer", "topic")) }
+    let(:job_class) do
+      job_class = Struct.new(:id, :executor) do
+        class << self
+          def action
+            :consume
+          end
+        end
+      end
+
+      stub_const("DatadogSpanSpecJob", job_class)
+    end
+    let(:details) { { job: job_class.new("id", executor), time: 1 } }
+    let(:own_span) { client.spans.last }
+
+    before do
+      allow(Karafka.logger).to receive(:info)
+      allow(Karafka.logger).to receive(:warn)
+    end
+
+    def instrument(name, payload = details)
+      event = Karafka::Core::Monitoring::Event.new(name, payload)
+      span_listener.public_send(:"on_#{name.tr(".", "_")}", event)
+    end
+
+    context "when job is processed" do
+      before do
+        instrument("worker.process")
+        instrument("worker.processed")
+        instrument("worker.completed")
+      end
+
+      it "finishes its own span once" do
+        expect(own_span.finishes).to eq(1)
+      end
+
+      it "does not finish the active span of another integration" do
+        expect(foreign_span.finishes).to eq(0)
+      end
+    end
+
+    context "when wrap fails and worker.processed is not published" do
+      before do
+        instrument("worker.process")
+        instrument("error.occurred", { error: error, type: "consumer.wrap.error" })
+        instrument("worker.completed")
+      end
+
+      it "finishes its own span on worker.completed" do
+        expect(own_span.finishes).to eq(1)
+      end
+
+      it "sets the error on its own span" do
+        expect(own_span.errors).to eq([error])
+        expect(foreign_span.errors).to be_empty
+      end
+    end
+
+    context "when worker fails and worker.processed is not published" do
+      before do
+        instrument("worker.process")
+        instrument("error.occurred", details.merge(error: error, type: "worker.process.error"))
+        instrument("worker.completed")
+      end
+
+      it "finishes its own span on worker.completed" do
+        expect(own_span.finishes).to eq(1)
+      end
+
+      it "sets the error on its own span" do
+        expect(own_span.errors).to eq([error])
+        expect(foreign_span.errors).to be_empty
+      end
+    end
+
+    context "when worker.completed is published without a job" do
+      before { instrument("worker.completed", { job: nil }) }
+
+      it "does not finish any span" do
+        expect(foreign_span.finishes).to eq(0)
+      end
+    end
+
+    context "when error occurs outside of a job" do
+      before do
+        instrument("error.occurred", { error: error, type: "connection.client.poll.error" })
+      end
+
+      it "sets the error on the active span" do
+        expect(foreign_span.errors).to eq([error])
+      end
+    end
+
+    context "when dd-trace-rb Karafka integration is active" do
+      before do
+        stub_const(
+          "Datadog::Tracing::Contrib::Karafka::Patcher",
+          Module.new do
+            class << self
+              def patch_successful
+                true
+              end
+            end
+          end
+        )
+
+        2.times do
+          instrument("worker.process")
+          instrument("worker.processed")
+        end
+      end
+
+      it "warns once" do
+        expect(Karafka.logger).to have_received(:warn).with(/dd-trace-rb Karafka integration/).once
+      end
+    end
+
+    context "when dd-trace-rb Karafka integration patch failed" do
+      before do
+        stub_const(
+          "Datadog::Tracing::Contrib::Karafka::Patcher",
+          Module.new do
+            class << self
+              def patched?
+                true
+              end
+
+              def patch_successful
+                false
+              end
+            end
+          end
+        )
+
+        instrument("worker.process")
+      end
+
+      it { expect(Karafka.logger).not_to have_received(:warn) }
+    end
+
+    context "when dd-trace-rb Karafka integration is loaded but not active" do
+      before do
+        stub_const(
+          "Datadog::Tracing::Contrib::Karafka::Patcher",
+          Module.new do
+            class << self
+              def patched?
+                false
+              end
+
+              def patch_successful
+                false
+              end
+            end
+          end
+        )
+
+        instrument("worker.process")
+      end
+
+      it { expect(Karafka.logger).not_to have_received(:warn) }
+    end
+
+    context "when dd-trace-rb Karafka integration is not loaded" do
+      before { instrument("worker.process") }
+
+      it { expect(Karafka.logger).not_to have_received(:warn) }
     end
   end
 
