@@ -5,8 +5,12 @@ module Karafka
     # Proxy is used as a translation layer in between the DSL and raw topic and consumer group
     # objects.
     class Proxy
-      # Non-writer DSL methods that set a target setting when called with any non-nil argument. Like
-      # writers, a call in the block is not overwritten by the same call in the defaults.
+      # Non-writer DSL methods that set a target setting when called with any non-nil argument.
+      #
+      # Block-set values are kept over defaults for methods with a `name=` writer. Pro `pause` has
+      # none and merges into the existing config, so without listing it here the defaults (evaluated
+      # after the block) would replace a topic's own `pause(...)`. Like writers, a call in the block
+      # is not overwritten by the same call in the defaults.
       SETTING_METHODS = %i[pause].freeze
 
       private_constant :SETTING_METHODS
