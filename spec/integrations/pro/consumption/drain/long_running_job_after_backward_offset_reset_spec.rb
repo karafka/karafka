@@ -31,7 +31,7 @@
 # When a topic is recreated, librdkafka resets its partitions back to the earliest offset. When
 # the first messages after that reset are drained, the LRJ pause must still resume each partition
 # right after its last consumed message: no message may be consumed twice and the position of a
-# paused partition must match the last consumed offset.
+# paused partition must be right after the last consumed message.
 #
 # Small partition fetches keep messages of many partitions queued, so later batches are drained.
 
