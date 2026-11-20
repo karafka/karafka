@@ -1,79 +1,65 @@
 # frozen_string_literal: true
 
-# Karafka should handle invalid topic names and patterns
+# Karafka should reject invalid topic and consumer group names at draw time
 
 setup_karafka
 
-# Test with malformed topic names
-malformed_failed = false
+consumer_class = Class.new(Karafka::BaseConsumer)
 
-begin
-  draw_routes(create_topics: false) do
-    subscription_group do
-      # Topic names with invalid characters
-      topic "topic\x00name" do # Null byte
-        consumer Class.new(Karafka::BaseConsumer)
-      end
-    end
-  end
-rescue Karafka::Errors::InvalidConfigurationError
-  malformed_failed = true
-end
-
-# Test extremely long topic names
-clear_app_draws
-long_name_failed = false
-
-begin
+invalid_topic_names = [
+  # Null byte
+  "topic\x00name",
   # Kafka topic names have a limit (249 characters)
-  very_long_topic_name = "a" * 300
+  "a" * 300,
+  # Characters not allowed in Kafka
+  "topic with spaces",
+  "",
+  "ok\nbad name!",
+  ".",
+  ".."
+]
+
+accepted = []
+
+invalid_topic_names.each do |topic_name|
+  clear_app_draws
 
   draw_routes(create_topics: false) do
     subscription_group do
-      topic very_long_topic_name do
-        consumer Class.new(Karafka::BaseConsumer)
+      topic topic_name do
+        consumer consumer_class
       end
     end
   end
+
+  accepted << topic_name
 rescue Karafka::Errors::InvalidConfigurationError
-  long_name_failed = true
+  nil
 end
 
-# Test topic names with invalid Kafka characters
 clear_app_draws
-invalid_chars_failed = false
 
 begin
   draw_routes(create_topics: false) do
-    subscription_group do
-      # Topic names with characters not allowed in Kafka
-      topic "topic with spaces" do
-        consumer Class.new(Karafka::BaseConsumer)
+    consumer_group "ok\nbad cg!" do
+      topic "valid_topic" do
+        consumer consumer_class
       end
     end
   end
+
+  accepted << "ok\nbad cg!"
 rescue Karafka::Errors::InvalidConfigurationError
-  invalid_chars_failed = true
+  nil
 end
 
-# Test empty topic name
+assert_equal [], accepted
+
 clear_app_draws
-empty_name_failed = false
 
-begin
-  draw_routes(create_topics: false) do
-    subscription_group do
-      topic "" do # Empty topic name
-        consumer Class.new(Karafka::BaseConsumer)
-      end
-    end
+# The longest name Kafka accepts stays valid
+draw_routes(create_topics: false) do
+  topic "a" * 249 do
+    consumer consumer_class
   end
-rescue Karafka::Errors::InvalidConfigurationError
-  empty_name_failed = true
 end
-
-# We expect at least some of these edge cases to fail
-assert(
-  malformed_failed || long_name_failed || invalid_chars_failed || empty_name_failed,
-  "At least one invalid topic name should have failed validation"
-)
