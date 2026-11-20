@@ -5,8 +5,8 @@ module Karafka
     # Proxy is used as a translation layer in between the DSL and raw topic and consumer group
     # objects.
     class Proxy
-      # Non-writer DSL methods that set a target setting when called with arguments. Like writers,
-      # a call in the block is not overwritten by the same call in the defaults.
+      # Non-writer DSL methods that set a target setting when called with any non-nil argument. Like
+      # writers, a call in the block is not overwritten by the same call in the defaults.
       SETTING_METHODS = %i[pause].freeze
 
       private_constant :SETTING_METHODS
@@ -30,15 +30,12 @@ module Karafka
 
       # Translates the no "=" DSL of routing into elements assignments on target
       # @param method_name [Symbol] name of the missing method
-      # @param args [Array<Object>] positional arguments of the DSL call
-      # @param kwargs [Hash] keyword arguments of the DSL call
-      # @option kwargs [Object] :name any keyword argument the target method accepts
-      def method_missing(method_name, *args, **kwargs, &)
+      def method_missing(method_name, ...)
         return super unless respond_to_missing?(method_name)
 
         writer = @target.respond_to?(:"#{method_name}=")
 
-        if writer || (SETTING_METHODS.include?(method_name) && !(args.empty? && kwargs.empty?))
+        if writer || (SETTING_METHODS.include?(method_name) && setting_call?(...))
           if @applying_defaults
             return if @assigned.include?(method_name)
           else
@@ -47,9 +44,9 @@ module Karafka
         end
 
         if writer
-          @target.public_send(:"#{method_name}=", *args, **kwargs, &)
+          @target.public_send(:"#{method_name}=", ...)
         else
-          @target.public_send(method_name, *args, **kwargs, &)
+          @target.public_send(method_name, ...)
         end
       end
 
@@ -60,6 +57,16 @@ module Karafka
         @target.respond_to?(:"#{method_name}=", include_private) ||
           @target.respond_to?(method_name, include_private) ||
           super
+      end
+
+      private
+
+      # @param args [Array<Object>] positional arguments of the DSL call
+      # @param kwargs [Hash] keyword arguments of the DSL call
+      # @option kwargs [Object] :name any keyword argument the target method accepts
+      # @return [Boolean] true when the call has any non-nil argument, so it sets a value
+      def setting_call?(*args, **kwargs)
+        args.any? { |arg| !arg.nil? } || kwargs.any? { |_, value| !value.nil? }
       end
     end
   end

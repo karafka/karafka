@@ -67,6 +67,16 @@ RSpec.describe_current do
       expect(target.pause).to eq(timeout: 1, max_timeout: 2)
     end
 
+    it "expect to apply the defaults pause when the block set only nil values" do
+      described_class.new(target, defaults) { pause(timeout: nil) }
+      expect(target.pause).to eq(timeout: 1, max_timeout: 2)
+    end
+
+    it "expect not to apply the defaults pause when the block set a false value" do
+      described_class.new(target, defaults) { pause(with_exponential_backoff: false) }
+      expect(target.pause).to eq(with_exponential_backoff: false)
+    end
+
     it "expect to apply the defaults pause when there is no block" do
       described_class.new(target, defaults)
       expect(target.pause).to eq(timeout: 1, max_timeout: 2)
