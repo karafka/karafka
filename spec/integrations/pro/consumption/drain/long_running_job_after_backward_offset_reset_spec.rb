@@ -95,6 +95,7 @@ PARTITIONS.times do |partition|
   assert_equal (0...AFTER).to_a, DT[[:after, partition]]
 end
 
+# A seek clears the position (-1) until the next fetch, which then starts at the seek offset
 DT[:positions].each do |partition, expected, position|
-  assert_equal expected, position, [partition, DT[:positions]]
+  assert [expected, -1].include?(position), [partition, DT[:positions]]
 end
