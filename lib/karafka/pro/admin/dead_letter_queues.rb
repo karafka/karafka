@@ -38,21 +38,10 @@ module Karafka
         # How many messages we dispatch in one go
         BATCH_SIZE = 1_000
 
-        # Headers the Pro DLQ adds to each dispatched message to describe its origin. They are
-        # removed when copying, so the copied message carries only its original headers
-        SOURCE_HEADERS = %w[
-          source_topic
-          source_partition
-          source_offset
-          source_consumer_group
-          source_attempts
-          source_trace_id
-        ].freeze
-
         # Header with the number of times a message was copied out of a dead letter queue
         REPLAY_COUNT_HEADER = "replay_count"
 
-        private_constant :BATCH_SIZE, :SOURCE_HEADERS, :REPLAY_COUNT_HEADER
+        private_constant :BATCH_SIZE, :REPLAY_COUNT_HEADER
 
         class << self
           # @param topic_name [String] dead letter queue topic name
@@ -257,7 +246,9 @@ module Karafka
             source_partition = headers["source_partition"]
             dispatched[:partition] = source_partition.to_i if !target_topic_name && source_partition
 
-            SOURCE_HEADERS.each { |header| headers.delete(header) }
+            Processing::ConsumerGroups::Strategies::Dlq::Default::SOURCE_HEADERS.each do |header|
+              headers.delete(header)
+            end
           end
 
           headers[REPLAY_COUNT_HEADER] = (headers[REPLAY_COUNT_HEADER].to_i + 1).to_s

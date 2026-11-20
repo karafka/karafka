@@ -44,6 +44,16 @@ module Karafka
                 dead_letter_queue
               ].freeze
 
+              # Headers added to each dispatched DLQ message to describe its origin
+              SOURCE_HEADERS = %w[
+                source_topic
+                source_partition
+                source_offset
+                source_consumer_group
+                source_attempts
+                source_trace_id
+              ].freeze
+
               # Override of the standard `#mark_as_consumed` in order to handle the pause tracker
               # reset in case DLQ is marked as fully independent. When DLQ is marked independent,
               # any offset marking causes the pause count tracker to reset. This is useful when the
@@ -181,12 +191,16 @@ module Karafka
                   partition_key: source_partition,
                   payload: skippable_message.raw_payload,
                   headers: skippable_message.raw_headers.merge(
-                    "source_topic" => topic.name,
-                    "source_partition" => source_partition,
-                    "source_offset" => skippable_message.offset.to_s,
-                    "source_consumer_group" => topic.group.id,
-                    "source_attempts" => attempt.to_s,
-                    "source_trace_id" => errors_tracker.trace_id
+                    SOURCE_HEADERS.zip(
+                      [
+                        topic.name,
+                        source_partition,
+                        skippable_message.offset.to_s,
+                        topic.group.id,
+                        attempt.to_s,
+                        errors_tracker.trace_id
+                      ]
+                    ).to_h
                   )
                 }
 
