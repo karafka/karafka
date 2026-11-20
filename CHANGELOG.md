@@ -12,52 +12,25 @@
 - **[Feature]** Add `Karafka::Admin.describe_cluster` and `.describe_topics` to read the cluster id, controller, brokers with racks, topic ids, partition leaders and replicas, and optionally the authorized operations. Requires karafka-rdkafka `>= 0.31.0`.
 - **[Feature]** Add `Karafka::Admin.delete_records` to delete the messages of given partitions below a given offset (or all of them with `:end`) by moving their low watermark. It is destructive and irreversible.
 - **[Feature]** Add `Karafka::Admin.delete_consumer_group_offsets` to delete a consumer group's committed offsets for given topics or partitions, keeping the consumer group and its other offsets. Raises `Karafka::Errors::ConsumerGroupSubscribedToTopicError` for topics the consumer group is subscribed to.
+- **[Feature]** [Pro] Add Virtual Partitions Estimator, a console API that samples a topic and estimates how well Virtual Partitions would parallelize it. Results can be saved as a versioned JSON report (`target_file:`) and displayed with `karafka vps estimate-report`.
+- **[Feature]** Add `Admin::Configs::Config#source` (e.g. `:dynamic_topic_config`, `:dynamic_broker_config`, `:default_config`), also on synonyms, telling a value set on the topic from one inherited from the broker or a built-in default. Requires karafka-rdkafka `>= 0.32.1`.
 - **[Feature]** [Pro] Add `Karafka::Pro::Admin::DeadLetterQueues.copy` to replay DLQ messages (all, or given partitions and an offset range) back to their source topic and partition with their key and original headers, or to a given topic. Each copy increments a `replay_count` header.
 - [Enhancement] Defer default log file creation until the first write and keep logging working (to stdout) when the log file cannot be created or written, e.g. on read-only filesystems (ydah).
-- [Enhancement] Build `Setup::DefaultsInjector` (and its Pro extension) on `Karafka::Core::Configurable::Injector`. Behavior is unchanged. Requires karafka-core `>= 2.6.3`.
 - [Enhancement] Stop allocating 6 objects per consumed message: build the default topic deserializers only once and read `max_messages` once per poll batch.
 - [Enhancement] Stop allocating a keyword `Hash` per consumed message when building its metadata.
 - [Enhancement] Log only the top two backtrace lines for `librdkafka.error` in the `LoggerListener`, so unreachable brokers no longer flood the logs.
 - [Enhancement] Include the topic, partition and offset from librdkafka error details (e.g. a message that failed to decompress) in `LoggerListener` error logs. Only librdkafka errors are used, and the consumer's own context takes precedence.
 - [Enhancement] Instrument `client.topics.unknown` and log it at the info level when a subscribed topic does not exist yet and `allow.auto.create.topics` is on, instead of ignoring it silently.
+- [Enhancement] Support the `:consumer_group` resource type in `Karafka::Admin::Configs`, so consumer group configs can be described and altered, e.g. `consumer.session.timeout.ms` and `consumer.heartbeat.interval.ms`, which `group.protocol: "consumer"` (KIP-848) does not take from the client config.
 - [Change] Raise `UnsupportedOptionError` with the Ruby engine name (e.g. `jruby`) when Swarm runs on a Ruby without `Process.fork`, also when `Swarm::Supervisor#run` is called directly, before any work is done.
-- [Change] Require `karafka-rdkafka` `>=` `0.32.0`. A failed consumer close is now reported as a `librdkafka.error` on `error.occurred` instead of being dropped. A close fails in practice only after a fatal error, e.g. when the consumer was fenced by a static membership conflict. Such an error is usually reported first when polling, so it is reported twice: as `connection.client.poll.error` and again on close.
+- [Change] Require `karafka-rdkafka` `>=` `0.32.2`: lag and offset reads pass the partition list of `Admin#list_consumer_group_offsets` as the `topic_partition_list:` keyword, required since 0.32.1 (0.32.2 is the same code, released with Sigstore attestations).
+- [Change] Require `karafka-rdkafka` `>=` `0.32.0`. A failed consumer close is now reported as a `librdkafka.error` on `error.occurred` instead of being dropped. A close fails in practice only after a fatal error, e.g. when a static membership conflict fenced the consumer. Polling usually reports that error first, so it is reported twice: as `connection.client.poll.error` and on close.
 - [Change] Fail `karafka topics align` and `migrate` (exit 1) when an existing declarative topic has config keys the cluster does not know (e.g. a typo), naming them, instead of skipping them silently. `plan` lists such keys as unknown and fails too.
 - [Change] Raise `Karafka::Errors::ConsumerGroupNotEmptyError` when `Karafka::Admin` changes the offsets of a consumer group with active members, instead of silently leaving them unchanged. With an external consumer client, offsets are read and changed for the queried consumer group, not the client's own.
-- [Maintenance] Cover `karafka install --share_groups` with an integration spec: it generates `ApplicationShareConsumer` and the app boots with it.
-- [Maintenance] Cover the `:max_timestamp` and Integer-timestamp `Admin#read_partition_offsets` offset modes with integration specs.
-- [Maintenance] Cover the untested New Relic `MetricsListener` paths with integration specs: revoked and shutdown metrics, overridden listener methods, and an empty metrics list.
-- [Maintenance] [Pro] Cover the `JobsQueue` per-group semaphore growth fix under LRJ and async-locking workloads with integration specs.
-- [Maintenance] Run the Rails 8.0 transactional ActiveJob integration spec against Rails `8.0.3`. It was pinned to Rails `7.2.2.1`, so it duplicated the 7.2 run.
+- [Change] Apply the routing `defaults` block to consumer-group topics only. Share-group topics get no defaults, so consumer-group-only calls in it (e.g. `config(...)`, `dead_letter_queue`) no longer raise `NoMethodError` when a share group is drawn.
+- [Change] Require `karafka-core` `>=` `2.6.8`.
+- [Change] Apply `strict_declarative_topics` to share-group topics too: each one needs an active declaration in `declaratives.draw`, made before `routes.draw`.
 - [Maintenance] Foundational work for Kafka share groups (KIP-932) is in progress (routing layer, consumer class hierarchy, config seams). Not usable yet - share groups can be described in routing but cannot run.
-- [Maintenance] Move consumer-group connection internals under a new `Connection::ConsumerGroups` namespace to prepare for KIP-932 share groups. They are internal, so no aliases are kept.
-- [Maintenance] Cover with an integration spec that a forceful shutdown does not reopen the clients of still running listeners.
-- [Maintenance] Cover `Admin.list_consumer_groups` with integration specs for a live group reporting `:stable` and for KIP-848 (consumer protocol) groups.
-- [Maintenance] Cover the `CoordinatorsBuffer` and `PausesManager` revoke-time topic pruning fixes with an integration spec driving real rebalances.
-- [Maintenance] Cover with an integration spec that the default logger creates no `log/` directory until something is logged.
-- [Maintenance] Cover `Admin.describe_topics(include_authorized_operations: true)` with an integration spec.
-- [Maintenance] Rename positional String topic parameters (`name`, `topic`) to `topic_name` across `Admin`, connection, routing and Pro internals. Positional, so callers are not affected.
-- [Maintenance] Name the positional partition count of `Admin.create_topic` / `.create_partitions` (and `Admin::Topics`) `partition_count`, and use named constants for the `karafka console` and Pro `topics health` exit codes.
-- [Maintenance] Drop `byebug` from the test bundle and stop requiring it in the spec helpers.
-- [Maintenance] Run the CLI swarm and deserializers allocation specs on JRuby.
-- [Maintenance] Declare `rake` in the `Gemfile`. It came only through `karafka-rdkafka`, which will stop depending on it for precompiled platform gems.
-- [Maintenance] Turn broker auto-create off in integration specs (`allow.auto.create.topics: false`), as it could start two CreateTopics for one topic and log `TOPIC_ALREADY_EXISTS`. Specs that test missing or later-appearing topics turn it back on.
-- [Maintenance] [Pro] Stabilize the `Karafka::Admin::Recovery` `read_committed_offsets` no-offsets integration spec against a fresh CI broker.
-- [Maintenance] Stabilize the `Karafka::Admin::Acl` `#create`/`#describe` specs against asynchronous ACL propagation on slow CI.
-- [Maintenance] Stabilize the empty-topic `read_watermark_offsets` specs against a broker leader-election race.
-- [Maintenance] Stabilize the Kubernetes liveness fenced-out integration spec, which could probe the already closed liveness server during shutdown.
-- [Maintenance] Stabilize the exponential backoff integration spec by checking the pause timeouts instead of wall-clock upper bounds.
-- [Maintenance] [Pro] Stabilize the throttled virtual partitions integration spec by measuring throttling from the first consumption instead of from startup.
-- [Maintenance] Stabilize the producer monitor overwrite integration spec by creating its topic before producing.
-- [Maintenance] [Pro] Stabilize the `lost_assignment_with_offset_storage` transactions spec.
-- [Maintenance] [Pro] Stabilize the patterned virtual partitions integration spec, which failed with `unknown_topic_or_part` when its pattern matched no topic yet.
-- [Maintenance] Remove the `GC.compact` fallback from `Karafka::App.warmup`, as `Process.warmup` exists on every supported Ruby.
-- [Maintenance] Rename the internal `*_DEV_DEFAULTS` kafka defaults to `*_NON_PRODUCTION_DEFAULTS`, as they apply in every environment except `production`. Behavior is unchanged.
-- [Maintenance] Skip integration specs that cannot run on JRuby (fork, Swarm, Puma workers, `SIGQUIT`, C extension gems, consoles hit by a JRuby autoload bug) when `bin/integrations` runs on JRuby, and report them as skipped.
-- [Maintenance] Stabilize the hammered `AssignmentsTracker` generations integration spec by using 10 consumer groups instead of 100, so it no longer exceeds the shutdown timeout on a loaded CI runner.
-- [Maintenance] Stabilize the hammered `AssignmentsTracker` inspect integration spec by using 10 consumer groups instead of 101, so it no longer exceeds the shutdown timeout on a loaded CI runner, and by inspecting from a background thread while the groups get assignments.
-- [Maintenance] [Pro] Stabilize the cooperative-sticky transactional revoke and reclaim integration spec. A rebalance can bump the generation while a transaction is open, so its offset commit fails with `illegal_generation` and the batch is consumed again.
-- [Maintenance] [Pro] Stabilize the parallel segments throttling integration spec. It failed when the segment groups ran out of phase.
 - [Fix] [Pro] Do not let healthy KIP-848 (`group.protocol=consumer`) multiplexed listeners that never received an assignment block dynamic scaling. With more listeners than partitions they stay in the `init` join state with a rebalance age of 0, so the manager never saw them as stable and kept them alive instead of scaling them down.
 - [Fix] Stop `CoordinatorsBuffer#@coordinators` from growing unbounded across rebalances by dropping a topic entry on revoke once it tracks no partitions (mirrors `PausesManager#delete`).
 - [Fix] Use `::JSON.parse` in the ActiveJob deserializer, so consuming ActiveJob messages works with the json gem `>= 3.0`.
@@ -72,13 +45,29 @@
 - [Fix] Restore `InlineInsights::Tracker.exists?`, which raised `NoMethodError` because its delegated `#exists?` was removed.
 - [Fix] Stop `Admin` operations from retrying forever when their result never becomes visible. They now raise `ResultNotVisibleError` after `admin.max_retries_duration`.
 - [Fix] Keep the Datadog `LoggerListener` job types cache consistent on JRuby when many workers fill it at once.
-- [Fix] Reset ActiveJob current attributes also when restoring them from the job payload fails part way, so values set before the failure no longer stay on the worker thread. Attributes the consumer does not declare are now skipped and a non-Hash attributes payload raises `Karafka::Errors::InvalidConfigurationError`.
+- [Fix] Reset ActiveJob current attributes also when restoring them from the job payload fails part way, so they no longer stay on the worker thread. Attributes the consumer does not declare are now skipped and a non-Hash attributes payload raises `Karafka::Errors::InvalidConfigurationError`.
 - [Fix] [Pro] Stop an LRJ retry pause from staying paused forever when the listener resumed the partition before the client pause landed.
 - [Fix] [Pro] Validate all four schedule headers of scheduled messages. Only the cancel headers were checked, so a schedule missing `schedule_target_topic` passed and one missing `schedule_target_epoch` raised `KeyError`.
 - [Fix] Stop forceful shutdown from using a listener's client from two threads at once on JRuby. A listener still running after termination now keeps its client open and is reported via `connection.listener.shutdown.skipped`.
 - [Fix] Stop routing `defaults` from overwriting a topic's own `consumer`, `kafka`, `max_messages`, `max_wait_time`, `initial_offset` and `consumer_persistence`.
 - [Fix] Stop routing `kafka(inherit: true, ...)` from changing the given settings hash. A frozen hash raised `FrozenError` and a hash shared by many topics stopped inheriting the root `kafka` settings after the first topic.
-- [Fix] Fail `karafka topics` `plan`, `migrate`, `align`, `create`, `delete`, `repartition` and `reset` (exit 1) before changing anything when any declarative topic, also a missing or skipped one, has config keys the cluster does not know. They now need `DescribeConfigs` on declared topics with config.
+- [Fix] Fail `karafka topics` `plan`, `migrate`, `align`, `create`, `delete`, `repartition` and `reset` (exit 1) before any change when any declarative topic, also a missing or skipped one, has config keys unknown to the cluster. They now need `DescribeConfigs` on declared topics with config. With no topic to describe, new topics are checked only when `Create` is allowed on them.
+- [Fix] In independent DLQ, a message that failed after a recovered one in the same batch saw `#attempt` `0` and got one retry more than `max_retries`. In Pro, a custom DLQ `strategy:` also saw the errors of the recovered message.
+- [Fix] Make the Datadog `LoggerListener` finish its own job span, not the active one, also on job errors. With dd-trace-rb's Karafka integration active too (e.g. `datadog/auto_instrument`), jobs nested into one never-ending trace and memory grew without limit. It now warns once when both are active.
+- [Fix] Log `lag_compensation.refresher.error` in the Datadog `LoggerListener` through `Karafka.logger` at `warn` level, not to stderr via `Kernel#warn`.
+- [Fix] Treat `allow.auto.create.topics` as on only when it is `true` or `"true"`. Any other value (e.g. `"false"`) now reports a missing subscribed topic as an error instead of waiting with a "Waiting for it to be created" log. This includes values librdkafka reads as true, e.g. `1` and `"TRUE"`.
+- [Fix] State the real minimum (10) in the routing `max_wait_time` validation error. It said "bigger than 0" for values from 1 to 9 that the rule rejects.
+- [Fix] Remove the `**args` parameter and its documented `kafka:` option from the top-level routing `subscription_group`. They never worked: any keyword argument raised a generic `ArgumentError`. Keyword arguments now raise `ArgumentError: no keywords accepted`.
+- [Fix] Give each swarm node its own stable `transactional.id` (`<transactional.id>_<node id>`, as with `group.instance.id`), so nodes of a swarm with a transactional default producer no longer fence each other. A swarm with one node keeps the configured id.
+- [Fix] [Pro] Use the producer set in `swarm.node.after_fork` for scheduled messages and recurring tasks when they use the default producer, instead of the node producer it replaced.
+- [Fix] Keep topics drawn without an explicit `subscription_group` in one default subscription group of their consumer group, also when a `subscription_group` block is drawn between them. Before, each block started a new default subscription group, so routes with this layout now get fewer subscription groups and Kafka connections. With Pro, those topics also keep the consumer-group-level `multiplexing` settings.
+- [Fix] Reject topics whose names differ only by namespacing style (e.g. `a.b` and `a_b`) in one consumer group or share group also when other namespaced topics follow them. With `strict_topics_namespacing` on, a later namespaced topic without such a collision hid the error.
+- [Fix] Keep topics drawn without an explicit `subscription_group` in one default subscription group of their consumer group, also when a `subscription_group` block is drawn between them, so such routes now get fewer subscription groups and Kafka connections. With Pro, those topics also keep the consumer-group-level `multiplexing` settings.
+- [Fix] [Pro] Keep a topic's own `pause(...)` over a routing `defaults` `pause(...)`. Before, the defaults replaced it, also on the Web UI reports topic, the Recurring Tasks schedules topic and Parallel Segments topic copies.
+- [Fix] Make routing and config validation stricter: reject topic, group and client id names spanning many lines, the `.` and `..` topic names, topic names over 249 characters, and topic consumers that are not a class or class name (e.g. an instance), at boot instead of later.
+- [Maintenance] 2.6.2.alpha1 was published without a Sigstore attestation: signing failed in the release workflow (the signer does not work with json 3.x, the default of Ruby 4.0) and the attestation patch then pushed the gem unsigned.
+- [Maintenance] Sign the gem with `sigstore-cli` and push it with `gem push --attestation` (the `gem-push` action of `karafka/misc`), so a failed signing stops the release instead of publishing the gem without an attestation.
+- [Maintenance] Add the `Sigstore Check` workflow: nightly, and on pull requests that change the push workflow, it builds the gem, signs it like a release and verifies the attestation, without pushing.
 
 ## 2.6.1 (2026-08-24)
 - **[Feature]** [Pro] Add an opt-in envelope encryption mode for Messages At Rest (`config.encryption.mode = :envelope`, requires openssl `>= 3.0`) without the RSA payload size limit. Upgrade all consuming processes before enabling.

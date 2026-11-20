@@ -136,7 +136,18 @@ RSpec.describe_current do
   describe "producer configuration block" do
     subject(:config) { Karafka::App.config }
 
+    let(:original_producer) { Karafka::App.config.producer }
+
+    # Each example gets its own producer, so the shared spec producer is not altered or replaced
+    before do
+      original_producer
+      Karafka::App.config.producer = nil
+    end
+
     after do
+      Karafka::App.config.producer&.close
+      Karafka::App.config.producer = original_producer
+
       # Reset to clean state
       Karafka::App.setup do |c|
         c.kafka = { "bootstrap.servers": "127.0.0.1:9092" }

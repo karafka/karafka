@@ -153,6 +153,9 @@ RSpec.describe_current do
             "ssl.key.password": "keypass",
             "sasl.oauthbearer.client.secret": "oauth_secret",
             "ssl.key.pem": "private_key_pem",
+            "sasl.oauthbearer.assertion.private.key.pem": "assertion_key_pem",
+            "sasl.oauthbearer.assertion.private.key.passphrase": "assertion_key_pass",
+            ssl_key: "ssl_key_value",
             "ssl.certificate.pem": "certificate_pem",
             "security.protocol": "sasl_ssl"
           )
@@ -164,6 +167,14 @@ RSpec.describe_current do
           expect(Karafka.logger).to have_received(:info).with(/ssl\.key\.password: \[REDACTED\]/)
           expect(Karafka.logger).to have_received(:info).with(/sasl\.oauthbearer\.client\.secret: \[REDACTED\]/)
           expect(Karafka.logger).to have_received(:info).with(/ssl\.key\.pem: \[REDACTED\]/)
+          expect(Karafka.logger).to have_received(:info).with(/sasl\.oauthbearer\.assertion\.private\.key\.pem: \[REDACTED\]/)
+          expect(Karafka.logger).to have_received(:info).with(/sasl\.oauthbearer\.assertion\.private\.key\.passphrase: \[REDACTED\]/)
+          expect(Karafka.logger).to have_received(:info).with(/ssl_key: \[REDACTED\]/)
+        end
+
+        it "expect not to leak the redacted values" do
+          info_cli.call
+          expect(Karafka.logger).not_to have_received(:info).with(/assertion_key_pem|assertion_key_pass|ssl_key_value/)
         end
 
         it "expect not to redact non-sensitive values" do

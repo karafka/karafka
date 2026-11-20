@@ -71,6 +71,22 @@ RSpec.describe_current do
       end
     end
 
+    context "when we want to describe a consumer group" do
+      let(:group_id) { SecureRandom.uuid }
+      let(:resources) { [described_class::Resource.new(type: :consumer_group, name: group_id)] }
+      let(:session_timeout) do
+        result.first.configs.find { |config| config.name == "consumer.session.timeout.ms" }
+      end
+
+      it do
+        expect(result.size).to eq(1)
+        expect(result.first.type).to eq(:consumer_group)
+        expect(result.first.name).to eq(group_id)
+        expect(session_timeout.value).to eq("45000")
+        expect(session_timeout.default?).to be(true)
+      end
+    end
+
     context "when trying to query multiple brokers at the same time" do
       let(:resources) do
         [
@@ -93,15 +109,7 @@ RSpec.describe_current do
       result
     end
 
-    let(:described_topic_config) do
-      lambda do
-        Karafka::Admin::Configs.describe(resources).first.configs.find do |config|
-          config.name == name
-        end.value
-      end
-    end
-
-    let(:described_broker_config) do
+    let(:described_config) do
       lambda do
         Karafka::Admin::Configs.describe(resources).first.configs.find do |config|
           config.name == name
@@ -142,7 +150,7 @@ RSpec.describe_current do
 
       before { resources.first.set(name, value) }
 
-      it { expect { result }.to change(described_topic_config, :call).from("86400000").to(value) }
+      it { expect { result }.to change(described_config, :call).from("86400000").to(value) }
     end
 
     context "when we want to set an invalid value on a topic" do
@@ -164,13 +172,13 @@ RSpec.describe_current do
         setter = described_class::Resource.new(type: :topic, name: topic_name)
         setter.set(name, 100_000)
         described_class.alter(setter)
-        wait_for_config(described_topic_config, "100000")
+        wait_for_config(described_config, "100000")
 
         resources.first.delete(name)
       end
 
       it "expect to reset to cluster default" do
-        expect { result }.to change(described_topic_config, :call).from("100000").to("86400000")
+        expect { result }.to change(described_config, :call).from("100000").to("86400000")
       end
     end
 
@@ -183,14 +191,14 @@ RSpec.describe_current do
         setter = described_class::Resource.new(type: :topic, name: topic_name)
         setter.set(name, "delete")
         described_class.alter(setter)
-        wait_for_config(described_topic_config, "delete")
+        wait_for_config(described_config, "delete")
 
         resources.first.append(name, value)
       end
 
       it "expect to append to the previous" do
         expect { result }
-          .to change(described_topic_config, :call)
+          .to change(described_config, :call)
           .from("delete").to("delete,compact")
       end
     end
@@ -232,15 +240,35 @@ RSpec.describe_current do
         setter = described_class::Resource.new(type: :topic, name: topic_name)
         setter.set(name, "delete,compact")
         described_class.alter(setter)
-        wait_for_config(described_topic_config, "delete,compact")
+        wait_for_config(described_config, "delete,compact")
 
         resources.first.delete(name, value)
       end
 
       it "expect to delete from the config value" do
         expect { result }
-          .to change(described_topic_config, :call)
+          .to change(described_config, :call)
           .from("delete,compact").to("delete")
+      end
+    end
+
+    context "when we want to set a valid value on a consumer group" do
+      let(:name) { "consumer.heartbeat.interval.ms" }
+      let(:resources) { [described_class::Resource.new(type: :consumer_group, name: SecureRandom.uuid)] }
+
+      before { resources.first.set(name, 6_000) }
+
+      it { expect { result }.to change(described_config, :call).from("5000").to("6000") }
+    end
+
+    context "when we want to set an invalid value on a consumer group" do
+      let(:resources) { [described_class::Resource.new(type: :consumer_group, name: SecureRandom.uuid)] }
+
+      before { resources.first.set("consumer.session.timeout.ms", 1) }
+
+      it "expect to reject the value" do
+        expect { result }
+          .to raise_error(Rdkafka::RdkafkaError, /group\.consumer\.min\.session\.timeout\.ms/)
       end
     end
 
@@ -249,7 +277,7 @@ RSpec.describe_current do
       let(:broker_name) { "1" }
       let(:value) { (threads_before.to_i + 1).to_s }
       let(:resources) { [described_class::Resource.new(type: :broker, name: broker_name)] }
-      let(:threads_before) { described_broker_config.call }
+      let(:threads_before) { described_config.call }
 
       before do
         resources.first.set(name, value)
@@ -258,7 +286,7 @@ RSpec.describe_current do
 
       it "expect to be able to alter broker settings" do
         expect { result }
-          .to change(described_topic_config, :call)
+          .to change(described_config, :call)
           .from(threads_before.to_s)
           .to((threads_before.to_i + 1).to_s)
       end

@@ -124,8 +124,9 @@ module Karafka
         end
       end
 
-      # @param block [Proc] block with per-topic evaluated defaults
-      # @return [Proc] defaults that should be evaluated per topic
+      # @param block [Proc] block with defaults evaluated per consumer-group topic
+      # @return [Proc] defaults that should be evaluated per consumer-group topic
+      # @note Defaults apply to consumer-group topics only. Share-group topics do not get them.
       def defaults(&block)
         return @defaults unless block
 
@@ -175,21 +176,10 @@ module Karafka
       # subscription group customization
       # @param subscription_group_name [String, Symbol] subscription group id. When not provided,
       #   a random uuid will be used
-      # @param args [Hash] any extra arguments accepted by the subscription group builder
       # @param block [Proc] further topics definitions
-      # @option args [String] :kafka optional kafka scope settings
-      def subscription_group(
-        subscription_group_name = SubscriptionGroup.id,
-        **args,
-        &block
-      )
+      def subscription_group(subscription_group_name = SubscriptionGroup.id, **nil, &block)
         consumer_group(default_group_id) do
-          target.public_send(
-            :subscription_group=,
-            subscription_group_name.to_s,
-            **args,
-            &block
-          )
+          target.public_send(:subscription_group=, subscription_group_name.to_s, &block)
         end
       end
 

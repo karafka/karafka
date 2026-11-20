@@ -20,8 +20,9 @@ module Karafka
         # @return [Hash{Karafka::Declaratives::Topic => Hash{String => String}}] declarative
         #   topics with their configs (names with values) that the cluster does not know. Names
         #   and values are strings, as the cluster returns them.
-        # @note Config names are read from an existing topic, so nothing is reported when the
-        #   cluster has no topics or when we are not allowed to describe any of them.
+        # @note Config names are read from an existing topic. When there is no topic we can
+        #   describe, the cluster validates the creation of the topics instead. Nothing is
+        #   reported for a topic we are not allowed to create either.
         def call
           topics = @declaratives_topics.reject { |topic| topic.declaratives.details.empty? }
 
@@ -29,7 +30,7 @@ module Karafka
 
           topics_configs = find_topics_configs(topics)
 
-          return {} unless topics_configs
+          return find_unknown_on_create(topics) unless topics_configs
 
           topics.each_with_object({}) do |topic, unknown|
             names = if !@as_new && @existing_topics_names.include?(topic.name)
@@ -38,17 +39,40 @@ module Karafka
               topics_configs.names
             end
 
-            configs = topic
-              .declaratives
-              .details
-              .to_h { |name, value| [name.to_s, value.to_s] }
-              .except(*names)
+            configs = configs(topic).except(*names)
 
             unknown[topic] = configs unless configs.empty?
           end
         end
 
         private
+
+        # @param topic [Karafka::Declaratives::Topic] declarative topic
+        # @return [Hash{String => String}] topic configs names with values
+        def configs(topic)
+          topic.declaratives.details.to_h { |name, value| [name.to_s, value.to_s] }
+        end
+
+        # @param topics [Array<Karafka::Declaratives::Topic>] declarative topics with configs,
+        #   none of which exists, as otherwise we would describe it
+        # @return [Hash{Karafka::Declaratives::Topic => Hash{String => String}}] declarative
+        #   topics with their configs that the cluster does not know. Topics we are not allowed
+        #   to create are skipped.
+        def find_unknown_on_create(topics)
+          Admin.with_admin do |admin|
+            new_topics_configs = Cluster::NewTopicsConfigs.new(admin)
+
+            topics.each_with_object({}) do |topic, unknown|
+              configs = configs(topic)
+              names = new_topics_configs.unknown(topic, configs)
+
+              unknown[topic] = configs.slice(*names) unless names.empty?
+            # We may be allowed to create only some of the topics
+            rescue Rdkafka::RdkafkaError => e
+              raise unless e.code == :topic_authorization_failed
+            end
+          end
+        end
 
         # @param topics [Array<Karafka::Declaratives::Topic>] declarative topics with configs
         # @return [Cluster::TopicsConfigs, nil] configs of one of our existing topics, otherwise

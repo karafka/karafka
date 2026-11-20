@@ -50,28 +50,30 @@ class Consumer < Karafka::BaseConsumer
   end
 
   def consume
-    DT[:running] = true
+    cycled = !DT[:attempts].empty?
     offsets = []
+    counters = []
 
     transaction do
       messages.each do |message|
-        DT[:all][partition] ||= []
-        DT[:all][partition] << message.offset
-
-        DT[:data][partition] ||= []
-        DT[:data][partition] << message.raw_payload.to_i
-
         raise if @buffer.include?(message.offset)
 
         offsets << message.offset
+        counters << message.raw_payload.to_i
         produce_async(topic: DT.topics[1], payload: message.raw_payload)
       end
 
       mark_as_consumed(messages.last) unless DT.key?(:marked)
     end
 
-    DT[:marked] = true
+    # Keep marking through the first rebalance cycle, so rebalances meet open marking transactions
+    DT[:marked] = true if cycled
     @buffer.concat(offsets)
+
+    # Only batches of committed transactions are recorded, so a lost retry of an aborted batch
+    # leaves a gap
+    (DT[:all][partition] ||= []).concat(offsets)
+    (DT[:data][partition] ||= []).concat(counters)
   end
 end
 
@@ -114,6 +116,9 @@ end
 consumer = setup_rdkafka_consumer("partition.assignment.strategy": "cooperative-sticky")
 
 other = Thread.new do
+  # Rebalance only once Karafka committed a batch of each partition
+  sleep(0.1) until DT[:all].size >= 2
+
   loop do
     consumer.subscribe(DT.topic)
     consumer.each { break }
@@ -144,11 +149,13 @@ DT[:errors].each do |error|
   assert_equal(:illegal_generation, error.code, error)
 end
 
-# This ensures we do not skip over offsets
+assert_equal([0, 1], DT[:all].keys.sort)
+
+# This ensures we do not skip over offsets, starting from the first one
 # The +1 range is for the transactional marker
 DT[:all].each do |partition, offsets|
   sorted = offsets.uniq.sort
-  previous = sorted.first - 1
+  previous = -1
 
   sorted.each do |offset|
     assert(
@@ -163,7 +170,7 @@ end
 # This ensures we do not skip over messages
 DT[:data].each do |partition, counters|
   sorted = counters.uniq.sort
-  previous = sorted.first - 1
+  previous = -1
 
   sorted.each do |count|
     assert_equal(

@@ -41,13 +41,6 @@
         "ruby/setup-ruby"
       ],
       "minimumReleaseAge": "5 days"
-    },
-    {
-      "description": "Major updates stay manual",
-      "matchUpdateTypes": [
-        "major"
-      ],
-      "automerge": false
     }
   ],
   "labels": [
@@ -59,8 +52,6 @@
       "before 4am on the first day of the month"
     ]
   },
-  "automerge": true,
-  "platformAutomerge": true,
   "osvVulnerabilityAlerts": true,
   "vulnerabilityAlerts": {
     "labels": [

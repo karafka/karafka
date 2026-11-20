@@ -52,6 +52,12 @@ RSpec.describe_current do
 
       it { expect(check).not_to be_success }
     end
+
+    context "when it has an invalid second line" do
+      before { config[:id] = "ok\nbad id!" }
+
+      it { expect(check).not_to be_success }
+    end
   end
 
   context "when we validate name" do
@@ -69,6 +75,42 @@ RSpec.describe_current do
 
     context "when it is an invalid string" do
       before { config[:name] = "%^&*(" }
+
+      it { expect(check).not_to be_success }
+    end
+
+    context "when it has an invalid second line" do
+      before { config[:name] = "ok\nbad name!" }
+
+      it { expect(check).not_to be_success }
+    end
+
+    context "when it is a dot" do
+      before { config[:name] = "." }
+
+      it { expect(check).not_to be_success }
+    end
+
+    context "when it is a double dot" do
+      before { config[:name] = ".." }
+
+      it { expect(check).not_to be_success }
+    end
+
+    context "when it is three dots" do
+      before { config[:name] = "..." }
+
+      it { expect(check).to be_success }
+    end
+
+    context "when it is 249 characters long" do
+      before { config[:name] = "a" * 249 }
+
+      it { expect(check).to be_success }
+    end
+
+    context "when it is longer than 249 characters" do
+      before { config[:name] = "a" * 250 }
 
       it { expect(check).not_to be_success }
     end
@@ -160,6 +202,22 @@ RSpec.describe_current do
       it { expect(check).not_to be_success }
     end
 
+    context "when below the minimum of 10" do
+      before { config[:max_wait_time] = 5 }
+
+      it { expect(check).not_to be_success }
+
+      it "states the minimum in the error message" do
+        expect(check.errors.to_h[:max_wait_time]).to eq("needs to be an integer bigger or equal to 10")
+      end
+    end
+
+    context "when equal to the minimum of 10" do
+      before { config[:max_wait_time] = 10 }
+
+      it { expect(check).to be_success }
+    end
+
     context "when missing" do
       before { config.delete(:max_wait_time) }
 
@@ -216,6 +274,21 @@ RSpec.describe_current do
       before { config[:consumer] = :SomeConsumerByName }
 
       it { expect(check).to be_success }
+    end
+
+    context "when it is a consumer instance" do
+      before { config[:consumer] = Class.new(Karafka::BaseConsumer).new }
+
+      it "expect not to be valid with a class-required error" do
+        expect(check).not_to be_success
+        expect(check.errors.to_h[:consumer]).to include("consumer class or its name")
+      end
+    end
+
+    context "when it is an Integer" do
+      before { config[:consumer] = 123 }
+
+      it { expect(check).not_to be_success }
     end
   end
 

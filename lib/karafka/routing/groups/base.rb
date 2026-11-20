@@ -5,9 +5,10 @@ module Karafka
     # Namespace for the Kafka-level group types (consumer groups and share groups).
     module Groups
       # Base class describing a single Kafka group (a consumer group or a share group) that is
-      # going to subscribe to given topics. It carries the mode-agnostic routing machinery; the
-      # subclasses only declare their {#group_type}, the activity-manager scope they filter under
-      # and the topic class they instantiate.
+      # going to subscribe to given topics. It carries the mode-agnostic routing machinery and
+      # applies the routing defaults to each topic; the subclasses only declare their
+      # {#group_type}, the activity-manager scope they filter under and the topic class they
+      # instantiate, and may override `topic_defaults` to change which defaults apply.
       #
       # @note A single group represents one Kafka group, but it may not match 1:1 with subscription
       #   groups. There can be more subscription groups than groups.
@@ -72,7 +73,7 @@ module Karafka
           topic = topic_class.new(topic_name, self)
           @topics << Proxy.new(
             topic,
-            builder.defaults,
+            topic_defaults,
             &
           ).target
           built_topic = @topics.last
@@ -86,15 +87,18 @@ module Karafka
         # topic definition
         # @param name [String, Symbol] name of the current subscription group
         def subscription_group=(name = SubscriptionGroup.id, &)
+          previous_subscription_group_details = @current_subscription_group_details
+
           # We cast it here, so the routing supports symbol based but that's anyhow later on
           # validated as a string
           @current_subscription_group_details = { name: name.to_s }
 
           Proxy.new(self, &)
 
-          # We need to reset the current subscription group after it is used, so it won't leak
-          # outside to other topics that would be defined without a defined subscription group
-          @current_subscription_group_details = { name: SubscriptionGroup.id }
+          # We need to restore the previous subscription group after it is used, so it won't leak
+          # outside to other topics that would be defined without a defined subscription group and
+          # so those topics keep sharing the same default subscription group
+          @current_subscription_group_details = previous_subscription_group_details
         end
 
         # @return [Array<Routing::SubscriptionGroup>] all the subscription groups build based on
@@ -130,6 +134,12 @@ module Karafka
         # @raise [NotImplementedError] when not overridden
         def activity_scope
           raise NotImplementedError, "Implement in a subclass"
+        end
+
+        # @return [Proc, nil] routing defaults evaluated against each topic of this group or nil
+        #   when none apply
+        def topic_defaults
+          builder.defaults
         end
 
         # @return [Class] routing topic class this group instantiates for its topics. Overridden

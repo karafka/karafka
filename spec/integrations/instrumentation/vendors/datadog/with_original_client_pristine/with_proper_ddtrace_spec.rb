@@ -12,7 +12,11 @@ dummy_boot_file = "#{Tempfile.new.path}.rb"
 FileUtils.touch(dummy_boot_file)
 ENV["KARAFKA_BOOT_FILE"] = dummy_boot_file
 
-setup_karafka
+strio = StringIO.new
+
+setup_karafka do |config|
+  config.logger = Logger.new(strio)
+end
 
 require "karafka/instrumentation/vendors/datadog/logger_listener"
 
@@ -43,3 +47,8 @@ produce(DT.topic, "1")
 start_karafka_and_wait_until do
   DT.key?(0)
 end
+
+# datadog is required before karafka here, so its Karafka patch is never applied and nothing is
+# duplicated
+assert !Datadog::Tracing::Contrib::Karafka::Patcher.patch_successful
+assert !strio.string.include?("dd-trace-rb Karafka integration is active")

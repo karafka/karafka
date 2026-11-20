@@ -92,6 +92,36 @@ RSpec.describe_current do
         it { expect(check).not_to be_success }
       end
 
+      context "when a namespaced topic without a collision follows the colliding ones" do
+        before do
+          config[:topics] = %w[a_b a.b x_y].map { |name| topics[0].merge(name: name) }
+        end
+
+        it { expect(check).not_to be_success }
+
+        it "expect to report the namespacing error" do
+          expect(check.errors[:topics]).to include("unique considering namespacing styles")
+        end
+      end
+
+      context "when several namespaced topics without collisions follow the colliding ones" do
+        before do
+          names = %w[a.b a_b x_y c.d e_f g.h.i]
+          config[:topics] = names.map { |name| topics[0].merge(name: name) }
+        end
+
+        it { expect(check).not_to be_success }
+      end
+
+      context "when many namespaced topics have distinct names" do
+        before do
+          names = %w[a_b a.c x_y c.d e_f g.h.i plain]
+          config[:topics] = names.map { |name| topics[0].merge(name: name) }
+        end
+
+        it { expect(check).to be_success }
+      end
+
       context "when strict_topics_namespacing is set to false" do
         before do
           config[:topics][1] = config[:topics][0].dup
@@ -123,6 +153,12 @@ RSpec.describe_current do
       before { config[:id] = "%^&*(" }
 
       it { expect(check).not_to be_success }
+    end
+
+    context "when id is longer than 249 characters" do
+      before { config[:id] = "a" * 250 }
+
+      it { expect(check).to be_success }
     end
   end
 

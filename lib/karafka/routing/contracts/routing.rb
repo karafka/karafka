@@ -27,8 +27,8 @@ module Karafka
         end
 
         # Ensures, that when declarative topics strict requirement is on, all topics have
-        # declarative definition (including DLQ topics). It will ignore routing pattern topics
-        # because those topics are virtual
+        # declarative definition (including DLQ and share-group topics). It will ignore routing
+        # pattern topics because those topics are virtual
         virtual do |data, errors|
           next unless errors.empty?
           # Do not validate declaratives unless required and explicitly enabled
@@ -40,14 +40,20 @@ module Karafka
           dec_topics = Set.new
           # All topics including the DLQ topics names that are marked as active
           topics = Set.new
+          repository = Karafka::App.declaratives.repository
 
           data.each do |group|
             group[:topics].each do |topic|
               dec = topic[:declaratives]
 
-              # Share-group topics (KIP-932) do not support declarative management (nor DLQ), so
-              # they are not subject to the strict declarative check
-              next unless dec
+              # Share-group topics (KIP-932) have no routing declaratives (nor DLQ), so they need
+              # an active declaration from `declaratives.draw`
+              unless dec
+                topics << topic[:name]
+                dec_topics << topic[:name] if repository.find(topic[:name])&.active?
+
+                next
+              end
 
               pat = topic[:patterns]
               # Ignore pattern topics because they won't exist and should not be declarative managed

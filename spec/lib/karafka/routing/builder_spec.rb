@@ -67,6 +67,51 @@ RSpec.describe_current do
       it { expect(topic.subscription_group_details).to eq(name: "test") }
     end
 
+    context "when we use simple topic style with one nameless subscription group" do
+      let(:topic) { builder.first.topics.first }
+
+      before do
+        builder.draw do
+          subscription_group do
+            topic :topic_name1 do
+              consumer Class.new(Karafka::BaseConsumer)
+            end
+          end
+        end
+      end
+
+      it { expect(topic.subscription_group_details[:name]).to be_a(String) }
+      it { expect(topic.subscription_group_details[:name]).not_to be_empty }
+    end
+
+    context "when we use simple topic style with a subscription group with keyword arguments" do
+      let(:draw) do
+        builder.draw do
+          subscription_group :test, kafka: { "bootstrap.servers": "localhost:9092" } do
+            topic :topic_name1 do
+              consumer Class.new(Karafka::BaseConsumer)
+            end
+          end
+        end
+      end
+
+      it { expect { draw }.to raise_error(ArgumentError, "no keywords accepted") }
+    end
+
+    context "when we use simple topic style with a nameless subscription group with keyword arguments" do
+      let(:draw) do
+        builder.draw do
+          subscription_group kafka: { "bootstrap.servers": "localhost:9092" } do
+            topic :topic_name1 do
+              consumer Class.new(Karafka::BaseConsumer)
+            end
+          end
+        end
+      end
+
+      it { expect { draw }.to raise_error(ArgumentError, "no keywords accepted") }
+    end
+
     context "when we use simple topic style with one subscription group and two topics" do
       let(:topic1) { builder.first.topics.first }
       let(:topic2) { builder.first.topics.last }
@@ -142,6 +187,118 @@ RSpec.describe_current do
 
       it { expect(topic1.subscription_group_details).to eq(name: "test1") }
       it { expect(topic2.subscription_group_details).not_to be_nil }
+    end
+
+    context "when topics without a subscription group surround subscription group blocks" do
+      let(:consumer_class) { Class.new(Karafka::BaseConsumer) }
+      let(:groups) do
+        builder.first.subscription_groups.map { |sg| sg.topics.map(&:name) }
+      end
+
+      context "when there is one subscription group block in between" do
+        before do
+          consumer = consumer_class
+
+          builder.draw do
+            topic(:a) { consumer consumer }
+            subscription_group(:s) { topic(:b) { consumer consumer } }
+            topic(:c) { consumer consumer }
+          end
+        end
+
+        it { expect(groups).to eq([%w[a c], %w[b]]) }
+      end
+
+      context "when there are multiple subscription group blocks in between" do
+        before do
+          consumer = consumer_class
+
+          builder.draw do
+            topic(:a) { consumer consumer }
+            subscription_group(:s1) { topic(:b) { consumer consumer } }
+            topic(:c) { consumer consumer }
+            subscription_group { topic(:d) { consumer consumer } }
+            topic(:e) { consumer consumer }
+          end
+        end
+
+        it { expect(groups).to eq([%w[a c e], %w[b], %w[d]]) }
+      end
+
+      context "when subscription group blocks are nested" do
+        before do
+          consumer = consumer_class
+
+          builder.draw do
+            topic(:a) { consumer consumer }
+
+            subscription_group(:outer) do
+              topic(:b) { consumer consumer }
+              subscription_group(:inner) { topic(:c) { consumer consumer } }
+              topic(:d) { consumer consumer }
+            end
+
+            topic(:e) { consumer consumer }
+          end
+        end
+
+        it { expect(groups).to eq([%w[a e], %w[b d], %w[c]]) }
+      end
+
+      context "when a subscription group block is named like the default subscription group" do
+        before do
+          consumer = consumer_class
+
+          builder.draw do
+            topic(:a) { consumer consumer }
+          end
+
+          default_name = builder.first.topics.first.subscription_group_details[:name]
+
+          builder.draw do
+            subscription_group(default_name) { topic(:b) { consumer consumer } }
+            topic(:c) { consumer consumer }
+          end
+        end
+
+        it { expect(groups).to eq([%w[a b c]]) }
+      end
+
+      context "when this happens inside of an explicit consumer group" do
+        before do
+          consumer = consumer_class
+
+          builder.draw do
+            consumer_group(:cg) do
+              topic(:a) { consumer consumer }
+              subscription_group(:s) { topic(:b) { consumer consumer } }
+              topic(:c) { consumer consumer }
+            end
+          end
+        end
+
+        it { expect(groups).to eq([%w[a c], %w[b]]) }
+      end
+
+      context "when this happens inside of a share group" do
+        let(:groups) do
+          builder.share_groups.first.subscription_groups.map { |sg| sg.topics.map(&:name) }
+        end
+
+        before do
+          consumer = Class.new(Karafka::ShareConsumer)
+
+          builder.draw do
+            share_group(:sh) do
+              topic(:a) { consumer consumer }
+              subscription_group(:s) { topic(:b) { consumer consumer } }
+              topic(:c) { consumer consumer }
+            end
+          end
+        end
+
+        it { expect(groups).to eq([%w[a c], %w[b]]) }
+      end
     end
 
     context "when we use 0.6 simple topic style single topic groups" do

@@ -105,4 +105,16 @@ RSpec.describe_current do
 
     it { expect(contract.call(config)).not_to be_success }
   end
+
+  context "when schedules topic is longer than 249 characters" do
+    before { recurring_tasks[:topics][:schedules][:name] = "a" * 250 }
+
+    it { expect(contract.call(config)).not_to be_success }
+  end
+
+  context "when logs topic is a double dot" do
+    before { recurring_tasks[:topics][:logs][:name] = ".." }
+
+    it { expect(contract.call(config)).not_to be_success }
+  end
 end

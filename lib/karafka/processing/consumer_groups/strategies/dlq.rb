@@ -6,7 +6,7 @@ module Karafka
       module Strategies
         # When using dead letter queue, processing won't stop after defined number of retries
         # upon encountering non-critical errors but the messages that error will be moved to a
-        # separate topic with their payload and metadata, so they can be handled differently.
+        # separate topic with their payload, so they can be handled differently.
         module Dlq
           include Default
 
@@ -31,7 +31,9 @@ module Karafka
             # If we were not able to mark no need to reset
             return false unless super
 
+            # The running attempt was already counted before consumption, so it becomes the first one
             coordinator.pause_tracker.reset
+            coordinator.pause_tracker.increment
 
             true
           end
@@ -46,7 +48,9 @@ module Karafka
             return super unless topic.dead_letter_queue.independent?
             return false unless super
 
+            # The running attempt was already counted before consumption, so it becomes the first one
             coordinator.pause_tracker.reset
+            coordinator.pause_tracker.increment
 
             true
           end

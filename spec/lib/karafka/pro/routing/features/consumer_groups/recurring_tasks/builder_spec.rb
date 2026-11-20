@@ -56,5 +56,21 @@ RSpec.describe_current do
       it { expect(topic.recurring_tasks?).to be(true) }
       it { expect(topic.max_messages).to eq(5) }
     end
+
+    context "when routing defaults set a pause" do
+      before do
+        Karafka::App.routes.defaults do
+          pause(timeout: 100, max_timeout: 200, with_exponential_backoff: true)
+        end
+
+        builder.recurring_tasks(true)
+      end
+
+      it "expect the schedules topic to keep its own pause" do
+        expect(topic.pause.timeout).to eq(60_000)
+        expect(topic.pause.max_timeout).to eq(60_000)
+        expect(topic.pause.with_exponential_backoff).to be(false)
+      end
+    end
   end
 end

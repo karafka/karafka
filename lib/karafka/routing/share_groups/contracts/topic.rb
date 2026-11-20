@@ -17,29 +17,29 @@ module Karafka
             ).fetch("en").fetch("validations").fetch("routing").fetch("topic")
           end
 
-          required(:deserializers) { |val| !val.nil? }
-          required(:id) { |val| val.is_a?(String) && Karafka::Contracts::TOPIC_REGEXP.match?(val) }
-          required(:kafka) { |val| val.is_a?(Hash) && !val.empty? }
-          required(:max_messages) { |val| val.is_a?(Integer) && val >= 1 }
-          required(:max_wait_time) { |val| val.is_a?(Integer) && val >= 10 }
-          required(:name) { |val| val.is_a?(String) && Karafka::Contracts::TOPIC_REGEXP.match?(val) }
-          required(:active) { |val| [true, false].include?(val) }
-          nested(:subscription_group_details) do
-            required(:name) { |val| val.is_a?(String) && !val.empty? }
-          end
-
           # Share consumers (KIP-932) do not support pattern subscriptions, so regexp-style topic
           # definitions must be rejected with a clear error instead of only the generic name-format
           # one. A `Regexp` given to `topic()` is stringified by the routing into a `"(?..."`
           # prefixed literal and a librdkafka pattern subscription string starts with `"^"` - both
-          # shapes indicate the user expected regexp subscriptions to work. This virtual runs
-          # independently of other errors so its message always accompanies the generic one.
+          # shapes indicate the user expected regexp subscriptions to work. It is defined before
+          # the `name` format rule because only the first error of a path is kept.
           virtual do |data, _errors|
             name = data[:name].to_s
 
             next unless name.start_with?("^", "(?")
 
             [[%w[name], :regexp_subscription_not_supported]]
+          end
+
+          required(:deserializers) { |val| !val.nil? }
+          required(:id) { |val| val.is_a?(String) && Karafka::Contracts::KAFKA_IDS_REGEXP.match?(val) }
+          required(:kafka) { |val| val.is_a?(Hash) && !val.empty? }
+          required(:max_messages) { |val| val.is_a?(Integer) && val >= 1 }
+          required(:max_wait_time) { |val| val.is_a?(Integer) && val >= 10 }
+          required(:name) { |val| val.is_a?(String) && Karafka::Contracts::TOPIC_NAME_REGEXP.match?(val) }
+          required(:active) { |val| [true, false].include?(val) }
+          nested(:subscription_group_details) do
+            required(:name) { |val| val.is_a?(String) && !val.empty? }
           end
 
           # Consumer needs to be present only if topic is active
@@ -63,11 +63,10 @@ module Karafka
             consumer = data.fetch(:consumer)
 
             # Only actual consumer classes carry mode information, so the mode is enforced on
-            # classes only. Every other value is left untouched: nil (inactive/admin-only topics
-            # may have no consumer, already handled by the missing-check above) and String/Symbol
-            # by-name references (a class passed for reload is resolved to a Class before it reaches
-            # here, so nothing functional is skipped).
-            next unless consumer.is_a?(Class)
+            # classes only. nil is skipped: inactive/admin-only topics may have no consumer, already
+            # handled by the missing-check above.
+            next if consumer.nil? || consumer.is_a?(String) || consumer.is_a?(Symbol)
+            next [[%w[consumer], :class_required]] unless consumer.is_a?(Class)
             next if consumer <= Karafka::Consumers::ShareGroup
 
             [[%w[consumer], :share_consumer_required]]

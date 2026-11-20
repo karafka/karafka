@@ -132,13 +132,14 @@ en:
         kafka_format: needs to be a filled hash
         missing: needs to be present
         max_messages_format: 'needs to be an integer bigger than 0'
-        max_wait_time_format: 'needs to be an integer bigger than 0'
+        max_wait_time_format: 'needs to be an integer bigger or equal to 10'
         name_format: 'needs to be a string with a Kafka accepted format'
         name_regexp_subscription_not_supported: regexp/pattern topic subscriptions are not supported for share groups (KIP-932) - use an explicit topic name
         consumer_share_consumer_required: needs to be a share consumer inheriting from Karafka::ShareConsumer
         consumer_group_consumer_required: needs to be a consumer group consumer inheriting from Karafka::BaseConsumer
         deserializers_format: needs to be present
         consumer_format: needs to be present
+        consumer_class_required: needs to be a consumer class or its name as a String or Symbol
         id_format: 'needs to be a string with a Kafka accepted format'
         initial_offset_format: needs to be either earliest or latest
         subscription_group_details.name_format: must be a non-empty string
