@@ -28,12 +28,9 @@ jobs:
         with:
           bundler-cache: false
 
-      - name: Configure trusted publishing credentials
-        uses: rubygems/configure-rubygems-credentials@dc5a8d8553e6ee01fc26761a49e99e733d17954a # v2.1.0
+      - name: Build the gem
+        run: gem build *.gemspec
 
-      # rubygems/release-gem falls back to an unsigned push when signing fails, so we sign
-      # and push ourselves and a failed signing stops the release
-      - name: Build and push the gem (with Sigstore attestation)
-        run: |
-          gem build *.gemspec
-          .github/release/push_gem.sh *.gem
+      # Unlike rubygems/release-gem, this action does not push when signing fails
+      - name: Sign and push the gem (with Sigstore attestation)
+        uses: karafka/misc/.github/actions/gem-push@4b22ea7636319e13121e63fbc7ebdf5e15985960 # master

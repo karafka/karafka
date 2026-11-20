@@ -1,7 +1,7 @@
 name: Sigstore Check
 
-# Builds the gem and signs it the way the push workflows do, then verifies the attestation,
-# without pushing anything, so a broken signer shows up before a release
+# Builds the gem, signs it the way the push workflows do and verifies the attestation, without
+# pushing anything, so a broken signer shows up before a release
 
 on:
   schedule:
@@ -9,9 +9,8 @@ on:
   pull_request:
     branches: [ master ]
     paths:
-      - '.github/release/**'
       - '.github/workflows/sigstore_check.yml'
-      - '.github/workflows/push_*.yml'
+      - '.github/workflows/push*.yml'
   workflow_dispatch:
 
 permissions:
@@ -43,12 +42,8 @@ jobs:
         with:
           bundler-cache: false
 
-      - name: Build, sign and verify the gem
-        run: |
-          gem build *.gemspec
-          gem_file=$(ls *.gem)
+      - name: Build the gem
+        run: gem build *.gemspec
 
-          .github/release/sigstore.sh sign "$gem_file" --bundle "$gem_file.sigstore.json"
-          .github/release/sigstore.sh verify "$gem_file" --bundle "$gem_file.sigstore.json" \
-            --certificate-identity "https://github.com/${GITHUB_WORKFLOW_REF}" \
-            --certificate-oidc-issuer https://token.actions.githubusercontent.com
+      - name: Sign and verify the gem
+        uses: karafka/misc/.github/actions/sigstore-check@4b22ea7636319e13121e63fbc7ebdf5e15985960 # master
