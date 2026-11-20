@@ -41,7 +41,10 @@ module Karafka
         # Header with the number of times a message was copied out of a dead letter queue
         REPLAY_COUNT_HEADER = "replay_count"
 
-        private_constant :BATCH_SIZE, :REPLAY_COUNT_HEADER
+        # Strategy that dispatches messages to the DLQ and defines their origin headers
+        DLQ_STRATEGY = Processing::ConsumerGroups::Strategies::Dlq::Default
+
+        private_constant :BATCH_SIZE, :REPLAY_COUNT_HEADER, :DLQ_STRATEGY
 
         class << self
           # @param topic_name [String] dead letter queue topic name
@@ -225,7 +228,7 @@ module Karafka
         # @return [Hash] message to dispatch
         def build_message(message, target_topic_name)
           headers = message.raw_headers.dup
-          source_topic = headers["source_topic"]
+          source_topic = headers[DLQ_STRATEGY::SOURCE_TOPIC_HEADER]
 
           unless target_topic_name || source_topic
             raise(
@@ -243,12 +246,10 @@ module Karafka
           dispatched[:key] = message.raw_key if message.raw_key
 
           if source_topic
-            source_partition = headers["source_partition"]
+            source_partition = headers[DLQ_STRATEGY::SOURCE_PARTITION_HEADER]
             dispatched[:partition] = source_partition.to_i if !target_topic_name && source_partition
 
-            Processing::ConsumerGroups::Strategies::Dlq::Default::SOURCE_HEADERS.each do |header|
-              headers.delete(header)
-            end
+            DLQ_STRATEGY::SOURCE_HEADERS.each { |header| headers.delete(header) }
           end
 
           headers[REPLAY_COUNT_HEADER] = (headers[REPLAY_COUNT_HEADER].to_i + 1).to_s
