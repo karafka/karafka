@@ -28,8 +28,12 @@ jobs:
         with:
           bundler-cache: false
 
-      - name: Bundle install
-        run: |
-          bundle install --jobs 4 --retry 3
+      - name: Configure trusted publishing credentials
+        uses: rubygems/configure-rubygems-credentials@dc5a8d8553e6ee01fc26761a49e99e733d17954a # v2.1.0
 
-      - uses: rubygems/release-gem@7f9650160c1a4e7989fdc9855807bdbd421d8b6b # v1.4.1
+      # rubygems/release-gem falls back to an unsigned push when signing fails, so we sign
+      # and push ourselves and a failed signing stops the release
+      - name: Build and push the gem (with Sigstore attestation)
+        run: |
+          gem build *.gemspec
+          .github/release/push_gem.sh *.gem
