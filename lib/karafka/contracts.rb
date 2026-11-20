@@ -12,5 +12,9 @@ module Karafka
     # Regexp for validating topic names. On top of the `KAFKA_IDS_REGEXP` format, Kafka rejects
     # names longer than 249 characters and the `.` and `..` names
     TOPIC_NAME_REGEXP = /\A(?!\.\.?\z)[A-Za-z0-9\-_.]{1,249}\z/
+
+    # Released karafka-web (1.0.1) reads this constant at load time, so it must stay until web
+    # no longer uses it
+    TOPIC_REGEXP = KAFKA_IDS_REGEXP
   end
 end

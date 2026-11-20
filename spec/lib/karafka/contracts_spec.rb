@@ -41,6 +41,10 @@ RSpec.describe_current do
     end
   end
 
+  describe "#TOPIC_REGEXP" do
+    it { expect(described_class::TOPIC_REGEXP).to eq(described_class::KAFKA_IDS_REGEXP) }
+  end
+
   describe "#TOPIC_NAME_REGEXP" do
     subject(:match) { input.match? described_class::TOPIC_NAME_REGEXP }
 
