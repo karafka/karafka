@@ -33,4 +33,4 @@ jobs:
 
       # Unlike rubygems/release-gem, this action does not push when signing fails
       - name: Sign and push the gem (with Sigstore attestation)
-        uses: karafka/misc/.github/actions/gem-push@4b22ea7636319e13121e63fbc7ebdf5e15985960 # master
+        uses: karafka/misc/.github/actions/gem-push@0fae3bd661f8f240f5b12039eb844ad52940a4fb # master
