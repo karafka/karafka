@@ -24,6 +24,14 @@ RSpec.describe_current do
         def healthy?
           true
         end
+
+        def on_app_running(_event)
+          start
+        end
+
+        def on_app_stopped(_event)
+          stop
+        end
       end
     end
 
@@ -36,9 +44,9 @@ RSpec.describe_current do
       end
     end
 
-    before { listener.send(:start) }
+    before { listener.on_app_running(nil) }
 
-    after { listener.send(:stop) }
+    after { listener.on_app_stopped(nil) }
 
     it { expect(probe.call).to eq("200") }
 
