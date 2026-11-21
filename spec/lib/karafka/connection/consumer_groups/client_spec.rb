@@ -307,6 +307,26 @@ RSpec.describe_current do
     end
   end
 
+  describe "#stop after #reset" do
+    let(:kafka) { instance_double(Rdkafka::Consumer) }
+    let(:assigned) { instance_double(Rdkafka::Consumer::TopicPartitionList, empty?: false) }
+    let(:unassigned) { instance_double(Rdkafka::Consumer::TopicPartitionList, empty?: true) }
+
+    before do
+      allow(client).to receive(:build_consumer).and_return(kafka)
+      allow(kafka).to receive_messages(start: nil, unsubscribe: nil, close: nil)
+      allow(kafka).to receive(:assignment).and_return(assigned, unassigned, assigned, unassigned)
+    end
+
+    it "expect to unsubscribe again on a stop after the reset" do
+      client.stop
+      client.reset
+      client.stop
+
+      expect(kafka).to have_received(:unsubscribe).twice
+    end
+  end
+
   describe "#inspect" do
     let(:client_name) { "test-consumer-1" }
 

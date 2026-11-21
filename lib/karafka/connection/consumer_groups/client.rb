@@ -393,6 +393,7 @@ module Karafka
 
             @interval_runner.reset
             @closed = false
+            @unsubscribing = false
             @paused_tpls.clear
           end
         end
