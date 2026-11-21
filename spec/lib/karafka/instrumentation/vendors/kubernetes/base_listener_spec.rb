@@ -16,7 +16,9 @@ RSpec.describe_current do
   end
 
   describe "HTTP server" do
-    subject(:listener) { listener_class.new(hostname: "127.0.0.1", port: port) }
+    subject(:listener) do
+      listener_class.new(hostname: "127.0.0.1", port: port, client_read_timeout: 1_000)
+    end
 
     let(:port) { 9_031 }
     let(:listener_class) do
@@ -60,9 +62,18 @@ RSpec.describe_current do
         expect(probe.call).to eq("200")
       end
 
-      it "closes the idle connection" do
+      it "closes the idle connection after the client read timeout" do
+        expect(idle.wait_readable(0.5)).to be_nil
         expect(idle.wait_readable(3)).to eq(idle)
         expect(idle.read).to eq("")
+      end
+
+      context "when the client read timeout is not set" do
+        subject(:listener) { listener_class.new(hostname: "127.0.0.1", port: port) }
+
+        it "keeps the idle connection open longer" do
+          expect(idle.wait_readable(2)).to be_nil
+        end
       end
     end
 

@@ -18,9 +18,8 @@ module Karafka
           # Some timeouts, fail
           FAIL_CODE = "500 Internal Server Error"
 
-          # How long (in ms) we wait for a client to send the request line, so one idle connection
-          # cannot block the probes that come after it
-          CLIENT_READ_TIMEOUT = 1_000
+          # Default time in ms we wait for a client to send the request line
+          DEFAULT_CLIENT_READ_TIMEOUT = 10_000
 
           # Max number of bytes we read from a client while looking for the request line
           MAX_REQUEST_LINE_LENGTH = 8_192
@@ -28,18 +27,23 @@ module Karafka
           private_constant(
             :OK_CODE,
             :FAIL_CODE,
-            :CLIENT_READ_TIMEOUT,
+            :DEFAULT_CLIENT_READ_TIMEOUT,
             :MAX_REQUEST_LINE_LENGTH
           )
 
           # @param hostname [String, nil] hostname or nil to bind on all
           # @param port [Integer] TCP port on which we want to run our HTTP status server
+          # @param client_read_timeout [Integer] time in ms we wait for a client to send the request
+          #   line before we close its connection. Probes are answered one at a time, so an idle
+          #   connection delays the probes that come after it by up to this time
           def initialize(
             hostname: nil,
-            port: 3000
+            port: 3000,
+            client_read_timeout: DEFAULT_CLIENT_READ_TIMEOUT
           )
             @hostname = hostname
             @port = port
+            @client_read_timeout = client_read_timeout
           end
 
           # @return [Boolean] true if all good, false if we should tell k8s to kill this process
@@ -81,7 +85,7 @@ module Karafka
           # @return [String, nil] request line or nil when the client did not send one in time, sent
           #   a too long one or disconnected
           def read_request_line(client)
-            deadline = monotonic_now + CLIENT_READ_TIMEOUT
+            deadline = monotonic_now + @client_read_timeout
             buffer = "".b
 
             loop do

@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 # An idle connection to the liveness probe server (connects, sends nothing) must not block the
-# probes that come after it
+# probes that come after it for longer than the configured client read timeout
 
 require "net/http"
 require "karafka/instrumentation/vendors/kubernetes/liveness_listener"
@@ -16,7 +16,8 @@ end
 
 listener = Karafka::Instrumentation::Vendors::Kubernetes::LivenessListener.new(
   hostname: "127.0.0.1",
-  port: 9025
+  port: 9025,
+  client_read_timeout: 1_000
 )
 
 Karafka.monitor.subscribe(listener)
