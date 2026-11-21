@@ -74,6 +74,26 @@ RSpec.describe_current do
     end
   end
 
+  context "when nodes array is empty" do
+    let(:nodes) { [] }
+
+    it { expect(validation).not_to be_success }
+
+    it "reports a nodes format error" do
+      expect(validation.errors[:"swarm.nodes"]).to include("non-empty")
+    end
+  end
+
+  context "when nodes hash is empty" do
+    let(:nodes) { {} }
+
+    it { expect(validation).not_to be_success }
+
+    it "reports a nodes format error" do
+      expect(validation.errors[:"swarm.nodes"]).to include("non-empty")
+    end
+  end
+
   context "when nodes hash contains non-integer nodes" do
     let(:nodes) { { "test" => [1] } }
 
