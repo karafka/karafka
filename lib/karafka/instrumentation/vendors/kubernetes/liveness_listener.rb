@@ -71,12 +71,15 @@ module Karafka
           #   Requires `statistics.interval.ms` to be configured in the Kafka client settings;
           #   without it `statistics.emitted` never fires, tracking hashes remain empty, and this
           #   check has no effect (no misreporting).
+          # @param client_read_timeout [Integer] time in ms we wait for a client to send the request
+          #   line before we close its connection
           def initialize(
             hostname: nil,
             port: 3000,
             consuming_ttl: DEFAULT_CONSUMING_TTL,
             polling_ttl: DEFAULT_POLLING_TTL,
-            stability_ttl: nil
+            stability_ttl: nil,
+            client_read_timeout: DEFAULT_CLIENT_READ_TIMEOUT
           )
             # If this is set to a symbol, it indicates unrecoverable error like fencing
             # While fencing can be partial (for one of the SGs), we still should consider this
@@ -100,7 +103,7 @@ module Karafka
             @join_states = {}
             # Maps subscription_group_id => monotonic_now when the current non-steady state began.
             @instabilities = {}
-            super(hostname: hostname, port: port)
+            super(hostname: hostname, port: port, client_read_timeout: client_read_timeout)
           end
 
           # @param _event [Karafka::Core::Monitoring::Event]

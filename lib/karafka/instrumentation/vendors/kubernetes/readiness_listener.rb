@@ -45,9 +45,12 @@ module Karafka
           #   to 3001 (one above the {LivenessListener} default of 3000) so both can be subscribed
           #   together out of the box without colliding. Use a port different from the liveness
           #   listener (and from Puma when embedding).
+          # @param client_read_timeout [Integer] time in ms we wait for a client to send the request
+          #   line before we close its connection
           def initialize(
             hostname: nil,
-            port: 3001
+            port: 3001,
+            client_read_timeout: DEFAULT_CLIENT_READ_TIMEOUT
           )
             @mutex = Mutex.new
             # Ids of subscription groups that have polled at least once.

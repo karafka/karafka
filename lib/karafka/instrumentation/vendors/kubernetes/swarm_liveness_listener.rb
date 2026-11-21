@@ -16,16 +16,19 @@ module Karafka
           #   thread dead because it is not controlling nodes. When configuring this, please take
           #   into consideration, that during shutdown of the swarm, there is no controlling
           #   happening.
+          # @param client_read_timeout [Integer] time in ms we wait for a client to send the request
+          #   line before we close its connection
           def initialize(
             hostname: nil,
             port: 3000,
-            controlling_ttl: 60 * 1_000
+            controlling_ttl: 60 * 1_000,
+            client_read_timeout: DEFAULT_CLIENT_READ_TIMEOUT
           )
             @hostname = hostname
             @port = port
             @controlling_ttl = controlling_ttl
             @controlling = monotonic_now
-            super(port: port, hostname: hostname)
+            super(port: port, hostname: hostname, client_read_timeout: client_read_timeout)
           end
 
           # Starts reporting in the supervisor only when it runs
