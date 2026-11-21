@@ -70,10 +70,10 @@ module Karafka
                   ]
                 }.freeze
 
-                # Suggestion for the `maybe` verdict when the `:consistent` distribution puts more
-                # than one key into a virtual partition, which the `:balanced` one can spread
-                BALANCED_SUGGESTION = "Try the :balanced distribution, as some keys share a " \
-                  "virtual partition."
+                # Suggestion when the verdict is not `recommended` and the `:balanced` distribution
+                # would give a higher speedup than the `:consistent` one
+                BALANCED_SUGGESTION = "Try the :balanced distribution, which gives a higher speedup " \
+                  "for this data."
 
                 # Suggestion when there is no score, because a concurrency below 2 parallelizes
                 # nothing
@@ -175,18 +175,16 @@ module Karafka
 
                   suggestions = SUGGESTIONS.fetch(stats["verdict"], [])
 
-                  return suggestions unless stats["verdict"] == "maybe" && keys_share_vps?(stats)
+                  return suggestions if stats["verdict"] == "recommended" || !balanced_faster?(stats)
 
                   [*suggestions, BALANCED_SUGGESTION]
                 end
 
                 # @param stats [Hash] summary stats
-                # @return [Boolean] true when the `:consistent` distribution put more keys than
-                #   virtual partitions into the batches
-                def keys_share_vps?(stats)
-                  return false unless (@report["settings"] || {})["distribution"] == "consistent"
-
-                  stats["avg_unique_keys"].to_f > stats["avg_active_vps"].to_f
+                # @return [Boolean] true when the `:balanced` distribution would give a higher
+                #   speedup
+                def balanced_faster?(stats)
+                  stats["avg_balanced_speedup"].to_f > stats["avg_speedup"].to_f
                 end
 
                 # @param value [Object]

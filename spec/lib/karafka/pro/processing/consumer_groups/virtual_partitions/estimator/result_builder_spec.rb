@@ -42,8 +42,8 @@ RSpec.describe_current do
     messages: 8,
     utilization: 100.0,
     load_imbalance: 0.0,
-    parallelization: 100.0,
     speedup: active_vps.to_f,
+    parallelization: (speedup - 1) * 100 / 3,
     collapsed: false
   )
     {
@@ -103,14 +103,14 @@ RSpec.describe_current do
         batches: 3,
         avg_active_vps: 2.3,
         active_vps: { min: 1, median: 2, max: 4 },
-        poor_batches: 1,
+        poor_batches: 2,
         single_vp_batches: 1
       )
     end
   end
 
   context "when a batch uses many VPs but one of them holds most of the messages" do
-    let(:partitions_batches) { { 0 => [batch(active_vps: 4, speedup: 1.1), batch(active_vps: 2, speedup: 2.0)] } }
+    let(:partitions_batches) { { 0 => [batch(active_vps: 4, speedup: 1.1), batch(active_vps: 3, speedup: 3.0)] } }
 
     it "counts the poor batches by the speedup" do
       expect(result[:summary]).to include(poor_batches: 1)
@@ -223,31 +223,31 @@ RSpec.describe_current do
     context "when at the maybe threshold" do
       let(:stats) { { utilization: 60.0, parallelization: 20.0 } }
 
-      it { expect(result[:summary]).to include(score: 40, verdict: :maybe) }
+      it { expect(result[:summary]).to include(score: 30, verdict: :maybe) }
     end
 
     context "when just below the maybe threshold" do
       let(:stats) { { utilization: 50.0, parallelization: 20.0 } }
 
-      it { expect(result[:summary]).to include(score: 39, verdict: :not_recommended) }
+      it { expect(result[:summary]).to include(score: 29, verdict: :not_recommended) }
     end
 
     context "when the load imbalance is above 100%" do
-      let(:stats) { { utilization: 0.0, parallelization: 0.0, load_imbalance: 150.0 } }
+      let(:stats) { { utilization: 0.0, parallelization: 50.0, load_imbalance: 150.0 } }
 
-      it { expect(result[:summary]).to include(score: 10, verdict: :not_recommended) }
+      it { expect(result[:summary]).to include(score: 45, verdict: :maybe) }
     end
 
     context "with configured thresholds and weights" do
       let(:estimator_config) { Karafka::App.config.consumer_groups.virtual_partitions.estimator }
       let(:original_config) { estimator_config.to_h }
-      let(:recommended_score) { 68 }
+      let(:recommended_score) { 66 }
       let(:maybe_score) { 20 }
-      let(:stats) { { utilization: 50.0, parallelization: 80.0, load_imbalance: 10.0 } }
+      let(:stats) { { utilization: 50.0, load_imbalance: 10.0 } }
 
       # One poor batch out of two gives 50% stability
       let(:partitions_batches) do
-        { 0 => [batch(active_vps: 4, **stats), batch(active_vps: 1, **stats)] }
+        { 0 => [batch(active_vps: 4, **stats), batch(active_vps: 1, parallelization: 40.0, **stats)] }
       end
 
       before do
@@ -270,14 +270,14 @@ RSpec.describe_current do
       end
 
       it "uses all the configured weights" do
-        expect(result[:summary]).to include(score: 68, verdict: :recommended)
+        expect(result[:summary]).to include(score: 66, verdict: :recommended)
       end
 
       context "when the score is below the configured maybe score" do
         let(:recommended_score) { 70 }
         let(:maybe_score) { 69 }
 
-        it { expect(result[:summary]).to include(score: 68, verdict: :not_recommended) }
+        it { expect(result[:summary]).to include(score: 66, verdict: :not_recommended) }
       end
     end
   end

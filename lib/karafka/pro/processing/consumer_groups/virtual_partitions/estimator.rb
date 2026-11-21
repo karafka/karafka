@@ -203,17 +203,21 @@ module Karafka
             # @return [Hash] batch stats
             def analyze_batch(batch)
               collapsed = false
+              balanced_groups = nil
 
               begin
                 keys = batch.to_h { |message| [message, @partitioner.call(message)] }
 
-                groups = if @concurrency > 1
+                if @concurrency > 1
                   # Reuses the computed keys, so the partitioner runs once per message
-                  @distributor_class
-                    .new(DistributorConfig.new(keys.method(:fetch), @reducer, @concurrency))
-                    .call(batch)
+                  config = DistributorConfig.new(keys.method(:fetch), @reducer, @concurrency)
+                  groups = @distributor_class.new(config).call(batch)
+
+                  if @distributor_class == Distributors::Consistent
+                    balanced_groups = Distributors::Balanced.new(config).call(batch)
+                  end
                 else
-                  { 0 => batch }
+                  groups = { 0 => batch }
                 end
               rescue
                 collapsed = @concurrency > 1
@@ -225,6 +229,7 @@ module Karafka
               sizes = groups.each_value.map(&:size).sort!.reverse!
               largest = sizes.first
               active_vps = sizes.size
+              speedup = speedup(size, largest)
 
               {
                 first_offset: batch.first.offset,
@@ -236,12 +241,22 @@ module Karafka
                 active_vps: active_vps,
                 group_sizes: sizes,
                 utilization: [active_vps * 100.0 / @concurrency, 100.0].min,
-                # A collapsed batch is one group, which is not a measure of how evenly keys spread
-                load_imbalance: collapsed ? nil : coefficient_of_variation(sizes),
-                parallelization: [size * 100.0 / @concurrency / largest, 100.0].min,
-                # More groups than concurrency still run on at most concurrency workers
-                speedup: [size.to_f / largest, @concurrency].min
+                # One group (e.g. a collapsed batch) is not a measure of how evenly keys spread
+                load_imbalance: (active_vps == 1) ? nil : coefficient_of_variation(sizes),
+                # Gain over sequential processing: 0 at 1x, 100 at a speedup equal to concurrency
+                parallelization: (@concurrency > 1) ? (speedup - 1) * 100 / (@concurrency - 1) : 0.0,
+                speedup: speedup,
+                # Speedup of the :balanced distribution, estimated only for the :consistent one
+                balanced_speedup: balanced_groups && speedup(size, balanced_groups.each_value.map(&:size).max)
               }
+            end
+
+            # @param size [Integer] batch size
+            # @param largest [Integer] size of the largest group
+            # @return [Float] speedup over processing the batch as one group
+            def speedup(size, largest)
+              # More groups than concurrency still run on at most concurrency workers
+              [size.to_f / largest, @concurrency].min
             end
 
             # @param sizes [Array<Integer>] group sizes

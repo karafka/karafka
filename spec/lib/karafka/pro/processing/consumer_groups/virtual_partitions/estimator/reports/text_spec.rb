@@ -117,25 +117,40 @@ RSpec.describe_current do
     end
 
     context "when the verdict is maybe" do
-      let(:summary) { { "score" => 50, "verdict" => "maybe", "avg_unique_keys" => 2.0, "avg_active_vps" => 2.0 } }
-      let(:report) do
-        JSON.parse(estimator.analyze(messages).to_json).tap { |report| report["summary"].merge!(summary) }
-      end
+      let(:estimator) { estimator_class.new(concurrency: 5, batch_size: 100) }
+      let(:messages) { build_messages(Array.new(200) { |i| %w[a b][i % 2] }) }
 
+      it { expect(text).to include("verdict: maybe") }
       it { expect(text).to include("Virtual Partitions may help") }
       it { expect(text).not_to include(":balanced") }
 
-      context "when keys share VPs with the consistent distribution" do
-        let(:summary) { super().merge("avg_unique_keys" => 6.0, "avg_active_vps" => 4.0) }
+      context "when the balanced distribution gives a higher speedup" do
+        let(:messages) { build_messages(Array.new(200) { |i| (i % 100 < 35) ? "hot" : "unique-#{i}" }) }
 
+        it { expect(text).to include("verdict: maybe") }
         it { expect(text).to include("Try the :balanced distribution") }
       end
 
-      context "when keys share VPs with the balanced distribution" do
-        let(:estimator) { estimator_class.new(concurrency: 5, distribution: :balanced) }
-        let(:summary) { super().merge("avg_unique_keys" => 6.0, "avg_active_vps" => 4.0) }
+      context "when a hot key fills the largest VP alone" do
+        let(:estimator) do
+          estimator_class.new(
+            concurrency: 5,
+            batch_size: 100,
+            reducer: ->(key) { (key == "hot") ? 0 : 1 + (key.to_s.sum % 4) }
+          )
+        end
 
-        it { expect(text).not_to include("Try the :balanced distribution") }
+        let(:messages) { build_messages(Array.new(200) { |i| (i % 100 < 35) ? "hot" : "unique-#{i}" }) }
+
+        it { expect(text).to include("verdict: maybe") }
+        it { expect(text).not_to include(":balanced") }
+      end
+
+      context "with the balanced distribution" do
+        let(:estimator) { estimator_class.new(concurrency: 5, batch_size: 100, distribution: :balanced) }
+        let(:messages) { build_messages(Array.new(200) { |i| (i % 100 < 35) ? "hot" : "unique-#{i}" }) }
+
+        it { expect(text).not_to include(":balanced distribution") }
       end
     end
 
@@ -145,6 +160,13 @@ RSpec.describe_current do
       it { expect(text).to include("verdict: not_recommended") }
       it { expect(text).to include("In most batches a few keys hold most of the messages.") }
       it { expect(text).not_to include(":balanced") }
+
+      context "when two keys share a VP that the balanced distribution would split" do
+        let(:messages) { build_messages(Array.new(200) { |i| %w[a f][i % 2] }) }
+
+        it { expect(text).to include("verdict: not_recommended") }
+        it { expect(text).to include("Try the :balanced distribution") }
+      end
     end
 
     context "with unknown top level keys" do

@@ -266,11 +266,11 @@ RSpec.describe_current do
           avg_active_vps: 2.0,
           avg_utilization: 50.0,
           avg_load_imbalance: 50.0,
-          avg_parallelization: 33.3,
+          avg_parallelization: 11.1,
           avg_speedup: 1.3,
           poor_batches: 1,
           single_vp_batches: 0,
-          score: 33,
+          score: 18,
           verdict: :not_recommended
         )
       end
@@ -284,8 +284,8 @@ RSpec.describe_current do
         expect(result[:summary]).to include(
           avg_utilization: 100.0,
           avg_load_imbalance: 103.9,
-          avg_parallelization: 35.7,
-          score: 35,
+          avg_parallelization: 14.3,
+          score: 20,
           verdict: :not_recommended
         )
       end
@@ -298,8 +298,8 @@ RSpec.describe_current do
       it "computes the exact metrics" do
         expect(result[:summary]).to include(
           avg_load_imbalance: 19.2,
-          avg_parallelization: 75.0,
-          score: 81,
+          avg_parallelization: 66.7,
+          score: 75,
           verdict: :recommended
         )
       end
@@ -352,6 +352,50 @@ RSpec.describe_current do
 
         expect(score).to be > summary(hot_key_with_strays)[:score]
         expect(score).to be > summary(hot_key_with_unique_keys)[:score]
+      end
+
+      context "with concurrency of 2" do
+        def summary(messages)
+          described_class.new(concurrency: 2, **settings).analyze(messages)[:summary]
+        end
+
+        it "does not rate a single key as maybe" do
+          expect(summary(build_messages(Array.new(1_000) { "same" }))).to include(
+            avg_speedup: 1.0,
+            avg_load_imbalance: nil,
+            verdict: :not_recommended
+          )
+        end
+
+        it "does not rate a hot key with a few stray keys as maybe" do
+          expect(summary(hot_key_with_strays)).to include(avg_speedup: 1.0, verdict: :not_recommended)
+        end
+
+        it "rates two equal keys as recommended" do
+          expect(summary(two_equal_keys)).to include(avg_speedup: 2.0, verdict: :recommended)
+        end
+      end
+    end
+
+    context "when estimating the balanced distribution speedup" do
+      let(:settings) { { details: true } }
+      let(:messages) { build_messages(Array.new(200) { |i| %w[a f][i % 2] }) }
+
+      it "estimates it next to the consistent one" do
+        expect(result[:summary]).to include(avg_speedup: 1.0, avg_balanced_speedup: 2.0)
+      end
+
+      context "with the balanced distribution" do
+        let(:settings) { { details: true, distribution: :balanced } }
+
+        it { expect(result[:summary]).to include(avg_speedup: 2.0, avg_balanced_speedup: nil) }
+        it { expect(result[:partitions][0][:batches_details].map { |batch| batch[:balanced_speedup] }).to eq([nil, nil]) }
+      end
+
+      context "when partitioner raises" do
+        let(:settings) { { partitioner: ->(_) { raise StandardError } } }
+
+        it { expect(result[:summary]).to include(avg_balanced_speedup: nil) }
       end
     end
 

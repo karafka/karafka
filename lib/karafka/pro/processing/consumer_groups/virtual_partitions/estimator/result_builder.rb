@@ -40,7 +40,7 @@ module Karafka
             # `consumer_groups.virtual_partitions.estimator` config.
             class ResultBuilder
               # @param settings [Hash] estimator settings to include in the result. Its
-              #   `:concurrency` is used to count the poor batches (speedup below half of it).
+              #   `:concurrency` is used to decide if there is anything to score.
               # @param details [Boolean] should the partitions stats also include per-batch details
               def initialize(settings:, details:)
                 @settings = settings
@@ -94,22 +94,25 @@ module Karafka
                 end
 
                 active_vps = batches.map { |batch| batch[:active_vps] }.sort!
-                uncollapsed_batches = batches.reject { |batch| batch[:collapsed] }
+                # Single group batches have no load imbalance
+                measured_batches = batches.reject { |batch| batch[:load_imbalance].nil? }
+                balanced_batches = batches.reject { |batch| batch[:balanced_speedup].nil? }
 
                 result.merge!(
                   avg_unique_keys: average(batches, :unique_keys),
                   avg_null_keys: average(batches, :null_keys),
                   avg_active_vps: average(batches, :active_vps),
                   avg_utilization: average(batches, :utilization),
-                  avg_load_imbalance: uncollapsed_batches.empty? ? nil : average(uncollapsed_batches, :load_imbalance),
+                  avg_load_imbalance: measured_batches.empty? ? nil : average(measured_batches, :load_imbalance),
                   avg_parallelization: average(batches, :parallelization),
                   avg_speedup: average(batches, :speedup),
+                  avg_balanced_speedup: balanced_batches.empty? ? nil : average(balanced_batches, :balanced_speedup),
                   active_vps: {
                     min: active_vps.first,
                     median: median(active_vps),
                     max: active_vps.last
                   },
-                  poor_batches: batches.count { |batch| batch[:speedup] < @concurrency / 2.0 },
+                  poor_batches: batches.count { |batch| batch[:parallelization] < 50 },
                   single_vp_batches: batches.count { |batch| batch[:active_vps] == 1 }
                 )
 

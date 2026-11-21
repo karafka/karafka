@@ -34,7 +34,7 @@ RSpec.describe_current do
   it { expect(config.distribution).to eq(:consistent) }
   it { expect(config.report_file).to eq("report.json") }
   it { expect(config.recommended_score).to eq(70) }
-  it { expect(config.maybe_score).to eq(40) }
+  it { expect(config.maybe_score).to eq(30) }
 
   it "has score weights that sum up to 100" do
     expect(config.score_weights.to_h).to eq(
