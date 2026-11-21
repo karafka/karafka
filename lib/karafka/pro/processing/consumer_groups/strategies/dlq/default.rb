@@ -44,6 +44,29 @@ module Karafka
                 dead_letter_queue
               ].freeze
 
+              # Header with the topic of the message dispatched to the DLQ
+              SOURCE_TOPIC_HEADER = "source_topic"
+              # Header with the partition of the message dispatched to the DLQ
+              SOURCE_PARTITION_HEADER = "source_partition"
+              # Header with the offset of the message dispatched to the DLQ
+              SOURCE_OFFSET_HEADER = "source_offset"
+              # Header with the consumer group that dispatched the message to the DLQ
+              SOURCE_CONSUMER_GROUP_HEADER = "source_consumer_group"
+              # Header with the number of processing attempts before the DLQ dispatch
+              SOURCE_ATTEMPTS_HEADER = "source_attempts"
+              # Header with the trace id of the error that caused the DLQ dispatch
+              SOURCE_TRACE_ID_HEADER = "source_trace_id"
+
+              # Headers added to each dispatched DLQ message to describe its origin
+              SOURCE_HEADERS = [
+                SOURCE_TOPIC_HEADER,
+                SOURCE_PARTITION_HEADER,
+                SOURCE_OFFSET_HEADER,
+                SOURCE_CONSUMER_GROUP_HEADER,
+                SOURCE_ATTEMPTS_HEADER,
+                SOURCE_TRACE_ID_HEADER
+              ].freeze
+
               # Override of the standard `#mark_as_consumed` in order to handle the pause tracker
               # reset in case DLQ is marked as fully independent. When DLQ is marked independent,
               # any offset marking causes the pause count tracker to reset. This is useful when the
@@ -187,12 +210,12 @@ module Karafka
                   partition_key: source_partition,
                   payload: skippable_message.raw_payload,
                   headers: skippable_message.raw_headers.merge(
-                    "source_topic" => topic.name,
-                    "source_partition" => source_partition,
-                    "source_offset" => skippable_message.offset.to_s,
-                    "source_consumer_group" => topic.group.id,
-                    "source_attempts" => attempt.to_s,
-                    "source_trace_id" => errors_tracker.trace_id
+                    SOURCE_TOPIC_HEADER => topic.name,
+                    SOURCE_PARTITION_HEADER => source_partition,
+                    SOURCE_OFFSET_HEADER => skippable_message.offset.to_s,
+                    SOURCE_CONSUMER_GROUP_HEADER => topic.group.id,
+                    SOURCE_ATTEMPTS_HEADER => attempt.to_s,
+                    SOURCE_TRACE_ID_HEADER => errors_tracker.trace_id
                   )
                 }
 
