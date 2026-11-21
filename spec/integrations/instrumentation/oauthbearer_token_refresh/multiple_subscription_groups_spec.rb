@@ -14,6 +14,7 @@ class Listener
 
     DT[:refreshes] << [
       bearer.class,
+      Thread.current[:requested_bearer_name],
       bearer.name,
       bearer.oauthbearer_set_token(
         token: "jwt",
@@ -33,6 +34,13 @@ end
 Karafka.monitor.subscribe("error.occurred") do |event|
   DT[:errors] << [event[:type], event[:error].code]
 end
+
+# Registered before any client starts, so it runs first and records the name librdkafka asked
+# for in the thread that then dispatches the event
+Karafka::Core::Instrumentation.oauthbearer_token_refresh_callbacks.add(
+  :requested_bearer_name,
+  ->(_rd_config, bearer_name) { Thread.current[:requested_bearer_name] = bearer_name }
+)
 
 clients = {}
 
@@ -64,7 +72,8 @@ end
 
 assert_equal 2, DT[:refreshes].size
 assert_equal [Rdkafka::Consumer], DT[:refreshes].map(&:first).uniq
-assert_equal clients.values.sort, DT[:refreshes].map { |refresh| refresh[1] }.sort
+assert_equal clients.values.sort, DT[:refreshes].map { |refresh| refresh[2] }.sort
+assert_equal DT[:refreshes].map { |refresh| refresh[1] }, DT[:refreshes].map { |refresh| refresh[2] }
 assert_equal [0], DT[:refreshes].map(&:last).uniq
 assert_equal ["librdkafka.error"], DT[:errors].map(&:first).uniq
 assert (DT[:errors].map(&:last).uniq - %i[authentication all_brokers_down]).empty?
