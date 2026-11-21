@@ -3,12 +3,10 @@
 # Regression test to ensure correct offset handling when EOF is reached and subsequent
 # messages are produced.
 #
-# Note: While librdkafka has a bug in rd_kafka_consume_batch() where offsets can be
-# incorrectly advanced by 2 after EOF (see https://github.com/confluentinc/librdkafka/pull/5213),
-# this bug does NOT affect Karafka as we use different APIs (rd_kafka_consumer_poll).
-#
-# However, the bug affects rd_kafka_position(), which we use. This test verifies that
-# position tracking remains correct after EOF.
+# Note: librdkafka before 2.14.0 had a bug in the batch consume APIs where the position could be
+# advanced past EOF (see https://github.com/confluentinc/librdkafka/pull/5213). Karafka drains
+# prefetched messages with rd_kafka_consume_batch_queue_nb, so this test verifies that position
+# tracking via rd_kafka_position() remains correct after EOF.
 #
 # Test scenario:
 # 1. Produce 5 messages (offsets 0-4)
@@ -39,9 +37,7 @@ class Consumer < Karafka::BaseConsumer
     # Only capture position and produce after all initial messages are consumed
     # This ensures the test works correctly even if messages arrive in multiple batches
     if DT[:consumed].size >= 5 && !DT.key?(:position_after_eof)
-      # Get position using rdkafka position API
-      # Use send to access the private method for testing
-      DT[:position_after_eof] = client.send(:topic_partition_position, topic.name, partition)
+      DT[:position_after_eof] = fetch_position(client, topic.name, partition)
 
       produce_many(topic.name, ["after_eof"])
     end

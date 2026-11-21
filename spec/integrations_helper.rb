@@ -372,6 +372,20 @@ def draw_routes(consumer_class = nil, create_topics: true, &block)
   create_declarative_topics
 end
 
+# Returns the librdkafka position of a topic partition, so the offset of the next message it
+# would fetch
+# @param client [Karafka::Connection::ConsumerGroups::Client] client of the consumer
+# @param topic_name [String]
+# @param partition [Integer]
+# @return [Integer] position or -1 when there is none yet
+def fetch_position(client, topic_name, partition)
+  tpl = Rdkafka::Consumer::TopicPartitionList.new(
+    topic_name => [Rdkafka::Consumer::Partition.new(partition, nil, 0)]
+  )
+
+  client.wrapped_kafka.position(tpl).to_h.fetch(topic_name).first.offset || -1
+end
+
 # Returns the next offset that we would consume if we would subscribe again
 # @param topic [String] topic we are interested in
 # @param normalize [Boolean]
