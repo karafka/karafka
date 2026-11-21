@@ -134,8 +134,10 @@ module Karafka
               # @return [Integer] score from 0 to 100
               def score(stats)
                 weights = @config.score_weights
-                # Without any batch to measure the balance on, it is the worst case
-                balance = [100.0 - (stats[:avg_load_imbalance] || 100.0), 0.0].max
+                # Single group batches have no load imbalance to measure, so they count as the worst
+                # balance
+                measured_share = (stats[:batches] - stats[:single_vp_batches]).fdiv(stats[:batches])
+                balance = [100.0 - (stats[:avg_load_imbalance] || 100.0), 0.0].max * measured_share
                 stability = 100.0 - (stats[:poor_batches] * 100.0 / stats[:batches])
 
                 (

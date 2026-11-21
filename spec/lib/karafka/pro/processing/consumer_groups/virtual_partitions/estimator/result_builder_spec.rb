@@ -168,6 +168,18 @@ RSpec.describe_current do
     end
   end
 
+  context "when some batches have one group" do
+    let(:partitions_batches) do
+      single = batch(active_vps: 1, utilization: 25.0, parallelization: 0.0, load_imbalance: nil)
+
+      { 0 => Array.new(7) { single } + Array.new(3) { batch(active_vps: 4) } }
+    end
+
+    it "scores their balance as the worst case" do
+      expect(result[:summary]).to include(avg_load_imbalance: 0.0, single_vp_batches: 7, score: 32)
+    end
+  end
+
   context "when concurrency is below 2" do
     let(:settings) { { concurrency: 1, distribution: :consistent } }
     let(:partitions_batches) { { 0 => [batch(active_vps: 1, utilization: 100.0)], 1 => [] } }
@@ -247,7 +259,7 @@ RSpec.describe_current do
 
       # One poor batch out of two gives 50% stability
       let(:partitions_batches) do
-        { 0 => [batch(active_vps: 4, **stats), batch(active_vps: 1, parallelization: 40.0, **stats)] }
+        { 0 => [batch(active_vps: 4, **stats), batch(active_vps: 2, parallelization: 40.0, **stats)] }
       end
 
       before do

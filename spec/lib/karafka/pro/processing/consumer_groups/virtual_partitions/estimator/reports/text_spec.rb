@@ -154,6 +154,19 @@ RSpec.describe_current do
       end
     end
 
+    context "when the verdict is recommended and the balanced distribution is faster" do
+      let(:estimator) { estimator_class.new(concurrency: 5, batch_size: 100) }
+      let(:messages) { build_messages(Array.new(200) { |i| "key-#{i % 9}" }) }
+
+      it "does not suggest it" do
+        summary = report["summary"]
+
+        expect(summary["avg_balanced_speedup"]).to be > summary["avg_speedup"]
+        expect(text).to include("verdict: recommended")
+        expect(text).not_to include(":balanced")
+      end
+    end
+
     context "when the verdict is not_recommended" do
       let(:messages) { build_messages(Array.new(200) { |i| (i % 100 < 96) ? "hot" : "stray-#{i}" }) }
 
