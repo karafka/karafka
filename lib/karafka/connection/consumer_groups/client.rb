@@ -631,6 +631,7 @@ module Karafka
           @kafka = nil
           @wrapped_kafka = nil
           @buffer.clear
+          @last_offsets.clear
           # We do not clear rebalance manager here as we may still have revocation info here that we
           # want to consider valid prior to running another reconnection
         end
