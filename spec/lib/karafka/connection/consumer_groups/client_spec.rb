@@ -292,6 +292,15 @@ RSpec.describe_current do
       let(:first) { build(:kafka_fetched_message, topic: topic_name, partition: 0, offset: 0) }
       let(:drained) { [] }
 
+      let(:revocation) do
+        {
+          subscription_group_id: subscription_group.id,
+          tpl: Rdkafka::Consumer::TopicPartitionList.new(
+            topic_name => [Rdkafka::Consumer::Partition.new(0, nil)]
+          )
+        }
+      end
+
       let(:buffer_state) do
         state = {}
         client.batch_poll.each do |topic, partition, messages, eof|
@@ -302,6 +311,32 @@ RSpec.describe_current do
 
       def message(partition, offset, topic = topic_name)
         build(:kafka_fetched_message, topic: topic, partition: partition, offset: offset)
+      end
+
+      # Holds the drain seek to the given offset and seeks partition 0 to 7 from another thread
+      # meanwhile. Returns the seek offsets made while it was held and all of them
+      def seek_offsets_with_drain_seek_held(drain_offset)
+        release = Queue.new
+        entered = Queue.new
+        offsets = []
+
+        allow(kafka).to receive(:seek) do |seek|
+          offsets << seek.offset
+          next unless seek.offset == drain_offset
+
+          entered << true
+          release.pop
+        end
+
+        poller = Thread.new { client.batch_poll }
+        entered.pop
+        other = Thread.new { client.seek(Karafka::Messages::Seek.new(topic_name, 0, 7)) }
+        Thread.pass until other.status == "sleep" || !other.alive?
+        held = offsets.dup
+        release << true
+        [poller, other].each(&:join)
+
+        [held, offsets]
       end
 
       def eof_error(partition, offset)
@@ -591,31 +626,8 @@ RSpec.describe_current do
         end
 
         context "when another thread seeks while the drain seeks it back" do
-          let(:other_seek) { Karafka::Messages::Seek.new(topic_name, 0, 7) }
-
           it "expect the other seek to wait for it" do
-            release = Queue.new
-            entered = Queue.new
-            offsets = []
-
-            allow(kafka).to receive(:seek) do |seek|
-              offsets << seek.offset
-              next unless seek.offset == 1
-
-              entered << true
-              release.pop
-            end
-
-            poller = Thread.new { client.batch_poll }
-            entered.pop
-            other = Thread.new { client.seek(other_seek) }
-            Thread.pass until other.status == "sleep" || !other.alive?
-            seen = offsets.dup
-            release << true
-            [poller, other].each(&:join)
-
-            expect(seen).to eq([1])
-            expect(offsets).to eq([1, 7])
+            expect(seek_offsets_with_drain_seek_held(1)).to eq([[1], [1, 7]])
           end
         end
 
@@ -740,15 +752,6 @@ RSpec.describe_current do
         context "when the partition was revoked in an earlier batch" do
           let(:first) { message(1, 0) }
 
-          let(:revocation) do
-            {
-              subscription_group_id: subscription_group.id,
-              tpl: Rdkafka::Consumer::TopicPartitionList.new(
-                topic_name => [Rdkafka::Consumer::Partition.new(0, nil)]
-              )
-            }
-          end
-
           before do
             batches = [[], drained]
 
@@ -770,15 +773,6 @@ RSpec.describe_current do
 
         context "when another partition was revoked in an earlier batch" do
           let(:first) { message(0, 5) }
-
-          let(:revocation) do
-            {
-              subscription_group_id: subscription_group.id,
-              tpl: Rdkafka::Consumer::TopicPartitionList.new(
-                topic_name => [Rdkafka::Consumer::Partition.new(0, nil)]
-              )
-            }
-          end
 
           before do
             batches = [[], [message(1, 0), message(1, 1)]]
@@ -809,31 +803,8 @@ RSpec.describe_current do
         end
 
         context "when another thread seeks while the drain aligns the position" do
-          let(:other_seek) { Karafka::Messages::Seek.new(topic_name, 0, 7) }
-
           it "expect the other seek to wait for it" do
-            release = Queue.new
-            entered = Queue.new
-            offsets = []
-
-            allow(kafka).to receive(:seek) do |seek|
-              offsets << seek.offset
-              next unless seek.offset == 2
-
-              entered << true
-              release.pop
-            end
-
-            poller = Thread.new { client.batch_poll }
-            entered.pop
-            other = Thread.new { client.seek(other_seek) }
-            Thread.pass until other.status == "sleep" || !other.alive?
-            seen = offsets.dup
-            release << true
-            [poller, other].each(&:join)
-
-            expect(seen).to eq([2])
-            expect(offsets).to eq([2, 7])
+            expect(seek_offsets_with_drain_seek_held(2)).to eq([[2], [2, 7]])
           end
         end
 
@@ -857,15 +828,6 @@ RSpec.describe_current do
         context "when the rewound partition is revoked inside of the drain" do
           let(:first) { message(0, 300) }
           let(:drained) { [message(0, 0)] }
-
-          let(:revocation) do
-            {
-              subscription_group_id: subscription_group.id,
-              tpl: Rdkafka::Consumer::TopicPartitionList.new(
-                topic_name => [Rdkafka::Consumer::Partition.new(0, nil)]
-              )
-            }
-          end
 
           before do
             allow(kafka).to receive(:poll_batch_nb) do
@@ -930,15 +892,6 @@ RSpec.describe_current do
 
       context "when partitions are revoked inside of the drain" do
         let(:drained) { [message(0, 1), message(1, 0), message(1, 0)] }
-
-        let(:revocation) do
-          {
-            subscription_group_id: subscription_group.id,
-            tpl: Rdkafka::Consumer::TopicPartitionList.new(
-              topic_name => [Rdkafka::Consumer::Partition.new(0, nil)]
-            )
-          }
-        end
 
         before do
           allow(kafka).to receive(:poll_batch_nb) do
