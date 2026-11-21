@@ -5,6 +5,7 @@ en:
       multiplexing_statistics_required_for_dynamic_multiplexing: 'Dynamic multiplexing requires statistics to be enabled (statistics.interval.ms must be greater than 0)'
 
       topic:
+        virtual_partitions.partitioner_format: needs to be defined and needs to respond to `#call`
         virtual_partitions.partitioner_respond_to_call: needs to be defined and needs to respond to `#call`
         virtual_partitions.max_partitions_format: needs to be equal or more than 1
         virtual_partitions.offset_metadata_strategy_format: needs to be either :exact or :current
@@ -26,10 +27,10 @@ en:
         filtering.factories_format: 'needs to contain only factories responding to #call'
         filtering.active_format: 'needs to be boolean'
 
-        expiring.ttl_format: 'needs to be equal or more than 0 and an integer'
+        expiring.ttl_format: 'needs to be a positive integer'
         expiring.active_format: 'needs to be boolean'
 
-        delaying.delay_format: 'needs to be equal or more than 0 and an integer'
+        delaying.delay_format: 'needs to be a positive integer'
         delaying.active_format: 'needs to be boolean'
 
         pause.active_format: 'needs to be boolean'
