@@ -40,7 +40,7 @@ module Karafka
             # `consumer_groups.virtual_partitions.estimator` config.
             class ResultBuilder
               # @param settings [Hash] estimator settings to include in the result. Its
-              #   `:concurrency` is used to count the poor batches.
+              #   `:concurrency` is used to decide if there is anything to score.
               # @param details [Boolean] should the partitions stats also include per-batch details
               def initialize(settings:, details:)
                 @settings = settings
@@ -94,22 +94,24 @@ module Karafka
                 end
 
                 active_vps = batches.map { |batch| batch[:active_vps] }.sort!
-                uncollapsed_batches = batches.reject { |batch| batch[:collapsed] }
+                measured_batches = batches.reject { |batch| batch[:load_imbalance].nil? }
+                balanced_batches = batches.reject { |batch| batch[:balanced_speedup].nil? }
 
                 result.merge!(
                   avg_unique_keys: average(batches, :unique_keys),
                   avg_null_keys: average(batches, :null_keys),
                   avg_active_vps: average(batches, :active_vps),
                   avg_utilization: average(batches, :utilization),
-                  avg_load_imbalance: uncollapsed_batches.empty? ? nil : average(uncollapsed_batches, :load_imbalance),
+                  avg_load_imbalance: measured_batches.empty? ? nil : average(measured_batches, :load_imbalance),
                   avg_parallelization: average(batches, :parallelization),
                   avg_speedup: average(batches, :speedup),
+                  avg_balanced_speedup: balanced_batches.empty? ? nil : average(balanced_batches, :balanced_speedup),
                   active_vps: {
                     min: active_vps.first,
                     median: median(active_vps),
                     max: active_vps.last
                   },
-                  poor_batches: batches.count { |batch| batch[:active_vps] < @concurrency / 2.0 },
+                  poor_batches: batches.count { |batch| batch[:parallelization] < 50 },
                   single_vp_batches: batches.count { |batch| batch[:active_vps] == 1 }
                 )
 
@@ -131,8 +133,10 @@ module Karafka
               # @return [Integer] score from 0 to 100
               def score(stats)
                 weights = @config.score_weights
-                # Without any batch to measure the balance on, it is the worst case
-                balance = [100.0 - (stats[:avg_load_imbalance] || 100.0), 0.0].max
+                # Single group batches have no load imbalance to measure, so they count as the worst
+                # balance
+                measured_share = (stats[:batches] - stats[:single_vp_batches]).fdiv(stats[:batches])
+                balance = [100.0 - (stats[:avg_load_imbalance] || 100.0), 0.0].max * measured_share
                 stability = 100.0 - (stats[:poor_batches] * 100.0 / stats[:batches])
 
                 (

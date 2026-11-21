@@ -34,13 +34,13 @@ RSpec.describe_current do
   it { expect(config.distribution).to eq(:consistent) }
   it { expect(config.report_file).to eq("report.json") }
   it { expect(config.recommended_score).to eq(70) }
-  it { expect(config.maybe_score).to eq(40) }
+  it { expect(config.maybe_score).to eq(30) }
 
   it "has score weights that sum up to 100" do
     expect(config.score_weights.to_h).to eq(
-      utilization: 40,
-      parallelization: 30,
-      balance: 20,
+      utilization: 10,
+      parallelization: 70,
+      balance: 10,
       stability: 10
     )
   end

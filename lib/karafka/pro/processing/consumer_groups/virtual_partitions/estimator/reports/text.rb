@@ -60,15 +60,20 @@ module Karafka
                     "Virtual Partitions should parallelize this data well."
                   ],
                   "maybe" => [
-                    "Virtual Partitions may help, but the keys do not spread evenly.",
-                    "Try a partitioner on a more granular attribute or the :balanced distribution."
+                    "Virtual Partitions may help, but the messages do not spread over all of them.",
+                    "Try a partitioner on a more granular attribute."
                   ],
                   "not_recommended" => [
                     "Virtual Partitions are unlikely to help with this data.",
-                    "Most batches use only a few keys. Use a more granular partitioner or more " \
-                    "Kafka partitions."
+                    "In most batches a few keys hold most of the messages. Use a more granular " \
+                    "partitioner or more Kafka partitions."
                   ]
                 }.freeze
+
+                # Suggestion when the verdict is not `recommended` and the `:balanced` distribution
+                # would give a higher speedup than the `:consistent` one
+                BALANCED_SUGGESTION = "Try the :balanced distribution, which gives a higher speedup " \
+                  "for this data."
 
                 # Suggestion when there is no score, because a concurrency below 2 parallelizes
                 # nothing
@@ -79,10 +84,18 @@ module Karafka
                 # Limitations the estimate does not model
                 CAVEATS = [
                   "The estimate assumes the same processing cost for each message.",
+                  "The estimate assumes full batches. A consumer that is caught up gets smaller " \
+                  "batches, which parallelize less.",
                   "The worker pool is shared with other partitions and topics."
                 ].freeze
 
-                private_constant :COLUMNS, :SUGGESTIONS, :UNSCORED_SUGGESTIONS, :CAVEATS
+                private_constant(
+                  :COLUMNS,
+                  :SUGGESTIONS,
+                  :BALANCED_SUGGESTION,
+                  :UNSCORED_SUGGESTIONS,
+                  :CAVEATS
+                )
 
                 # @param report [Hash] report parsed from JSON, so with String keys
                 def initialize(report)
@@ -160,7 +173,18 @@ module Karafka
                 def suggestions(stats)
                   return UNSCORED_SUGGESTIONS if stats["score"].nil?
 
-                  SUGGESTIONS.fetch(stats["verdict"], [])
+                  suggestions = SUGGESTIONS.fetch(stats["verdict"], [])
+
+                  return suggestions if stats["verdict"] == "recommended" || !balanced_faster?(stats)
+
+                  [*suggestions, BALANCED_SUGGESTION]
+                end
+
+                # @param stats [Hash] summary stats
+                # @return [Boolean] true when the `:balanced` distribution would give a higher
+                #   speedup
+                def balanced_faster?(stats)
+                  stats["avg_balanced_speedup"].to_f > stats["avg_speedup"].to_f
                 end
 
                 # @param value [Object]
