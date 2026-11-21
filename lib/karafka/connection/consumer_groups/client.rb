@@ -800,7 +800,10 @@ module Karafka
 
           # Revocation callbacks run inside of the drain call, before its messages reach the buffer.
           # The drain runs only without an earlier rebalance in this batch, so all the revocations
-          # are from the drain itself
+          # are from the drain itself. The seeks below take `@mutex`, but a seek from another thread
+          # done after the drain call and before them is overwritten. Only non-blocking jobs and
+          # user threads seek while we poll, and it also needs a rebalance or an offset reset in
+          # this window, so we accept it
           clean_up_after_drain if @rebalance_manager.changed?
           align_positions_after_drain(rewound) if rewound
 
