@@ -17,7 +17,7 @@ class Consumer < Karafka::BaseConsumer
       # Simulate something went wrong on a per message basis
       raise StandardError
     rescue
-      dispatch_to_dlq(message)
+      dispatch_to_dead_letter_queue(message)
     end
 
     # Crash whole batch outside of per message error handling

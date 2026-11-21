@@ -6,6 +6,8 @@
 # We can use this API to manually move stuff to DLQ without raising any errors upon detecting a
 # corrupted message.
 
+# The deprecated `#dispatch_to_dlq` name should still dispatch.
+
 setup_karafka
 
 class Consumer < Karafka::BaseConsumer
