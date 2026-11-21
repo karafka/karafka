@@ -150,11 +150,8 @@ module Karafka
                 )
               end
 
-              # Alias of {#dispatch_to_dead_letter_queue}
-              # @param skippable_message [Karafka::Messages::Message]
-              def dispatch_to_dlq(skippable_message)
-                dispatch_to_dead_letter_queue(skippable_message)
-              end
+              # Older name, still supported
+              alias_method :dispatch_to_dlq, :dispatch_to_dead_letter_queue
 
               # Dispatches the message to the DLQ (when needed and when applicable based on
               # settings) and marks this message as consumed for non MOM flows.
