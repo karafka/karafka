@@ -60,15 +60,20 @@ module Karafka
                     "Virtual Partitions should parallelize this data well."
                   ],
                   "maybe" => [
-                    "Virtual Partitions may help, but the keys do not spread evenly.",
-                    "Try a partitioner on a more granular attribute or the :balanced distribution."
+                    "Virtual Partitions may help, but the messages do not spread over all of them.",
+                    "Try a partitioner on a more granular attribute."
                   ],
                   "not_recommended" => [
                     "Virtual Partitions are unlikely to help with this data.",
-                    "Most batches use only a few keys. Use a more granular partitioner or more " \
-                    "Kafka partitions."
+                    "In most batches a few keys hold most of the messages. Use a more granular " \
+                    "partitioner or more Kafka partitions."
                   ]
                 }.freeze
+
+                # Suggestion for the `maybe` verdict when the `:consistent` distribution puts more
+                # than one key into a virtual partition, which the `:balanced` one can spread
+                BALANCED_SUGGESTION = "Try the :balanced distribution, as some keys share a " \
+                  "virtual partition."
 
                 # Suggestion when there is no score, because a concurrency below 2 parallelizes
                 # nothing
@@ -79,10 +84,18 @@ module Karafka
                 # Limitations the estimate does not model
                 CAVEATS = [
                   "The estimate assumes the same processing cost for each message.",
+                  "The estimate assumes full batches. A consumer that is caught up gets smaller " \
+                  "batches, which parallelize less.",
                   "The worker pool is shared with other partitions and topics."
                 ].freeze
 
-                private_constant :COLUMNS, :SUGGESTIONS, :UNSCORED_SUGGESTIONS, :CAVEATS
+                private_constant(
+                  :COLUMNS,
+                  :SUGGESTIONS,
+                  :BALANCED_SUGGESTION,
+                  :UNSCORED_SUGGESTIONS,
+                  :CAVEATS
+                )
 
                 # @param report [Hash] report parsed from JSON, so with String keys
                 def initialize(report)
@@ -160,7 +173,20 @@ module Karafka
                 def suggestions(stats)
                   return UNSCORED_SUGGESTIONS if stats["score"].nil?
 
-                  SUGGESTIONS.fetch(stats["verdict"], [])
+                  suggestions = SUGGESTIONS.fetch(stats["verdict"], [])
+
+                  return suggestions unless stats["verdict"] == "maybe" && keys_share_vps?(stats)
+
+                  [*suggestions, BALANCED_SUGGESTION]
+                end
+
+                # @param stats [Hash] summary stats
+                # @return [Boolean] true when the `:consistent` distribution put more keys than
+                #   virtual partitions into the batches
+                def keys_share_vps?(stats)
+                  return false unless (@report["settings"] || {})["distribution"] == "consistent"
+
+                  stats["avg_unique_keys"].to_f > stats["avg_active_vps"].to_f
                 end
 
                 # @param value [Object]

@@ -40,7 +40,7 @@ module Karafka
             # `consumer_groups.virtual_partitions.estimator` config.
             class ResultBuilder
               # @param settings [Hash] estimator settings to include in the result. Its
-              #   `:concurrency` is used to count the poor batches.
+              #   `:concurrency` is used to count the poor batches (speedup below half of it).
               # @param details [Boolean] should the partitions stats also include per-batch details
               def initialize(settings:, details:)
                 @settings = settings
@@ -109,7 +109,7 @@ module Karafka
                     median: median(active_vps),
                     max: active_vps.last
                   },
-                  poor_batches: batches.count { |batch| batch[:active_vps] < @concurrency / 2.0 },
+                  poor_batches: batches.count { |batch| batch[:speedup] < @concurrency / 2.0 },
                   single_vp_batches: batches.count { |batch| batch[:active_vps] == 1 }
                 )
 

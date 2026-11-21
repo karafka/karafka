@@ -43,6 +43,7 @@ RSpec.describe_current do
     utilization: 100.0,
     load_imbalance: 0.0,
     parallelization: 100.0,
+    speedup: active_vps.to_f,
     collapsed: false
   )
     {
@@ -55,7 +56,7 @@ RSpec.describe_current do
       utilization: utilization,
       load_imbalance: load_imbalance,
       parallelization: parallelization,
-      speedup: active_vps.to_f
+      speedup: speedup
     }
   end
 
@@ -108,6 +109,14 @@ RSpec.describe_current do
     end
   end
 
+  context "when a batch uses many VPs but one of them holds most of the messages" do
+    let(:partitions_batches) { { 0 => [batch(active_vps: 4, speedup: 1.1), batch(active_vps: 2, speedup: 2.0)] } }
+
+    it "counts the poor batches by the speedup" do
+      expect(result[:summary]).to include(poor_batches: 1)
+    end
+  end
+
   context "with an even number of batches" do
     let(:partitions_batches) do
       { 0 => [batch(active_vps: 1), batch(active_vps: 4)], 1 => [batch(active_vps: 2), batch(active_vps: 2)] }
@@ -155,7 +164,7 @@ RSpec.describe_current do
     end
 
     it "scores the balance as the worst case" do
-      expect(result[:summary]).to include(avg_load_imbalance: nil, score: 18, verdict: :not_recommended)
+      expect(result[:summary]).to include(avg_load_imbalance: nil, score: 20, verdict: :not_recommended)
     end
   end
 
@@ -200,25 +209,25 @@ RSpec.describe_current do
     let(:partitions_batches) { { 0 => [batch(active_vps: 4, **stats)] } }
 
     context "when at the recommended threshold" do
-      let(:stats) { { utilization: 25.0 } }
+      let(:stats) { { utilization: 80.0, parallelization: 60.0 } }
 
       it { expect(result[:summary]).to include(score: 70, verdict: :recommended) }
     end
 
     context "when just below the recommended threshold" do
-      let(:stats) { { utilization: 97.5, parallelization: 0.0 } }
+      let(:stats) { { utilization: 70.0, parallelization: 60.0 } }
 
       it { expect(result[:summary]).to include(score: 69, verdict: :maybe) }
     end
 
     context "when at the maybe threshold" do
-      let(:stats) { { utilization: 25.0, parallelization: 0.0 } }
+      let(:stats) { { utilization: 60.0, parallelization: 20.0 } }
 
       it { expect(result[:summary]).to include(score: 40, verdict: :maybe) }
     end
 
     context "when just below the maybe threshold" do
-      let(:stats) { { utilization: 22.5, parallelization: 0.0 } }
+      let(:stats) { { utilization: 50.0, parallelization: 20.0 } }
 
       it { expect(result[:summary]).to include(score: 39, verdict: :not_recommended) }
     end

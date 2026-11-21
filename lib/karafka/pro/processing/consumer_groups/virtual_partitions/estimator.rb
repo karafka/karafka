@@ -49,6 +49,10 @@ module Karafka
           # @note The estimate assumes the same processing cost for each message. It does not
           #   model the worker pool that is shared with other partitions and topics.
           #
+          # @note The estimate assumes full batches of `batch_size` messages, as a consumer gets
+          #   when it processes a backlog. A consumer that is caught up gets smaller batches, which
+          #   parallelize less.
+          #
           # @example
           #   vps = Karafka::Pro::Processing::ConsumerGroups::VirtualPartitions
           #   estimator = vps::Estimator.new(
@@ -235,7 +239,8 @@ module Karafka
                 # A collapsed batch is one group, which is not a measure of how evenly keys spread
                 load_imbalance: collapsed ? nil : coefficient_of_variation(sizes),
                 parallelization: [size * 100.0 / @concurrency / largest, 100.0].min,
-                speedup: size.to_f / largest
+                # More groups than concurrency still run on at most concurrency workers
+                speedup: [size.to_f / largest, @concurrency].min
               }
             end
 

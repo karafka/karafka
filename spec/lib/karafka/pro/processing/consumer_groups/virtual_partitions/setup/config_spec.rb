@@ -38,9 +38,9 @@ RSpec.describe_current do
 
   it "has score weights that sum up to 100" do
     expect(config.score_weights.to_h).to eq(
-      utilization: 40,
-      parallelization: 30,
-      balance: 20,
+      utilization: 10,
+      parallelization: 70,
+      balance: 10,
       stability: 10
     )
   end

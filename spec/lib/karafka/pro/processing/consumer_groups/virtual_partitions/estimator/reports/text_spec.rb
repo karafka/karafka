@@ -49,6 +49,7 @@ RSpec.describe_current do
       it { expect(text).to include("distribution: consistent") }
       it { expect(text).to include("verdict: #{estimator.analyze(messages)[:summary][:verdict]}") }
       it { expect(text).to include("The worker pool is shared with other partitions and topics.") }
+      it { expect(text).to include("The estimate assumes full batches.") }
       it { expect(text).not_to include("\e[") }
       it { expect(text).to include("Virtual Partitions should parallelize this data well.") }
 
@@ -112,7 +113,38 @@ RSpec.describe_current do
       it { expect(text).to include("score: -/100") }
       it { expect(text).to include("verdict: not_recommended") }
       it { expect(text).to include("A concurrency below 2 runs each batch as one group") }
-      it { expect(text).not_to include("Most batches use only a few keys") }
+      it { expect(text).not_to include("a few keys hold most of the messages") }
+    end
+
+    context "when the verdict is maybe" do
+      let(:summary) { { "score" => 50, "verdict" => "maybe", "avg_unique_keys" => 2.0, "avg_active_vps" => 2.0 } }
+      let(:report) do
+        JSON.parse(estimator.analyze(messages).to_json).tap { |report| report["summary"].merge!(summary) }
+      end
+
+      it { expect(text).to include("Virtual Partitions may help") }
+      it { expect(text).not_to include(":balanced") }
+
+      context "when keys share VPs with the consistent distribution" do
+        let(:summary) { super().merge("avg_unique_keys" => 6.0, "avg_active_vps" => 4.0) }
+
+        it { expect(text).to include("Try the :balanced distribution") }
+      end
+
+      context "when keys share VPs with the balanced distribution" do
+        let(:estimator) { estimator_class.new(concurrency: 5, distribution: :balanced) }
+        let(:summary) { super().merge("avg_unique_keys" => 6.0, "avg_active_vps" => 4.0) }
+
+        it { expect(text).not_to include("Try the :balanced distribution") }
+      end
+    end
+
+    context "when the verdict is not_recommended" do
+      let(:messages) { build_messages(Array.new(200) { |i| (i % 100 < 96) ? "hot" : "stray-#{i}" }) }
+
+      it { expect(text).to include("verdict: not_recommended") }
+      it { expect(text).to include("In most batches a few keys hold most of the messages.") }
+      it { expect(text).not_to include(":balanced") }
     end
 
     context "with unknown top level keys" do
