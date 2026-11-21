@@ -780,7 +780,9 @@ module Karafka
             end
 
             # Handled as on the first attempt of a blocking `#poll`, as the drain neither waits nor
-            # retries. A repeated error reaches the next blocking `#poll` that owns the retries
+            # retries. An error that keeps coming behind messages is handled only in drains, so it
+            # gets no backoff and no escalation. A retry of a blocking `#poll` would also return the
+            # next message
             action = poll_error_action(item, true)
 
             case action
