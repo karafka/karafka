@@ -85,7 +85,7 @@ module Karafka
                       return resume if revoked?
 
                       skippable_message, = find_skippable_message
-                      dispatch_to_dlq(skippable_message) if dispatch_to_dlq?
+                      dispatch_to_dead_letter_queue(skippable_message) if dispatch_to_dlq?
                       mark_dispatched_to_dlq(skippable_message)
                     end
                   end

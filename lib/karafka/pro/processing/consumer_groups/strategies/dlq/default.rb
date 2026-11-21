@@ -151,7 +151,7 @@ module Karafka
               #
               # @param skippable_message [Array<Karafka::Messages::Message>] message we want to
               #   dispatch to DLQ
-              def dispatch_to_dlq(skippable_message)
+              def dispatch_to_dead_letter_queue(skippable_message)
                 # DLQ should never try to dispatch a message that was cleaned. It message was
                 # cleaned, we will not have all the needed data. If you see this error, it means
                 # that your processing flow is not as expected and you have cleaned message that
@@ -173,6 +173,9 @@ module Karafka
                 )
               end
 
+              # Older name, still supported
+              alias_method :dispatch_to_dlq, :dispatch_to_dead_letter_queue
+
               # Dispatches the message to the DLQ (when needed and when applicable based on
               # settings) and marks this message as consumed for non MOM flows.
               #
@@ -181,7 +184,7 @@ module Karafka
                 skippable_message, = find_skippable_message
 
                 dispatch = lambda do
-                  dispatch_to_dlq(skippable_message) if dispatch_to_dlq?
+                  dispatch_to_dead_letter_queue(skippable_message) if dispatch_to_dlq?
 
                   mark_dispatched_to_dlq(skippable_message) if mark_after_dispatch?
                 end
@@ -221,7 +224,13 @@ module Karafka
 
                 # Optional method user can define in consumer to enhance the dlq message hash with
                 # some extra details if needed or to replace payload, etc
-                if respond_to?(:enhance_dlq_message, true)
+                if respond_to?(:enhance_dead_letter_queue_message, true)
+                  enhance_dead_letter_queue_message(
+                    dlq_message,
+                    skippable_message
+                  )
+                # Older name, still supported
+                elsif respond_to?(:enhance_dlq_message, true)
                   enhance_dlq_message(
                     dlq_message,
                     skippable_message
