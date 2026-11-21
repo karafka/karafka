@@ -642,6 +642,16 @@ RSpec.describe_current do
           end
         end
 
+        context "when only its eof was drained" do
+          let(:first) { message(1, 0) }
+          let(:drained) { [eof_error(0, 1), message(1, 1)] }
+
+          it "expect to remove it without seeking" do
+            expect(buffer_state).to eq([topic_name, 1] => { offsets: [0, 1], eof: false })
+            expect(kafka).not_to have_received(:seek)
+          end
+        end
+
         context "when a message from before the revocation precedes lower ones" do
           let(:drained) { [message(0, 6), message(0, 5), message(0, 6)] }
           let(:position) { 7 }

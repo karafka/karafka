@@ -818,6 +818,7 @@ module Karafka
           rewinds = []
 
           @buffer.each do |topic_name, partition, messages|
+            next if messages.empty?
             next unless revoked.fetch(topic_name, EMPTY_ARRAY).include?(partition)
             next unless assigned.fetch(topic_name, EMPTY_ARRAY).include?(partition)
 
