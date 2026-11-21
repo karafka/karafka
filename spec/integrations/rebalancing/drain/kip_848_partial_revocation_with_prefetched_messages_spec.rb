@@ -93,7 +93,6 @@ other = Thread.new do
   # Karafka should have consumed from all the partitions, so the revoked ones have queued data
   sleep(0.1) until PARTITIONS.times.all? { |partition| DT[:all].fetch(partition, []).any? }
 
-  # Joins only once Karafka waits before a drain
   DT[:ready] = true
   sleep(0.1) until DT.key?(:joining)
 

@@ -40,8 +40,6 @@ class Consumer < Karafka::BaseConsumer
 
     messages.each do |message|
       (after_reset ? DT[:after] : DT[:before]) << message.offset
-
-      # Before the reset, offsets are committed only up to COMMITTED
       mark_as_consumed!(message) if after_reset || message.offset < COMMITTED
     end
 
