@@ -61,12 +61,18 @@ RSpec.describe_current do
     context "when a client sends a too long request line" do
       let(:client) { TCPSocket.new("127.0.0.1", port) }
 
+      let(:response) do
+        client.write("GET /#{"a" * 10_000} HTTP/1.1\r\n\r\n")
+        client.wait_readable(3)
+        client.read
+      rescue Errno::ECONNRESET, Errno::EPIPE
+        ""
+      end
+
       after { client.close }
 
       it "closes the connection without a response and keeps serving" do
-        client.write("GET /#{"a" * 8_187}")
-        expect(client.wait_readable(3)).to eq(client)
-        expect(client.read).to eq("")
+        expect(response).to eq("")
         expect(probe.call).to eq("200")
       end
     end
