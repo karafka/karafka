@@ -58,8 +58,9 @@ module Karafka
                 setting(:maybe_score, default: 30)
 
                 # Weights of the score components. They need to sum up to 100. Parallelization
-                # is the speedup gain over sequential processing, so it weighs the most. The others do not tell how much
-                # work runs in parallel (e.g. one hot key with a few stray keys uses all VPs).
+                # is the speedup gain over sequential processing, so it weighs the most. The others
+                # do not tell how much work runs in parallel (e.g. one hot key with a few stray keys
+                # uses all VPs).
                 setting(:score_weights) do
                   setting(:utilization, default: 10)
                   setting(:parallelization, default: 70)

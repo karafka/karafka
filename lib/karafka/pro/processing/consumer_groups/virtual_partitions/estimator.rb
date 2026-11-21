@@ -243,10 +243,8 @@ module Karafka
                 utilization: [active_vps * 100.0 / @concurrency, 100.0].min,
                 # One group (e.g. a collapsed batch) is not a measure of how evenly keys spread
                 load_imbalance: (active_vps == 1) ? nil : coefficient_of_variation(sizes),
-                # Gain over sequential processing: 0 at 1x, 100 at a speedup equal to concurrency
                 parallelization: (@concurrency > 1) ? (speedup - 1) * 100 / (@concurrency - 1) : 0.0,
                 speedup: speedup,
-                # Speedup of the :balanced distribution, estimated only for the :consistent one
                 balanced_speedup: balanced_groups && speedup(size, balanced_groups.each_value.map(&:size).max)
               }
             end

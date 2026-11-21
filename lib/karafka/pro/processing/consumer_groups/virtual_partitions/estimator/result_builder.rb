@@ -94,7 +94,6 @@ module Karafka
                 end
 
                 active_vps = batches.map { |batch| batch[:active_vps] }.sort!
-                # Single group batches have no load imbalance
                 measured_batches = batches.reject { |batch| batch[:load_imbalance].nil? }
                 balanced_batches = batches.reject { |batch| batch[:balanced_speedup].nil? }
 
