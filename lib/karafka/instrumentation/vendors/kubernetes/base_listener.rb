@@ -19,7 +19,7 @@ module Karafka
           FAIL_CODE = "500 Internal Server Error"
 
           # Default time in ms we wait for a client to send the request line
-          DEFAULT_CLIENT_READ_TIMEOUT = 10_000
+          DEFAULT_CLIENT_READ_TIMEOUT = 5_000
 
           # Max number of bytes we read from a client while looking for the request line
           MAX_REQUEST_LINE_LENGTH = 8_192
@@ -78,8 +78,9 @@ module Karafka
             client&.close
           end
 
-          # Reads from the client until the end of the request line, within a deadline and a size
-          # limit
+          # Reads the request line without `gets`, because `gets` blocks with no timeout and no size
+          # limit. Probes are served one at a time, so one idle or slow connection would block all
+          # the later probes until it closes, and a client could make us buffer a line of any length
           #
           # @param client [TCPSocket]
           # @return [String, nil] request line or nil when the client did not send one in time, sent
