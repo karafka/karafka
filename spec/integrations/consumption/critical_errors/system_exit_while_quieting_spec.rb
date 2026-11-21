@@ -14,6 +14,10 @@ end
   end
 end
 
+Karafka::App.monitor.subscribe("app.stopping") do
+  DT[:stopping_thread] = Thread.current.name
+end
+
 class Consumer < Karafka::BaseConsumer
   def consume
     DT[:in] = true
@@ -33,10 +37,11 @@ Thread.new do
   Process.kill("TSTP", Process.pid)
 end
 
-# The stop is initiated by the framework, the wait block only observes
 start_karafka_and_wait_until(reset_status: true) do
   DT[:states].include?("app.stopping")
 end
 
-assert_equal %w[app.quieting app.stopping], DT[:states].first(2)
+# Quiet may be reached before the critical shutdown starts
+assert_equal %w[app.quieting app.stopping], DT[:states].uniq - %w[app.quiet]
+assert_equal "karafka.critical_shutdown", DT[:stopping_thread]
 assert_equal 0, fetch_next_offset

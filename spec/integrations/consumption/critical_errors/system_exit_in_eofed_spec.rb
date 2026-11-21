@@ -39,7 +39,6 @@ end
 
 produce_many(DT.topic, DT.uuids(2))
 
-# The stop is initiated by the framework, the wait block only observes
 start_karafka_and_wait_until(reset_status: true) do
   DT.key?(:eofed) && Karafka::App.done?
 end

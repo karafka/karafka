@@ -75,7 +75,6 @@ end
 
 produce_many(DT.topics[0], (0..9).map(&:to_s))
 
-# The stop is initiated by the framework, the wait block only observes
 start_karafka_and_wait_until(reset_status: true) do
   DT.key?(:failed_batch_first) && Karafka::App.done?
 end

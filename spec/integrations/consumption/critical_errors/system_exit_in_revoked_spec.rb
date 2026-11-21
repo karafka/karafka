@@ -51,7 +51,6 @@ other = Thread.new do
   consumer.poll(100) until DT.key?(:end)
 end
 
-# The stop is initiated by the framework, the wait block only observes
 start_karafka_and_wait_until(reset_status: true) do
   !DT[:revoked].empty? && Karafka::App.done?
 end
