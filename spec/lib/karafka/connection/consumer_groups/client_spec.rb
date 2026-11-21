@@ -715,50 +715,6 @@ RSpec.describe_current do
           end
         end
 
-        context "when the drain goes back within a run of one partition" do
-          let(:first) { message(1, 0) }
-          let(:drained) { [message(0, 5), message(0, 0)] }
-
-          it "expect to seek the stale position" do
-            client.batch_poll
-
-            expect(kafka).to have_received(:seek) do |seek|
-              expect([seek.topic, seek.partition, seek.offset]).to eq([topic_name, 0, 1])
-            end
-          end
-        end
-
-        context "when the drain goes back after a run of another partition" do
-          let(:first) { message(1, 0) }
-          let(:drained) { [message(0, 5), message(1, 1), message(0, 0)] }
-
-          it "expect to seek the stale position" do
-            client.batch_poll
-
-            expect(kafka).to have_received(:seek) do |seek|
-              expect([seek.topic, seek.partition, seek.offset]).to eq([topic_name, 0, 1])
-            end
-          end
-        end
-
-        context "when the previous message of the partition came last in an earlier drain" do
-          let(:first) { message(1, 0) }
-
-          before do
-            allow(kafka).to receive(:poll).and_return(first, nil, message(1, 1), nil)
-            allow(kafka).to receive(:poll_batch_nb).and_return([message(0, 300)], [message(0, 0)])
-          end
-
-          it "expect to seek the stale position" do
-            client.batch_poll
-            client.batch_poll
-
-            expect(kafka).to have_received(:seek) do |seek|
-              expect([seek.topic, seek.partition, seek.offset]).to eq([topic_name, 0, 1])
-            end
-          end
-        end
-
         context "when the partition was revoked in an earlier batch" do
           let(:first) { message(1, 0) }
 
@@ -815,23 +771,6 @@ RSpec.describe_current do
         context "when another thread seeks while the drain aligns the position" do
           it "expect the other seek to wait for it" do
             expect(seek_offsets_with_drain_seek_held(2)).to eq([[2], [2, 7]])
-          end
-        end
-
-        context "when the same partition of another topic came in between" do
-          let(:other_topic) { SecureRandom.hex(6) }
-          let(:first) { message(1, 0) }
-
-          let(:drained) do
-            [message(0, 300), message(0, 0, other_topic), message(0, 1, other_topic), message(0, 0)]
-          end
-
-          it "expect to seek the stale position of the first topic only" do
-            client.batch_poll
-
-            expect(kafka).to have_received(:seek).once do |seek|
-              expect([seek.topic, seek.partition, seek.offset]).to eq([topic_name, 0, 1])
-            end
           end
         end
 

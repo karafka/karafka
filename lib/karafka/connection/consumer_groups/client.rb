@@ -87,8 +87,7 @@ module Karafka
           @closed = false
           @subscription_group = subscription_group
           @buffer = RawMessagesBuffer.new
-          # Last offset handed over per partition, to detect drains that went back in offsets
-          @last_offsets = Hash.new { |hash, topic_name| hash[topic_name] = {} }
+          @offset_regression_tracker = OffsetRegressionTracker.new
           @rebalance_manager = RebalanceManager.new(@subscription_group.id, @buffer)
           @rebalance_callback = Instrumentation::Callbacks::ConsumerGroups::Rebalance.new(
             @subscription_group,
@@ -163,7 +162,7 @@ module Karafka
               nil
             else
               @buffer << response
-              @last_offsets[response.topic][response.partition] = response.offset
+              @offset_regression_tracker.track(response)
 
               # After a rebalance in this poll, the batch ends below without draining, so the drain
               # clean-up never removes messages of partitions assigned back in that rebalance
@@ -177,7 +176,7 @@ module Karafka
             #
             # We also do early break, so the information about rebalance is used as soon as possible
             if @rebalance_manager.changed?
-              forget_revoked_last_offsets
+              @offset_regression_tracker.forget(@rebalance_manager.revoked_partitions)
 
               # Since rebalances do not occur often, we can run events polling as well without
               # any throttling
@@ -631,7 +630,7 @@ module Karafka
           @kafka = nil
           @wrapped_kafka = nil
           @buffer.clear
-          @last_offsets.clear
+          @offset_regression_tracker.clear
           # We do not clear rebalance manager here as we may still have revocation info here that we
           # want to consider valid prior to running another reconnection
         end
@@ -759,22 +758,10 @@ module Karafka
           return false unless room.positive?
 
           eofed = false
-          rewound = nil
-          previous = nil
 
           kafka.poll_batch_nb(0, max_items: room).each do |item|
             unless item.is_a?(Rdkafka::RdkafkaError)
-              # Drained messages come in runs of one partition, so we look up the last offset
-              # handed over only when the partition changes
-              if previous && previous.partition == item.partition && previous.topic == item.topic
-                (rewound ||= []) << item if item.offset < previous.offset
-              else
-                @last_offsets[previous.topic][previous.partition] = previous.offset if previous
-                last_offset = @last_offsets[item.topic][item.partition]
-                (rewound ||= []) << item if last_offset && item.offset < last_offset
-              end
-
-              previous = item
+              @offset_regression_tracker.track(item)
 
               next @buffer << item
             end
@@ -798,8 +785,6 @@ module Karafka
             end
           end
 
-          @last_offsets[previous.topic][previous.partition] = previous.offset if previous
-
           # Revocation callbacks run inside of the drain call, before its messages reach the buffer.
           # The drain runs only without an earlier rebalance in this batch, so all the revocations
           # are from the drain itself. The seeks below take `@mutex`, but a seek from another thread
@@ -807,6 +792,7 @@ module Karafka
           # user threads seek while we poll, and it also needs a rebalance or an offset reset in
           # this window, so we accept it
           clean_up_after_drain if @rebalance_manager.changed?
+          rewound = @offset_regression_tracker.rewound
           align_positions_after_drain(rewound) if rewound
 
           # A message after an eof of the same partition clears its eof
@@ -862,16 +848,6 @@ module Karafka
 
               internal_seek(Messages::Seek.new(topic_name, partition, messages.last.offset + 1))
             end
-          end
-        end
-
-        # Removes the last offsets of revoked partitions, so the drain of a partition assigned back
-        # later does not compare its messages with offsets from before the revocation
-        def forget_revoked_last_offsets
-          @rebalance_manager.revoked_partitions.each do |topic_name, partitions|
-            next unless @last_offsets.key?(topic_name)
-
-            partitions.each { |partition| @last_offsets[topic_name].delete(partition) }
           end
         end
 
