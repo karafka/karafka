@@ -162,7 +162,7 @@ module Karafka
               nil
             else
               @buffer << response
-              @offset_regression_tracker.track(response)
+              @offset_regression_tracker.store(response)
 
               # After a rebalance in this poll, the batch ends below without draining, so the drain
               # clean-up never removes messages of partitions assigned back in that rebalance

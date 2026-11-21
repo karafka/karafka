@@ -31,6 +31,16 @@ module Karafka
           @previous = message
         end
 
+        # Stores the message as the last one handed over for its partition, without checking it.
+        # A blocking poll always moves the position to its message, so it cannot leave it stale
+        #
+        # @param message [Rdkafka::Consumer::Message] message handed over to the buffer
+        def store(message)
+          previous = @previous
+          @last_offsets[previous.topic][previous.partition] = previous.offset if previous
+          @previous = message
+        end
+
         # @return [Array<Rdkafka::Consumer::Message>, nil] messages tracked behind the previous
         #   message of their partition since the last call, nil when there were none
         def rewound

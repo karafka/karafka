@@ -791,6 +791,20 @@ RSpec.describe_current do
           end
         end
 
+        context "when only the blocking poll goes back in offsets" do
+          before do
+            allow(kafka).to receive(:poll).and_return(message(0, 300), nil, message(0, 0), nil)
+            allow(kafka).to receive(:poll_batch_nb).and_return([], [message(1, 0)])
+          end
+
+          it "expect not to check the position" do
+            client.batch_poll
+            client.batch_poll
+
+            expect(kafka).not_to have_received(:position)
+          end
+        end
+
         context "when the drain goes forward" do
           let(:first) { message(0, 0) }
 

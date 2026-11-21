@@ -95,14 +95,39 @@ RSpec.describe_current do
     end
   end
 
-  describe "#clear" do
+  describe "#store" do
     before do
       tracker.track(message(0, 300))
-      tracker.track(message(0, 0))
-      tracker.clear
+      tracker.store(message(0, 0))
     end
 
-    it { expect(tracker.rewound).to be_nil }
-    it { expect(rewound(message(0, 0))).to be_nil }
+    it "expect not to check the message" do
+      expect(tracker.rewound).to be_nil
+    end
+
+    it "expect to compare later messages with it" do
+      expect(rewound(message(0, 1), message(1, 0), message(0, 0))).to eq([[topic_name, 0, 0]])
+    end
+  end
+
+  describe "#clear" do
+    context "when rewound messages were not taken yet" do
+      before do
+        tracker.track(message(0, 300))
+        tracker.track(message(0, 0))
+        tracker.clear
+      end
+
+      it { expect(tracker.rewound).to be_nil }
+    end
+
+    context "when a message was tracked" do
+      before do
+        tracker.track(message(0, 300))
+        tracker.clear
+      end
+
+      it { expect(rewound(message(0, 0))).to be_nil }
+    end
   end
 end
