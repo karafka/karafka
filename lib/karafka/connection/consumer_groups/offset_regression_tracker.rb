@@ -8,13 +8,16 @@ module Karafka
       #
       # @note Messages come in runs of one partition, so the last offset of a partition is stored
       #   only when the partition changes, and a message of the same partition is compared with
-      #   the previous one
+      #   the previous one. Only the coordinates of the previous message are kept, not the message,
+      #   so its payload is not retained between batches
       class OffsetRegressionTracker
         # @return [Karafka::Connection::ConsumerGroups::OffsetRegressionTracker] tracker without
         #   any tracked offsets
         def initialize
           @last_offsets = Hash.new { |hash, topic_name| hash[topic_name] = {} }
-          @previous = nil
+          @previous_topic = nil
+          @previous_partition = nil
+          @previous_offset = nil
           @rewound = nil
         end
 
@@ -23,17 +26,21 @@ module Karafka
         #
         # @param message [Rdkafka::Consumer::Message] message handed over to the buffer
         def track(message)
-          previous = @previous
+          topic_name = message.topic
+          partition = message.partition
+          offset = message.offset
 
-          if previous && previous.partition == message.partition && previous.topic == message.topic
-            (@rewound ||= []) << message if message.offset < previous.offset
+          if @previous_partition == partition && @previous_topic == topic_name
+            (@rewound ||= []) << message if offset < @previous_offset
           else
-            @last_offsets[previous.topic][previous.partition] = previous.offset if previous
-            last_offset = @last_offsets[message.topic][message.partition]
-            (@rewound ||= []) << message if last_offset && message.offset < last_offset
+            @last_offsets[@previous_topic][@previous_partition] = @previous_offset if @previous_topic
+            last_offset = @last_offsets[topic_name][partition]
+            (@rewound ||= []) << message if last_offset && offset < last_offset
+            @previous_topic = topic_name
+            @previous_partition = partition
           end
 
-          @previous = message
+          @previous_offset = offset
         end
 
         # Stores the message as the last one handed over for its partition, without checking it.
@@ -41,9 +48,10 @@ module Karafka
         #
         # @param message [Rdkafka::Consumer::Message] message handed over to the buffer
         def store(message)
-          previous = @previous
-          @last_offsets[previous.topic][previous.partition] = previous.offset if previous
-          @previous = message
+          @last_offsets[@previous_topic][@previous_partition] = @previous_offset if @previous_topic
+          @previous_topic = message.topic
+          @previous_partition = message.partition
+          @previous_offset = message.offset
         end
 
         # @return [Array<Rdkafka::Consumer::Message>, nil] messages tracked behind the previous
@@ -63,9 +71,7 @@ module Karafka
           @rewound = nil
 
           revoked_partitions.each do |topic_name, partitions|
-            if @previous&.topic == topic_name && partitions.include?(@previous.partition)
-              @previous = nil
-            end
+            clear_previous if @previous_topic == topic_name && partitions.include?(@previous_partition)
 
             next unless @last_offsets.key?(topic_name)
 
@@ -76,8 +82,17 @@ module Karafka
         # Removes all the tracked offsets
         def clear
           @last_offsets.clear
-          @previous = nil
+          clear_previous
           @rewound = nil
+        end
+
+        private
+
+        # Forgets the previous message coordinates
+        def clear_previous
+          @previous_topic = nil
+          @previous_partition = nil
+          @previous_offset = nil
         end
       end
     end

@@ -55,6 +55,16 @@ RSpec.describe_current do
 
       it { expect(tracker.rewound).to be_nil }
     end
+
+    context "when a message that is not rewound was tracked" do
+      let(:tracked) { message(0, 0) }
+
+      before { tracker.track(tracked) }
+
+      it "expect not to keep it" do
+        expect(ObjectSpace.reachable_objects_from(tracker)).not_to include(tracked)
+      end
+    end
   end
 
   describe "#forget" do
@@ -109,6 +119,16 @@ RSpec.describe_current do
 
     it "expect to compare later messages with it" do
       expect(rewound(message(0, 1), message(1, 0), message(0, 0))).to eq([[topic_name, 0, 0]])
+    end
+
+    context "when a message was stored" do
+      let(:stored) { message(1, 0) }
+
+      before { tracker.store(stored) }
+
+      it "expect not to keep it" do
+        expect(ObjectSpace.reachable_objects_from(tracker)).not_to include(stored)
+      end
     end
   end
 
