@@ -80,7 +80,7 @@ RSpec.describe_current do
       end
     end
 
-    context "when consumer defines the deprecated #enhance_dlq_message" do
+    context "when consumer defines the older #enhance_dlq_message" do
       let(:consumer_class) do
         Class.new(Karafka::BaseConsumer) do
           private
@@ -124,7 +124,7 @@ RSpec.describe_current do
   end
 
   describe "#dispatch_to_dlq" do
-    it "expect to keep dispatching to the DLQ topic under the deprecated name" do
+    it "expect to keep dispatching to the DLQ topic under the older name" do
       consumer.dispatch_to_dlq(message)
 
       expect(producer).to have_received(:produce_async)

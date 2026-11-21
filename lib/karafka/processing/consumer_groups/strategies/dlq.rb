@@ -134,8 +134,8 @@ module Karafka
             )
           end
 
+          # Alias of {#dispatch_to_dead_letter_queue}
           # @param skippable_message [Karafka::Messages::Message]
-          # @deprecated Use {#dispatch_to_dead_letter_queue}. Will be removed in Karafka 3.0.
           def dispatch_to_dlq(skippable_message)
             dispatch_to_dead_letter_queue(skippable_message)
           end

@@ -27,7 +27,7 @@ RSpec.describe_current do
   end
 
   describe "#dispatch_to_dlq" do
-    it "expect to keep dispatching to the DLQ topic under the deprecated name" do
+    it "expect to keep dispatching to the DLQ topic under the older name" do
       consumer.dispatch_to_dlq(message)
 
       expect(producer).to have_received(:produce_async).with(expected_dispatch)

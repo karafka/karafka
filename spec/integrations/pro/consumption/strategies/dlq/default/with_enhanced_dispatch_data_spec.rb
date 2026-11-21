@@ -30,7 +30,7 @@
 
 # We should be able to dispatch to DLQ with usage of the enhanced errors tracking details
 
-# The deprecated `#enhance_dlq_message` name should still be used.
+# The older `#enhance_dlq_message` name should still be used.
 
 setup_karafka(allow_errors: %w[consumer.consume.error])
 
