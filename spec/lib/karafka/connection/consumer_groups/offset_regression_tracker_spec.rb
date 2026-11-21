@@ -14,45 +14,47 @@ RSpec.describe_current do
     tracker.rewound&.map { |message| [message.topic, message.partition, message.offset] }
   end
 
-  context "when nothing was tracked" do
-    it { expect(tracker.rewound).to be_nil }
-  end
-
-  context "when offsets go forward" do
-    it { expect(rewound(message(0, 0), message(0, 1), message(1, 0), message(0, 2))).to be_nil }
-  end
-
-  context "when offsets go back within a run of one partition" do
-    it { expect(rewound(message(0, 5), message(0, 0))).to eq([[topic_name, 0, 0]]) }
-  end
-
-  context "when offsets go back after a run of another partition" do
-    it do
-      expect(rewound(message(0, 5), message(1, 1), message(0, 0))).to eq([[topic_name, 0, 0]])
-    end
-  end
-
-  context "when the same partition of another topic comes in between" do
-    it do
-      expect(
-        rewound(message(0, 300), message(0, 0, "other"), message(0, 1, "other"), message(0, 0))
-      ).to eq([[topic_name, 0, 0]])
-    end
-  end
-
-  context "when the previous message of the partition was tracked before the last take" do
-    before do
-      tracker.track(message(0, 300))
-      tracker.rewound
+  describe "#track and #rewound" do
+    context "when nothing was tracked" do
+      it { expect(tracker.rewound).to be_nil }
     end
 
-    it { expect(rewound(message(0, 0))).to eq([[topic_name, 0, 0]]) }
-  end
+    context "when offsets go forward" do
+      it { expect(rewound(message(0, 0), message(0, 1), message(1, 0), message(0, 2))).to be_nil }
+    end
 
-  context "when rewound messages were taken" do
-    before { rewound(message(0, 5), message(0, 0)) }
+    context "when offsets go back within a run of one partition" do
+      it { expect(rewound(message(0, 5), message(0, 0))).to eq([[topic_name, 0, 0]]) }
+    end
 
-    it { expect(tracker.rewound).to be_nil }
+    context "when offsets go back after a run of another partition" do
+      it do
+        expect(rewound(message(0, 5), message(1, 1), message(0, 0))).to eq([[topic_name, 0, 0]])
+      end
+    end
+
+    context "when the same partition of another topic comes in between" do
+      it do
+        expect(
+          rewound(message(0, 300), message(0, 0, "other"), message(0, 1, "other"), message(0, 0))
+        ).to eq([[topic_name, 0, 0]])
+      end
+    end
+
+    context "when the previous message of the partition was tracked before the last take" do
+      before do
+        tracker.track(message(0, 300))
+        tracker.rewound
+      end
+
+      it { expect(rewound(message(0, 0))).to eq([[topic_name, 0, 0]]) }
+    end
+
+    context "when rewound messages were taken" do
+      before { rewound(message(0, 5), message(0, 0)) }
+
+      it { expect(tracker.rewound).to be_nil }
+    end
   end
 
   describe "#forget" do

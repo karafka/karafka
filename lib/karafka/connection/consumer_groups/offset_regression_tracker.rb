@@ -10,12 +10,17 @@ module Karafka
       #   only when the partition changes, and a message of the same partition is compared with
       #   the previous one
       class OffsetRegressionTracker
+        # @return [Karafka::Connection::ConsumerGroups::OffsetRegressionTracker] tracker without
+        #   any tracked offsets
         def initialize
           @last_offsets = Hash.new { |hash, topic_name| hash[topic_name] = {} }
           @previous = nil
           @rewound = nil
         end
 
+        # Records the message as the last one handed over for its partition and flags it as
+        # rewound when its offset is lower than the one of the previous message of its partition
+        #
         # @param message [Rdkafka::Consumer::Message] message handed over to the buffer
         def track(message)
           previous = @previous
