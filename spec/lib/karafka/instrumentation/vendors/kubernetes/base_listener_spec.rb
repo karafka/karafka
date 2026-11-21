@@ -63,7 +63,9 @@ RSpec.describe_current do
 
       let(:response) do
         client.write("GET /#{"a" * 10_000} HTTP/1.1\r\n\r\n")
-        client.wait_readable(3)
+        # Closed well before the read timeout, so the size cap and not the deadline closed it
+        next :not_closed unless client.wait_readable(0.5)
+
         client.read
       rescue Errno::ECONNRESET, Errno::EPIPE
         ""
