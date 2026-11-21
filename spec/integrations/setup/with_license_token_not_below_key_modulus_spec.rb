@@ -10,12 +10,14 @@ public_key = OpenSSL::PKey::RSA.new(
 LICENSE_TOKEN = [public_key.n.to_s(2)].pack("m")
 
 license = Module.new do
-  def self.token
-    LICENSE_TOKEN
-  end
+  class << self
+    def token
+      LICENSE_TOKEN
+    end
 
-  def self.version
-    "1.0.0"
+    def version
+      "1.0.0"
+    end
   end
 end
 
