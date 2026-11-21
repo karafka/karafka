@@ -71,8 +71,9 @@ RSpec.describe_current do
       context "when the client read timeout is not set" do
         subject(:listener) { listener_class.new(hostname: "127.0.0.1", port: port) }
 
-        it "keeps the idle connection open longer" do
-          expect(idle.wait_readable(2)).to be_nil
+        it "closes the idle connection after the default client read timeout" do
+          expect(idle.wait_readable(4)).to be_nil
+          expect(idle.wait_readable(3)).to eq(idle)
         end
       end
     end
