@@ -708,6 +708,37 @@ RSpec.describe_current do
           end
         end
 
+        context "when the partition was revoked in an earlier batch" do
+          let(:first) { message(1, 0) }
+
+          let(:revocation) do
+            {
+              subscription_group_id: subscription_group.id,
+              tpl: Rdkafka::Consumer::TopicPartitionList.new(
+                topic_name => [Rdkafka::Consumer::Partition.new(0, nil)]
+              )
+            }
+          end
+
+          before do
+            batches = [[], drained]
+
+            allow(kafka).to receive(:poll).and_return(message(0, 300), first, nil)
+            allow(kafka).to receive(:poll_batch_nb) do
+              batch = batches.shift
+              client.rebalance_manager.on_rebalance_partitions_revoked(revocation) if batch.empty?
+              batch
+            end
+          end
+
+          it "expect not to compare its drained messages with offsets from before" do
+            client.batch_poll
+            client.batch_poll
+
+            expect(kafka).not_to have_received(:position)
+          end
+        end
+
         context "when the same partition of another topic came in between" do
           let(:other_topic) { SecureRandom.hex(6) }
           let(:first) { message(1, 0) }

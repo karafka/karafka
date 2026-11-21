@@ -177,6 +177,8 @@ module Karafka
             #
             # We also do early break, so the information about rebalance is used as soon as possible
             if @rebalance_manager.changed?
+              forget_revoked_last_offsets
+
               # Since rebalances do not occur often, we can run events polling as well without
               # any throttling
               events_poll
@@ -823,10 +825,12 @@ module Karafka
 
           @rebalance_manager.remove_revoked_and_duplicated_messages
 
-          rewinds.each do |rewind|
-            position = topic_partition_position(rewind.topic, rewind.partition)
+          @mutex.synchronize do
+            rewinds.each do |rewind|
+              position = topic_partition_position(rewind.topic, rewind.partition)
 
-            internal_seek(rewind) if position > rewind.offset
+              internal_seek(rewind) if position > rewind.offset
+            end
           end
         end
 
@@ -834,18 +838,33 @@ module Karafka
         # moves it only forward. When the offsets went back without a seek, e.g. on an offset reset
         # after the topic was recreated, the position stays ahead of the drained messages and a
         # pause without an offset would resume from it. We seek such partitions to right after
-        # their last drained message. The seek does not happen when the position is already there
+        # their last drained message. The seek does not happen when the position is already there.
+        # When the last drained message is followed by a transaction marker, the position is
+        # rightly past it, so we seek and purge the prefetched messages once. It does not lose
+        # messages
         #
         # @param rewound [Array<Rdkafka::Consumer::Message>] drained messages behind the previous
         #   message of their partition
         def align_positions_after_drain(rewound)
           rewound.map! { |message| [message.topic, message.partition] }.uniq!
 
-          @buffer.each do |topic_name, partition, messages|
-            next if messages.empty?
-            next unless rewound.include?([topic_name, partition])
+          @mutex.synchronize do
+            @buffer.each do |topic_name, partition, messages|
+              next if messages.empty?
+              next unless rewound.include?([topic_name, partition])
 
-            internal_seek(Messages::Seek.new(topic_name, partition, messages.last.offset + 1))
+              internal_seek(Messages::Seek.new(topic_name, partition, messages.last.offset + 1))
+            end
+          end
+        end
+
+        # Removes the last offsets of revoked partitions, so the drain of a partition assigned back
+        # later does not compare its messages with offsets from before the revocation
+        def forget_revoked_last_offsets
+          @rebalance_manager.revoked_partitions.each do |topic_name, partitions|
+            next unless @last_offsets.key?(topic_name)
+
+            partitions.each { |partition| @last_offsets[topic_name].delete(partition) }
           end
         end
 
