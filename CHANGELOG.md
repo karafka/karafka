@@ -69,6 +69,7 @@
 - [Fix] [Pro] Report a `virtual_partitions` `partitioner` that does not respond to `#call` (e.g. `partitioner: :key`) as a validation error instead of failing with `KeyError`, and say that `delay_by` and `expire_in` need a positive integer (0 is rejected).
 - [Fix] [Pro] Report an empty swarm `nodes` (`swarm(nodes: [])` or `swarm(nodes: {})`) as a validation error instead of failing with `NoMethodError`.
 - [Fix] [Pro] Unsubscribe again before closing a dynamic multiplexing listener that was scaled down and then scaled up. Before, such a listener skipped the unsubscribe on each later stop.
+- [Fix] [Pro] Do not judge a dynamic multiplexing listener restarted by an upscale on the statistics of its previous consumer. Before, it could be scaled down again at once, before it got an assignment, and cycle between up and down.
 - [Fix] Raise `InvalidLicenseTokenError` on JRuby for a license token whose ciphertext is not below the public key modulus (e.g. one signed with another key). Before, a Java `DataLengthException` or `ArrayIndexOutOfBoundsException` was raised.
 - [Maintenance] 2.6.2.alpha1 was published without a Sigstore attestation: signing failed in the release workflow (the signer does not work with json 3.x, the default of Ruby 4.0) and the attestation patch then pushed the gem unsigned.
 - [Maintenance] Sign the gem with `sigstore-cli` and push it with `gem push --attestation` (the `gem-push` action of `karafka/misc`), so a failed signing stops the release instead of publishing the gem without an attestation.
