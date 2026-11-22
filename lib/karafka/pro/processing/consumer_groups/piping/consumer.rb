@@ -116,10 +116,10 @@ module Karafka
                 topic: topic,
                 payload: message.raw_payload,
                 headers: message.raw_headers.merge(
-                  "source_topic" => message.topic,
-                  "source_partition" => message.partition.to_s,
-                  "source_offset" => message.offset.to_s,
-                  "source_consumer_group" => self.topic.group.id
+                  Strategies::Dlq::Default::SOURCE_TOPIC_HEADER => message.topic,
+                  Strategies::Dlq::Default::SOURCE_PARTITION_HEADER => message.partition.to_s,
+                  Strategies::Dlq::Default::SOURCE_OFFSET_HEADER => message.offset.to_s,
+                  Strategies::Dlq::Default::SOURCE_CONSUMER_GROUP_HEADER => self.topic.group.id
                 )
               }
 
