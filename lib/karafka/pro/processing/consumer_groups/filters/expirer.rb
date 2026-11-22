@@ -55,9 +55,11 @@ module Karafka
             # Removes too old messages and instruments `filtering.expired` when any were removed
             #
             # @param messages [Array<Karafka::Messages::Message>]
+            # @note Each run reports what it removed, so messages fetched again (after a retry,
+            #   a rebalance or a seek) are reported again
             def apply!(messages)
               @applied = false
-              count = 0
+              size = messages.size
               first = nil
               last = nil
 
@@ -71,13 +73,12 @@ module Karafka
                 if too_old
                   first ||= message
                   last = message
-                  count += 1
                 end
 
                 too_old
               end
 
-              return if count.zero?
+              return unless first
 
               @applied = true
 
@@ -87,7 +88,7 @@ module Karafka
                 topic: @topic.name,
                 partition: @partition,
                 subscription_group: @topic.subscription_group,
-                count: count,
+                count: size - messages.size,
                 first_offset: first.offset,
                 last_offset: last.offset,
                 ttl: @ttl
