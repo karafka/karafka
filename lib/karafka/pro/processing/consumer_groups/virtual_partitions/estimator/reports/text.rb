@@ -75,6 +75,22 @@ module Karafka
                 BALANCED_SUGGESTION = "Try the :balanced distribution, which gives a higher speedup " \
                   "for this data."
 
+                # Suggestions when the partitioner raised in every batch, so each batch ran as one
+                # group
+                COLLAPSED_SUGGESTIONS = [
+                  "The partitioner raised an error in every batch, so each batch was processed as " \
+                  "one group.",
+                  "Fix the partitioner and run the estimate again."
+                ].freeze
+
+                # Suggestions when an error was raised in every batch and a custom reducer was used
+                # by the `:consistent` distribution, as such a reducer can also raise
+                COLLAPSED_REDUCER_SUGGESTIONS = [
+                  "The partitioner or the reducer raised an error in every batch, so each batch " \
+                  "was processed as one group.",
+                  "Fix the one that raised and run the estimate again."
+                ].freeze
+
                 # Suggestion when there is no score, because a concurrency below 2 parallelizes
                 # nothing
                 UNSCORED_SUGGESTIONS = [
@@ -93,6 +109,8 @@ module Karafka
                   :COLUMNS,
                   :SUGGESTIONS,
                   :BALANCED_SUGGESTION,
+                  :COLLAPSED_SUGGESTIONS,
+                  :COLLAPSED_REDUCER_SUGGESTIONS,
                   :UNSCORED_SUGGESTIONS,
                   :CAVEATS
                 )
@@ -173,11 +191,22 @@ module Karafka
                 def suggestions(stats)
                   return UNSCORED_SUGGESTIONS if stats["score"].nil?
 
+                  if stats["collapsed_batches"] == stats["batches"]
+                    return custom_reducer? ? COLLAPSED_REDUCER_SUGGESTIONS : COLLAPSED_SUGGESTIONS
+                  end
+
                   suggestions = SUGGESTIONS.fetch(stats["verdict"], [])
 
                   return suggestions if stats["verdict"] == "recommended" || !balanced_faster?(stats)
 
                   [*suggestions, BALANCED_SUGGESTION]
+                end
+
+                # @return [Boolean] true when the `:consistent` distribution used a custom reducer
+                def custom_reducer?
+                  settings = @report["settings"] || {}
+
+                  settings["custom_reducer"] == true && settings["distribution"] == "consistent"
                 end
 
                 # @param stats [Hash] summary stats

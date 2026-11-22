@@ -182,6 +182,63 @@ RSpec.describe_current do
       end
     end
 
+    context "when the partitioner raises in every batch" do
+      let(:estimator) do
+        estimator_class.new(concurrency: 5, batch_size: 100, partitioner: ->(_) { raise "boom" })
+      end
+
+      it { expect(text).to include("collapsed: 2") }
+      it { expect(text).to include("verdict: not_recommended") }
+      it { expect(text).to include("The partitioner raised an error in every batch") }
+      it { expect(text).to include("Fix the partitioner and run the estimate again.") }
+      it { expect(text).not_to include("a few keys hold most of the messages") }
+      it { expect(text).not_to include(":balanced") }
+    end
+
+    context "when a custom reducer raises in every batch" do
+      let(:estimator) do
+        estimator_class.new(concurrency: 5, batch_size: 100, reducer: ->(_) { raise "boom" })
+      end
+
+      it { expect(text).to include("collapsed: 2") }
+      it { expect(text).to include("The partitioner or the reducer raised an error in every batch") }
+      it { expect(text).to include("Fix the one that raised and run the estimate again.") }
+      it { expect(text).not_to include("Fix the partitioner") }
+      it { expect(text).not_to include("a few keys hold most of the messages") }
+    end
+
+    context "when the partitioner raises in every batch with a custom reducer and :balanced" do
+      let(:estimator) do
+        estimator_class.new(
+          concurrency: 5,
+          batch_size: 100,
+          distribution: :balanced,
+          partitioner: ->(_) { raise "boom" },
+          reducer: ->(key) { key.to_s.sum % 5 }
+        )
+      end
+
+      it { expect(text).to include("The partitioner raised an error in every batch") }
+      it { expect(text).not_to include("or the reducer") }
+    end
+
+    context "when the partitioner raises in some batches only" do
+      let(:estimator) do
+        estimator_class.new(
+          concurrency: 5,
+          batch_size: 100,
+          partitioner: ->(message) { (message.offset < 100) ? raise("boom") : message.raw_key }
+        )
+      end
+
+      let(:messages) { build_messages(Array.new(200) { |i| (i % 100 < 96) ? "hot" : "stray-#{i}" }) }
+
+      it { expect(text).to include("collapsed: 1") }
+      it { expect(text).to include("verdict: not_recommended") }
+      it { expect(text).to include("In most batches a few keys hold most of the messages.") }
+      it { expect(text).not_to include("The partitioner raised an error") }
+    end
+
     context "with unknown top level keys" do
       let(:report) do
         JSON.parse(estimator.analyze(messages).to_json).merge("future" => { "a" => 1 })
