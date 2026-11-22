@@ -67,6 +67,23 @@ RSpec.describe_current do
         .with(hash_including(topic: topic, key: "key", payload: "message_payload"))
     end
 
+    it "adds the source headers with the DLQ header names" do
+      consumer_instance.pipe_async(topic: "target_topic", message: message)
+
+      expect(consumer_instance)
+        .to have_received(:produce_async)
+        .with(
+          hash_including(
+            headers: message.raw_headers.merge(
+              "source_topic" => topic,
+              "source_partition" => "1",
+              "source_offset" => message.offset.to_s,
+              "source_consumer_group" => consumer_instance.topic.group.id
+            )
+          )
+        )
+    end
+
     context "when there is no key" do
       let(:message) do
         build(
