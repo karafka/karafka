@@ -51,16 +51,7 @@ module Karafka
           # Creates new manager instance
           def initialize
             super
-            @changes = Hash.new do |h, k|
-              h[k] = {
-                state: "",
-                join_state: "",
-                join_state_changed_at: monotonic_now,
-                unassigned: false,
-                state_age: 0,
-                changed_at: monotonic_now
-              }
-            end
+            @changes = Hash.new { |h, k| h[k] = fresh_change }
 
             # Ids of subscription groups that use the KIP-848 consumer group protocol
             @consumer_protocol_ids = Set.new
@@ -274,9 +265,26 @@ module Karafka
 
           # Indicates, that something has changed on a subscription group. We consider every single
           # change we make as a change to the setup as well.
+          #
+          # Statistics collected so far come from the previous consumer instance of this
+          # subscription group, so we forget them. Otherwise a restarted listener would be judged on
+          # a stable state its new consumer did not reach yet.
+          #
           # @param subscription_group_id [String]
           def touch(subscription_group_id)
-            @changes[subscription_group_id][:changed_at] = 0
+            @changes[subscription_group_id].merge!(fresh_change)
+          end
+
+          # @return [Hash] change details of a subscription group with no statistics yet
+          def fresh_change
+            {
+              state: "",
+              join_state: "",
+              join_state_changed_at: monotonic_now,
+              unassigned: false,
+              state_age: 0,
+              changed_at: monotonic_now
+            }
           end
 
           # @param sg_listeners [Array<Listener>] listeners from one multiplexed sg

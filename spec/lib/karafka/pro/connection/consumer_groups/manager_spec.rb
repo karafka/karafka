@@ -697,4 +697,71 @@ RSpec.describe_current do
       end
     end
   end
+
+  # A listener restarted by an upscale must not be judged on the statistics of its previous
+  # consumer instance, as those report a steady state that the new consumer did not reach yet
+  describe "restarted listeners" do
+    let(:now) { 1_000_000 }
+    let(:scale_delay) { 1_000 }
+    let(:assignments) { { routing_topic1 => [0] } }
+
+    before do
+      allow(app).to receive(:done?).and_return(false)
+      allow(app).to receive(:assignments) { assignments }
+      allow(manager).to receive(:monotonic_now) { now }
+
+      subscription_group1.multiplexing.scale_delay = scale_delay
+      subscription_group1.multiplexing.active = true
+      subscription_group1.multiplexing.min = 1
+      subscription_group1.multiplexing.max = 2
+      subscription_group1.multiplexing.boot = 2
+
+      manager.register(listeners)
+      listener_g11.running!
+      listener_g12.running!
+
+      manager.notice(subscription_group1.id, statistics)
+      manager.notice(subscription_group2.id, statistics)
+
+      allow(manager).to receive(:monotonic_now) { now + scale_delay }
+      manager.control
+      listener_g12.stopped!
+
+      allow(listener_g12).to receive(:start!) do
+        allow(listener_g12).to receive(:active?).and_return(true)
+      end
+
+      assignments[routing_topic1] = [0, 1]
+      manager.control
+    end
+
+    it { expect(listener_g12).to have_received(:stop!).once }
+    # Once on boot and once on the upscale
+    it { expect(listener_g12).to have_received(:start!).twice }
+
+    context "when it did not report fresh statistics yet" do
+      before do
+        assignments[routing_topic1] = [0]
+        allow(manager).to receive(:monotonic_now) { now + (scale_delay * 10) }
+        manager.control
+      end
+
+      it "expect not to scale it down on its previous consumer statistics" do
+        expect(listener_g12).to have_received(:stop!).once
+      end
+    end
+
+    context "when it reported fresh statistics and still has no assignment" do
+      before do
+        assignments[routing_topic1] = [0]
+        allow(manager).to receive(:monotonic_now) { now + (scale_delay * 10) }
+        manager.notice(subscription_group2.id, statistics)
+        manager.control
+      end
+
+      it "expect to scale it down" do
+        expect(listener_g12).to have_received(:stop!).twice
+      end
+    end
+  end
 end
