@@ -75,6 +75,18 @@ module Karafka
         @nodes.none?(&:alive?)
       end
 
+      # @return [Float, nil] time in ms left until the earliest pending node restart is due or
+      #   nil if no node waits for a restart
+      def restart_backoff
+        @nodes.filter_map do |node|
+          dead_since = @statuses[node][:dead_since]
+
+          next unless dead_since
+
+          [node_restart_timeout - (monotonic_now - dead_since), 0].max
+        end.min
+      end
+
       # Checks on nodes if they are ok one after another
       def control
         monitor.instrument("swarm.manager.control", caller: self) do
