@@ -28,7 +28,6 @@
 # License: https://karafka.io/docs/Pro-License-Comm/
 # Contact: contact@karafka.io
 
-
 # A listener restarted by an upscale should not be judged on the statistics of its previous
 # consumer. With statistics emitted rarely, such stale statistics report a steady state, so the
 # restarted listener would be scaled down again at once, before it gets an assignment.
