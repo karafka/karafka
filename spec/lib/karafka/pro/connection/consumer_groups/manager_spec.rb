@@ -126,9 +126,12 @@ RSpec.describe_current do
   describe "#notice" do
     let(:changes) { manager.instance_variable_get(:@changes) }
     let(:details) { changes.values.first }
-    let!(:started_at) { monotonic_now }
+    let(:started_at) { monotonic_now }
 
-    before { manager.register(listeners) }
+    before do
+      started_at
+      manager.register(listeners)
+    end
 
     context "when notice was used" do
       before { manager.notice(subscription_group1.id, statistics) }
