@@ -698,8 +698,6 @@ RSpec.describe_current do
     end
   end
 
-  # A listener restarted by an upscale must not be judged on the statistics of its previous
-  # consumer instance, as those report a steady state that the new consumer did not reach yet
   describe "restarted listeners" do
     let(:now) { 1_000_000 }
     let(:scale_delay) { 1_000 }
