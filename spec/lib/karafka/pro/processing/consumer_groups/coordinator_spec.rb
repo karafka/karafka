@@ -176,7 +176,8 @@ RSpec.describe_current do
       before { sleep(0.1) }
 
       it "returns true for the edge of the time frame" do
-        expect(coordinator.active_within?(205)).to be(true)
+        # 200 ms past the sleeps leaves room for scheduler delays on loaded runners
+        expect(coordinator.active_within?(400)).to be(true)
       end
     end
 

@@ -126,6 +126,7 @@ RSpec.describe_current do
   describe "#notice" do
     let(:changes) { manager.instance_variable_get(:@changes) }
     let(:details) { changes.values.first }
+    let!(:started_at) { monotonic_now }
 
     before { manager.register(listeners) }
 
@@ -135,7 +136,7 @@ RSpec.describe_current do
       it { expect(details[:state_age]).to eq(13_995) }
       it { expect(details[:join_state]).to eq("steady") }
       it { expect(details[:state]).to eq("up") }
-      it { expect(monotonic_now - details[:changed_at]).to be < 50 }
+      it { expect(details[:changed_at]).to be_between(started_at, monotonic_now) }
     end
   end
 
