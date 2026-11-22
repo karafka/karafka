@@ -75,7 +75,7 @@ module Karafka
         @nodes.none?(&:alive?)
       end
 
-      # @return [Float, nil] time in ms left until the earliest pending node restart is due or
+      # @return [Numeric, nil] time in ms left until the earliest pending node restart is due or
       #   nil if no node waits for a restart
       def restart_backoff
         @nodes.filter_map do |node|

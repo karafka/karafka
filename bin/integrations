@@ -97,6 +97,7 @@ class Scenario
     'swarm/node_pipe_fd_leak_on_restart_spec.rb' => 'fork',
     'swarm/post_fork_idempotent_producer_reinitialization_spec.rb' => 'fork',
     'swarm/post_fork_producer_statistics_disabled_spec.rb' => 'fork',
+    'swarm/quiet_during_dead_node_restart_backoff_spec.rb' => 'fork',
     'swarm/regular_flow_with_post_fork_producer_spec.rb' => 'fork',
     'swarm/share_groups_fail_fast_before_fork_spec.rb' => 'fork',
     'swarm/start_stop_after_time_spec.rb' => 'fork',
