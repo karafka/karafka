@@ -59,6 +59,28 @@ RSpec.describe_current do
         expect(topic.filter.factories.size).to eq(1)
       end
     end
+
+    context "when the filter is built for a partition" do
+      subject(:expirer) { topic.filter.factories.first.call(topic, 3) }
+
+      let(:events) { [] }
+      let(:listener) { ->(event) { events << event } }
+      let(:message) { build(:messages_message, timestamp: Time.now.utc - 2) }
+
+      before do
+        topic.expiring(1_000)
+        Karafka.monitor.subscribe("filtering.expired", &listener)
+        expirer.apply!([message])
+      end
+
+      after { Karafka.monitor.unsubscribe(listener) }
+
+      it { expect(expirer).to be_a(Karafka::Pro::Processing::ConsumerGroups::Filters::Expirer) }
+
+      it "expect to report expired messages for this topic partition" do
+        expect(events.map { |event| [event[:topic], event[:partition]] }).to eq([[topic.name, 3]])
+      end
+    end
   end
 
   describe "#expiring?" do
