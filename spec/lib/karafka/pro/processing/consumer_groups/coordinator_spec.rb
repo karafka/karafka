@@ -173,10 +173,17 @@ RSpec.describe_current do
     end
 
     context "when the coordinator was active just before the specified interval" do
-      before { sleep(0.1) }
+      let(:now) { [1_000.0] }
+
+      before do
+        allow(coordinator).to receive(:monotonic_now) { now.first }
+        coordinator.increment(:consume)
+        coordinator.decrement(:consume)
+        now[0] = 1_199.0
+      end
 
       it "returns true for the edge of the time frame" do
-        expect(coordinator.active_within?(205)).to be(true)
+        expect(coordinator.active_within?(200)).to be(true)
       end
     end
 

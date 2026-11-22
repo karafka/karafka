@@ -365,9 +365,12 @@ RSpec.describe_current do
         end
       end
 
+      let(:started_at) { Time.now.to_f }
+
       before do
         queue << job1
 
+        started_at
         thread1
         thread2
       end
@@ -379,9 +382,8 @@ RSpec.describe_current do
 
       # tick should not allow for wait skipping, it should just trigger a re-check
       it "expect not to pass until the queue is actually closed" do
-        before = Time.now.to_f
         queue.wait(job1.group_id)
-        expect(Time.now.to_f - before).to be >= 1
+        expect(Time.now.to_f - started_at).to be >= 1
       end
     end
 
