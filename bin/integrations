@@ -89,6 +89,7 @@ class Scenario
     'swarm/cli_validations_for_inclusions_spec.rb' => 'fork',
     'swarm/dead_node_cleanup_spec.rb' => 'fork',
     'swarm/dead_node_recovery_spec.rb' => 'fork',
+    'swarm/dead_node_restart_after_restart_timeout_spec.rb' => 'fork',
     'swarm/forceful_nodes_restart_graceful_supervisor_stop_spec.rb' => 'fork',
     'swarm/forceful_shutdown_of_hanging_spec.rb' => 'fork',
     'swarm/liveness_before_fetch_loop_reporting_spec.rb' => 'fork',
