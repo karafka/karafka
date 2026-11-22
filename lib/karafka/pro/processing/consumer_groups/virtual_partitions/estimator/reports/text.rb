@@ -75,6 +75,14 @@ module Karafka
                 BALANCED_SUGGESTION = "Try the :balanced distribution, which gives a higher speedup " \
                   "for this data."
 
+                # Suggestions when the partitioner raised in every batch, so each batch ran as one
+                # group
+                COLLAPSED_SUGGESTIONS = [
+                  "The partitioner raised an error in every batch, so each batch was processed as " \
+                  "one group.",
+                  "Fix the partitioner and run the estimate again."
+                ].freeze
+
                 # Suggestion when there is no score, because a concurrency below 2 parallelizes
                 # nothing
                 UNSCORED_SUGGESTIONS = [
@@ -93,6 +101,7 @@ module Karafka
                   :COLUMNS,
                   :SUGGESTIONS,
                   :BALANCED_SUGGESTION,
+                  :COLLAPSED_SUGGESTIONS,
                   :UNSCORED_SUGGESTIONS,
                   :CAVEATS
                 )
@@ -172,6 +181,7 @@ module Karafka
                 # @return [Array<String>] suggestions for the verdict
                 def suggestions(stats)
                   return UNSCORED_SUGGESTIONS if stats["score"].nil?
+                  return COLLAPSED_SUGGESTIONS if stats["collapsed_batches"] == stats["batches"]
 
                   suggestions = SUGGESTIONS.fetch(stats["verdict"], [])
 
