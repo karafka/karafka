@@ -751,6 +751,18 @@ RSpec.describe_current do
       end
     end
 
+    context "when it reported statistics within the scale delay of the restart" do
+      before do
+        assignments[routing_topic1] = [0]
+        manager.notice(subscription_group2.id, statistics)
+        manager.control
+      end
+
+      it "expect not to scale it down before the scale delay passes" do
+        expect(listener_g12).to have_received(:stop!).once
+      end
+    end
+
     context "when it reported fresh statistics and still has no assignment" do
       before do
         assignments[routing_topic1] = [0]
