@@ -80,13 +80,25 @@ RSpec.configure do |config|
     expectations.include_chain_clauses_in_custom_matcher_descriptions = true
   end
 
-  # Specs that cannot pass on JRuby, tagged `jruby_unsupported: <reason>`:
-  # - :envelope - JRuby-OpenSSL has no `PKey#encrypt` and `#decrypt`, so the Pro envelope
-  #   encryption mode works only on MRI
-  # - :openssl_version - JRuby-OpenSSL reports the openssl gem as 2.2.3
-  # - :rsa_error - JRuby-OpenSSL older than 0.19.4 raises a Java exception instead of
-  #   `OpenSSL::PKey::RSAError` for RSA input that is too large
-  config.filter_run_excluding(:jruby_unsupported) if RUBY_ENGINE == "jruby"
+  # Specs tagged `jruby_unsupported: <reason>` need an OpenSSL feature that JRuby-OpenSSL lacks.
+  # They are excluded only where the feature is missing:
+  # - :envelope - no `PKey::RSA#encrypt` and `#decrypt`, needed by the Pro envelope mode
+  # - :openssl_version - the openssl gem is older than 3.0 (JRuby-OpenSSL reports 2.2.3)
+  # - :rsa_error - jruby-openssl older than 0.19.4 raises a Java exception instead of
+  #   `OpenSSL::PKey::PKeyError` for RSA input that is too large
+  config.filter_run_excluding(
+    jruby_unsupported: lambda do |reason|
+      case reason
+      when :envelope
+        !OpenSSL::PKey::RSA.method_defined?(:encrypt)
+      when :openssl_version
+        Gem::Version.new(OpenSSL::VERSION) < Gem::Version.new("3.0.0")
+      when :rsa_error
+        defined?(JOpenSSL::VERSION) &&
+          Gem::Version.new(JOpenSSL::VERSION) < Gem::Version.new("0.19.4")
+      end
+    end
+  )
 
   config.before do |example|
     # When we test things, we subscribe sometimes with one-off monitors, they need to always be
