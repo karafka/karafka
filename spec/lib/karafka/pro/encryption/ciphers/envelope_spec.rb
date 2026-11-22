@@ -38,7 +38,8 @@ RSpec.describe_current do
     )
   end
 
-  describe "#encrypt and #decrypt" do
+  describe "#encrypt and #decrypt",
+    jruby_unsupported: :envelope do
     it "encrypts and decrypts payloads far beyond the RSA key capacity" do
       content = "a" * 100_000
 
@@ -63,14 +64,16 @@ RSpec.describe_current do
   end
 
   describe "corruption and forgery handling" do
-    it "detects ciphertext tampering via the GCM auth tag" do
+    it "detects ciphertext tampering via the GCM auth tag",
+      jruby_unsupported: :envelope do
       envelope = cipher.encrypt("sensitive").b
       envelope.setbyte(-1, envelope.getbyte(-1) ^ 1)
 
       expect { cipher.decrypt("1", envelope) }.to raise_error(OpenSSL::Cipher::CipherError)
     end
 
-    it "detects iv tampering (inherent to GCM, as the tag depends on the iv)" do
+    it "detects iv tampering (inherent to GCM, as the tag depends on the iv)",
+      jruby_unsupported: :envelope do
       envelope = cipher.encrypt("sensitive").b
       # Last iv byte, computed from the front of the layout:
       # [1B version][wrapped key (modulus size)][12B iv]...
@@ -81,7 +84,8 @@ RSpec.describe_current do
       expect { cipher.decrypt("1", envelope) }.to raise_error(OpenSSL::Cipher::CipherError)
     end
 
-    it "authenticates the header via AAD (re-wrap of the same key is rejected)" do
+    it "authenticates the header via AAD (re-wrap of the same key is rejected)",
+      jruby_unsupported: :envelope do
       # The only header mutation that survives every other guard: the very same AES key
       # re-wrapped with the public key (OAEP is randomized, so different bytes, same key).
       # Version check passes, OAEP unwraps fine, key size, iv and tag are all valid - without
@@ -101,7 +105,8 @@ RSpec.describe_current do
       expect { cipher.decrypt("1", forged) }.to raise_error(OpenSSL::Cipher::CipherError)
     end
 
-    it "rejects truncated envelopes within the OpenSSL error family" do
+    it "rejects truncated envelopes within the OpenSSL error family",
+      jruby_unsupported: :envelope do
       expect { cipher.decrypt("1", "") }
         .to raise_error(OpenSSL::PKey::RSAError, /corrupted or truncated/)
 
@@ -113,7 +118,8 @@ RSpec.describe_current do
       expect { cipher.decrypt("1", truncated) }.to raise_error(OpenSSL::PKey::RSAError)
     end
 
-    it "rejects unknown envelope format versions" do
+    it "rejects unknown envelope format versions",
+      jruby_unsupported: :envelope do
       envelope = cipher.encrypt("sensitive").b
       envelope.setbyte(0, 0x02)
 
@@ -128,7 +134,8 @@ RSpec.describe_current do
         .to raise_error(OpenSSL::PKey::RSAError, /unsupported envelope version/)
     end
 
-    it "rejects forged envelopes wrapping a wrong-size AES key within the OpenSSL family" do
+    it "rejects forged envelopes wrapping a wrong-size AES key within the OpenSSL family",
+      jruby_unsupported: :envelope do
       # Anyone holding the (distributed) public key can wrap data of arbitrary length. Such
       # a forge must not escape as an ArgumentError from the AES key assignment
       public_key = OpenSSL::PKey::RSA.new(fixture_file("rsa/public_key_1.pem"))
@@ -142,7 +149,8 @@ RSpec.describe_current do
         .to raise_error(OpenSSL::PKey::RSAError, /invalid envelope key size/)
     end
 
-    it "fails reliably on a non-matching private key (OAEP unwrapping)" do
+    it "fails reliably on a non-matching private key (OAEP unwrapping)",
+      jruby_unsupported: :envelope do
       allow(Karafka::App.config.encryption).to receive(:private_keys).and_return(
         "1" => fixture_file("rsa/private_key_2.pem")
       )

@@ -49,7 +49,8 @@ RSpec.describe_current do
       expect(cipher.decrypt("1", cipher.encrypt(content))).to eq(content)
     end
 
-    it "cannot encrypt payloads exceeding the RSA PKCS1 capacity" do
+    it "cannot encrypt payloads exceeding the RSA PKCS1 capacity",
+      jruby_unsupported: :rsa_error do
       # Class-only assertion: the message and the exact class (RSAError vs PKeyError) differ
       # across OpenSSL 1.1/3.x builds
       expect { cipher.encrypt("a" * (direct_limit + 1)) }

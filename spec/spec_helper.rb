@@ -80,6 +80,14 @@ RSpec.configure do |config|
     expectations.include_chain_clauses_in_custom_matcher_descriptions = true
   end
 
+  # Specs that cannot pass on JRuby, tagged `jruby_unsupported: <reason>`:
+  # - :envelope - JRuby-OpenSSL has no `PKey#encrypt` and `#decrypt`, so the Pro envelope
+  #   encryption mode works only on MRI
+  # - :openssl_version - JRuby-OpenSSL reports the openssl gem as 2.2.3
+  # - :rsa_error - JRuby-OpenSSL older than 0.19.4 raises a Java exception instead of
+  #   `OpenSSL::PKey::RSAError` for RSA input that is too large
+  config.filter_run_excluding(:jruby_unsupported) if RUBY_ENGINE == "jruby"
+
   config.before do |example|
     # When we test things, we subscribe sometimes with one-off monitors, they need to always be
     # cleared not to spam and break test-suit
