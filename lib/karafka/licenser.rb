@@ -134,15 +134,25 @@ module Karafka
 
         decoded_token = formatted_token.unpack1("m") # decode from base64
 
-        begin
-          data = public_key.public_decrypt(decoded_token)
-        rescue OpenSSL::OpenSSLError
-          data = nil
-        end
+        data = decrypt(public_key, decoded_token)
 
         details = data ? JSON.parse(data) : raise_invalid_license_token(license_config)
 
         license_config.entity = details.fetch("entity")
+      end
+
+      # @param public_key [OpenSSL::PKey::RSA] public key used to decrypt the token
+      # @param decoded_token [String] base64 decoded license token
+      # @return [String, nil] decrypted token data or nil if it cannot be decrypted
+      def decrypt(public_key, decoded_token)
+        # A ciphertext longer than the key modulus or not below it was not made with this key.
+        # JRuby raises Java exceptions for it instead of OpenSSL::OpenSSLError
+        return nil if decoded_token.bytesize > public_key.n.num_bytes
+        return nil if OpenSSL::BN.new(decoded_token, 2) >= public_key.n
+
+        public_key.public_decrypt(decoded_token)
+      rescue OpenSSL::OpenSSLError
+        nil
       end
 
       # Checks if the license token has been expired/revoked

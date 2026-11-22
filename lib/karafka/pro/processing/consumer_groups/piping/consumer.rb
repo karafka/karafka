@@ -42,7 +42,10 @@ module Karafka
             # Empty hash to save on memory allocations
             EMPTY_HASH = {}.freeze
 
-            private_constant :EMPTY_HASH
+            # DLQ strategy that defines the source header names
+            DLQ_STRATEGY = Strategies::Dlq::Default
+
+            private_constant :EMPTY_HASH, :DLQ_STRATEGY
 
             # Pipes given message to the provided topic with expected details. Useful for
             # pass-through operations where deserialization is not needed. Upon usage it will
@@ -116,10 +119,10 @@ module Karafka
                 topic: topic,
                 payload: message.raw_payload,
                 headers: message.raw_headers.merge(
-                  "source_topic" => message.topic,
-                  "source_partition" => message.partition.to_s,
-                  "source_offset" => message.offset.to_s,
-                  "source_consumer_group" => self.topic.group.id
+                  DLQ_STRATEGY::SOURCE_TOPIC_HEADER => message.topic,
+                  DLQ_STRATEGY::SOURCE_PARTITION_HEADER => message.partition.to_s,
+                  DLQ_STRATEGY::SOURCE_OFFSET_HEADER => message.offset.to_s,
+                  DLQ_STRATEGY::SOURCE_CONSUMER_GROUP_HEADER => self.topic.group.id
                 )
               }
 

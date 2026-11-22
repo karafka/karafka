@@ -52,7 +52,10 @@ module Karafka
                   config = Config.new(active: !ttl.nil?, ttl: ttl)
 
                   if config.active?
-                    factory = ->(*) { Pro::Processing::ConsumerGroups::Filters::Expirer.new(ttl) }
+                    factory = lambda do |topic, partition|
+                      Pro::Processing::ConsumerGroups::Filters::Expirer.new(ttl, topic, partition)
+                    end
+
                     filter(factory)
                   end
 

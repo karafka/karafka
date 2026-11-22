@@ -49,8 +49,9 @@ module Karafka
 
                   required(:nodes) do |val|
                     next true if val.is_a?(Range)
-                    next true if val.is_a?(Array) && val.all?(Integer)
+                    next true if val.is_a?(Array) && !val.empty? && val.all?(Integer)
                     next false unless val.is_a?(Hash)
+                    next false if val.empty?
                     next false unless val.keys.all?(Integer)
 
                     values = val.values
