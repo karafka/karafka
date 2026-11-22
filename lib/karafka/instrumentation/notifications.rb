@@ -88,6 +88,7 @@ module Karafka
 
         filtering.throttled
         filtering.seek
+        filtering.expired
 
         oauthbearer.token_refresh
 

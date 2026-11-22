@@ -37,18 +37,29 @@ module Karafka
           # It never moves offsets in any way and does not impact the processing flow. It always
           # runs the `Actions.skip` action.
           class Expirer < Base
+            include Helpers::ConfigImporter.new(
+              monitor: %i[monitor]
+            )
+
             # @param ttl [Integer] maximum age of a message (in ms)
-            def initialize(ttl)
+            # @param topic [Karafka::Routing::Topic] topic for which we filter
+            # @param partition [Integer] partition for which we filter
+            def initialize(ttl, topic, partition)
               super()
 
               @ttl = ttl
+              @topic = topic
+              @partition = partition
             end
 
-            # Removes too old messages
+            # Removes too old messages and instruments `filtering.expired` when any were removed
             #
             # @param messages [Array<Karafka::Messages::Message>]
             def apply!(messages)
               @applied = false
+              count = 0
+              first = nil
+              last = nil
 
               # Time on message is in seconds with ms precision, so we need to convert the ttl that
               # is in ms to this format
@@ -57,10 +68,30 @@ module Karafka
               messages.delete_if do |message|
                 too_old = message.timestamp < border
 
-                @applied = true if too_old
+                if too_old
+                  first ||= message
+                  last = message
+                  count += 1
+                end
 
                 too_old
               end
+
+              return if count.zero?
+
+              @applied = true
+
+              monitor.instrument(
+                "filtering.expired",
+                caller: self,
+                topic: @topic.name,
+                partition: @partition,
+                subscription_group: @topic.subscription_group,
+                count: count,
+                first_offset: first.offset,
+                last_offset: last.offset,
+                ttl: @ttl
+              )
             end
 
             # @return [nil] this filter does not deal with timeouts

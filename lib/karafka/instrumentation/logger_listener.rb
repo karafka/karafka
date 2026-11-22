@@ -347,6 +347,17 @@ module Karafka
         MSG
       end
 
+      # Logs info about messages removed by the Pro expiring filter
+      #
+      # @param event [Karafka::Core::Monitoring::Event] event details including payload
+      def on_filtering_expired(event)
+        info <<~MSG.tr("\n", " ").strip!
+          [#{event[:subscription_group].id}] Expired #{event[:count]} messages
+          (offsets #{event[:first_offset]}-#{event[:last_offset]}, ttl: #{event[:ttl]} ms)
+          on #{event[:topic]}-#{event[:partition]}
+        MSG
+      end
+
       # @param event [Karafka::Core::Monitoring::Event] event details including payload
       def on_swarm_manager_stopping(event)
         node = event[:node]

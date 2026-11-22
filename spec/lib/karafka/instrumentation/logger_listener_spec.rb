@@ -389,6 +389,28 @@ RSpec.describe_current do
     it { expect(Karafka.logger).to have_received(:info).with(message) }
   end
 
+  describe "#on_filtering_expired" do
+    subject(:trigger) { listener.on_filtering_expired(event) }
+
+    let(:payload) do
+      {
+        caller: nil,
+        topic: "test",
+        partition: 2,
+        subscription_group: subscription_group,
+        count: 3,
+        first_offset: 10,
+        last_offset: 14,
+        ttl: 1_000
+      }
+    end
+    let(:message) do
+      "[#{subscription_group.id}] Expired 3 messages (offsets 10-14, ttl: 1000 ms) on test-2"
+    end
+
+    it { expect(Karafka.logger).to have_received(:info).with(message) }
+  end
+
   describe "#on_filtering_seek" do
     subject(:trigger) { listener.on_filtering_seek(event) }
 
