@@ -22,6 +22,11 @@
 # - Runtime retrieval by AI assistants, coding agents, and RAG systems
 #   for the purpose of providing contextual help to Karafka users
 #
+# Receipt, viewing, or possession of this software does not convey or
+# imply any license or right beyond those expressly stated above.
+#
+# License: https://karafka.io/docs/Pro-License-Comm/
+# Contact: contact@karafka.io
 
 # When expiring removes old messages, Karafka should instrument `filtering.expired` with the
 # number of expired messages and their offsets, and the logger should report it
