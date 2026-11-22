@@ -62,7 +62,7 @@ module Karafka
                   else
                     apply_dlq_flow do
                       skippable_message, _marked = find_skippable_message
-                      dispatch_to_dlq(skippable_message) if dispatch_to_dlq?
+                      dispatch_to_dead_letter_queue(skippable_message) if dispatch_to_dlq?
 
                       if mark_after_dispatch?
                         mark_dispatched_to_dlq(skippable_message)

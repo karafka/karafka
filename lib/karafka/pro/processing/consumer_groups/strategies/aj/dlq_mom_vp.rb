@@ -71,7 +71,7 @@ module Karafka
                       # Here we are in a collapsed state, hence we can apply the same logic as
                       # Aj::DlqMom
                       skippable_message, = find_skippable_message
-                      dispatch_to_dlq(skippable_message) if dispatch_to_dlq?
+                      dispatch_to_dead_letter_queue(skippable_message) if dispatch_to_dlq?
                       mark_dispatched_to_dlq(skippable_message)
                     end
                   end
