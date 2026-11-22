@@ -75,13 +75,21 @@ module Karafka
                 BALANCED_SUGGESTION = "Try the :balanced distribution, which gives a higher speedup " \
                   "for this data."
 
-                # Suggestions when the partitioner raised in every batch, so each batch ran as one
-                # group
-                COLLAPSED_SUGGESTIONS = [
-                  "The partitioner raised an error in every batch, so each batch was processed as " \
-                  "one group.",
-                  "Fix the partitioner and run the estimate again."
-                ].freeze
+                # Suggestions when an error was raised in every batch, so each batch ran as one
+                # group. Keyed by the `custom_reducer` setting, as only a custom reducer can also
+                # raise.
+                COLLAPSED_SUGGESTIONS = {
+                  false => [
+                    "The partitioner raised an error in every batch, so each batch was processed " \
+                    "as one group.",
+                    "Fix the partitioner and run the estimate again."
+                  ],
+                  true => [
+                    "The partitioner or the reducer raised an error in every batch, so each batch " \
+                    "was processed as one group.",
+                    "Fix the one that raised and run the estimate again."
+                  ]
+                }.freeze
 
                 # Suggestion when there is no score, because a concurrency below 2 parallelizes
                 # nothing
@@ -181,7 +189,10 @@ module Karafka
                 # @return [Array<String>] suggestions for the verdict
                 def suggestions(stats)
                   return UNSCORED_SUGGESTIONS if stats["score"].nil?
-                  return COLLAPSED_SUGGESTIONS if stats["collapsed_batches"] == stats["batches"]
+
+                  if stats["collapsed_batches"] == stats["batches"]
+                    return COLLAPSED_SUGGESTIONS.fetch(@report.dig("settings", "custom_reducer") == true)
+                  end
 
                   suggestions = SUGGESTIONS.fetch(stats["verdict"], [])
 
