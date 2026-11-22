@@ -207,6 +207,21 @@ RSpec.describe_current do
       it { expect(text).not_to include("a few keys hold most of the messages") }
     end
 
+    context "when the partitioner raises in every batch with a custom reducer and :balanced" do
+      let(:estimator) do
+        estimator_class.new(
+          concurrency: 5,
+          batch_size: 100,
+          distribution: :balanced,
+          partitioner: ->(_) { raise "boom" },
+          reducer: ->(key) { key.to_s.sum % 5 }
+        )
+      end
+
+      it { expect(text).to include("The partitioner raised an error in every batch") }
+      it { expect(text).not_to include("or the reducer") }
+    end
+
     context "when the partitioner raises in some batches only" do
       let(:estimator) do
         estimator_class.new(
