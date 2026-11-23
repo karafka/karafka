@@ -233,7 +233,13 @@ jobs:
         env:
           SPECS_SEED: ${{ github.run_id }}
           SPECS_GROUP: ${{ matrix.parallel_group }}
+          SPECS_CONCURRENCY: 7
+          SPECS_TIMINGS_FILE: ${{ runner.temp }}/specs_timings.tsv
         run: bin/integrations --exclude '/pro' --exclude '/multi_broker'
+
+      - name: Print integration specs timings
+        if: always()
+        run: cat "$RUNNER_TEMP/specs_timings.tsv" || true
 
       - name: Check Kafka logs for unexpected warnings
         run: bin/verify_kafka_warnings
@@ -302,8 +308,14 @@ jobs:
           KARAFKA_PRO_LICENSE_CHECKSUM: ${{ secrets.KARAFKA_PRO_LICENSE_CHECKSUM }}
           SPECS_SEED: ${{ github.run_id }}
           SPECS_GROUP: ${{ matrix.parallel_group }}
+          SPECS_CONCURRENCY: 7
+          SPECS_TIMINGS_FILE: ${{ runner.temp }}/specs_timings.tsv
         run: |
           bin/integrations '/pro'
+
+      - name: Print integration specs timings
+        if: always()
+        run: cat "$RUNNER_TEMP/specs_timings.tsv" || true
 
       - name: Check Kafka logs for unexpected warnings
         run: bin/verify_kafka_warnings
