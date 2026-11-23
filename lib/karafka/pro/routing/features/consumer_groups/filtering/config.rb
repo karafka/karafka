@@ -41,9 +41,10 @@ module Karafka
                 !factories.empty?
               end
 
+              # @param args [Array] arguments for each factory (the routing topic and the partition)
               # @return [Array<Object>] array of filters applicable to a topic partition
-              def filters
-                factories.map(&:call)
+              def filters(*args)
+                factories.map { |factory| factory.call(*args) }
               end
 
               # @return [Hash] this config hash
