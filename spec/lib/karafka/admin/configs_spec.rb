@@ -73,14 +73,14 @@ RSpec.describe_current do
 
     context "when we want to describe a consumer group" do
       let(:group_id) { SecureRandom.uuid }
-      let(:resources) { [described_class::Resource.new(type: :consumer_group, name: group_id)] }
+      let(:resources) { [described_class::Resource.new(type: :group, name: group_id)] }
       let(:session_timeout) do
         result.first.configs.find { |config| config.name == "consumer.session.timeout.ms" }
       end
 
       it do
         expect(result.size).to eq(1)
-        expect(result.first.type).to eq(:consumer_group)
+        expect(result.first.type).to eq(:group)
         expect(result.first.name).to eq(group_id)
         expect(session_timeout.value).to eq("45000")
         expect(session_timeout.default?).to be(true)
@@ -254,7 +254,7 @@ RSpec.describe_current do
 
     context "when we want to set a valid value on a consumer group" do
       let(:name) { "consumer.heartbeat.interval.ms" }
-      let(:resources) { [described_class::Resource.new(type: :consumer_group, name: SecureRandom.uuid)] }
+      let(:resources) { [described_class::Resource.new(type: :group, name: SecureRandom.uuid)] }
 
       before { resources.first.set(name, 6_000) }
 
@@ -262,7 +262,7 @@ RSpec.describe_current do
     end
 
     context "when we want to set an invalid value on a consumer group" do
-      let(:resources) { [described_class::Resource.new(type: :consumer_group, name: SecureRandom.uuid)] }
+      let(:resources) { [described_class::Resource.new(type: :group, name: SecureRandom.uuid)] }
 
       before { resources.first.set("consumer.session.timeout.ms", 1) }
 
