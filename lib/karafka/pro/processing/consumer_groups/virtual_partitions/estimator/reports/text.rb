@@ -91,6 +91,22 @@ module Karafka
                   "Fix the one that raised and run the estimate again."
                 ].freeze
 
+                # Suggestions when the partitioner raised in some batches only. Those batches ran as
+                # one group and lowered the score, so key skew cannot be told apart from them
+                PARTLY_COLLAPSED_SUGGESTIONS = [
+                  "The partitioner raised an error in %<collapsed>s of %<batches>s batches, so " \
+                  "those batches were processed as one group and lowered the score.",
+                  "Fix the partitioner and run the estimate again."
+                ].freeze
+
+                # Suggestions when an error was raised in some batches only and a custom reducer was
+                # used by the `:consistent` distribution
+                PARTLY_COLLAPSED_REDUCER_SUGGESTIONS = [
+                  "The partitioner or the reducer raised an error in %<collapsed>s of %<batches>s " \
+                  "batches, so those batches were processed as one group and lowered the score.",
+                  "Fix the one that raised and run the estimate again."
+                ].freeze
+
                 # Suggestion when there is no score, because a concurrency below 2 parallelizes
                 # nothing
                 UNSCORED_SUGGESTIONS = [
@@ -111,6 +127,8 @@ module Karafka
                   :BALANCED_SUGGESTION,
                   :COLLAPSED_SUGGESTIONS,
                   :COLLAPSED_REDUCER_SUGGESTIONS,
+                  :PARTLY_COLLAPSED_SUGGESTIONS,
+                  :PARTLY_COLLAPSED_REDUCER_SUGGESTIONS,
                   :UNSCORED_SUGGESTIONS,
                   :CAVEATS
                 )
@@ -195,11 +213,26 @@ module Karafka
                     return custom_reducer? ? COLLAPSED_REDUCER_SUGGESTIONS : COLLAPSED_SUGGESTIONS
                   end
 
+                  return partly_collapsed(stats) if stats["collapsed_batches"].to_i.positive?
+
                   suggestions = SUGGESTIONS.fetch(stats["verdict"], [])
 
                   return suggestions if stats["verdict"] == "recommended" || !balanced_faster?(stats)
 
                   [*suggestions, BALANCED_SUGGESTION]
+                end
+
+                # @param stats [Hash] summary stats
+                # @return [Array<String>] suggestions naming the partitioner (or the reducer) as the
+                #   cause of the collapsed batches instead of key skew
+                def partly_collapsed(stats)
+                  templates = custom_reducer? ? PARTLY_COLLAPSED_REDUCER_SUGGESTIONS : PARTLY_COLLAPSED_SUGGESTIONS
+                  counts = { collapsed: stats["collapsed_batches"], batches: stats["batches"] }
+                  lines = templates.map { |template| format(template, counts) }
+
+                  return lines unless stats["verdict"] == "recommended"
+
+                  [*SUGGESTIONS.fetch("recommended"), *lines]
                 end
 
                 # @return [Boolean] true when the `:consistent` distribution used a custom reducer
