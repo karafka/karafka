@@ -1,7 +1,8 @@
 # frozen_string_literal: true
 
-# Deleting a consumer group that has active members should raise and leave its committed offsets
-# unchanged, as Kafka deletes only empty consumer groups
+# Deleting a consumer group that has active members should raise
+# `Karafka::Errors::ConsumerGroupNotEmptyError` and leave its committed offsets unchanged, as Kafka
+# deletes only empty consumer groups
 
 setup_karafka
 
@@ -22,15 +23,15 @@ start_karafka_and_wait_until do
 
   begin
     Karafka::Admin.delete_consumer_group(DT.group)
-  rescue Rdkafka::RdkafkaError => e
+  rescue Karafka::Errors::ConsumerGroupNotEmptyError => e
     DT[:error] = e
   end
 
   true
 end
 
-assert DT[:error].is_a?(Rdkafka::RdkafkaError)
-assert_equal :non_empty_group, DT[:error].code
+assert DT[:error].is_a?(Karafka::Errors::ConsumerGroupNotEmptyError)
+assert_equal DT.group, DT[:error].message
 
 offsets = Karafka::Admin.read_lags_with_offsets({ DT.group => [DT.topic] })
 
