@@ -63,6 +63,60 @@ RSpec.describe_current do
     end
   end
 
+  describe "#restart_backoff" do
+    let(:target_node) { manager.nodes.first }
+
+    before do
+      swarm_cfg.node_restart_timeout = 5_000
+
+      manager.nodes.each do |node|
+        allow(node).to receive(:start)
+        allow(node).to receive(:cleanup)
+        allow(node).to receive(:status).and_return(0)
+      end
+    end
+
+    context "when all nodes are alive" do
+      before { manager.control }
+
+      it { expect(manager.restart_backoff).to be_nil }
+    end
+
+    context "when a node died and waits for a restart" do
+      before do
+        allow(target_node).to receive(:alive?).and_return(false)
+        manager.control
+      end
+
+      it "expect to return the time left until its restart" do
+        expect(manager.restart_backoff).to be_between(4_000, 5_000)
+      end
+    end
+
+    context "when a node died and its restart is overdue" do
+      before do
+        swarm_cfg.node_restart_timeout = 50
+        allow(target_node).to receive(:alive?).and_return(false)
+        manager.control
+        sleep(0.1)
+      end
+
+      it { expect(manager.restart_backoff).to eq(0) }
+    end
+
+    context "when a dead node was restarted" do
+      before do
+        swarm_cfg.node_restart_timeout = 50
+        allow(target_node).to receive(:alive?).and_return(false)
+        manager.control
+        sleep(0.1)
+        manager.control
+      end
+
+      it { expect(manager.restart_backoff).to be_nil }
+    end
+  end
+
   describe "#control" do
     let(:target_node) { manager.nodes.first }
 
