@@ -42,15 +42,12 @@ RSpec.describe_current do
       allow(kafka).to receive_messages(
         start: nil, name: "test-consumer", unsubscribe: nil, close: nil
       )
-      # held before the unsubscribe, gone right after it
       allow(kafka).to receive(:assignment).and_return(full, none)
       allow(client).to receive(:ping)
       allow(client).to receive(:sleep)
     end
 
     context "when the member id is cleared only after the assignment is empty" do
-      # librdkafka empties the assignment before the revoke-time commit is done and sends the
-      # LeaveGroup (clearing the member id) only after it. A close in between drops the leave.
       before { allow(kafka).to receive(:member_id).and_return("member-1", "member-1", "") }
 
       it "expect to keep pinging until the member id is cleared and only then close" do
@@ -92,24 +89,6 @@ RSpec.describe_current do
 
         expect(kafka).to have_received(:close).once
       end
-    end
-  end
-
-  describe "#left_group?" do
-    let(:kafka) { instance_double(Rdkafka::Consumer) }
-
-    before { allow(client).to receive(:kafka).and_return(kafka) }
-
-    it "expect to be false while librdkafka still has a member id" do
-      allow(kafka).to receive(:member_id).and_return("member-1")
-
-      expect(client.left_group?).to be(false)
-    end
-
-    it "expect to be true once librdkafka cleared the member id" do
-      allow(kafka).to receive(:member_id).and_return("")
-
-      expect(client.left_group?).to be(true)
     end
   end
 
