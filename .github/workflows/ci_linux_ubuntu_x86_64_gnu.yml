@@ -260,6 +260,7 @@ jobs:
         parallel_group:
           - '0'
           - '1'
+          - '2'
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - name: Install package dependencies
@@ -310,6 +311,7 @@ jobs:
           SPECS_GROUP: ${{ matrix.parallel_group }}
           SPECS_CONCURRENCY: 7
           SPECS_TIMINGS_FILE: ${{ runner.temp }}/specs_timings.tsv
+          SPECS_GROUPS: 3
         run: |
           bin/integrations '/pro'
 
