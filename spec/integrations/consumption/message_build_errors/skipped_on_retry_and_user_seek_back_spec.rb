@@ -1,8 +1,8 @@
 # frozen_string_literal: true
 
-# When librdkafka cannot build a message (here its headers), Karafka should report it via
-# `error.occurred` with the topic, partition and offset in the error details. The message is
-# skipped, but the user can seek back to it from the consumer and consume it.
+# When librdkafka cannot build a message (here its headers) and the poll retries, Karafka should
+# report it via `error.occurred` with the topic, partition and offset in the error details. The
+# retry skips the message, but the user can seek back to it from the consumer and consume it.
 
 setup_karafka(allow_errors: %w[connection.client.poll.error])
 
@@ -20,6 +20,22 @@ module BrokenHeaders
 end
 
 Rdkafka::Bindings.singleton_class.prepend(BrokenHeaders)
+
+# The poll does not retry when the error lands at the end of the poll window. We force the retry
+# so this scenario does not depend on timing
+module ForcedRetry
+  def retryable?
+    if DT.key?(:broken) && !DT.key?(:retry_forced)
+      DT[:retry_forced] = true
+
+      return true
+    end
+
+    super
+  end
+end
+
+Karafka::TimeTrackers::Poll.prepend(ForcedRetry)
 
 Karafka.monitor.subscribe("error.occurred") do |event|
   DT[:errors] << event
