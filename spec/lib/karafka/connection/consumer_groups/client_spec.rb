@@ -253,6 +253,63 @@ RSpec.describe_current do
         end
       end
     end
+
+    context "when a retryable error is raised once" do
+      before do
+        # Long enough for a retry
+        allow(subscription_group).to receive(:max_wait_time).and_return(1_000)
+        allow(kafka).to receive(:poll).and_invoke(->(_) { raise error }, ->(_) {})
+
+        client.batch_poll
+      end
+
+      context "when a message cannot be built and the retry skips it" do
+        let(:error) do
+          # -199 is bad_msg
+          Rdkafka::RdkafkaError.new(-199, details: { topic: topic_name, partition: 0, offset: 2 })
+        end
+
+        it "expect to report it as an error with its details" do
+          expect(Karafka.monitor).to have_received(:instrument).with(
+            "error.occurred",
+            caller: client,
+            error: error,
+            type: "connection.client.poll.error"
+          ).once
+        end
+
+        it "expect to retry the poll" do
+          expect(kafka).to have_received(:poll).at_least(:twice)
+        end
+      end
+
+      context "when a partition error (msg_size_too_large) has no message position" do
+        let(:error) do
+          # 10 is msg_size_too_large
+          Rdkafka::RdkafkaError.new(
+            10,
+            details: { topic: topic_name, partition: 0, offset: Rdkafka::Bindings::RD_KAFKA_OFFSET_INVALID }
+          )
+        end
+
+        it "expect to report it as an error with its details" do
+          expect(Karafka.monitor).to have_received(:instrument).with(
+            "error.occurred",
+            caller: client,
+            error: error,
+            type: "connection.client.poll.error"
+          ).once
+        end
+      end
+
+      context "when the error has no offset in its details" do
+        let(:error) { Rdkafka::RdkafkaError.new(-199) }
+
+        it "expect not to report it" do
+          expect(Karafka.monitor).not_to have_received(:instrument).with("error.occurred", any_args)
+        end
+      end
+    end
   end
 
   describe "#reset" do

@@ -747,6 +747,8 @@ module Karafka
 
           # Any fatal error should always cause early report
           early_report = true if e.fatal?
+          # Partition errors may skip their message on retry, so we report them
+          early_report = true if e.details.key?(:offset)
 
           if early_report || !retryable
             Karafka.monitor.instrument(
