@@ -142,7 +142,7 @@ module Karafka
 
           icfg.active_job.consumer_class = ActiveJob::Consumer
           icfg.active_job.dispatcher = ActiveJob::Dispatcher.new
-          icfg.active_job.job_options_contract = ActiveJob::JobOptionsContract.new
+          icfg.active_job.job_options_contract = ActiveJob::Contracts::JobOptions.new
 
           # The decorator is swapped unconditionally as it is a pass-through when the paused
           # partitions lags refreshing is disabled or when there is no refreshed data
