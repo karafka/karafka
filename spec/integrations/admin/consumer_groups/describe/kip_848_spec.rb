@@ -2,7 +2,7 @@
 
 # Karafka::Admin.describe_consumer_groups should describe KIP-848 (consumer protocol) consumer
 # groups: stable with the live member holding all the partitions while running and empty after
-# shutdown.
+# shutdown, reporting the consumer protocol type in both.
 
 setup_karafka(consumer_group_protocol: true)
 
@@ -32,10 +32,12 @@ end
 live = DT[:live]
 
 assert_equal :stable, live[:state]
+assert_equal :consumer, live[:type]
 assert_equal 1, live[:members].size
 assert_equal({ DT.topic => [0, 1] }, live[:members].first[:assignment])
 
 stopped = Karafka::Admin.describe_consumer_groups([DT.group]).first
 
 assert_equal :empty, stopped[:state]
+assert_equal :consumer, stopped[:type]
 assert_equal [], stopped[:members]

@@ -26,6 +26,13 @@ module Karafka
         Rdkafka::Bindings::RD_KAFKA_CONSUMER_GROUP_STATE_EMPTY => :empty
       }.freeze
 
+      # Maps the librdkafka consumer group types (rebalance protocols) to symbols
+      CONSUMER_GROUP_TYPES = {
+        Rdkafka::Bindings::RD_KAFKA_CONSUMER_GROUP_TYPE_UNKNOWN => :unknown,
+        Rdkafka::Bindings::RD_KAFKA_CONSUMER_GROUP_TYPE_CONSUMER => :consumer,
+        Rdkafka::Bindings::RD_KAFKA_CONSUMER_GROUP_TYPE_CLASSIC => :classic
+      }.freeze
+
       # Consumer group describe errors that mean the coordinator is not ready yet, not that the
       # consumer group could not be described. They are transient (e.g. on a fresh cluster before
       # `__consumer_offsets` is loaded) and librdkafka returns them per consumer group without
@@ -62,6 +69,7 @@ module Karafka
         :LONG_TIME_AGO,
         :DAY_IN_SECONDS,
         :CONSUMER_GROUP_STATES,
+        :CONSUMER_GROUP_TYPES,
         :COORDINATOR_NOT_READY_ERRORS,
         :OFFSETS_FETCH_RETRYABLE_ERRORS,
         :CONSUMER_GROUP_NOT_EMPTY_ERRORS,
@@ -618,6 +626,8 @@ module Karafka
       #   - `:group_id` [String] the consumer group id
       #   - `:state` [Symbol] consumer group state, one of `:unknown`,
       #     `:preparing_rebalance`, `:completing_rebalance`, `:stable`, `:dead`, `:empty`
+      #   - `:type` [Symbol] rebalance protocol of the consumer group: `:classic`, `:consumer`
+      #     (KIP-848) or `:unknown` when the broker does not report it
       #   - `:partition_assignor` [String, nil] partition assignor in use (e.g. `"range"`)
       #   - `:coordinator` [Hash, nil] the consumer group coordinator broker as
       #     `{ id:, host:, port:, rack: }`
@@ -641,6 +651,7 @@ module Karafka
       #   # => {
       #   #   group_id: 'billing',
       #   #   state: :stable,
+      #   #   type: :classic,
       #   #   partition_assignor: 'range',
       #   #   coordinator: { id: 1, host: '127.0.0.1', port: 9092, rack: nil },
       #   #   members: [
@@ -883,6 +894,7 @@ module Karafka
         {
           group_id: group[:group_id],
           state: CONSUMER_GROUP_STATES.fetch(group[:state], :unknown),
+          type: CONSUMER_GROUP_TYPES.fetch(group[:type], :unknown),
           partition_assignor: group[:partition_assignor],
           coordinator: group[:coordinator],
           members: group[:members]

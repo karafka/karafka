@@ -1,7 +1,8 @@
 # frozen_string_literal: true
 
 # Karafka::Admin.describe_consumer_groups should report a running consumer group as stable, with
-# its live member holding all the partitions and with the coordinator broker.
+# its live member holding all the partitions, with the coordinator broker and the classic
+# protocol type.
 
 setup_karafka
 
@@ -32,6 +33,7 @@ live = DT[:live]
 
 assert_equal DT.group, live[:group_id]
 assert_equal :stable, live[:state]
+assert_equal :classic, live[:type]
 assert_equal 1, live[:members].size
 assert live[:coordinator][:id].is_a?(Integer), live[:coordinator]
 
