@@ -44,9 +44,9 @@ module Karafka
         COORDINATOR_NOT_READY_ERRORS + %i[unstable_offset_commit]
       ).freeze
 
-      # Errors with which Kafka rejects an offsets change of a consumer group that has active
-      # members. Brokers report it as `unknown_member_id` per partition, as the change does not
-      # come from any of the consumer group members.
+      # Errors with which Kafka rejects an offsets change or a deletion of a consumer group that has
+      # active members. Brokers reject a deletion with `non_empty_group` and an offsets change with
+      # `unknown_member_id` per partition, as the change does not come from any of its members.
       CONSUMER_GROUP_NOT_EMPTY_ERRORS = %i[
         non_empty_group
         unknown_member_id
