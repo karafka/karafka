@@ -25,10 +25,10 @@ TIMING = {
 }.freeze
 
 def timing_configs
-  resource = Karafka::Admin::Configs::Resource.new(type: :consumer_group, name: DT.group)
+  resource = Karafka::Admin::Configs::Resource.new(type: :group, name: DT.group)
   described = Karafka::Admin::Configs.describe(resource).first
 
-  assert_equal :consumer_group, described.type
+  assert_equal :group, described.type
   assert_equal DT.group, described.name
 
   described.configs.select { |config| TIMING.key?(config.name) }
@@ -47,7 +47,7 @@ defaults = timing_configs
 assert_equal TIMING.keys.sort, defaults.map(&:name).sort
 assert defaults.all?(&:default?)
 
-group = Karafka::Admin::Configs::Resource.new(type: :consumer_group, name: DT.group)
+group = Karafka::Admin::Configs::Resource.new(type: :group, name: DT.group)
 TIMING.each { |name, value| group.set(name, value) }
 Karafka::Admin::Configs.alter(group)
 
@@ -66,7 +66,7 @@ altered = timing_configs
 assert_equal TIMING, altered.to_h { |config| [config.name, config.value] }
 assert altered.none?(&:default?)
 
-group = Karafka::Admin::Configs::Resource.new(type: :consumer_group, name: DT.group)
+group = Karafka::Admin::Configs::Resource.new(type: :group, name: DT.group)
 TIMING.each_key { |name| group.delete(name) }
 Karafka::Admin::Configs.alter(group)
 
