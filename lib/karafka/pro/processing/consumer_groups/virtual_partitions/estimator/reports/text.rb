@@ -92,10 +92,11 @@ module Karafka
                 ].freeze
 
                 # Suggestions when the partitioner raised in some batches only. Those batches ran as
-                # one group and lowered the score, so key skew cannot be told apart from them
+                # one group, so the score does not show how their keys spread
                 PARTLY_COLLAPSED_SUGGESTIONS = [
                   "The partitioner raised an error in %<collapsed>s of %<batches>s batches, so " \
-                  "those batches were processed as one group and lowered the score.",
+                  "those batches were processed as one group and the score does not show how " \
+                  "their keys spread.",
                   "Fix the partitioner and run the estimate again."
                 ].freeze
 
@@ -103,7 +104,8 @@ module Karafka
                 # used by the `:consistent` distribution
                 PARTLY_COLLAPSED_REDUCER_SUGGESTIONS = [
                   "The partitioner or the reducer raised an error in %<collapsed>s of %<batches>s " \
-                  "batches, so those batches were processed as one group and lowered the score.",
+                  "batches, so those batches were processed as one group and the score does not " \
+                  "show how their keys spread.",
                   "Fix the one that raised and run the estimate again."
                 ].freeze
 

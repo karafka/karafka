@@ -236,6 +236,7 @@ RSpec.describe_current do
       it { expect(text).to include("collapsed: 9") }
       it { expect(text).to include("verdict: not_recommended") }
       it { expect(text).to include("The partitioner raised an error in 9 of 10 batches") }
+      it { expect(text).to include("the score does not show how their keys spread.") }
       it { expect(text).to include("Fix the partitioner and run the estimate again.") }
       it { expect(text).not_to include("Virtual Partitions are unlikely to help") }
       it { expect(text).not_to include("a few keys hold most of the messages") }
@@ -252,6 +253,7 @@ RSpec.describe_current do
         end
 
         it { expect(text).to include("The partitioner or the reducer raised an error in 9 of 10 batches") }
+        it { expect(text).to include("the score does not show how their keys spread.") }
         it { expect(text).to include("Fix the one that raised and run the estimate again.") }
         it { expect(text).not_to include("Fix the partitioner") }
         it { expect(text).not_to include("a few keys hold most of the messages") }
