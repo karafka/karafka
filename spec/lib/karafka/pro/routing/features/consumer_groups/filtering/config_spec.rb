@@ -64,6 +64,48 @@ RSpec.describe_current do
         expect(config.filters).to eq([1, 2])
       end
     end
+
+    context "when factories require the topic and partition" do
+      subject(:config) { topic.filtering }
+
+      let(:builder) { Karafka::App.config.internal.routing.builder.class.new }
+      let(:topic) { builder.first.topics.first }
+      let(:filters_scope) { Karafka::Pro::Processing::ConsumerGroups::Filters }
+      let(:segments_scope) { Karafka::Pro::Processing::ConsumerGroups::ParallelSegments::Filters }
+
+      before do
+        builder.draw do
+          consumer_group :test do
+            parallel_segments(count: 2, partitioner: ->(message) { message.key })
+
+            topic :test do
+              consumer Class.new(Karafka::BaseConsumer)
+              inline_insights(required: true)
+              expire_in(1_000)
+              delay_by(1_000)
+              filter(->(topic, partition) { [topic.name, partition] })
+            end
+          end
+        end
+      end
+
+      after { builder.clear }
+
+      it "expect to build each filter for the given topic partition" do
+        filters = config.filters(topic, 2)
+
+        expect(filters.map(&:class)).to eq(
+          [
+            segments_scope::Default,
+            filters_scope::InlineInsightsDelayer,
+            filters_scope::Expirer,
+            filters_scope::Delayer,
+            Array
+          ]
+        )
+        expect(filters.last).to eq([topic.name, 2])
+      end
+    end
   end
 
   describe "#to_h" do

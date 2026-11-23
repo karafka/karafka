@@ -64,7 +64,7 @@ end
 aj_config = Karafka::App.config.internal.active_job
 
 assert_equal aj_config.dispatcher.class, Karafka::Pro::ActiveJob::Dispatcher
-assert_equal aj_config.job_options_contract.class, Karafka::Pro::ActiveJob::JobOptionsContract
+assert_equal aj_config.job_options_contract.class, Karafka::Pro::ActiveJob::Contracts::JobOptions
 assert_equal VALUE1, DT[0][0]
 assert_equal VALUE2, DT[0][1]
 assert_equal 1, DT.data.size

@@ -124,7 +124,19 @@ module Karafka
       # Keeps the lock on the queue so we control nodes only when it is needed
       # @note We convert to seconds since the queue timeout requires seconds
       def lock
-        @queue.pop(timeout: supervision_interval / 1_000.0)
+        @queue.pop(timeout: lock_timeout / 1_000.0)
+      end
+
+      # @return [Numeric] ms to wait for an event before the next control. Shorter than the
+      #   supervision interval when a dead node is due for a restart earlier, as no event wakes
+      #   us up for that.
+      def lock_timeout
+        @mutex.synchronize do
+          # Nodes are not restarted in those states
+          return supervision_interval if @quieting || @stopping
+
+          [supervision_interval, manager.restart_backoff].compact.min
+        end
       end
 
       # Frees the lock on events that could require nodes control
