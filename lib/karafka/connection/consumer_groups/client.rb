@@ -344,7 +344,7 @@ module Karafka
 
             unsubscribe
 
-            until assignment.empty?
+            until assignment.empty? && left_group?
               used += monotonic_now - stopped_at
               stopped_at = monotonic_now
 
@@ -357,6 +357,19 @@ module Karafka
           end
 
           close
+        end
+
+        # @return [Boolean] true when this member is no longer in the group. The assignment is
+        #   empty while the revoke-time offset commit is still in flight, and the classic protocol
+        #   sends the `LeaveGroup` only after that commit. A close in between drops the leave and
+        #   the other members wait for `session.timeout.ms`. librdkafka clears the member id when
+        #   it sends the `LeaveGroup`, so we wait for that.
+        # @note The KIP-848 consumer protocol keeps its client-generated member id after the
+        #   leave, and librdkafka leaves on close there, so we do not wait for it.
+        def left_group?
+          return true if @subscription_group.kafka[:"group.protocol"].to_s.casecmp?("consumer")
+
+          kafka.member_id.to_s.empty?
         end
 
         # Marks given message as consumed.
