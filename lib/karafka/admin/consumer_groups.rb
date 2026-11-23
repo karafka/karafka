@@ -290,16 +290,16 @@ module Karafka
       # @raise [Karafka::Errors::ConsumerGroupNotEmptyError] when the new consumer group has
       #   active members. Kafka accepts offset changes only for consumer groups without members,
       #   so this method should **not** be executed on a running consumer group.
-      # @raise [Karafka::Errors::ConsumerGroupNotEmptyError] when `delete_previous` is `true` and
-      #   the previous consumer group has active members. This is checked before any offsets are
-      #   copied, so nothing is changed in either of the consumer groups.
+      # @raise [Karafka::Errors::ConsumerGroupNotEmptyError] when the previous consumer group has
+      #   active members. This is checked before any offsets are copied, so nothing is changed in
+      #   either of the consumer groups, unless a member joins during the rename.
       #
       # @note After migration unless `delete_previous` is set to `false`, old group will be
       #   removed.
       #
       # @note If new group exists, old offsets will be added to it.
       def rename(previous_name, new_name, topics, delete_previous: true)
-        if delete_previous && !describe(previous_name).first[:members].empty?
+        unless describe(previous_name).first[:members].empty?
           raise(Errors::ConsumerGroupNotEmptyError, previous_name)
         end
 

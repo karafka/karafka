@@ -237,11 +237,9 @@ RSpec.describe Karafka::Admin::ConsumerGroups do
           described_class.rename(previous_name, new_name, topics, delete_previous: false)
         end
 
-        it "expect to copy without checking the previous consumer group" do
-          rename
-
-          expect(instance).not_to have_received(:describe)
-          expect(instance).to have_received(:copy)
+        it "expect to raise a consumer group not empty error without copying" do
+          expect { rename }.to raise_error(Karafka::Errors::ConsumerGroupNotEmptyError, previous_name)
+          expect(instance).not_to have_received(:copy)
         end
       end
     end
@@ -272,11 +270,7 @@ RSpec.describe Karafka::Admin::ConsumerGroups do
       end
 
       context "when the consumer group has active members" do
-        let(:error) do
-          Rdkafka::RdkafkaError.new(Rdkafka::Bindings::RD_KAFKA_RESP_ERR__STATE).tap do |rdkafka_error|
-            allow(rdkafka_error).to receive(:code).and_return(:non_empty_group)
-          end
-        end
+        let(:error) { Rdkafka::RdkafkaError.new(68) }
 
         it "expect to raise a consumer group not empty error" do
           expect { deletion }.to raise_error(Karafka::Errors::ConsumerGroupNotEmptyError, cg_id)
