@@ -25,7 +25,9 @@ RSpec.describe_current do
     let(:token_data) { { "entity" => entity_name } }
     let(:license_module) {
       Module.new {
-        def self.token
+        class << self
+          def token
+          end
         end
       }
     }
@@ -185,12 +187,14 @@ RSpec.describe_current do
       let(:custom_version) { "1.0.0-custom" }
       let(:custom_license_module) do
         Module.new do
-          def self.token
-            "custom-user-token"
-          end
+          class << self
+            def token
+              "custom-user-token"
+            end
 
-          def self.version
-            "1.0.0-custom"
+            def version
+              "1.0.0-custom"
+            end
           end
         end
       end
@@ -281,8 +285,10 @@ RSpec.describe_current do
 
         it "raises when existing License constant is missing version" do
           stale_license = Module.new do
-            def self.token
-              "stale-token"
+            class << self
+              def token
+                "stale-token"
+              end
             end
           end
           stub_const("Karafka::License", stale_license)
