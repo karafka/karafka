@@ -78,5 +78,5 @@ raise unless Karafka::Pro::Routing::Features::ConsumerGroups::VirtualPartitions:
 raise unless Karafka::Pro::Processing::ConsumerGroups::Jobs::ConsumeNonBlocking
 raise unless Karafka::Pro::ActiveJob::Consumer
 raise unless Karafka::Pro::ActiveJob::Dispatcher
-raise unless Karafka::Pro::ActiveJob::JobOptionsContract
+raise unless Karafka::Pro::ActiveJob::Contracts::JobOptions
 raise unless Karafka::Pro::Instrumentation::PerformanceTracker
