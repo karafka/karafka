@@ -41,9 +41,7 @@ module Karafka
                 !factories.empty?
               end
 
-              # @param args [Array] arguments passed to each factory: the routing topic and the
-              #   partition, as the filters applier passes them. Without them, factories are called
-              #   with no arguments.
+              # @param args [Array] arguments for each factory (the routing topic and the partition)
               # @return [Array<Object>] array of filters applicable to a topic partition
               def filters(*args)
                 factories.map { |factory| factory.call(*args) }
