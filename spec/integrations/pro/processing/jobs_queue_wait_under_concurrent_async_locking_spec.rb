@@ -30,21 +30,15 @@
 
 # Many consumers pausing their subscription group with new lock ids
 # (subscription_groups_coordinator.pause, #lock_async underneath) while the listener waits on the
-# same group should not fail. The listener's #wait? removes expired locks from the group locks
-# Hash with #delete_if; if it did that without the jobs queue mutex, a consumer adding a new lock
-# key in the meantime raised "can't add a new key into hash during iteration" in #consume.
+# same group should not fail.
 
-setup_karafka(allow_errors: true) do |config|
+setup_karafka do |config|
   config.max_messages = 1
   config.concurrency = 5
 end
 
 PARTITIONS = 5
 LOCKS_PER_CONSUME = 200_000
-
-Karafka.monitor.subscribe("error.occurred") do |event|
-  DT[:errors] << event[:error]
-end
 
 class Consumer < Karafka::BaseConsumer
   def consume
@@ -75,7 +69,7 @@ PARTITIONS.times do |partition|
 end
 
 start_karafka_and_wait_until do
-  DT[:consumed].size >= PARTITIONS || DT[:errors].any?
+  DT[:consumed].size >= PARTITIONS
 end
 
-assert_equal [], DT[:errors].map { |error| "#{error.class}: #{error.message}" }
+assert_equal PARTITIONS.times.to_a, DT[:consumed].sort

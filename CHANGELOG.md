@@ -77,7 +77,7 @@
 - [Fix] Raise `Karafka::Errors::ConsumerGroupNotEmptyError` from `Karafka::Admin.delete_consumer_group` and `.rename_consumer_group` for a consumer group with active members. `rename_consumer_group` now fails before it copies any offsets.
 - [Fix] Restart a dead Swarm node once `node_restart_timeout` (5 s) passes. Before, the restart waited for the next supervision check, up to `supervision_interval` (30 s), leaving static membership partitions idle for that long.
 - [Fix] [Pro] Pass the topic and partition given to routing `filtering.filters` to the filter factories. Before, it called them with no arguments and raised `ArgumentError` for custom `->(topic, partition)` filters, required inline insights, parallel segments and `expire_in`.
-- [Fix] [Pro] Stop a rare `can't add a new key into hash during iteration` error when a listener checks its jobs while a consumer takes an async lock (`subscription_groups_coordinator.pause`).
+- [Fix] [Pro] Stop a rare `can't add a new key into hash during iteration` error in `#consume` when it calls `subscription_groups_coordinator.pause`.
 - [Maintenance] 2.6.2.alpha1 was published without a Sigstore attestation: signing failed in the release workflow (the signer does not work with json 3.x, the default of Ruby 4.0) and the attestation patch then pushed the gem unsigned.
 - [Maintenance] Sign the gem with `sigstore-cli` and push it with `gem push --attestation` (the `gem-push` action of `karafka/misc`), so a failed signing stops the release instead of publishing the gem without an attestation.
 - [Maintenance] Add the `Sigstore Check` workflow: nightly, and on pull requests that change the push workflow, it builds the gem, signs it like a release and verifies the attestation, without pushing.

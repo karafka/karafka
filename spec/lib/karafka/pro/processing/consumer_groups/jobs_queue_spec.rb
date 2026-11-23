@@ -413,69 +413,38 @@ RSpec.describe_current do
       end
     end
 
-    context "when another thread uses the queue while wait checks the jobs" do
-      let(:job) { OpenStruct.new(group_id: 2, id: 1, call: true) }
-      let(:readers) { [] }
-      let(:blocked) { [] }
+    %i[<< lock].each do |add_method|
+      context "when another thread uses the queue while wait checks a job added with ##{add_method}" do
+        let(:job) { OpenStruct.new(group_id: 2, id: 1, call: true) }
+        let(:readers) { [] }
+        let(:blocked) { [] }
 
-      before do
-        allow(job).to receive(:non_blocking?) do
-          reader = Thread.new { queue.statistics }
-          readers << reader
+        before do
+          allow(job).to receive(:non_blocking?) do
+            reader = Thread.new { queue.statistics }
+            readers << reader
 
-          100.times do
-            break if reader.status == "sleep" || !reader.alive?
+            100.times do
+              break if reader.status == "sleep" || !reader.alive?
 
-            sleep(0.01)
+              sleep(0.01)
+            end
+
+            blocked << (reader.status == "sleep")
+
+            true
           end
 
-          blocked << (reader.status == "sleep")
-
-          true
+          queue.public_send(add_method, job)
         end
 
-        queue << job
-      end
+        after { readers.each(&:join) }
 
-      after { readers.each(&:join) }
+        it "expect the other thread to wait until the check is done" do
+          queue.wait(job.group_id)
 
-      it "expect the other thread to wait until the check is done" do
-        queue.wait(job.group_id)
-
-        expect(blocked).to eq([true])
-      end
-    end
-
-    context "when another thread uses the queue while wait checks the waiting jobs" do
-      let(:job) { OpenStruct.new(group_id: 2, id: 1, call: true) }
-      let(:readers) { [] }
-      let(:blocked) { [] }
-
-      before do
-        allow(job).to receive(:non_blocking?) do
-          reader = Thread.new { queue.statistics }
-          readers << reader
-
-          100.times do
-            break if reader.status == "sleep" || !reader.alive?
-
-            sleep(0.01)
-          end
-
-          blocked << (reader.status == "sleep")
-
-          true
+          expect(blocked).to eq([true])
         end
-
-        queue.lock(job)
-      end
-
-      after { readers.each(&:join) }
-
-      it "expect the other thread to wait until the check is done" do
-        queue.wait(job.group_id)
-
-        expect(blocked).to eq([true])
       end
     end
 
