@@ -11,8 +11,9 @@ module Karafka
           topic: Rdkafka::Bindings::RD_KAFKA_RESOURCE_TOPIC,
           # use when you want to manage configs of a given broker
           broker: Rdkafka::Bindings::RD_KAFKA_RESOURCE_BROKER,
-          # use when you want to manage configs of a given consumer group
-          consumer_group: Rdkafka::Bindings::RD_KAFKA_RESOURCE_GROUP
+          # use when you want to manage configs of a given group. Kafka's `GROUP` resource type
+          # covers consumer groups as well as other group kinds (e.g. share groups)
+          group: Rdkafka::Bindings::RD_KAFKA_RESOURCE_GROUP
         }.freeze
 
         # Map for operations we may perform on the resource configs
@@ -28,8 +29,7 @@ module Karafka
         attr_reader :type, :name, :configs
 
         # @param type [Symbol, Integer] type of resource as a symbol for mapping or integer
-        # @param name [String] name of the resource. It's the broker id, topic name or consumer
-        #   group id
+        # @param name [String] name of the resource. It's the broker id, topic name or group id
         # @return [Resource]
         def initialize(type:, name:)
           @type = map_type(type)
