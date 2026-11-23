@@ -8,22 +8,37 @@ setup_karafka
 
 valid_kafka = Karafka::App.config.kafka
 
+draws = {
+  consumer_group: lambda do
+    draw_routes(create_topics: false) do
+      consumer_group DT.group do
+        topic DT.topic do
+          active(false)
+        end
+      end
+    end
+  end,
+  share_group: lambda do
+    draw_routes(create_topics: false) do
+      share_group DT.group do
+        topic DT.topic do
+          active(false)
+        end
+      end
+    end
+  end
+}
+
 [nil, ""].each do |servers|
   Karafka::App.config.kafka = valid_kafka.merge("bootstrap.servers": servers)
 
-  %i[consumer_group share_group].each do |group_type|
+  draws.each do |group_type, draw|
     clear_app_draws
 
     error = nil
 
     begin
-      draw_routes(create_topics: false) do
-        send(group_type, DT.group) do
-          topic DT.topic do
-            active(false)
-          end
-        end
-      end
+      draw.call
     rescue Karafka::Errors::InvalidConfigurationError => e
       error = e
     end
@@ -35,10 +50,4 @@ end
 Karafka::App.config.kafka = valid_kafka
 clear_app_draws
 
-draw_routes(create_topics: false) do
-  consumer_group DT.group do
-    topic DT.topic do
-      active(false)
-    end
-  end
-end
+draws.fetch(:consumer_group).call
