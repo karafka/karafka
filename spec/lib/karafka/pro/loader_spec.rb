@@ -58,7 +58,7 @@ RSpec.describe_current do
 
       it "expect to change active job components into pro" do
         expect(aj_config.dispatcher).to be_a(Karafka::Pro::ActiveJob::Dispatcher)
-        expect(aj_config.job_options_contract).to be_a(Karafka::Pro::ActiveJob::JobOptionsContract)
+        expect(aj_config.job_options_contract).to be_a(Karafka::Pro::ActiveJob::Contracts::JobOptions)
       end
     end
   end

@@ -387,9 +387,9 @@ module Karafka
         setting :active_job do
           # option dispatcher [Karafka::ActiveJob::Dispatcher] default dispatcher for ActiveJob
           setting :dispatcher, default: ActiveJob::Dispatcher.new
-          # option job_options_contract [Karafka::Contracts::JobOptionsContract] contract for
+          # option job_options_contract [Karafka::ActiveJob::Contracts::JobOptions] contract for
           #   ensuring, that extra job options defined are valid
-          setting :job_options_contract, default: ActiveJob::JobOptionsContract.new
+          setting :job_options_contract, default: ActiveJob::Contracts::JobOptions.new
           # option consumer [Class] consumer class that should be used to consume ActiveJob data
           setting :consumer_class, default: ActiveJob::Consumer
           # option deserializer [Karafka::ActiveJob::Deserializer] deserializer for ActiveJob jobs

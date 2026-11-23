@@ -115,7 +115,7 @@ RSpec.describe_current do
         },
         active_job: {
           dispatcher: Karafka::ActiveJob::Dispatcher.new,
-          job_options_contract: Karafka::ActiveJob::JobOptionsContract.new,
+          job_options_contract: Karafka::ActiveJob::Contracts::JobOptions.new,
           consumer_class: Karafka::ActiveJob::Consumer
         }
       },

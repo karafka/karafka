@@ -60,7 +60,7 @@ assert const_visible?("Karafka::Pro::Routing::Features::ConsumerGroups::VirtualP
 assert const_visible?("Karafka::Pro::Processing::ConsumerGroups::Jobs::ConsumeNonBlocking")
 assert const_visible?("Karafka::Pro::ActiveJob::Consumer")
 assert const_visible?("Karafka::Pro::ActiveJob::Dispatcher")
-assert const_visible?("Karafka::Pro::ActiveJob::JobOptionsContract")
+assert const_visible?("Karafka::Pro::ActiveJob::Contracts::JobOptions")
 assert const_visible?("Karafka::Pro::Instrumentation::PerformanceTracker")
 assert_equal pro::Processing::ConsumerGroups::StrategySelector, config.processing.consumer_groups.strategy_selector.class
 assert_equal pro::Processing::ConsumerGroups::Partitioner, config.processing.consumer_groups.partitioner_class
@@ -70,7 +70,7 @@ assert_equal pro::Processing::ConsumerGroups::JobsQueue, config.processing.jobs_
 assert_equal pro::Processing::ConsumerGroups::JobsBuilder, config.processing.consumer_groups.jobs_builder.class
 assert_equal pro::ActiveJob::Dispatcher, config.active_job.dispatcher.class
 assert_equal pro::ActiveJob::Consumer, config.active_job.consumer_class
-assert_equal pro::ActiveJob::JobOptionsContract, config.active_job.job_options_contract.class
+assert_equal pro::ActiveJob::Contracts::JobOptions, config.active_job.job_options_contract.class
 # With encryption disabled, normal parser should be used
 parser = Karafka::Messages::Parser
 assert Karafka::App.config.internal.messages.parser.is_a?(parser)
