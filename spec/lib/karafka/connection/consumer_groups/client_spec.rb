@@ -282,6 +282,30 @@ RSpec.describe_current do
       end
     end
 
+    context "when a partition error (msg_size_too_large) has no message position" do
+      let(:error) do
+        # 10 is msg_size_too_large, -1001 is no offset (RD_KAFKA_OFFSET_INVALID)
+        Rdkafka::RdkafkaError.new(10, details: { topic: topic_name, partition: 0, offset: -1001 })
+      end
+
+      before do
+        # Long enough for a retry
+        allow(subscription_group).to receive(:max_wait_time).and_return(1_000)
+        allow(kafka).to receive(:poll).and_invoke(->(_) { raise error }, ->(_) {})
+
+        client.batch_poll
+      end
+
+      it "expect to report it as an error with its details" do
+        expect(Karafka.monitor).to have_received(:instrument).with(
+          "error.occurred",
+          caller: client,
+          error: error,
+          type: "connection.client.poll.error"
+        ).once
+      end
+    end
+
     context "when a retryable error has no offset in its details" do
       let(:error) { Rdkafka::RdkafkaError.new(-199) }
 
