@@ -253,6 +253,50 @@ RSpec.describe_current do
         end
       end
     end
+
+    context "when a message cannot be built and the retry skips it" do
+      let(:error) do
+        # -199 is bad_msg
+        Rdkafka::RdkafkaError.new(-199, details: { topic: topic_name, partition: 0, offset: 2 })
+      end
+
+      before do
+        # Long enough for a retry
+        allow(subscription_group).to receive(:max_wait_time).and_return(1_000)
+        allow(kafka).to receive(:poll).and_invoke(->(_) { raise error }, ->(_) {})
+
+        client.batch_poll
+      end
+
+      it "expect to report it as an error with its details" do
+        expect(Karafka.monitor).to have_received(:instrument).with(
+          "error.occurred",
+          caller: client,
+          error: error,
+          type: "connection.client.poll.error"
+        ).once
+      end
+
+      it "expect to retry the poll" do
+        expect(kafka).to have_received(:poll).at_least(:twice)
+      end
+    end
+
+    context "when a retryable error has no offset in its details" do
+      let(:error) { Rdkafka::RdkafkaError.new(-199) }
+
+      before do
+        # Long enough for a retry
+        allow(subscription_group).to receive(:max_wait_time).and_return(1_000)
+        allow(kafka).to receive(:poll).and_invoke(->(_) { raise error }, ->(_) {})
+
+        client.batch_poll
+      end
+
+      it "expect not to report it" do
+        expect(Karafka.monitor).not_to have_received(:instrument).with("error.occurred", any_args)
+      end
+    end
   end
 
   describe "#reset" do

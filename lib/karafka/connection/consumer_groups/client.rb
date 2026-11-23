@@ -747,6 +747,9 @@ module Karafka
 
           # Any fatal error should always cause early report
           early_report = true if e.fatal?
+          # A message that librdkafka could not build (e.g. broken headers) is already behind the
+          # consumer position, so the retry skips it. We report it so users can seek back to it
+          early_report = true if e.details.key?(:offset)
 
           if early_report || !retryable
             Karafka.monitor.instrument(
