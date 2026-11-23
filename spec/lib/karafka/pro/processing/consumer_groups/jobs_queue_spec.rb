@@ -413,6 +413,41 @@ RSpec.describe_current do
       end
     end
 
+    %i[<< lock].each do |add_method|
+      context "when another thread uses the queue while wait checks a job added with ##{add_method}" do
+        let(:job) { OpenStruct.new(group_id: 2, id: 1, call: true) }
+        let(:readers) { [] }
+        let(:blocked) { [] }
+
+        before do
+          allow(job).to receive(:non_blocking?) do
+            reader = Thread.new { queue.statistics }
+            readers << reader
+
+            100.times do
+              break if reader.status == "sleep" || !reader.alive?
+
+              sleep(0.01)
+            end
+
+            blocked << (reader.status == "sleep")
+
+            true
+          end
+
+          queue.public_send(add_method, job)
+        end
+
+        after { readers.each(&:join) }
+
+        it "expect the other thread to wait until the check is done" do
+          queue.wait(job.group_id)
+
+          expect(blocked).to eq([true])
+        end
+      end
+    end
+
     context "when Karafka is stopping and the queue is empty" do
       before { allow(Karafka::App).to receive(:stopping?).and_return(true) }
 

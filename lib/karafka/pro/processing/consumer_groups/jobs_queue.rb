@@ -244,11 +244,14 @@ module Karafka
           # @return [Boolean] should we keep waiting or not
           # @note We do not wait for non-blocking jobs. Their flow should allow for `poll` running
           #   as they may exceed `max.poll.interval`
+          # @note Reads under the lock because workers change the same Arrays and Hashes, and
+          #   `#locked_async?` deletes expired locks from the Hash that `#lock_async` writes to
           def wait?(group_id)
-            return true unless @in_processing[group_id].all?(&:non_blocking?)
-            return true unless @in_waiting[group_id].all?(&:non_blocking?)
-
-            locked_async?(group_id)
+            @mutex.synchronize do
+              !@in_processing[group_id].all?(&:non_blocking?) ||
+                !@in_waiting[group_id].all?(&:non_blocking?) ||
+                locked_async?(group_id)
+            end
           end
         end
       end
