@@ -63,6 +63,5 @@ assert_equal 0, poll_error[:error].details[:partition]
 assert_equal 2, poll_error[:error].details[:offset]
 assert_equal "connection.listener.fetch_loop.error", fetch_loop_error[:type]
 assert_equal poll_error[:error], fetch_loop_error[:error]
-# Fetched again after the reset: nothing skipped
 assert_equal (0..4).to_a, DT[:offsets].uniq.sort
 assert DT[:offsets].index(2) < DT[:offsets].index(4)

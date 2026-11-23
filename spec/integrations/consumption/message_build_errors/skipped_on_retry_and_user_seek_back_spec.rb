@@ -70,6 +70,5 @@ assert_equal DT.topic, error.details[:topic]
 assert_equal 0, error.details[:partition]
 assert_equal 2, error.details[:offset]
 assert DT.key?(:seeked)
-# Skipped first: offset 3 was consumed before offset 2
 assert DT[:offsets].index(3) < DT[:offsets].index(2)
 assert_equal [2, 3, 4], DT[:offsets].last(3)
