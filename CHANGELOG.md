@@ -33,6 +33,8 @@
 - [Change] Apply `strict_declarative_topics` to share-group topics too: each one needs an active declaration in `declaratives.draw`, made before `routes.draw`.
 - [Change] Add `#dispatch_to_dead_letter_queue` and, in Pro, `#enhance_dead_letter_queue_message` as the preferred names of the consumer `#dispatch_to_dlq` and `#enhance_dlq_message`. The old names stay supported.
 - [Maintenance] Foundational work for Kafka share groups (KIP-932) is in progress (routing layer, consumer class hierarchy, config seams). Not usable yet - share groups can be described in routing but cannot run.
+- [Maintenance] 2.6.2.alpha1 was published without a Sigstore attestation: signing failed in the release workflow (the signer does not work with json 3.x, the default of Ruby 4.0) and the attestation patch then pushed the gem unsigned.
+- [Maintenance] Sign the gem with `sigstore-cli` and push it with `gem push --attestation` (the `gem-push` action of `karafka/misc`), so a failed signing stops the release instead of publishing the gem without an attestation.
 - [Fix] [Pro] Do not let healthy KIP-848 (`group.protocol=consumer`) multiplexed listeners that never received an assignment block dynamic scaling. With more listeners than partitions they stay in the `init` join state with a rebalance age of 0, so the manager never saw them as stable and kept them alive instead of scaling them down.
 - [Fix] Stop `CoordinatorsBuffer#@coordinators` from growing unbounded across rebalances by dropping a topic entry on revoke once it tracks no partitions (mirrors `PausesManager#delete`).
 - [Fix] Use `::JSON.parse` in the ActiveJob deserializer, so consuming ActiveJob messages works with the json gem `>= 3.0`.
@@ -72,9 +74,6 @@
 - [Fix] [Pro] Unsubscribe again before closing a dynamic multiplexing listener that was scaled down and then scaled up. Before, such a listener skipped the unsubscribe on each later stop.
 - [Fix] [Pro] Do not judge a dynamic multiplexing listener restarted by an upscale on the statistics of its previous consumer. Before, it could be scaled down again at once, before it got an assignment, and cycle between up and down.
 - [Fix] Raise `InvalidLicenseTokenError` on JRuby for a license token whose ciphertext is not below the public key modulus (e.g. one signed with another key). Before, a Java `DataLengthException` or `ArrayIndexOutOfBoundsException` was raised.
-- [Maintenance] 2.6.2.alpha1 was published without a Sigstore attestation: signing failed in the release workflow (the signer does not work with json 3.x, the default of Ruby 4.0) and the attestation patch then pushed the gem unsigned.
-- [Maintenance] Sign the gem with `sigstore-cli` and push it with `gem push --attestation` (the `gem-push` action of `karafka/misc`), so a failed signing stops the release instead of publishing the gem without an attestation.
-- [Maintenance] Add the `Sigstore Check` workflow: nightly, and on pull requests that change the push workflow, it builds the gem, signs it like a release and verifies the attestation, without pushing.
 
 ## 2.6.1 (2026-08-24)
 - **[Feature]** [Pro] Add an opt-in envelope encryption mode for Messages At Rest (`config.encryption.mode = :envelope`, requires openssl `>= 3.0`) without the RSA payload size limit. Upgrade all consuming processes before enabling.
