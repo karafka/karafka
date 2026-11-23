@@ -98,5 +98,12 @@ RSpec.describe_current do
       it { expect(check).not_to be_success }
       it { expect(check.errors.keys).to eq(%i[kafka.bootstrap.servers]) }
     end
+
+    context "when they are not a string" do
+      before { config[:kafka] = { "bootstrap.servers": %w[localhost:9092] } }
+
+      it { expect(check).not_to be_success }
+      it { expect(check.errors.keys).to eq(%i[kafka.bootstrap.servers]) }
+    end
   end
 end
