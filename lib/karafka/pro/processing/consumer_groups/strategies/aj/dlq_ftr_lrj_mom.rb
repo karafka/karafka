@@ -73,14 +73,14 @@ module Karafka
 
                     resume
                   else
-                    apply_dlq_flow do
+                    apply_dead_letter_queue_flow do
                       # LRJ revocation runs concurrently with the job. If the partition was
                       # revoked we must not dispatch: the new owner will reprocess and dispatch
                       return resume if revoked?
 
                       skippable_message, = find_skippable_message
-                      dispatch_to_dead_letter_queue(skippable_message) if dispatch_to_dlq?
-                      mark_dispatched_to_dlq(skippable_message)
+                      dispatch_to_dead_letter_queue(skippable_message) if dispatch_to_dead_letter_queue?
+                      mark_dispatched_to_dead_letter_queue(skippable_message)
                     end
                   end
                 end

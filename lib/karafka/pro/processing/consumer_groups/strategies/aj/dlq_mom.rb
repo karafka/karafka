@@ -61,13 +61,13 @@ module Karafka
                     # Do NOT commit offsets, they are comitted after each job in the AJ consumer.
                     coordinator.pause_tracker.reset
                   else
-                    apply_dlq_flow do
+                    apply_dead_letter_queue_flow do
                       skippable_message, = find_skippable_message
-                      dispatch_to_dead_letter_queue(skippable_message) if dispatch_to_dlq?
+                      dispatch_to_dead_letter_queue(skippable_message) if dispatch_to_dead_letter_queue?
                       # We can commit the offset here because we know that we skip it "forever" and
                       # since AJ consumer commits the offset after each job, we also know that the
                       # previous job was successful
-                      mark_dispatched_to_dlq(skippable_message)
+                      mark_dispatched_to_dead_letter_queue(skippable_message)
                     end
                   end
                 end
