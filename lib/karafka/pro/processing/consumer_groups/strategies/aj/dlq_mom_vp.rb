@@ -67,12 +67,12 @@ module Karafka
 
                     mark_as_consumed(last_group_message)
                   else
-                    apply_dlq_flow do
+                    apply_dead_letter_queue_flow do
                       # Here we are in a collapsed state, hence we can apply the same logic as
                       # Aj::DlqMom
                       skippable_message, = find_skippable_message
-                      dispatch_to_dead_letter_queue(skippable_message) if dispatch_to_dlq?
-                      mark_dispatched_to_dlq(skippable_message)
+                      dispatch_to_dead_letter_queue(skippable_message) if dispatch_to_dead_letter_queue?
+                      mark_dispatched_to_dead_letter_queue(skippable_message)
                     end
                   end
                 end

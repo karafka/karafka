@@ -124,7 +124,7 @@ module Karafka
 
                     mark_as_consumed(last_group_message)
                   else
-                    apply_dlq_flow do
+                    apply_dead_letter_queue_flow do
                       dispatch_if_needed_and_mark_as_consumed
                     end
                   end
@@ -160,7 +160,7 @@ module Karafka
 
                 producer.public_send(
                   topic.dead_letter_queue.dispatch_method,
-                  build_dlq_message(
+                  build_dead_letter_queue_message(
                     skippable_message
                   )
                 )
@@ -184,9 +184,9 @@ module Karafka
                 skippable_message, = find_skippable_message
 
                 dispatch = lambda do
-                  dispatch_to_dead_letter_queue(skippable_message) if dispatch_to_dlq?
+                  dispatch_to_dead_letter_queue(skippable_message) if dispatch_to_dead_letter_queue?
 
-                  mark_dispatched_to_dlq(skippable_message) if mark_after_dispatch?
+                  mark_dispatched_to_dead_letter_queue(skippable_message) if mark_after_dispatch?
                 end
 
                 if dispatch_in_a_transaction?
@@ -204,11 +204,11 @@ module Karafka
 
               # @param skippable_message [Array<Karafka::Messages::Message>]
               # @return [Hash] dispatch DLQ message
-              def build_dlq_message(skippable_message)
+              def build_dead_letter_queue_message(skippable_message)
                 source_partition = skippable_message.partition.to_s
 
-                dlq_message = {
-                  topic: @_dispatch_to_dlq_topic || topic.dead_letter_queue.topic,
+                dead_letter_queue_message = {
+                  topic: @_dispatch_to_dead_letter_queue_topic || topic.dead_letter_queue.topic,
                   key: skippable_message.raw_key,
                   partition_key: source_partition,
                   payload: skippable_message.raw_payload,
@@ -226,26 +226,26 @@ module Karafka
                 # some extra details if needed or to replace payload, etc
                 if respond_to?(:enhance_dead_letter_queue_message, true)
                   enhance_dead_letter_queue_message(
-                    dlq_message,
+                    dead_letter_queue_message,
                     skippable_message
                   )
                 # Older name, still supported
                 elsif respond_to?(:enhance_dlq_message, true)
                   enhance_dlq_message(
-                    dlq_message,
+                    dead_letter_queue_message,
                     skippable_message
                   )
                 end
 
-                dlq_message
+                dead_letter_queue_message
               end
 
               # @return [Boolean] should we dispatch the message to DLQ or not. When the dispatch
               #   topic is set to false, we will skip the dispatch, effectively ignoring the broken
               #   message without taking any action.
-              def dispatch_to_dlq?
+              def dispatch_to_dead_letter_queue?
                 return false unless topic.dead_letter_queue.topic
-                return false unless @_dispatch_to_dlq
+                return false unless @_dispatch_to_dead_letter_queue
 
                 true
               end
@@ -271,7 +271,7 @@ module Karafka
               #
               # In case of `:skip` and `:dispatch` will run the exact flow provided in a block
               # In case of `:retry` always `#retry_after_pause` is applied
-              def apply_dlq_flow
+              def apply_dead_letter_queue_flow
                 # Process-critical errors are never dispatched or skipped regardless of the
                 # strategy outcome: the retry pause protects the partition during the critical
                 # shutdown and the failed batch is redelivered after the restart.
@@ -295,11 +295,11 @@ module Karafka
 
                   return
                 when :skip
-                  @_dispatch_to_dlq = false
+                  @_dispatch_to_dead_letter_queue = false
                 when :dispatch
-                  @_dispatch_to_dlq = true
+                  @_dispatch_to_dead_letter_queue = true
                   # Use custom topic if it was returned from the strategy
-                  @_dispatch_to_dlq_topic = target_topic || topic.dead_letter_queue.topic
+                  @_dispatch_to_dead_letter_queue_topic = target_topic || topic.dead_letter_queue.topic
                 else
                   raise Karafka::Errors::UnsupportedCaseError, flow
                 end
@@ -312,12 +312,12 @@ module Karafka
                 # Always backoff after DLQ dispatch even on skip to prevent overloads on errors
                 pause(seek_offset, nil, false)
               ensure
-                @_dispatch_to_dlq_topic = nil
+                @_dispatch_to_dead_letter_queue_topic = nil
               end
 
               # Marks message that went to DLQ (if applicable) based on the requested method
               # @param skippable_message [Karafka::Messages::Message]
-              def mark_dispatched_to_dlq(skippable_message)
+              def mark_dispatched_to_dead_letter_queue(skippable_message)
                 case topic.dead_letter_queue.marking_method
                 when :mark_as_consumed
                   mark_as_consumed(skippable_message)

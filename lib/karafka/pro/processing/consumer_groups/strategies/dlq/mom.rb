@@ -54,12 +54,12 @@ module Karafka
                   if coordinator.success?
                     coordinator.pause_tracker.reset
                   else
-                    apply_dlq_flow do
+                    apply_dead_letter_queue_flow do
                       skippable_message, = find_skippable_message
-                      dispatch_to_dead_letter_queue(skippable_message) if dispatch_to_dlq?
+                      dispatch_to_dead_letter_queue(skippable_message) if dispatch_to_dead_letter_queue?
 
                       if mark_after_dispatch?
-                        mark_dispatched_to_dlq(skippable_message)
+                        mark_dispatched_to_dead_letter_queue(skippable_message)
                       else
                         # Save the next offset we want to go with after moving given message to DLQ
                         # Without this, we would not be able to move forward and we would end up

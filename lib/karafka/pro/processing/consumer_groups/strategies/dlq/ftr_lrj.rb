@@ -75,7 +75,7 @@ module Karafka
 
                     resume
                   else
-                    apply_dlq_flow do
+                    apply_dead_letter_queue_flow do
                       return resume if revoked?
 
                       dispatch_if_needed_and_mark_as_consumed
