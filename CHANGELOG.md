@@ -34,6 +34,7 @@
 - [Change] Apply `strict_declarative_topics` to share-group topics too: each one needs an active declaration in `declaratives.draw`, made before `routes.draw`.
 - [Change] Add `#dispatch_to_dead_letter_queue` and, in Pro, `#enhance_dead_letter_queue_message` as the preferred names of the consumer `#dispatch_to_dlq` and `#enhance_dlq_message`. The old names stay supported.
 - [Change] Reject a `nil` or empty `bootstrap.servers` (e.g. from an unset ENV variable) when drawing routes, instead of only checking that the key exists. Such a server used to boot and consume nothing. Apps that set it to `nil` in tests must set a placeholder string.
+- [Change] Accept `nil` as not set for `license.token`, `oauth.token_provider_listener`, `internal.processing.worker_job_call_wrapper` and Pro `encryption.fingerprinter` (`false` still works).
 - [Maintenance] Foundational work for Kafka share groups (KIP-932) is in progress (routing layer, consumer class hierarchy, config seams). Not usable yet - share groups can be described in routing but cannot run.
 - [Maintenance] 2.6.2.alpha1 was published without a Sigstore attestation: signing failed in the release workflow (the signer does not work with json 3.x, the default of Ruby 4.0) and the attestation patch then pushed the gem unsigned.
 - [Maintenance] Sign the gem with `sigstore-cli` and push it with `gem push --attestation` (the `gem-push` action of `karafka/misc`), so a failed signing stops the release instead of publishing the gem without an attestation.

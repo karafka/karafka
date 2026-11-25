@@ -100,6 +100,14 @@ RSpec.describe_current do
   end
 
   context "when fingerprinter is provided" do
+    [nil, false].each do |value|
+      context "when it is #{value.inspect}" do
+        before { encryption[:fingerprinter] = value }
+
+        it { expect(contract.call(config)).to be_success }
+      end
+    end
+
     context "when it does not respond to #hexdigest" do
       before { encryption[:fingerprinter] = Object }
 

@@ -33,7 +33,7 @@ module Karafka
         @id = SecureRandom.hex(6)
         @jobs_queue = jobs_queue
         @pool = pool
-        @non_wrapped_flow = worker_job_call_wrapper == false
+        @non_wrapped_flow = !worker_job_call_wrapper
       end
 
       private

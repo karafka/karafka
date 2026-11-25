@@ -3,7 +3,7 @@ en:
     setup:
       config:
         license.entity_format: needs to be a string
-        license.token_format: needs to be either false or a string
+        license.token_format: needs to be false, nil or a string
         license.expires_on_format: needs to be a valid date
 
         missing: needs to be present
@@ -32,11 +32,11 @@ en:
         shutdown_timeout_vs_max_wait_time: shutdown_timeout must be more than max_wait_time
         worker_thread_priority_format: must be between -3 and 3
 
-        oauth.token_provider_listener_format: 'must be false or respond to #on_oauthbearer_token_refresh'
+        oauth.token_provider_listener_format: 'must be false, nil or respond to #on_oauthbearer_token_refresh'
 
         internal.processing.jobs_queue_class_format: cannot be nil
         internal.processing.scheduler_class_format: cannot be nil
-        internal.processing.worker_job_call_wrapper_format: 'needs to be false or respond to #wrap'
+        internal.processing.worker_job_call_wrapper_format: 'needs to be false, nil or respond to #wrap'
         internal.processing.critical_errors_format: 'needs to be an array of Exception subclasses'
         internal.processing.consumer_groups.jobs_builder_format: cannot be nil
         internal.processing.consumer_groups.coordinator_class_format: cannot be nil

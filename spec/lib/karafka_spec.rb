@@ -72,6 +72,28 @@ RSpec.describe_current do
     end
   end
 
+  describe ".pro?" do
+    let(:license) { Karafka::App.config.license }
+
+    before { @token = license.token }
+
+    after { license.token = @token }
+
+    [nil, false].each do |value|
+      context "when license token is #{value.inspect}" do
+        before { license.token = value }
+
+        it { expect(karafka.pro?).to be(false) }
+      end
+    end
+
+    context "when license token is a string" do
+      before { license.token = "token" }
+
+      it { expect(karafka.pro?).to be(true) }
+    end
+  end
+
   describe ".boot_file" do
     before { ENV["KARAFKA_BOOT_FILE"] = boot_file }
 

@@ -125,7 +125,7 @@ en:
         encryption.public_key_format: 'is not a valid public RSA key'
         encryption.private_keys_invalid: 'contains an invalid private RSA key string'
         encryption.fingerprinter_missing: 'needs to be false or respond to #hexdigest method'
-        encryption.fingerprinter_format: 'needs to be false or respond to #hexdigest method'
+        encryption.fingerprinter_format: 'needs to be false, nil or respond to #hexdigest method'
 
         consumer_groups.virtual_partitions.estimator.sample_size_format: needs to be an integer bigger than 0
         consumer_groups.virtual_partitions.estimator.distribution_format: needs to be either :consistent or :balanced

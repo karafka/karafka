@@ -90,7 +90,7 @@ module Karafka
 
     # @return [Boolean] true if there is a valid pro token present
     def pro?
-      App.config.license.token != false
+      App.config.license.token ? true : false
     end
 
     # @return [Boolean] Do we run within/with Rails. We use this to initialize Railtie and proxy

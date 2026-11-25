@@ -19,8 +19,8 @@ module Karafka
       # Namespace for Pro version related license management. If you use LGPL, no need to worry
       #   about any of this
       setting :license do
-        # option token [String, false] - license token issued when you acquire a Pro license
-        # Leave false if using the LGPL version and all is going to work just fine :)
+        # option token [String, false, nil] - license token issued when you acquire a Pro license
+        # Leave false or nil if using the LGPL version and all is going to work just fine :)
         #
         # By using the commercial components, you accept the LICENSE-COMM commercial license terms
         # and conditions
@@ -82,7 +82,7 @@ module Karafka
       setting :worker_thread_priority, default: -1
 
       setting :oauth do
-        # option [false, #call] Listener for using oauth bearer. This listener will be able to
+        # option [false, nil, #call] Listener for using oauth bearer. This listener will be able to
         #   get the client name to decide whether to use a single multi-client token refreshing
         #   or have separate tokens per instance.
         setting :token_provider_listener, default: false
@@ -310,8 +310,8 @@ module Karafka
           setting :jobs_queue_class, default: Processing::ConsumerGroups::JobsQueue
           # option scheduler [Object] scheduler we will be using
           setting :scheduler_class, default: Processing::Schedulers::Default
-          # option worker_job_call_wrapper [Proc, false] callable object that will be used to wrap
-          #   the worker execution of a job or false if no wrapper needed
+          # option worker_job_call_wrapper [Proc, false, nil] callable object that will be used to
+          #   wrap the worker execution of a job or false/nil if no wrapper needed
           setting :worker_job_call_wrapper, default: false
           # option critical_errors [Array<Class>] errors that indicate that the process integrity
           #   is compromised or that termination was explicitly requested. They are not retried
@@ -480,7 +480,7 @@ module Karafka
             # We also propagate same listener to the default producer to make sure, that the
             # listener for oauth is also automatically used by the producer. That way we don't
             # have to configure it manually for the default producer
-            producer_config.oauth.token_provider_listener = oauth_listener
+            producer_config.oauth.token_provider_listener = oauth_listener if oauth_listener
             producer_config.logger = config.logger
           end
 

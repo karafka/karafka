@@ -418,6 +418,18 @@ RSpec.describe_current do
     context "when token is nil" do
       before { config[:license][:token] = nil }
 
+      it { expect(contract.call(config)).to be_success }
+    end
+
+    context "when token is false" do
+      before { config[:license][:token] = false }
+
+      it { expect(contract.call(config)).to be_success }
+    end
+
+    context "when token is not a string" do
+      before { config[:license][:token] = 1 }
+
       it { expect(contract.call(config)).not_to be_success }
     end
 
@@ -755,7 +767,6 @@ RSpec.describe_current do
     %i[
       jobs_queue_class
       scheduler_class
-      worker_job_call_wrapper
       critical_errors
     ].each do |key|
       context "when processing #{key} is missing" do
@@ -769,6 +780,26 @@ RSpec.describe_current do
 
         it { expect(contract.call(config)).not_to be_success }
       end
+    end
+
+    context "when processing worker_job_call_wrapper is missing" do
+      before { config[:internal][:processing].delete(:worker_job_call_wrapper) }
+
+      it { expect(contract.call(config)).not_to be_success }
+    end
+
+    [nil, false].each do |value|
+      context "when processing worker_job_call_wrapper is #{value.inspect}" do
+        before { config[:internal][:processing][:worker_job_call_wrapper] = value }
+
+        it { expect(contract.call(config)).to be_success }
+      end
+    end
+
+    context "when processing worker_job_call_wrapper does not respond to #wrap" do
+      before { config[:internal][:processing][:worker_job_call_wrapper] = true }
+
+      it { expect(contract.call(config)).not_to be_success }
     end
 
     %i[
@@ -982,6 +1013,14 @@ RSpec.describe_current do
       it "expects to not be successful" do
         expect(contract.call(config)).not_to be_success
       end
+    end
+  end
+
+  [nil, false].each do |value|
+    context "when oauth token_provider_listener is #{value.inspect}" do
+      before { config[:oauth][:token_provider_listener] = value }
+
+      it { expect(contract.call(config)).to be_success }
     end
   end
 

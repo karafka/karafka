@@ -24,7 +24,7 @@ module Karafka
 
         # License validity happens in the licenser. Here we do only the simple consistency checks
         nested(:license) do
-          required(:token) { |val| [true, false].include?(val) || val.is_a?(String) }
+          required(:token) { |val| [true, false, nil].include?(val) || val.is_a?(String) }
           required(:entity) { |val| val.is_a?(String) }
         end
 
@@ -53,7 +53,7 @@ module Karafka
 
         nested(:oauth) do
           required(:token_provider_listener) do |val|
-            val == false || val.respond_to?(:on_oauthbearer_token_refresh)
+            val.nil? || val == false || val.respond_to?(:on_oauthbearer_token_refresh)
           end
         end
 
@@ -123,7 +123,9 @@ module Karafka
           nested(:processing) do
             required(:jobs_queue_class) { |val| !val.nil? }
             required(:scheduler_class) { |val| !val.nil? }
-            required(:worker_job_call_wrapper) { |val| val == false || val.respond_to?(:wrap) }
+            required(:worker_job_call_wrapper) do |val|
+              val.nil? || val == false || val.respond_to?(:wrap)
+            end
             required(:critical_errors) do |val|
               val.is_a?(Array) && val.all? { |klass| klass.is_a?(Class) && klass <= Exception }
             end

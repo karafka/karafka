@@ -46,7 +46,9 @@ module Karafka
             required(:mode) { |val| %i[envelope direct].include?(val) }
             required(:version) { |val| val.is_a?(String) && !val.empty? }
             required(:public_key) { |val| val.is_a?(String) }
-            required(:fingerprinter) { |val| val == false || val.respond_to?(:hexdigest) }
+            required(:fingerprinter) do |val|
+              val.nil? || val == false || val.respond_to?(:hexdigest)
+            end
 
             required(:private_keys) do |val|
               val.is_a?(Hash) &&

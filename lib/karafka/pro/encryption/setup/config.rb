@@ -81,7 +81,7 @@ module Karafka
 
           # When set to any digest that responds to `#hexdigest` will compute checksum of the
           # message payload for post-description integrity verification. It will include a
-          # fingerprint in headers
+          # fingerprint in headers. Set to false or nil to disable
           setting(:fingerprinter, default: false)
 
           configure
