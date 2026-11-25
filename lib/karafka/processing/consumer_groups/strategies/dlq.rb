@@ -15,6 +15,12 @@ module Karafka
             dead_letter_queue
           ].freeze
 
+          # W3C Trace Context headers copied from the original message to the DLQ message
+          TRACE_HEADERS = %w[
+            traceparent
+            tracestate
+          ].freeze
+
           # Override of the standard `#mark_as_consumed` in order to handle the pause tracker
           # reset in case DLQ is marked as fully independent. When DLQ is marked independent,
           # any offset marking causes the pause count tracker to reset. This is useful when
@@ -115,15 +121,23 @@ module Karafka
             skippable_message ? [skippable_message, true] : [messages.first, false]
           end
 
-          # Moves the broken message into a separate queue defined via the settings
+          # Moves the broken message into a separate queue defined via the settings. Only the W3C
+          # trace headers of the original message are copied, so the trace context is not lost.
           # @private
           # @param skippable_message [Karafka::Messages::Message] message we are skipping that also
           #   should go to the dlq topic
           def dispatch_to_dead_letter_queue(skippable_message)
-            producer.public_send(
-              topic.dead_letter_queue.dispatch_method,
+            dlq_message = {
               topic: topic.dead_letter_queue.topic,
               payload: skippable_message.raw_payload
+            }
+
+            trace_headers = skippable_message.raw_headers.slice(*TRACE_HEADERS)
+            dlq_message[:headers] = trace_headers unless trace_headers.empty?
+
+            producer.public_send(
+              topic.dead_letter_queue.dispatch_method,
+              dlq_message
             )
 
             # Notify about dispatch on the events bus
