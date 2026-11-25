@@ -65,8 +65,7 @@ RSpec.describe_current do
       expect(cipher.encrypt("content").bytesize).to eq(modulus_size)
     end
 
-    context "when envelope mode is configured",
-      jruby_unsupported: :envelope do
+    context "when envelope mode is configured", jruby_unsupported: :envelope do
       before do
         allow(Karafka::App.config.encryption).to receive(:mode).and_return(:envelope)
       end
@@ -92,8 +91,7 @@ RSpec.describe_current do
       expect(cipher.decrypt("1", direct)).to eq("legacy at rest")
     end
 
-    it "decrypts envelope format payloads while in direct mode",
-      jruby_unsupported: :envelope do
+    it "decrypts envelope format payloads while in direct mode", jruby_unsupported: :envelope do
       allow(Karafka::App.config.encryption).to receive(:mode).and_return(:envelope)
       envelope = cipher.encrypt("new format")
       allow(Karafka::App.config.encryption).to receive(:mode).and_return(:direct)
@@ -101,8 +99,10 @@ RSpec.describe_current do
       expect(cipher.decrypt("1", envelope)).to eq("new format")
     end
 
-    it "routes payloads of exactly the modulus size to the direct RSA path",
-      jruby_unsupported: :envelope do
+    it(
+      "routes payloads of exactly the modulus size to the direct RSA path",
+      jruby_unsupported: :envelope
+    ) do
       # Inherent blind spot of the size heuristic: such input cannot be told apart from a
       # direct ciphertext. Depending on the exact bytes it either raises an RSA error or -
       # when the PKCS1 v1.5 padding coincidentally validates - yields garbage. It must never

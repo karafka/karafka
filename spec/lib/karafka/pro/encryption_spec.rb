@@ -46,8 +46,7 @@ RSpec.describe_current do
     end
 
     context "when envelope mode runs on a recent enough openssl gem" do
-      it "expect to pass",
-        jruby_unsupported: :openssl_version do
+      it "expect to pass", jruby_unsupported: :openssl_version do
         expect { verification }.not_to raise_error
       end
     end
