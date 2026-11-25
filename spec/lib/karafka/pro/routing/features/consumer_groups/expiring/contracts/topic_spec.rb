@@ -56,6 +56,16 @@ RSpec.describe_current do
     it { expect(check).not_to be_success }
   end
 
+  context "when ttl is exactly zero" do
+    before { config[:expiring][:ttl] = 0 }
+
+    it { expect(check).not_to be_success }
+
+    it "reports a positive integer requirement" do
+      expect(check.errors[:"expiring.ttl"]).to eq("needs to be a positive integer")
+    end
+  end
+
   context "when ttl is not an integer" do
     before { config[:expiring][:ttl] = "test" }
 

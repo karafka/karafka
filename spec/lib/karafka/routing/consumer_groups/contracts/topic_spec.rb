@@ -52,6 +52,12 @@ RSpec.describe_current do
 
       it { expect(check).not_to be_success }
     end
+
+    context "when it has an invalid second line" do
+      before { config[:id] = "ok\nbad id!" }
+
+      it { expect(check).not_to be_success }
+    end
   end
 
   context "when we validate name" do
@@ -69,6 +75,42 @@ RSpec.describe_current do
 
     context "when it is an invalid string" do
       before { config[:name] = "%^&*(" }
+
+      it { expect(check).not_to be_success }
+    end
+
+    context "when it has an invalid second line" do
+      before { config[:name] = "ok\nbad name!" }
+
+      it { expect(check).not_to be_success }
+    end
+
+    context "when it is a dot" do
+      before { config[:name] = "." }
+
+      it { expect(check).not_to be_success }
+    end
+
+    context "when it is a double dot" do
+      before { config[:name] = ".." }
+
+      it { expect(check).not_to be_success }
+    end
+
+    context "when it is three dots" do
+      before { config[:name] = "..." }
+
+      it { expect(check).to be_success }
+    end
+
+    context "when it is 249 characters long" do
+      before { config[:name] = "a" * 249 }
+
+      it { expect(check).to be_success }
+    end
+
+    context "when it is longer than 249 characters" do
+      before { config[:name] = "a" * 250 }
 
       it { expect(check).not_to be_success }
     end
@@ -233,6 +275,21 @@ RSpec.describe_current do
 
       it { expect(check).to be_success }
     end
+
+    context "when it is a consumer instance" do
+      before { config[:consumer] = Class.new(Karafka::BaseConsumer).new }
+
+      it "expect not to be valid with a class-required error" do
+        expect(check).not_to be_success
+        expect(check.errors.to_h[:consumer]).to include("consumer class or its name")
+      end
+    end
+
+    context "when it is an Integer" do
+      before { config[:consumer] = 123 }
+
+      it { expect(check).not_to be_success }
+    end
   end
 
   context "when we validate active" do
@@ -265,6 +322,26 @@ RSpec.describe_current do
 
   context "when kafka has some stuff but not bootstrap servers" do
     before { config[:kafka] = { "message.max.bytes" => 1_000 } }
+
+    it { expect(check).not_to be_success }
+  end
+
+  context "when bootstrap servers are nil" do
+    before { config[:kafka] = { "bootstrap.servers": nil } }
+
+    it { expect(check).not_to be_success }
+    it { expect(check.errors.keys).to eq(%i[kafka.bootstrap.servers]) }
+  end
+
+  context "when bootstrap servers are an empty string" do
+    before { config[:kafka] = { "bootstrap.servers": "" } }
+
+    it { expect(check).not_to be_success }
+    it { expect(check.errors.keys).to eq(%i[kafka.bootstrap.servers]) }
+  end
+
+  context "when bootstrap servers are not a string" do
+    before { config[:kafka] = { "bootstrap.servers": %w[localhost:9092] } }
 
     it { expect(check).not_to be_success }
   end

@@ -217,6 +217,32 @@ RSpec.describe Karafka::Admin::ConsumerGroups do
       it { expect { rename }.not_to raise_error }
       it { expect(rename).to be(false) }
     end
+
+    context "when the previous consumer group has active members" do
+      let(:instance) { described_class.new }
+
+      before do
+        allow(described_class).to receive(:new).and_return(instance)
+        allow(instance).to receive(:describe).with(previous_name).and_return([{ members: [{}] }])
+        allow(instance).to receive(:copy)
+      end
+
+      it "expect to raise a consumer group not empty error without copying" do
+        expect { rename }.to raise_error(Karafka::Errors::ConsumerGroupNotEmptyError, previous_name)
+        expect(instance).not_to have_received(:copy)
+      end
+
+      context "when the previous consumer group should not be deleted" do
+        subject(:rename) do
+          described_class.rename(previous_name, new_name, topics, delete_previous: false)
+        end
+
+        it "expect to raise a consumer group not empty error without copying" do
+          expect { rename }.to raise_error(Karafka::Errors::ConsumerGroupNotEmptyError, previous_name)
+          expect(instance).not_to have_received(:copy)
+        end
+      end
+    end
   end
 
   describe "#delete" do
@@ -227,6 +253,34 @@ RSpec.describe Karafka::Admin::ConsumerGroups do
 
       it do
         expect { deletion }.to raise_error(Rdkafka::RdkafkaError)
+      end
+    end
+
+    context "when Kafka rejects the deletion" do
+      let(:cg_id) { SecureRandom.uuid }
+      let(:instance) { described_class.new }
+      let(:admin) { instance_double(Rdkafka::Admin) }
+      let(:handle) { instance_double(Rdkafka::Admin::DeleteGroupsHandle) }
+
+      before do
+        allow(described_class).to receive(:new).and_return(instance)
+        allow(instance).to receive(:with_admin).and_yield(admin)
+        allow(admin).to receive(:delete_group).and_return(handle)
+        allow(handle).to receive(:wait).and_raise(error)
+      end
+
+      context "when the consumer group has active members" do
+        let(:error) { Rdkafka::RdkafkaError.new(68) }
+
+        it "expect to raise a consumer group not empty error" do
+          expect { deletion }.to raise_error(Karafka::Errors::ConsumerGroupNotEmptyError, cg_id)
+        end
+      end
+
+      context "when it fails with another error" do
+        let(:error) { Rdkafka::RdkafkaError.new(Rdkafka::Bindings::RD_KAFKA_RESP_ERR__STATE) }
+
+        it { expect { deletion }.to raise_error(error) }
       end
     end
 

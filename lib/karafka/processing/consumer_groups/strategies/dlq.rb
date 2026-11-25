@@ -83,11 +83,11 @@ module Karafka
               skippable_message, = find_skippable_message
 
               # Send skippable message to the dql topic
-              dispatch_to_dlq(skippable_message)
+              dispatch_to_dead_letter_queue(skippable_message)
 
               # We mark the broken message as consumed and move on
               if mark_after_dispatch?
-                mark_dispatched_to_dlq(skippable_message)
+                mark_dispatched_to_dead_letter_queue(skippable_message)
 
                 return if revoked?
               else
@@ -119,7 +119,7 @@ module Karafka
           # @private
           # @param skippable_message [Karafka::Messages::Message] message we are skipping that also
           #   should go to the dlq topic
-          def dispatch_to_dlq(skippable_message)
+          def dispatch_to_dead_letter_queue(skippable_message)
             producer.public_send(
               topic.dead_letter_queue.dispatch_method,
               topic: topic.dead_letter_queue.topic,
@@ -134,6 +134,9 @@ module Karafka
             )
           end
 
+          # Older name, still supported
+          alias_method :dispatch_to_dlq, :dispatch_to_dead_letter_queue
+
           # @return [Boolean] should we mark given message as consumed after dispatch. For default
           #  non MOM strategies if user did not explicitly tell us not to, we mark it. Default is
           #  `nil`, which means `true` in this case. If user provided alternative value, we go
@@ -146,7 +149,7 @@ module Karafka
 
           # Marks message that went to DLQ (if applicable) based on the requested method
           # @param skippable_message [Karafka::Messages::Message]
-          def mark_dispatched_to_dlq(skippable_message)
+          def mark_dispatched_to_dead_letter_queue(skippable_message)
             case topic.dead_letter_queue.marking_method
             when :mark_as_consumed
               mark_as_consumed(skippable_message)

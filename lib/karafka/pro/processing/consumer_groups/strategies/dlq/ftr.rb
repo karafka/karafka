@@ -61,7 +61,7 @@ module Karafka
 
                     handle_post_filtering
                   else
-                    apply_dlq_flow do
+                    apply_dead_letter_queue_flow do
                       dispatch_if_needed_and_mark_as_consumed
                     end
                   end

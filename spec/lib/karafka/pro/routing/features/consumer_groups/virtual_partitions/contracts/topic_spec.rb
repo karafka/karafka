@@ -76,6 +76,16 @@ RSpec.describe_current do
     it { expect(check).not_to be_success }
   end
 
+  context "when partitioner does not respond to #call" do
+    before { config[:virtual_partitions][:partitioner] = :key }
+
+    it { expect(check).not_to be_success }
+
+    it "reports a partitioner error" do
+      expect(check.errors[:"virtual_partitions.partitioner"]).to include("respond to `#call`")
+    end
+  end
+
   context "when there is no reducer" do
     before { config[:virtual_partitions][:reducer] = nil }
 

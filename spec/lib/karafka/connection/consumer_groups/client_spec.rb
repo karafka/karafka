@@ -254,25 +254,59 @@ RSpec.describe_current do
       end
     end
 
-    [-199, -155].each do |code|
-      context "when a message fails to build with #{code}" do
-        let(:error) { Rdkafka::RdkafkaError.new(code, "Error reading message headers") }
+    context "when a retryable error is raised once" do
+      before do
+        # Long enough for a retry
+        allow(subscription_group).to receive(:max_wait_time).and_return(1_000)
+        allow(kafka).to receive(:poll).and_invoke(->(_) { raise error }, ->(_) {})
 
-        before do
-          # Enough time to retry, so it is reported even when it is not raised
-          allow(subscription_group).to receive(:max_wait_time).and_return(1_000)
-          allow(kafka).to receive(:poll).and_invoke(->(_) { raise error }, ->(_) {})
+        client.batch_poll
+      end
 
-          client.batch_poll
+      context "when a message cannot be built and the retry skips it" do
+        let(:error) do
+          # -199 is bad_msg
+          Rdkafka::RdkafkaError.new(-199, details: { topic: topic_name, partition: 0, offset: 2 })
         end
 
-        it "expect to report it as an error" do
+        it "expect to report it as an error with its details" do
           expect(Karafka.monitor).to have_received(:instrument).with(
             "error.occurred",
             caller: client,
             error: error,
             type: "connection.client.poll.error"
+          ).once
+        end
+
+        it "expect to retry the poll" do
+          expect(kafka).to have_received(:poll).at_least(:twice)
+        end
+      end
+
+      context "when a partition error (msg_size_too_large) has no message position" do
+        let(:error) do
+          # 10 is msg_size_too_large
+          Rdkafka::RdkafkaError.new(
+            10,
+            details: { topic: topic_name, partition: 0, offset: Rdkafka::Bindings::RD_KAFKA_OFFSET_INVALID }
           )
+        end
+
+        it "expect to report it as an error with its details" do
+          expect(Karafka.monitor).to have_received(:instrument).with(
+            "error.occurred",
+            caller: client,
+            error: error,
+            type: "connection.client.poll.error"
+          ).once
+        end
+      end
+
+      context "when the error has no offset in its details" do
+        let(:error) { Rdkafka::RdkafkaError.new(-199) }
+
+        it "expect not to report it" do
+          expect(Karafka.monitor).not_to have_received(:instrument).with("error.occurred", any_args)
         end
       end
     end
@@ -348,7 +382,7 @@ RSpec.describe_current do
 
       before do
         allow(client).to receive(:kafka).and_return(kafka)
-        allow(subscription_group).to receive_messages(max_wait_time: 100, max_messages: max_messages)
+        allow(subscription_group).to receive_messages(max_wait_time: 1_000, max_messages: max_messages)
         allow(kafka).to receive(:poll).and_return(first, nil)
         allow(kafka).to receive(:poll_batch_nb).and_return(drained)
         allow(Karafka.monitor).to receive(:instrument).and_call_original
@@ -565,7 +599,10 @@ RSpec.describe_current do
 
       [-199, -155].each do |code|
         context "when the drain has a message that failed to build with #{code}" do
-          let(:error) { Rdkafka::RdkafkaError.new(code, "Error reading message headers") }
+          let(:error) do
+            Rdkafka::RdkafkaError.new(code, details: { topic: topic_name, partition: 0, offset: 2 })
+          end
+
           let(:drained) { [message(0, 1), error, message(0, 3)] }
 
           it "expect to keep the messages around it" do
@@ -581,6 +618,14 @@ RSpec.describe_current do
               error: error,
               type: "connection.client.poll.error"
             )
+          end
+
+          context "when the batch has no time left for a retry" do
+            before { allow(subscription_group).to receive(:max_wait_time).and_return(100) }
+
+            it "expect to raise it, so the client is reset and fetches it again" do
+              expect { client.batch_poll }.to raise_error(error)
+            end
           end
         end
       end
@@ -628,6 +673,23 @@ RSpec.describe_current do
         context "when another thread seeks while the drain seeks it back" do
           it "expect the other seek to wait for it" do
             expect(seek_offsets_with_drain_seek_held(1)).to eq([[1], [1, 7]])
+          end
+        end
+
+        context "when the partition is only assigned inside of the drain" do
+          before do
+            allow(kafka).to receive(:poll_batch_nb) do
+              client.rebalance_manager.on_rebalance_partitions_assigned(tpl)
+              drained
+            end
+          end
+
+          it "expect to keep its drained messages and not to seek it" do
+            expect(buffer_state).to eq(
+              [topic_name, 0] => { offsets: [0, 1, 2], eof: false },
+              [topic_name, 1] => { offsets: [0], eof: false }
+            )
+            expect(kafka).not_to have_received(:seek)
           end
         end
 
@@ -873,6 +935,26 @@ RSpec.describe_current do
         expect { client.reset }.to raise_error(Rdkafka::RdkafkaError)
         expect(error_callbacks).not_to have_key(sg_id)
       end
+    end
+  end
+
+  describe "#stop after #reset" do
+    let(:kafka) { instance_double(Rdkafka::Consumer) }
+    let(:assigned) { instance_double(Rdkafka::Consumer::TopicPartitionList, empty?: false) }
+    let(:unassigned) { instance_double(Rdkafka::Consumer::TopicPartitionList, empty?: true) }
+
+    before do
+      allow(client).to receive(:build_consumer).and_return(kafka)
+      allow(kafka).to receive_messages(start: nil, unsubscribe: nil, close: nil)
+      allow(kafka).to receive(:assignment).and_return(assigned, unassigned, assigned, unassigned)
+    end
+
+    it "expect to unsubscribe again on a stop after the reset" do
+      client.stop
+      client.reset
+      client.stop
+
+      expect(kafka).to have_received(:unsubscribe).twice
     end
   end
 

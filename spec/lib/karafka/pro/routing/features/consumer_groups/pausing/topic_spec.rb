@@ -99,6 +99,51 @@ RSpec.describe_current do
         expect(topic.pause.active?).to be(true)
       end
     end
+
+    context "when routing defaults set a pause" do
+      let(:builder) { Karafka::App.routes }
+      let(:consumer_class) { Class.new(Karafka::BaseConsumer) }
+      let(:drawn_topic) { builder.first.topics.first }
+
+      before do
+        consumer = consumer_class
+
+        builder.draw do
+          defaults do
+            pause(timeout: 1_000, max_timeout: 10_000)
+            pause(with_exponential_backoff: true)
+          end
+
+          topic(:a) do
+            consumer consumer
+            pause(timeout: 5_000)
+            pause(max_timeout: 50_000)
+          end
+
+          topic(:b) do
+            consumer consumer
+          end
+        end
+      end
+
+      it "expect the topic own pause to win over the defaults one" do
+        expect(drawn_topic.pause.to_h).to eq(
+          active: true,
+          timeout: 5_000,
+          max_timeout: 50_000,
+          with_exponential_backoff: false
+        )
+      end
+
+      it "expect the defaults pause to apply to a topic without its own pause" do
+        expect(builder.first.topics.last.pause.to_h).to eq(
+          active: true,
+          timeout: 1_000,
+          max_timeout: 10_000,
+          with_exponential_backoff: true
+        )
+      end
+    end
   end
 
   describe "#pause?" do

@@ -55,13 +55,16 @@ module Karafka
                 setting(:recommended_score, default: 70)
 
                 # Minimum score for the `:maybe` verdict
-                setting(:maybe_score, default: 40)
+                setting(:maybe_score, default: 30)
 
-                # Weights of the score components. They need to sum up to 100.
+                # Weights of the score components. They need to sum up to 100. Parallelization
+                # is the speedup gain over sequential processing, so it weighs the most. The others
+                # do not tell how much work runs in parallel (e.g. one hot key with a few stray keys
+                # uses all VPs).
                 setting(:score_weights) do
-                  setting(:utilization, default: 40)
-                  setting(:parallelization, default: 30)
-                  setting(:balance, default: 20)
+                  setting(:utilization, default: 10)
+                  setting(:parallelization, default: 70)
+                  setting(:balance, default: 10)
                   setting(:stability, default: 10)
                 end
               end

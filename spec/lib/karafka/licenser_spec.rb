@@ -25,7 +25,9 @@ RSpec.describe_current do
     let(:token_data) { { "entity" => entity_name } }
     let(:license_module) {
       Module.new {
-        def self.token
+        class << self
+          def token
+          end
         end
       }
     }
@@ -84,10 +86,32 @@ RSpec.describe_current do
       end
     end
 
-    context "when token is encrypted with a different key" do
-      let(:other_key) { OpenSSL::PKey::RSA.new(2048) }
+    context "when token is encrypted with a different smaller key" do
+      let(:other_key) { OpenSSL::PKey::RSA.new(1024) }
       let(:encrypted_token) { other_key.private_encrypt(token_data.to_json) }
       let(:base64_token) { [encrypted_token].pack("m") }
+
+      before { allow(license_module).to receive(:token).and_return(base64_token) }
+
+      it "raises InvalidLicenseTokenError" do
+        expect { prepare_and_verify }.to raise_error(Karafka::Errors::InvalidLicenseTokenError)
+        expect(license_config.token).to be(false)
+      end
+    end
+
+    context "when token value is not below the key modulus" do
+      let(:base64_token) { [rsa_key.n.to_s(2)].pack("m") }
+
+      before { allow(license_module).to receive(:token).and_return(base64_token) }
+
+      it "raises InvalidLicenseTokenError" do
+        expect { prepare_and_verify }.to raise_error(Karafka::Errors::InvalidLicenseTokenError)
+        expect(license_config.token).to be(false)
+      end
+    end
+
+    context "when token is longer than the key modulus" do
+      let(:base64_token) { ["\x00".b * (rsa_key.n.num_bytes + 1)].pack("m") }
 
       before { allow(license_module).to receive(:token).and_return(base64_token) }
 
@@ -163,12 +187,14 @@ RSpec.describe_current do
       let(:custom_version) { "1.0.0-custom" }
       let(:custom_license_module) do
         Module.new do
-          def self.token
-            "custom-user-token"
-          end
+          class << self
+            def token
+              "custom-user-token"
+            end
 
-          def self.version
-            "1.0.0-custom"
+            def version
+              "1.0.0-custom"
+            end
           end
         end
       end
@@ -259,8 +285,10 @@ RSpec.describe_current do
 
         it "raises when existing License constant is missing version" do
           stale_license = Module.new do
-            def self.token
-              "stale-token"
+            class << self
+              def token
+                "stale-token"
+              end
             end
           end
           stub_const("Karafka::License", stale_license)

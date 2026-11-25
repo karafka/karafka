@@ -304,13 +304,13 @@ module Karafka
         topic = consumer.topic.name
         message = event[:message]
         offset = message.offset
-        dlq_topic = consumer.topic.dead_letter_queue.topic
+        dead_letter_queue_topic = consumer.topic.dead_letter_queue.topic
         partition = message.partition
 
         info <<~MSG.tr("\n", " ").strip!
           [#{consumer.id}] Dispatched message #{offset}
           from #{topic}-#{partition}
-          to DLQ topic: #{dlq_topic}
+          to DLQ topic: #{dead_letter_queue_topic}
         MSG
       end
 
@@ -344,6 +344,17 @@ module Karafka
         info <<~MSG.tr("\n", " ").strip!
           [#{consumer.id}] Post-filtering seeking to message #{offset}
           on #{topic}-#{partition}
+        MSG
+      end
+
+      # Logs info about messages removed by the Pro expiring filter
+      #
+      # @param event [Karafka::Core::Monitoring::Event] event details including payload
+      def on_filtering_expired(event)
+        info <<~MSG.tr("\n", " ").strip!
+          [#{event[:subscription_group].id}] Expired #{event[:count]} messages
+          (offsets #{event[:first_offset]}-#{event[:last_offset]}, ttl: #{event[:ttl]} ms)
+          on #{event[:topic]}-#{event[:partition]}
         MSG
       end
 

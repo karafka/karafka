@@ -48,6 +48,13 @@ RSpec.describe_current do
       end
     end
 
+    context "when offsets go back in two partitions of one topic" do
+      it do
+        expect(rewound(message(0, 5), message(1, 5), message(0, 0), message(1, 0)))
+          .to eq(topic_name => [0, 1])
+      end
+    end
+
     context "when offsets go back in partitions of several topics" do
       it do
         expect(

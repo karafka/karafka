@@ -115,7 +115,7 @@ RSpec.describe_current do
         },
         active_job: {
           dispatcher: Karafka::ActiveJob::Dispatcher.new,
-          job_options_contract: Karafka::ActiveJob::JobOptionsContract.new,
+          job_options_contract: Karafka::ActiveJob::Contracts::JobOptions.new,
           consumer_class: Karafka::ActiveJob::Consumer
         }
       },
@@ -439,6 +439,12 @@ RSpec.describe_current do
       before { config[:client_id] = 2 }
 
       it { expect(contract.call(config)).not_to be_success }
+    end
+
+    context "when client_id is a dot" do
+      before { config[:client_id] = "." }
+
+      it { expect(contract.call(config)).to be_success }
     end
   end
 

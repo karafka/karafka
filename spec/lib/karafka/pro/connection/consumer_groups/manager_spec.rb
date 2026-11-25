@@ -126,8 +126,12 @@ RSpec.describe_current do
   describe "#notice" do
     let(:changes) { manager.instance_variable_get(:@changes) }
     let(:details) { changes.values.first }
+    let(:started_at) { monotonic_now }
 
-    before { manager.register(listeners) }
+    before do
+      started_at
+      manager.register(listeners)
+    end
 
     context "when notice was used" do
       before { manager.notice(subscription_group1.id, statistics) }
@@ -135,7 +139,7 @@ RSpec.describe_current do
       it { expect(details[:state_age]).to eq(13_995) }
       it { expect(details[:join_state]).to eq("steady") }
       it { expect(details[:state]).to eq("up") }
-      it { expect(monotonic_now - details[:changed_at]).to be < 50 }
+      it { expect(details[:changed_at]).to be_between(started_at, monotonic_now) }
     end
   end
 
@@ -694,6 +698,83 @@ RSpec.describe_current do
 
           it { expect(listener_g12).not_to have_received(:stop!) }
         end
+      end
+    end
+  end
+
+  describe "restarted listeners" do
+    let(:now) { 1_000_000 }
+    let(:scale_delay) { 1_000 }
+    let(:assignments) { { routing_topic1 => [0] } }
+
+    before do
+      allow(app).to receive(:done?).and_return(false)
+      allow(app).to receive(:assignments) { assignments }
+      allow(manager).to receive(:monotonic_now) { now }
+
+      subscription_group1.multiplexing.scale_delay = scale_delay
+      subscription_group1.multiplexing.active = true
+      subscription_group1.multiplexing.min = 1
+      subscription_group1.multiplexing.max = 2
+      subscription_group1.multiplexing.boot = 2
+
+      manager.register(listeners)
+      listener_g11.running!
+      listener_g12.running!
+
+      manager.notice(subscription_group1.id, statistics)
+      manager.notice(subscription_group2.id, statistics)
+
+      allow(manager).to receive(:monotonic_now) { now + scale_delay }
+      manager.control
+      listener_g12.stopped!
+
+      allow(listener_g12).to receive(:start!) do
+        allow(listener_g12).to receive(:active?).and_return(true)
+      end
+
+      assignments[routing_topic1] = [0, 1]
+      manager.control
+    end
+
+    it { expect(listener_g12).to have_received(:stop!).once }
+    # Once on boot and once on the upscale
+    it { expect(listener_g12).to have_received(:start!).twice }
+
+    context "when it did not report fresh statistics yet" do
+      before do
+        assignments[routing_topic1] = [0]
+        allow(manager).to receive(:monotonic_now) { now + (scale_delay * 10) }
+        manager.control
+      end
+
+      it "expect not to scale it down on its previous consumer statistics" do
+        expect(listener_g12).to have_received(:stop!).once
+      end
+    end
+
+    context "when it reported statistics within the scale delay of the restart" do
+      before do
+        assignments[routing_topic1] = [0]
+        manager.notice(subscription_group2.id, statistics)
+        manager.control
+      end
+
+      it "expect not to scale it down before the scale delay passes" do
+        expect(listener_g12).to have_received(:stop!).once
+      end
+    end
+
+    context "when it reported fresh statistics and still has no assignment" do
+      before do
+        assignments[routing_topic1] = [0]
+        allow(manager).to receive(:monotonic_now) { now + (scale_delay * 10) }
+        manager.notice(subscription_group2.id, statistics)
+        manager.control
+      end
+
+      it "expect to scale it down" do
+        expect(listener_g12).to have_received(:stop!).twice
       end
     end
   end

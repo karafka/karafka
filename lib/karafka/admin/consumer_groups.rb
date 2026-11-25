@@ -44,9 +44,9 @@ module Karafka
         COORDINATOR_NOT_READY_ERRORS + %i[unstable_offset_commit]
       ).freeze
 
-      # Errors with which Kafka rejects an offsets change of a consumer group that has active
-      # members. Brokers report it as `unknown_member_id` per partition, as the change does not
-      # come from any of the consumer group members.
+      # Errors with which Kafka rejects an offsets change or a deletion of a consumer group that has
+      # active members. Brokers reject a deletion with `non_empty_group` and an offsets change with
+      # `unknown_member_id` per partition, as the change does not come from any of its members.
       CONSUMER_GROUP_NOT_EMPTY_ERRORS = %i[
         non_empty_group
         unknown_member_id
@@ -290,15 +290,19 @@ module Karafka
       # @raise [Karafka::Errors::ConsumerGroupNotEmptyError] when the new consumer group has
       #   active members. Kafka accepts offset changes only for consumer groups without members,
       #   so this method should **not** be executed on a running consumer group.
-      # @raise [Rdkafka::RdkafkaError] (`non_empty_group`) when `delete_previous` is `true` and
-      #   the previous consumer group has active members. The offsets are then already copied to
-      #   the new consumer group and the previous consumer group keeps its offsets.
+      # @raise [Karafka::Errors::ConsumerGroupNotEmptyError] when the previous consumer group has
+      #   active members. This is checked before any offsets are copied, so nothing is changed in
+      #   either of the consumer groups, unless a member joins during the rename.
       #
       # @note After migration unless `delete_previous` is set to `false`, old group will be
       #   removed.
       #
       # @note If new group exists, old offsets will be added to it.
       def rename(previous_name, new_name, topics, delete_previous: true)
+        unless describe(previous_name).first[:members].empty?
+          raise(Errors::ConsumerGroupNotEmptyError, previous_name)
+        end
+
         copy_result = copy(previous_name, new_name, topics)
 
         return false unless copy_result
@@ -315,7 +319,7 @@ module Karafka
       #
       # @return [void]
       #
-      # @raise [Rdkafka::RdkafkaError] (`non_empty_group`) when the consumer group has active
+      # @raise [Karafka::Errors::ConsumerGroupNotEmptyError] when the consumer group has active
       #   members. Kafka removes only consumer groups without members, so this method should
       #   **not** be executed on a running consumer group.
       # @raise [Rdkafka::RdkafkaError] (`group_id_not_found`) when the consumer group does not
@@ -324,6 +328,10 @@ module Karafka
         with_admin do |admin|
           handler = admin.delete_group(group_id)
           handler.wait(max_wait_timeout_ms: max_wait_time_ms)
+        rescue Rdkafka::RdkafkaError => e
+          raise unless CONSUMER_GROUP_NOT_EMPTY_ERRORS.include?(e.code)
+
+          raise(Errors::ConsumerGroupNotEmptyError, group_id)
         end
       end
 

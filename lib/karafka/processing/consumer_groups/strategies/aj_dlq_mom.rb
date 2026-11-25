@@ -36,11 +36,11 @@ module Karafka
             else
               coordinator.pause_tracker.reset
               skippable_message, = find_skippable_message
-              dispatch_to_dlq(skippable_message)
+              dispatch_to_dead_letter_queue(skippable_message)
               # We can commit the offset here because we know that we skip it "forever" and
               # since AJ consumer commits the offset after each job, we also know that the
               # previous job was successful
-              mark_dispatched_to_dlq(skippable_message)
+              mark_dispatched_to_dead_letter_queue(skippable_message)
               pause(seek_offset, nil, false)
             end
           end

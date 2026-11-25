@@ -102,6 +102,11 @@ RSpec.describe_current do
         [["b", 0, 4]]
       ],
       [
+        "two partitions of one topic were rewound",
+        { "a" => { 0 => [1], 1 => [3, 4], 2 => [9] } }, { "a" => [0, 1] },
+        [["a", 0, 2], ["a", 1, 5]]
+      ],
+      [
         "partitions of several topics were rewound",
         { "a" => { 0 => [7] }, "b" => { 1 => [3, 4] } }, { "a" => [0], "b" => [1] },
         [["a", 0, 8], ["b", 1, 5]]

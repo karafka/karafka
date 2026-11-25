@@ -29,7 +29,7 @@
 # Contact: contact@karafka.io
 
 # When DLQ transfer occurs, we should be able to build our own payload and headers via
-# `#enhance_dlq_message`
+# `#enhance_dead_letter_queue_message`
 
 setup_karafka(allow_errors: %w[consumer.consume.error]) do |config|
   config.max_messages = 1
@@ -42,7 +42,7 @@ class Consumer < Karafka::BaseConsumer
 
   private
 
-  def enhance_dlq_message(dlq_message, skippable_message)
+  def enhance_dead_letter_queue_message(dlq_message, skippable_message)
     dlq_message[:payload] = { orig: skippable_message.raw_payload, extra: 1 }.to_json
     dlq_message[:headers]["total-remap"] = "yes"
   end

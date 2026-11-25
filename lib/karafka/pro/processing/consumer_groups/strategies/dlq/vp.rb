@@ -55,7 +55,7 @@ module Karafka
               #
               # In case of `:skip` and `:dispatch` will run the exact flow provided in a block
               # In case of `:retry` always `#retry_after_pause` is applied
-              def apply_dlq_flow
+              def apply_dead_letter_queue_flow
                 # Process-critical errors are never dispatched or skipped regardless of the
                 # strategy outcome: the retry pause protects the partition during the critical
                 # shutdown and the failed batch is redelivered after the restart.
@@ -91,11 +91,11 @@ module Karafka
 
                   return
                 when :skip
-                  @_dispatch_to_dlq = false
+                  @_dispatch_to_dead_letter_queue = false
                 when :dispatch
-                  @_dispatch_to_dlq = true
+                  @_dispatch_to_dead_letter_queue = true
                   # Use custom topic if it was returned from the strategy
-                  @_dispatch_to_dlq_topic = target_topic || topic.dead_letter_queue.topic
+                  @_dispatch_to_dead_letter_queue_topic = target_topic || topic.dead_letter_queue.topic
                 else
                   raise Karafka::Errors::UnsupportedCaseError, flow
                 end
@@ -108,7 +108,7 @@ module Karafka
                 # Always backoff after DLQ dispatch even on skip to prevent overloads on errors
                 pause(seek_offset, nil, false)
               ensure
-                @_dispatch_to_dlq_topic = nil
+                @_dispatch_to_dead_letter_queue_topic = nil
               end
             end
           end

@@ -59,11 +59,7 @@ module Karafka
           # this will not recover as fencing is permanent
           :auto_offset_reset, # -140
           # This can happen with new rebalance protocol and same group.instance.id in use
-          :unreleased_instance_id, # 111
-          # A message that could not be read (e.g. its headers). It is already consumed and lost.
-          # Header parsing fails with one of these two
-          :bad_msg, # -199
-          :underflow # -155
+          :unreleased_instance_id # 111
         ].freeze
 
         private_constant :MAX_POLL_RETRIES, :COOP_UNSUBSCRIBE_FACTOR, :EARLY_REPORT_ERRORS
@@ -154,7 +150,7 @@ module Karafka
               @buffer.eof(response[:topic], response[:partition])
 
               # Eof events of other partitions are often ready as well, so they land in this batch
-              drain(max_messages - @buffer.size) unless @rebalance_manager.changed?
+              drain(max_messages - @buffer.size, time_poll) unless @rebalance_manager.changed?
             when nil
               nil
             else
@@ -163,7 +159,7 @@ module Karafka
 
               # After a rebalance in this poll, the batch ends below without draining, so the drain
               # clean-up never removes messages of partitions assigned back in that rebalance
-              eofed = drain(max_messages - @buffer.size) unless @rebalance_manager.changed?
+              eofed = drain(max_messages - @buffer.size, time_poll) unless @rebalance_manager.changed?
             end
 
             # Upon polling rebalance manager might have been updated.
@@ -411,6 +407,7 @@ module Karafka
 
             @interval_runner.reset
             @closed = false
+            @unsubscribing = false
             @paused_tpls.clear
           end
         end
@@ -750,8 +747,9 @@ module Karafka
         # an error are already dequeued.
         #
         # @param room [Integer] how many messages we can still take into the buffer
+        # @param time_poll [Karafka::TimeTrackers::Poll] time tracker of the batch
         # @return [Boolean] true if any of the partitions is still at eof after the drain
-        def drain(room)
+        def drain(room, time_poll)
           return false unless room.positive?
 
           eofed = false
@@ -763,11 +761,14 @@ module Karafka
               next @buffer << item
             end
 
-            # Handled as on the first attempt of a blocking `#poll`, as the drain neither waits nor
-            # retries. An error that keeps coming behind messages is handled only in drains, so it
-            # gets no backoff and no escalation. A retry of a blocking `#poll` would also return the
-            # next message
-            action = poll_error_action(item, true)
+            # Handled as on the first attempt of a blocking `#poll` with the time left in this batch,
+            # as the drain neither waits nor retries. An error that keeps coming behind messages is
+            # handled only in drains, so it gets no backoff and no escalation. A retry of a blocking
+            # `#poll` would also return the next message
+            attempt = TimeTrackers::Poll.new(time_poll.remaining)
+            attempt.start
+
+            action = poll_error_action(item, attempt.retryable?)
 
             case action
             when :eof
@@ -875,6 +876,8 @@ module Karafka
 
           # Any fatal error should always cause early report
           early_report = true if error.fatal?
+          # Partition errors may skip their message on retry, so we report them
+          early_report = true if error.details.key?(:offset)
 
           if early_report || !retryable
             Karafka.monitor.instrument(

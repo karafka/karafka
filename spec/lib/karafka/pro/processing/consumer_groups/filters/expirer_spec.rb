@@ -29,9 +29,16 @@
 # Contact: contact@karafka.io
 
 RSpec.describe_current do
-  subject(:expirer) { described_class.new(500) }
+  subject(:expirer) { described_class.new(500, topic, 0) }
 
+  let(:topic) { build(:routing_topic) }
   let(:messages) { [build(:messages_message)] }
+  let(:events) { [] }
+  let(:listener) { ->(event) { events << event } }
+
+  before { Karafka.monitor.subscribe("filtering.expired", &listener) }
+
+  after { Karafka.monitor.unsubscribe(listener) }
 
   context "when all messages are fresh" do
     it "expect not to filter" do
@@ -46,6 +53,11 @@ RSpec.describe_current do
     it "expect to always skip" do
       expirer.apply!(messages)
       expect(expirer.action).to eq(:skip)
+    end
+
+    it "expect not to instrument" do
+      expirer.apply!(messages)
+      expect(events).to be_empty
     end
   end
 
@@ -68,6 +80,54 @@ RSpec.describe_current do
     it "expect to apply" do
       expirer.apply!(messages)
       expect(expirer.applied?).to be(true)
+    end
+  end
+
+  context "when several messages are older than ttl" do
+    let(:messages) do
+      [
+        build(:messages_message, offset: 10, timestamp: Time.now.utc - 3),
+        build(:messages_message, offset: 11, timestamp: Time.now.utc),
+        build(:messages_message, offset: 12, timestamp: Time.now.utc - 2),
+        build(:messages_message, offset: 13, timestamp: Time.now.utc)
+      ]
+    end
+
+    before { expirer.apply!(messages) }
+
+    it "expect to keep only fresh messages" do
+      expect(messages.map(&:offset)).to eq([11, 13])
+    end
+
+    it "expect to instrument once with expired messages details" do
+      expect(events.size).to eq(1)
+
+      event = events.first
+
+      expect(event[:caller]).to eq(expirer)
+      expect(event[:topic]).to eq(topic.name)
+      expect(event[:partition]).to eq(0)
+      expect(event[:subscription_group]).to eq(topic.subscription_group)
+      expect(event[:count]).to eq(2)
+      expect(event[:first_offset]).to eq(10)
+      expect(event[:last_offset]).to eq(12)
+      expect(event[:ttl]).to eq(500)
+    end
+
+    it "expect to report only the last run when applied again" do
+      expirer.apply!([build(:messages_message, offset: 14, timestamp: Time.now.utc - 2)])
+
+      expect(events.size).to eq(2)
+      expect(events.last[:count]).to eq(1)
+      expect(events.last[:first_offset]).to eq(14)
+      expect(events.last[:last_offset]).to eq(14)
+    end
+
+    it "expect not to instrument nor stay applied when next run has nothing to expire" do
+      expirer.apply!([build(:messages_message)])
+
+      expect(events.size).to eq(1)
+      expect(expirer.applied?).to be(false)
     end
   end
 end

@@ -73,6 +73,12 @@ RSpec.describe_current do
     it { expect(check).not_to be_success }
   end
 
+  context "when name is longer than 249 characters" do
+    before { pattern[:name] = "a" * 250 }
+
+    it { expect(check).not_to be_success }
+  end
+
   context "when regexp string does not start with ^" do
     before { pattern[:regexp_string] = "test" }
 

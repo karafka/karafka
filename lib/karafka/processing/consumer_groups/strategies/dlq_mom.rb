@@ -37,11 +37,11 @@ module Karafka
 
               skippable_message, = find_skippable_message
 
-              dispatch_to_dlq(skippable_message)
+              dispatch_to_dead_letter_queue(skippable_message)
 
               # We mark the broken message as consumed and move on
               if mark_after_dispatch?
-                mark_dispatched_to_dlq(skippable_message)
+                mark_dispatched_to_dead_letter_queue(skippable_message)
 
                 return if revoked?
               else

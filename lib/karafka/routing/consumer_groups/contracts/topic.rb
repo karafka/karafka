@@ -13,12 +13,12 @@ module Karafka
           end
 
           required(:deserializers) { |val| !val.nil? }
-          required(:id) { |val| val.is_a?(String) && Karafka::Contracts::TOPIC_REGEXP.match?(val) }
+          required(:id) { |val| val.is_a?(String) && Karafka::Contracts::KAFKA_IDS_REGEXP.match?(val) }
           required(:kafka) { |val| val.is_a?(Hash) && !val.empty? }
           required(:max_messages) { |val| val.is_a?(Integer) && val >= 1 }
           required(:initial_offset) { |val| %w[earliest latest].include?(val) }
           required(:max_wait_time) { |val| val.is_a?(Integer) && val >= 10 }
-          required(:name) { |val| val.is_a?(String) && Karafka::Contracts::TOPIC_REGEXP.match?(val) }
+          required(:name) { |val| val.is_a?(String) && Karafka::Contracts::TOPIC_NAME_REGEXP.match?(val) }
           required(:active) { |val| [true, false].include?(val) }
           nested(:subscription_group_details) do
             required(:name) { |val| val.is_a?(String) && !val.empty? }
@@ -45,11 +45,10 @@ module Karafka
             consumer = data.fetch(:consumer)
 
             # Only actual consumer classes carry mode information, so the mode is enforced on
-            # classes only. Every other value is left untouched: nil (inactive/admin-only topics
-            # may have no consumer, already handled by the missing-check above) and String/Symbol
-            # by-name references (a class passed for reload is resolved to a Class before it reaches
-            # here, so nothing functional is skipped).
-            next unless consumer.is_a?(Class)
+            # classes only. nil is skipped: inactive/admin-only topics may have no consumer, already
+            # handled by the missing-check above.
+            next if consumer.nil? || consumer.is_a?(String) || consumer.is_a?(Symbol)
+            next [[%w[consumer], :class_required]] unless consumer.is_a?(Class)
             next if consumer <= Karafka::Consumers::ConsumerGroup
 
             [[%w[consumer], :group_consumer_required]]
@@ -74,13 +73,16 @@ module Karafka
           # When users redefine kafka scope settings per topic, they often forget to define the
           # basic stuff as they assume it is auto-inherited. It is not (unless inherit flag used),
           # leaving them with things like bootstrap.servers undefined. This checks that bootstrap
-          # servers are defined so we can catch those issues before they cause more problems.
+          # servers are a non-empty string (not nil from an unset ENV var) so we can catch those
+          # issues before they cause more problems.
           virtual do |data, errors|
             next unless errors.empty?
 
             kafka = data.fetch(:kafka)
 
-            next if kafka.key?(:"bootstrap.servers")
+            servers = kafka[:"bootstrap.servers"]
+
+            next if servers.is_a?(String) && !servers.empty?
 
             [[%w[kafka bootstrap.servers], :missing]]
           end

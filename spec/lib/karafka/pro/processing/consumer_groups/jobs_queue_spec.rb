@@ -365,9 +365,12 @@ RSpec.describe_current do
         end
       end
 
+      let(:started_at) { Time.now.to_f }
+
       before do
         queue << job1
 
+        started_at
         thread1
         thread2
       end
@@ -379,9 +382,8 @@ RSpec.describe_current do
 
       # tick should not allow for wait skipping, it should just trigger a re-check
       it "expect not to pass until the queue is actually closed" do
-        before = Time.now.to_f
         queue.wait(job1.group_id)
-        expect(Time.now.to_f - before).to be >= 1
+        expect(Time.now.to_f - started_at).to be >= 1
       end
     end
 
@@ -408,6 +410,41 @@ RSpec.describe_current do
         queue.wait(3)
 
         expect(semaphore.size).to eq(0)
+      end
+    end
+
+    %i[<< lock].each do |add_method|
+      context "when another thread uses the queue while wait checks a job added with ##{add_method}" do
+        let(:job) { OpenStruct.new(group_id: 2, id: 1, call: true) }
+        let(:readers) { [] }
+        let(:blocked) { [] }
+
+        before do
+          allow(job).to receive(:non_blocking?) do
+            reader = Thread.new { queue.statistics }
+            readers << reader
+
+            100.times do
+              break if reader.status == "sleep" || !reader.alive?
+
+              sleep(0.01)
+            end
+
+            blocked << (reader.status == "sleep")
+
+            true
+          end
+
+          queue.public_send(add_method, job)
+        end
+
+        after { readers.each(&:join) }
+
+        it "expect the other thread to wait until the check is done" do
+          queue.wait(job.group_id)
+
+          expect(blocked).to eq([true])
+        end
       end
     end
 

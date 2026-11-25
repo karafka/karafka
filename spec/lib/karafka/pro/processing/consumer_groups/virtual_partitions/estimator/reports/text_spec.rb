@@ -49,6 +49,7 @@ RSpec.describe_current do
       it { expect(text).to include("distribution: consistent") }
       it { expect(text).to include("verdict: #{estimator.analyze(messages)[:summary][:verdict]}") }
       it { expect(text).to include("The worker pool is shared with other partitions and topics.") }
+      it { expect(text).to include("The estimate assumes full batches.") }
       it { expect(text).not_to include("\e[") }
       it { expect(text).to include("Virtual Partitions should parallelize this data well.") }
 
@@ -112,7 +113,130 @@ RSpec.describe_current do
       it { expect(text).to include("score: -/100") }
       it { expect(text).to include("verdict: not_recommended") }
       it { expect(text).to include("A concurrency below 2 runs each batch as one group") }
-      it { expect(text).not_to include("Most batches use only a few keys") }
+      it { expect(text).not_to include("a few keys hold most of the messages") }
+    end
+
+    context "when the verdict is maybe" do
+      let(:estimator) { estimator_class.new(concurrency: 5, batch_size: 100) }
+      let(:messages) { build_messages(Array.new(200) { |i| %w[a b][i % 2] }) }
+
+      it { expect(text).to include("verdict: maybe") }
+      it { expect(text).to include("Virtual Partitions may help") }
+      it { expect(text).not_to include(":balanced") }
+
+      context "when the balanced distribution gives a higher speedup" do
+        let(:messages) { build_messages(Array.new(200) { |i| (i % 100 < 35) ? "hot" : "unique-#{i}" }) }
+
+        it { expect(text).to include("verdict: maybe") }
+        it { expect(text).to include("Try the :balanced distribution") }
+      end
+
+      context "when a hot key fills the largest VP alone" do
+        let(:estimator) do
+          estimator_class.new(
+            concurrency: 5,
+            batch_size: 100,
+            reducer: ->(key) { (key == "hot") ? 0 : 1 + (key.to_s.sum % 4) }
+          )
+        end
+
+        let(:messages) { build_messages(Array.new(200) { |i| (i % 100 < 35) ? "hot" : "unique-#{i}" }) }
+
+        it { expect(text).to include("verdict: maybe") }
+        it { expect(text).not_to include(":balanced") }
+      end
+
+      context "with the balanced distribution" do
+        let(:estimator) { estimator_class.new(concurrency: 5, batch_size: 100, distribution: :balanced) }
+        let(:messages) { build_messages(Array.new(200) { |i| (i % 100 < 35) ? "hot" : "unique-#{i}" }) }
+
+        it { expect(text).not_to include(":balanced distribution") }
+      end
+    end
+
+    context "when the verdict is recommended and the balanced distribution is faster" do
+      let(:estimator) { estimator_class.new(concurrency: 5, batch_size: 100) }
+      let(:messages) { build_messages(Array.new(200) { |i| "key-#{i % 9}" }) }
+
+      it "does not suggest it" do
+        summary = report["summary"]
+
+        expect(summary["avg_balanced_speedup"]).to be > summary["avg_speedup"]
+        expect(text).to include("verdict: recommended")
+        expect(text).not_to include(":balanced")
+      end
+    end
+
+    context "when the verdict is not_recommended" do
+      let(:messages) { build_messages(Array.new(200) { |i| (i % 100 < 96) ? "hot" : "stray-#{i}" }) }
+
+      it { expect(text).to include("verdict: not_recommended") }
+      it { expect(text).to include("In most batches a few keys hold most of the messages.") }
+      it { expect(text).not_to include(":balanced") }
+
+      context "when two keys share a VP that the balanced distribution would split" do
+        let(:messages) { build_messages(Array.new(200) { |i| %w[a f][i % 2] }) }
+
+        it { expect(text).to include("verdict: not_recommended") }
+        it { expect(text).to include("Try the :balanced distribution") }
+      end
+    end
+
+    context "when the partitioner raises in every batch" do
+      let(:estimator) do
+        estimator_class.new(concurrency: 5, batch_size: 100, partitioner: ->(_) { raise "boom" })
+      end
+
+      it { expect(text).to include("collapsed: 2") }
+      it { expect(text).to include("verdict: not_recommended") }
+      it { expect(text).to include("The partitioner raised an error in every batch") }
+      it { expect(text).to include("Fix the partitioner and run the estimate again.") }
+      it { expect(text).not_to include("a few keys hold most of the messages") }
+      it { expect(text).not_to include(":balanced") }
+    end
+
+    context "when a custom reducer raises in every batch" do
+      let(:estimator) do
+        estimator_class.new(concurrency: 5, batch_size: 100, reducer: ->(_) { raise "boom" })
+      end
+
+      it { expect(text).to include("collapsed: 2") }
+      it { expect(text).to include("The partitioner or the reducer raised an error in every batch") }
+      it { expect(text).to include("Fix the one that raised and run the estimate again.") }
+      it { expect(text).not_to include("Fix the partitioner") }
+      it { expect(text).not_to include("a few keys hold most of the messages") }
+    end
+
+    context "when the partitioner raises in every batch with a custom reducer and :balanced" do
+      let(:estimator) do
+        estimator_class.new(
+          concurrency: 5,
+          batch_size: 100,
+          distribution: :balanced,
+          partitioner: ->(_) { raise "boom" },
+          reducer: ->(key) { key.to_s.sum % 5 }
+        )
+      end
+
+      it { expect(text).to include("The partitioner raised an error in every batch") }
+      it { expect(text).not_to include("or the reducer") }
+    end
+
+    context "when the partitioner raises in some batches only" do
+      let(:estimator) do
+        estimator_class.new(
+          concurrency: 5,
+          batch_size: 100,
+          partitioner: ->(message) { (message.offset < 100) ? raise("boom") : message.raw_key }
+        )
+      end
+
+      let(:messages) { build_messages(Array.new(200) { |i| (i % 100 < 96) ? "hot" : "stray-#{i}" }) }
+
+      it { expect(text).to include("collapsed: 1") }
+      it { expect(text).to include("verdict: not_recommended") }
+      it { expect(text).to include("In most batches a few keys hold most of the messages.") }
+      it { expect(text).not_to include("The partitioner raised an error") }
     end
 
     context "with unknown top level keys" do

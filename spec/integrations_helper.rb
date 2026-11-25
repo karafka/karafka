@@ -271,12 +271,14 @@ def become_pro!
   return if Karafka.pro?
 
   mod = Module.new do
-    def self.token
-      ENV.fetch("KARAFKA_PRO_LICENSE_TOKEN")
-    end
+    class << self
+      def token
+        ENV.fetch("KARAFKA_PRO_LICENSE_TOKEN")
+      end
 
-    def self.version
-      "1.0.0"
+      def version
+        "1.0.0"
+      end
     end
   end
 
