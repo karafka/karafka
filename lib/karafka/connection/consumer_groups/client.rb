@@ -66,11 +66,7 @@ module Karafka
           :underflow # -155
         ].freeze
 
-        # Default for partitions lookups without allocations
-        EMPTY_ARRAY = [].freeze
-
-        private_constant :MAX_POLL_RETRIES, :COOP_UNSUBSCRIBE_FACTOR, :EARLY_REPORT_ERRORS,
-          :EMPTY_ARRAY
+        private_constant :MAX_POLL_RETRIES, :COOP_UNSUBSCRIBE_FACTOR, :EARLY_REPORT_ERRORS
 
         # Creates a new consumer instance.
         #
@@ -88,6 +84,7 @@ module Karafka
           @subscription_group = subscription_group
           @buffer = RawMessagesBuffer.new
           @offset_regression_tracker = OffsetRegressionTracker.new
+          @drain_seek_planner = DrainSeekPlanner.new
           @rebalance_manager = RebalanceManager.new(@subscription_group.id, @buffer)
           @rebalance_callback = Instrumentation::Callbacks::ConsumerGroups::Rebalance.new(
             @subscription_group,
@@ -787,67 +784,44 @@ module Karafka
 
           # Revocation callbacks run inside of the drain call, before its messages reach the buffer.
           # The drain runs only without an earlier rebalance in this batch, so all the revocations
-          # are from the drain itself. The seeks below take `@mutex`, but a seek from another thread
+          # are from the drain itself. The seeks take `@mutex`, but a seek from another thread
           # done after the drain call and before them is overwritten. Only non-blocking jobs and
           # user threads seek while we poll, and it also needs a rebalance or an offset reset in
           # this window, so we accept it
-          clean_up_after_drain if @rebalance_manager.changed?
+          if @rebalance_manager.changed?
+            rewinds = @drain_seek_planner.rewinds(
+              @buffer,
+              @rebalance_manager.revoked_partitions,
+              @rebalance_manager.assigned_partitions
+            )
+
+            @rebalance_manager.remove_revoked_and_duplicated_messages
+          end
+
           rewound = @offset_regression_tracker.rewound
-          align_positions_after_drain(rewound) if rewound
+          alignments = @drain_seek_planner.alignments(@buffer, rewound) if rewound
+
+          seek_after_drain(rewinds, alignments) if rewinds || alignments
 
           # A message after an eof of the same partition clears its eof
           eofed && @buffer.eof?
         end
 
-        # Removes drained messages of revoked partitions. A partition can also be assigned back
-        # within the same drain and librdkafka may then already be past some of its drained
-        # messages, so we seek it back to the lowest of them, not to lose them. A drained message
-        # from before the revocation can precede them, so we never seek forward
-        def clean_up_after_drain
-          assigned = @rebalance_manager.assigned_partitions
-          revoked = @rebalance_manager.revoked_partitions
-          rewinds = []
-
-          @buffer.each do |topic_name, partition, messages|
-            next if messages.empty?
-            next unless revoked.fetch(topic_name, EMPTY_ARRAY).include?(partition)
-            next unless assigned.fetch(topic_name, EMPTY_ARRAY).include?(partition)
-
-            rewinds << Messages::Seek.new(topic_name, partition, messages.map(&:offset).min)
-          end
-
-          @rebalance_manager.remove_revoked_and_duplicated_messages
-
+        # Seeks partitions as planned after a drain. A rewind never moves a partition forward, as
+        # librdkafka may not be past its drained messages yet
+        #
+        # @param rewinds [Array<Messages::Seek>, nil] seeks back to the lowest drained offsets
+        # @param alignments [Array<Messages::Seek>, nil] seeks to right after the last drained
+        #   messages
+        def seek_after_drain(rewinds, alignments)
           @mutex.synchronize do
-            rewinds.each do |rewind|
+            rewinds&.each do |rewind|
               position = topic_partition_position(rewind.topic, rewind.partition)
 
               internal_seek(rewind) if position > rewind.offset
             end
-          end
-        end
 
-        # A blocking poll always moves the position of a partition to its message, but the drain
-        # moves it only forward. When the offsets went back without a seek, e.g. on an offset reset
-        # after the topic was recreated, the position stays ahead of the drained messages and a
-        # pause without an offset would resume from it. We seek such partitions to right after
-        # their last drained message. The seek does not happen when the position is already there.
-        # When the last drained message is followed by a transaction marker, the position is
-        # rightly past it, so we seek and purge the prefetched messages once. It does not lose
-        # messages
-        #
-        # @param rewound [Array<Rdkafka::Consumer::Message>] drained messages behind the previous
-        #   message of their partition
-        def align_positions_after_drain(rewound)
-          rewound.map! { |message| [message.topic, message.partition] }.uniq!
-
-          @mutex.synchronize do
-            @buffer.each do |topic_name, partition, messages|
-              next if messages.empty?
-              next unless rewound.include?([topic_name, partition])
-
-              internal_seek(Messages::Seek.new(topic_name, partition, messages.last.offset + 1))
-            end
+            alignments&.each { |alignment| internal_seek(alignment) }
           end
         end
 

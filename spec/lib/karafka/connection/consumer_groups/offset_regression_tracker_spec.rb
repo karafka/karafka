@@ -11,7 +11,7 @@ RSpec.describe_current do
 
   def rewound(*messages)
     messages.each { |message| tracker.track(message) }
-    tracker.rewound&.map { |message| [message.topic, message.partition, message.offset] }
+    tracker.rewound
   end
 
   describe "#track and #rewound" do
@@ -24,12 +24,12 @@ RSpec.describe_current do
     end
 
     context "when offsets go back within a run of one partition" do
-      it { expect(rewound(message(0, 5), message(0, 0))).to eq([[topic_name, 0, 0]]) }
+      it { expect(rewound(message(0, 5), message(0, 0))).to eq(topic_name => [0]) }
     end
 
     context "when offsets go back after a run of another partition" do
       it do
-        expect(rewound(message(0, 5), message(1, 1), message(0, 0))).to eq([[topic_name, 0, 0]])
+        expect(rewound(message(0, 5), message(1, 1), message(0, 0))).to eq(topic_name => [0])
       end
     end
 
@@ -37,7 +37,22 @@ RSpec.describe_current do
       it do
         expect(
           rewound(message(0, 300), message(0, 0, "other"), message(0, 1, "other"), message(0, 0))
-        ).to eq([[topic_name, 0, 0]])
+        ).to eq(topic_name => [0])
+      end
+    end
+
+    context "when offsets of one partition go back several times" do
+      it do
+        expect(rewound(message(0, 5), message(0, 0), message(0, 3), message(0, 1)))
+          .to eq(topic_name => [0])
+      end
+    end
+
+    context "when offsets go back in partitions of several topics" do
+      it do
+        expect(
+          rewound(message(0, 5), message(0, 5, "other"), message(0, 0), message(0, 0, "other"))
+        ).to eq(topic_name => [0], "other" => [0])
       end
     end
 
@@ -47,10 +62,10 @@ RSpec.describe_current do
         tracker.rewound
       end
 
-      it { expect(rewound(message(0, 0))).to eq([[topic_name, 0, 0]]) }
+      it { expect(rewound(message(0, 0))).to eq(topic_name => [0]) }
     end
 
-    context "when rewound messages were taken" do
+    context "when rewound partitions were taken" do
       before { rewound(message(0, 5), message(0, 0)) }
 
       it { expect(tracker.rewound).to be_nil }
@@ -81,11 +96,11 @@ RSpec.describe_current do
       end
 
       it "expect to keep the last offsets of other partitions" do
-        expect(rewound(message(0, 5), message(1, 0))).to eq([[topic_name, 1, 0]])
+        expect(rewound(message(0, 5), message(1, 0))).to eq(topic_name => [1])
       end
     end
 
-    context "when rewound messages were not taken yet" do
+    context "when rewound partitions were not taken yet" do
       before do
         tracker.track(message(1, 0))
         tracker.forget(topic_name => [0])
@@ -103,7 +118,7 @@ RSpec.describe_current do
     context "when a partition of another topic was revoked" do
       before { tracker.forget("other" => [0]) }
 
-      it { expect(rewound(message(0, 0))).to eq([[topic_name, 0, 0]]) }
+      it { expect(rewound(message(0, 0))).to eq(topic_name => [0]) }
     end
   end
 
@@ -118,7 +133,7 @@ RSpec.describe_current do
     end
 
     it "expect to compare later messages with it" do
-      expect(rewound(message(0, 1), message(1, 0), message(0, 0))).to eq([[topic_name, 0, 0]])
+      expect(rewound(message(0, 1), message(1, 0), message(0, 0))).to eq(topic_name => [0])
     end
 
     context "when a message was stored" do
@@ -133,7 +148,7 @@ RSpec.describe_current do
   end
 
   describe "#clear" do
-    context "when rewound messages were not taken yet" do
+    context "when rewound partitions were not taken yet" do
       before do
         tracker.track(message(0, 300))
         tracker.track(message(0, 0))

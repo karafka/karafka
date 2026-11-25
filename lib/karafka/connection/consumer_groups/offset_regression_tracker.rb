@@ -21,8 +21,8 @@ module Karafka
           @rewound = nil
         end
 
-        # Records the message as the last one handed over for its partition and flags it as
-        # rewound when its offset is lower than the one of the previous message of its partition
+        # Records the message as the last one handed over for its partition and flags its partition
+        # as rewound when its offset is lower than the one of the previous message of its partition
         #
         # @param message [Rdkafka::Consumer::Message] message handed over to the buffer
         def track(message)
@@ -31,11 +31,11 @@ module Karafka
           offset = message.offset
 
           if @previous_partition == partition && @previous_topic == topic_name
-            (@rewound ||= []) << message if offset < @previous_offset
+            rewind(topic_name, partition) if offset < @previous_offset
           else
             @last_offsets[@previous_topic][@previous_partition] = @previous_offset if @previous_topic
             last_offset = @last_offsets[topic_name][partition]
-            (@rewound ||= []) << message if last_offset && offset < last_offset
+            rewind(topic_name, partition) if last_offset && offset < last_offset
             @previous_topic = topic_name
             @previous_partition = partition
           end
@@ -54,8 +54,8 @@ module Karafka
           @previous_offset = message.offset
         end
 
-        # @return [Array<Rdkafka::Consumer::Message>, nil] messages tracked behind the previous
-        #   message of their partition since the last call, nil when there were none
+        # @return [Hash{String => Array<Integer>}, nil] partitions per topic with messages tracked
+        #   behind the previous message of their partition since the last call, nil when none
         def rewound
           rewound = @rewound
           @rewound = nil
@@ -63,7 +63,7 @@ module Karafka
         end
 
         # Removes the last offsets of revoked partitions, so messages of a partition assigned back
-        # later are not compared with offsets from before the revocation. Rewound messages not
+        # later are not compared with offsets from before the revocation. Rewound partitions not
         # taken yet are dropped, as they are from before the rebalance
         #
         # @param revoked_partitions [Hash{String => Array<Integer>}] revoked partitions per topic
@@ -87,6 +87,15 @@ module Karafka
         end
 
         private
+
+        # Flags the partition as rewound
+        #
+        # @param topic_name [String]
+        # @param partition [Integer]
+        def rewind(topic_name, partition)
+          partitions = ((@rewound ||= {})[topic_name] ||= [])
+          partitions << partition unless partitions.include?(partition)
+        end
 
         # Forgets the previous message coordinates
         def clear_previous

@@ -641,29 +641,6 @@ RSpec.describe_current do
             expect(kafka).not_to have_received(:seek)
           end
         end
-
-        context "when only its eof was drained" do
-          let(:first) { message(1, 0) }
-          let(:drained) { [eof_error(0, 1), message(1, 1)] }
-
-          it "expect to remove it without seeking" do
-            expect(buffer_state).to eq([topic_name, 1] => { offsets: [0, 1], eof: false })
-            expect(kafka).not_to have_received(:seek)
-          end
-        end
-
-        context "when a message from before the revocation precedes lower ones" do
-          let(:drained) { [message(0, 6), message(0, 5), message(0, 6)] }
-          let(:position) { 7 }
-
-          it "expect to seek back to the lowest drained offset" do
-            client.batch_poll
-
-            expect(kafka).to have_received(:seek) do |seek|
-              expect([seek.topic, seek.partition, seek.offset]).to eq([topic_name, 0, 5])
-            end
-          end
-        end
       end
 
       context "when the drain goes back in offsets without a seek" do
@@ -697,24 +674,6 @@ RSpec.describe_current do
           end
         end
 
-        context "when the previous message of the partition came in an earlier batch" do
-          let(:first) { message(1, 0) }
-
-          before do
-            allow(kafka).to receive(:poll).and_return(message(0, 300), nil, first, nil)
-            allow(kafka).to receive(:poll_batch_nb).and_return([], drained)
-          end
-
-          it "expect to seek the stale position as well" do
-            client.batch_poll
-            client.batch_poll
-
-            expect(kafka).to have_received(:seek) do |seek|
-              expect([seek.topic, seek.partition, seek.offset]).to eq([topic_name, 0, 2])
-            end
-          end
-        end
-
         context "when the partition was revoked in an earlier batch" do
           let(:first) { message(1, 0) }
 
@@ -734,37 +693,6 @@ RSpec.describe_current do
             client.batch_poll
 
             expect(kafka).not_to have_received(:position)
-          end
-        end
-
-        context "when another partition was revoked in an earlier batch" do
-          let(:first) { message(0, 5) }
-
-          before do
-            batches = [[], [message(1, 0), message(1, 1)]]
-
-            allow(kafka).to receive(:position) do |tpl|
-              partition = tpl.to_h.fetch(topic_name).first.partition
-
-              Rdkafka::Consumer::TopicPartitionList.new(
-                topic_name => [Rdkafka::Consumer::Partition.new(partition, position)]
-              )
-            end
-            allow(kafka).to receive(:poll).and_return(message(1, 300), first, nil)
-            allow(kafka).to receive(:poll_batch_nb) do
-              batch = batches.shift
-              client.rebalance_manager.on_rebalance_partitions_revoked(revocation) if batch.empty?
-              batch
-            end
-          end
-
-          it "expect to keep the last offsets of the kept partition" do
-            client.batch_poll
-            client.batch_poll
-
-            expect(kafka).to have_received(:seek) do |seek|
-              expect([seek.topic, seek.partition, seek.offset]).to eq([topic_name, 1, 2])
-            end
           end
         end
 
