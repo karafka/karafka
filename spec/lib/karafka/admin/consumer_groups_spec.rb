@@ -631,6 +631,81 @@ RSpec.describe Karafka::Admin::ConsumerGroups do
       end
     end
 
+    context "when the committed offsets are not stable yet and then become stable" do
+      let(:group_ids) { [cg_id] }
+      let(:instance) { described_class.new }
+      let(:admin) { instance_double(Rdkafka::Admin) }
+      let(:handle) { instance_double(Rdkafka::Admin::ListConsumerGroupOffsetsHandle) }
+      let(:error) do
+        Rdkafka::RdkafkaError.new(Rdkafka::Bindings::RD_KAFKA_RESP_ERR__STATE).tap do |rdkafka_error|
+          allow(rdkafka_error).to receive(:code).and_return(:unstable_offset_commit)
+        end
+      end
+      let(:report) do
+        instance_double(
+          Rdkafka::Admin::ListConsumerGroupOffsetsReport,
+          partitions: [{ topic: name, partition: 0, offset: 7, metadata: nil, error: nil }]
+        )
+      end
+
+      before do
+        allow(described_class).to receive_messages(new: instance, retry_backoff: 1)
+        allow(instance).to receive(:with_admin).and_yield(admin)
+        allow(admin).to receive(:list_consumer_group_offsets).and_return(handle)
+
+        calls = 0
+        allow(handle).to receive(:wait) do
+          calls += 1
+          raise(error) if calls == 1
+
+          report
+        end
+      end
+
+      it "expect to retry and ask for stable offsets" do
+        expect(results).to eq(cg_id => { name => { 0 => 7 } })
+        expect(handle).to have_received(:wait).twice
+        expect(admin)
+          .to have_received(:list_consumer_group_offsets)
+          .with(cg_id, require_stable_offsets: true)
+          .twice
+      end
+    end
+
+    context "when the isolation level is read_uncommitted" do
+      let(:group_ids) { [cg_id] }
+      let(:instance) { described_class.new }
+      let(:admin) { instance_double(Rdkafka::Admin) }
+      let(:handle) { instance_double(Rdkafka::Admin::ListConsumerGroupOffsetsHandle) }
+      let(:report) do
+        instance_double(
+          Rdkafka::Admin::ListConsumerGroupOffsetsReport,
+          partitions: [{ topic: name, partition: 0, offset: 3, metadata: nil, error: nil }]
+        )
+      end
+
+      let(:original_kafka) { Karafka::App.config.kafka.dup }
+
+      before do
+        original_kafka
+        Karafka::App.config.kafka[:"isolation.level"] = "read_uncommitted"
+
+        allow(described_class).to receive(:new).and_return(instance)
+        allow(instance).to receive(:with_admin).and_yield(admin)
+        allow(admin).to receive(:list_consumer_group_offsets).and_return(handle)
+        allow(handle).to receive(:wait).and_return(report)
+      end
+
+      after { Karafka::App.config.kafka.replace(original_kafka) }
+
+      it "expect not to ask for stable offsets" do
+        expect(results).to eq(cg_id => { name => { 0 => 3 } })
+        expect(admin)
+          .to have_received(:list_consumer_group_offsets)
+          .with(cg_id, require_stable_offsets: false)
+      end
+    end
+
     context "when fetching the committed offsets fails with a non-transient error" do
       let(:group_ids) { [cg_id] }
       let(:instance) { described_class.new }
