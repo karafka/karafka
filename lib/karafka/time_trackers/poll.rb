@@ -37,7 +37,7 @@ module Karafka
         @started_at = monotonic_now
       end
 
-      # @return [Integer] milliseconds since the last start, not yet taken from the remaining time
+      # @return [Float] milliseconds since the last start, not yet taken from the remaining time
       def elapsed
         monotonic_now - @started_at
       end
