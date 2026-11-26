@@ -636,11 +636,7 @@ RSpec.describe Karafka::Admin::ConsumerGroups do
       let(:instance) { described_class.new }
       let(:admin) { instance_double(Rdkafka::Admin) }
       let(:handle) { instance_double(Rdkafka::Admin::ListConsumerGroupOffsetsHandle) }
-      let(:error) do
-        Rdkafka::RdkafkaError.new(Rdkafka::Bindings::RD_KAFKA_RESP_ERR__STATE).tap do |rdkafka_error|
-          allow(rdkafka_error).to receive(:code).and_return(:unstable_offset_commit)
-        end
-      end
+      let(:error) { Rdkafka::RdkafkaError.new(88) }
       let(:report) do
         instance_double(
           Rdkafka::Admin::ListConsumerGroupOffsetsReport,
