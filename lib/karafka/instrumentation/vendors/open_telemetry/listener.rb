@@ -22,6 +22,28 @@ module Karafka
 
           def_delegators :config, :client, :links
 
+          # Reads the trace context from message headers. A header key present more than once
+          # comes as an array of values and we use the last one.
+          module HeadersGetter
+            class << self
+              # @param carrier [Hash] message headers
+              # @param key [String] header key
+              # @return [String, nil] header value
+              def get(carrier, key)
+                value = carrier[key]
+                value.is_a?(Array) ? value.last : value
+              end
+
+              # @param carrier [Hash] message headers
+              # @return [Array<String>] header keys
+              def keys(carrier)
+                carrier.keys
+              end
+            end
+          end
+
+          private_constant :HeadersGetter
+
           # `OpenTelemetry::Trace::Tracer` that we should use to trace stuff
           setting :client
 
@@ -70,7 +92,7 @@ module Karafka
                 "messaging.operation.type" => "process",
                 "messaging.destination.name" => topic_name,
                 "messaging.destination.partition.id" => consumer.partition.to_s,
-                "messaging.consumer.group.name" => topic.consumer_group.id,
+                "messaging.consumer.group.name" => topic.subscription_group.group_id,
                 "messaging.batch.message_count" => messages.size,
                 "kafka.offset" => messages.metadata.first_offset
               }
@@ -132,19 +154,24 @@ module Karafka
 
           # @param messages [Karafka::Messages::Messages] consumed batch
           # @return [Array<OpenTelemetry::Trace::Link>, nil] links to the valid trace contexts
-          #   extracted from the first `links.max_messages` messages headers or nil when off
+          #   extracted from the first `links.max_messages` messages headers or nil when off or
+          #   when none of those messages carries a valid trace context
           def build_links(messages)
             return unless links.active
 
             propagation = ::OpenTelemetry.propagation
+            empty_context = ::OpenTelemetry::Context.empty
 
             # We use the raw array not to trigger instrumentation that patches `Messages#each`
             built = messages.raw.first(links.max_messages).filter_map do |message|
               span_context = ::OpenTelemetry::Trace.current_span(
-                propagation.extract(message.headers)
+                propagation.extract(message.headers, context: empty_context, getter: HeadersGetter)
               ).context
 
               ::OpenTelemetry::Trace::Link.new(span_context) if span_context.valid?
+            # Tracing must never fail the consumption, so we skip headers we cannot extract from
+            rescue
+              nil
             end
 
             built.empty? ? nil : built

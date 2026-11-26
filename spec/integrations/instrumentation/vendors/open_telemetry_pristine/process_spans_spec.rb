@@ -4,6 +4,7 @@
 # current in `#consume`, record consumption errors on it without leaking it and link it to the
 # producers trace contexts from the message headers
 
+require "karafka"
 require "opentelemetry/sdk"
 require "karafka/instrumentation/vendors/open_telemetry/listener"
 
@@ -15,7 +16,8 @@ end
 
 tracer = OpenTelemetry.tracer_provider.tracer("karafka-integration")
 
-setup_karafka(allow_errors: %w[consumer.consume.error])
+# One worker thread, so a context the listener does not detach would leak into the next batches
+setup_karafka(allow_errors: %w[consumer.consume.error]) { |config| config.concurrency = 1 }
 
 class Consumer < Karafka::BaseConsumer
   def consume
@@ -41,6 +43,11 @@ Karafka.monitor.subscribe(
     config.links.max_messages = 5
   end
 )
+
+# Subscribed after the listener, so it runs after the listener closed the span
+Karafka.monitor.subscribe("worker.completed") do
+  DT[:after] << OpenTelemetry::Trace.current_span.context.valid?
+end
 
 draw_routes(Consumer)
 
@@ -86,4 +93,5 @@ process_spans.each do |span|
   assert span.links.all? { |link| link.span_context.span_id == producer_span.context.span_id }
 end
 
-assert_equal OpenTelemetry::Trace::Span::INVALID, OpenTelemetry::Trace.current_span
+assert !DT[:after].empty?
+assert DT[:after].none?

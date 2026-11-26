@@ -19,7 +19,11 @@ RSpec.describe_current do
     provider
   end
   let(:tracer) { tracer_provider.tracer("karafka-spec") }
-  let(:topic) { build(:routing_topic) }
+  let(:topic_kafka) { {} }
+  let(:topic) do
+    topics = Karafka::Routing::Topics.new([build(:routing_topic, kafka: topic_kafka)])
+    build(:routing_subscription_group, topics: topics).topics.first
+  end
   let(:raw_headers) { [{}, {}] }
   let(:messages) do
     raw_headers.map.with_index do |headers, index|
@@ -93,6 +97,14 @@ RSpec.describe_current do
 
     it "expect not to add links by default" do
       expect(process_span.links).to be_nil
+    end
+
+    context "when the topic sets its own Kafka group.id" do
+      let(:topic_kafka) { { "group.id": "legacy-group" } }
+
+      it "expect to use the Kafka consumer group name" do
+        expect(process_span.attributes["messaging.consumer.group.name"]).to eq("legacy-group")
+      end
     end
   end
 
@@ -206,6 +218,50 @@ RSpec.describe_current do
       let(:raw_headers) { [{}, {}] }
 
       it { expect(process_span.links).to be_nil }
+    end
+
+    context "when a span is current while no message carries a trace context" do
+      let(:raw_headers) { [{}, {}] }
+
+      before do
+        listener.on_worker_completed(completed_event)
+
+        tracer.in_span("outer") do
+          listener.on_consumer_consume(consume_event)
+          listener.on_consumer_consumed(consumed_event)
+        end
+      end
+
+      it "expect not to link the current span" do
+        expect(finished_spans.select { |span| span.name == "process #{topic.name}" }.map(&:links))
+          .to eq([nil, nil])
+      end
+    end
+
+    context "when a message has the trace context header more than once" do
+      let(:raw_headers) do
+        producer_spans.map do |span|
+          headers = {}
+          OpenTelemetry.propagation.inject(
+            headers,
+            context: OpenTelemetry::Trace.context_with_span(span)
+          )
+          headers.transform_values { |value| [value, value] }
+        end
+      end
+
+      it "expect to link the trace context from the last value" do
+        expect(process_span.links.map { |link| link.span_context.span_id })
+          .to eq(producer_spans.map { |span| span.context.span_id })
+      end
+    end
+
+    context "when extraction of a message trace context raises" do
+      let(:raw_headers) { [{ "traceparent" => Object.new }] }
+
+      it "expect to skip that message and still trace the batch" do
+        expect(process_span.links).to be_nil
+      end
     end
   end
 end
