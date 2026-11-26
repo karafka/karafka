@@ -79,22 +79,25 @@ RSpec.describe_current do
       end
     end
 
-    context "when encrypted message does not match fingerprint but fingerprinting is off" do
-      let(:headers) { { "encryption" => "1", "encryption_fingerprint" => rand.to_s } }
+    [false, nil].each do |disabled_fingerprinter|
+      context "when message does not match fingerprint and fingerprinter is #{disabled_fingerprinter.inspect}" do
+        let(:headers) { { "encryption" => "1", "encryption_fingerprint" => rand.to_s } }
 
-      let(:raw_payload) do
-        Karafka::App.config.encryption.cipher.encrypt({ "test" => 1 }.to_json)
-      end
+        let(:raw_payload) do
+          Karafka::App.config.encryption.cipher.encrypt({ "test" => 1 }.to_json)
+        end
 
-      before do
-        allow(Karafka::App.config.encryption).to receive_messages(
-          public_key: fixture_file("rsa/public_key_1.pem"),
-          private_keys: { "1" => fixture_file("rsa/private_key_1.pem") }
-        )
-      end
+        before do
+          allow(Karafka::App.config.encryption).to receive_messages(
+            public_key: fixture_file("rsa/public_key_1.pem"),
+            fingerprinter: disabled_fingerprinter,
+            private_keys: { "1" => fixture_file("rsa/private_key_1.pem") }
+          )
+        end
 
-      it "expect to decrypt it and then run deserializer" do
-        expect(parsing).to eq("test" => 1)
+        it "expect to decrypt it and then run deserializer" do
+          expect(parsing).to eq("test" => 1)
+        end
       end
     end
 

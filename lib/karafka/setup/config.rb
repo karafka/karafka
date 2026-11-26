@@ -82,9 +82,9 @@ module Karafka
       setting :worker_thread_priority, default: -1
 
       setting :oauth do
-        # option [false, nil, #call] Listener for using oauth bearer. This listener will be able to
-        #   get the client name to decide whether to use a single multi-client token refreshing
-        #   or have separate tokens per instance.
+        # option [false, nil, #on_oauthbearer_token_refresh] Listener for using oauth bearer.
+        #   This listener will be able to get the client name to decide whether to use a single
+        #   multi-client token refreshing or have separate tokens per instance.
         setting :token_provider_listener, default: false
       end
 
@@ -310,8 +310,8 @@ module Karafka
           setting :jobs_queue_class, default: Processing::ConsumerGroups::JobsQueue
           # option scheduler [Object] scheduler we will be using
           setting :scheduler_class, default: Processing::Schedulers::Default
-          # option worker_job_call_wrapper [Proc, false, nil] callable object that will be used to
-          #   wrap the worker execution of a job or false/nil if no wrapper needed
+          # option worker_job_call_wrapper [#wrap, false, nil] object responding to `#wrap` that will
+          #   be used to wrap the worker execution of a job or false/nil if no wrapper needed
           setting :worker_job_call_wrapper, default: false
           # option critical_errors [Array<Class>] errors that indicate that the process integrity
           #   is compromised or that termination was explicitly requested. They are not retried
