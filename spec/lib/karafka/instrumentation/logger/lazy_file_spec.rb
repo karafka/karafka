@@ -12,6 +12,7 @@ RSpec.describe_current do
   before do
     allow(file).to receive(:write).and_return(10)
     allow(file).to receive(:close)
+    allow(file).to receive(:flush)
   end
 
   describe "#write" do
@@ -59,6 +60,31 @@ RSpec.describe_current do
             expect(lazy_file.write("x")).to be_nil
           end
         end
+      end
+    end
+  end
+
+  describe "#flush" do
+    it "does not open the underlying file just to flush it" do
+      expect(lazy_file.flush).to be_nil
+      expect(opener_calls).to be_empty
+    end
+
+    it "flushes the underlying file once it was opened" do
+      lazy_file.write("a")
+      lazy_file.flush
+
+      expect(file).to have_received(:flush)
+    end
+
+    context "when flushing raises a read-only filesystem error" do
+      before do
+        lazy_file.write("a")
+        allow(file).to receive(:flush).and_raise(Errno::EROFS)
+      end
+
+      it "does not raise" do
+        expect { lazy_file.flush }.not_to raise_error
       end
     end
   end

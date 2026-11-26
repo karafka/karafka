@@ -15,6 +15,11 @@ module Karafka
       jobs_queue_class: %i[internal processing jobs_queue_class]
     )
 
+    # How long (in ms) we wait for the logs flush before the forceful exit
+    FORCEFUL_FLUSH_WAIT = 1_000
+
+    private_constant :FORCEFUL_FLUSH_WAIT
+
     class << self
       # Set of consuming threads. Each consumer thread contains a single consumer
       attr_accessor :listeners
@@ -210,6 +215,11 @@ module Karafka
         # that must guarantee the process terminates. On a normal (graceful) shutdown the producer
         # is still closed via the `ensure` block below, which `exit!` deliberately skips here.
         #
+        # `exit!` skips the IO finalizers, so without a flush the buffered logs (including the
+        # forceful shutdown details reported above) would be lost. Unlike the producer, a flush
+        # of the logs does not depend on the cluster.
+        flush_logs
+
         # exit! is not within the instrumentation as it would not trigger due to exit
         Kernel.exit!(forceful_exit_code)
       ensure
@@ -257,6 +267,26 @@ module Karafka
         # We don't have to safe-guard it with check states as the state transitions work only
         # in one direction
         Karafka::App.quiet!
+      end
+
+      private
+
+      # Flushes the buffered data of the default logger, `$stdout` and `$stderr`
+      # @note A stream that cannot be flushed (closed, broken pipe, no `#flush`) is skipped. The
+      #   flush runs in a thread we wait on for at most `FORCEFUL_FLUSH_WAIT`, so a stalled reader
+      #   (full pipe) cannot block the forceful exit.
+      def flush_logs
+        logger = Karafka.logger
+        streams = [$stdout, $stderr]
+        streams.unshift(logger) if logger.is_a?(Karafka::Instrumentation::Logger)
+
+        Thread.new do
+          streams.each do |stream|
+            stream.flush
+          rescue
+            nil
+          end
+        end.join(FORCEFUL_FLUSH_WAIT / 1_000.0)
       end
     end
 

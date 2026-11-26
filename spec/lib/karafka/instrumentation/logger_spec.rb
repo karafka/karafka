@@ -97,6 +97,76 @@ RSpec.describe Karafka::Instrumentation::Logger do
     end
   end
 
+  describe "#flush" do
+    let(:karafka_test_root) { Pathname(Dir::Tmpname.create("karafka") { |_| nil }) }
+    let(:log_path) { karafka_test_root.join("log/#{Karafka.env}.log") }
+
+    before do
+      allow(Karafka::App).to receive(:root).and_return(karafka_test_root)
+      Dir.mkdir(karafka_test_root, 0o700)
+      allow($stdout).to receive(:write)
+      allow($stdout).to receive(:flush)
+    end
+
+    after { FileUtils.rm_rf(karafka_test_root) }
+
+    it "writes buffered logs to the log file" do
+      logger.error("message")
+
+      expect(log_path.read).not_to include("message")
+
+      logger.flush
+
+      expect(log_path.read).to include("message")
+    end
+
+    it "flushes stdout" do
+      logger.flush
+
+      expect($stdout).to have_received(:flush)
+    end
+
+    context "when stdout stalls" do
+      before { allow($stdout).to receive(:flush) { Kernel.sleep(5) } }
+
+      it "writes buffered logs to the log file before the stdout flush" do
+        logger.error("message")
+
+        Thread.new { logger.flush }.join(1)
+
+        expect(log_path.read).to include("message")
+      end
+    end
+
+    context "when stdout is a buffered pipe without a reader" do
+      let(:original_stdout) { $stdout }
+      let(:pipe) { IO.pipe }
+
+      before do
+        original_stdout
+        reader, writer = pipe
+        reader.close
+        writer.sync = false
+        $stdout = writer
+      end
+
+      after do
+        $stdout = original_stdout
+        writer = pipe.last
+        writer.close
+      rescue Errno::EPIPE
+        nil
+      end
+
+      it "still writes buffered logs to the log file" do
+        logger.error("message")
+
+        expect { logger.flush }.not_to raise_error
+        expect(log_path.read).to include("message")
+      end
+    end
+  end
+
   describe "#file" do
     let(:log_file) { Karafka::App.root.join("log", "#{Karafka.env}.log") }
 

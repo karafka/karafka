@@ -154,15 +154,25 @@ RSpec.describe_current do
     context "when shutdown time is more then 1" do
       let(:timeout_s) { 15 }
       let(:timeout_ms) { timeout_s * 1_000 }
+      let(:logger) { Karafka::Instrumentation::Logger.new }
+      let(:stdout_flush) { -> {} }
+      let(:stderr_flush) { -> {} }
+      let(:exited_at) { [] }
 
       before do
+        allow(Karafka).to receive(:logger).and_return(logger)
+        allow(logger).to receive(:flush)
         allow(Karafka::App).to receive_messages(
           stopped?: false,
           terminated?: false,
           stop!: true
         )
         allow(described_class).to receive(:sleep)
-        allow(Kernel).to receive(:exit!)
+        allow(Kernel).to receive(:exit!) do
+          exited_at << Process.clock_gettime(Process::CLOCK_MONOTONIC)
+        end
+        allow($stdout).to receive(:flush) { stdout_flush.call }
+        allow($stderr).to receive(:flush) { stderr_flush.call }
       end
 
       context "when there are no active threads (all shutdown ok)" do
@@ -185,6 +195,7 @@ RSpec.describe_current do
             active?: true
           )
         end
+        let(:started_at) { Process.clock_gettime(Process::CLOCK_MONOTONIC) }
 
         before do
           described_class.listeners = instance_double(
@@ -194,6 +205,7 @@ RSpec.describe_current do
             select: [active_thread],
             each: nil
           )
+          started_at
           server_class.stop
         end
 
@@ -201,6 +213,50 @@ RSpec.describe_current do
           expect(Karafka::App).to have_received(:stop!)
           expect(described_class).to have_received(:sleep).with(0.1).exactly(timeout_s * 10).times
           expect(Kernel).to have_received(:exit!).with(2)
+        end
+
+        it "expect to flush the logger, stdout and stderr before the exit" do
+          expect(logger).to have_received(:flush).ordered
+          expect($stdout).to have_received(:flush).ordered
+          expect($stderr).to have_received(:flush).ordered
+          expect(Kernel).to have_received(:exit!).with(2).ordered
+        end
+
+        context "when stdout cannot be flushed" do
+          let(:stdout_flush) { -> { raise Errno::EPIPE } }
+
+          it "expect to flush stderr and exit" do
+            expect(logger).to have_received(:flush)
+            expect($stderr).to have_received(:flush)
+            expect(Kernel).to have_received(:exit!).with(2)
+          end
+        end
+
+        context "when stderr has no flush" do
+          let(:stderr_flush) { -> { raise NoMethodError } }
+
+          it "expect to exit" do
+            expect(Kernel).to have_received(:exit!).with(2)
+          end
+        end
+
+        context "when stdout stalls" do
+          let(:stdout_flush) { -> { Kernel.sleep(5) } }
+
+          it "expect to exit without waiting for the flush to finish" do
+            expect(logger).to have_received(:flush)
+            expect(exited_at.size).to eq(1)
+            expect(exited_at.first - started_at).to be < 3
+          end
+        end
+
+        context "with a custom logger" do
+          let(:logger) { Logger.new(StringIO.new) }
+
+          it "expect not to flush the custom logger" do
+            expect(logger).not_to have_received(:flush)
+            expect(Kernel).to have_received(:exit!).with(2)
+          end
         end
       end
 

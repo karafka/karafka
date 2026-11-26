@@ -20,8 +20,26 @@ module Karafka
       # @param _args Any arguments that we don't care about but that are needed in order to
       #   make this logger compatible with the default Ruby one
       def initialize(*_args)
+        @stdout = $stdout
+        @log_file = LazyFile.new { file }
         super(target)
         self.level = ENV_MAP[Karafka.env] || ENV_MAP["default"]
+      end
+
+      # Flushes buffered logs to the log file and to stdout
+      # @note Used before `Kernel.exit!` (forceful shutdown), which skips the IO finalizers. The
+      #   file goes first and each target has its own rescue, so neither a broken stdout (closed,
+      #   broken pipe) nor a stalled one (full pipe, the caller stops waiting) prevents the file
+      #   flush.
+      # @return [nil]
+      def flush
+        [@log_file, @stdout].each do |log_target|
+          log_target.flush
+        rescue IOError, SystemCallError
+          nil
+        end
+
+        nil
       end
 
       private
@@ -32,7 +50,7 @@ module Karafka
       def target
         Karafka::Helpers::MultiDelegator
           .delegate(:write, :close)
-          .to($stdout, LazyFile.new { file })
+          .to(@stdout, @log_file)
       end
 
       # @return [Pathname] Path to a file to which we should log
