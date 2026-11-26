@@ -103,6 +103,10 @@ RSpec.describe Karafka::Instrumentation::Logger do
     it "opens a log_file in append mode" do
       expect(logger.send(:file).path.to_s).to eq log_file.to_s
     end
+
+    it "opens a log_file in sync mode" do
+      expect(logger.send(:file).sync).to be(true)
+    end
   end
 
   describe "read-only filesystem handling (EROFS)" do
@@ -139,7 +143,7 @@ RSpec.describe Karafka::Instrumentation::Logger do
     end
 
     context "when the file turns read-only after being opened (write raises EROFS)" do
-      let(:handle) { instance_double(File, write: nil, close: nil) }
+      let(:handle) { instance_double(File, write: nil, close: nil, "sync=": true) }
 
       before do
         allow(FileUtils).to receive(:mkdir_p)

@@ -41,11 +41,12 @@ module Karafka
       end
 
       # @return [File] file to which we want to write our logs
-      # @note File is being opened in append mode ('a')
+      # @note File is being opened in append mode ('a') and in the sync mode, as `Logger` does for
+      #   files it opens itself, so logs are not lost on `Kernel.exit!` (forceful shutdown)
       def file
         FileUtils.mkdir_p(File.dirname(log_path))
 
-        @file ||= File.open(log_path, "a")
+        @file ||= File.open(log_path, "a").tap { |log_file| log_file.sync = true }
       rescue Errno::EACCES, Errno::EROFS
         nil
       end

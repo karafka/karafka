@@ -163,6 +163,8 @@ RSpec.describe_current do
         )
         allow(described_class).to receive(:sleep)
         allow(Kernel).to receive(:exit!)
+        allow($stdout).to receive(:flush)
+        allow($stderr).to receive(:flush)
       end
 
       context "when there are no active threads (all shutdown ok)" do
@@ -200,6 +202,42 @@ RSpec.describe_current do
         it "expect stop and exit with sleep" do
           expect(Karafka::App).to have_received(:stop!)
           expect(described_class).to have_received(:sleep).with(0.1).exactly(timeout_s * 10).times
+          expect(Kernel).to have_received(:exit!).with(2)
+        end
+
+        it "expect to flush stdout and stderr before the exit" do
+          expect($stdout).to have_received(:flush).ordered
+          expect($stderr).to have_received(:flush).ordered
+          expect(Kernel).to have_received(:exit!).with(2).ordered
+        end
+      end
+
+      context "when there are active consuming threads and stdout cannot be flushed" do
+        let(:active_thread) do
+          instance_double(
+            Karafka::Connection::ConsumerGroups::Listener,
+            stopped?: true,
+            terminate: true,
+            shutdown: true,
+            active?: true
+          )
+        end
+
+        before do
+          allow($stdout).to receive(:flush).and_raise(Errno::EPIPE)
+
+          described_class.listeners = instance_double(
+            Karafka::Connection::ListenersBatch,
+            active: [active_thread],
+            all?: false,
+            select: [active_thread],
+            each: nil
+          )
+          server_class.stop
+        end
+
+        it "expect to flush stderr and exit" do
+          expect($stderr).to have_received(:flush)
           expect(Kernel).to have_received(:exit!).with(2)
         end
       end

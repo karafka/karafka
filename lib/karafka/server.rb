@@ -210,6 +210,11 @@ module Karafka
         # that must guarantee the process terminates. On a normal (graceful) shutdown the producer
         # is still closed via the `ensure` block below, which `exit!` deliberately skips here.
         #
+        # `exit!` skips the IO finalizers, so without a flush the buffered logs (including the
+        # forceful shutdown details reported above) would be lost. Unlike the producer, a flush
+        # of the standard streams does not depend on the cluster.
+        flush_standard_streams
+
         # exit! is not within the instrumentation as it would not trigger due to exit
         Kernel.exit!(forceful_exit_code)
       ensure
@@ -257,6 +262,19 @@ module Karafka
         # We don't have to safe-guard it with check states as the state transitions work only
         # in one direction
         Karafka::App.quiet!
+      end
+
+      private
+
+      # Flushes buffered `$stdout` and `$stderr` data
+      # @note A stream that cannot be flushed (closed, broken pipe) is skipped, so it cannot
+      #   prevent the forceful exit
+      def flush_standard_streams
+        [$stdout, $stderr].each do |stream|
+          stream.flush
+        rescue IOError, SystemCallError
+          nil
+        end
       end
     end
 
