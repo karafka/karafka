@@ -597,6 +597,39 @@ RSpec.describe_current do
         end
       end
 
+      context "when the drain has many errors and eofs" do
+        let(:timed_out) { Rdkafka::RdkafkaError.new(Rdkafka::Bindings::RD_KAFKA_RESP_ERR__TIMED_OUT) }
+
+        def trackers_built_with(drained)
+          built = 0
+
+          allow(kafka).to receive(:poll).and_return(first, nil)
+          allow(kafka).to receive(:poll_batch_nb).and_return(drained)
+          allow(Karafka::TimeTrackers::Poll).to receive(:new).and_wrap_original do |original, *args|
+            built += 1
+            original.call(*args)
+          end
+
+          client.batch_poll
+
+          built
+        end
+
+        it "expect to check the time left once per drain, not per error" do
+          baseline = trackers_built_with([message(0, 1)])
+          errors = trackers_built_with([timed_out, eof_error(1, 0), timed_out, message(1, 1)])
+
+          expect(errors).to eq(baseline + 1)
+        end
+
+        it "expect not to check the time left for eofs" do
+          baseline = trackers_built_with([message(0, 1)])
+          eofs = trackers_built_with([eof_error(1, 0), eof_error(2, 0), message(1, 1), message(2, 1)])
+
+          expect(eofs).to eq(baseline)
+        end
+      end
+
       [-199, -155].each do |code|
         context "when the drain has a message that failed to build with #{code}" do
           let(:error) do

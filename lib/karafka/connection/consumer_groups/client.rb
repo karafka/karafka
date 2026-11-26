@@ -753,6 +753,7 @@ module Karafka
           return false unless room.positive?
 
           eofed = false
+          retryable = nil
 
           kafka.poll_batch_nb(0, max_items: room).each do |item|
             unless item.is_a?(Rdkafka::RdkafkaError)
@@ -761,19 +762,27 @@ module Karafka
               next @buffer << item
             end
 
+            if item.code == :partition_eof
+              @buffer.eof(item.details[:topic], item.details[:partition])
+              eofed = true
+
+              next
+            end
+
             # Handled as on the first attempt of a blocking `#poll` with the time left in this batch,
             # as the drain neither waits nor retries. An error that keeps coming behind messages is
             # handled only in drains, so it gets no backoff and no escalation. A retry of a blocking
-            # `#poll` would also return the next message
-            attempt = TimeTrackers::Poll.new(time_poll.remaining)
-            attempt.start
+            # `#poll` would also return the next message. The time left does not change during the
+            # drain, so it is checked once
+            if retryable.nil?
+              attempt = TimeTrackers::Poll.new(time_poll.remaining)
+              attempt.start
+              retryable = attempt.retryable?
+            end
 
-            action = poll_error_action(item, attempt.retryable?)
+            action = poll_error_action(item, retryable)
 
             case action
-            when :eof
-              @buffer.eof(item.details[:topic], item.details[:partition])
-              eofed = true
             when :raise
               raise item
             when :skip, :retry
