@@ -81,7 +81,7 @@
 - [Fix] [Pro] Pass the topic and partition given to routing `filtering.filters` to the filter factories. Before, it called them with no arguments and raised `ArgumentError` for custom `->(topic, partition)` filters, required inline insights, parallel segments and `expire_in`.
 - [Fix] Leave the consumer group on a cooperative-sticky shutdown (classic protocol) also when the group coordinator is slow (about 50 ms or more). Before, the other members got the stopped consumer's partitions only after `session.timeout.ms`.
 - [Fix] [Pro] Stop a rare `can't add a new key into hash during iteration` error in `#consume` when it calls `subscription_groups_coordinator.pause`.
-- [Fix] Keep the logs written before a forceful shutdown (e.g. `Forceful Karafka server stop` with its blocking details): flush the default logger (stdout and `log/<env>.log`), `$stdout` and `$stderr` before `Kernel.exit!`. Before, both lost their buffered lines.
+- [Fix] Write the default logger lines (e.g. `Forceful Karafka server stop` with its blocking details) to stdout and `log/<env>.log` on a forceful shutdown. Before, the forceful exit lost them in `log/<env>.log`, and in stdout when it was a pipe or a file.
 
 ## 2.6.1 (2026-08-24)
 - **[Feature]** [Pro] Add an opt-in envelope encryption mode for Messages At Rest (`config.encryption.mode = :envelope`, requires openssl `>= 3.0`) without the RSA payload size limit. Upgrade all consuming processes before enabling.

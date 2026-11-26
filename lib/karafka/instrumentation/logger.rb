@@ -31,6 +31,7 @@ module Karafka
       #   file goes first and each target has its own rescue, so neither a broken stdout (closed,
       #   broken pipe) nor a stalled one (full pipe, the caller stops waiting) prevents the file
       #   flush.
+      # @return [nil]
       def flush
         [@log_file, @stdout].each do |log_target|
           log_target.flush

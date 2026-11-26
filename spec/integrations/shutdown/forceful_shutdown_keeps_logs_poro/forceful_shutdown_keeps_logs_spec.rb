@@ -2,7 +2,7 @@
 
 # When `karafka server` stops forcefully, the default logger output written before the
 # `Kernel.exit!` (including the forceful shutdown details) should reach both the piped stdout
-# and the log file. `exit!` skips the IO finalizers, so unflushed buffers would be lost.
+# and the log file.
 
 require "digest"
 require "securerandom"
@@ -51,7 +51,10 @@ RUBY
 env = { "KARAFKA_ENV" => "development" }
 
 migrate = system(env, "bundle exec karafka topics migrate", out: File::NULL, err: File::NULL)
-raise "topics migrate failed" unless migrate
+unless migrate
+  warn "FAIL: topics migrate failed"
+  exit(1)
+end
 
 reader, writer = IO.pipe
 pid = Process.spawn(env, "bundle exec karafka server", out: writer, err: writer)
@@ -63,10 +66,16 @@ Process.kill("TERM", pid)
 _, status = Timeout.timeout(60) { Process.wait2(pid) }
 stdout = output.value
 
-raise "Expected exit code 2, got #{status.exitstatus}: #{stdout}" unless status.exitstatus == 2
+unless status.exitstatus == 2
+  warn "FAIL: Expected exit code 2, got #{status.exitstatus}: #{stdout}"
+  exit(1)
+end
 
 [["stdout", stdout], ["log file", File.read(LOG_PATH)]].each do |name, content|
   ["Stopping Karafka server", "Forceful Karafka server stop", "still active", "In processing"].each do |line|
-    raise "Expected #{line.inspect} in #{name}: #{content}" unless content.include?(line)
+    next if content.include?(line)
+
+    warn "FAIL: Expected #{line.inspect} in #{name}: #{content}"
+    exit(1)
   end
 end
