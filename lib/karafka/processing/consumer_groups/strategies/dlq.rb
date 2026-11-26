@@ -127,17 +127,17 @@ module Karafka
           # @param skippable_message [Karafka::Messages::Message] message we are skipping that also
           #   should go to the dlq topic
           def dispatch_to_dead_letter_queue(skippable_message)
-            dlq_message = {
+            dead_letter_queue_message = {
               topic: topic.dead_letter_queue.topic,
               payload: skippable_message.raw_payload
             }
 
             trace_headers = skippable_message.raw_headers.slice(*TRACE_HEADERS)
-            dlq_message[:headers] = trace_headers unless trace_headers.empty?
+            dead_letter_queue_message[:headers] = trace_headers unless trace_headers.empty?
 
             producer.public_send(
               topic.dead_letter_queue.dispatch_method,
-              dlq_message
+              dead_letter_queue_message
             )
 
             # Notify about dispatch on the events bus
