@@ -17,7 +17,7 @@ setup_karafka do |config|
 end
 
 module DrainTracker
-  def drain(room)
+  def drain(room, time_poll)
     DT[:drained] = true
 
     super

@@ -21,7 +21,7 @@ setup_karafka do |config|
 end
 
 module DrainWindow
-  def drain(room)
+  def drain(room, time_poll)
     DT[:drained] = true
 
     # Widens the window between the blocking poll and the drain

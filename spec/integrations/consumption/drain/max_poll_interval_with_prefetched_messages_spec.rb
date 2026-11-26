@@ -22,7 +22,7 @@ setup_karafka do |config|
 end
 
 module DrainDelay
-  def drain(room)
+  def drain(room, time_poll)
     DT[:delayed] = true
     sleep(5)
 

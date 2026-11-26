@@ -21,7 +21,7 @@ setup_karafka do |config|
 end
 
 module DrainWindow
-  def drain(room)
+  def drain(room, time_poll)
     revocations = DT[:revocations].size
     assignments = DT[:assignments].size
 

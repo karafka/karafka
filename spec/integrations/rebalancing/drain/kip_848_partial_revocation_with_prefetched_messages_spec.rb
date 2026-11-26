@@ -20,7 +20,7 @@ setup_karafka(consumer_group_protocol: true) do |config|
 end
 
 module DrainWindow
-  def drain(room)
+  def drain(room, time_poll)
     callbacks = DT[:callbacks].size
 
     if DT.key?(:ready) && !DT.key?(:joining)
