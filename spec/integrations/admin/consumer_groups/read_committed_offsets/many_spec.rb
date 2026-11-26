@@ -38,11 +38,10 @@ end
 other_group = "#{DT.group}-other"
 never_group = "#{DT.group}-never"
 
-# A topic that is not in the routing of this consumer group
 Karafka::Admin.seek_consumer_group(DT.group, { DT.topics[1] => { 2 => 4 } })
 Karafka::Admin.seek_consumer_group(other_group, { DT.topics[1] => { 2 => 1 } })
 
-results = Karafka::Admin.read_committed_offsets(other_group, never_group, DT.group)
+results = Karafka::Admin.read_committed_offsets([other_group, never_group, DT.group])
 
 assert_equal [other_group, never_group, DT.group], results.keys
 assert_equal({ DT.topics[1] => { 2 => 1 } }, results[other_group])

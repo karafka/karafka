@@ -234,7 +234,7 @@ RSpec.describe_current do
       expect_any_instance_of(Karafka::Admin::ConsumerGroups)
         .to receive(:read_committed_offsets)
         .with(*group_ids)
-      described_class.read_committed_offsets(*group_ids)
+      described_class.read_committed_offsets(group_ids)
     end
   end
 

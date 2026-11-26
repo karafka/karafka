@@ -587,11 +587,7 @@ RSpec.describe Karafka::Admin::ConsumerGroups do
       let(:instance) { described_class.new }
       let(:admin) { instance_double(Rdkafka::Admin) }
       let(:handle) { instance_double(Rdkafka::Admin::ListConsumerGroupOffsetsHandle) }
-      let(:error) do
-        Rdkafka::RdkafkaError.new(Rdkafka::Bindings::RD_KAFKA_RESP_ERR__STATE).tap do |rdkafka_error|
-          allow(rdkafka_error).to receive(:code).and_return(:coordinator_load_in_progress)
-        end
-      end
+      let(:error) { Rdkafka::RdkafkaError.new(14) }
       let(:report) do
         instance_double(
           Rdkafka::Admin::ListConsumerGroupOffsetsReport,
@@ -658,7 +654,7 @@ RSpec.describe Karafka::Admin::ConsumerGroups do
         end
       end
 
-      it "expect to retry and ask for stable offsets" do
+      it "retries and asks for stable offsets" do
         expect(results).to eq(cg_id => { name => { 0 => 7 } })
         expect(handle).to have_received(:wait).twice
         expect(admin)
@@ -694,7 +690,7 @@ RSpec.describe Karafka::Admin::ConsumerGroups do
 
       after { Karafka::App.config.kafka.replace(original_kafka) }
 
-      it "expect not to ask for stable offsets" do
+      it "does not ask for stable offsets" do
         expect(results).to eq(cg_id => { name => { 0 => 3 } })
         expect(admin)
           .to have_received(:list_consumer_group_offsets)

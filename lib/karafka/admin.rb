@@ -283,12 +283,12 @@ module Karafka
 
       # Reads all committed offsets of given consumer groups
       #
-      # @param group_ids [String, Array<String>] consumer group or groups to read
+      # @param group_ids [Array<String>] consumer groups to read
       # @return [Hash{String => Hash{String => Hash{Integer => Integer}}}] committed offsets per
       #   consumer group, topic name and partition
       # @see ConsumerGroups.read_committed_offsets
-      def read_committed_offsets(*group_ids)
-        new.read_committed_offsets(*group_ids)
+      def read_committed_offsets(group_ids)
+        new.read_committed_offsets(group_ids)
       end
 
       # Plans a replication factor increase for a topic that can be used with Kafka's
@@ -518,9 +518,9 @@ module Karafka
       )
     end
 
-    # @param group_ids [String, Array<String>] consumer group or groups to read
+    # @param group_ids [Array<String>] consumer groups to read
     # @see ConsumerGroups#read_committed_offsets
-    def read_committed_offsets(*group_ids)
+    def read_committed_offsets(group_ids)
       consumer_groups_admin.read_committed_offsets(*group_ids)
     end
 
