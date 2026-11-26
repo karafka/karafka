@@ -15,11 +15,8 @@ module Karafka
 
         private_constant :EMPTY_ARRAY
 
-        # A partition can be revoked and assigned back within one drain and librdkafka may then
-        # already be past some of its drained messages, which are removed with the revoked ones.
-        # Such partitions go back to the lowest of their drained offsets. A drained message from
-        # before the revocation can precede lower ones, so the lowest is used and the client never
-        # seeks forward
+        # Plans seeks back to the lowest drained offset of partitions revoked and assigned back
+        # within the drain. See `Client#seek_after_drain`
         #
         # @param buffer [Karafka::Connection::RawMessagesBuffer] buffer after the drain
         # @param revoked [Hash{String => Array<Integer>}] partitions revoked per topic
@@ -39,12 +36,8 @@ module Karafka
           rewinds
         end
 
-        # A blocking poll always moves the position of a partition to its message, but the drain
-        # moves it only forward. When the offsets went back without a seek, e.g. on an offset
-        # reset after the topic was recreated, the position stays ahead of the drained messages
-        # and a pause without an offset would resume from it. Such partitions go to right after
-        # their last drained message. When it is followed by a transaction marker, the position is
-        # rightly past it, so the seek purges the prefetched messages once. It does not lose any
+        # Plans seeks to right after the last drained message of partitions whose drained offsets
+        # went back. See `Client#seek_after_drain`
         #
         # @param buffer [Karafka::Connection::RawMessagesBuffer] buffer after the revoked
         #   partitions were removed from it

@@ -5,8 +5,8 @@
 # client and continue from the committed offset with no gap. With a low `max_wait_time` this is the
 # case users hit.
 #
-# The error is injected into the first poll call after a message: on master that is the next
-# blocking poll, with the drain it is the drain right after the message.
+# The error is injected into whichever poll call comes after the first message, so the spec does
+# not depend on whether that call is a blocking poll or a drain.
 
 MESSAGES = 100
 
@@ -18,7 +18,7 @@ end
 
 TIMED_OUT = Rdkafka::RdkafkaError.new(Rdkafka::Bindings::RD_KAFKA_RESP_ERR__TIMED_OUT)
 
-module TransientError
+module InjectedTimeout
   def poll(timeout_ms)
     raise TIMED_OUT if inject?
 
@@ -45,7 +45,7 @@ module TransientError
   end
 end
 
-Rdkafka::Consumer.prepend(TransientError)
+Rdkafka::Consumer.prepend(InjectedTimeout)
 
 Karafka.monitor.subscribe("error.occurred") do |event|
   DT[:errors] << event
