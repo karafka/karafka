@@ -20,8 +20,17 @@ module Karafka
       # @param _args Any arguments that we don't care about but that are needed in order to
       #   make this logger compatible with the default Ruby one
       def initialize(*_args)
-        super(target)
+        @target = target
+        super(@target)
         self.level = ENV_MAP[Karafka.env] || ENV_MAP["default"]
+      end
+
+      # Flushes buffered logs to stdout and to the log file
+      # @note Used before `Kernel.exit!` (forceful shutdown), which skips the IO finalizers
+      def flush
+        @target.flush
+
+        nil
       end
 
       private
@@ -31,7 +40,7 @@ module Karafka
       # We use this approach to log stuff to file and to the $stdout at the same time
       def target
         Karafka::Helpers::MultiDelegator
-          .delegate(:write, :close)
+          .delegate(:write, :close, :flush)
           .to($stdout, LazyFile.new { file })
       end
 
@@ -41,12 +50,11 @@ module Karafka
       end
 
       # @return [File] file to which we want to write our logs
-      # @note File is being opened in append mode ('a') and in the sync mode, as `Logger` does for
-      #   files it opens itself, so logs are not lost on `Kernel.exit!` (forceful shutdown)
+      # @note File is being opened in append mode ('a')
       def file
         FileUtils.mkdir_p(File.dirname(log_path))
 
-        @file ||= File.open(log_path, "a").tap { |log_file| log_file.sync = true }
+        @file ||= File.open(log_path, "a")
       rescue Errno::EACCES, Errno::EROFS
         nil
       end

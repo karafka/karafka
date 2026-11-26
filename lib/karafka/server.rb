@@ -212,8 +212,8 @@ module Karafka
         #
         # `exit!` skips the IO finalizers, so without a flush the buffered logs (including the
         # forceful shutdown details reported above) would be lost. Unlike the producer, a flush
-        # of the standard streams does not depend on the cluster.
-        flush_standard_streams
+        # of the logs does not depend on the cluster.
+        flush_logs
 
         # exit! is not within the instrumentation as it would not trigger due to exit
         Kernel.exit!(forceful_exit_code)
@@ -266,11 +266,15 @@ module Karafka
 
       private
 
-      # Flushes buffered `$stdout` and `$stderr` data
+      # Flushes the buffered data of the default logger, `$stdout` and `$stderr`
       # @note A stream that cannot be flushed (closed, broken pipe) is skipped, so it cannot
       #   prevent the forceful exit
-      def flush_standard_streams
-        [$stdout, $stderr].each do |stream|
+      def flush_logs
+        logger = Karafka.logger
+        streams = [$stdout, $stderr]
+        streams.unshift(logger) if logger.is_a?(Karafka::Instrumentation::Logger)
+
+        streams.each do |stream|
           stream.flush
         rescue IOError, SystemCallError
           nil

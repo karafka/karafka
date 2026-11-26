@@ -29,6 +29,16 @@ module Karafka
           nil
         end
 
+        # Flushes the underlying file if it was ever opened.
+        # @return [nil]
+        def flush
+          @file&.flush
+
+          nil
+        rescue Errno::EACCES, Errno::EROFS
+          nil
+        end
+
         # Closes the underlying file if it was ever opened.
         # @return [nil]
         def close

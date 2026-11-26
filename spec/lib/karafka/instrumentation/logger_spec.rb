@@ -97,15 +97,41 @@ RSpec.describe Karafka::Instrumentation::Logger do
     end
   end
 
+  describe "#flush" do
+    let(:karafka_test_root) { Pathname(Dir::Tmpname.create("karafka") { |_| nil }) }
+    let(:log_path) { karafka_test_root.join("log/#{Karafka.env}.log") }
+
+    before do
+      allow(Karafka::App).to receive(:root).and_return(karafka_test_root)
+      Dir.mkdir(karafka_test_root, 0o700)
+      allow($stdout).to receive(:write)
+      allow($stdout).to receive(:flush)
+    end
+
+    after { FileUtils.rm_rf(karafka_test_root) }
+
+    it "writes buffered logs to the log file" do
+      logger.error("message")
+
+      expect(log_path.read).not_to include("message")
+
+      logger.flush
+
+      expect(log_path.read).to include("message")
+    end
+
+    it "flushes stdout" do
+      logger.flush
+
+      expect($stdout).to have_received(:flush)
+    end
+  end
+
   describe "#file" do
     let(:log_file) { Karafka::App.root.join("log", "#{Karafka.env}.log") }
 
     it "opens a log_file in append mode" do
       expect(logger.send(:file).path.to_s).to eq log_file.to_s
-    end
-
-    it "opens a log_file in sync mode" do
-      expect(logger.send(:file).sync).to be(true)
     end
   end
 
@@ -143,7 +169,7 @@ RSpec.describe Karafka::Instrumentation::Logger do
     end
 
     context "when the file turns read-only after being opened (write raises EROFS)" do
-      let(:handle) { instance_double(File, write: nil, close: nil, "sync=": true) }
+      let(:handle) { instance_double(File, write: nil, close: nil) }
 
       before do
         allow(FileUtils).to receive(:mkdir_p)

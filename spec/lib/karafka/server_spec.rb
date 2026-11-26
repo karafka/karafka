@@ -154,8 +154,11 @@ RSpec.describe_current do
     context "when shutdown time is more then 1" do
       let(:timeout_s) { 15 }
       let(:timeout_ms) { timeout_s * 1_000 }
+      let(:logger) { Karafka::Instrumentation::Logger.new }
 
       before do
+        allow(Karafka).to receive(:logger).and_return(logger)
+        allow(logger).to receive(:flush)
         allow(Karafka::App).to receive_messages(
           stopped?: false,
           terminated?: false,
@@ -205,7 +208,8 @@ RSpec.describe_current do
           expect(Kernel).to have_received(:exit!).with(2)
         end
 
-        it "expect to flush stdout and stderr before the exit" do
+        it "expect to flush the logger, stdout and stderr before the exit" do
+          expect(logger).to have_received(:flush).ordered
           expect($stdout).to have_received(:flush).ordered
           expect($stderr).to have_received(:flush).ordered
           expect(Kernel).to have_received(:exit!).with(2).ordered
@@ -237,7 +241,37 @@ RSpec.describe_current do
         end
 
         it "expect to flush stderr and exit" do
+          expect(logger).to have_received(:flush)
           expect($stderr).to have_received(:flush)
+          expect(Kernel).to have_received(:exit!).with(2)
+        end
+      end
+
+      context "when there are active consuming threads and a custom logger" do
+        let(:logger) { Logger.new(StringIO.new) }
+        let(:active_thread) do
+          instance_double(
+            Karafka::Connection::ConsumerGroups::Listener,
+            stopped?: true,
+            terminate: true,
+            shutdown: true,
+            active?: true
+          )
+        end
+
+        before do
+          described_class.listeners = instance_double(
+            Karafka::Connection::ListenersBatch,
+            active: [active_thread],
+            all?: false,
+            select: [active_thread],
+            each: nil
+          )
+          server_class.stop
+        end
+
+        it "expect not to flush the custom logger" do
+          expect(logger).not_to have_received(:flush)
           expect(Kernel).to have_received(:exit!).with(2)
         end
       end
