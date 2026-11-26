@@ -4,7 +4,10 @@ module Karafka
   module Connection
     module ConsumerGroups
       # Tracks the last offset handed over per partition, to detect messages that went back in
-      # offsets without a seek, e.g. after an offset reset of a recreated topic
+      # offsets without a seek, e.g. after an offset reset of a recreated topic. It matters only
+      # because a drain moves the librdkafka position forward and never back: after such a step
+      # back the position stays ahead of what we handed over, and a pause without an offset or a
+      # skipped seek would then lose messages. See `Client#seek_after_drain`
       #
       # @note Messages come in runs of one partition, so the last offset of a partition is stored
       #   only when the partition changes, and a message of the same partition is compared with

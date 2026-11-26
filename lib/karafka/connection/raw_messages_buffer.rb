@@ -70,6 +70,9 @@ module Karafka
         @groups[topic_name][partition][:eof] = true
       end
 
+      # The drain uses it to check whether an eof it saw still stands, as a later message of the
+      # same partition clears it
+      #
       # @return [Boolean] true if any of the partitions is marked as eof
       def eof?
         @groups.each_value.any? do |partitions|
