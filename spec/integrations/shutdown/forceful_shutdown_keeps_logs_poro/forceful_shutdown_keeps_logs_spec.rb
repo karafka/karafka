@@ -66,7 +66,7 @@ stdout = output.value
 raise "Expected exit code 2, got #{status.exitstatus}: #{stdout}" unless status.exitstatus == 2
 
 [["stdout", stdout], ["log file", File.read(LOG_PATH)]].each do |name, content|
-  %w[Stopping\ Karafka\ server Forceful\ Karafka\ server\ stop].each do |line|
+  ["Stopping Karafka server", "Forceful Karafka server stop", "still active", "In processing"].each do |line|
     raise "Expected #{line.inspect} in #{name}: #{content}" unless content.include?(line)
   end
 end

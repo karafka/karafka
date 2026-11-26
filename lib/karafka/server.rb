@@ -15,6 +15,11 @@ module Karafka
       jobs_queue_class: %i[internal processing jobs_queue_class]
     )
 
+    # How long (in ms) we wait for the logs flush before the forceful exit
+    FORCEFUL_FLUSH_WAIT = 1_000
+
+    private_constant :FORCEFUL_FLUSH_WAIT
+
     class << self
       # Set of consuming threads. Each consumer thread contains a single consumer
       attr_accessor :listeners
@@ -267,18 +272,21 @@ module Karafka
       private
 
       # Flushes the buffered data of the default logger, `$stdout` and `$stderr`
-      # @note A stream that cannot be flushed (closed, broken pipe) is skipped, so it cannot
-      #   prevent the forceful exit
+      # @note A stream that cannot be flushed (closed, broken pipe) is skipped. The flush runs in
+      #   a thread we wait on for at most `FORCEFUL_FLUSH_WAIT`, so a stalled reader (full pipe)
+      #   cannot block the forceful exit.
       def flush_logs
         logger = Karafka.logger
         streams = [$stdout, $stderr]
         streams.unshift(logger) if logger.is_a?(Karafka::Instrumentation::Logger)
 
-        streams.each do |stream|
-          stream.flush
-        rescue IOError, SystemCallError
-          nil
-        end
+        Thread.new do
+          streams.each do |stream|
+            stream.flush
+          rescue IOError, SystemCallError
+            nil
+          end
+        end.join(FORCEFUL_FLUSH_WAIT / 1_000.0)
       end
     end
 

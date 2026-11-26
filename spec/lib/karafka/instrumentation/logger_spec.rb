@@ -125,6 +125,34 @@ RSpec.describe Karafka::Instrumentation::Logger do
 
       expect($stdout).to have_received(:flush)
     end
+
+    context "when stdout is a buffered pipe without a reader" do
+      let(:original_stdout) { $stdout }
+      let(:pipe) { IO.pipe }
+
+      before do
+        original_stdout
+        reader, writer = pipe
+        reader.close
+        writer.sync = false
+        $stdout = writer
+      end
+
+      after do
+        $stdout = original_stdout
+        writer = pipe.last
+        writer.close
+      rescue Errno::EPIPE
+        nil
+      end
+
+      it "still writes buffered logs to the log file" do
+        logger.error("message")
+
+        expect { logger.flush }.not_to raise_error
+        expect(log_path.read).to include("message")
+      end
+    end
   end
 
   describe "#file" do

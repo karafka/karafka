@@ -247,6 +247,43 @@ RSpec.describe_current do
         end
       end
 
+      context "when there are active consuming threads and stdout stalls" do
+        let(:active_thread) do
+          instance_double(
+            Karafka::Connection::ConsumerGroups::Listener,
+            stopped?: true,
+            terminate: true,
+            shutdown: true,
+            active?: true
+          )
+        end
+        let(:started_at) { Process.clock_gettime(Process::CLOCK_MONOTONIC) }
+        let(:exited_at) { [] }
+
+        before do
+          allow($stdout).to receive(:flush) { Kernel.sleep(5) }
+          allow(Kernel).to receive(:exit!) do
+            exited_at << Process.clock_gettime(Process::CLOCK_MONOTONIC)
+          end
+
+          described_class.listeners = instance_double(
+            Karafka::Connection::ListenersBatch,
+            active: [active_thread],
+            all?: false,
+            select: [active_thread],
+            each: nil
+          )
+          started_at
+          server_class.stop
+        end
+
+        it "expect to exit without waiting for the flush to finish" do
+          expect(logger).to have_received(:flush)
+          expect(exited_at.size).to eq(1)
+          expect(exited_at.first - started_at).to be < 3
+        end
+      end
+
       context "when there are active consuming threads and a custom logger" do
         let(:logger) { Logger.new(StringIO.new) }
         let(:active_thread) do
