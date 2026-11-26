@@ -49,12 +49,14 @@ ENV["KARAFKA_BOOT_FILE"] = dummy_boot_file
 ExampleApp.initialize!
 
 mod = Module.new do
-  def self.token
-    ENV.fetch("KARAFKA_PRO_LICENSE_TOKEN")
-  end
+  class << self
+    def token
+      ENV.fetch("KARAFKA_PRO_LICENSE_TOKEN")
+    end
 
-  def self.version
-    "1.0.0"
+    def version
+      "1.0.0"
+    end
   end
 end
 

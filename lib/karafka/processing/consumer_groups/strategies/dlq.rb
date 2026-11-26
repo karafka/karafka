@@ -87,7 +87,7 @@ module Karafka
 
               # We mark the broken message as consumed and move on
               if mark_after_dispatch?
-                mark_dispatched_to_dlq(skippable_message)
+                mark_dispatched_to_dead_letter_queue(skippable_message)
 
                 return if revoked?
               else
@@ -149,7 +149,7 @@ module Karafka
 
           # Marks message that went to DLQ (if applicable) based on the requested method
           # @param skippable_message [Karafka::Messages::Message]
-          def mark_dispatched_to_dlq(skippable_message)
+          def mark_dispatched_to_dead_letter_queue(skippable_message)
             case topic.dead_letter_queue.marking_method
             when :mark_as_consumed
               mark_as_consumed(skippable_message)

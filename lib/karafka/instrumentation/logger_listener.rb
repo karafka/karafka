@@ -304,13 +304,13 @@ module Karafka
         topic = consumer.topic.name
         message = event[:message]
         offset = message.offset
-        dlq_topic = consumer.topic.dead_letter_queue.topic
+        dead_letter_queue_topic = consumer.topic.dead_letter_queue.topic
         partition = message.partition
 
         info <<~MSG.tr("\n", " ").strip!
           [#{consumer.id}] Dispatched message #{offset}
           from #{topic}-#{partition}
-          to DLQ topic: #{dlq_topic}
+          to DLQ topic: #{dead_letter_queue_topic}
         MSG
       end
 

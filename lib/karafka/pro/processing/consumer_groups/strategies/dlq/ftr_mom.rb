@@ -60,12 +60,12 @@ module Karafka
 
                     handle_post_filtering
                   else
-                    apply_dlq_flow do
+                    apply_dead_letter_queue_flow do
                       skippable_message, _marked = find_skippable_message
-                      dispatch_to_dead_letter_queue(skippable_message) if dispatch_to_dlq?
+                      dispatch_to_dead_letter_queue(skippable_message) if dispatch_to_dead_letter_queue?
 
                       if mark_after_dispatch?
-                        mark_dispatched_to_dlq(skippable_message)
+                        mark_dispatched_to_dead_letter_queue(skippable_message)
                       else
                         self.seek_offset = skippable_message.offset + 1
                       end

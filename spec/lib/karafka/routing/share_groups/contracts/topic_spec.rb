@@ -76,4 +76,34 @@ RSpec.describe_current do
       it { expect(check).not_to be_success }
     end
   end
+
+  context "when we validate bootstrap servers" do
+    context "when they are missing" do
+      before { config[:kafka] = { "message.max.bytes" => 1_000 } }
+
+      it { expect(check).not_to be_success }
+      it { expect(check.errors.keys).to eq(%i[kafka.bootstrap.servers]) }
+    end
+
+    context "when they are nil" do
+      before { config[:kafka] = { "bootstrap.servers": nil } }
+
+      it { expect(check).not_to be_success }
+      it { expect(check.errors.keys).to eq(%i[kafka.bootstrap.servers]) }
+    end
+
+    context "when they are an empty string" do
+      before { config[:kafka] = { "bootstrap.servers": "" } }
+
+      it { expect(check).not_to be_success }
+      it { expect(check.errors.keys).to eq(%i[kafka.bootstrap.servers]) }
+    end
+
+    context "when they are not a string" do
+      before { config[:kafka] = { "bootstrap.servers": %w[localhost:9092] } }
+
+      it { expect(check).not_to be_success }
+      it { expect(check.errors.keys).to eq(%i[kafka.bootstrap.servers]) }
+    end
+  end
 end

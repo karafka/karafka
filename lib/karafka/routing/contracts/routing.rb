@@ -59,8 +59,8 @@ module Karafka
               # Ignore pattern topics because they won't exist and should not be declarative managed
               topics << topic[:name] if !pat || !pat[:active]
 
-              dlq = topic[:dead_letter_queue]
-              topics << dlq[:topic] if dlq[:active]
+              dead_letter_queue = topic[:dead_letter_queue]
+              topics << dead_letter_queue[:topic] if dead_letter_queue[:active]
 
               dec_topics << topic[:name] if dec[:active]
             end
