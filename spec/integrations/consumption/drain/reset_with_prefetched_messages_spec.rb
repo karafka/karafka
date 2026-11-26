@@ -2,10 +2,13 @@
 
 # When an error in the poll resets the client while librdkafka holds prefetched messages and the
 # committed offset is behind the last message handed over, consumption should resume from the
-# committed offset and continue with no gap.
+# committed offset of each partition and continue with no gap.
 #
 # Small partition fetches and slow batches make librdkafka queue the messages before we poll again.
+# With two partitions, the first message of a partition after the reset can come from a drain, so
+# the offset regression tracker must not keep offsets from before the reset.
 
+PARTITIONS = 2
 MESSAGES = 300
 COMMITTED = 50
 
@@ -39,7 +42,7 @@ class Consumer < Karafka::BaseConsumer
     after_reset = DT.key?(:failed)
 
     messages.each do |message|
-      (after_reset ? DT[:after] : DT[:before]) << message.offset
+      DT[[after_reset ? :after : :before, partition]] << message.offset
       mark_as_consumed!(message) if after_reset || message.offset < COMMITTED
     end
 
@@ -51,16 +54,25 @@ draw_routes do
   topic DT.topic do
     consumer Consumer
     manual_offset_management true
+    config(partitions: PARTITIONS)
   end
 end
 
-produce_many(DT.topic, DT.uuids(MESSAGES))
+PARTITIONS.times do |partition|
+  produce_many(DT.topic, DT.uuids(MESSAGES), partition: partition)
+end
 
 start_karafka_and_wait_until do
-  DT[:after].include?(MESSAGES - 1)
+  PARTITIONS.times.all? { |partition| DT[[:after, partition]].include?(MESSAGES - 1) }
 end
 
 assert_equal 1, DT[:resets].size
-assert_equal (0..DT[:before].last).to_a, DT[:before]
-assert DT[:before].last >= COMMITTED + 40
-assert_equal (COMMITTED...MESSAGES).to_a, DT[:after]
+assert(PARTITIONS.times.any? { |partition| DT[[:before, partition]].last.to_i >= COMMITTED + 40 })
+
+PARTITIONS.times do |partition|
+  before = DT[[:before, partition]]
+  committed = before.empty? ? 0 : [before.last + 1, COMMITTED].min
+
+  assert_equal (0...before.size).to_a, before
+  assert_equal (committed...MESSAGES).to_a, DT[[:after, partition]]
+end
