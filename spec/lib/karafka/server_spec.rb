@@ -247,6 +247,35 @@ RSpec.describe_current do
         end
       end
 
+      context "when there are active consuming threads and stderr has no flush" do
+        let(:active_thread) do
+          instance_double(
+            Karafka::Connection::ConsumerGroups::Listener,
+            stopped?: true,
+            terminate: true,
+            shutdown: true,
+            active?: true
+          )
+        end
+
+        before do
+          allow($stderr).to receive(:flush).and_raise(NoMethodError)
+
+          described_class.listeners = instance_double(
+            Karafka::Connection::ListenersBatch,
+            active: [active_thread],
+            all?: false,
+            select: [active_thread],
+            each: nil
+          )
+          server_class.stop
+        end
+
+        it "expect to exit" do
+          expect(Kernel).to have_received(:exit!).with(2)
+        end
+      end
+
       context "when there are active consuming threads and stdout stalls" do
         let(:active_thread) do
           instance_double(

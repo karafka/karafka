@@ -28,8 +28,9 @@ module Karafka
 
       # Flushes buffered logs to the log file and to stdout
       # @note Used before `Kernel.exit!` (forceful shutdown), which skips the IO finalizers. The
-      #   file goes first and each target has its own rescue, so a broken stdout (closed, broken
-      #   pipe) does not prevent the file flush.
+      #   file goes first and each target has its own rescue, so neither a broken stdout (closed,
+      #   broken pipe) nor a stalled one (full pipe, the caller stops waiting) prevents the file
+      #   flush.
       def flush
         [@log_file, @stdout].each do |log_target|
           log_target.flush

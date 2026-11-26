@@ -126,6 +126,18 @@ RSpec.describe Karafka::Instrumentation::Logger do
       expect($stdout).to have_received(:flush)
     end
 
+    context "when stdout stalls" do
+      before { allow($stdout).to receive(:flush) { Kernel.sleep(5) } }
+
+      it "writes buffered logs to the log file before the stdout flush" do
+        logger.error("message")
+
+        Thread.new { logger.flush }.join(1)
+
+        expect(log_path.read).to include("message")
+      end
+    end
+
     context "when stdout is a buffered pipe without a reader" do
       let(:original_stdout) { $stdout }
       let(:pipe) { IO.pipe }
