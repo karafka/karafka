@@ -4,10 +4,10 @@
 # offset commit is still in flight after the assignment is gone (slow coordinator path).
 #
 # Karafka talks to the broker through a proxy on the `DELAYED` listener. On shutdown, the proxy
-# holds the `OffsetCommit` that librdkafka sends after the unassign until Karafka either pings
-# again with an empty assignment or closes the client, so the commit is in flight when the
-# assignment empties. When the client closes before that commit returns, librdkafka never sends
-# the `LeaveGroup`, and the other member gets the partitions only after `session.timeout.ms`.
+# holds the `OffsetCommit` that librdkafka sends after the unassign for a fixed time, so the
+# commit is in flight when the assignment empties. When the client closes before that commit
+# returns, librdkafka never sends the `LeaveGroup`, and the other member gets the partitions only
+# after `session.timeout.ms`.
 
 require "socket"
 
@@ -17,10 +17,10 @@ SESSION_TIMEOUT_MS = 30_000
 class CommitHoldingProxy
   OFFSET_COMMIT_API_KEY = 8
 
-  # Time for librdkafka to start the close after `#close` was called
-  CLOSE_RELEASE_DELAY = 1
+  # Much longer than the time between the unassign and the close without the fix (~0.1 s)
+  HOLD_TIME = 3
 
-  private_constant :OFFSET_COMMIT_API_KEY, :CLOSE_RELEASE_DELAY
+  private_constant :OFFSET_COMMIT_API_KEY, :HOLD_TIME
 
   # @param port [Integer] port to listen on (the `DELAYED` advertised port)
   # @param target_port [Integer] broker port of the `DELAYED` listener
@@ -30,7 +30,6 @@ class CommitHoldingProxy
     @mutex = Mutex.new
     @released = ConditionVariable.new
     @holding = false
-    @held = false
 
     Thread.new do
       loop { forward(@server.accept) }
@@ -39,29 +38,18 @@ class CommitHoldingProxy
     end
   end
 
-  # Holds the next `OffsetCommit` request (and the requests after it on its connection)
+  # Holds `OffsetCommit` requests (and the requests after them on their connection) for
+  # `HOLD_TIME` seconds
   def hold!
     @mutex.synchronize { @holding = true }
-  end
 
-  # @return [Boolean] true when an `OffsetCommit` request is held now
-  def held?
-    @mutex.synchronize { @held }
-  end
-
-  # Lets the held requests through and stops holding
-  def release!
-    @mutex.synchronize do
-      @holding = false
-      @released.broadcast
-    end
-  end
-
-  # Releases after librdkafka started the close
-  def release_after_close!
     Thread.new do
-      sleep(CLOSE_RELEASE_DELAY)
-      release!
+      sleep(HOLD_TIME)
+
+      @mutex.synchronize do
+        @holding = false
+        @released.broadcast
+      end
     end
   end
 
@@ -105,30 +93,16 @@ class CommitHoldingProxy
     @mutex.synchronize do
       return unless @holding
 
-      @held = true
       DT[:held_commits] << true
       @released.wait(@mutex) while @holding
-      @held = false
     end
   end
 end
 
 PROXY = CommitHoldingProxy.new(9097, 9096)
 
-# Drives the proxy from the stop loop steps, so the commit is in flight when the assignment empties
-module CommitHolding
-  def ping
-    PROXY.release! if PROXY.held? && assignment.empty?
-
-    super
-  end
-
-  def close
-    PROXY.release_after_close!
-
-    super
-  end
-
+# Marks the shutdown unsubscribe, so only the revoke on shutdown holds the commit
+module UnsubscribeMarking
   private
 
   def unsubscribe
@@ -148,7 +122,7 @@ module UnassignCommitHolding
   end
 end
 
-Karafka::Connection::ConsumerGroups::Client.prepend(CommitHolding)
+Karafka::Connection::ConsumerGroups::Client.prepend(UnsubscribeMarking)
 Rdkafka::Bindings.singleton_class.prepend(UnassignCommitHolding)
 
 setup_karafka do |config|
