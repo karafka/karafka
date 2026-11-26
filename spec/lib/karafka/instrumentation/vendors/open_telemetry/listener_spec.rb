@@ -174,16 +174,17 @@ RSpec.describe_current do
 
   context "when links are active" do
     let(:producer_spans) { Array.new(3) { tracer.start_span("producer").tap(&:finish) } }
-    let(:raw_headers) do
-      producer_spans.map do |span|
+    let(:trace_headers) do
+      lambda do |span|
         headers = {}
         OpenTelemetry.propagation.inject(
           headers,
           context: OpenTelemetry::Trace.context_with_span(span)
         )
         headers
-      end + [{}]
+      end
     end
+    let(:raw_headers) { producer_spans.map(&trace_headers) + [{}] }
     let(:max_messages) { 128 }
 
     before do
@@ -240,16 +241,7 @@ RSpec.describe_current do
 
     context "when a message has the trace context header more than once" do
       let(:raw_headers) do
-        repeated = producer_spans.first(2).map do |span|
-          headers = {}
-          OpenTelemetry.propagation.inject(
-            headers,
-            context: OpenTelemetry::Trace.context_with_span(span)
-          )
-          headers
-        end
-
-        [{ "traceparent" => repeated.map { |headers| headers["traceparent"] } }]
+        [{ "traceparent" => producer_spans.first(2).map { |span| trace_headers.call(span)["traceparent"] } }]
       end
 
       it "expect to link the trace context from the last value" do
@@ -259,15 +251,7 @@ RSpec.describe_current do
     end
 
     context "when extraction of a message trace context raises" do
-      let(:raw_headers) do
-        headers = {}
-        OpenTelemetry.propagation.inject(
-          headers,
-          context: OpenTelemetry::Trace.context_with_span(producer_spans.first)
-        )
-
-        [{ "traceparent" => Object.new }, headers]
-      end
+      let(:raw_headers) { [{ "traceparent" => Object.new }, trace_headers.call(producer_spans.first)] }
 
       it "expect to skip only that message and still link the others" do
         expect(process_span.links.map { |link| link.span_context.span_id })
