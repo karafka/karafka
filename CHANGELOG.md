@@ -79,6 +79,7 @@
 - [Fix] Raise `Karafka::Errors::ConsumerGroupNotEmptyError` from `Karafka::Admin.delete_consumer_group` and `.rename_consumer_group` for a consumer group with active members. `rename_consumer_group` now fails before it copies any offsets.
 - [Fix] Restart a dead Swarm node once `node_restart_timeout` (5 s) passes. Before, the restart waited for the next supervision check, up to `supervision_interval` (30 s), leaving static membership partitions idle for that long.
 - [Fix] [Pro] Pass the topic and partition given to routing `filtering.filters` to the filter factories. Before, it called them with no arguments and raised `ArgumentError` for custom `->(topic, partition)` filters, required inline insights, parallel segments and `expire_in`.
+- [Fix] Leave the consumer group on a cooperative-sticky shutdown (classic protocol) also when the group coordinator is slow (about 50 ms or more). Before, the other members got the stopped consumer's partitions only after `session.timeout.ms`.
 - [Fix] [Pro] Stop a rare `can't add a new key into hash during iteration` error in `#consume` when it calls `subscription_groups_coordinator.pause`.
 
 ## 2.6.1 (2026-08-24)
