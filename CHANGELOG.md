@@ -22,7 +22,7 @@
 - [Enhancement] Include the topic, partition and offset from librdkafka error details (e.g. a message that failed to decompress) in `LoggerListener` error logs. Only librdkafka errors are used, and the consumer's own context takes precedence.
 - [Enhancement] Instrument `client.topics.unknown` and log it at the info level when a subscribed topic does not exist yet and `allow.auto.create.topics` is on, instead of ignoring it silently.
 - [Enhancement] Take already fetched messages in one go instead of one poll per message, lowering the CPU time per consumed message. EOF events of many partitions now come in one batch. When more messages of a partition follow its EOF in that batch, `eofed` does not run for it, as the partition is no longer at its end.
-- [Enhancement] Support the `:group` resource type (Kafka's `GROUP`) in `Karafka::Admin::Configs`, so consumer group configs can be described and altered, e.g. `consumer.session.timeout.ms` and `consumer.heartbeat.interval.ms`, which `group.protocol: "consumer"` (KIP-848) does not take from the client config.
+- [Enhancement] Support the `:group` resource type (Kafka's `GROUP`) in `Karafka::Admin::Configs` to describe and alter consumer group configs, e.g. `consumer.session.timeout.ms` and `consumer.heartbeat.interval.ms`, which `group.protocol: "consumer"` (KIP-848) does not take from the client config.
 - [Enhancement] Instrument `filtering.expired` once per filtering run when Pro `expire_in` drops messages (count and first/last offset), and log it in the `LoggerListener`. Messages fetched again (e.g. after a retry) are reported again.
 - [Enhancement] Report librdkafka consumer errors for a partition (e.g. a message that cannot be built, `msg_size_too_large`) as `connection.client.poll.error` on `error.occurred`, with `topic`, `partition` and `offset` in the error `details`. Consumption does not change.
 - [Change] Raise `UnsupportedOptionError` with the Ruby engine name (e.g. `jruby`) when Swarm runs on a Ruby without `Process.fork`, also when `Swarm::Supervisor#run` is called directly, before any work is done.
@@ -36,8 +36,8 @@
 - [Change] Add `#dispatch_to_dead_letter_queue` and, in Pro, `#enhance_dead_letter_queue_message` as the preferred names of the consumer `#dispatch_to_dlq` and `#enhance_dlq_message`. The old names stay supported.
 - [Change] Reject a `nil` or empty `bootstrap.servers` (e.g. from an unset ENV variable) when drawing routes, instead of only checking that the key exists. Such a server used to boot and consume nothing. Apps that set it to `nil` in tests must set a placeholder string.
 - [Maintenance] Foundational work for Kafka share groups (KIP-932) is in progress (routing layer, consumer class hierarchy, config seams). Not usable yet - share groups can be described in routing but cannot run.
-- [Maintenance] 2.6.2.alpha1 was published without a Sigstore attestation: signing failed in the release workflow (the signer does not work with json 3.x, the default of Ruby 4.0) and the attestation patch then pushed the gem unsigned.
-- [Maintenance] Sign the gem with `sigstore-cli` and push it with `gem push --attestation` (the `gem-push` action of `karafka/misc`), so a failed signing stops the release instead of publishing the gem without an attestation.
+- [Maintenance] 2.6.2.alpha1 was published without a Sigstore attestation because signing failed in the release workflow.
+- [Maintenance] Stop the release when gem signing fails, instead of publishing the gem without a Sigstore attestation.
 - [Fix] [Pro] Do not let healthy KIP-848 (`group.protocol=consumer`) multiplexed listeners that never received an assignment block dynamic scaling. With more listeners than partitions they stay in the `init` join state with a rebalance age of 0, so the manager never saw them as stable and kept them alive instead of scaling them down.
 - [Fix] Stop `CoordinatorsBuffer#@coordinators` from growing unbounded across rebalances by dropping a topic entry on revoke once it tracks no partitions (mirrors `PausesManager#delete`).
 - [Fix] Use `::JSON.parse` in the ActiveJob deserializer, so consuming ActiveJob messages works with the json gem `>= 3.0`.
@@ -80,10 +80,8 @@
 - [Fix] Raise `Karafka::Errors::ConsumerGroupNotEmptyError` from `Karafka::Admin.delete_consumer_group` and `.rename_consumer_group` for a consumer group with active members. `rename_consumer_group` now fails before it copies any offsets.
 - [Fix] Restart a dead Swarm node once `node_restart_timeout` (5 s) passes. Before, the restart waited for the next supervision check, up to `supervision_interval` (30 s), leaving static membership partitions idle for that long.
 - [Fix] [Pro] Pass the topic and partition given to routing `filtering.filters` to the filter factories. Before, it called them with no arguments and raised `ArgumentError` for custom `->(topic, partition)` filters, required inline insights, parallel segments and `expire_in`.
+- [Fix] Leave the consumer group on a cooperative-sticky shutdown (classic protocol) also when the group coordinator is slow (about 50 ms or more). Before, the other members got the stopped consumer's partitions only after `session.timeout.ms`.
 - [Fix] [Pro] Stop a rare `can't add a new key into hash during iteration` error in `#consume` when it calls `subscription_groups_coordinator.pause`.
-- [Maintenance] 2.6.2.alpha1 was published without a Sigstore attestation: signing failed in the release workflow (the signer does not work with json 3.x, the default of Ruby 4.0) and the attestation patch then pushed the gem unsigned.
-- [Maintenance] Sign the gem with `sigstore-cli` and push it with `gem push --attestation` (the `gem-push` action of `karafka/misc`), so a failed signing stops the release instead of publishing the gem without an attestation.
-- [Maintenance] Add the `Sigstore Check` workflow: nightly, and on pull requests that change the push workflow, it builds the gem, signs it like a release and verifies the attestation, without pushing.
 
 ## 2.6.1 (2026-08-24)
 - **[Feature]** [Pro] Add an opt-in envelope encryption mode for Messages At Rest (`config.encryption.mode = :envelope`, requires openssl `>= 3.0`) without the RSA payload size limit. Upgrade all consuming processes before enabling.

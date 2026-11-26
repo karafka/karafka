@@ -32,6 +32,66 @@ RSpec.describe_current do
     end
   end
 
+  describe "#stop" do
+    let(:kafka) { instance_double(Rdkafka::Consumer) }
+    let(:full) { instance_double(Rdkafka::Consumer::TopicPartitionList, empty?: false) }
+    let(:none) { instance_double(Rdkafka::Consumer::TopicPartitionList, empty?: true) }
+
+    before do
+      allow(client).to receive(:build_consumer).and_return(kafka)
+      allow(kafka).to receive_messages(
+        start: nil, name: "test-consumer", unsubscribe: nil, close: nil
+      )
+      allow(kafka).to receive(:assignment).and_return(full, none)
+      allow(client).to receive(:ping)
+      allow(client).to receive(:sleep)
+    end
+
+    context "when the member id is cleared only after the assignment is empty" do
+      before { allow(kafka).to receive(:member_id).and_return("member-1", "member-1", "") }
+
+      it "expect to keep pinging until the member id is cleared and only then close" do
+        client.stop
+
+        expect(client).to have_received(:ping).twice
+        expect(kafka).to have_received(:close).once
+      end
+    end
+
+    context "when the KIP-848 consumer protocol is used" do
+      let(:subscription_group) do
+        build(:routing_subscription_group).tap do |sub_group|
+          allow(sub_group)
+            .to receive(:kafka)
+            .and_return(sub_group.kafka.merge("group.protocol": "consumer"))
+        end
+      end
+
+      before { allow(kafka).to receive(:member_id).and_return("client-generated-id") }
+
+      it "expect not to wait for the member id that this protocol keeps after the leave" do
+        client.stop
+
+        expect(kafka).not_to have_received(:member_id)
+        expect(client).not_to have_received(:ping)
+        expect(kafka).to have_received(:close).once
+      end
+    end
+
+    context "when the member id is never cleared" do
+      before do
+        allow(kafka).to receive(:member_id).and_return("member-1")
+        allow(client).to receive(:shutdown_timeout).and_return(0)
+      end
+
+      it "expect to still close within the unsubscribe time cap" do
+        client.stop
+
+        expect(kafka).to have_received(:close).once
+      end
+    end
+  end
+
   describe "#assignment" do
     let(:kafka) { instance_double(Rdkafka::Consumer) }
 
@@ -978,7 +1038,7 @@ RSpec.describe_current do
 
     before do
       allow(client).to receive(:build_consumer).and_return(kafka)
-      allow(kafka).to receive_messages(start: nil, unsubscribe: nil, close: nil)
+      allow(kafka).to receive_messages(start: nil, unsubscribe: nil, close: nil, member_id: "")
       allow(kafka).to receive(:assignment).and_return(assigned, unassigned, assigned, unassigned)
     end
 
