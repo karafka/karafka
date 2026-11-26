@@ -720,6 +720,22 @@ RSpec.describe_current do
               expect { client.batch_poll }.to raise_error(error)
             end
           end
+
+          context "when the blocking poll before the drain used up the time for a retry" do
+            before do
+              allow(subscription_group).to receive(:max_wait_time).and_return(1_000)
+              polls = [first, nil]
+
+              allow(kafka).to receive(:poll) do
+                sleep(0.95)
+                polls.shift
+              end
+            end
+
+            it "expect to raise it as the next blocking poll would" do
+              expect { client.batch_poll }.to raise_error(error)
+            end
+          end
         end
       end
 

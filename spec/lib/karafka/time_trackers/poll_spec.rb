@@ -9,6 +9,19 @@ RSpec.describe_current do
     allow(Process).to receive(:clock_gettime).and_return(*times.map { |time| time * 1_000 })
   end
 
+  context "when time passed since the start and there was no checkpoint yet" do
+    let(:times) { [1, 1.3] }
+
+    before { tracker.start }
+
+    it { expect(tracker.elapsed).to be_within(1).of(300) }
+
+    it "expect not to take it from the remaining time" do
+      tracker.elapsed
+      expect(tracker.remaining).to eq(1_000)
+    end
+  end
+
   context "when we still have time after 2 ms and it is first attempt" do
     before do
       tracker.start

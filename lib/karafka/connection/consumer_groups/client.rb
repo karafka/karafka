@@ -775,7 +775,7 @@ module Karafka
             # `#poll` would also return the next message. The time left does not change during the
             # drain, so it is checked once
             if retryable.nil?
-              attempt = TimeTrackers::Poll.new(time_poll.remaining)
+              attempt = TimeTrackers::Poll.new(time_poll.remaining - time_poll.elapsed)
               attempt.start
               retryable = attempt.retryable?
             end

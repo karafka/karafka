@@ -37,9 +37,14 @@ module Karafka
         @started_at = monotonic_now
       end
 
+      # @return [Integer] milliseconds since the last start, not yet taken from the remaining time
+      def elapsed
+        monotonic_now - @started_at
+      end
+
       # Stops time tracking of a given piece of code and updates the remaining time.
       def checkpoint
-        @remaining -= (monotonic_now - @started_at)
+        @remaining -= elapsed
       end
 
       # @return [Boolean] If anything went wrong, can we retry after a backoff period or not
