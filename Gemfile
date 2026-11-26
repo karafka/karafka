@@ -24,6 +24,7 @@ end
 
 group :test do
   gem "factory_bot"
+  gem "opentelemetry-sdk", require: false
   gem "ostruct"
   gem "simplecov"
 end
