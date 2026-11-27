@@ -243,6 +243,9 @@ module Karafka
           # time and release GVL on polling but we provide this for API consistency and some
           # special edge cases.
           setting :listener_thread_priority, default: 0
+          # With `false` we poll already fetched messages one at a time as before. Consumers get
+          # batches either way. Meant to go away once batch polling has proven itself
+          setting :batch_polling, default: true
 
           # Settings that are altered by our client proxy layer
           setting :proxy do

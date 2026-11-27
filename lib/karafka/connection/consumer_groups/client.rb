@@ -15,7 +15,8 @@ module Karafka
         include Helpers::ConfigImporter.new(
           logger: %i[logger],
           tick_interval: %i[internal tick_interval],
-          shutdown_timeout: %i[shutdown_timeout]
+          shutdown_timeout: %i[shutdown_timeout],
+          batch_polling: %i[internal connection batch_polling]
         )
 
         attr_reader :rebalance_manager
@@ -79,6 +80,9 @@ module Karafka
           @closed = false
           @subscription_group = subscription_group
           @buffer = RawMessagesBuffer.new
+          @offset_regression_tracker = OffsetRegressionTracker.new
+          @drain_seek_planner = DrainSeekPlanner.new
+          @batch_polling = batch_polling
           @rebalance_manager = RebalanceManager.new(@subscription_group.id, @buffer)
           @rebalance_callback = Instrumentation::Callbacks::ConsumerGroups::Rebalance.new(
             @subscription_group,
@@ -104,6 +108,8 @@ module Karafka
           # no longer may be able to fetch them from Kafka. We could build them but it is easier
           # to just keep them here and use if needed when cannot be obtained
           @paused_tpls = Hash.new { |h, k| h[k] = {} }
+          # Partitions sought by `#seek` or `#pause` with an offset since the last drain call
+          @sought_partitions = Hash.new { |h, k| h[k] = {} }
         end
 
         # Fetches messages within boundaries defined by the settings (time, size, topics, etc).
@@ -124,6 +130,8 @@ module Karafka
           max_messages = @subscription_group.max_messages
 
           loop do
+            eofed = false
+
             time_poll.start
 
             # Don't fetch more messages if we do not have any time left
@@ -144,10 +152,18 @@ module Karafka
             # We get a hash only in case of eof error
             when Hash
               @buffer.eof(response[:topic], response[:partition])
+
+              # Eof events of other partitions are often ready as well, so they land in this batch
+              drain(max_messages - @buffer.size, time_poll) if drain?
             when nil
               nil
             else
               @buffer << response
+              @offset_regression_tracker.store(response)
+
+              # After a rebalance in this poll, the batch ends below without draining, so the drain
+              # clean-up never removes messages of partitions assigned back in that rebalance
+              eofed = drain(max_messages - @buffer.size, time_poll) if drain?
             end
 
             # Upon polling rebalance manager might have been updated.
@@ -157,6 +173,11 @@ module Karafka
             #
             # We also do early break, so the information about rebalance is used as soon as possible
             if @rebalance_manager.changed?
+              # A partition assigned back later starts from its committed offset, which can be
+              # behind what we handed over before. That is not a regression, so we do not compare
+              # with offsets from before the revocation
+              @offset_regression_tracker.forget(@rebalance_manager.revoked_partitions)
+
               # Since rebalances do not occur often, we can run events polling as well without
               # any throttling
               events_poll
@@ -175,7 +196,7 @@ module Karafka
             # signaling to propagate it asap
             # Worth keeping in mind, that the rebalance manager might have been updated despite no
             # messages being returned during a poll
-            break if response.nil? || response.is_a?(Hash)
+            break if response.nil? || response.is_a?(Hash) || eofed
           end
 
           @buffer
@@ -231,7 +252,10 @@ module Karafka
         # @note Please note, that if you are seeking to a time offset, getting the offset is
         #   blocking
         def seek(message)
-          @mutex.synchronize { internal_seek(message) }
+          @mutex.synchronize do
+            @sought_partitions[message.topic][message.partition] = true
+            internal_seek(message)
+          end
         end
 
         # Pauses given partition and moves back to last successful offset processed.
@@ -281,6 +305,8 @@ module Karafka
             return unless offset
 
             pause_msg = Messages::Seek.new(topic_name, partition, offset)
+
+            @sought_partitions[topic_name][partition] = true
 
             internal_seek(pause_msg)
           end
@@ -610,6 +636,9 @@ module Karafka
           @kafka = nil
           @wrapped_kafka = nil
           @buffer.clear
+          # A new consumer starts from the committed offsets, which can be behind what this one
+          # handed over
+          @offset_regression_tracker.clear
           # We do not clear rebalance manager here as we may still have revocation info here that we
           # want to consider valid prior to running another reconnection
         end
@@ -702,9 +731,177 @@ module Karafka
           # tick interval time limitations and not because time run out without any data
           time_poll.exceeded? ? nil : :tick_time
         rescue Rdkafka::RdkafkaError => e
-          early_report = false
-
           retryable = time_poll.attempts <= MAX_POLL_RETRIES && time_poll.retryable?
+
+          action = poll_error_action(e, retryable)
+
+          case action
+          when :eof then return e.details
+          when :skip then return nil
+          when :raise then raise
+          when :retry then nil
+          else
+            raise Karafka::Errors::UnsupportedCaseError, action
+          end
+
+          # Most of the errors can be safely ignored as librdkafka will recover from them
+          # See https://github.com/edenhill/librdkafka/issues/1987#issuecomment-422008750
+          # See https://github.com/edenhill/librdkafka/wiki/Error-handling
+
+          time_poll.checkpoint
+          time_poll.backoff
+
+          # poll may not only return message but also can run callbacks and if they changed,
+          # despite the errors we need to delegate to the other app parts
+          @rebalance_manager.changed? ? nil : retry
+        end
+
+        # @return [Boolean] should we drain after the blocking poll
+        def drain?
+          @batch_polling && !@rebalance_manager.changed?
+        end
+
+        # Takes, in one non-blocking call, the messages librdkafka has already fetched, so we do not
+        # cross into it once per message. It only follows a blocking `#poll` and never replaces it:
+        # the blocking poll is what waits for data, owns the time budget of the batch and retries
+        # with a backoff, while the drain only takes what is already there. Every item is handled
+        # in order, because the ones after an error are already dequeued.
+        #
+        # @param room [Integer] how many messages we can still take into the buffer
+        # @param time_poll [Karafka::TimeTrackers::Poll] time tracker of the batch
+        # @return [Boolean] true if any of the partitions is still at eof after the drain
+        def drain(room, time_poll)
+          return false unless room.positive?
+
+          eofed = false
+          retryable = nil
+
+          @mutex.synchronize { @sought_partitions.each_value(&:clear) }
+
+          kafka.poll_batch_nb(0, max_items: room).each do |item|
+            unless item.is_a?(Rdkafka::RdkafkaError)
+              @offset_regression_tracker.track(item)
+
+              next @buffer << item
+            end
+
+            # Eofs are frequent and need neither the error handling nor the time check below
+            if item.code == :partition_eof
+              @buffer.eof(item.details[:topic], item.details[:partition])
+              eofed = true
+
+              next
+            end
+
+            # A drain neither waits nor retries, so an error is judged as on the first attempt of a
+            # blocking `#poll`, with the time the batch has left after the blocking poll before it,
+            # as the next blocking poll would see it: it is skipped when there is time to retry and
+            # raised when there is not, so the client is reset and fetches it again. An error that
+            # keeps coming behind messages is seen only by drains, so it never gets a backoff. The
+            # time left does not change during the drain, so it is checked once
+            if retryable.nil?
+              attempt = TimeTrackers::Poll.new(time_poll.remaining - time_poll.elapsed)
+              attempt.start
+              retryable = attempt.retryable?
+            end
+
+            action = poll_error_action(item, retryable)
+
+            case action
+            when :raise
+              raise item
+            when :skip, :retry
+              nil
+            else
+              raise Karafka::Errors::UnsupportedCaseError, action
+            end
+          end
+
+          # Revocation callbacks run inside of the drain call, before its messages reach the buffer.
+          # The drain runs only without an earlier rebalance in this batch, so all the revocations
+          # are from the drain itself
+          if @rebalance_manager.changed?
+            rewinds = @drain_seek_planner.rewinds(
+              @buffer,
+              @rebalance_manager.revoked_partitions,
+              @rebalance_manager.assigned_partitions
+            )
+
+            @rebalance_manager.remove_revoked_and_duplicated_messages
+          end
+
+          rewound = @offset_regression_tracker.rewound
+          alignments = @drain_seek_planner.alignments(@buffer, rewound) if rewound
+
+          seek_after_drain(rewinds, alignments) if rewinds || alignments
+
+          # A message after an eof of the same partition clears its eof
+          eofed && @buffer.eof?
+        end
+
+        # Seeks partitions after a drain, only in the two cases where taking many messages in one
+        # call leaves librdkafka in a different place than one blocking poll per message would.
+        # With one message per poll we never had to seek, and in steady state we still do not: with
+        # ascending offsets and no rebalance inside of the drain, both lists are empty.
+        #
+        # Rewinds: a rebalance used to end the batch, so messages from after a re-assignment could
+        # only come in a later batch. A drain serves the rebalance callbacks in the middle of its
+        # call, so it can return messages of one partition from both before its revocation and
+        # after its re-assignment. We cannot tell them apart and drop them all, as we do for any
+        # revoked partition, but the ones from after the re-assignment were already taken from
+        # librdkafka and would be lost. We go back to the lowest of them, and only when librdkafka
+        # is already past it, so a partition is never moved forward. It needs both callbacks
+        # within one non-blocking call, so it is rare, but it does not need anything to be broken.
+        #
+        # Alignments: a blocking poll sets the position of a partition to its message, while a
+        # drain moves it only forward. When offsets go back without a seek (e.g. a recreated
+        # topic), the position stays ahead of what we handed over. A pause without an offset
+        # resumes from the position and we skip seeks to the position, so both would skip
+        # messages. An ordinary seek back (e.g. a retry) is also planned here, but the position is
+        # then already right and `#internal_seek` does nothing. On a transactional topic it can be
+        # one past the last message because of a marker, and we then seek once and fetch again
+        # what was prefetched. No message is lost.
+        #
+        # A partition sought by `#seek` or `#pause` with an offset after the drain call is skipped:
+        # that seek is newer than our plan and wins.
+        #
+        # @param rewinds [Array<Messages::Seek>, nil] seeks back to the lowest drained offsets
+        # @param alignments [Array<Messages::Seek>, nil] seeks to right after the last drained
+        #   messages
+        def seek_after_drain(rewinds, alignments)
+          @mutex.synchronize do
+            rewinds&.each do |rewind|
+              next if sought?(rewind)
+
+              position = topic_partition_position(rewind.topic, rewind.partition)
+
+              internal_seek(rewind) if position > rewind.offset
+            end
+
+            alignments&.each do |alignment|
+              next if sought?(alignment)
+
+              internal_seek(alignment)
+            end
+          end
+        end
+
+        # @param seek [Messages::Seek] seek planned after a drain
+        # @return [Boolean] was its partition sought by `#seek` or `#pause` since the drain call
+        def sought?(seek)
+          partitions = @sought_partitions.fetch(seek.topic, nil)
+
+          partitions ? partitions.key?(seek.partition) : false
+        end
+
+        # Instruments a polling error and decides how it should be handled
+        #
+        # @param error [Rdkafka::RdkafkaError] error from polling
+        # @param retryable [Boolean] can we still retry given our time and attempts
+        # @return [Symbol] `:eof` when partition end was reached, `:skip` when the error should be
+        #   ignored, `:raise` when it should be raised and `:retry` when we can poll again
+        def poll_error_action(error, retryable)
+          early_report = false
 
           # There are retryable issues on which we want to report fast as they are source of
           # problems and can mean some bigger system instabilities
@@ -712,7 +909,7 @@ module Karafka
           # We want to report early on max poll interval exceeding because it may mean that the
           # underlying processing is taking too much time and it is not LRJ
 
-          case e.code
+          case error.code
           when *EARLY_REPORT_ERRORS
             early_report = true
           # See
@@ -725,11 +922,11 @@ module Karafka
                 "client.topics.unknown",
                 caller: self,
                 subscription_group: @subscription_group,
-                topic: e.details[:topic],
-                error: e
+                topic: error.details[:topic],
+                error: error
               )
 
-              return nil
+              return :skip
             end
 
             early_report = true
@@ -742,35 +939,24 @@ module Karafka
           # not expect a lof of lag and want to quickly move to processing.
           # We can also pass the eof notion to the consumers for improved decision making.
           when :partition_eof
-            return e.details
+            return :eof
           end
 
           # Any fatal error should always cause early report
-          early_report = true if e.fatal?
+          early_report = true if error.fatal?
           # Partition errors may skip their message on retry, so we report them
-          early_report = true if e.details.key?(:offset)
+          early_report = true if error.details.key?(:offset)
 
           if early_report || !retryable
             Karafka.monitor.instrument(
               "error.occurred",
               caller: self,
-              error: e,
+              error: error,
               type: "connection.client.poll.error"
             )
           end
 
-          raise unless retryable
-
-          # Most of the errors can be safely ignored as librdkafka will recover from them
-          # See https://github.com/edenhill/librdkafka/issues/1987#issuecomment-422008750
-          # See https://github.com/edenhill/librdkafka/wiki/Error-handling
-
-          time_poll.checkpoint
-          time_poll.backoff
-
-          # poll may not only return message but also can run callbacks and if they changed,
-          # despite the errors we need to delegate to the other app parts
-          @rebalance_manager.changed? ? nil : retry
+          retryable ? :retry : :raise
         end
 
         # Builds a new rdkafka consumer instance based on the subscription group configuration
