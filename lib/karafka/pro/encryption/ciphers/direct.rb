@@ -39,6 +39,21 @@ module Karafka
         # payloads and remains available only for backwards compatibility with data already
         # encrypted at rest and with fleets not yet fully upgraded.
         class Direct < Base
+          # Initializes the cipher with an empty key moduli cache
+          def initialize
+            super
+            @moduli = {}
+          end
+
+          # Parses the key material and caches the private key moduli
+          #
+          # @param encryption_config [Karafka::Core::Configurable::Node] encryption config node
+          def warmup(encryption_config)
+            super
+
+            encryption_config.private_keys.each_key { |version| modulus(version) }
+          end
+
           # Encrypts given content with the public key
           # @param content [String]
           # @return [String] RSA ciphertext, always exactly the key modulus size
@@ -53,16 +68,15 @@ module Karafka
           # @raise [OpenSSL::PKey::RSAError] when content is not below the key modulus. JRuby
           #   raises Java exceptions for it instead of an OpenSSL error
           def decrypt(version, content)
-            pem = private_pem(version)
-            modulus = pem.n
-            modulus_bytes = modulus.num_bytes
+            key_modulus = modulus(version)
 
-            if content.bytesize > modulus_bytes ||
-                (content.bytesize == modulus_bytes && OpenSSL::BN.new(content, 2) >= modulus)
+            # Both are big-endian, so for equal sizes byte order is numeric order
+            if content.bytesize > key_modulus.bytesize ||
+                (content.bytesize == key_modulus.bytesize && content >= key_modulus)
               raise(OpenSSL::PKey::RSAError, "data too large for modulus")
             end
 
-            pem.private_decrypt(content)
+            private_pem(version).private_decrypt(content)
           end
 
           # @param version [String] encryption version
@@ -76,7 +90,17 @@ module Karafka
           #   never as the envelope diagnostics. The legacy direct format carries no marker
           #   that could disambiguate this.
           def owns?(version, content)
-            content.bytesize == private_pem(version).n.num_bytes
+            content.bytesize == modulus(version).bytesize
+          end
+
+          private
+
+          # @param version [String] encryption version
+          # @return [String] big-endian bytes of the `version` private key modulus
+          def modulus(version)
+            return @moduli[version] if @moduli.key?(version)
+
+            @moduli[version] = private_pem(version).n.to_s(2).freeze
           end
         end
       end
