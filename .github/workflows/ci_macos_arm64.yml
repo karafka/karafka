@@ -31,10 +31,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        ruby:
-          - '4.0'
-          - '3.4'
-          - '3.3'
+        # Saves runner time: 3.3 and 4.0 bracket 3.4, and the nightly still runs it
+        ruby: ${{ github.event_name == 'pull_request' && fromJSON('["4.0", "3.3"]') || fromJSON('["4.0", "3.4", "3.3"]') }}
         macos-version:
           - 'macos-15'
           - 'macos-26'

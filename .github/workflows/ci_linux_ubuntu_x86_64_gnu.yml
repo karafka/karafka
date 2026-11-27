@@ -173,10 +173,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        ruby:
-          - '4.0'
-          - '3.4'
-          - '3.3'
+        # Saves runner time: 3.3 and 4.0 bracket 3.4, and the nightly still runs it
+        ruby: ${{ github.event_name == 'pull_request' && fromJSON('["4.0", "3.3"]') || fromJSON('["4.0", "3.4", "3.3"]') }}
         parallel_group:
           - '0'
           - '1'
@@ -235,7 +233,13 @@ jobs:
         env:
           SPECS_SEED: ${{ github.run_id }}
           SPECS_GROUP: ${{ matrix.parallel_group }}
+          SPECS_CONCURRENCY: 7
+          SPECS_TIMINGS_FILE: ${{ runner.temp }}/specs_timings.tsv
         run: bin/integrations --exclude '/pro' --exclude '/multi_broker'
+
+      - name: Print integration specs timings
+        if: always()
+        run: cat "$RUNNER_TEMP/specs_timings.tsv" || true
 
       - name: Check Kafka logs for unexpected warnings
         run: bin/verify_kafka_warnings
@@ -251,13 +255,12 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        ruby:
-          - '4.0'
-          - '3.4'
-          - '3.3'
+        # Saves runner time: 3.3 and 4.0 bracket 3.4, and the nightly still runs it
+        ruby: ${{ github.event_name == 'pull_request' && fromJSON('["4.0", "3.3"]') || fromJSON('["4.0", "3.4", "3.3"]') }}
         parallel_group:
           - '0'
           - '1'
+          - '2'
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - name: Install package dependencies
@@ -306,8 +309,15 @@ jobs:
           KARAFKA_PRO_LICENSE_CHECKSUM: ${{ secrets.KARAFKA_PRO_LICENSE_CHECKSUM }}
           SPECS_SEED: ${{ github.run_id }}
           SPECS_GROUP: ${{ matrix.parallel_group }}
+          SPECS_CONCURRENCY: 7
+          SPECS_TIMINGS_FILE: ${{ runner.temp }}/specs_timings.tsv
+          SPECS_GROUPS: 3
         run: |
           bin/integrations '/pro'
+
+      - name: Print integration specs timings
+        if: always()
+        run: cat "$RUNNER_TEMP/specs_timings.tsv" || true
 
       - name: Check Kafka logs for unexpected warnings
         run: bin/verify_kafka_warnings
