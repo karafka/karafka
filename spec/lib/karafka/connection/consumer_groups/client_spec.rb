@@ -812,6 +812,24 @@ RSpec.describe_current do
           end
         end
 
+        context "when the partition is sought between the drain call and its seek back" do
+          before do
+            allow(kafka).to receive(:poll_batch_nb) do
+              client.rebalance_manager.on_rebalance_partitions_revoked(tpl)
+              client.rebalance_manager.on_rebalance_partitions_assigned(tpl)
+              client.seek(Karafka::Messages::Seek.new(topic_name, 0, 7))
+              drained
+            end
+          end
+
+          it "expect not to overwrite that seek" do
+            client.batch_poll
+
+            expect(kafka).to have_received(:seek).once
+            expect(kafka).to have_received(:seek).with(have_attributes(offset: 7))
+          end
+        end
+
         context "when the partition is only assigned inside of the drain" do
           before do
             allow(kafka).to receive(:poll_batch_nb) do
@@ -920,6 +938,47 @@ RSpec.describe_current do
           before do
             allow(kafka).to receive(:poll_batch_nb) do
               client.seek(Karafka::Messages::Seek.new(topic_name, 1, 7))
+              drained
+            end
+          end
+
+          it "expect to seek the stale position" do
+            client.batch_poll
+
+            expect(kafka).to have_received(:seek).with(have_attributes(partition: 0, offset: 2))
+          end
+        end
+
+        context "when the partition is paused with an offset between the drain call and its seek" do
+          before do
+            allow(client).to receive(:internal_commit_offsets)
+            allow(kafka).to receive_messages(
+              pause: nil,
+              assignment: { topic_name => [Rdkafka::Consumer::Partition.new(0, nil)] }
+            )
+            allow(kafka).to receive(:poll_batch_nb) do
+              client.pause(topic_name, 0, 7)
+              drained
+            end
+          end
+
+          it "expect not to overwrite the seek of that pause" do
+            client.batch_poll
+
+            expect(kafka).to have_received(:seek).once
+            expect(kafka).to have_received(:seek).with(have_attributes(offset: 7))
+          end
+        end
+
+        context "when the partition is paused without an offset between the drain call and its seek" do
+          before do
+            allow(client).to receive(:internal_commit_offsets)
+            allow(kafka).to receive_messages(
+              pause: nil,
+              assignment: { topic_name => [Rdkafka::Consumer::Partition.new(0, nil)] }
+            )
+            allow(kafka).to receive(:poll_batch_nb) do
+              client.pause(topic_name, 0)
               drained
             end
           end
