@@ -82,3 +82,4 @@ end
 assert DT[:consumed].empty?
 assert_equal "consumer.consume.error", DT[:errors].first[:type]
 assert DT[:errors].first[:error].is_a?(OpenSSL::PKey::PKeyError)
+assert_equal "data too large for modulus", DT[:errors].first[:error].message

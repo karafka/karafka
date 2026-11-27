@@ -71,6 +71,20 @@ RSpec.describe_current do
     end
   end
 
+  describe "#warmup" do
+    let(:ciphertext) { "x" * (direct_limit + 11) }
+
+    before do
+      ciphertext
+      cipher.warmup(Karafka::App.config.encryption)
+      allow_any_instance_of(OpenSSL::PKey::RSA).to receive(:n).and_raise(RuntimeError)
+    end
+
+    it "caches the key moduli, so the format check does not read the keys again" do
+      expect(cipher.owns?("1", ciphertext)).to be(true)
+    end
+  end
+
   describe "#owns?" do
     it "recognizes content of exactly the key modulus size as its own format" do
       expect(cipher.owns?("1", cipher.encrypt("content"))).to be(true)
