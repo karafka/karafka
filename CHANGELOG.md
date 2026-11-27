@@ -81,6 +81,7 @@
 - [Fix] [Pro] Pass the topic and partition given to routing `filtering.filters` to the filter factories. Before, it called them with no arguments and raised `ArgumentError` for custom `->(topic, partition)` filters, required inline insights, parallel segments and `expire_in`.
 - [Fix] Leave the consumer group on a cooperative-sticky shutdown (classic protocol) also when the group coordinator is slow (about 50 ms or more). Before, the other members got the stopped consumer's partitions only after `session.timeout.ms`.
 - [Fix] [Pro] Stop a rare `can't add a new key into hash during iteration` error in `#consume` when it calls `subscription_groups_coordinator.pause`.
+- [Fix] Make `Karafka::Admin.describe_consumer_groups` return for consumer group ids with UTF-8 non-ASCII characters. Before, it retried until killed, as librdkafka returns the ids as BINARY.
 
 ## 2.6.1 (2026-08-24)
 - **[Feature]** [Pro] Add an opt-in envelope encryption mode for Messages At Rest (`config.encryption.mode = :envelope`, requires openssl `>= 3.0`) without the RSA payload size limit. Upgrade all consuming processes before enabling.

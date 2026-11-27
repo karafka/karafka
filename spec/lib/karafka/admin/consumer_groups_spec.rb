@@ -680,6 +680,17 @@ RSpec.describe Karafka::Admin::ConsumerGroups do
       end
     end
 
+    context "when a consumer group id has UTF-8 non-ASCII characters" do
+      let(:group_ids) { ["#{SecureRandom.uuid}-zażółć", SecureRandom.uuid] }
+
+      before { allow(described_class).to receive(:new).and_call_original }
+
+      it "describes it and keeps the requested order" do
+        expect(descriptions.map { |group| group[:group_id].b }).to eq(group_ids.map(&:b))
+        expect(descriptions.map { |group| group[:state] }).to eq(%i[dead dead])
+      end
+    end
+
     context "when building the consumer group description" do
       let(:group) do
         described_group(group_id, state: Rdkafka::Bindings::RD_KAFKA_CONSUMER_GROUP_STATE_STABLE)
