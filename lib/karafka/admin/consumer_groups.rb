@@ -666,7 +666,7 @@ module Karafka
 
         start_time = self.class.monotonic_now
         described = {}
-        pending = group_ids.uniq
+        pending = group_ids.uniq(&:b)
 
         with_admin do |admin|
           until pending.empty?
@@ -677,8 +677,9 @@ module Karafka
             report.groups.each do |group|
               error = group[:error]
 
+              # librdkafka returns ids as BINARY, so we match them with requested ids by bytes
               unless error
-                described[group[:group_id]] = build_group(group)
+                described[group[:group_id].b] = build_group(group)
 
                 next
               end
@@ -687,13 +688,13 @@ module Karafka
               raise(error) if self.class.monotonic_now - start_time >= self.class.max_retries_duration
             end
 
-            pending -= described.keys
+            pending = pending.reject { |group_id| described.key?(group_id.b) }
 
             sleep(self.class.retry_backoff / 1_000.0) unless pending.empty?
           end
         end
 
-        group_ids.map { |group_id| described.fetch(group_id) }
+        group_ids.map { |group_id| described.fetch(group_id.b) }
       end
 
       private
