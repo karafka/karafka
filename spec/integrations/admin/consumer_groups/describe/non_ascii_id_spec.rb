@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 # Karafka::Admin.describe_consumer_groups should describe a consumer group with a UTF-8 non-ASCII
-# id. librdkafka returns ids as BINARY, so the describe loop must match them by bytes.
+# id.
 
 setup_karafka
 
