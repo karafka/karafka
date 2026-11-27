@@ -124,6 +124,12 @@ module Karafka
           )
         end
 
+        # @param group_ids [String, Array<String>] consumer group or groups to read
+        # @see #read_committed_offsets
+        def read_committed_offsets(*group_ids)
+          new.read_committed_offsets(*group_ids)
+        end
+
         # @see #list
         def list
           new.list
@@ -564,6 +570,61 @@ module Karafka
         end
 
         merged
+      end
+
+      # Reads all committed offsets of given consumer groups without listing topics or partitions
+      #
+      # @param group_ids [String, Array<String>] id of the consumer group to read or a list of
+      #   them
+      #
+      # @return [Hash{String => Hash{String => Hash{Integer => Integer}}}] committed offsets per
+      #   consumer group, topic name and partition, with consumer groups in the order of
+      #   `group_ids`
+      #
+      # @note Only partitions with a committed offset are included, so a consumer group without
+      #   any committed offsets (or one that does not exist) maps to an empty hash.
+      #
+      # @note Kafka fetches committed offsets one consumer group per request, so this sends one
+      #   request per consumer group. Each request is independent of the number of topics and
+      #   partitions in the cluster.
+      #
+      # @note Same as consumers, under `read_committed` we fetch only stable committed offsets.
+      #
+      # @example Read committed offsets of a consumer group
+      #   Karafka::Admin::ConsumerGroups.read_committed_offsets('billing')
+      #   # => { 'billing' => { 'payments' => { 0 => 120, 1 => 98 } } }
+      #
+      # @example Read committed offsets of several consumer groups
+      #   Karafka::Admin::ConsumerGroups.read_committed_offsets('billing', 'never-consumed')
+      #   # => { 'billing' => { 'payments' => { 0 => 120, 1 => 98 } }, 'never-consumed' => {} }
+      def read_committed_offsets(*group_ids)
+        group_ids = group_ids.flatten.uniq
+        require_stable = isolation_level == IsolationLevels::READ_COMMITTED
+        groups_offs = {}
+
+        return groups_offs if group_ids.empty?
+
+        with_admin do |admin|
+          group_ids.each do |group_id|
+            offsets = groups_offs[group_id] = {}
+
+            report = with_retries(OFFSETS_FETCH_RETRYABLE_ERRORS) do
+              admin
+                .list_consumer_group_offsets(group_id, require_stable_offsets: require_stable)
+                .wait(max_wait_timeout_ms: max_wait_time_ms)
+            end
+
+            report.partitions.each do |details|
+              offset = details[:offset]
+
+              next unless offset
+
+              (offsets[details[:topic]] ||= {})[details[:partition]] = offset
+            end
+          end
+        end
+
+        groups_offs
       end
 
       # Lists all consumer groups in the cluster together with their current state.

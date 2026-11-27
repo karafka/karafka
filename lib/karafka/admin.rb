@@ -281,6 +281,16 @@ module Karafka
         )
       end
 
+      # Reads all committed offsets of given consumer groups
+      #
+      # @param group_ids [Array<String>] consumer groups to read
+      # @return [Hash{String => Hash{String => Hash{Integer => Integer}}}] committed offsets per
+      #   consumer group, topic name and partition
+      # @see ConsumerGroups.read_committed_offsets
+      def read_committed_offsets(group_ids)
+        new.read_committed_offsets(group_ids)
+      end
+
       # Plans a replication factor increase for a topic that can be used with Kafka's
       # reassignment tools. Since librdkafka does not support increasing replication factor
       # directly, this method generates the necessary JSON and commands for manual execution.
@@ -506,6 +516,12 @@ module Karafka
         groups_with_topics,
         active_topics_only: active_topics_only
       )
+    end
+
+    # @param group_ids [Array<String>] consumer groups to read
+    # @see ConsumerGroups#read_committed_offsets
+    def read_committed_offsets(group_ids)
+      consumer_groups_admin.read_committed_offsets(*group_ids)
     end
 
     # @param topic [String] topic name to plan replication for
