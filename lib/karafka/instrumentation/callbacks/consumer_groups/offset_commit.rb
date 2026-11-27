@@ -25,8 +25,7 @@ module Karafka
           # @param error [Rdkafka::RdkafkaError] commit error
           # @param tpl [Rdkafka::Consumer::TopicPartitionList] offsets of the commit
           # @note rdkafka calls it only for failed commits: not on success and not on `no_offset`
-          #   (nothing new to commit). The offsets of the other commits are then not converted to
-          #   Ruby at all.
+          #   (nothing new to commit).
           # @note librdkafka also passes sync commit results here. We skip the errors that
           #   `Connection::Proxy#commit_offsets` handles without raising (e.g. a commit after the
           #   assignment was lost), as they are not errors for Karafka.
