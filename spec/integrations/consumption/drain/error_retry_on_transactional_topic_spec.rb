@@ -7,7 +7,8 @@
 # nothing may be skipped after it.
 #
 # Small partition fetches and a slow first batch make librdkafka queue the messages before we poll
-# again.
+# again. Slower other partitions and batches larger than one fetch make a drain take messages of
+# more than one partition, so the first messages after the retry come from a drain.
 
 PARTITIONS = 3
 PER_TRANSACTION = 20
@@ -17,7 +18,7 @@ setup_karafka(allow_errors: %w[consumer.consume.error]) do |config|
   config.kafka[:"transactional.id"] = SecureRandom.uuid
   config.kafka[:"isolation.level"] = "read_committed"
   config.kafka[:"max.partition.fetch.bytes"] = 1_024
-  config.max_messages = 10
+  config.max_messages = 25
   config.concurrency = 3
 end
 
@@ -31,6 +32,18 @@ end
 
 Rdkafka::Consumer.prepend(DrainTracker)
 
+module SeekPlanTracker
+  private
+
+  def seek_after_drain(rewinds, alignments)
+    alignments&.each { |alignment| DT[:alignments] << [alignment.partition, alignment.offset] }
+
+    super
+  end
+end
+
+Karafka::Connection::ConsumerGroups::Client.prepend(SeekPlanTracker)
+
 class Consumer < Karafka::BaseConsumer
   def consume
     unless DT.key?(:slowed)
@@ -40,6 +53,10 @@ class Consumer < Karafka::BaseConsumer
 
     offsets = messages.map(&:offset)
     DT[partition] << offsets
+
+    # Other partitions keep messages queued, so a blocking poll takes one of theirs and the retried
+    # partition comes back through a drain
+    sleep(0.5) unless partition.zero?
 
     return unless partition.zero? && !DT.key?(:failed) && offsets.last > PER_TRANSACTION
 
@@ -84,6 +101,8 @@ start_karafka_and_wait_until do
 end
 
 assert !DT[:drains].empty?
+# The retried partition came back through a drain, which planned to seek it
+assert(DT[:alignments].any? { |partition, _| partition.zero? }, DT[:alignments])
 
 failed = DT[0][DT[:failed]]
 # The retry starts at the first message of the failed batch

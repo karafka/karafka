@@ -29,6 +29,18 @@ end
 
 Rdkafka::Consumer.prepend(DrainTracker)
 
+module SeekPlanTracker
+  private
+
+  def seek_after_drain(rewinds, alignments)
+    alignments&.each { |alignment| DT[:alignments] << [alignment.partition, alignment.offset] }
+
+    super
+  end
+end
+
+Karafka::Connection::ConsumerGroups::Client.prepend(SeekPlanTracker)
+
 class Consumer < Karafka::BaseConsumer
   def consume
     unless DT.key?(:slowed)
@@ -69,5 +81,7 @@ end
 
 assert !DT[:drains].empty?
 assert DT.key?(:paused)
+# Holes left by aborted transactions are not a rewind, so the drain plans no seek
+assert_equal [], DT[:alignments]
 assert DT[:paused] < expected.last
 assert_equal expected, DT[:offsets]
