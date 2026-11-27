@@ -110,7 +110,7 @@ module Karafka
           @paused_tpls = Hash.new { |h, k| h[k] = {} }
           # Partitions sought by `#seek` or `#pause` with an offset since the last drain call. Such
           # a seek is newer than what the drain planned for them, so the drain does not seek them
-          @sought_partitions = Set.new
+          @sought_partitions = Hash.new { |h, k| h[k] = {} }
         end
 
         # Fetches messages within boundaries defined by the settings (time, size, topics, etc).
@@ -254,7 +254,7 @@ module Karafka
         #   blocking
         def seek(message)
           @mutex.synchronize do
-            @sought_partitions << [message.topic, message.partition]
+            @sought_partitions[message.topic][message.partition] = true
             internal_seek(message)
           end
         end
@@ -307,7 +307,7 @@ module Karafka
 
             pause_msg = Messages::Seek.new(topic_name, partition, offset)
 
-            @sought_partitions << [topic_name, partition]
+            @sought_partitions[topic_name][partition] = true
 
             internal_seek(pause_msg)
           end
@@ -777,7 +777,7 @@ module Karafka
           eofed = false
           retryable = nil
 
-          @mutex.synchronize { @sought_partitions.clear }
+          @mutex.synchronize { @sought_partitions.each_value(&:clear) }
 
           kafka.poll_batch_nb(0, max_items: room).each do |item|
             unless item.is_a?(Rdkafka::RdkafkaError)
@@ -872,7 +872,7 @@ module Karafka
         def seek_after_drain(rewinds, alignments)
           @mutex.synchronize do
             rewinds&.each do |rewind|
-              next if @sought_partitions.include?([rewind.topic, rewind.partition])
+              next if sought?(rewind)
 
               position = topic_partition_position(rewind.topic, rewind.partition)
 
@@ -880,11 +880,19 @@ module Karafka
             end
 
             alignments&.each do |alignment|
-              next if @sought_partitions.include?([alignment.topic, alignment.partition])
+              next if sought?(alignment)
 
               internal_seek(alignment)
             end
           end
+        end
+
+        # @param seek [Messages::Seek] seek planned after a drain
+        # @return [Boolean] was its partition sought by `#seek` or `#pause` since the drain call
+        def sought?(seek)
+          partitions = @sought_partitions.fetch(seek.topic, nil)
+
+          partitions ? partitions.key?(seek.partition) : false
         end
 
         # Instruments a polling error and decides how it should be handled
