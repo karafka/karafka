@@ -15,6 +15,7 @@
 - **[Feature]** [Pro] Add Virtual Partitions Estimator, a console API that samples a topic and estimates how well Virtual Partitions would parallelize it. Results can be saved as a versioned JSON report (`target_file:`) and displayed with `karafka vps estimate-report`.
 - **[Feature]** Add `Admin::Configs::Config#source` (e.g. `:dynamic_topic_config`, `:dynamic_broker_config`, `:default_config`), also on synonyms, telling a value set on the topic from one inherited from the broker or a built-in default. Requires karafka-rdkafka `>= 0.32.1`.
 - **[Feature]** [Pro] Add `Karafka::Pro::Admin::DeadLetterQueues.copy` to replay DLQ messages (all, or given partitions and an offset range) back to their source topic and partition with their key and original headers, or to a given topic. Each copy increments a `replay_count` header.
+- **[Feature]** Add `Karafka::Admin.read_committed_offsets` to read all committed offsets of given consumer groups (`{ group_id => { topic => { partition => offset } } }`) without listing their topics.
 - [Enhancement] Defer default log file creation until the first write and keep logging working (to stdout) when the log file cannot be created or written, e.g. on read-only filesystems (ydah).
 - [Enhancement] Stop allocating 6 objects per consumed message: build the default topic deserializers only once and read `max_messages` once per poll batch.
 - [Enhancement] Stop allocating a keyword `Hash` per consumed message when building its metadata.
@@ -82,6 +83,8 @@
 - [Fix] [Pro] Pass the topic and partition given to routing `filtering.filters` to the filter factories. Before, it called them with no arguments and raised `ArgumentError` for custom `->(topic, partition)` filters, required inline insights, parallel segments and `expire_in`.
 - [Fix] Leave the consumer group on a cooperative-sticky shutdown (classic protocol) also when the group coordinator is slow (about 50 ms or more). Before, the other members got the stopped consumer's partitions only after `session.timeout.ms`.
 - [Fix] [Pro] Stop a rare `can't add a new key into hash during iteration` error in `#consume` when it calls `subscription_groups_coordinator.pause`.
+- [Fix] Make `Karafka::Admin.describe_consumer_groups` return for consumer group ids with UTF-8 non-ASCII characters. Before, it retried until killed, as librdkafka returns the ids as BINARY.
+- [Fix] [Pro] Raise `OpenSSL::PKey::RSAError` on JRuby when decrypting a direct mode payload that is not below the private key modulus. Before, a Java `DataLengthException` or `ArrayIndexOutOfBoundsException` was raised.
 
 ## 2.6.1 (2026-08-24)
 - **[Feature]** [Pro] Add an opt-in envelope encryption mode for Messages At Rest (`config.encryption.mode = :envelope`, requires openssl `>= 3.0`) without the RSA payload size limit. Upgrade all consuming processes before enabling.

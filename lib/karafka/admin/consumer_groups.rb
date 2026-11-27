@@ -124,6 +124,12 @@ module Karafka
           )
         end
 
+        # @param group_ids [String, Array<String>] consumer group or groups to read
+        # @see #read_committed_offsets
+        def read_committed_offsets(*group_ids)
+          new.read_committed_offsets(*group_ids)
+        end
+
         # @see #list
         def list
           new.list
@@ -566,6 +572,61 @@ module Karafka
         merged
       end
 
+      # Reads all committed offsets of given consumer groups without listing topics or partitions
+      #
+      # @param group_ids [String, Array<String>] id of the consumer group to read or a list of
+      #   them
+      #
+      # @return [Hash{String => Hash{String => Hash{Integer => Integer}}}] committed offsets per
+      #   consumer group, topic name and partition, with consumer groups in the order of
+      #   `group_ids`
+      #
+      # @note Only partitions with a committed offset are included, so a consumer group without
+      #   any committed offsets (or one that does not exist) maps to an empty hash.
+      #
+      # @note Kafka fetches committed offsets one consumer group per request, so this sends one
+      #   request per consumer group. Each request is independent of the number of topics and
+      #   partitions in the cluster.
+      #
+      # @note Same as consumers, under `read_committed` we fetch only stable committed offsets.
+      #
+      # @example Read committed offsets of a consumer group
+      #   Karafka::Admin::ConsumerGroups.read_committed_offsets('billing')
+      #   # => { 'billing' => { 'payments' => { 0 => 120, 1 => 98 } } }
+      #
+      # @example Read committed offsets of several consumer groups
+      #   Karafka::Admin::ConsumerGroups.read_committed_offsets('billing', 'never-consumed')
+      #   # => { 'billing' => { 'payments' => { 0 => 120, 1 => 98 } }, 'never-consumed' => {} }
+      def read_committed_offsets(*group_ids)
+        group_ids = group_ids.flatten.uniq
+        require_stable = isolation_level == IsolationLevels::READ_COMMITTED
+        groups_offs = {}
+
+        return groups_offs if group_ids.empty?
+
+        with_admin do |admin|
+          group_ids.each do |group_id|
+            offsets = groups_offs[group_id] = {}
+
+            report = with_retries(OFFSETS_FETCH_RETRYABLE_ERRORS) do
+              admin
+                .list_consumer_group_offsets(group_id, require_stable_offsets: require_stable)
+                .wait(max_wait_timeout_ms: max_wait_time_ms)
+            end
+
+            report.partitions.each do |details|
+              offset = details[:offset]
+
+              next unless offset
+
+              (offsets[details[:topic]] ||= {})[details[:partition]] = offset
+            end
+          end
+        end
+
+        groups_offs
+      end
+
       # Lists all consumer groups in the cluster together with their current state.
       #
       # This is a read-only, lightweight introspection call: it answers "which groups exist and
@@ -666,7 +727,7 @@ module Karafka
 
         start_time = self.class.monotonic_now
         described = {}
-        pending = group_ids.uniq
+        pending = group_ids.uniq(&:b)
 
         with_admin do |admin|
           until pending.empty?
@@ -677,8 +738,9 @@ module Karafka
             report.groups.each do |group|
               error = group[:error]
 
+              # librdkafka returns ids as BINARY, so we match them with requested ids by bytes
               unless error
-                described[group[:group_id]] = build_group(group)
+                described[group[:group_id].b] = build_group(group)
 
                 next
               end
@@ -687,13 +749,13 @@ module Karafka
               raise(error) if self.class.monotonic_now - start_time >= self.class.max_retries_duration
             end
 
-            pending -= described.keys
+            pending = pending.reject { |group_id| described.key?(group_id.b) }
 
             sleep(self.class.retry_backoff / 1_000.0) unless pending.empty?
           end
         end
 
-        group_ids.map { |group_id| described.fetch(group_id) }
+        group_ids.map { |group_id| described.fetch(group_id.b) }
       end
 
       private

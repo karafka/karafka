@@ -57,6 +57,34 @@ RSpec.describe_current do
     end
   end
 
+  describe "#decrypt" do
+    let(:modulus) { OpenSSL::PKey::RSA.new(fixture_file("rsa/public_key_1.pem")).n }
+
+    it "raises an RSA error for content of the modulus size not below the modulus" do
+      expect { cipher.decrypt("1", modulus.to_s(2)) }
+        .to raise_error(OpenSSL::PKey::RSAError, "data too large for modulus")
+    end
+
+    it "raises an RSA error for content longer than the modulus" do
+      expect { cipher.decrypt("1", "\x00".b * (modulus.num_bytes + 1)) }
+        .to raise_error(OpenSSL::PKey::RSAError, "data too large for modulus")
+    end
+  end
+
+  describe "#warmup" do
+    let(:ciphertext) { "x" * (direct_limit + 11) }
+
+    before do
+      ciphertext
+      cipher.warmup(Karafka::App.config.encryption)
+      allow_any_instance_of(OpenSSL::PKey::RSA).to receive(:n).and_raise(RuntimeError)
+    end
+
+    it "caches the key moduli, so the format check does not read the keys again" do
+      expect(cipher.owns?("1", ciphertext)).to be(true)
+    end
+  end
+
   describe "#owns?" do
     it "recognizes content of exactly the key modulus size as its own format" do
       expect(cipher.owns?("1", cipher.encrypt("content"))).to be(true)

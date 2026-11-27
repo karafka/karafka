@@ -227,6 +227,17 @@ RSpec.describe_current do
     end
   end
 
+  describe "#read_committed_offsets" do
+    let(:group_ids) { [SecureRandom.uuid, SecureRandom.uuid] }
+
+    it "delegates to ConsumerGroups#read_committed_offsets" do
+      expect_any_instance_of(Karafka::Admin::ConsumerGroups)
+        .to receive(:read_committed_offsets)
+        .with(*group_ids)
+      described_class.read_committed_offsets(group_ids)
+    end
+  end
+
   describe "#with_consumer" do
     context "when operating on an external client" do
       subject(:admin) { described_class.new(external_client: external_client) }

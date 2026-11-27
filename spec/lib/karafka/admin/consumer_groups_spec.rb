@@ -533,6 +533,192 @@ RSpec.describe Karafka::Admin::ConsumerGroups do
     end
   end
 
+  describe "#read_committed_offsets" do
+    subject(:results) { described_class.read_committed_offsets(*group_ids) }
+
+    let(:cg_id) { SecureRandom.uuid }
+    let(:cg_id2) { SecureRandom.uuid }
+
+    context "when no consumer groups are requested" do
+      let(:group_ids) { [] }
+
+      it { expect(results).to eq({}) }
+    end
+
+    context "when a consumer group has no committed offsets" do
+      let(:group_ids) { [cg_id] }
+
+      it { expect(results).to eq(cg_id => {}) }
+    end
+
+    context "when several consumer groups committed offsets" do
+      before do
+        Karafka::Admin::Topics.create(name, 3, 1)
+        Karafka::Admin::Topics.create(name2, 1, 1)
+        3.times { PRODUCERS.regular.produce_sync(topic: name, payload: "1", partition: 0) }
+        2.times { PRODUCERS.regular.produce_sync(topic: name, payload: "1", partition: 2) }
+        PRODUCERS.regular.produce_sync(topic: name2, payload: "1")
+        described_class.seek(cg_id, name => { 0 => 3, 2 => 1 }, name2 => { 0 => 1 })
+        described_class.seek(cg_id2, name => { 2 => 2 })
+      end
+
+      let(:group_ids) { [cg_id2, "never-consumed-#{cg_id}", cg_id] }
+
+      it "returns only committed partitions of each of them in the requested order" do
+        expect(results).to eq(
+          cg_id2 => { name => { 2 => 2 } },
+          "never-consumed-#{cg_id}" => {},
+          cg_id => { name => { 0 => 3, 2 => 1 }, name2 => { 0 => 1 } }
+        )
+        expect(results.keys).to eq(group_ids)
+      end
+    end
+
+    context "when the consumer groups are requested as an array" do
+      subject(:results) { described_class.read_committed_offsets(group_ids) }
+
+      let(:group_ids) { [cg_id, cg_id2] }
+
+      it { expect(results).to eq(cg_id => {}, cg_id2 => {}) }
+    end
+
+    context "when a coordinator is not ready yet and then becomes ready" do
+      let(:group_ids) { [cg_id, cg_id2] }
+      let(:instance) { described_class.new }
+      let(:admin) { instance_double(Rdkafka::Admin) }
+      let(:handle) { instance_double(Rdkafka::Admin::ListConsumerGroupOffsetsHandle) }
+      let(:error) { Rdkafka::RdkafkaError.new(14) }
+      let(:report) do
+        instance_double(
+          Rdkafka::Admin::ListConsumerGroupOffsetsReport,
+          partitions: [
+            { topic: name, partition: 0, offset: 5, metadata: nil, error: nil },
+            { topic: name, partition: 1, offset: nil, metadata: nil, error: nil }
+          ]
+        )
+      end
+
+      before do
+        allow(described_class).to receive_messages(new: instance, retry_backoff: 1)
+        allow(instance).to receive(:with_admin).and_yield(admin)
+        allow(admin).to receive(:list_consumer_group_offsets).and_return(handle)
+
+        calls = 0
+        allow(handle).to receive(:wait) do
+          calls += 1
+          raise(error) if calls == 1
+
+          report
+        end
+      end
+
+      it "retries and asks for stable offsets without a partition list" do
+        expect(results).to eq(cg_id => { name => { 0 => 5 } }, cg_id2 => { name => { 0 => 5 } })
+        expect(handle).to have_received(:wait).exactly(3).times
+        expect(admin)
+          .to have_received(:list_consumer_group_offsets)
+          .with(cg_id, require_stable_offsets: true)
+          .twice
+        expect(admin)
+          .to have_received(:list_consumer_group_offsets)
+          .with(cg_id2, require_stable_offsets: true)
+          .once
+        expect(instance).to have_received(:with_admin).once
+      end
+    end
+
+    context "when the committed offsets are not stable yet and then become stable" do
+      let(:group_ids) { [cg_id] }
+      let(:instance) { described_class.new }
+      let(:admin) { instance_double(Rdkafka::Admin) }
+      let(:handle) { instance_double(Rdkafka::Admin::ListConsumerGroupOffsetsHandle) }
+      let(:error) { Rdkafka::RdkafkaError.new(88) }
+      let(:report) do
+        instance_double(
+          Rdkafka::Admin::ListConsumerGroupOffsetsReport,
+          partitions: [{ topic: name, partition: 0, offset: 7, metadata: nil, error: nil }]
+        )
+      end
+
+      before do
+        allow(described_class).to receive_messages(new: instance, retry_backoff: 1)
+        allow(instance).to receive(:with_admin).and_yield(admin)
+        allow(admin).to receive(:list_consumer_group_offsets).and_return(handle)
+
+        calls = 0
+        allow(handle).to receive(:wait) do
+          calls += 1
+          raise(error) if calls == 1
+
+          report
+        end
+      end
+
+      it "retries and asks for stable offsets" do
+        expect(results).to eq(cg_id => { name => { 0 => 7 } })
+        expect(handle).to have_received(:wait).twice
+        expect(admin)
+          .to have_received(:list_consumer_group_offsets)
+          .with(cg_id, require_stable_offsets: true)
+          .twice
+      end
+    end
+
+    context "when the isolation level is read_uncommitted" do
+      let(:group_ids) { [cg_id] }
+      let(:instance) { described_class.new }
+      let(:admin) { instance_double(Rdkafka::Admin) }
+      let(:handle) { instance_double(Rdkafka::Admin::ListConsumerGroupOffsetsHandle) }
+      let(:report) do
+        instance_double(
+          Rdkafka::Admin::ListConsumerGroupOffsetsReport,
+          partitions: [{ topic: name, partition: 0, offset: 3, metadata: nil, error: nil }]
+        )
+      end
+
+      let(:original_kafka) { Karafka::App.config.kafka.dup }
+
+      before do
+        original_kafka
+        Karafka::App.config.kafka[:"isolation.level"] = "read_uncommitted"
+
+        allow(described_class).to receive(:new).and_return(instance)
+        allow(instance).to receive(:with_admin).and_yield(admin)
+        allow(admin).to receive(:list_consumer_group_offsets).and_return(handle)
+        allow(handle).to receive(:wait).and_return(report)
+      end
+
+      after { Karafka::App.config.kafka.replace(original_kafka) }
+
+      it "does not ask for stable offsets" do
+        expect(results).to eq(cg_id => { name => { 0 => 3 } })
+        expect(admin)
+          .to have_received(:list_consumer_group_offsets)
+          .with(cg_id, require_stable_offsets: false)
+      end
+    end
+
+    context "when fetching the committed offsets fails with a non-transient error" do
+      let(:group_ids) { [cg_id] }
+      let(:instance) { described_class.new }
+      let(:admin) { instance_double(Rdkafka::Admin) }
+      let(:error) { Rdkafka::RdkafkaError.new(Rdkafka::Bindings::RD_KAFKA_RESP_ERR__STATE) }
+      let(:handle) { instance_double(Rdkafka::Admin::ListConsumerGroupOffsetsHandle) }
+
+      before do
+        allow(described_class).to receive(:new).and_return(instance)
+        allow(instance).to receive(:with_admin).and_yield(admin)
+        allow(admin).to receive(:list_consumer_group_offsets).and_return(handle)
+        allow(handle).to receive(:wait).and_raise(error)
+      end
+
+      it "raises the error without retrying" do
+        expect { results }.to raise_error(error)
+        expect(handle).to have_received(:wait).once
+      end
+    end
+  end
+
   describe "#list" do
     subject(:listing) { described_class.list }
 
@@ -677,6 +863,31 @@ RSpec.describe Karafka::Admin::ConsumerGroups do
         expect(descriptions.map { |group| group[:group_id] }).to eq(group_ids)
         expect(descriptions.map { |group| group[:state] }).to eq(%i[dead dead])
         expect(descriptions.map { |group| group[:members] }).to eq([[], []])
+      end
+    end
+
+    context "when a consumer group id has UTF-8 non-ASCII characters" do
+      let(:group_ids) { ["#{SecureRandom.uuid}-zażółć", SecureRandom.uuid] }
+
+      before { allow(described_class).to receive(:new).and_call_original }
+
+      it "describes it and keeps the requested order" do
+        expect(descriptions.map { |group| group[:group_id].b }).to eq(group_ids.map(&:b))
+        expect(descriptions.map { |group| group[:state] }).to eq(%i[dead dead])
+      end
+
+      it { expect(descriptions.first[:group_id].encoding).to eq(Encoding::BINARY) }
+    end
+
+    context "when the same UTF-8 non-ASCII id is requested in UTF-8 and in BINARY" do
+      let(:non_ascii_id) { "#{SecureRandom.uuid}-zażółć" }
+      let(:group_ids) { [non_ascii_id, non_ascii_id.b, group_id] }
+
+      before { allow(described_class).to receive(:new).and_call_original }
+
+      it "describes it once and returns it for each request" do
+        expect(descriptions.map { |group| group[:group_id].b }).to eq(group_ids.map(&:b))
+        expect(descriptions.map { |group| group[:state] }).to eq(%i[dead dead dead])
       end
     end
 
