@@ -108,8 +108,7 @@ module Karafka
           # no longer may be able to fetch them from Kafka. We could build them but it is easier
           # to just keep them here and use if needed when cannot be obtained
           @paused_tpls = Hash.new { |h, k| h[k] = {} }
-          # Partitions sought by `#seek` or `#pause` with an offset since the last drain call. Such
-          # a seek is newer than what the drain planned for them, so the drain does not seek them
+          # Partitions sought by `#seek` or `#pause` with an offset since the last drain call
           @sought_partitions = Hash.new { |h, k| h[k] = {} }
         end
 

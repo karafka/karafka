@@ -22,27 +22,9 @@ setup_karafka(allow_errors: %w[consumer.consume.error]) do |config|
   config.concurrency = 3
 end
 
-module DrainTracker
-  def poll_batch_nb(...)
-    items = super
-    DT[:drains] << items.size unless items.empty?
-    items
-  end
-end
+track_drains
 
-Rdkafka::Consumer.prepend(DrainTracker)
-
-module SeekPlanTracker
-  private
-
-  def seek_after_drain(rewinds, alignments)
-    alignments&.each { |alignment| DT[:alignments] << [alignment.partition, alignment.offset] }
-
-    super
-  end
-end
-
-Karafka::Connection::ConsumerGroups::Client.prepend(SeekPlanTracker)
+track_drain_seek_plans
 
 class Consumer < Karafka::BaseConsumer
   def consume
@@ -54,8 +36,6 @@ class Consumer < Karafka::BaseConsumer
     offsets = messages.map(&:offset)
     DT[partition] << offsets
 
-    # Other partitions keep messages queued, so a blocking poll takes one of theirs and the retried
-    # partition comes back through a drain
     sleep(0.5) unless partition.zero?
 
     return unless partition.zero? && !DT.key?(:failed) && offsets.last > PER_TRANSACTION
@@ -100,12 +80,10 @@ start_karafka_and_wait_until do
   PARTITIONS.times.all? { |partition| DT[partition].flatten.last == expected.last }
 end
 
-assert !DT[:drains].empty?
-# The retried partition came back through a drain, which planned to seek it
-assert(DT[:alignments].any? { |partition, _| partition.zero? }, DT[:alignments])
+assert DT[:drains].any?(&:positive?)
+assert(DT[:drain_alignments].any? { |partition, _| partition.zero? }, DT[:drain_alignments])
 
 failed = DT[0][DT[:failed]]
-# The retry starts at the first message of the failed batch
 assert_equal failed.first, DT[0][DT[:failed] + 1].first
 
 PARTITIONS.times do |partition|

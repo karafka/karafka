@@ -19,27 +19,9 @@ setup_karafka do |config|
   config.max_messages = 15
 end
 
-module DrainTracker
-  def poll_batch_nb(...)
-    items = super
-    DT[:drains] << items.size unless items.empty?
-    items
-  end
-end
+track_drains
 
-Rdkafka::Consumer.prepend(DrainTracker)
-
-module SeekPlanTracker
-  private
-
-  def seek_after_drain(rewinds, alignments)
-    alignments&.each { |alignment| DT[:alignments] << [alignment.partition, alignment.offset] }
-
-    super
-  end
-end
-
-Karafka::Connection::ConsumerGroups::Client.prepend(SeekPlanTracker)
+track_drain_seek_plans
 
 class Consumer < Karafka::BaseConsumer
   def consume
@@ -79,9 +61,8 @@ start_karafka_and_wait_until do
   DT[:offsets].last == expected.last
 end
 
-assert !DT[:drains].empty?
+assert DT[:drains].any?(&:positive?)
 assert DT.key?(:paused)
-# Holes left by aborted transactions are not a rewind, so the drain plans no seek
-assert_equal [], DT[:alignments]
+assert_equal [], DT[:drain_alignments]
 assert DT[:paused] < expected.last
 assert_equal expected, DT[:offsets]

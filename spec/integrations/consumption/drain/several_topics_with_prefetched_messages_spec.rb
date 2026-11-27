@@ -16,15 +16,7 @@ setup_karafka do |config|
   config.kafka[:"max.partition.fetch.bytes"] = 1_024
 end
 
-module DrainTracker
-  def drain(room, time_poll)
-    DT[:drained] = true
-
-    super
-  end
-end
-
-Karafka::Connection::ConsumerGroups::Client.prepend(DrainTracker)
+track_drains
 
 class Consumer < Karafka::BaseConsumer
   def consume
@@ -84,7 +76,7 @@ start_karafka_and_wait_until do
 end
 
 # Without the drain hook running, this spec would not test anything
-assert DT.key?(:drained)
+assert !DT[:drains].empty?
 assert DT.key?(:paused)
 assert DT.key?(:sought)
 

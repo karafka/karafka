@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 # With `internal.connection.batch_polling` off and `enable.partition.eof` on, eof events of many
-# partitions come one per blocking poll, as before the drain. Every partition at its end should
+# partitions come one per blocking poll. Every partition at its end should
 # still get `eofed`, and `poll_batch_nb` should never be called.
 #
 # A slow first batch makes librdkafka queue the messages and eof events of all the partitions.
@@ -16,14 +16,7 @@ setup_karafka do |config|
   config.internal.connection.batch_polling = false
 end
 
-module DrainTracker
-  def poll_batch_nb(...)
-    DT[:drains] << true
-    super
-  end
-end
-
-Rdkafka::Consumer.prepend(DrainTracker)
+track_drains
 
 class Consumer < Karafka::BaseConsumer
   def consume

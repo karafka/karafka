@@ -18,27 +18,9 @@ setup_karafka do |config|
   config.max_messages = 20
 end
 
-module DrainTracker
-  def poll_batch_nb(...)
-    items = super
-    DT[:drains] << items.size unless items.empty?
-    items
-  end
-end
+track_drains
 
-Rdkafka::Consumer.prepend(DrainTracker)
-
-module SeekPlanTracker
-  private
-
-  def seek_after_drain(rewinds, alignments)
-    DT[:plans] << [rewinds, alignments]
-
-    super
-  end
-end
-
-Karafka::Connection::ConsumerGroups::Client.prepend(SeekPlanTracker)
+track_drain_seek_plans
 
 class Consumer < Karafka::BaseConsumer
   def consume
@@ -68,10 +50,9 @@ end
 offsets = DT[:offsets]
 before = offsets.take_while { |offset| offset < DELETED_UNTIL }
 
-assert !DT[:drains].empty?
+assert DT[:drains].any?(&:positive?)
 assert DT.key?(:paused)
-# The reset went forward: what was fetched before the deletion, then the new start
 assert before.last < DELETED_UNTIL - 1, before.last
 assert_equal (0..before.last).to_a, before
 assert_equal (DELETED_UNTIL...MESSAGES).to_a, offsets.drop(before.size)
-assert_equal [], DT[:plans]
+assert_equal [], DT[:drain_rewinds] + DT[:drain_alignments]

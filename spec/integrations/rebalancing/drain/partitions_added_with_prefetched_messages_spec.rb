@@ -118,7 +118,6 @@ end
 
 # Without a rebalance callback inside of a drain, this spec would not test anything
 assert !DT[:in_drain_callbacks].empty?
-# The rebalance only assigned
 assert DT[:revocations].all?(&:zero?), DT[:revocations]
 
 PARTITIONS.times do |partition|

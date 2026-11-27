@@ -17,15 +17,7 @@ setup_karafka do |config|
   config.max_messages = 20
 end
 
-module DrainTracker
-  def poll_batch_nb(...)
-    items = super
-    DT[:drains] << items.size unless items.empty?
-    items
-  end
-end
-
-Rdkafka::Consumer.prepend(DrainTracker)
+track_drains
 
 class Consumer < Karafka::BaseConsumer
   def consume
@@ -77,7 +69,7 @@ start_karafka_and_wait_until do
   DT[:offsets].last == FIRST + SECOND + LATER - 1
 end
 
-assert !DT[:drains].empty?
+assert DT[:drains].any?(&:positive?)
 
 expected = (0..30).to_a * 2 + (FIRST..70).to_a + (FIRST + SECOND...FIRST + SECOND + LATER).to_a
 

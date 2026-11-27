@@ -388,6 +388,37 @@ def fetch_position(client, topic_name, partition)
   client.wrapped_kafka.position(tpl).to_h.fetch(topic_name).first.offset || -1
 end
 
+# Records the number of items of every `Rdkafka::Consumer#poll_batch_nb` call in `DT[:drains]`,
+# so a drain spec can assert that the drain ran (or, with batch polling off, that it never did)
+def track_drains
+  Rdkafka::Consumer.prepend(
+    Module.new do
+      def poll_batch_nb(...)
+        items = super
+        DT[:drains] << items.size
+        items
+      end
+    end
+  )
+end
+
+# Records the seeks the drain planned, as `[partition, offset]`, in `DT[:drain_rewinds]` and
+# `DT[:drain_alignments]`
+def track_drain_seek_plans
+  Karafka::Connection::ConsumerGroups::Client.prepend(
+    Module.new do
+      private
+
+      def seek_after_drain(rewinds, alignments)
+        rewinds&.each { |seek| DT[:drain_rewinds] << [seek.partition, seek.offset] }
+        alignments&.each { |seek| DT[:drain_alignments] << [seek.partition, seek.offset] }
+
+        super
+      end
+    end
+  )
+end
+
 # Returns the next offset that we would consume if we would subscribe again
 # @param topic [String] topic we are interested in
 # @param normalize [Boolean]

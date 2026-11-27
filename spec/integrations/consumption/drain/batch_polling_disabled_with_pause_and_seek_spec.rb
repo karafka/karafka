@@ -1,9 +1,8 @@
 # frozen_string_literal: true
 
-# With `internal.connection.batch_polling` off, a pause without an offset and a seek back from
-# consume should work as before the drain: after a pause at the end of a batch, consumption
-# continues right after its last message, and after the seek it continues from the seek offset. `poll_batch_nb`
-# should never be called.
+# With `internal.connection.batch_polling` off, after a pause without an offset at the end of a
+# batch, consumption should continue right after its last message, and after a seek back from
+# consume it should continue from the seek offset. `poll_batch_nb` should never be called.
 #
 # Small partition fetches and a slow first batch make librdkafka queue the messages that a drain
 # would normally take.
@@ -19,14 +18,7 @@ setup_karafka do |config|
   config.internal.connection.batch_polling = false
 end
 
-module DrainTracker
-  def poll_batch_nb(...)
-    DT[:drains] << true
-    super
-  end
-end
-
-Rdkafka::Consumer.prepend(DrainTracker)
+track_drains
 
 class Consumer < Karafka::BaseConsumer
   def consume

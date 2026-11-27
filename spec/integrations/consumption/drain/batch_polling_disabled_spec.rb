@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 # With `internal.connection.batch_polling` off, Karafka should poll already fetched messages one
-# at a time, as it did before the drain, and never call `poll_batch_nb`. This is the fall back
+# at a time and never call `poll_batch_nb`. This is the fall back
 # for users that hit a problem with the drain, so it must keep consumption complete.
 #
 # Small partition fetches and a slow first batch make librdkafka queue messages of all the
@@ -17,14 +17,7 @@ setup_karafka do |config|
   config.internal.connection.batch_polling = false
 end
 
-module DrainTracker
-  def poll_batch_nb(...)
-    DT[:drains] << true
-    super
-  end
-end
-
-Rdkafka::Consumer.prepend(DrainTracker)
+track_drains
 
 class Consumer < Karafka::BaseConsumer
   def consume

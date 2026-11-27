@@ -17,15 +17,7 @@ setup_karafka do |config|
   config.max_messages = 100
 end
 
-module DrainTracker
-  def poll_batch_nb(...)
-    items = super
-    DT[:drains] << items.size unless items.empty?
-    items
-  end
-end
-
-Rdkafka::Consumer.prepend(DrainTracker)
+track_drains
 
 class Consumer < Karafka::BaseConsumer
   def consume
@@ -90,8 +82,7 @@ end
 DT[:terminate] = true
 other.join
 
-assert !DT[:drains].empty?
+assert DT[:drains].any?(&:positive?)
 assert DT[:stopped_at] < PER_PARTITION - 1
-# Static membership: the other member never gets the partition of the stopped one
 assert !DT[:other].include?(owned)
 assert_equal (0...PER_PARTITION).to_a, DT[owned]

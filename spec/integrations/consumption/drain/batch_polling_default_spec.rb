@@ -2,7 +2,7 @@
 
 # Batch polling is on by default: with messages prefetched by librdkafka, Karafka should take them
 # with `poll_batch_nb` after the first blocking poll, and consume every partition in order with no
-# gap and no duplicate. It is the counterpart of `batch_polling_disabled_spec.rb`.
+# gap and no duplicate.
 #
 # Small partition fetches and a slow first batch make librdkafka queue messages of all the
 # partitions before we poll again.
@@ -16,14 +16,7 @@ setup_karafka do |config|
   config.concurrency = 4
 end
 
-module DrainTracker
-  def poll_batch_nb(...)
-    DT[:drains] << true
-    super
-  end
-end
-
-Rdkafka::Consumer.prepend(DrainTracker)
+track_drains
 
 class Consumer < Karafka::BaseConsumer
   def consume
