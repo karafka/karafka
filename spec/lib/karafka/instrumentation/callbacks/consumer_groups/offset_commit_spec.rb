@@ -72,6 +72,27 @@ RSpec.describe_current do
     end
   end
 
+  describe "#offsets_commit_succeeded_listened?" do
+    context "when nothing subscribes to client.offsets.committed" do
+      it { expect(callback.offsets_commit_succeeded_listened?).to be(false) }
+    end
+
+    context "when something subscribes to client.offsets.committed" do
+      before { monitor.subscribe("client.offsets.committed") { nil } }
+
+      it { expect(callback.offsets_commit_succeeded_listened?).to be(true) }
+    end
+
+    context "when the monitor cannot list its listeners" do
+      before { allow(monitor).to receive(:listeners).and_raise(StandardError) }
+
+      it "expect to report it and skip the successful commits" do
+        expect(callback.offsets_commit_succeeded_listened?).to be(false)
+        expect(tracked_errors.last[:type]).to eq("callbacks.offset_commit.error")
+      end
+    end
+  end
+
   describe "#on_offsets_commit_succeeded" do
     let(:committed) { [] }
 

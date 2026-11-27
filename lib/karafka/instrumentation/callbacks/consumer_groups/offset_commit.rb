@@ -60,11 +60,25 @@ module Karafka
             instrument_error("callbacks.offset_commit.error", e, tpl)
           end
 
+          # @return [Boolean] true when something subscribes to `client.offsets.committed`
+          # @note rdkafka asks it on each successful commit. Without a subscriber it does not
+          #   convert the committed offsets, as their list has an entry for every assigned
+          #   partition.
+          def offsets_commit_succeeded_listened?
+            listeners = monitor.listeners["client.offsets.committed"]
+
+            !listeners.nil? && !listeners.empty?
+          rescue => e
+            instrument_error("callbacks.offset_commit.error", e, nil)
+
+            false
+          end
+
           private
 
           # @param type [String] error type
           # @param error [StandardError] error to publish
-          # @param tpl [Rdkafka::Consumer::TopicPartitionList] offsets of the commit
+          # @param tpl [Rdkafka::Consumer::TopicPartitionList, nil] offsets of the commit, if any
           def instrument_error(type, error, tpl)
             monitor.instrument(
               "error.occurred",
