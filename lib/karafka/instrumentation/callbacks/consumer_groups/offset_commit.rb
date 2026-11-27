@@ -40,9 +40,11 @@ module Karafka
 
           # Publishes a successful offset commit
           #
-          # @param tpl [Rdkafka::Consumer::TopicPartitionList] committed offsets
+          # @param tpl [Rdkafka::Consumer::TopicPartitionList] offsets of the commit
           # @note rdkafka calls it only for successful commits: not on failures and not on
           #   `no_offset`. It is called for sync and async commits.
+          # @note Karafka commits the stored offsets, so the list has every assigned partition. A
+          #   partition with nothing committed has a nil offset.
           def on_offsets_commit_succeeded(tpl)
             monitor.instrument(
               "client.offsets.committed",
