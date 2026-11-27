@@ -93,6 +93,6 @@ batches = DT[[:after, partition]]
 # The batch with the drained messages ends right before the offset the drain planned to seek to
 last_drained = batches.index { |batch| batch.last == planned_offset - 1 }
 
-assert SEEK_TO < planned_offset, DT[:planned]
+assert planned_offset > SEEK_TO, DT[:planned]
 assert !last_drained.nil?, batches
 assert_equal (SEEK_TO...AFTER).to_a, batches[(last_drained + 1)..].flatten
