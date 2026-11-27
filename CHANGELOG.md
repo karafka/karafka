@@ -82,6 +82,7 @@
 - [Fix] Leave the consumer group on a cooperative-sticky shutdown (classic protocol) also when the group coordinator is slow (about 50 ms or more). Before, the other members got the stopped consumer's partitions only after `session.timeout.ms`.
 - [Fix] [Pro] Stop a rare `can't add a new key into hash during iteration` error in `#consume` when it calls `subscription_groups_coordinator.pause`.
 - [Fix] Make `Karafka::Admin.describe_consumer_groups` return for consumer group ids with UTF-8 non-ASCII characters. Before, it retried until killed, as librdkafka returns the ids as BINARY.
+- [Fix] [Pro] Raise `OpenSSL::PKey::RSAError` on JRuby when decrypting a direct mode payload that is not below the private key modulus. Before, a Java `DataLengthException` or `ArrayIndexOutOfBoundsException` was raised.
 
 ## 2.6.1 (2026-08-24)
 - **[Feature]** [Pro] Add an opt-in envelope encryption mode for Messages At Rest (`config.encryption.mode = :envelope`, requires openssl `>= 3.0`) without the RSA payload size limit. Upgrade all consuming processes before enabling.
