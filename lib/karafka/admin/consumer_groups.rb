@@ -666,7 +666,7 @@ module Karafka
 
         start_time = self.class.monotonic_now
         described = {}
-        pending = group_ids.uniq
+        pending = group_ids.uniq(&:b)
 
         with_admin do |admin|
           until pending.empty?

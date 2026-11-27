@@ -689,6 +689,20 @@ RSpec.describe Karafka::Admin::ConsumerGroups do
         expect(descriptions.map { |group| group[:group_id].b }).to eq(group_ids.map(&:b))
         expect(descriptions.map { |group| group[:state] }).to eq(%i[dead dead])
       end
+
+      it { expect(descriptions.first[:group_id].encoding).to eq(Encoding::BINARY) }
+    end
+
+    context "when the same UTF-8 non-ASCII id is requested in UTF-8 and in BINARY" do
+      let(:non_ascii_id) { "#{SecureRandom.uuid}-zażółć" }
+      let(:group_ids) { [non_ascii_id, non_ascii_id.b, group_id] }
+
+      before { allow(described_class).to receive(:new).and_call_original }
+
+      it "describes it once and returns it for each request" do
+        expect(descriptions.map { |group| group[:group_id].b }).to eq(group_ids.map(&:b))
+        expect(descriptions.map { |group| group[:state] }).to eq(%i[dead dead dead])
+      end
     end
 
     context "when building the consumer group description" do

@@ -10,6 +10,7 @@ non_ascii_id = "#{DT.group}-zażółć"
 missing, ascii = Karafka::Admin.describe_consumer_groups([non_ascii_id, DT.group])
 
 assert_equal non_ascii_id.b, missing[:group_id].b
+assert_equal Encoding::BINARY, missing[:group_id].encoding
 assert_equal :dead, missing[:state]
 assert_equal [], missing[:members]
 assert_equal DT.group, ascii[:group_id]
