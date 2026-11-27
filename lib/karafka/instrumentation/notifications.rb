@@ -36,6 +36,7 @@ module Karafka
         client.reset
         client.topics.unknown
         client.events_poll
+        client.offsets.committed
 
         connection.listener.before_fetch_loop
         connection.listener.fetch_loop

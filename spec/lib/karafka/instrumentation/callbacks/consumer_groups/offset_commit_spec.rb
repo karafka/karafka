@@ -71,4 +71,50 @@ RSpec.describe_current do
       end
     end
   end
+
+  describe "#on_offsets_commit_succeeded" do
+    let(:committed) { [] }
+
+    before do
+      local_committed = committed
+
+      monitor.subscribe("client.offsets.committed") do |event|
+        local_committed << event
+      end
+    end
+
+    context "when the commit succeeded" do
+      before { callback.on_offsets_commit_succeeded(tpl) }
+
+      it "expect to publish the commit details" do
+        expect(committed.size).to eq(1)
+        expect(committed.first.payload).to eq(
+          caller: callback,
+          subscription_group_id: subscription_group.id,
+          subscription_group: subscription_group,
+          consumer_group_id: consumer_group_id,
+          consumer_group: subscription_group.group,
+          group_id: consumer_group_id,
+          group: subscription_group.group,
+          client_id: client_id,
+          tpl: tpl
+        )
+      end
+
+      it { expect(tracked_errors).to be_empty }
+    end
+
+    context "when a client.offsets.committed subscriber fails" do
+      before do
+        monitor.subscribe("client.offsets.committed") do
+          raise StandardError
+        end
+      end
+
+      it "expect to contain in, notify and continue as we do not want to crash rdkafka" do
+        expect { callback.on_offsets_commit_succeeded(tpl) }.not_to raise_error
+        expect(tracked_errors.last[:type]).to eq("callbacks.offset_commit.error")
+      end
+    end
+  end
 end

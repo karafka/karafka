@@ -4,8 +4,9 @@ module Karafka
   module Instrumentation
     module Callbacks
       module ConsumerGroups
-        # Callback that connects to the librdkafka offset commit callback and publishes failed
-        # offset commits. Without it, a failed async commit is only logged by librdkafka.
+        # Callback that connects to the librdkafka offset commit callback and publishes the
+        # successful and the failed offset commits. Without it, a failed async commit is only
+        # logged by librdkafka.
         class OffsetCommit
           include Helpers::ConfigImporter.new(
             monitor: %i[monitor]
@@ -32,9 +33,31 @@ module Karafka
           def on_offsets_commit_failed(error, tpl)
             return if Connection::Proxy::COMMIT_HANDLED_ERRORS.include?(error.code)
 
-            instrument("connection.client.commit_offsets.error", error, tpl)
+            instrument_error("connection.client.commit_offsets.error", error, tpl)
           rescue => e
-            instrument("callbacks.offset_commit.error", e, tpl)
+            instrument_error("callbacks.offset_commit.error", e, tpl)
+          end
+
+          # Publishes a successful offset commit
+          #
+          # @param tpl [Rdkafka::Consumer::TopicPartitionList] committed offsets
+          # @note rdkafka calls it only for successful commits: not on failures and not on
+          #   `no_offset`. It is called for sync and async commits.
+          def on_offsets_commit_succeeded(tpl)
+            monitor.instrument(
+              "client.offsets.committed",
+              caller: self,
+              subscription_group_id: @subscription_group.id,
+              subscription_group: @subscription_group,
+              consumer_group_id: @subscription_group.group.id,
+              consumer_group: @subscription_group.group,
+              group_id: @subscription_group.group.id,
+              group: @subscription_group.group,
+              client_id: @client_id,
+              tpl: tpl
+            )
+          rescue => e
+            instrument_error("callbacks.offset_commit.error", e, tpl)
           end
 
           private
@@ -42,7 +65,7 @@ module Karafka
           # @param type [String] error type
           # @param error [StandardError] error to publish
           # @param tpl [Rdkafka::Consumer::TopicPartitionList] offsets of the commit
-          def instrument(type, error, tpl)
+          def instrument_error(type, error, tpl)
             monitor.instrument(
               "error.occurred",
               caller: self,
