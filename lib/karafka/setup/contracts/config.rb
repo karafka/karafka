@@ -92,6 +92,7 @@ module Karafka
             required(:conductor) { |val| !val.nil? }
             required(:reset_backoff) { |val| val.is_a?(Integer) && val >= 1_000 }
             required(:listener_thread_priority) { |val| (-3..3).to_a.include?(val) }
+            required(:batch_polling) { |val| [true, false].include?(val) }
 
             nested(:proxy) do
               nested(:commit) do

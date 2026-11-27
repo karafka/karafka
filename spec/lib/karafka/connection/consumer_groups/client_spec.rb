@@ -461,6 +461,33 @@ RSpec.describe_current do
         end
       end
 
+      context "when batch polling is off" do
+        let(:drained) { [message(0, 1), message(0, 2)] }
+
+        let(:original_batch_polling) { Karafka::App.config.internal.connection.batch_polling }
+
+        let(:client_without_batch_polling) { described_class.new(subscription_group, -> { true }) }
+
+        before do
+          original_batch_polling
+          Karafka::App.config.internal.connection.batch_polling = false
+          allow(client_without_batch_polling).to receive(:kafka).and_return(kafka)
+        end
+
+        after { Karafka::App.config.internal.connection.batch_polling = original_batch_polling }
+
+        it "expect not to drain" do
+          client_without_batch_polling.batch_poll
+          expect(kafka).not_to have_received(:poll_batch_nb)
+        end
+
+        it "expect to poll messages one by one" do
+          offsets = []
+          client_without_batch_polling.batch_poll.each { |_, _, messages| offsets << messages.map(&:offset) }
+          expect(offsets).to eq([[0]])
+        end
+      end
+
       context "when the first message fills the buffer" do
         let(:max_messages) { 1 }
 
@@ -870,6 +897,47 @@ RSpec.describe_current do
         context "when another thread seeks while the drain aligns the position" do
           it "expect the other seek to wait for it" do
             expect(seek_offsets_with_drain_seek_held(2)).to eq([[2], [2, 7]])
+          end
+        end
+
+        context "when the partition is sought between the drain call and its seek" do
+          before do
+            allow(kafka).to receive(:poll_batch_nb) do
+              client.seek(Karafka::Messages::Seek.new(topic_name, 0, 7))
+              drained
+            end
+          end
+
+          it "expect not to overwrite that seek" do
+            client.batch_poll
+
+            expect(kafka).to have_received(:seek).once
+            expect(kafka).to have_received(:seek).with(have_attributes(offset: 7))
+          end
+        end
+
+        context "when another partition is sought between the drain call and its seek" do
+          before do
+            allow(kafka).to receive(:poll_batch_nb) do
+              client.seek(Karafka::Messages::Seek.new(topic_name, 1, 7))
+              drained
+            end
+          end
+
+          it "expect to seek the stale position" do
+            client.batch_poll
+
+            expect(kafka).to have_received(:seek).with(have_attributes(partition: 0, offset: 2))
+          end
+        end
+
+        context "when the partition was sought before the drain call" do
+          before { client.seek(Karafka::Messages::Seek.new(topic_name, 0, 7)) }
+
+          it "expect to seek the stale position" do
+            client.batch_poll
+
+            expect(kafka).to have_received(:seek).with(have_attributes(partition: 0, offset: 2))
           end
         end
 

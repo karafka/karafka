@@ -58,6 +58,7 @@ RSpec.describe_current do
           conductor: 1,
           reset_backoff: 1_000,
           listener_thread_priority: 0,
+          batch_polling: true,
           proxy: {
             query_watermark_offsets: {
               timeout: 100,
@@ -700,6 +701,26 @@ RSpec.describe_current do
 
       context "when listener_thread_priority is more than 3" do
         before { config[:internal][:connection][:listener_thread_priority] = 4 }
+
+        it { expect(contract.call(config)).not_to be_success }
+      end
+    end
+
+    context "when we validate batch_polling" do
+      context "when batch_polling is false" do
+        before { config[:internal][:connection][:batch_polling] = false }
+
+        it { expect(contract.call(config)).to be_success }
+      end
+
+      context "when batch_polling is nil" do
+        before { config[:internal][:connection][:batch_polling] = nil }
+
+        it { expect(contract.call(config)).not_to be_success }
+      end
+
+      context "when batch_polling is not a boolean" do
+        before { config[:internal][:connection][:batch_polling] = 1 }
 
         it { expect(contract.call(config)).not_to be_success }
       end

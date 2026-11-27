@@ -82,6 +82,7 @@ en:
         internal.connection.proxy.metadata.max_attempts_format: needs to be an integer bigger than 0
         internal.connection.proxy.metadata.wait_time_format: needs to be an integer bigger than 0
         internal.connection.listener_thread_priority_format: must be between -3 and 3
+        internal.connection.batch_polling_format: needs to be either true or false
 
         internal.swarm.manager_format: cannot be nil
         internal.swarm.orphaned_exit_code_format: needs to be an integer bigger or equal to 0

@@ -15,7 +15,8 @@ module Karafka
         include Helpers::ConfigImporter.new(
           logger: %i[logger],
           tick_interval: %i[internal tick_interval],
-          shutdown_timeout: %i[shutdown_timeout]
+          shutdown_timeout: %i[shutdown_timeout],
+          batch_polling: %i[internal connection batch_polling]
         )
 
         attr_reader :rebalance_manager
@@ -81,6 +82,7 @@ module Karafka
           @buffer = RawMessagesBuffer.new
           @offset_regression_tracker = OffsetRegressionTracker.new
           @drain_seek_planner = DrainSeekPlanner.new
+          @batch_polling = batch_polling
           @rebalance_manager = RebalanceManager.new(@subscription_group.id, @buffer)
           @rebalance_callback = Instrumentation::Callbacks::ConsumerGroups::Rebalance.new(
             @subscription_group,
@@ -106,6 +108,9 @@ module Karafka
           # no longer may be able to fetch them from Kafka. We could build them but it is easier
           # to just keep them here and use if needed when cannot be obtained
           @paused_tpls = Hash.new { |h, k| h[k] = {} }
+          # Partitions sought by `#seek` or `#pause` with an offset since the last drain call. Such
+          # a seek is newer than what the drain planned for them, so the drain does not seek them
+          @sought_partitions = Set.new
         end
 
         # Fetches messages within boundaries defined by the settings (time, size, topics, etc).
@@ -150,7 +155,7 @@ module Karafka
               @buffer.eof(response[:topic], response[:partition])
 
               # Eof events of other partitions are often ready as well, so they land in this batch
-              drain(max_messages - @buffer.size, time_poll) unless @rebalance_manager.changed?
+              drain(max_messages - @buffer.size, time_poll) if drain?
             when nil
               nil
             else
@@ -159,7 +164,7 @@ module Karafka
 
               # After a rebalance in this poll, the batch ends below without draining, so the drain
               # clean-up never removes messages of partitions assigned back in that rebalance
-              eofed = drain(max_messages - @buffer.size, time_poll) unless @rebalance_manager.changed?
+              eofed = drain(max_messages - @buffer.size, time_poll) if drain?
             end
 
             # Upon polling rebalance manager might have been updated.
@@ -248,7 +253,10 @@ module Karafka
         # @note Please note, that if you are seeking to a time offset, getting the offset is
         #   blocking
         def seek(message)
-          @mutex.synchronize { internal_seek(message) }
+          @mutex.synchronize do
+            @sought_partitions << [message.topic, message.partition]
+            internal_seek(message)
+          end
         end
 
         # Pauses given partition and moves back to last successful offset processed.
@@ -298,6 +306,8 @@ module Karafka
             return unless offset
 
             pause_msg = Messages::Seek.new(topic_name, partition, offset)
+
+            @sought_partitions << [topic_name, partition]
 
             internal_seek(pause_msg)
           end
@@ -747,6 +757,11 @@ module Karafka
           @rebalance_manager.changed? ? nil : retry
         end
 
+        # @return [Boolean] should we drain after the blocking poll
+        def drain?
+          @batch_polling && !@rebalance_manager.changed?
+        end
+
         # Takes, in one non-blocking call, the messages librdkafka has already fetched, so we do not
         # cross into it once per message. It only follows a blocking `#poll` and never replaces it:
         # the blocking poll is what waits for data, owns the time budget of the batch and retries
@@ -761,6 +776,8 @@ module Karafka
 
           eofed = false
           retryable = nil
+
+          @mutex.synchronize { @sought_partitions.clear }
 
           kafka.poll_batch_nb(0, max_items: room).each do |item|
             unless item.is_a?(Rdkafka::RdkafkaError)
@@ -803,10 +820,7 @@ module Karafka
 
           # Revocation callbacks run inside of the drain call, before its messages reach the buffer.
           # The drain runs only without an earlier rebalance in this batch, so all the revocations
-          # are from the drain itself. The seeks take `@mutex`, but a seek from another thread
-          # done after the drain call and before them is overwritten. Only non-blocking jobs and
-          # user threads seek while we poll, and it also needs a rebalance or an offset reset in
-          # this window, so we accept it
+          # are from the drain itself
           if @rebalance_manager.changed?
             rewinds = @drain_seek_planner.rewinds(
               @buffer,
@@ -849,18 +863,27 @@ module Karafka
         # one past the last message because of a marker, and we then seek once and fetch again
         # what was prefetched. No message is lost.
         #
+        # A partition sought by `#seek` or `#pause` with an offset after the drain call is skipped:
+        # that seek is newer than our plan and wins.
+        #
         # @param rewinds [Array<Messages::Seek>, nil] seeks back to the lowest drained offsets
         # @param alignments [Array<Messages::Seek>, nil] seeks to right after the last drained
         #   messages
         def seek_after_drain(rewinds, alignments)
           @mutex.synchronize do
             rewinds&.each do |rewind|
+              next if @sought_partitions.include?([rewind.topic, rewind.partition])
+
               position = topic_partition_position(rewind.topic, rewind.partition)
 
               internal_seek(rewind) if position > rewind.offset
             end
 
-            alignments&.each { |alignment| internal_seek(alignment) }
+            alignments&.each do |alignment|
+              next if @sought_partitions.include?([alignment.topic, alignment.partition])
+
+              internal_seek(alignment)
+            end
           end
         end
 
