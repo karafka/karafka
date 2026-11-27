@@ -50,8 +50,19 @@ module Karafka
           # @param version [String] encryption version
           # @param content [String] encrypted content
           # @return [String] decrypted content
+          # @raise [OpenSSL::PKey::RSAError] when content is not below the key modulus. JRuby
+          #   raises Java exceptions for it instead of an OpenSSL error
           def decrypt(version, content)
-            private_pem(version).private_decrypt(content)
+            pem = private_pem(version)
+            modulus = pem.n
+            modulus_bytes = modulus.num_bytes
+
+            if content.bytesize > modulus_bytes ||
+                (content.bytesize == modulus_bytes && OpenSSL::BN.new(content, 2) >= modulus)
+              raise(OpenSSL::PKey::RSAError, "data too large for modulus")
+            end
+
+            pem.private_decrypt(content)
           end
 
           # @param version [String] encryption version
