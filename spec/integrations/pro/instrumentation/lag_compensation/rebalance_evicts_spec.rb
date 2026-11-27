@@ -81,20 +81,27 @@ draw_routes(Consumer)
 Thread.new do
   sleep(0.1) until DT.key?(:paused_0) && DT.key?(:paused_1)
 
+  paused_emits = DT[:emits].size
+
   loop do
     2.times { |partition| produce(DT.topic, DT.uuid, partition: partition) }
     sleep(0.3)
 
-    break if DT.key?(:revoked) || DT[:emits].size >= 60
+    break if DT.key?(:revoked) || DT[:emits].size >= paused_emits + 60
   rescue WaterDrop::Errors::ProducerClosedError
     break
   end
 end
 
 # Join a second consumer on a time proxy (well past the pause age), independent of compensation, so
-# the rebalance fires whether or not compensation is working
+# the rebalance fires whether or not compensation is working. Emits are counted from the pause, not
+# from the app start, so a late pause does not leave too little time for the compensation
 Thread.new do
-  sleep(0.1) until DT.key?(:paused_0) && DT.key?(:paused_1) && DT[:emits].size >= 16
+  sleep(0.1) until DT.key?(:paused_0) && DT.key?(:paused_1)
+
+  paused_emits = DT[:emits].size
+
+  sleep(0.1) until DT[:emits].size >= paused_emits + 16
 
   other = setup_rdkafka_consumer
   other.subscribe(DT.topic)
