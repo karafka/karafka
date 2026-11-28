@@ -702,7 +702,8 @@ module Karafka
       # @note Even if you request one consumer group, the result is always an array.
       #
       # @note A consumer group id the cluster does not know is not an error. Kafka reports it in
-      #   the `:dead` state with no members.
+      #   the `:dead` state with no members and librdkafka reports its type as `:classic`, so the
+      #   type of a `:dead` consumer group does not tell its real protocol.
       #
       # @note librdkafka does not retry a consumer group coordinator that is not available yet
       #   (e.g. on a fresh cluster), so we retry it for up to `admin.max_retries_duration`.

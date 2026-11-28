@@ -961,6 +961,14 @@ RSpec.describe Karafka::Admin::ConsumerGroups do
       it { expect(descriptions.first[:type]).to eq(:unknown) }
     end
 
+    context "when the consumer group type is not known to Karafka" do
+      let(:group) { described_group(group_id).merge(type: 99, type_name: "Streams") }
+
+      before { allow(admin).to receive(:describe_consumer_groups).and_return(group_report(group)) }
+
+      it { expect(descriptions.first[:type]).to eq(:unknown) }
+    end
+
     context "when the broker returns the consumer groups in a different order" do
       let(:group_ids) { %w[g1 g2] }
 
