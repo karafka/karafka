@@ -183,6 +183,8 @@ module Karafka
         # How long should we wait on the listeners forceful shutdown when they are stuck beyond the
         # shutdown timeout before forcing a bypass
         setting :forceful_shutdown_wait, default: 5_000
+        # How long (in ms) should we wait for the logs flush before the forceful exit
+        setting :forceful_flush_wait, default: 1_000
 
         setting :swarm do
           # Manager for swarm nodes control

@@ -41,6 +41,7 @@ RSpec.describe_current do
         supervision_sleep: 0.1,
         forceful_exit_code: 2,
         forceful_shutdown_wait: 5_000,
+        forceful_flush_wait: 1_000,
         status: Karafka::Status.new,
         process: Karafka::Process.new,
         tick_interval: 5_000,
@@ -191,28 +192,30 @@ RSpec.describe_current do
     end
   end
 
-  context "when validating forceful_shutdown_wait" do
-    context "when forceful_shutdown_wait is missing" do
-      before { config[:internal].delete(:forceful_shutdown_wait) }
+  %i[forceful_shutdown_wait forceful_flush_wait].each do |setting|
+    context "when validating #{setting}" do
+      context "when #{setting} is missing" do
+        before { config[:internal].delete(setting) }
 
-      it "expects to not be successful" do
-        expect(contract.call(config)).not_to be_success
+        it "expects to not be successful" do
+          expect(contract.call(config)).not_to be_success
+        end
       end
-    end
 
-    context "when forceful_shutdown_wait is not an integer" do
-      before { config[:internal][:forceful_shutdown_wait] = "not_integer" }
+      context "when #{setting} is not an integer" do
+        before { config[:internal][setting] = "not_integer" }
 
-      it "expects to not be successful" do
-        expect(contract.call(config)).not_to be_success
+        it "expects to not be successful" do
+          expect(contract.call(config)).not_to be_success
+        end
       end
-    end
 
-    context "when forceful_shutdown_wait is less than 0" do
-      before { config[:internal][:forceful_shutdown_wait] = -1 }
+      context "when #{setting} is less than 0" do
+        before { config[:internal][setting] = -1 }
 
-      it "expects to not be successful" do
-        expect(contract.call(config)).not_to be_success
+        it "expects to not be successful" do
+          expect(contract.call(config)).not_to be_success
+        end
       end
     end
   end

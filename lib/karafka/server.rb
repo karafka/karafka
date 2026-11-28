@@ -11,14 +11,10 @@ module Karafka
       shutdown_timeout: %i[shutdown_timeout],
       forceful_exit_code: %i[internal forceful_exit_code],
       forceful_shutdown_wait: %i[internal forceful_shutdown_wait],
+      forceful_flush_wait: %i[internal forceful_flush_wait],
       process: %i[internal process],
       jobs_queue_class: %i[internal processing jobs_queue_class]
     )
-
-    # How long (in ms) we wait for the logs flush before the forceful exit
-    FORCEFUL_FLUSH_WAIT = 1_000
-
-    private_constant :FORCEFUL_FLUSH_WAIT
 
     class << self
       # Set of consuming threads. Each consumer thread contains a single consumer
@@ -273,7 +269,7 @@ module Karafka
 
       # Flushes the buffered data of the default logger, `$stdout` and `$stderr`
       # @note A stream that cannot be flushed (closed, broken pipe, no `#flush`) is skipped. The
-      #   flush runs in a thread we wait on for at most `FORCEFUL_FLUSH_WAIT`, so a stalled reader
+      #   flush runs in a thread we wait on for at most `forceful_flush_wait`, so a stalled reader
       #   (full pipe) cannot block the forceful exit.
       def flush_logs
         logger = Karafka.logger
@@ -286,7 +282,7 @@ module Karafka
           rescue
             nil
           end
-        end.join(FORCEFUL_FLUSH_WAIT / 1_000.0)
+        end.join(forceful_flush_wait / 1_000.0)
       end
     end
 
