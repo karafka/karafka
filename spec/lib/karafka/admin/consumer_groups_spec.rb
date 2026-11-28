@@ -935,38 +935,26 @@ RSpec.describe Karafka::Admin::ConsumerGroups do
       end
     end
 
-    context "when the consumer group uses the consumer (KIP-848) protocol" do
-      let(:group) do
-        described_group(group_id).merge(
-          type: Rdkafka::Bindings::RD_KAFKA_CONSUMER_GROUP_TYPE_CONSUMER,
-          type_name: "Consumer"
-        )
+    context "when mapping the librdkafka numeric types" do
+      let(:group_ids) { %w[g-consumer g-unknown g-weird] }
+
+      before do
+        allow(admin)
+          .to receive(:describe_consumer_groups)
+          .and_return(
+            group_report(
+              described_group("g-consumer")
+                .merge(type: Rdkafka::Bindings::RD_KAFKA_CONSUMER_GROUP_TYPE_CONSUMER),
+              described_group("g-unknown")
+                .merge(type: Rdkafka::Bindings::RD_KAFKA_CONSUMER_GROUP_TYPE_UNKNOWN),
+              described_group("g-weird").merge(type: 99)
+            )
+          )
       end
 
-      before { allow(admin).to receive(:describe_consumer_groups).and_return(group_report(group)) }
-
-      it { expect(descriptions.first[:type]).to eq(:consumer) }
-    end
-
-    context "when the consumer group type is unknown" do
-      let(:group) do
-        described_group(group_id).merge(
-          type: Rdkafka::Bindings::RD_KAFKA_CONSUMER_GROUP_TYPE_UNKNOWN,
-          type_name: "Unknown"
-        )
+      it "maps each numeric type to its symbol and unknown codes to :unknown" do
+        expect(descriptions.map { |group| group[:type] }).to eq(%i[consumer unknown unknown])
       end
-
-      before { allow(admin).to receive(:describe_consumer_groups).and_return(group_report(group)) }
-
-      it { expect(descriptions.first[:type]).to eq(:unknown) }
-    end
-
-    context "when the consumer group type is not known to Karafka" do
-      let(:group) { described_group(group_id).merge(type: 99, type_name: "Streams") }
-
-      before { allow(admin).to receive(:describe_consumer_groups).and_return(group_report(group)) }
-
-      it { expect(descriptions.first[:type]).to eq(:unknown) }
     end
 
     context "when the broker returns the consumer groups in a different order" do
