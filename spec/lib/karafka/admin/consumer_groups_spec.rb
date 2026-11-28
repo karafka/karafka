@@ -916,6 +916,7 @@ RSpec.describe Karafka::Admin::ConsumerGroups do
             {
               group_id: group_id,
               state: :stable,
+              type: :classic,
               partition_assignor: "range",
               coordinator: coordinator,
               members: [
@@ -932,6 +933,32 @@ RSpec.describe Karafka::Admin::ConsumerGroups do
           ]
         )
       end
+    end
+
+    context "when the consumer group uses the consumer (KIP-848) protocol" do
+      let(:group) do
+        described_group(group_id).merge(
+          type: Rdkafka::Bindings::RD_KAFKA_CONSUMER_GROUP_TYPE_CONSUMER,
+          type_name: "Consumer"
+        )
+      end
+
+      before { allow(admin).to receive(:describe_consumer_groups).and_return(group_report(group)) }
+
+      it { expect(descriptions.first[:type]).to eq(:consumer) }
+    end
+
+    context "when the consumer group type is unknown" do
+      let(:group) do
+        described_group(group_id).merge(
+          type: Rdkafka::Bindings::RD_KAFKA_CONSUMER_GROUP_TYPE_UNKNOWN,
+          type_name: "Unknown"
+        )
+      end
+
+      before { allow(admin).to receive(:describe_consumer_groups).and_return(group_report(group)) }
+
+      it { expect(descriptions.first[:type]).to eq(:unknown) }
     end
 
     context "when the broker returns the consumer groups in a different order" do
