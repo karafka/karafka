@@ -125,19 +125,19 @@ RSpec.describe_current do
 
   describe "#stop" do
     let(:original_shutdown_timeout) { Karafka::App.config.shutdown_timeout }
-    let(:original_forceful_flush_wait) { Karafka::App.config.internal.forceful_flush_wait }
-    let(:forceful_flush_wait) { original_forceful_flush_wait }
+    let(:original_forceful_flush_timeout) { Karafka::App.config.internal.forceful_flush_timeout }
+    let(:forceful_flush_timeout) { original_forceful_flush_timeout }
 
     before do
       original_shutdown_timeout
-      original_forceful_flush_wait
+      original_forceful_flush_timeout
       Karafka::App.config.internal.status.run!
       Karafka::App.config.shutdown_timeout = timeout_ms
       # `shutdown_timeout` is memoized on the class via ConfigImporter, so we clear it to ensure
       # each example reads the freshly assigned config value regardless of run order.
       described_class.instance_variable_set(:@shutdown_timeout, nil)
-      Karafka::App.config.internal.forceful_flush_wait = forceful_flush_wait
-      described_class.instance_variable_set(:@forceful_flush_wait, nil)
+      Karafka::App.config.internal.forceful_flush_timeout = forceful_flush_timeout
+      described_class.instance_variable_set(:@forceful_flush_timeout, nil)
       allow(process).to receive(:supervised?).and_return(true)
     end
 
@@ -152,8 +152,8 @@ RSpec.describe_current do
       server_class.stop
       Karafka::App.config.shutdown_timeout = original_shutdown_timeout
       described_class.instance_variable_set(:@shutdown_timeout, nil)
-      Karafka::App.config.internal.forceful_flush_wait = original_forceful_flush_wait
-      described_class.instance_variable_set(:@forceful_flush_wait, nil)
+      Karafka::App.config.internal.forceful_flush_timeout = original_forceful_flush_timeout
+      described_class.instance_variable_set(:@forceful_flush_timeout, nil)
       # After shutdown we need to reinitialize the app for other specs
       Karafka::App.initialize!
     end
@@ -256,8 +256,8 @@ RSpec.describe_current do
             expect(exited_at.first - started_at).to be < 3
           end
 
-          context "with a custom forceful flush wait" do
-            let(:forceful_flush_wait) { 100 }
+          context "with a custom forceful flush timeout" do
+            let(:forceful_flush_timeout) { 100 }
 
             it "expect to wait for the flush no longer than the configured time" do
               expect(exited_at.size).to eq(1)

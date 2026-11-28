@@ -76,7 +76,7 @@ module Karafka
           required(:supervision_sleep) { |val| val.is_a?(Numeric) && val.positive? }
           required(:forceful_exit_code) { |val| val.is_a?(Integer) && val >= 0 }
           required(:forceful_shutdown_wait) { |val| val.is_a?(Integer) && val >= 0 }
-          required(:forceful_flush_wait) { |val| val.is_a?(Integer) && val >= 0 }
+          required(:forceful_flush_timeout) { |val| val.is_a?(Integer) && val >= 0 }
 
           nested(:swarm) do
             required(:manager) { |val| !val.nil? }

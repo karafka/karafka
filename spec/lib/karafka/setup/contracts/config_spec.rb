@@ -41,7 +41,7 @@ RSpec.describe_current do
         supervision_sleep: 0.1,
         forceful_exit_code: 2,
         forceful_shutdown_wait: 5_000,
-        forceful_flush_wait: 1_000,
+        forceful_flush_timeout: 1_000,
         status: Karafka::Status.new,
         process: Karafka::Process.new,
         tick_interval: 5_000,
@@ -192,7 +192,7 @@ RSpec.describe_current do
     end
   end
 
-  %i[forceful_shutdown_wait forceful_flush_wait].each do |setting|
+  %i[forceful_shutdown_wait forceful_flush_timeout].each do |setting|
     context "when validating #{setting}" do
       context "when #{setting} is missing" do
         before { config[:internal].delete(setting) }
