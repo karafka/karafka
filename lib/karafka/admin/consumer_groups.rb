@@ -26,6 +26,13 @@ module Karafka
         Rdkafka::Bindings::RD_KAFKA_CONSUMER_GROUP_STATE_EMPTY => :empty
       }.freeze
 
+      # Consumer group protocol types reported by `#describe`
+      CONSUMER_GROUP_TYPES = {
+        Rdkafka::Bindings::RD_KAFKA_CONSUMER_GROUP_TYPE_UNKNOWN => :unknown,
+        Rdkafka::Bindings::RD_KAFKA_CONSUMER_GROUP_TYPE_CLASSIC => :classic,
+        Rdkafka::Bindings::RD_KAFKA_CONSUMER_GROUP_TYPE_CONSUMER => :consumer
+      }.freeze
+
       # Consumer group describe errors that mean the coordinator is not ready yet, not that the
       # consumer group could not be described. They are transient (e.g. on a fresh cluster before
       # `__consumer_offsets` is loaded) and librdkafka returns them per consumer group without
@@ -62,6 +69,7 @@ module Karafka
         :LONG_TIME_AGO,
         :DAY_IN_SECONDS,
         :CONSUMER_GROUP_STATES,
+        :CONSUMER_GROUP_TYPES,
         :COORDINATOR_NOT_READY_ERRORS,
         :OFFSETS_FETCH_RETRYABLE_ERRORS,
         :CONSUMER_GROUP_NOT_EMPTY_ERRORS,
@@ -669,8 +677,8 @@ module Karafka
         end
       end
 
-      # Describes consumer groups: their state, partition assignor, coordinator and members with
-      # their current partition assignments.
+      # Describes consumer groups: their state, type, partition assignor, coordinator and members
+      # with their current partition assignments.
       #
       # @param group_ids [String, Array<String>] id of the consumer group to describe or a list of
       #   them. Multiple consumer groups are described in one request.
@@ -679,6 +687,8 @@ module Karafka
       #   - `:group_id` [String] the consumer group id
       #   - `:state` [Symbol] consumer group state, one of `:unknown`,
       #     `:preparing_rebalance`, `:completing_rebalance`, `:stable`, `:dead`, `:empty`
+      #   - `:type` [Symbol] consumer group protocol type: `:classic`, `:consumer` (KIP-848) or
+      #     `:unknown`
       #   - `:partition_assignor` [String, nil] partition assignor in use (e.g. `"range"`)
       #   - `:coordinator` [Hash, nil] the consumer group coordinator broker as
       #     `{ id:, host:, port:, rack: }`
@@ -692,7 +702,8 @@ module Karafka
       # @note Even if you request one consumer group, the result is always an array.
       #
       # @note A consumer group id the cluster does not know is not an error. Kafka reports it in
-      #   the `:dead` state with no members.
+      #   the `:dead` state with no members and librdkafka reports its type as `:classic`, so the
+      #   type of a `:dead` consumer group does not tell its real protocol.
       #
       # @note librdkafka does not retry a consumer group coordinator that is not available yet
       #   (e.g. on a fresh cluster), so we retry it for up to `admin.max_retries_duration`.
@@ -702,6 +713,7 @@ module Karafka
       #   # => {
       #   #   group_id: 'billing',
       #   #   state: :stable,
+      #   #   type: :classic,
       #   #   partition_assignor: 'range',
       #   #   coordinator: { id: 1, host: '127.0.0.1', port: 9092, rack: nil },
       #   #   members: [
@@ -940,11 +952,12 @@ module Karafka
       end
 
       # @param group [Hash] consumer group description from `DescribeConsumerGroupsReport`
-      # @return [Hash] consumer group description with the state as a symbol
+      # @return [Hash] consumer group description with the state and type as symbols
       def build_group(group)
         {
           group_id: group[:group_id],
           state: CONSUMER_GROUP_STATES.fetch(group[:state], :unknown),
+          type: CONSUMER_GROUP_TYPES.fetch(group[:type], :unknown),
           partition_assignor: group[:partition_assignor],
           coordinator: group[:coordinator],
           members: group[:members]

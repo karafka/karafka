@@ -916,6 +916,7 @@ RSpec.describe Karafka::Admin::ConsumerGroups do
             {
               group_id: group_id,
               state: :stable,
+              type: :classic,
               partition_assignor: "range",
               coordinator: coordinator,
               members: [
@@ -931,6 +932,28 @@ RSpec.describe Karafka::Admin::ConsumerGroups do
             }
           ]
         )
+      end
+    end
+
+    context "when mapping the librdkafka numeric types" do
+      let(:group_ids) { %w[g-consumer g-unknown g-weird] }
+
+      before do
+        allow(admin)
+          .to receive(:describe_consumer_groups)
+          .and_return(
+            group_report(
+              described_group("g-consumer")
+                .merge(type: Rdkafka::Bindings::RD_KAFKA_CONSUMER_GROUP_TYPE_CONSUMER),
+              described_group("g-unknown")
+                .merge(type: Rdkafka::Bindings::RD_KAFKA_CONSUMER_GROUP_TYPE_UNKNOWN),
+              described_group("g-weird").merge(type: 99)
+            )
+          )
+      end
+
+      it "maps each numeric type to its symbol and unknown codes to :unknown" do
+        expect(descriptions.map { |group| group[:type] }).to eq(%i[consumer unknown unknown])
       end
     end
 

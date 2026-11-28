@@ -247,7 +247,7 @@ module Karafka
         new.list_consumer_groups
       end
 
-      # Describes consumer groups: their state, assignor, coordinator and members
+      # Describes consumer groups: their state, type, assignor, coordinator and members
       #
       # @param group_ids [Array<String>] consumer groups to describe
       # @return [Array<Hash>] consumer group details in the order of `group_ids`
